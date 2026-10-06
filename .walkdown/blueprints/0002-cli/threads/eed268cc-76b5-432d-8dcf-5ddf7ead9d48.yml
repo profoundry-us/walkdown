@@ -1,0 +1,13 @@
+id: n-0383
+uuid: eed268cc-76b5-432d-8dcf-5ddf7ead9d48
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:50:48.183Z
+anchor:
+  rule: locations.threads.clashing-labels-ask
+status: open
+body: "Found while judging: a branch merge left `a`'s n-0007 beside `b`'s
+  n-0007, one label in two blueprints of one project. Labels are numbered across
+  the project, but neither `threads` nor `lint` says so; the clash check reads
+  one blueprint."

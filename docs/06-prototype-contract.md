@@ -109,7 +109,7 @@ states as belonging to their page. `walkdown extract` flattens each one into a s
 its own, written the way a URL is written:
 
 ```yaml
-# blueprint/storyboard.yml, after the merge
+# <home>/storyboard.yml, after the merge
   - id: waitlist-invite-batch
     title: Confirm a batch invite
     prototype: /screens/waitlist-admin.html#invite-batch
@@ -151,11 +151,11 @@ need attention, which is information, not an error.
 
 ## Hosting
 
-Serve the export from `blueprint/prototype/` and `walkdown serve` mounts it at
+Serve the export from a `prototype/` in the blueprint's home and `walkdown serve` mounts it at
 `/prototype/` with working paths and deep links. No second server, no build step.
 
 A relative `prototype.root` is looked for beside the spec first, then in the code. So
-`prototype: { root: prototype/ }` names `blueprint/prototype/` when that exists, which is
+`prototype: { root: prototype/ }` names `<home>/prototype/`, beside `spec.yml`, when that exists, which is
 the only place a home kept outside the repository can hold its design, and a
 repository's own `prototype/` otherwise, which is where walkdown keeps its own.
 

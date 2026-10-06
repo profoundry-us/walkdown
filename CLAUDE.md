@@ -169,7 +169,7 @@ goes next").
 Here the panel under review writes to the blueprint it serves, so judging
 anything that files, refuses or pins needs a scratch copy first. The shipped
 skills no longer say so — each blueprint's own `governance:` lines in its
-`walkdown.yml` do, and every judge prompt carries them. A copy holds one
+`spec.yml` do, and every judge prompt carries them. A copy holds one
 blueprint, the panel's unless `--blueprint cli` says otherwise:
 
     node tools/scratch.mjs new sitting-0830 --why "..." --port 4730   # a copy, stamped, app surface on 4730

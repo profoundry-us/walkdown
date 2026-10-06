@@ -11,10 +11,11 @@ expect:
   - '^Threads$'
   - '^Rules and verdicts$'
   - '^The panel$'
-  - '^  walkdown blueprints rename <id> <new-id>$'
+  - '^  walkdown blueprints rename <id> <new-name> \[--folder <folder>\]$'
+  - '^  walkdown upgrade \[--dry-run\]$'
 anchors:
   - { id: cli.help.intro, match: '^(walkdown —|A command is|`walkdown <noun>)' }
-  - { id: cli.help.ready, match: '^(Getting ready|  walkdown (init|skills))' }
+  - { id: cli.help.ready, match: '^(Getting ready|  walkdown (init|skills|upgrade))' }
   - { id: cli.help.blueprints, match: '^(Blueprints|  walkdown (blueprints|pointer))' }
   - { id: cli.help.records, match: '^(Records|  walkdown (records|where))' }
   - { id: cli.help.threads, match: '^(Threads|  walkdown threads)' }

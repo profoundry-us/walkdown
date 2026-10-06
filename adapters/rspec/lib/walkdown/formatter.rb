@@ -49,7 +49,8 @@ module Walkdown
     # `blueprint` sits in its home; anything else is somebody's own layout and
     # keeps the sibling rule all the same.
     def runs_dir(blueprint_dir)
-      File.join(File.dirname(File.expand_path(blueprint_dir)), 'runs')
+      # A home is one folder (ADR 0014): its runs sit beside its spec.yml.
+      File.join(File.expand_path(blueprint_dir), 'runs')
     end
 
     # Where this run files, as { into: [{ id:, spec:, runs: }], project: [...] },
@@ -135,8 +136,7 @@ module Walkdown
     def find_blueprint_dir(start = Dir.pwd)
       dir = File.expand_path(start)
       6.times do
-        return dir if File.exist?(File.join(dir, 'walkdown.yml'))
-        return File.join(dir, 'blueprint') if File.exist?(File.join(dir, 'blueprint', 'walkdown.yml'))
+        return dir if File.exist?(File.join(dir, 'spec.yml'))
 
         parent = File.dirname(dir)
         break if parent == dir

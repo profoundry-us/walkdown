@@ -15,7 +15,13 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { installSkills, placePointer, pointerBlock, scaffold, skillFiles } from '../lib/init.js';
+import { installSkills, placePointer, POINTER_BEGIN, POINTER_END, POINTER_TEXT, scaffold, skillFiles } from '../lib/init.js';
+
+/*
+ * A block as walkdown wrote it before ADR 0014, naming a blueprint - the
+ * shape the fixed paragraph replaces, and the boundary cases' "before".
+ */
+const oldBlock = (where) => `${POINTER_BEGIN}\n## walkdown\n\nThis project's spec is the walkdown blueprint in \`${where}\`.\n${POINTER_END}\n`;
 import { lint } from '../lib/lint.js';
 import { removePointer } from '../lib/standard.js';
 import { runChecks } from '../lib/run-cmd.js';
@@ -54,20 +60,15 @@ after(() => rmSync(root, { recursive: true, force: true }));
  * writes, since a blueprint nothing declares is not one walkdown reads.
  */
 const homeSpec = (proj, name = basename(proj)) =>
-  join(proj, '.walkdown', 'blueprints', `0001-${name}`, 'blueprint');
+  join(proj, '.walkdown', 'blueprints', `0001-${name}`);
 const spec = (proj) => ({ specDir: homeSpec(proj), commit: 'spec' });
 /** The spec's path as `scaffold` reports it: relative to the project root. */
 const rel = (proj, ...parts) =>
-  join('.walkdown', 'blueprints', `0001-${basename(proj)}`, 'blueprint', ...parts);
+  join('.walkdown', 'blueprints', `0001-${basename(proj)}`, ...parts);
 function declare(proj, name = basename(proj)) {
   const home = join(proj, '.walkdown', 'blueprints', `0001-${name}`);
-  mkdirSync(join(proj, '.walkdown'), { recursive: true });
-  writeFileSync(
-    join(proj, '.walkdown', 'config.yml'),
-    ['blueprints:', `  - id: ${name}`, `    home: 0001-${name}`, ''].join('\n'),
-  );
-  // The manifest above is what the checkout declares; the registry row is
-  // what a reader goes through (ADR 0003).
+  mkdirSync(home, { recursive: true });
+  // The registry row is what a reader goes through (ADR 0003).
   register({ id: name, project: proj, homeDir: home });
   return homeSpec(proj, name);
 }
@@ -92,8 +93,9 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   // The pointer names wherever the spec actually went, which is not
   // necessarily inside the repository any more.
   const pointer = readFileSync(join(proj, 'CLAUDE.md'), 'utf8');
-  // The pointer names the home the spec actually went to.
-  assert.match(pointer, /walkdown blueprint in `\.walkdown\/blueprints\/0001-fresh\/blueprint\/`/);
+  // It says where specs live, and names none of them (ADR 0014 §7).
+  assert.match(pointer, /specs are walkdown blueprints, under `\.walkdown\/blueprints\/`/);
+  assert.doesNotMatch(pointer, /fresh/);
   assert.match(pointer, /AGENTS\.md/);
   assert.equal(actionOf(results, homeSpec(proj)), 'spec-in-repo');
 
@@ -172,14 +174,8 @@ test('several agent files: init writes no pointer and says which they are @rule:
     assert.doesNotMatch(readFileSync(join(proj, f), 'utf8'), /walkdown:begin/, f);
 
   // And the person (or the wizard) settles it by naming one.
-  assert.equal(
-    placePointer(join(proj, 'AGENTS.md'), pointerBlock('blueprint/')),
-    'pointer-appended',
-  );
-  assert.match(
-    readFileSync(join(proj, 'AGENTS.md'), 'utf8'),
-    /walkdown blueprint in `blueprint\/`/,
-  );
+  assert.equal(placePointer(join(proj, 'AGENTS.md'), POINTER_TEXT), 'pointer-appended');
+  assert.match(readFileSync(join(proj, 'AGENTS.md'), 'utf8'), /under `\.walkdown\/blueprints\/`/);
 });
 
 test('a project with only an AGENTS.md gets the pointer there, not in a new CLAUDE.md @rule:locations.pointer.placed-where-agents-read', () => {
@@ -195,16 +191,13 @@ test('a project with only an AGENTS.md gets the pointer there, not in a new CLAU
   );
 });
 
-test('the pointer names the blueprint relatively, from wherever the file sits @rule:locations.pointer.placed-where-agents-read', () => {
+test('the pointer reads the same from wherever the file sits, and carries no path of this machine @rule:locations.pointer.names-no-blueprint', () => {
   /*
    * n-0209: the block measured "is the spec under here?" against the working
-   * DIRECTORY and fell back to an absolute path when it was not. Run from a
-   * subdirectory the home does not sit under, it wrote `/Users/somebody/...`
-   * into a file that gets committed and is wrong on every other machine.
-   *
-   * The path is read from beside the file it lands in, so that is what it is
-   * relative to, and both being in the same checkout is what makes a relative
-   * path mean anything - the code root is the test, not the cwd.
+   * DIRECTORY and fell back to an absolute path when it was not, writing
+   * `/Users/somebody/...` into a file that gets committed. It names no
+   * blueprint now (ADR 0014 §7), so there is nothing in it to measure - the
+   * same paragraph at the root and in a subdirectory.
    */
   const repo = join(root, 'pointer-subdir');
   const deep = join(repo, 'packages', 'web');
@@ -221,14 +214,9 @@ test('the pointer names the blueprint relatively, from wherever the file sits @r
 
   cli(['pointer', '--into', 'AGENTS.md'], deep);
   const block = readFileSync(join(deep, 'AGENTS.md'), 'utf8');
-  assert.match(block, /\.\.\/\.\.\/\.walkdown\/blueprints\/0001-[^/]+\/blueprint\//);
+  assert.equal(block, POINTER_TEXT);
   assert.ok(!block.includes(root), `no machine path in a committed file:\n${block}`);
-
-  // And at the root, where it was always right, it stays a plain relative path.
-  cli(['pointer', '--into', 'CLAUDE.md'], repo);
-  const atRoot = readFileSync(join(repo, 'CLAUDE.md'), 'utf8');
-  assert.match(atRoot, /\.walkdown\/blueprints\/0001-[^/]+\/blueprint\//);
-  assert.ok(!atRoot.startsWith('/') && !atRoot.includes(root), atRoot);
+  assert.equal(readFileSync(join(repo, 'CLAUDE.md'), 'utf8'), POINTER_TEXT, 'and the same at the root');
 });
 
 /*
@@ -236,14 +224,14 @@ test('the pointer names the blueprint relatively, from wherever the file sits @r
  * saying `blueprint/` after the spec moved out is worse than no block at all,
  * because an agent believes it and goes looking.
  */
-test('a moved spec rewrites its own block and nothing around it @rule:locations.pointer.owns-only-its-block', () => {
+test('an old block is rewritten to the fixed paragraph, and nothing around it @rule:locations.pointer.owns-only-its-block', () => {
   const proj = join(root, 'moved');
   mkdirSync(proj);
   const file = join(proj, 'CLAUDE.md');
-  writeFileSync(file, '# Head\n\n' + pointerBlock('blueprint/') + '\n## Tail\n');
-  assert.equal(placePointer(file, pointerBlock('/elsewhere/spec')), 'pointer-updated');
+  writeFileSync(file, '# Head\n\n' + oldBlock('blueprint/') + '\n## Tail\n');
+  assert.equal(placePointer(file, POINTER_TEXT), 'pointer-updated');
   const after = readFileSync(file, 'utf8');
-  assert.match(after, /blueprint in `\/elsewhere\/spec`/);
+  assert.match(after, /under `\.walkdown\/blueprints\/`/);
   assert.doesNotMatch(after, /`blueprint\/`/);
   assert.equal(after.match(/walkdown:begin/g).length, 1, 'replaced, not appended');
   assert.match(after, /^# Head/);
@@ -273,11 +261,11 @@ test('the block ends at its marker\'s line, whatever comes next @rule:locations.
     const proj = join(root, `boundary-${name}`);
     mkdirSync(proj, { recursive: true });
     const file = join(proj, 'CLAUDE.md');
-    // pointerBlock ends in a newline of its own; strip it and put back the
+    // The block ends in a newline of its own; strip it and put back the
     // line ending this file actually uses.
-    writeFileSync(file, head + pointerBlock('blueprint/').replace(/\n$/, '') + gap + tail);
+    writeFileSync(file, head + oldBlock('blueprint/').replace(/\n$/, '') + gap + tail);
 
-    assert.equal(placePointer(file, pointerBlock('/elsewhere/spec')), 'pointer-updated', name);
+    assert.equal(placePointer(file, POINTER_TEXT), 'pointer-updated', name);
     const after = readFileSync(file, 'utf8');
     assert.equal(after.match(/walkdown:begin/g).length, 1, `${name}: replaced, not appended`);
     // The whole file, exactly: their words on both sides untouched, our block
@@ -285,7 +273,7 @@ test('the block ends at its marker\'s line, whatever comes next @rule:locations.
     // space-only line here, or a blank one, or ate a `<`.
     assert.equal(
       after,
-      head + pointerBlock('/elsewhere/spec') + tail,
+      head + POINTER_TEXT + tail,
       `${name}: the block owns its own lines and not one character more`,
     );
   }
@@ -303,7 +291,7 @@ test('taking the block out leaves the file as it would have been @rule:locations
     const proj = join(root, `removal-${name}`);
     mkdirSync(proj, { recursive: true });
     const file = join(proj, 'CLAUDE.md');
-    writeFileSync(file, head + pointerBlock('blueprint/').replace(/\n$/, '') + gap + tail);
+    writeFileSync(file, head + oldBlock('blueprint/').replace(/\n$/, '') + gap + tail);
 
     assert.equal(removePointer(file), 'removed', name);
     assert.equal(readFileSync(file, 'utf8'), head + tail, `${name}: their words, and only theirs`);
@@ -313,7 +301,7 @@ test('taking the block out leaves the file as it would have been @rule:locations
   const proj = join(root, 'removal-whole');
   mkdirSync(proj, { recursive: true });
   const file = join(proj, 'CLAUDE.md');
-  writeFileSync(file, pointerBlock('blueprint/'));
+  writeFileSync(file, oldBlock('blueprint/'));
   assert.equal(removePointer(file), 'deleted');
   assert.equal(existsSync(file), false);
 });
@@ -329,12 +317,12 @@ test('words left on the marker\'s line are kept, not swallowed @rule:locations.p
   mkdirSync(proj, { recursive: true });
   const file = join(proj, 'CLAUDE.md');
   const theirs = '<!-- mine, on the same line -->';
-  writeFileSync(file, `# Head\n\n${pointerBlock('blueprint/').replace(/\n$/, '')} ${theirs}\n## Tail\n`);
+  writeFileSync(file, `# Head\n\n${oldBlock('blueprint/').replace(/\n$/, '')} ${theirs}\n## Tail\n`);
 
-  assert.equal(placePointer(file, pointerBlock('/elsewhere/spec')), 'pointer-updated');
+  assert.equal(placePointer(file, POINTER_TEXT), 'pointer-updated');
   assert.equal(
     readFileSync(file, 'utf8'),
-    `# Head\n\n${pointerBlock('/elsewhere/spec')}${theirs}\n## Tail\n`,
+    `# Head\n\n${POINTER_TEXT}${theirs}\n## Tail\n`,
   );
 
   assert.equal(removePointer(file), 'removed');
@@ -405,15 +393,17 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
   const proj = join(root, 'moved-ledger');
   const home = join(root, 'moved-ledger-home');
   const runsAway = join(home, 'elsewhere', 'runs');
-  mkdirSync(join(proj, 'blueprint'), { recursive: true });
+  mkdirSync(proj, { recursive: true });
   mkdirSync(home, { recursive: true });
   writeFileSync(join(home, 'profile.yml'), ['defaults:', `  runs: ${runsAway}`, ''].join('\n'));
   writeFileSync(
     join(home, 'registry.yml'),
     [
       'blueprints:',
-      '  - id: moved-ledger',
-      `    project: ${proj}`,
+      '  - id: 0001-fx-moved-ledger',
+      '    project: fx',
+      '    code: fx',
+      `    checkout: ${proj}`,
       `    home: ${proj}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
@@ -425,7 +415,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
     `node -e "const fs=require('fs');fs.mkdirSync('${runsAway}',{recursive:true});` +
     `fs.writeFileSync('${runsAway}/probe-run.json','{}')"`;
   writeFileSync(
-    join(proj, 'blueprint', 'spec.yml'),
+    join(proj, 'spec.yml'),
     ['blueprint: moved-ledger', 'runner:', `  run_all: "${probe.replaceAll('"', '\\"')}"`, ''].join(
       '\n',
     ),
@@ -437,7 +427,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
       new URL('../bin/walkdown.js', import.meta.url).pathname,
       'run',
       '--blueprint',
-      'moved-ledger',
+      '0001-fx-moved-ledger',
     ],
     { env: { ...process.env, WALKDOWN_HOME: home } },
   ).toString();
@@ -446,7 +436,7 @@ test('run sees a record arrive in a runs directory a config moved @rule:location
 
 test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates exit code', () => {
   const proj = join(root, 'runner');
-  mkdirSync(join(proj, 'blueprint'), { recursive: true });
+  mkdirSync(proj, { recursive: true });
   /*
    * Declared, with every record named. A hand-built fixture is still a
    * blueprint somebody wrote down - that is the only kind walkdown answers
@@ -456,7 +446,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   register({ id: 'runner', project: proj, homeDir: proj });
   const probe = `node -e "require('fs').writeFileSync('probe.txt', process.env.WALKDOWN_TARGET + ':' + process.env.APP_HOST + ':' + (process.env.RULE_ARG || ''))"`;
   writeFileSync(
-    join(proj, 'blueprint', 'spec.yml'),
+    join(proj, 'spec.yml'),
     [
       'blueprint: runner',
       'runner:',
@@ -466,7 +456,7 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
       '    staging: { env: { APP_HOST: "https://stage.example" } }',
     ].join('\n'),
   );
-  const blueprint = loadBlueprint(join(proj, 'blueprint'), { cwd: proj });
+  const blueprint = loadBlueprint(proj, { cwd: proj });
 
   const all = runChecks(blueprint, { target: 'staging', stdio: 'pipe' });
   assert.equal(all.code, 0);
@@ -482,10 +472,10 @@ test('run substitutes {id}, injects target env and WALKDOWN_TARGET, propagates e
   assert.throws(() => runChecks(blueprint, { target: 'nope', stdio: 'pipe' }), /unknown target/);
 
   writeFileSync(
-    join(proj, 'blueprint', 'spec.yml'),
+    join(proj, 'spec.yml'),
     'blueprint: runner\nrunner: { run_all: "node -e \\"process.exit(3)\\"" }\n',
   );
-  const failing = runChecks(loadBlueprint(join(proj, 'blueprint'), { cwd: proj }), { stdio: 'pipe' });
+  const failing = runChecks(loadBlueprint(proj, { cwd: proj }), { stdio: 'pipe' });
   assert.equal(failing.code, 3);
 });
 

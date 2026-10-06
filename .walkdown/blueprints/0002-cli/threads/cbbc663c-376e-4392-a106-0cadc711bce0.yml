@@ -1,0 +1,13 @@
+id: n-0382
+uuid: cbbc663c-376e-4392-a106-0cadc711bce0
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:50:47.924Z
+anchor:
+  rule: locations.keeping.upgrade-moves-once
+status: open
+body: "Found while judging: on a machine with no ~/.walkdown at all, `status`
+  and `blueprints import . --all` in an old-layout clone never say an upgrade is
+  due. Import says 'no spec.yml there' instead. `walkdown upgrade` then fixes
+  it."

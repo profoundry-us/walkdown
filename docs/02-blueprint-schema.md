@@ -2,19 +2,30 @@
 
 ## File layout
 
+A blueprint's home is one flat folder (ADR 0014; where it lives is
+[08-locations.md](08-locations.md)):
+
 ```
-blueprint/
-  walkdown.yml          # blueprint config (see 03-runner-contract.md)
+.walkdown/blueprints/202608-checkout/
+  spec.yml              # blueprint config (see 03-runner-contract.md)
   storyboard.yml        # screen registry
   features/             # edit-in-place documents (human/agent authored)
     checkout.yml
     onboarding.yml
+  AGENTS.md             # agent conventions, copied from walkdown
+  records.yml           # where this blueprint's records usually live
+  .gitignore            # this blueprint's commit choice
   runs/                 # append-only ledger (machine appended; see 05-runs-ledger.md)
     2026-08-20T14-12-03Z-staging.json
-  threads/              # append-mostly notes & questions
-    q-0042.yml
-    n-0017.yml
+  threads/              # append-mostly notes & questions, one file per thread, named by UUID
+    3f2c9a1e-7b4d-4e0a-9c61-2d8f5b0a7e13.yml    # q-0042
+    b81d04c7-52e9-4a3f-8f0e-6c1a9d2e4b75.yml    # n-0017
+  evidence/  drafts/    # git-ignored unless the blueprint commits everything
 ```
+
+The spec is `spec.yml`, `storyboard.yml` and `features/`, and nothing else: the hash a run
+is stamped with covers those three by name, so refreshing `AGENTS.md` or touching a record
+never changes what a run says it was judged against.
 
 Design rationale:
 
@@ -38,7 +49,7 @@ Feature 1─* Story 1─* Rule *─* Screen (via storyboard IDs)
 ## Feature file
 
 ```yaml
-# blueprint/features/checkout.yml
+# <home>/features/checkout.yml
 feature: checkout
 title: Guest checkout
 source:
@@ -160,7 +171,7 @@ stopped being a spec.
 ## Storyboard
 
 ```yaml
-# blueprint/storyboard.yml
+# <home>/storyboard.yml
 screens:
   - id: checkout-payment
     title: Payment step
@@ -215,8 +226,9 @@ screens:
 ## Threads
 
 ```yaml
-# blueprint/threads/q-0042.yml
-id: q-0042
+# <home>/threads/3f2c9a1e-7b4d-4e0a-9c61-2d8f5b0a7e13.yml
+id: q-0042                     # the label people read and type
+uuid: 3f2c9a1e-7b4d-4e0a-9c61-2d8f5b0a7e13   # the identity, and the file's name
 kind: question                 # question | note
 author: agent                  # agent | <person>
 created: 2026-08-20T14:03:00Z
@@ -244,10 +256,18 @@ replies:
     created: 2026-08-20T16:02:00Z
     body: Built; the error sits under the field. Run 2026-08-20T16-00-11Z re-verified it.
     attachments:                # pictures on the message (n-0096): pasted into the form or given with --attach
-      - file: attachments/q-0042-1.png   # under the threads directory, beside the records
+      - file: attachments/3f2c9a1e-7b4d-4e0a-9c61-2d8f5b0a7e13-1.png   # under the threads directory, named after the thread's UUID
         name: after.png
 ```
 
+- **The UUID is a thread's identity; `id` is its label.** The UUID is given when the
+  thread is filed and names its file, so two branches that each file a note add two files
+  and never one merge conflict. The label (`q-0042`, `n-0017`) is the next number after
+  the threads present where it is filed, so two branches can each give out the same one;
+  walkdown says so when it sees a clash, and relabels the newer thread only when a person
+  agrees, keeping the old label as an alias. Run records and replies written since ADR
+  0014 name a thread by its UUID; older records keep the labels they hold and resolve
+  through them.
 - A question is **not done when answered**. It is done when **incorporated** — the answer
   folded into the rule's statement or steps (here: a new `then` line about submit-time
   validation). The thread stays as provenance. `walkdown lint` lists threads stuck at

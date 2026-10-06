@@ -6,5 +6,12 @@ author: topher
 created: 2026-10-05T12:47:17.208Z
 anchor:
   rule: locations.several.new-makes-another
-status: open
-body: This rule title says `init-makes-another`, but it's about the `blueprint new` command. I think we need to rename the rule?
+status: addressed
+body: This rule title says `init-makes-another`, but it's about the `blueprint
+  new` command. I think we need to rename the rule?
+replies:
+  - author: agent
+    created: 2026-10-06T02:26:29Z
+    body: "Renamed with `walkdown rules rename` (3a3e068): the rule is
+      `locations.several.new-makes-another` now, and answers to its old id
+      through `formerly:`, so its verdicts carried over."

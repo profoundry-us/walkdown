@@ -7,8 +7,8 @@ know Gherkin, and mapping to it measurably helps them.
 
 | Term | Definition | BDD ancestry |
 |---|---|---|
-| **Project** | A directory somebody imported — normally a repository. What a person means by "what I am working on". It may hold several blueprints; walkdown learns about one through `walkdown init` or `walkdown import`, and never by walking a tree (ADR 0001). | — |
-| **Blueprint** | The whole artifact: the directory of files (`blueprint/`) that is the canonical statement of what we're building, with its own storyboard, rules, threads and runs. A project may hold several; `walkdown blueprints` lists the ones this machine can reach. | Executable specification / living documentation |
+| **Project** | A directory somebody imported — normally a repository. What a person means by "what I am working on". It may hold several blueprints; walkdown learns about one through `walkdown blueprints new` or `walkdown blueprints import`, and never by walking a tree (ADR 0001). In the registry a project is a label on each row, named after the repository unless the person names it (ADR 0014). | — |
+| **Blueprint** | The whole artifact: the files that are the canonical statement of what we're building, with its own storyboard, rules, threads and runs, kept in one flat folder, its **home**, around a `spec.yml`. A project may hold several; `walkdown blueprints` lists the ones this machine can reach, each under a registry ID this machine gave it (`0002-wd-cli`). Inside its project the bare name (`cli`) does as well. | Executable specification / living documentation |
 | **Feature** | Top-level grouping of stories. One file per feature. | Gherkin `Feature` |
 | **Story** | A user-goal within a feature. | User story (Example Mapping yellow card) |
 | **Rule** | A single verifiable statement — an acceptance criterion. The atomic unit everything else attaches to. | Gherkin `Rule` (Example Mapping blue card) |
@@ -59,5 +59,7 @@ Cucumber's discovery → formulation → automation maps onto the walkdown loop:
   and the config, and the day two blueprints had to share a page the ambiguity stopped
   being survivable. A project is a directory; a blueprint is a specification inside one
   (ADR 0001). q-0270 settled the last of it: the config key is `blueprints:` and a
-  blueprint's own `walkdown.yml` opens `blueprint:`. Nothing walkdown writes says the old
+  blueprint's own `walkdown.yml` opens `blueprint:`. Since ADR 0014 that file is `spec.yml`,
+  still opening `blueprint:`, and `blueprints:` is the registry's, the repository's
+  `.walkdown/config.yml` being gone. Nothing walkdown writes says the old
   word any more; the threads that argued it out still do, because the ledger is history.

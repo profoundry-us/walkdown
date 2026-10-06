@@ -1,0 +1,20 @@
+id: n-0377
+uuid: 52e17fcf-6621-4484-9ac8-7d67cc660db5
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:43:12.779Z
+anchor:
+  rule: locations.pointer.owns-only-its-block
+status: addressed
+body: Agent judging found two misses. Un-committing the last blueprint trims the
+  person's own trailing blank lines, through removePointer's /\n{3,}$/ replace,
+  and drops a CRLF's \r after the end marker. And a block the person deleted
+  after the first commit is appended again by the next commit, though the rule
+  says it writes the paragraph once.
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:20Z
+    body: The paragraph is placed only by the first blueprint committed in a
+      checkout. Taking it out trims trailing blank lines only when the block was
+      at the end of the file, and keeps a CRLF line's ending.

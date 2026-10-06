@@ -1,10 +1,10 @@
 /*
  * The checks drive a real walkdown server, and the panel WRITES — threads,
- * drafts, run records. Pointing that at blueprint/ would mean a check run
+ * drafts, run records. Pointing that at the real home would mean a check run
  * appending notes and verdicts to the project's own ledger, which is exactly
  * the thing this tool exists to keep honest.
  *
- * So the suite serves a disposable copy. blueprint/ is copied into
+ * So the suite serves a disposable copy. The home is copied into
  * tmp/checkspace/ before the run - from playwright.config.js, at import, because
  * Playwright launches the web servers from the config BEFORE globalSetup runs,
  * and a server started in a checkspace that does not exist yet fails with an
@@ -14,8 +14,8 @@
  * Guarded by an environment variable rather than a module flag: Playwright's
  * workers re-import the config, and a worker that rebuilt the checkspace would
  * pull the directory out from under the running server. The main process
- * prepares once and the workers inherit the mark. and the prototype directory is linked
- * beside it, because `prototype.root` resolves against the blueprint's parent.
+ * prepares once and the workers inherit the mark. The prototype directory is linked
+ * beside it, because `prototype.root` resolves against the code root.
  * Anything the checks write lands there and is thrown away next run.
  */
 import {
@@ -49,7 +49,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
 
   /*
    * Pin the personal-config home at a scratch directory inside the checkspace.
-   * Locations are resolved from ~/.walkdown/config.yml, and a suite that read
+   * Locations are resolved from ~/.walkdown/registry.yml, and a suite that read
    * the developer's own would pass or fail depending on whose laptop ran it -
    * the one thing a check may never depend on. Pinned rather than merely
    * unset, because unset means the real home.
@@ -62,27 +62,29 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    */
   const pinned = process.env.WALKDOWN_HOME;
   delete process.env.WALKDOWN_HOME;
-  const realEvidence = resolveLocations({ spec: join(root, HOME, 'blueprint') }).evidence.path;
+  const realEvidence = resolveLocations({ spec: join(root, HOME) }).evidence.path;
   process.env.WALKDOWN_HOME = pinned ?? join(CHECKSPACE, 'home');
 
   rmSync(CHECKSPACE, { recursive: true, force: true });
   mkdirSync(join(CHECKSPACE, 'home'), { recursive: true });
   mkdirSync(CHECKSPACE, { recursive: true });
   /*
-   * The home, as it is laid out - blueprint/ threads/ runs/ - into a
-   * .walkdown of the checkspace's own, so the copy has the same shape as the
-   * real thing and the same shape as any adopter's.
+   * The home, as it is laid out - one folder, spec.yml with threads/ and
+   * runs/ beside it (ADR 0014) - into a .walkdown of the checkspace's own, so
+   * the copy has the same shape as the real thing and as any adopter's.
+   * Evidence and drafts are one machine's, and stay behind.
    */
-  for (const part of ['blueprint', 'threads', 'runs'])
-    cpSync(join(root, HOME, part), join(CHECKSPACE, HOME, part), { recursive: true });
+  const homeCopy = (from, to) =>
+    cpSync(from, to, { recursive: true, filter: (src) => !/\/(evidence|drafts)(\/|$)/.test(src.slice(from.length)) });
+  homeCopy(join(root, HOME), join(CHECKSPACE, HOME));
   /*
    * A sibling, so the server holds more than one project. Some rules are only
    * visible with a choice to make — which blueprint a page belongs to, and what
    * the panel does when you pick one that is about somewhere else.
    */
   /*
-   * Copied as a HOME - blueprint/ with threads/ and runs/ beside it, at
-   * example/ - but WITHOUT its own `.walkdown`: the checkspace's one config
+   * Copied as a HOME - one folder, at example/ - but WITHOUT its own
+   * `.walkdown`: the checkspace's one config
    * declares both projects so a single server offers both, and a pack's own
    * `.walkdown` would hide it from that server by design.
    *
@@ -91,8 +93,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * lives in a home, so the copy is one.
    */
   const exHome = join(root, 'example', EXAMPLE_HOME);
-  for (const part of ['blueprint', 'runs', 'threads'])
-    cpSync(join(exHome, part), join(CHECKSPACE, 'example', part), { recursive: true });
+  homeCopy(exHome, join(CHECKSPACE, 'example'));
   /*
    * And point the copy's declared address at the port this run serves the
    * example app on. A pin filed on a page that names no project is routed to
@@ -103,7 +104,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * and no check in it reads an example verdict, which is the thing moving a
    * target would invalidate (lib/status.js `inPlace`).
    */
-  const exCfg = join(CHECKSPACE, 'example', 'blueprint', 'walkdown.yml');
+  const exCfg = join(CHECKSPACE, 'example', 'spec.yml');
   writeFileSync(exCfg, readFileSync(exCfg, 'utf8').replaceAll(EXAMPLE_DECLARED, EXAMPLE_ORIGIN));
   if (!existsSync(join(CHECKSPACE, 'prototype')))
     symlinkSync(join(root, 'prototype'), join(CHECKSPACE, 'prototype'), 'dir');
@@ -113,7 +114,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     symlinkSync(join(root, 'as-built'), join(CHECKSPACE, 'as-built'), 'dir');
   /*
    * Evidence, linked rather than copied. It no longer lives in the repository,
-   * so copying `blueprint/` no longer brings it - and one check opens a
+   * so copying the home does not bring it - and one check opens a
    * screenshot and asserts the picture actually loaded, because a count of
    * pictures nobody can see is not evidence. Linked because it is 97MB and
    * this runs before every suite.
@@ -125,7 +126,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   } else if (!existsSync(evLink)) placeholderEvidence(evLink);
   /*
    * And the two check suites, for the same reason: `authoring.location`
-   * resolves against the blueprint's parent, so without them the copy is a
+   * resolves against the code root, so without them the copy is a
    * project whose rules have no checks anywhere. That makes the panel's
    * check-source disclosure unverifiable here - it would have no source to
    * show - and it quietly disables the coverage staleness the real project
@@ -142,8 +143,9 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * a pin placed there would vanish the moment it was filed.
    */
   /*
-   * Ids match what the discovery used to produce, because the fixture page
-   * defaults `data-bp` to `blueprint`.
+   * The copy of walkdown's own is named `blueprint`, because the fixture
+   * page defaults `data-bp` to `blueprint` and `?bp=` takes the name an ID
+   * ends with while only one ID ends with it.
    */
   /*
    * And who is sitting at this machine. Records are written under the config's
@@ -153,7 +155,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * that is correct.
    */
   writeFileSync(
-    join(process.env.WALKDOWN_HOME, 'config.yml'),
+    join(process.env.WALKDOWN_HOME, 'profile.yml'),
     // A declared zone, and not the one the suite's laptop is in, so a
     // clock read in it is provably the config's and not the browser's.
     ['identity:', '  username: checks-person', '  name: A Checks Person', '  timezone: Asia/Tokyo', ''].join('\n'),
@@ -170,13 +172,18 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'registry.yml'),
     [
+      'next: 3',
       'blueprints:',
-      '  - id: blueprint',
-      `    project: ${CHECKSPACE}`,
+      '  - id: 0001-cs-blueprint',
+      '    project: checkspace',
+      '    code: cs',
+      `    checkout: ${CHECKSPACE}`,
       `    home: ${join(CHECKSPACE, HOME)}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
-      '  - id: example/blueprint',
-      `    project: ${CHECKSPACE}`,
+      '  - id: 0002-cs-example',
+      '    project: checkspace',
+      '    code: cs',
+      `    checkout: ${CHECKSPACE}`,
       `    home: ${join(CHECKSPACE, 'example')}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
@@ -191,7 +198,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * copy owns its own, never recorded, never signed.
    */
   writeFileSync(
-    join(CHECKSPACE, HOME, 'blueprint', 'features', 'fixture.yml'),
+    join(CHECKSPACE, HOME, 'features', 'fixture.yml'),
     [
       'feature: fixture',
       'title: Fixtures for the browser checks',
@@ -217,7 +224,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     ].join('\n'),
   );
 
-  const sb = join(CHECKSPACE, HOME, 'blueprint', 'storyboard.yml');
+  const sb = join(CHECKSPACE, HOME, 'storyboard.yml');
   writeFileSync(
     sb,
     readFileSync(sb, 'utf8') +

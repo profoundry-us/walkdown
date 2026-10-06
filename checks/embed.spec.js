@@ -338,7 +338,7 @@ test('a tag on the page naming another blueprint does not redirect a write', {
   const { blueprints } = await (await fetch(`${WD_ORIGIN}/api/blueprint`)).json();
   // What the fixture's panel opens, by key - the panel names its blueprint
   // by key from the moment the server answers, whatever form it was asked in.
-  const open = blueprints.find((b) => b.id === 'blueprint').key;
+  const open = blueprints.find((b) => b.id === '0001-cs-blueprint').key;
   const other = blueprints.map((b) => b.key).find((k) => k !== open);
   expect(other, 'the server must hold a second blueprint for this to be about anything').toBeTruthy();
 
@@ -506,7 +506,7 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
     thread = bp.threads.find((t) => t.body === 'The corner is clipped, see the picture.');
     return thread?.attachments?.length ?? 0;
   }).toBe(1);
-  expect(thread.attachments[0].file).toMatch(/^attachments\/n-\d{4}-1\.png$/);
+  expect(thread.attachments[0].file).toMatch(/^attachments\/[0-9a-f-]{36}-1\.png$/);
   expect(thread.attachments[0].name).toBe('shot.png');
   const served = await page.request.get(`${WD_ORIGIN}/${thread.attachments[0].file}?bp=blueprint`);
   expect(served.status()).toBe(200);

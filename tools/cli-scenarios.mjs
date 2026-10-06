@@ -54,7 +54,7 @@ export function machine({ path } = {}) {
   mkdirSync(join(shop, '.git'), { recursive: true });
   mkdirSync(home, { recursive: true });
   mkdirSync(join(root, 'claude'), { recursive: true }); // Claude Code is installed
-  writeFileSync(join(home, 'config.yml'), 'identity:\n  username: topher\n');
+  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
   writeFileSync(join(root, '.gitconfig'), '[user]\n\tname = Sam Shopper\n\temail = sam@example.com\n');
   const env = {
     ...process.env,
@@ -160,7 +160,9 @@ export function steady(text, m) {
     .replaceAll(m.shop, '~/shop')
     .replaceAll(m.home, '~/.walkdown')
     .replace(/\d{4}-\d\d-\d\dT\d\d[-:]\d\d[-:]\d\d(\.\d+)?Z/g, '2026-10-02T00-00-00Z')
-    .replace(/sha256:[0-9a-f]{12}/g, 'sha256:000000000000');
+    .replace(/sha256:[0-9a-f]{12}/g, 'sha256:000000000000')
+    // A folder `blueprints new` names for this month reads as October 2026.
+    .replace(/\b20\d{2}(0[1-9]|1[0-2])-(?=[a-z])/g, '202610-');
 }
 
 /**

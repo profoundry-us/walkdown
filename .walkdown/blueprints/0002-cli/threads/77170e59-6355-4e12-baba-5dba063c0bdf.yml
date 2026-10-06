@@ -1,0 +1,11 @@
+id: n-0361
+uuid: 77170e59-6355-4e12-baba-5dba063c0bdf
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:12.425Z
+anchor:
+  screen: init-again
+status: open
+body: ADR 0014 changed this screen's shape. as-built/cli/init-again.html is the
+  build. The identity line names ~/.walkdown/profile.yml (was config.yml).

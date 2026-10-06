@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
-import { dim } from '../../lib/report/tty.js';
-import { listThreads } from '../../lib/threads.js';
+import { dim, yellow } from '../../lib/report/tty.js';
+import { labelClashes, listThreads } from '../../lib/threads.js';
 import { eachOrExit, end, sectionHead } from './context.js';
 
 export function run(args) {
@@ -30,6 +30,7 @@ export function run(args) {
   each.forEach(({ id, blueprint }, i) => {
     if (each.length > 1) console.log(`${i ? '\n' : ''}${sectionHead(id)}\n`);
     report(of(blueprint), values);
+    clashes(blueprint);
   });
   return end(0);
 }
@@ -51,4 +52,16 @@ function report(threads, values) {
     console.log(`      ${firstLine.length > 100 ? firstLine.slice(0, 97) + '…' : firstLine}\n`);
   }
   console.log(dim('  walkdown threads show <id> shows a thread in full'));
+}
+
+/*
+ * Labels a merge left shared (ADR 0014 §9), said under the list whether or
+ * not the threads are active: a label names a conversation, and a second
+ * one answering to it is news either way. Listing never relabels.
+ */
+function clashes(blueprint) {
+  for (const { label, threads } of labelClashes(blueprint.threads)) {
+    console.log(yellow(`\n  ! ${label} labels ${threads.length} threads: ${threads.map((t) => t.uuid).join(', ')}`));
+    console.log(dim(`    \`walkdown threads relabel ${label}\` gives the newer one a label of its own`));
+  }
 }

@@ -8,7 +8,7 @@ exit: 0
 expect:
   - '^  · up to date  ~/\.walkdown$'
   - '^  · up to date  ~/\.walkdown/registry\.yml$'
-  - '^  · you\s+~/\.walkdown/config\.yml  already says who you are$'
+  - '^  · you\s+~/\.walkdown/profile\.yml  already says who you are$'
   - '^  · up to date  ~/\.claude/skills/walkdown'
   - '^Ready\.'
 anchors:

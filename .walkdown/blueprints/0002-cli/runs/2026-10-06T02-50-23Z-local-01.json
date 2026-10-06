@@ -1,0 +1,41 @@
+{
+  "run_id": "2026-10-06T02-50-23Z-local-01",
+  "created": "2026-10-06T02:50:23Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "5d8403d-dirty",
+  "tree_hash": "sha256:d87ad4459499",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "screens.identity.fragment-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9484646bb993",
+      "duration_ms": 1,
+      "checks": [
+        "test/screen-match.test.js:22",
+        "test/screen-match.test.js:27"
+      ]
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "pass",
+      "statement_hash": "sha256:56d83a30a6b1",
+      "duration_ms": 0,
+      "checks": [
+        "test/screen-match.test.js:32",
+        "test/screen-match.test.js:43"
+      ]
+    },
+    {
+      "rule": "screens.identity.one-matcher",
+      "status": "pass",
+      "statement_hash": "sha256:94c5e18bf909",
+      "duration_ms": 1,
+      "checks": [
+        "test/screen-match.test.js:92"
+      ]
+    }
+  ]
+}

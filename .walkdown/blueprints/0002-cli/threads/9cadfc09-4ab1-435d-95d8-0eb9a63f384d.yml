@@ -1,0 +1,14 @@
+id: n-0362
+uuid: 9cadfc09-4ab1-435d-95d8-0eb9a63f384d
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:12.668Z
+anchor:
+  screen: init-another
+status: open
+body: ADR 0014 changed this screen's shape. as-built/cli/init-another.html is
+  the build. Same flat-home created lines as blueprints-new, under the project's
+  own folder. The listed line names the full ID (0002-sp-search) and comes
+  before the 'another' line, which now reads 'added to `shop`, beside
+  `checkout`'.

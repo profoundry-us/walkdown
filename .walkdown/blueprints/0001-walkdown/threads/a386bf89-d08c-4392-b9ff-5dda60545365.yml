@@ -1,0 +1,18 @@
+id: n-0357
+uuid: a386bf89-d08c-4392-b9ff-5dda60545365
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T02:02:26.302Z
+anchor:
+  rule: panel.rules.evidence-visible
+status: open
+body: "Three panel checks fail on main and on adr-0014 alike: 'evidence that is
+  not a picture…' (panel.rules.evidence-visible), 'a rule leads with its claim…'
+  (panel.rules.claim-then-reason) and 'a headless rule says so once'
+  (panel.rules.headless-says-so). Each opens a rule that ADR 0013 moved into the
+  cli blueprint (status.derived.latest-wins, locations nothing-in-the-tree), and
+  the Playwright checkspace serves only walkdown's home, so the rule never
+  appears in panel.rules-list and the click times out. The checks need either a
+  walkdown rule with the same shape (runs with a transcript, a long
+  because/history, a headless rule) or the checkspace serving the cli home too."

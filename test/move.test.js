@@ -55,7 +55,7 @@ test('move relocates the files, records the choice, and edits no record @rule:lo
 
     // Recorded on the registry row (ADR 0003 §6): the move is a fact about this disk.
     const reg = readFileSync(join(p.home, 'registry.yml'), 'utf8');
-    assert.match(reg, /id: movable/);
+    assert.match(reg, /id: \d{4}-[a-z0-9]{2,3}-movable/);
     assert.match(reg, new RegExp(`runs: ${dest.replace(/[/\\-]/g, '\\$&')}`));
 
     // And the resolver now agrees, which is the only thing that makes it real.
@@ -270,13 +270,14 @@ test('a config that will not write back is refused before anything moves @rule:l
         ...opts,
       });
     cli(['blueprints', 'new', '--commit', 'spec']);
-    const cfg = join(home, 'profile.yml');
-    // A key said twice: the parser collects the error and hands back a
-    // document, and only stringifying it refuses.
-    writeFileSync(
-      cfg,
-      `${existsSync(cfg) ? readFileSync(cfg, 'utf8') : ''}identity:\n  username: one\nidentity:\n  username: two\n`,
-    );
+    /*
+     * The move is written on the registry row now (ADR 0003 §6, ADR 0014),
+     * so the registry is the file that must take it. A key said twice: the
+     * document parses with an error collected, and nothing can be written
+     * back through it.
+     */
+    const cfg = join(home, 'registry.yml');
+    writeFileSync(cfg, `${readFileSync(cfg, 'utf8')}next: 99\n`);
     const runs = join(repo, '.walkdown', 'blueprints', '0001-repo', 'runs');
     mkdirSync(runs, { recursive: true });
     writeFileSync(join(runs, 'a.json'), '{"run_id":"a"}');
@@ -284,7 +285,7 @@ test('a config that will not write back is refused before anything moves @rule:l
     const dest = join(root, 'elsewhere', 'runs');
     let out;
     try {
-      cli(['records', 'move', 'runs', '--to', dest]);
+      cli(['records', 'move', 'runs', '--to', dest], { stdio: 'pipe' });
       assert.fail('a move that cannot be written down must be refused');
     } catch (e) {
       out = `${e.stdout ?? ''}${e.stderr ?? ''}`;

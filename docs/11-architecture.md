@@ -14,7 +14,7 @@ answer to *rebuild or refactor*.
 | `src/panel/` | 4,769 | 16 | of which `app.js` is 2,798 |
 | `lib/viewer/embed.js` | 1,075 | 1 | hand-written, cannot import |
 | `checks/` + `test/` | 5,185 | 25 | two suites, one documented rule for which |
-| `blueprint/` | 7,350 | 132 | 128 rules, 122 threads, 93 runs |
+| `blueprint/` | 7,350 | 132 | 128 rules, 122 threads, 93 runs (since ADR 0014, two flat homes under `.walkdown/blueprints/`) |
 
 ### The healthy parts, which a rebuild would put at risk
 
@@ -261,7 +261,7 @@ and writes its reasoning against what it actually saw.
 What the product owes this direction — the harness's parts that survive as
 product surface rather than script: assembling the per-rule prompt from the
 blueprint; filing evidence under `runs/evidence/` logical keys; project
-governance carried in config (a `governance:` list in `walkdown.yml`, ridden
+governance carried in config (a `governance:` list in `spec.yml`, ridden
 into every prompt verbatim); and the server's governance rails
 (claim-never-accept, named actors), which are what make an improvising agent
 with a browser trustable near an append-only ledger. The scratch-copy

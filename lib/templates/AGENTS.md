@@ -155,7 +155,7 @@ rather than adding to it.
   finding.
 - Run with `walkdown run [--target <t>] [--rule <id>]` — the
   reporter/formatter appends the run record automatically, under the identity
-  in `~/.walkdown/config.yml`.
+  in `~/.walkdown/profile.yml`.
 - `walkdown lint` before you finish: coverage, staleness, storyboard refs,
   thread hygiene.
 - Before you hand work to a person, `walkdown status` lists nothing under

@@ -11,7 +11,7 @@ and Playwright — no walkdown CLI.
 |---|---|
 | `prototype/` | A Claude Design export — two screens, anchors as `data-testid` |
 | `app/` | The built product (vanilla HTML/JS), anchors carried over |
-| `blueprint/` | The hand-written blueprint: config, storyboard, one feature (5 rules), runs, threads |
+| `.walkdown/blueprints/0001-example/` | The hand-written blueprint: config, storyboard, one feature (5 rules), runs, threads. It was `blueprint/` at the milestone; since ADR 0014 it is one flat home around a `spec.yml` |
 | `checks/` | The project's "own" test suite — Playwright tests tagged `@rule:<id>` |
 
 Run the checks: `npm install && npx playwright test` (the config serves `app/` itself).
@@ -46,7 +46,7 @@ busy-wait starves the very timer that draws the veil.
 1. **Run 01** (`kind: checks`): both automated rules pass; `visual-match` skipped —
    `verify: [agent, human]` is not satisfiable by checks.
 2. **Run 02** (`kind: walkdown`, `actor: agent`): screenshots of prototype vs app for both
-   screens (see `blueprint/runs/evidence/`). Verdict: **fail** — the join button reads
+   screens (see `runs/evidence/` in the home). Verdict: **fail** — the join button reads
    "Join waitlist" but the prototype says "Join the waitlist". Copy drift the functional
    checks were structurally blind to; the agent judgment tier caught it and spawned note
    `n-0001` anchored to `waitlist.submit`.
@@ -69,7 +69,7 @@ eye across three run files.
    (Highest-priority automation.)
 2. **The config needed a `prototype` section the docs didn't have.** An agent walkdown
    must serve *both* surfaces; the storyboard's `prototype:` paths need a root and port to
-   resolve against. Added here as `prototype: { root, port }` in `walkdown.yml` — docs
+   resolve against. Added here as `prototype: { root, port }` in `walkdown.yml` (now `spec.yml`) — docs
    updated to match.
 3. **Runs before the first commit have no useful `git_sha`.** Used
    `blueprint_sha: "uncommitted"`; the schema should bless an explicit value for

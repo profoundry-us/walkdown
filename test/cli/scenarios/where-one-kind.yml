@@ -6,7 +6,7 @@ fixture: two-blueprints
 command: [where, spec]
 exit: 0
 expect:
-  - '^checkout\t~/\.walkdown/blueprints/0001-checkout/blueprint$'
-  - '^search\t~/\.walkdown/blueprints/0002-search/blueprint$'
+  - '^0001-sp-checkout\t~/\.walkdown/projects/shop/blueprints/202610-checkout$'
+  - '^0002-sp-search\t~/\.walkdown/projects/shop/blueprints/202610-search$'
 anchors:
   - { id: cli.where.row, match: '^\S+\t' }

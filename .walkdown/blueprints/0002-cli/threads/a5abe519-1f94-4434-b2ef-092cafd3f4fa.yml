@@ -1,0 +1,15 @@
+id: n-0358
+uuid: a5abe519-1f94-4434-b2ef-092cafd3f4fa
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:11.709Z
+anchor:
+  screen: blueprints-new
+status: open
+body: "ADR 0014 changed this screen's shape. as-built/cli/blueprints-new.html is
+  the build. A home is one flat folder now: the created lines are spec.yml,
+  storyboard.yml, records.yml, features/_template.yml and AGENTS.md, under
+  ~/.walkdown/projects/<label>/blueprints/<YYYYMM-name>/. The registry line
+  names the full ID (0001-sp-shop), and a new line says which project it joined
+  and its code ('+ project  `shop`, a new project on this machine, code `sp`')."

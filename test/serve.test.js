@@ -509,7 +509,12 @@ test('a sign-off records approved with its hash and threads @rule:panel.signoff.
   assert.equal(record.results[0].status, 'approved');
   // An approval is of the statement as written, so it is hash-stamped like a pass.
   assert.equal(record.results[0].statement_hash, formatHash('The visitor can do the thing.'));
-  assert.deepEqual(record.results[0].threads, ['n-0001']);
+  // Named by the thread's UUID, which a second branch's n-0001 cannot share (ADR 0014 §9).
+  const n1 = readdirSync(join(runs, '..', 'threads'))
+    .map((f) => readFileSync(join(runs, '..', 'threads', f), 'utf8'))
+    .find((t) => /^id: n-0001$/m.test(t));
+  assert.ok(n1, 'n-0001 was filed earlier in this file');
+  assert.deepEqual(record.results[0].threads, [n1.match(/^uuid: (.+)$/m)[1]]);
 });
 
 test('the blueprint payload names the panel build it ships', async () => {
@@ -640,8 +645,9 @@ test('a session drafts to disk and finishing seals it into one run', async () =>
   // Not a run: no run id, and it is nowhere near runs/.
   assert.equal(draft.run_id, undefined);
   assert.ok(!readdirSync(runs).some((f) => f.includes('local.json')));
-  // And never committed by accident.
-  assert.equal(readFileSync(join(draftsDir, '.gitignore'), 'utf8'), '*\n!.gitignore\n');
+  // Kept out of git by the home's own .gitignore, never by one of its own,
+  // which overruled a home committed whole (ADR 0014 §7).
+  assert.ok(!existsSync(join(draftsDir, '.gitignore')));
 
   await post({
     actor: 'topher',

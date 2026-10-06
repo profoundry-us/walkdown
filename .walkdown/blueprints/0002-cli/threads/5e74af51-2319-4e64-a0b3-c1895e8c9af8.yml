@@ -1,0 +1,19 @@
+id: q-0385
+uuid: 5e74af51-2319-4e64-a0b3-c1895e8c9af8
+kind: question
+author: agent
+created: 2026-10-06T02:51:01.322Z
+anchor:
+  rule: commands.blueprints.new-makes-one
+status: open
+body: "Found while judging: `blueprints new` run from a subdirectory of a
+  registered checkout refuses. It says 'the project label `repo` is another
+  checkout's', naming that same checkout. Since ADR 0014 a project is a
+  checkout, which argues for joining it. But n-0214 kept a subdirectory as a
+  project of its own on purpose, so this is a choice."
+options:
+  - label: Join the checkout's project
+    why: A project is a checkout since ADR 0014, so a subdirectory has none of its
+      own
+  - label: Stay a second project
+    why: Keep n-0214's deliberate case, and give it a label of its own

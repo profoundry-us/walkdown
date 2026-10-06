@@ -20,7 +20,7 @@ truths are stored separately.
 
 ## Run record
 
-One JSON file per run in `blueprint/runs/`, named `<timestamp>-<target>-<seq>.json`.
+One JSON file per run in the home's `runs/`, named `<timestamp>-<target>-<seq>.json`.
 Append-only: a run is never edited, and new runs never conflict in git.
 
 ```json
@@ -80,8 +80,9 @@ Fields of note:
 - **`status`** per rule: `pass | fail | skipped | blocked`, plus two that only walkdown
   sessions record — `approved | refining`, the **sign-off** verdicts for rules with no
   build evidence yet (see below). Failures carry the failure message; evidence paths
-  (screenshots, traces) live under `runs/evidence/` (git-ignored or LFS, per project
-  taste).
+  (screenshots, traces) are `runs/evidence/…` keys, which resolve to the home's
+  `evidence/` or wherever this machine moved it (git-ignored by the home's own
+  `.gitignore`, or committed, per blueprint).
 
 ## walkdown sessions (judgment runs)
 
@@ -106,10 +107,14 @@ walkdown sessions come in two flavors, producing the same record shape:
   "results": [
     { "rule": "checkout.guest.email-required", "status": "pass" },
     { "rule": "checkout.guest.visual-summary", "status": "fail",
-      "threads": ["n-0018"] }
+      "threads": ["b81d04c7-52e9-4a3f-8f0e-6c1a9d2e4b75"] }
   ]
 }
 ```
+
+A result names its threads by UUID, the thread's identity since ADR 0014 (the label people
+read, `n-0018`, can be given out twice by two branches). Records written before then hold
+labels, and are never edited; they resolve through the label.
 
 - The panel drives the session: it walks the rule list, takes the surface under review
   to each rule's screen ([04-embed-and-anchors.md](04-embed-and-anchors.md)), and
@@ -133,13 +138,13 @@ walkdown sessions come in two flavors, producing the same record shape:
 - Partial sessions are fine — un-visited rules simply don't appear in `results`.
 - **The sitting is drafted; only the finish is a run.** A run record is appended once,
   at Finish, and never edited — but the judging that leads to one takes a sitting, so
-  each verdict is written immediately to `blueprint/drafts/<target>.json` (and mirrored
+  each verdict is written immediately to the home's `drafts/<target>.json` (and mirrored
   into browser storage, which still works when the server is not there). A draft is
   explicitly *not* a run: no `run_id`, outside `runs/`, and no status is ever derived
   from it — `walkdown status` reports it as a sitting in progress, never as verdicts.
   Finishing appends the record and deletes the draft; discarding deletes it and writes
-  nothing. The directory ignores its own contents, so half-judged sittings are never
-  committed. (API: `GET`/`POST /api/draft`; the blueprint payload carries the current
+  nothing. The home's own `.gitignore` keeps `drafts/` out unless the blueprint commits
+  everything, so half-judged sittings are never committed. (API: `GET`/`POST /api/draft`; the blueprint payload carries the current
   draft so a panel that just booted resumes where it was.)
 - A rule is **verified** only when every evidence type in its `verify` list has a passing,
   non-stale latest result: `checks` from automated runs, `agent` from agent walkdowns,

@@ -1,0 +1,13 @@
+id: n-0366
+uuid: cb3e0962-54ec-4741-bcdb-4f7a90aa4522
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:13.631Z
+anchor:
+  screen: where-one-kind
+status: open
+body: ADR 0014 changed this screen's shape. as-built/cli/where-one-kind.html is
+  the build. Rows are keyed by full ID (0001-sp-checkout) and the paths are flat
+  homes under ~/.walkdown/projects/shop/blueprints/, so the first column is
+  wider.

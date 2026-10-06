@@ -14,6 +14,7 @@ import { test } from 'node:test';
 import { machine, steady } from '../tools/cli-scenarios.mjs';
 import { parse } from '../vendor/yaml.js';
 
+const nm = (id) => String(id).replace(/^\d{4}-[a-z0-9]{2,3}-/, '');
 const registry = (m) => parse(readFileSync(join(m.home, 'registry.yml'), 'utf8'))?.blueprints ?? [];
 
 /* Every file under a directory, path -> contents, for "byte for byte". */
@@ -75,7 +76,7 @@ test('a noun alone lists, and each noun takes its verbs @rule:commands.shape.nou
     }
     const verbs = (noun) => m.wd([noun, 'help']).stdout.split('\n')[0];
     assert.match(verbs('blueprints'), /<list\|new\|import\|rename\|commit\|forget>/);
-    assert.match(verbs('threads'), /<list\|new\|show\|reply\|set>/);
+    assert.match(verbs('threads'), /<list\|new\|show\|reply\|set\|relabel>/);
     assert.match(verbs('records'), /<list\|move>/);
     assert.match(verbs('rules'), /<move\|rename>/);
     for (const cmd of ['status', 'lint', 'hash', 'run', 'judge', 'sweep', 'where', 'claims', 'serve', 'pointer', 'skills']) {
@@ -208,14 +209,17 @@ test('init names what the machine lacks, installs none of it, and sets up the re
   }
 });
 
-test('blueprints new makes one outside the repository, again changes nothing, and an id makes another @rule:commands.blueprints.new-makes-one', () => {
+test('blueprints new makes one outside the repository, again changes nothing, and a name makes another @rule:commands.blueprints.new-makes-one', () => {
   const m = machine();
   try {
+    m.ok(['init']);
     const shop = snapshot(m.shop);
     const first = m.wd(['blueprints', 'new']);
     assert.equal(first.status, 0, first.stderr);
-    assert.deepEqual(registry(m).map((r) => r.id), ['shop'], 'named for the directory');
-    assert.ok(existsSync(join(m.home, 'blueprints', '0001-shop', 'blueprint', 'spec.yml')));
+    assert.deepEqual(registry(m).map((r) => nm(r.id)), ['shop'], 'named for the directory');
+    const personal = join(m.home, 'projects', 'shop', 'blueprints');
+    assert.deepEqual(readdirSync(personal).map((f) => f.replace(/^\d{6}-/, 'YYYYMM-')), ['YYYYMM-shop'], 'in a folder named for this month');
+    assert.ok(existsSync(join(personal, readdirSync(personal)[0], 'spec.yml')));
     assert.deepEqual(snapshot(m.shop), shop, 'nothing added to the repository');
 
     const again = m.wd(['blueprints', 'new']);
@@ -224,49 +228,56 @@ test('blueprints new makes one outside the repository, again changes nothing, an
 
     const another = m.wd(['blueprints', 'new', 'search']);
     assert.equal(another.status, 0, another.stderr);
-    assert.match(another.stdout, /`search` is another blueprint for this project, beside `shop` — commands that write take `--blueprint <id>`/);
-    assert.deepEqual(registry(m).map((r) => r.id).sort(), ['search', 'shop']);
+    assert.match(another.stdout, /added to `shop`, beside `shop` — commands that write take `--blueprint <id>`/);
+    assert.deepEqual(registry(m).map((r) => nm(r.id)).sort(), ['search', 'shop']);
   } finally {
     m.done();
   }
 });
 
-test('blueprints commit moves the whole home in and out, and leaves a shared .gitignore alone @rule:commands.blueprints.commit-moves-the-home', () => {
+test('blueprints commit moves the whole home in and out, keeping its folder name and its ID @rule:commands.blueprints.commit-moves-the-home', () => {
   const m = machine();
   try {
     gitInit(m);
-    m.ok(['blueprints', 'new']);
-    const runs = m.ok(['where', 'runs']).stdout.trim();
+    m.ok(['blueprints', 'new', 'shop']);
+    m.ok(['blueprints', 'new', 'search']);
+    const idOf = (name) => registry(m).find((r) => nm(r.id) === name).id;
+    const shopId = idOf('shop');
+    const runs = m.ok(['where', 'runs', '--blueprint', 'shop']).stdout.trim();
     mkdirSync(runs, { recursive: true });
     writeFileSync(join(runs, 'r.json'), '{"a run":true}\n');
+    const outside = m.ok(['where', 'spec', '--blueprint', 'shop']).stdout.trim();
+    const folder = basename(outside);
+    const search = snapshot(m.ok(['where', 'spec', '--blueprint', 'search']).stdout.trim());
 
-    m.ok(['blueprints', 'commit', 'spec']);
-    const inside = join(m.shop, '.walkdown', 'blueprints', '0001-shop');
-    assert.equal(m.ok(['where', 'spec']).stdout.trim(), join(inside, 'blueprint'));
-    assert.equal(readFileSync(join(m.ok(['where', 'runs']).stdout.trim(), 'r.json'), 'utf8'), '{"a run":true}\n', 'records and all');
-    const shared = join(m.shop, '.walkdown', '.gitignore');
-    assert.ok(existsSync(shared), "the spec standard's ignore file");
+    m.ok(['blueprints', 'commit', 'spec', '--blueprint', 'shop']);
+    const inside = join(m.shop, '.walkdown', 'blueprints', folder);
+    assert.equal(m.ok(['where', 'spec', '--blueprint', 'shop']).stdout.trim(), inside, 'the same folder name, in the repository');
+    assert.equal(readFileSync(join(m.ok(['where', 'runs', '--blueprint', 'shop']).stdout.trim(), 'r.json'), 'utf8'), '{"a run":true}\n', 'records and all');
+    assert.match(readFileSync(join(inside, '.gitignore'), 'utf8'), /^runs\/$/m, 'with its own .gitignore');
+    assert.equal(idOf('shop'), shopId, 'the ID is the same');
 
-    m.ok(['blueprints', 'commit', 'none']);
-    assert.equal(existsSync(inside), false, 'back out');
-    assert.equal(readFileSync(join(m.ok(['where', 'runs']).stdout.trim(), 'r.json'), 'utf8'), '{"a run":true}\n');
-
-    // With several, it asks which - and one leaving keeps the file the
-    // other still stands behind.
-    m.ok(['blueprints', 'commit', 'spec']);
-    m.ok(['blueprints', 'new', 'search', '--commit', 'spec']);
-    const which = m.wd(['blueprints', 'commit', 'none']);
-    assert.equal(which.status, 2);
-    assert.match(which.stderr, /--blueprint <id>/);
-    const before = readFileSync(shared, 'utf8');
     m.ok(['blueprints', 'commit', 'none', '--blueprint', 'shop']);
-    assert.equal(readFileSync(shared, 'utf8'), before, 'the shared .gitignore is as it was');
+    assert.equal(existsSync(inside), false, 'back out');
+    assert.equal(m.ok(['where', 'spec', '--blueprint', 'shop']).stdout.trim(), outside);
+    assert.equal(readFileSync(join(m.ok(['where', 'runs', '--blueprint', 'shop']).stdout.trim(), 'r.json'), 'utf8'), '{"a run":true}\n');
+    assert.equal(idOf('shop'), shopId, 'and still the same');
+    assert.deepEqual(snapshot(m.ok(['where', 'spec', '--blueprint', 'search']).stdout.trim()), search, "no other blueprint's files change");
+
+    // A committed folder with the same name as search's: refused, and nothing moves.
+    const searchFolder = basename(m.ok(['where', 'spec', '--blueprint', 'search']).stdout.trim());
+    mkdirSync(join(m.shop, '.walkdown', 'blueprints', searchFolder), { recursive: true });
+    writeFileSync(join(m.shop, '.walkdown', 'blueprints', searchFolder, 'spec.yml'), 'blueprint: someone-elses\n');
+    const taken = m.wd(['blueprints', 'commit', 'spec', '--blueprint', 'search']);
+    assert.equal(taken.status, 2);
+    assert.match(taken.stderr, new RegExp(searchFolder));
+    assert.deepEqual(snapshot(m.ok(['where', 'spec', '--blueprint', 'search']).stdout.trim()), search, 'and nothing moved');
   } finally {
     m.done();
   }
 });
 
-test('blueprints rename changes the id everywhere it lives and nothing it holds @rule:commands.blueprints.rename', () => {
+test('blueprints rename changes the name its ID ends with, and with --folder its folder, and nothing it holds @rule:commands.blueprints.rename', () => {
   const m = machine();
   try {
     gitInit(m);
@@ -274,25 +285,30 @@ test('blueprints rename changes the id everywhere it lives and nothing it holds 
     oneRule(m, 'b');
     m.ok(['blueprints', 'commit', 'spec', '--blueprint', 'b']);
     m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.', '--blueprint', 'b']);
-    m.ok(['pointer', '--into', 'CLAUDE.md']);
-    const was = m.ok(['where', 'spec', '--blueprint', 'b']).stdout.trim();
-    const home = join(was, '..').replace(/\/$/, '');
+    const home = m.ok(['where', 'spec', '--blueprint', 'b']).stdout.trim();
+    const was = registry(m).find((r) => nm(r.id) === 'b').id;
     const held = snapshot(home);
+    const repo = snapshot(m.shop);
     const status = m.ok(['status', '--blueprint', 'b', '--json']).stdout;
 
     const r = m.wd(['blueprints', 'rename', 'b', 'search']);
     assert.equal(r.status, 0, r.stderr);
-    const now = join(m.shop, '.walkdown', 'blueprints', `${basename(home).slice(0, 4)}-search`);
-    assert.ok(existsSync(now), `the folder keeps its number: ${readdirSync(join(m.shop, '.walkdown', 'blueprints'))}`);
-    assert.ok(registry(m).some((row) => row.id === 'search') && !registry(m).some((row) => row.id === 'b'));
-    assert.match(readFileSync(join(now, 'blueprint', 'spec.yml'), 'utf8'), /^blueprint: search$/m);
-    assert.match(readFileSync(join(m.shop, '.walkdown', 'config.yml'), 'utf8'), /id: search/);
-    assert.doesNotMatch(readFileSync(join(m.shop, '.walkdown', 'config.yml'), 'utf8'), /id: b\b/);
-    const after = snapshot(now);
-    for (const [rel, text] of Object.entries(held))
-      if (!rel.endsWith('/blueprint/walkdown.yml')) assert.equal(after[rel], text, `${rel} byte for byte`);
-    assert.equal(m.ok(['status', '--blueprint', 'search', '--json']).stdout, status.replaceAll('"b"', '"search"').replaceAll(home, now));
-    assert.match(readFileSync(join(m.shop, 'CLAUDE.md'), 'utf8'), /blueprints\/\d{4}-search/, 'the pointer names it anew');
+    const now = registry(m).find((row) => nm(row.id) === 'search');
+    assert.ok(now && !registry(m).some((row) => nm(row.id) === 'b'));
+    assert.equal(now.id, `${was.slice(0, was.lastIndexOf('-'))}-search`, 'keeping its number and its project code');
+    assert.equal(m.ok(['where', 'spec', '--blueprint', 'search']).stdout.trim(), home, 'its folder is unchanged');
+    assert.deepEqual(snapshot(m.shop), repo, 'and nothing in the repository changed');
+    assert.equal(m.ok(['status', '--blueprint', 'search', '--json']).stdout, status.replaceAll(was, now.id), 'status reads as b did');
+
+    // With --folder, the folder is renamed, and that is the only change in the repository.
+    const f = m.wd(['blueprints', 'rename', 'search', 'search', '--folder', '202610-search']);
+    assert.equal(f.status, 0, f.stderr);
+    const moved = join(m.shop, '.walkdown', 'blueprints', '202610-search');
+    assert.equal(m.ok(['where', 'spec', '--blueprint', 'search']).stdout.trim(), moved);
+    assert.deepEqual(snapshot(moved), held, 'its rules, threads and runs byte for byte');
+    const rel = (p) => p.slice(m.shop.length);
+    const expected = Object.fromEntries(Object.entries(repo).map(([k, v]) => [k.replace(rel(home), rel(moved)), v]));
+    assert.deepEqual(snapshot(m.shop), expected, 'the rename is the only change in the repository');
 
     const before = { home: snapshot(m.home), shop: snapshot(m.shop) };
     for (const bad of [['a', 'search'], ['a', 'Not An Id']]) {
@@ -300,29 +316,6 @@ test('blueprints rename changes the id everywhere it lives and nothing it holds 
       assert.equal(refused.status, 2, `${bad.join(' → ')} is refused`);
     }
     assert.deepEqual({ home: snapshot(m.home), shop: snapshot(m.shop) }, before, 'and nothing changed');
-  } finally {
-    m.done();
-  }
-});
-
-test('blueprints import registers what a project declares, and forget takes it off the list alone @rule:commands.blueprints.import-and-forget-moved', () => {
-  const m = machine();
-  try {
-    gitInit(m);
-    m.ok(['blueprints', 'new', '--commit', 'spec']);
-    const spec = m.ok(['where', 'spec']).stdout.trim();
-    m.ok(['blueprints', 'forget', 'shop']);
-    assert.deepEqual(registry(m), [], 'forgotten');
-    const records = snapshot(join(spec, '..'));
-
-    const r = m.wd(['blueprints', 'import', '.', '--all']);
-    assert.equal(r.status, 0, r.stderr);
-    const row = registry(m).find((x) => x.id === 'shop');
-    assert.equal(row?.registered?.by, 'import');
-
-    m.ok(['blueprints', 'forget', 'shop']);
-    assert.equal(registry(m).length, 0);
-    assert.deepEqual(snapshot(join(spec, '..')), records, 'no record touched');
   } finally {
     m.done();
   }

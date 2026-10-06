@@ -6,9 +6,10 @@ fixture: one-blueprint
 command: [blueprints, new, search]
 exit: 0
 expect:
-  - '\+ created\s+~/\.walkdown/blueprints/0002-search/blueprint/walkdown\.yml'
-  - '\+ another\s+`search` is another blueprint for this project, beside `checkout`'
+  - '\+ created\s+~/\.walkdown/projects/shop/blueprints/202610-search/spec\.yml'
+  - '\+ listed\s+~/\.walkdown/registry\.yml  as `0002-sp-search`'
+  - '\+ another\s+added to `shop`, beside `checkout` — commands that write take `--blueprint <id>` now'
 anchors:
-  - { id: cli.init.created, match: '^\s+\+ created' }
+  - { id: cli.init.created, match: '^\s+\+ (created|listed)' }
   - { id: cli.init.another, match: '^\s+\+ another' }
   - { id: cli.init.spec, match: '^\s+spec:' }

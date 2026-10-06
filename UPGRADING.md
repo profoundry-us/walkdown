@@ -42,16 +42,41 @@ the new one with your arguments in it, ready to copy.
 `walkdown init` now sets up the machine only. Run it once on each machine; it is safe
 to run again.
 
-### 3. Refresh each blueprint's AGENTS.md
+### 3. Move to the new layout
+
+Files moved too ([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)).
+Until they have, every command that loads a blueprint exits 2 and says an upgrade is due.
+See what would move, then move it:
+
+```
+walkdown upgrade --dry-run
+walkdown upgrade
+```
+
+Run it from inside each project whose blueprints you keep in the repository. It flattens
+each home, renames `config.yml` to `profile.yml`, renumbers the registry, gives every
+thread a uuid, and replaces the pointer block in `CLAUDE.md` / `AGENTS.md`. It is safe to
+run again. Commit what it changed in the repository; anyone else who pulls runs it once
+on their own machine for what lives there.
+
+Then, in place of the IDs you used to type:
+
+| Was | Now |
+|---|---|
+| `--blueprint walkdown` | still works inside the project; elsewhere, its full ID (`walkdown blueprints` lists them) |
+| `walkdown blueprints add <path>` | `walkdown blueprints import <path>` |
+| `walkdown blueprints rename <id> <new-id>` | `walkdown blueprints rename <id> <new-name> [--folder <folder>]` |
+
+### 4. Refresh each blueprint's AGENTS.md
 
 A blueprint's `AGENTS.md` names the commands agents use. Copy the shipped one over
 yours if you have not edited it:
 
 ```
-cp ~/.walkdown/walkdown/lib/templates/AGENTS.md <spec>/AGENTS.md
+cp ~/.walkdown/walkdown/lib/templates/AGENTS.md <home>/AGENTS.md
 ```
 
-`walkdown where spec` prints `<spec>`.
+`walkdown where spec` prints `<home>`.
 
 ## From 0.2.0 to 0.3.0
 

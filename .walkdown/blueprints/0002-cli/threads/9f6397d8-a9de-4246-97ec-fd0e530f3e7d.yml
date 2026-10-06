@@ -1,0 +1,21 @@
+id: n-0375
+uuid: 9f6397d8-a9de-4246-97ec-fd0e530f3e7d
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:43:12.271Z
+anchor:
+  rule: locations.answer.declared-not-discovered
+status: addressed
+body: Agent judging found a gap in a checkout with some homes imported and one
+  not. Standing in the unimported home, `walkdown where` prints the other two
+  blueprints' reports. It never names the folder or `walkdown blueprints
+  import`. `where --blueprint three` also says 'no row for this project', which
+  is false.
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:19Z
+    body: Standing in a home nothing imported, or naming it, now names the folder
+      and `walkdown blueprints import <home>`. Standing in an imported home
+      answers for that one. `where` gives the registry's own reason in place of
+      'no row for this project'.

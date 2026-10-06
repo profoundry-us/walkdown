@@ -5,7 +5,7 @@ rule: commands.shape.help-by-noun
 command: [threads, help]
 exit: 0
 expect:
-  - '^Usage: walkdown threads <list\|new\|show\|reply\|set> \.\.\.$'
+  - '^Usage: walkdown threads <list\|new\|show\|reply\|set\|relabel> \.\.\.$'
   - '^  walkdown threads show <id>'
   - '^  walkdown threads reply <id> <text>'
   - '^  walkdown threads set <id> --status'

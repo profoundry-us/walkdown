@@ -85,7 +85,7 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
     // screenshots.
     const reg = join(f.home, 'registry.yml');
     const doc = parse(readFileSync(reg, 'utf8'));
-    doc.blueprints.find((r) => r.id === 'ev-fixture').evidence = join(f.home, 'projects', 'ev-fixture', 'evidence');
+    doc.blueprints.find((r) => r.id.endsWith('-ev-fixture')).evidence = join(f.home, 'projects', 'ev-fixture', 'evidence');
     writeFileSync(reg, stringify(doc));
     const out = join(f.home, 'projects', 'ev-fixture', 'evidence', 'r1');
     mkdirSync(out, { recursive: true });

@@ -6,8 +6,8 @@ fixture: two-blueprints
 command: [status]
 exit: 0
 expect:
-  - '^━━ checkout ━━$'
-  - '^━━ search ━━$'
+  - '^━━ 0001-sp-checkout ━━$'
+  - '^━━ 0002-sp-search ━━$'
   - 'checkout\.basics\.pays'
   - 'search\.basics\.finds'
 anchors:

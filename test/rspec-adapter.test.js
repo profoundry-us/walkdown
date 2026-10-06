@@ -53,7 +53,7 @@ before(() => {
   // names the code as its project and the home apart from it.
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'registry.yml'),
-    `blueprints:\n  - id: app\n    project: ${code}\n    home: ${homeDir}\n    registered: { by: init, at: '2026-09-24T00:00:00Z' }\n`,
+    `blueprints:\n  - id: 0001-fx-app\n    project: fx\n    code: fx\n    checkout: ${code}\n    home: ${homeDir}\n    registered: { by: init, at: '2026-09-24T00:00:00Z' }\n`,
   );
 });
 after(() => rmSync(root, { recursive: true, force: true }));

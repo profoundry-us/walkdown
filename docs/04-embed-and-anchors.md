@@ -10,7 +10,7 @@ standardized on rather than inventing a parallel one:
 
 - **Playwright**: `page.getByTestId('checkout.submit')` works with zero configuration —
   `data-testid` is its default, and projects that pick a different attribute set the same
-  value in `testIdAttribute` (Playwright config) that they set in `walkdown.yml`.
+  value in `testIdAttribute` (Playwright config) that they set in `spec.yml`.
 - **Testing Library** (React/Vue unit tests): `getByTestId` — same default attribute.
 - **Capybara** (Rails workflow specs): set `Capybara.test_id = "data-testid"` and the
   built-in matchers (`click_button`, `find_field`, …) match anchors natively.
@@ -26,7 +26,7 @@ standardized on rather than inventing a parallel one:
 ```
 
 ```yaml
-# blueprint/walkdown.yml
+# <home>/spec.yml
 embed:
   anchor_attribute: data-testid   # default; the embed, lint, and check authoring all read this
 ```
@@ -89,7 +89,7 @@ It auto-detects its transport:
   through the panel.
 - **Standalone** (opened directly, or docked beside the panel in the app's own document):
   HTTP to the local walkdown server (`http://localhost:4700`), which writes threads
-  straight into `blueprint/threads/`.
+  straight into the blueprint's `threads/`.
 
 ## Injection per surface — boring on purpose
 
@@ -173,6 +173,6 @@ In both layouts:
 
 - The embed is dev/staging tooling; it must never be reachable in production builds
   (env-gated at build time, not runtime-hidden).
-- The local server accepts writes only for the currently-open project directory and only
-  into `blueprint/threads/` and `blueprint/runs/` (append paths) — never arbitrary files.
+- The local server accepts writes only for a blueprint the registry lists, and only into
+  its home's `threads/` and `runs/` (append paths) — never arbitrary files.
 - Embed payloads are data (thread YAML), never executed.

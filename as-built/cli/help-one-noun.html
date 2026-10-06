@@ -52,7 +52,7 @@
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
     <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads help</div>
       <div data-testid="cli.noun.usage">
-      <div class="ln">Usage: walkdown threads &lt;list|new|show|reply|set&gt; ...</div>
+      <div class="ln">Usage: walkdown threads &lt;list|new|show|reply|set|relabel&gt; ...</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.noun.verbs">
@@ -80,6 +80,10 @@
       <div class="ln">      (a note: open → addressed → verified | reopen | waived; a question: open → answered →</div>
       <div class="ln">      incorporated | reopen | waived). Verified and waived need a named person; waiving and</div>
       <div class="ln">      reopening need --reason. --reply lands with the change, or neither lands.</div>
+      <div class="ln"></div>
+      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; [--yes] [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">      Give the newer of two threads sharing a label (a merge can leave two) the next free</div>
+      <div class="ln">      label, keeping the old one as its alias. Asks first; with no terminal, --yes.</div>
       <div class="ln"></div>
       <div data-testid="cli.noun.bare">
       <div class="ln">The bare noun is `walkdown threads list`.</div>

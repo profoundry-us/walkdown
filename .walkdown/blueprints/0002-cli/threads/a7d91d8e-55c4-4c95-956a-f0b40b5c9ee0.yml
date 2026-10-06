@@ -1,0 +1,18 @@
+id: n-0371
+uuid: a7d91d8e-55c4-4c95-956a-f0b40b5c9ee0
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:42:58.474Z
+anchor:
+  rule: locations.threads.clashing-labels-ask
+status: addressed
+body: Agent judging found `walkdown threads relabel <older-uuid>` relabels the
+  OLDER of two threads sharing a label, though it printed 'The newer one would
+  be relabelled'. planRelabel targeted whichever thread the UUID named.
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:17Z
+    body: planRelabel now moves the newer of the threads sharing the label,
+      whichever one it was named by. test/thread-labels.test.js names the older
+      UUID and checks the newer would move.

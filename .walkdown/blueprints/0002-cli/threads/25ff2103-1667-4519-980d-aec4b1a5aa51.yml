@@ -1,0 +1,19 @@
+id: n-0373
+uuid: 25ff2103-1667-4519-980d-aec4b1a5aa51
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:42:59.225Z
+anchor:
+  rule: locations.answer.says-why
+status: addressed
+body: Agent judging found that in a worktree, kinds resolved from the
+  blueprint's records.yml say only 'the blueprint's own records.yml
+  (0003-pj-gamma)' though they resolve into the registered checkout's home, not
+  the worktree's. Rows made by `blueprints new` also say 'registered by init'.
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:18Z
+    body: A kind resolved from records.yml in a worktree now says it was read from
+      the registered home's, because git ignores it. Rows made by `blueprints
+      new` say so instead of 'init'.

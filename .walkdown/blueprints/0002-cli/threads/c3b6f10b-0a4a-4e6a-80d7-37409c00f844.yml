@@ -1,0 +1,18 @@
+id: n-0372
+uuid: c3b6f10b-0a4a-4e6a-80d7-37409c00f844
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:42:58.969Z
+anchor:
+  rule: locations.worktree.branch-spec-shared-records
+status: addressed
+body: "Agent judging found, for a worktree at <repo>/.claude/worktrees/reword:
+  status read main's wording, the thread landed in the checkout, the run carried
+  the checkout's commit and no branch, a commit-all run landed in the checkout,
+  and serve served main's spec. Same cause as the same-project finding."
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:18Z
+    body: Same fix as n-0374. The branch-spec test now runs in both layouts, the
+      Claude Code one inside the checkout included.

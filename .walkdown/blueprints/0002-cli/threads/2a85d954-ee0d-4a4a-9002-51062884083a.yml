@@ -1,0 +1,13 @@
+id: n-0367
+uuid: 2a85d954-ee0d-4a4a-9002-51062884083a
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:13.874Z
+anchor:
+  screen: writes-refused-among-several
+status: open
+body: "ADR 0014 changed this screen's shape.
+  as-built/cli/writes-refused-among-several.html is the build. The refusal lists
+  full IDs (0001-sp-checkout, 0002-sp-search), and its example takes the bare
+  name: --blueprint checkout."

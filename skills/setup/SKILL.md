@@ -88,11 +88,12 @@ clone.
 
     walkdown blueprints new --dir <project-root>
 
-By default the whole home - spec, threads, runs, evidence, drafts - lands in
-`~/.walkdown/blueprints/`, and the repository gets nothing at all, not even a
-pointer. Ask whether they would rather commit it: `--commit spec` puts the home
-in `.walkdown/` with a `.gitignore` that keeps runs, evidence and drafts out;
-`--commit all` the same with no `.gitignore`. The honest recommendation is
+By default the whole home - spec, threads, runs, evidence, drafts, in one flat
+folder - lands in `~/.walkdown/projects/<project>/blueprints/`, and the
+repository gets nothing at all, not even a pointer. Ask whether they would
+rather commit it: `--commit spec` puts the home in `.walkdown/blueprints/` with
+its own `.gitignore` that keeps runs, evidence and drafts out; `--commit all`
+the same with no `.gitignore`. The honest recommendation is
 `spec` for a team and nothing for an evaluation, and it can be changed later
 with `walkdown blueprints commit <standard>` - the home moves whole.
 
@@ -108,8 +109,10 @@ wants its own rules, threads and runs - is `blueprints new` again with an id:
 
     walkdown blueprints new <name> --dir <project-root>
 
-It gets its own numbered home and says which blueprints the project already
-holds; check the id is the one the person meant. From then on, every command
+It gets a home of its own and a registry ID (`0003-sh-search`, numbered on this
+machine), and says which blueprints the project already holds; check the name is
+the one the person meant. Inside the project the bare name works anywhere the ID
+does. From then on, every command
 that writes takes `--blueprint <id>`, and the reads report on each blueprint.
 Never pick one for the person when it is unclear which a rule belongs in - ask.
 
@@ -120,7 +123,7 @@ Finally, tell them where everything went, in one line each: `walkdown where`.
 
 ### Recording checks from a clone
 
-`walkdown.yml` says which reporter to add to their Playwright config, by the
+The blueprint's `spec.yml` says which reporter to add to their Playwright config, by the
 clone's path: nothing puts a `walkdown` package in their `node_modules`, so
 `['walkdown/reporter']` would not resolve there. Copy the line `blueprints new` wrote. The
 RSpec lines load the formatter from the clone the same way (`-I <clone>/adapters/rspec/lib

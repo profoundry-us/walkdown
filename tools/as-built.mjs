@@ -40,7 +40,7 @@ const OUT = join(ROOT, 'as-built');
  * for the same reason. Registered on this machine by `walkdown import
  * example`, which the checks and the project modal already rely on.
  */
-const BP = join(ROOT, 'example/.walkdown/blueprints/0001-example/blueprint');
+const BP = join(ROOT, 'example/.walkdown/blueprints/0001-example');
 // What the frame holds while capturing: the example's design for its front
 // door, served by the same walkdown. The drawing replaces the frame with a
 // box either way; this only decides what the bar says it is looking at.

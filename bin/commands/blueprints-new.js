@@ -192,6 +192,23 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
 
   async function build() {
     let listed = exact() ?? null;
+    /*
+     * The label was chosen before the lock, so another project may have
+     * taken it since. Asked again under the lock, and refused with nothing
+     * made: register() would refuse it after the home was scaffolded.
+     */
+    if (!listed && label.fresh) {
+      const rows = live().filter((r) => r.project && !(r.checkout && canon(expand(String(r.checkout))) === checkout));
+      const taken = rows.some((r) => String(r.project) === label.label)
+        ? `label \`${label.label}\``
+        : rows.some((r) => String(r.code) === label.code)
+          ? `code \`${label.code}\``
+          : null;
+      if (taken) {
+        console.error(red(`✗ the project ${taken} was taken while this ran. Nothing was made; run it again.`));
+        return process.exit(2);
+      }
+    }
     let loc = listed ? resolveLocations({ cwd: root, blueprint: String(listed.id) }) : null;
     const siblings = listed ? [] : mine().map((r) => nameOf(r.id));
     const current = loc?.standard?.name ?? (found ? (isHome(found) && existsSync(join(found, '.gitignore')) ? 'spec' : 'all') : null);
@@ -250,7 +267,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     // ---- the row ------------------------------------------------------------
     const entry = listed
       ? { action: 'kept', id: String(listed.id), path: registryPath(), beside: [] }
-      : register({ checkout, homeDir, by: 'init', project: label.label, code: label.code, name });
+      : register({ checkout, homeDir, by: 'blueprints new', project: label.label, code: label.code, name });
     if (entry.action === 'label-taken' || entry.action === 'code-taken') {
       console.error(red(`✗ the project ${entry.action === 'label-taken' ? 'label' : 'code'} \`${entry.taken}\` was taken while this ran. Run it again.`));
       return process.exit(2);
@@ -311,6 +328,21 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
       );
     else if (entry.action === 'written' && label.fresh)
       console.log(`  ${green('+ project')}  ${dim(`\`${label.label}\`, a new project on this machine, code \`${label.code}\``)}`);
+    /*
+     * One directory too deep. A project inside another project's checkout
+     * is deliberate where it is meant, so this is not a refusal - the
+     * finding was the silence: the person got a working second project in
+     * place of a correction, and the two only diverged later, when the
+     * outer kept its ledger and the inner started empty (n-0214).
+     */
+    const above =
+      entry.action === 'written' && label.fresh
+        ? live().filter((r) => r.checkout && !r.ephemeral && checkout.startsWith(`${canon(expand(String(r.checkout)))}/`))
+        : [];
+    if (above.length)
+      console.log(
+        `  ${yellow('! above')}    ${dim(`\`${above[0].id}\` already answers for this directory, from ${tilde(String(above[0].checkout))} — this makes two blueprints in two projects, each with its own ledger`)}`,
+      );
     if (unready)
       console.log(`  ${yellow('? you')}      this machine is not set up — \`walkdown init\` says who you are and installs the skills`);
 

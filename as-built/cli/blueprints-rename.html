@@ -15,7 +15,7 @@
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; blueprints rename changes an id and nothing it holds</title>
+  <title>As-built &mdash; blueprints rename changes the name in an ID and nothing it holds</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -52,15 +52,13 @@
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
     <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown blueprints rename search find</div>
       <div data-testid="cli.rename.changes">
-      <div class="ln">  ~ folder  ~/.walkdown/blueprints/0002-search  now 0002-find, keeping its number</div>
-      <div class="ln">  ~ registry  ~/.walkdown/registry.yml  `search` is `find`</div>
-      <div class="ln">  ~ named  ~/.walkdown/blueprints/0002-find/blueprint/walkdown.yml  blueprint: find</div>
+      <div class="ln">  ~ registry  ~/.walkdown/registry.yml  `0002-sp-search` is `0002-sp-find`</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.rename.done">
-      <div class="ln">✓ `search` is now `find`. Its rules, threads and runs are as they were.</div>
+      <div class="ln">✓ `0002-sp-search` is now `0002-sp-find`. Its rules, threads and runs are as they were.</div>
+      <div class="ln">  `--blueprint find` names it inside its project, `--blueprint 0002-sp-find` anywhere.</div>
       </div>
-      <div class="ln">  `--blueprint find` names it from here on.</div>
     <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>

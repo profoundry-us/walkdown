@@ -1,0 +1,13 @@
+id: n-0365
+uuid: a01e035e-62a5-4a1b-bb39-a3301d38c200
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:13.396Z
+anchor:
+  screen: status-two-blueprints
+status: open
+body: ADR 0014 changed this screen's shape.
+  as-built/cli/status-two-blueprints.html is the build. Section headers carry
+  the full ID (━━ 0001-sp-checkout ━━), and each section's path is the flat home
+  under ~/.walkdown/projects/shop/blueprints/.

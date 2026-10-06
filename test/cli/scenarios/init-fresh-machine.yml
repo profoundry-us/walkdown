@@ -8,7 +8,7 @@ exit: 0
 expect:
   - '^  \+ created  ~/\.walkdown$'
   - '^  \+ created  ~/\.walkdown/registry\.yml$'
-  - '^  \+ you\s+~/\.walkdown/config\.yml  as `sam`$'
+  - '^  \+ you\s+~/\.walkdown/profile\.yml  as `sam`$'
   - '^  \+ linked\s+~/\.claude/skills/walkdown'
   - '^  · git\s+'
   - '^Ready\. In a project, `walkdown blueprints new` starts a spec\.$'

@@ -69,7 +69,7 @@ to need them. *(This is currently the repository's largest debt; see
 | `checks/` | what a person sees or does, driving the real panel or embed with Playwright. |
 
 Which of the last two a check belongs in is not a preference — it is
-`ownership.evidence.same-surface`, and `blueprint/walkdown.yml` states it:
+`ownership.evidence.same-surface`, and each blueprint's `spec.yml` states it:
 a rule describing a surface is not verified by a test that drives the layer
 beneath it.
 

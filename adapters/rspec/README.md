@@ -23,7 +23,7 @@ bundle exec rspec spec/workflows -I <clone>/adapters/rspec/lib -r walkdown/forma
   --format progress --format Walkdown::Formatter
 ```
 
-In `blueprint/walkdown.yml` (`walkdown init` writes these with the clone's path filled in):
+In the blueprint's `spec.yml` (`walkdown blueprints new` writes these with the clone's path filled in):
 
 ```yaml
 runner:
@@ -50,7 +50,7 @@ metadata: it dry-run-prints `rule:<id> <file>:<line>` per tagged example, which 
 - `git_sha` is the code's (the cwd), `blueprint_sha` the spec's, each with a `-dirty`
   suffix for an unclean tree.
 - Target: `WALKDOWN_TARGET` (default `local`). Who a run is recorded under is `ci`
-  under CI and the `identity:` in `~/.walkdown/config.yml` otherwise — never an env
+  under CI and the `identity:` in `~/.walkdown/profile.yml` otherwise — never an env
   var. `base_url`: `Capybara.app_host`, else `APP_HOST`.
 - Evidence: add `evidence: ["tmp/screenshots/foo.png"]` metadata to an example to attach
   files your spec saved.

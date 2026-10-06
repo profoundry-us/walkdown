@@ -1,0 +1,14 @@
+id: n-0368
+uuid: 0a14520f-392d-42c8-9798-6d1706967de6
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:23:27.240Z
+anchor:
+  screen: help-one-noun
+status: open
+body: "A new verb, relabel, joins threads: the usage line reads
+  <list|new|show|reply|set|relabel>, and its entry is last ('walkdown threads
+  relabel <label|uuid> [--yes] [--blueprint <id>] [--json]', with what it does
+  beneath). as-built/cli/help-one-noun.html is the build. The root help (n-0360)
+  gains the same line under Threads."

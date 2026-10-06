@@ -37,8 +37,10 @@ writeFileSync(
   join(home, 'registry.yml'),
   [
     'blueprints:',
-    '  - id: reporter-fixture',
-    `    project: ${root}`,
+    '  - id: 0001-fx-reporter-fixture',
+    '    project: fx',
+    '    code: fx',
+    `    checkout: ${root}`,
     `    home: ${root}`,
     "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
     '',

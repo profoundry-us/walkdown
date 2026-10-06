@@ -34,7 +34,7 @@
        throwaway port so their own `walkdown serve` can keep running. -->
   <script>
     const WD = new URLSearchParams(location.search).get('wd') || 'http://localhost:4700';
-    for (const [file, attr, value] of [['panel.js', 'data-bp', new URLSearchParams(location.search).get('bp') || 'example/blueprint'],
+    for (const [file, attr, value] of [['panel.js', 'data-bp', new URLSearchParams(location.search).get('bp') || 'example'],
                                        ['embed.js', 'data-walkdown', '']]) {
       const s = document.createElement('script');
       s.src = `${WD}/${file}`;

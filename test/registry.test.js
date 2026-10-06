@@ -4,10 +4,10 @@
  * This file replaces repo-config.test.js, which held the two-config merge to
  * its promises: a committed list, a personal one layered over it, and a
  * report crediting whichever file supplied each key. That arrangement is
- * gone. A checkout's `.walkdown/config.yml` is a manifest that `walkdown
- * import` reads once; `~/.walkdown/registry.yml` is what every reader
- * consults; and `~/.walkdown/config.yml` is the person's - identity and
- * defaults - and registers nothing.
+ * gone. A checkout's `.walkdown/blueprints/` holds homes that `walkdown
+ * blueprints import` registers when asked (ADR 0014); `~/.walkdown/
+ * registry.yml` is what every reader consults; and `~/.walkdown/profile.yml`
+ * is the person's - identity and defaults - and registers nothing.
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -19,6 +19,7 @@ import { threadAt } from '../tools/test-home.mjs';
 import { readRegistry, readUserConfig, resolveLocations } from '../lib/locations.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
+const nm = (id) => String(id).replace(/^\d{4}-[a-z0-9]{2,3}-/, '');
 const prevHome = process.env.WALKDOWN_HOME;
 const roots = [];
 after(() => {
@@ -28,8 +29,8 @@ after(() => {
 });
 
 /*
- * A checkout as a clone arrives: a manifest naming a numbered home, the home
- * standing where it says, and nothing on this machine that has met it.
+ * A checkout as a clone arrives: a committed home under its .walkdown, and
+ * nothing on this machine that has met it.
  */
 function clone({ personalYaml = null, registryYaml = null } = {}) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-registry-')));
@@ -47,7 +48,6 @@ function clone({ personalYaml = null, registryYaml = null } = {}) {
   for (const k of ['threads', 'runs', 'evidence', 'drafts']) mkdirSync(join(homeDir, k), { recursive: true });
   writeFileSync(join(homeDir, 'spec.yml'), 'blueprint: shared\n');
   writeFileSync(join(homeDir, 'features', 'a.yml'), 'feature: a\nstories: []\n');
-  writeFileSync(join(repo, '.walkdown', 'config.yml'), 'blueprints:\n  - id: shared\n    home: 0001-shared\n');
   mkdirSync(join(repo, 'deep', 'nested'), { recursive: true });
   return { root, home, repo, homeDir };
 }
@@ -65,19 +65,19 @@ test('a manifest registers nothing; import does, and the row answers from any de
   const before = resolveLocations({ cwd: repo });
   assert.equal(before.blueprint, null, 'the clone declares it, and this machine has not met it');
   assert.match(before.spec.why, /nothing registered contains this directory/);
-  assert.match(before.spec.why, /declares `shared`/, 'the manifest is named');
+  assert.match(before.spec.why, /holds 1 blueprint folder\(s\) \(0001-shared/, 'the folder is named');
   assert.match(before.spec.why, /walkdown blueprints import/, 'and so is the door');
 
-  const r = walkdown(home, ['blueprints', 'import', '.'], repo);
+  const r = walkdown(home, ['blueprints', 'import', '.', '--all'], repo);
   assert.equal(r.status, 0, r.stderr);
-  const row = readRegistry().rows.find((x) => x.id === 'shared');
-  assert.equal(row.project, repo);
+  const row = readRegistry().rows.find((x) => nm(x.id) === 'shared');
+  assert.equal(row.checkout, repo);
   assert.equal(row.home, homeDir);
   assert.equal(row.registered.by, 'import');
 
   const fromRoot = resolveLocations({ cwd: repo });
   const fromDeep = resolveLocations({ cwd: join(repo, 'deep', 'nested') });
-  assert.equal(fromRoot.id, 'shared');
+  assert.equal(fromRoot.id, row.id);
   assert.equal(fromDeep.spec.path, join(homeDir), 'the same answer from anywhere in it');
   assert.equal(fromDeep.codeRoot, repo);
   assert.equal(fromDeep.config.matchedIn, 'registry');
@@ -85,16 +85,13 @@ test('a manifest registers nothing; import does, and the row answers from any de
   assert.match(fromDeep.spec.why, /registry/);
 });
 
-test('identity comes from the personal config, never from a manifest', () => {
-  const { repo, home } = clone({ personalYaml: 'identity:\n  username: me\n' });
-  writeFileSync(
-    join(repo, '.walkdown', 'config.yml'),
-    'identity:\n  username: committed-person\nblueprints:\n  - id: shared\n    home: 0001-shared\n',
-  );
-  walkdown(home, ['blueprints', 'import', '.'], repo);
+test('identity comes from the profile, never from anything committed', () => {
+  const { repo, home, homeDir } = clone({ personalYaml: 'identity:\n  username: me\n' });
+  writeFileSync(join(homeDir, 'spec.yml'), 'blueprint: shared\nidentity:\n  username: committed-person\n');
+  walkdown(home, ['blueprints', 'import', '.', '--all'], repo);
   assert.equal(readUserConfig().config.identity?.username, 'me');
   const bare = clone();
-  walkdown(bare.home, ['blueprints', 'import', '.'], bare.repo);
+  walkdown(bare.home, ['blueprints', 'import', '.', '--all'], bare.repo);
   assert.equal(readUserConfig().config.identity, undefined, 'and with none said, none is taken');
 });
 
@@ -124,7 +121,7 @@ test('a parse failure is reported against the file that has it @rule:locations.a
 
   // And a registry that does not parse refuses to be written to, rather
   // than being read as empty and appended over.
-  const r = walkdown(broken.home, ['blueprints', 'import', '.'], broken.repo);
+  const r = walkdown(broken.home, ['blueprints', 'import', '.', '--all'], broken.repo);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /does not parse/);
 });
@@ -141,12 +138,11 @@ test('a parse failure is reported against the file that has it @rule:locations.a
 test('a hand-written row naming a symlink is set aside, and import through the link registers the real path once @rule:locations.answer.registry-is-the-only-door', async () => {
   const { home, root } = clone();
   const mono = join(root, 'mono');
-  const pack = join(mono, 'packs', 'pack');
   mkdirSync(join(mono, '.git'), { recursive: true });
-  mkdirSync(pack, { recursive: true });
-  assert.equal(walkdown(home, ['blueprints', 'new', '--commit', 'spec'], mono).status, 0);
-  assert.equal(walkdown(home, ['blueprints', 'new', '--commit', 'spec'], pack).status, 0);
-  const packHome = join(pack, '.walkdown', 'blueprints', '0001-pack');
+  // A blueprint at the root, and a pack's with a folder of its own beside it.
+  assert.equal(walkdown(home, ['blueprints', 'new', 'mono', '--commit', 'spec'], mono).status, 0);
+  assert.equal(walkdown(home, ['blueprints', 'new', 'pack', '--folder', 'packs/pack', '--commit', 'spec'], mono).status, 0);
+  const packHome = join(mono, '.walkdown', 'blueprints', 'packs', 'pack');
   writeFileSync(
     join(packHome, 'features', 'a.yml'),
     'feature: a\nstories:\n  - id: a.s\n    rules:\n      - id: a.s.one\n        statement: One.\n        verify: [checks]\n',
@@ -158,39 +154,46 @@ test('a hand-written row naming a symlink is set aside, and import through the l
 
   // The row, by hand: no `registered:`, and the home spelled through the link.
   const registry = join(home, 'registry.yml');
-  writeFileSync(registry, readFileSync(registry, 'utf8') + `  - id: viasymlink\n    project: ${lab}\n    home: ${link}\n`);
+  writeFileSync(
+    registry,
+    readFileSync(registry, 'utf8') + `  - id: 0099-lb-viasymlink\n    project: lab\n    code: lb\n    checkout: ${lab}\n    home: ${link}\n`,
+  );
 
   // Set aside on read, and named under the file it is in.
-  const where = walkdown(home, ['where'], mono).stdout;
-  assert.match(where, /ignores `registry: viasymlink`.*written by hand/, where);
-  const byName = walkdown(home, ['where', '--blueprint', 'viasymlink'], mono);
-  assert.match(byName.stdout + byName.stderr, /no registered blueprint `viasymlink`/);
-  assert.equal(JSON.parse(walkdown(home, ['where', '--json'], mono).stdout).config.ignored.map((i) => i.id).join(), 'viasymlink');
+  const where = walkdown(home, ['where', '--blueprint', 'mono'], mono).stdout;
+  assert.match(where, /ignores `registry: 0099-lb-viasymlink`.*written by hand/, where);
+  const byName = walkdown(home, ['where', '--blueprint', '0099-lb-viasymlink'], mono);
+  assert.match(byName.stdout + byName.stderr, /no registered blueprint `0099-lb-viasymlink`/);
+  assert.equal(
+    JSON.parse(walkdown(home, ['where', '--json', '--blueprint', 'mono'], mono).stdout).config.ignored.map((i) => i.id).join(),
+    '0099-lb-viasymlink',
+  );
   // Nothing goes through it: not a status, not a thread, and the pack's ledger is untouched.
-  assert.notEqual(walkdown(home, ['status', '--blueprint', 'viasymlink'], mono).status, 0);
-  const filed = walkdown(home, ['threads', 'new', '--blueprint', 'viasymlink', '--rule', 'a.s.one', '--body', 'through the link', '--as-agent'], mono);
+  assert.notEqual(walkdown(home, ['status', '--blueprint', '0099-lb-viasymlink'], mono).status, 0);
+  const filed = walkdown(home, ['threads', 'new', '--blueprint', '0099-lb-viasymlink', '--rule', 'a.s.one', '--body', 'through the link', '--as-agent'], mono);
   assert.notEqual(filed.status, 0, filed.stdout);
-  assert.ok(!existsSync(threadAt(packHome, 'threads', 'n-0001')), 'nothing landed in the pack');
-  // And standing in the lab, where the row's project would contain you, it is still nothing.
+  assert.ok(!existsSync(join(packHome, 'threads')), 'nothing landed in the pack');
+  // And standing in the lab, where the row's checkout would contain you, it is still nothing.
   assert.equal(resolveLocations({ cwd: lab }).blueprint, null);
 
   // A server at the root lists what is registered - both rows - and never the link's.
   const { createWalkdownServer } = await import('../lib/serve.js');
-  const server = createWalkdownServer(join(mono, '.walkdown', 'blueprints', '0001-mono'), { cwd: mono });
+  const monoHome = readRegistry().rows.find((r) => nm(r.id) === 'mono').home;
+  const server = createWalkdownServer(monoHome, { cwd: mono });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   try {
     const base = `http://127.0.0.1:${server.address().port}`;
     const payload = await (await fetch(`${base}/api/blueprint`)).json();
-    assert.deepEqual(payload.blueprints.map((p) => p.id).sort(), ['mono', 'pack']);
-    assert.equal((await fetch(`${base}/api/blueprint?bp=viasymlink`)).status, 404);
+    assert.deepEqual(payload.blueprints.map((p) => nm(p.id)).sort(), ['mono', 'pack']);
+    assert.equal((await fetch(`${base}/api/blueprint?bp=0099-lb-viasymlink`)).status, 404);
   } finally {
     server.closeAllConnections();
     server.close();
   }
 
-  // Standing in the pack reaches the pack's row; at the root, the root's.
-  assert.equal(resolveLocations({ cwd: pack }).id, 'pack');
-  assert.equal(resolveLocations({ cwd: mono }).id, 'mono');
+  // Inside the checkout each is reached by its name.
+  assert.equal(nm(resolveLocations({ cwd: mono, blueprint: 'pack' }).id), 'pack');
+  assert.equal(nm(resolveLocations({ cwd: mono, blueprint: 'mono' }).id), 'mono');
 
   // Through the link, import is the one add - and it is the pack's home,
   // canonicalised, already listed once.
@@ -212,29 +215,28 @@ test('a hand-written row naming a symlink is set aside, and import through the l
 test('a hand-written row does not make a home "already listed" — import still registers it @rule:locations.answer.registry-is-the-only-door', () => {
   const { home, root } = clone();
   const mono = join(root, 'mono');
-  const pack = join(mono, 'packs', 'pack');
   mkdirSync(join(mono, '.git'), { recursive: true });
-  mkdirSync(pack, { recursive: true });
-  assert.equal(walkdown(home, ['blueprints', 'new', '--commit', 'spec'], pack).status, 0);
-  const packHome = join(pack, '.walkdown', 'blueprints', '0001-pack');
-  // Un-register what init wrote, leaving the manifest, and put the hand row in its place.
+  assert.equal(walkdown(home, ['blueprints', 'new', 'pack', '--folder', 'packs/pack', '--commit', 'spec'], mono).status, 0);
+  const packHome = join(mono, '.walkdown', 'blueprints', 'packs', 'pack');
+  // Un-register what `new` wrote, leaving the home, and put the hand row in its place.
   const lab = join(root, 'lab');
   mkdirSync(lab, { recursive: true });
   const link = join(lab, 'linkpack');
   symlinkSync(packHome, link, 'dir');
-  writeFileSync(join(home, 'registry.yml'), `blueprints:\n  - id: pack\n    project: ${lab}\n    home: ${link}\n`);
-  assert.equal(resolveLocations({ cwd: pack }).blueprint, null, 'the hand row is not a door');
+  writeFileSync(join(home, 'registry.yml'), `blueprints:\n  - id: 0001-mn-pack\n    project: mono\n    code: mn\n    checkout: ${mono}\n    home: ${link}\n`);
+  assert.equal(resolveLocations({ cwd: mono }).blueprint, null, 'the hand row is not a door');
 
   const r = walkdown(home, ['blueprints', 'import', link], lab);
   assert.equal(r.status, 0, r.stderr);
   assert.doesNotMatch(r.stdout, /already listed/, r.stdout);
   const rows = readRegistry().rows.filter((r) => r.registered && r.home);
+  const row = rows.find((r) => realpathSync(r.home) === realpathSync(packHome));
   assert.equal(rows.filter((r) => realpathSync(r.home) === realpathSync(packHome)).length, 1, JSON.stringify(rows));
-  assert.equal(resolveLocations({ cwd: pack }).id, rows.find((r) => realpathSync(r.home) === realpathSync(packHome)).id);
-  // Ids stay unique across the file, hand rows included: the new row is not `pack`.
-  assert.notEqual(rows.find((r) => realpathSync(r.home) === realpathSync(packHome)).id, 'pack');
+  assert.equal(resolveLocations({ cwd: mono }).id, row.id);
+  // IDs stay unique across the file, hand rows included: the new row is not `0001-mn-pack`.
+  assert.notEqual(row.id, '0001-mn-pack');
   // And a second import, from the real path, is the one that says already listed.
-  const again = walkdown(home, ['blueprints', 'import', packHome], pack);
+  const again = walkdown(home, ['blueprints', 'import', packHome], mono);
   assert.equal(again.status, 0, again.stderr);
   assert.match(again.stdout, /already listed/);
 });

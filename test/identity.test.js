@@ -88,7 +88,7 @@ test('a username that is not a string counts as nobody and names its file @rule:
     assert.equal(who.declared, false);
     assert.notEqual(who.source, 'config');
     assert.ok(who.username, 'the guess is still a name, so the report still boots');
-    assert.match(who.problem, /identity\.username.*config\.yml.*a list/);
+    assert.match(who.problem, /identity\.username.*profile\.yml.*a list/);
     assert.notEqual(who.name, 7, 'a number is not a display name either');
     writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: " person "\n');
     const fine = defaultActor(process.cwd());

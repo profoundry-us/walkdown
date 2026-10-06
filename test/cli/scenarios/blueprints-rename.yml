@@ -1,14 +1,15 @@
-# `walkdown blueprints rename`: an id put right without starting over.
+# `walkdown blueprints rename`: the name an ID ends with, put right without
+# starting over. The folder is left alone unless `--folder` is given.
 screen: blueprints-rename
-title: blueprints rename changes an id and nothing it holds
+title: blueprints rename changes the name in an ID and nothing it holds
 rule: commands.blueprints.rename
 fixture: two-blueprints
 command: [blueprints, rename, search, find]
 exit: 0
 expect:
-  - '^  ~ folder  ~/\.walkdown/blueprints/0002-search  now 0002-find, keeping its number$'
-  - '^  ~ registry  ~/\.walkdown/registry\.yml  `search` is `find`$'
-  - '^✓ `search` is now `find`\. Its rules, threads and runs are as they were\.$'
+  - '^  ~ registry  ~/\.walkdown/registry\.yml  `0002-sp-search` is `0002-sp-find`$'
+  - '^✓ `0002-sp-search` is now `0002-sp-find`\. Its rules, threads and runs are as they were\.$'
+  - '^  `--blueprint find` names it inside its project, `--blueprint 0002-sp-find` anywhere\.$'
 anchors:
   - { id: cli.rename.changes, match: '^  ~ ' }
-  - { id: cli.rename.done, match: '^✓ ' }
+  - { id: cli.rename.done, match: '^(✓ |  `--blueprint)' }

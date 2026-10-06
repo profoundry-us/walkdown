@@ -14,6 +14,7 @@ import { createWalkdownServer } from '../lib/serve.js';
 import { readRegistry, resolveLocations } from '../lib/locations.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
+const nm = (id) => String(id).replace(/^\d{4}-[a-z0-9]{2,3}-/, '');
 
 function scratch() {
   // Real, because the registry writes canonical paths (ADR 0003 §3) and macOS
@@ -50,30 +51,35 @@ const walkdown = (home, args, cwd, ok = true) => {
 };
 
 /*
- * TWO CHECKOUTS, ONE NAME, TWO ROWS. Two checkouts called `app` used to
+ * TWO CHECKOUTS, ONE NAME, TWO PROJECTS. Two checkouts called `app` used to
  * become one project through the merge - `thread new` in one filed into the
- * other's ledger (n-0160). The registry keys nothing by name: each checkout
- * is a row with its own project, standing in one reaches that one, and the
- * second `app` takes the next free id on this machine (ADR 0003).
+ * other's ledger (n-0160). A project is a label now, unique on the machine
+ * (ADR 0014 §3): the second `app` is asked for one of its own, nothing is
+ * registered until it has one, and then each answers for itself.
  */
-test('two checkouts sharing a name are two rows, and each answers for itself @rule:locations.default.one-home-per-blueprint', () => {
+test('two checkouts sharing a name are two projects, and each answers for itself @rule:locations.registry.projects-are-labels', () => {
   const s = scratch();
   try {
     const one = join(s.root, 'one', 'app');
     const two = join(s.root, 'two', 'app');
     for (const r of [one, two]) mkdirSync(join(r, '.git'), { recursive: true });
-    // `one` is a personal project (the default); `two` commits its spec.
+    // `one` is a personal blueprint (the default); `two` commits its spec.
     walkdown(s.home, ['blueprints', 'new'], one);
-    walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], two);
+    const refused = walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], two, false);
+    assert.equal(refused.status, 2);
+    assert.match(refused.stderr, /label `app` is another checkout's/);
+    assert.match(refused.stderr, /--project <label>/);
+    assert.equal(readRegistry().rows.length, 1, 'nothing registered until it has a label of its own');
+    walkdown(s.home, ['blueprints', 'new', '--commit', 'spec', '--project', 'app-two', '--code', 'a2'], two);
 
     const locOne = resolveLocations({ cwd: one });
     const locTwo = resolveLocations({ cwd: two });
-    assert.equal(locOne.id, 'app');
-    assert.match(locTwo.id, /^app/, 'both are called app, and the registry tells them apart');
+    assert.equal(nm(locOne.id), 'app');
+    assert.equal(nm(locTwo.id), 'app', 'both are called app, and their IDs tell them apart');
     assert.notEqual(locOne.id, locTwo.id);
     assert.notEqual(locOne.spec.path, locTwo.spec.path);
     assert.ok(locTwo.spec.path.startsWith(join(two, '.walkdown') + '/'), 'two answers with its own');
-    assert.equal(readRegistry().rows.filter((r) => r.project === one || r.project === two).length, 2);
+    assert.deepEqual(readRegistry().rows.map((r) => r.project).sort(), ['app', 'app-two']);
 
     // The write door: a note filed standing in `two` lands in `two`.
     const filed = walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'here', '--as-agent'], two, false);
@@ -85,33 +91,34 @@ test('two checkouts sharing a name are two rows, and each answers for itself @ru
   }
 });
 
-test('an ephemeral copy taking a registered id is a different row, not an override @rule:locations.default.one-home-per-blueprint', () => {
+test('an ephemeral copy is a row of its own, never an override of the original', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(join(repo, '.git'), { recursive: true });
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
-    const copy = blueprint(join(s.root, 'elsewhere'), 'copy');
-    // An ephemeral copy that asks for the same id, and gets the next one.
-    const said = walkdown(s.home, ['blueprints', 'import', copy, '--id', 'repo', '--ephemeral', '--why', 'a sitting'], s.root).stdout;
-    assert.match(said, /as `repo-2`/);
+    const copy = blueprint(join(s.root, 'elsewhere', 'repo'), 'copy');
+    const said = walkdown(s.home, ['blueprints', 'import', copy, '--ephemeral', '--why', 'a sitting'], s.root).stdout;
+    const copyId = said.match(/as `(\d{4}-tmp-repo)`/)?.[1];
+    assert.ok(copyId, said);
 
+    const original = readRegistry().rows.find((r) => !r.ephemeral);
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.spec.path, join(repo, '.walkdown', 'blueprints', '0001-repo'));
+    assert.equal(loc.spec.path, original.home);
     assert.equal(loc.config.registry.matched, true);
-    assert.equal(resolveLocations({ cwd: repo, blueprint: 'repo-2' }).spec.path, copy);
+    assert.equal(resolveLocations({ cwd: repo, blueprint: copyId }).spec.path, copy);
   } finally {
     s.cleanup();
   }
 });
 
 /*
- * CONFIG.YML REGISTERS NOTHING (ADR 0003 §4). A `blueprints:` row there -
+ * THE PROFILE REGISTERS NOTHING (ADR 0003 §4). A `blueprints:` row there -
  * the override shape `walkdown move` used to write, or a hand-written entry
  * from before the registry - is set aside and named, never merged: the
  * registry row is the only row, and a moved kind is a key on it.
  */
-test('a blueprints row in config.yml is set aside and named; the registry row carries the override', () => {
+test('a blueprints row in profile.yml is set aside and named; the registry row carries the override', () => {
   const s = scratch();
   try {
     const repo = join(s.root, 'repo');
@@ -122,7 +129,7 @@ test('a blueprints row in config.yml is set aside and named; the registry row ca
       `identity:\n  username: std-person\nblueprints:\n  - id: repo\n    evidence: ${join(s.root, 'ev')}\n`,
     );
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.evidence.path, join(repo, '.walkdown', 'blueprints', '0001-repo', 'evidence'), 'the row is not read');
+    assert.equal(loc.evidence.path, join(readRegistry().rows[0].home, 'evidence'), 'the row is not read');
     assert.ok(loc.config.ignored.some((ig) => ig.key === 'blueprints' && /registers nothing/.test(ig.why)));
     const said = walkdown(s.home, ['where'], repo).stdout;
     assert.match(said, /registers nothing/);
@@ -130,7 +137,7 @@ test('a blueprints row in config.yml is set aside and named; the registry row ca
     // The same decision made through the door that exists lands on the row.
     walkdown(s.home, ['records', 'move', 'evidence', '--to', join(s.root, 'ev')], repo);
     assert.equal(resolveLocations({ cwd: repo }).evidence.path, join(s.root, 'ev'));
-    const row = readRegistry().rows.find((r) => r.project === repo);
+    const row = readRegistry().rows.find((r) => r.checkout === repo);
     assert.equal(row.evidence, join(s.root, 'ev'));
   } finally {
     s.cleanup();
@@ -153,7 +160,7 @@ test('a server offers what the .walkdown where it was started declares, wherever
     // Registered: mono's own blueprint, and alpha's. Nothing registers the
     // second blueprint in alpha, and nothing reaches it by standing above it.
     walkdown(s.home, ['blueprints', 'new'], mono);
-    walkdown(s.home, ['blueprints', 'new'], alpha);
+    walkdown(s.home, ['blueprints', 'new', 'alpha'], alpha);
 
     const server = createWalkdownServer(join(alpha, 'blueprint2'), { cwd: mono });
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
@@ -173,7 +180,7 @@ test('a server offers what the .walkdown where it was started declares, wherever
        * written to.
        */
       const home = await (await fetch(`${base}/api/blueprint?bp=mono`)).json();
-      assert.deepEqual(home.blueprints.map((p) => p.id).sort(), ['alpha', 'mono']);
+      assert.deepEqual(home.blueprints.map((p) => nm(p.id)).sort(), ['alpha', 'mono']);
       assert.equal((await fetch(`${base}/api/blueprint?bp=reach`)).status, 404, 'an unregistered id is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=alpha-two`)).status, 404, 'the unregistered blueprint is not on offer');
       assert.equal((await fetch(`${base}/api/blueprint?bp=mono`)).status, 200);
@@ -221,7 +228,7 @@ test('the folder a server says it serves is the place its list came from @rule:p
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
       const payload = await (await fetch(`${base}/api/blueprint`)).json();
-      assert.deepEqual(payload.blueprints.map((p) => p.id).sort(), ['other', 'proj']);
+      assert.deepEqual(payload.blueprints.map((p) => nm(p.id)).sort(), ['other', 'proj']);
       assert.equal(payload.root, proj, 'the project, not the numbered home the spec sits in');
       assert.ok(
         !payload.root.includes('0001-proj'),

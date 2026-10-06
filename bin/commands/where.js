@@ -84,7 +84,7 @@ function report(loc) {
 
   console.log(`walkdown where — ${loc.id}\n`);
   /*
-   * Two files, each answering for itself. config.yml is the person's -
+   * Two files, each answering for itself. profile.yml is the person's -
    * identity and defaults - and registers nothing since ADR 0003; the
    * registry is what this machine knows about, and the only thing consulted.
    */
@@ -114,7 +114,7 @@ function report(loc) {
           ? red(`unreadable — ${reg.error}`)
           : reg.matched
             ? green(`the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`)
-            : dim('the registry — what this machine knows about; no row for this project')
+            : dim(`the registry — what this machine knows about; ${loc.config.registry.why ?? 'no row answers here'}`)
         : dim('the registry — not present; `walkdown import` or `walkdown init` starts it')
     }`,
   );

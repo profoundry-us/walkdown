@@ -5,7 +5,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadBlueprint } from '../../lib/blueprint.js';
-import { resolveLocations, SPEC_FILE, tilde, upgradeDue } from '../../lib/locations.js';
+import { nameOf, resolveLocations, SPEC_FILE, tilde, upgradeDue } from '../../lib/locations.js';
 
 /*
  * How a command finishes. process.exit() tears the process down before Node
@@ -88,7 +88,8 @@ export function severalHere(loc) {
   const ids = loc.config.registry.candidates;
   const project = loc.code?.path ? ` for ${tilde(loc.code.path)}` : '';
   console.error(`Several blueprints are registered${project}: ${ids.join(', ')}.`);
-  console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${ids[0]}\`).`);
+  // Inside the project the name an ID ends with is enough (ADR 0014 §2).
+  console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${nameOf(ids[0])}\`).`);
   process.exit(2);
 }
 
@@ -107,6 +108,11 @@ export const sectionHead = (id) => `━━ ${id} ━━`;
  */
 export function noBlueprintHere(loc, blueprintId) {
   const where = loc.config.registry?.path ?? loc.config.path;
+  // A home standing here, or called that, that nothing has imported.
+  if (/has not imported/.test(loc.spec?.why ?? '')) {
+    console.error(`No blueprint ${blueprintId ? `for \`${blueprintId}\`` : 'here'}: ${loc.spec.why}.`);
+    process.exit(2);
+  }
   console.error(
     blueprintId
       ? `No blueprint for \`${blueprintId}\` — either nothing registered it, or its spec is gone.`

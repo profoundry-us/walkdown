@@ -210,7 +210,8 @@ export async function run(args) {
       return end(2);
     }
     const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const said = (await rl.question('\nImport which? (numbers, or "all") ')).trim();
+    // Ctrl-D at the question is "none of them", not a stack trace.
+    const said = (await rl.question('\nImport which? (numbers, or "all") ').catch(() => '')).trim();
     rl.close();
     if (!said) {
       console.log(dim('nothing imported'));
@@ -237,14 +238,22 @@ export async function run(args) {
 function finish(chosen, checkout, values, known = []) {
   const written = [];
   for (const h of chosen) {
-    const row = register({
-      checkout: values.ephemeral ? null : checkout,
-      homeDir: h.dir,
-      by: 'import',
-      project: values.project ?? null,
-      code: values.code ?? null,
-      ephemeral: values.ephemeral ? { why: values.why ?? '' } : null,
-    });
+    let row;
+    try {
+      row = register({
+        checkout: values.ephemeral ? null : checkout,
+        homeDir: h.dir,
+        by: 'import',
+        project: values.project ?? null,
+        code: values.code ?? null,
+        ephemeral: values.ephemeral ? { why: values.why ?? '' } : null,
+      });
+    } catch (e) {
+      // A registry that does not parse, a lock held, a code that is no code:
+      // said as a sentence, with nothing written.
+      console.error(red(`✗ ${e.message}`));
+      return end(2);
+    }
     if (row.action === 'label-taken' || row.action === 'code-taken') {
       console.error(
         red(`✗ the project ${row.action === 'label-taken' ? 'label' : 'code'} \`${row.taken}\` is another project's on this machine. Nothing more was imported.`),
@@ -252,7 +261,7 @@ function finish(chosen, checkout, values, known = []) {
       console.error(dim('  Choose another with `--project <label>` and `--code <two or three letters>`.'));
       return end(2);
     }
-    written.push({ ...h, id: row.id, project: row.project, path: row.path, beside: row.beside ?? [], kept: row.action === 'kept' });
+    written.push({ ...h, id: row.id, project: row.project, path: row.path, beside: row.beside ?? [], kept: row.action === 'kept', from: row.from ?? null });
   }
   /*
    * Claims are indexed at import, so routing never has to load a spec (ADR
@@ -279,6 +288,11 @@ function finish(chosen, checkout, values, known = []) {
     return end(0);
   }
   for (const w of written) {
+    if (w.from) {
+      // The checkout moved: the same blueprint, by the same ID.
+      console.log(`  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`as \`${w.id}\`, still — the row named ${tilde(w.from)}, which is gone`)}`);
+      continue;
+    }
     console.log(`  ${w.kept ? dim('· already listed') : green('+ listed')}   ${tilde(w.dir)}  ${dim(`as \`${w.id}\``)}`);
     if (!w.kept)
       console.log(

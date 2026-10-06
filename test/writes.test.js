@@ -48,7 +48,7 @@ function project({ movedThreads = false } = {}) {
   if (movedThreads) {
     const reg = join(home, 'registry.yml');
     const doc = parse(readFileSync(reg, 'utf8'));
-    doc.blueprints.find((r) => r.id === 'writes-fixture').threads = threadsDir;
+    doc.blueprints.find((r) => r.id === h.id).threads = threadsDir;
     writeFileSync(reg, stringify(doc));
   }
   const bp = h.spec;

@@ -1,0 +1,14 @@
+id: n-0359
+uuid: 3917142a-b099-4d2b-a1c2-2b1fa8125b06
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T02:05:11.950Z
+anchor:
+  screen: blueprints-rename
+status: open
+body: "ADR 0014 changed this screen's shape. as-built/cli/blueprints-rename.html
+  is the build. Rename changes only the name inside the ID, keeping its number
+  and code: no folder or walkdown.yml lines unless --folder is given. The
+  registry line reads 0002-sp-search is 0002-sp-find, and the closing note says
+  --blueprint find works inside the project and the full ID anywhere."

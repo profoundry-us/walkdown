@@ -2,8 +2,8 @@ import { parseArgs } from 'node:util';
 import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
 import { defaultActor } from '../../lib/identity.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
-import { dim } from '../../lib/report/tty.js';
-import { getThread } from '../../lib/threads.js';
+import { dim, yellow } from '../../lib/report/tty.js';
+import { getThread, labelOwners } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, offer, openThread } from '../../lib/writes.js';
@@ -197,7 +197,7 @@ export function run(args) {
     const marked = thread.via ?? null;
     if (values.json) {
       console.log(
-        JSON.stringify({ id: opened, kind, status: thread.status, by, ...(marked ? { via: marked } : {}), anchor }),
+        JSON.stringify({ id: opened, uuid: thread.uuid, kind, status: thread.status, by, ...(marked ? { via: marked } : {}), anchor }),
       );
       return end(0);
     }
@@ -271,6 +271,14 @@ export function run(args) {
   }
 
   const t = getThread(blueprint, id);
+  const owners = labelOwners(blueprint.threads, id);
+  if (!t && owners.holding.length > 1) {
+    // A label two threads share is named, both of them, and never guessed.
+    console.error(`${id} labels ${owners.holding.length} threads:`);
+    for (const o of owners.holding) console.error(`  ${o.uuid}  ${String(o.created ?? '')}  ${String(o.body ?? '').trim().split('\n')[0].slice(0, 80)}`);
+    console.error(`Name one by its UUID, or \`walkdown threads relabel ${id}\` gives the newer one a label of its own.`);
+    process.exit(2);
+  }
   if (!t) {
     console.error(`No thread "${id}". \`walkdown threads --all\` lists every thread.`);
     process.exit(2);
@@ -340,6 +348,18 @@ export function run(args) {
     }`,
   );
   console.log(dim(`  ${anchorText(t.anchor)}`));
+  /*
+   * A label that has meant two threads says so, and which holds it now: an
+   * old commit message citing it reads one of them, and the reader should
+   * know there was another (ADR 0014 §9).
+   */
+  const others = [...owners.holding, ...owners.formerly].filter((o) => o.uuid !== t.uuid);
+  if (others.length) {
+    const holder = owners.holding[0];
+    console.log(yellow(`  ! ${id} has labelled ${others.length + 1} threads. It labels ${holder?.uuid ?? 'none'} now${holder?.uuid === t.uuid ? ' (this one)' : ''}.`));
+    for (const o of owners.formerly)
+      console.log(dim(`    ${o.uuid} was ${id}, and is ${o.id} now${o.uuid === t.uuid ? ' (this one)' : ''}`));
+  }
   /*
    * Author, and how the words arrived. Provenance was written to disk and
    * rendered by nothing - the thread file carried `via: agent` while every

@@ -30,6 +30,9 @@ mkdirSync(home, { recursive: true });
 const env = { ...process.env, WALKDOWN_HOME: home, NO_COLOR: "1" };
 const cli = resolve(root, "bin", "walkdown.js");
 
+// The hook's home is a cache of this checkout's registration, so a layout
+// from before ADR 0014 left in it is moved rather than refused.
+spawnSync(process.execPath, [cli, "upgrade"], { cwd: root, env, encoding: "utf8" });
 const imported = spawnSync(process.execPath, [cli, "blueprints", "import", root, "--all"], { cwd: root, env, encoding: "utf8" });
 if (imported.status !== 0) {
   process.stdout.write(imported.stdout + imported.stderr);

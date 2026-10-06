@@ -121,6 +121,7 @@ test('a run is stamped with the code repository, not the home the blueprint sits
 
   // The home lives elsewhere and is versioned in its own right.
   const h = declaredHome(join(root, 'bp-provenance'), 'runrec-3');
+  writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: runrec-3\n');
   git(h.root, 'init', '-q');
   git(h.root, 'add', '-A');
   git(h.root, 'commit', '-qm', 'the home, which no verdict is about');

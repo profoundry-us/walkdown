@@ -1,0 +1,294 @@
+{
+  "run_id": "2026-10-06T02-43-28Z-local-01",
+  "created": "2026-10-06T02:43:28Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5d8403d-dirty",
+  "note": "Four agent judges, each driving the CLI in scratch repos with scratch homes, for the 26 cli rules ADR 0014 built or reworded. Judged against the adr-0014 worktree before the fixes their findings led to.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.new-makes-one",
+      "status": "pass",
+      "statement_hash": "sha256:20c77e403ea3",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/commands.blueprints.new-makes-one.txt"
+      ],
+      "reasoning": "On a fresh scratch home after `walkdown init`, inside a git repo `shop` with no blueprint: `blueprints new` created ~/.walkdown/projects/shop/blueprints/202610-shop (this month's folder), listed it as 0001-sp-shop, and printed 'Nothing was added to this repository'. `git status --porcelain --ignored` was empty before and after. Run again, it printed 'up to date' for every file and the folder list did not change. `blueprints new search` made 202610-search beside 202610-shop as 0002-sp-search and printed '+ another added to `shop`, beside `shop` — commands that write take `--blueprint <id>` now'. An unflagged write (`threads new`) was then refused with 'Choose one with --blueprint'. For the fourth THEN, in projects whose codes did not collide: `--commit spec` put the home in .walkdown/blueprints/202610-garden with its own .gitignore (runs/, evidence/, drafts/) and a CLAUDE.md pointer, and was idempotent. `--commit all` left no .gitignore and reported 'tracked: everything'. `--dir <root>` from outside made the project for that root, with nothing in the repo. `--dir` plus `--commit spec` run from inside another repo wrote only to the named repo. On a subdirectory, `--dir` warned that the parent's blueprint already answers there. Nits that miss no THEN: a bad `--commit maybe` on `new` is refused with text that says 'walkdown blueprints commit takes none, spec or all'. A second project whose name derives the same code (`shop2` -> `sp`) is refused and pointed to --project/--code. The as-built pages blueprints-new and init-another match the statement: home under ~/.walkdown/projects/shop/blueprints/202610-*, nothing added to the repo, and the --blueprint line.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "fail",
+      "statement_hash": "sha256:7170e620ca41",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/commands.blueprints.commit-moves-the-home.txt",
+        "runs/evidence/2026-10-06T02-26-01Z/commands.blueprints.rename.txt"
+      ],
+      "reasoning": "Setup used only walkdown's own tools: our clone made personal blueprints alpha and beta (and a sweep run record in each), then a teammate with a separate WALKDOWN_HOME committed a home `202610-beta` with `blueprints new beta --commit spec`, and we `git pull`ed it. An earlier attempt is left in the transcript and marked as mis-built. `commit spec --blueprint alpha` moved the whole home into .walkdown/blueprints/202610-alpha with its own .gitignore. The run record went along, ignored by git. `commit none` moved it back out. The registry row kept ID 0001-og-alpha the whole time, and beta's personal and committed files hashed the same throughout. `commit spec --blueprint beta` was refused with exit 2, naming '.walkdown/blueprints/202610-beta already exists — a blueprint folder of that name is already committed in this repository. Nothing was moved.', and the hash diffs were empty. The last THEN misses: `walkdown lint` reported '0 errors, 0 warning(s)' for both blueprints before anyone tried to commit, and again after the refusal. There was no warning about the folder clash. It was just as silent in a second reproduction, where two registered blueprints of one project share 202610-search, one personal and one committed (rename evidence). The unit test for this rule never runs lint. Also seen, and not graded: (1) the clash refusal leaves ~/.walkdown/registry.yml.lock behind, so the next write within about 10s ('blueprints new gamma') is refused with 'another walkdown is writing ... right now'. (2) After commit spec then commit none, the personal home keeps the .gitignore that commit spec wrote.",
+      "threads": [
+        "2b5f205f-af5b-4903-aee4-9994bbfacc01"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "pass",
+      "statement_hash": "sha256:8877c6d6eba1",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/commands.blueprints.rename.txt"
+      ],
+      "reasoning": "Setup: project shop with personal `a` and committed `b`. b had one hashed rule, a thread made with `threads new`, a sweep run, and an agent-style run record. `blueprints rename b search` changed 0002-sp-b to 0002-sp-search, keeping its number and code. `where spec` still gave .walkdown/blueprints/202610-b, and the repo's file hashes and git status did not change. `status --blueprint search --json` was byte-identical to b's earlier status once the ID was substituted. The old name `b` no longer resolves, so the '--folder' step was driven as `rename search search --folder 202610-search`. That moved the folder, and git saw only the 8 files deleted under 202610-b and the same 8 untracked under 202610-search. Every file in the home hashed the same, the repo snapshot matched with only the path changed, and status still matched. `rename a search` was refused ('`search` is already a blueprint in project `shop`'). So were 'Not An Id', 'SEARCH', 'x/y', an unknown id and an empty name, all with exit 2, and a hash diff of both home and repo across the refusals was empty. The as-built blueprints-rename screen matches the statement: the ID keeps its number and code, and 'Its rules, threads and runs are as they were'. Seen while probing, and not in this rule's THEN: `rename a a2 --folder 202610-search` succeeds even though a committed sibling already holds that folder name, so rename can create the folder clash that commit-moves-the-home's lint warning is meant to catch.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/commands.blueprints.import-takes-what-it-is-pointed-at.txt"
+      ],
+      "reasoning": "Setup: a teammate (separate home) committed three homes, 202610-north, -south and -west, to a bare origin, which we cloned, and north was registered first by its path. Importing south by its home's path registered only south, printing 'as `0002-og-south` in project `origin`, beside `north`', and `blueprints` still listed west as unregistered. Re-importing south printed '· already listed ... as `0002-og-south`' with its registry row unchanged. With stdin not a TTY, the repo path printed '1. 202610-north · already listed as ...', '2. ...', '3. 202610-west', then 'Say which: --all, or --only <folders>. Nothing was imported.' (exit 2) and left the registry unchanged. `--only 202610-west` then registered west alone, and `--all` with everything listed changed nothing. Under a pseudo-terminal (script(1)), a fresh home marked the listed one, asked 'Import which? (numbers, or \"all\")', and registered only #3 when I answered 3, then the rest on 'all'. An empty answer printed 'nothing imported'. Throughout, the already-listed row stayed the same. An empty dir, a dir holding only a readme, a home's features/ subfolder and a missing path each said there was no blueprint there and registered nothing. Nit: `--only 202610-nope`, when everything is already listed, answers 'already listed every blueprint' with exit 0 instead of naming the unknown folder. With one folder unlisted, it does refuse and names what the repo holds.",
+      "threads": []
+    },
+    {
+      "rule": "commands.blueprints.forget-keeps-the-files",
+      "status": "pass",
+      "statement_hash": "sha256:ba872b7a43cd",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-06Z/commands.blueprints.forget-keeps-the-files.txt"
+      ],
+      "reasoning": "Setup: `team` (committed with --commit spec, then git-committed) and `solo` (personal). Each had a hashed rule, a thread from `threads new`, and a sweep run record. I hashed every file in both homes and the repo. Before forgetting, `walkdown serve --port 4736` on the scratch home listed 0001-sp-team and 0002-sp-solo at GET /api/blueprint. After `blueprints forget` of each: `blueprints` printed 'No blueprints', a new serve on 4736 returned blueprints: [] with '(0)' in its banner, and `status --blueprint team|solo` refused with 'No blueprint for ...'. The hash diffs of both homes and the repo were empty, and git status was clean. Forgetting the personal one printed '... 202610-solo is still on disk and nothing else will mention it; `rm -rf <path>` deletes it'. The committed one got only 'Its files are untouched'. Forgetting either again, or an unknown id, was refused.",
+      "threads": []
+    },
+    {
+      "rule": "commands.rules.rename",
+      "status": "pass",
+      "statement_hash": "sha256:baa430aa4d1f",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-06Z/commands.rules.rename.txt"
+      ],
+      "reasoning": "Setup: rule shop.cart.init-adds (verify checks and agent, signoff eng), hashed with `hash --write`. It had a checks run, an agent walkdown verdict and a signed eng walkdown record, written as JSON in the shapes the reporters, judge and panel use. It also had a thread from `threads new --rule` and a test file tagged with the old id. Status showed it all green: checks pass, agent pass, eng signed. `--dry-run` reported the change and left every file's hash the same. `rules rename shop.cart.init-adds shop.cart.add` wrote `formerly: [shop.cart.init-adds]` under the new id, with statement_hash sha256:49a6beb881d3 unchanged. The runs directory hashed byte for byte the same. `status shop.cart.add --json` differed from the earlier `status shop.cart.init-adds --json` only in the rule field, with the same checks, agent and acceptance cells. The thread file now says 'rule: shop.cart.add', and lint warned '[renamed] ... a check is tagged with `shop.cart.init-adds`, which was renamed - tag it `shop.cart.add`', with no 'uncovered' warning. A fresh failing checks record filed under the old id after the rename turned shop.cart.add to failing, so the old tag still counts. Renaming to shop.cart.remove (taken), renaming remove to shop.cart.init-adds (a former id of another rule), 'Not An Id', an unknown rule, and the id it already has were all refused with exit 2 and 'Nothing was renamed', and the spec hashes did not change. Renaming twice accumulated former ids, and renaming back to its own former id took that id out of the list. Cosmetic, not graded: lint's summary counts former ids as rules ('3 rules', then '4 rules', for a blueprint with 2).",
+      "threads": []
+    },
+    {
+      "rule": "locations.several.new-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:a3cdd067af7b",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-06Z/locations.several.new-makes-another.txt"
+      ],
+      "reasoning": "Setup: project mall with search (0001-ml-search) and project shop with search (0002-sp-search, personal). `blueprints new checkout` in shop made ~/.walkdown/projects/shop/blueprints/202610-checkout beside 202610-search, registered it as 0003-sp-checkout, and printed '+ another added to `shop`, beside `search` — commands that write take `--blueprint <id>` now'. git saw nothing. Run again, it printed 'up to date' for every file, and the home's hash snapshot did not change. With no name, it refused with 'This project holds several blueprints (search, checkout) and none is `shop`' (exit 2) and created nothing. `search` lives in both projects with separate IDs, and `checkout` in mall got its own 0004-ml-checkout without refusal. `blueprints commit spec` without --blueprint refused, naming '(search, checkout)' and suggesting `--blueprint search`. With a screen at /cart.html in both shop storyboards, `walkdown serve --port 4783` listed all four blueprints at /api/blueprint. `walkdown claims` reported '1 page(s) covered by more than one blueprint: http://localhost:3000/cart.html' with both 0002-sp-search and 0003-sp-checkout, as did `claims --url`. The as-built init-another page matches the statement ('added to `shop`, beside ...', with --blueprint). One wording gap, and not a fail: in mall, whose single blueprint is `search`, no-name `blueprints new` reuses `search` rather than refusing. The code comment cites ADR 0011 §1 for that ('where the project has one blueprint, is that one whatever it is called'), but the THEN does not state the one-blueprint case.",
+      "threads": []
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "fail",
+      "statement_hash": "sha256:b31372ab894d",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/locations.answer.says-why.txt"
+      ],
+      "reasoning": "I set up a repo with alpha (spec committed; its records.yml sends threads to ../alpha-threads and has no drafts line), beta (kept in the home, with evidence moved by `records move` onto this machine's registry), gamma (committed with an untouched records.yml), and a git worktree of the checkout. In the main checkout every row carries a reason. The spec row says `this machine's registry (id)`, runs, threads and evidence say `the blueprint's own records.yml`, beta's evidence says `this machine's registry (0002-pj-beta), which moved it here`, and code says `this machine's registry, which says which checkout`. The defaulted drafts row says `the home this machine registered`. That is a reason, though it never uses the word default. The worktree case misses the second THEN line. Run from the worktree, gamma's spec and threads resolve inside the worktree, and spec correctly says `this branch's copy, a git worktree of <proj>`. But runs, evidence and drafts resolve into the main checkout's home (<proj>/.walkdown/blueprints/202610-gamma/runs and so on), and each still says only `the blueprint's own records.yml (0003-pj-gamma)`. Read as written in the worktree, that records.yml would put them under the worktree. What sent them to the main checkout is the worktree rule, and the reason does not name it. The drafts row shows the reason was available: for alpha, whose drafts fell back to the default, it reads `the registered home's (0001-pj-alpha) — git ignores drafts, so every worktree shares them`. So the same decision is explained for one kind of record and mislabelled for the others. A smaller miss: the config row says `registered by init on <date>` for rows made by `walkdown blueprints new` (bin/commands/blueprints-new.js:270 writes `by: 'init'`), including in homes where `walkdown init` was never run.",
+      "threads": [
+        "25ff2103-1667-4519-980d-aec4b1a5aa51"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "fail",
+      "statement_hash": "sha256:e6a814857fe7",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/locations.answer.declared-not-discovered.txt"
+      ],
+      "reasoning": "On machine A I made three committed homes (one, two, three) in one repo and cloned it. On machine B (a fresh home) I ran `blueprints import . --only 202610-one,202610-two`. Each registered blueprint answers for itself. `where` gives each its own section with its own runs and threads paths. A thread filed with --blueprint one landed only in one's threads/, and `threads --all` showed `No threads.` for two. Each section names the row that answered and how it got there (`this machine's registry (0001-rp-one)`, `registered by import on 2026-10-06`). The third is never treated as a project: `status --blueprint three` and `threads new --blueprint three` refuse, and nothing was written under 202610-three. The second THEN line is missed in its second half, which asks the answer to name the folder and say `walkdown blueprints import`. Standing inside .walkdown/blueprints/202610-three, `walkdown where` printed the full reports for 0001-rp-one and 0002-rp-two and said nothing about the folder I was standing in. `where --blueprint three` (or `--blueprint 202610-three`) said `no registered blueprint `three` — `walkdown blueprints` lists them`. It also said `the registry — what this machine knows about; no row for this project`, which is false: this checkout has two rows. `status`/`threads new --blueprint three` said `either nothing registered it, or its spec is gone`. None of them names .walkdown/blueprints/202610-three or says `blueprints import`. Only `walkdown blueprints` does that (`1 blueprint folder(s) ... that no registry row names: .../202610-three ... walkdown blueprints import <folder> registers one`). In a checkout with no rows at all, `where` does name the folder and the import command (seen in the records-yml-informs probe). So the gap is the partly registered checkout this rule's GIVEN describes.",
+      "threads": [
+        "9f6397d8-a9de-4246-97ec-fd0e530f3e7d"
+      ]
+    },
+    {
+      "rule": "locations.answer.registry-is-the-only-door",
+      "status": "pass",
+      "statement_hash": "sha256:646e9430df33",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/locations.answer.registry-is-the-only-door.txt"
+      ],
+      "reasoning": "The fixture: repo/ registered with a committed home (0001-rp-rootbp), and packs/gamma as its own git repo with its own registered committed home (0002-gm-gamma). A symlink repo/gamma-link points at the pack's home, and I appended a hand-written row 0009-gm-link with no `registered:` naming the link. `where --blueprint 0009-gm-link` printed `ignores ... entry `0009-gm-link` — written by hand — no `registered:` says how it arrived; `walkdown blueprints import <home>` registers it`. `status` and `threads new --blueprint 0009-gm-link` both refused with exit 2. The pack's file list was unchanged afterwards (PACK-LEDGER-UNTOUCHED). A `walkdown serve` started at the repo root on 4748 listed exactly 0001-rp-rootbp and 0002-gm-gamma, and `?bp=0009-gm-link` returned `unknown project`. On a fresh home with only the root imported, `blueprints import <repo>/gamma-link` listed the pack's home once, under its real path, as 0002-gm-gamma. A second import said `already listed`, and the registry then held exactly two rows, both canonical. `where spec` from packs/gamma gave the pack's home. From repo/ and from repo/packs (between the two) it gave the root's home. Standing at a symlinked spelling ($T/repo-alias, and macOS /var versus the registry's /private/var throughout) matched the registered rows. A git worktree of repo answered as rootbp's project, with the spec read from the worktree, and no row was added for it. One wording slip that does not change the verdict: naming the hand row from the repo root printed `no row for this project` although the root has row 0001.",
+      "threads": []
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:f06360e3e6e5",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/locations.default.nothing-in-the-tree.txt"
+      ],
+      "reasoning": "I started from a git repo holding one committed README, a fresh WALKDOWN_HOME, and no profile (no `walkdown init`; `blueprints new` itself noted `this machine is not set up`). I ran `blueprints new shop`, added a feature, and ran `walkdown run` through the node-test reporter, which recorded a run. `threads new` filed a thread, and the draft was a POST /api/draft to a `walkdown serve` on 4776. Afterwards the tree's hash-plus-listing snapshot diffed IDENTICAL against the one taken before. `git status --porcelain --ignored` and `git ls-files --others` were empty: no .walkdown/, pointer, AGENTS.md or .gitignore. Everything walkdown made (spec.yml, storyboard.yml, records.yml, features/, AGENTS.md, runs/, threads/, drafts/) sat in one folder, <home>/projects/shop/blueprints/202610-shop. `where` answered `tracked nothing — every path is outside the repository, where git never looks` and `the home is in ~/.walkdown, which git never sees`. Deleting that one folder left only registry.yml and cache/claims.json in the home. Both are machine-level indexes, and `walkdown blueprints` then marks the row `(gone)`. I read that as the machine's record of the blueprint rather than something made for it, but it is the one thing that outlives the deletion.",
+      "threads": []
+    },
+    {
+      "rule": "locations.default.home-is-one-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2eadd5cdafaf",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-07Z/locations.default.home-is-one-folder.txt"
+      ],
+      "reasoning": "I made two blueprints in the home (<home>/projects/app/blueprints/202610-search and 202610-billing) and gave search a run, a thread, an evidence file and a draft. I then moved it into the repository with `blueprints commit spec`, which put it at .walkdown/blueprints/202610-search, and back out with `commit none`. In both places the listing shows the same flat shape: spec.yml, storyboard.yml, features/, AGENTS.md and records.yml side by side with runs/, threads/, evidence/ and drafts/, plus the home's .gitignore when the spec is committed. `where` resolves every record path as a direct child of the spec folder. There is no blueprint/ folder anywhere, and no record kind sits inside another (evidence is not under runs). Each move printed `the whole home, no record edited, the ID kept`. Hash diffs of the home's files before and after the round trip differ only in the .gitignore walkdown writes for the commit choice. Billing's files hashed identical throughout.",
+      "threads": []
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "fail",
+      "statement_hash": "sha256:b55ca34f14f7",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-08Z/locations.default.in-repo-on-request.txt"
+      ],
+      "reasoning": "This used two blueprints in one repo. Most THEN lines hold. `blueprints commit spec --blueprint search` moved the whole home to .walkdown/blueprints/202610-search and wrote its own .gitignore (runs/, evidence/, drafts/); git status then showed only spec, features, threads, AGENTS.md and CLAUDE.md. `commit all` removed the .gitignore. `commit spec` again wrote it back. `commit none` moved the home out whole and removed .walkdown and the CLAUDE.md it had made. Billing's files hashed identical across every change. Each command said in words what is tracked and how to change it. The tracked report is asked of git: a root .gitignore holding `.walkdown` produced `tracked: nothing — .gitignore:1 .walkdown hides the spec from git` and five lint errors. An emptied home .gitignore produced `present and keeps nothing out` and a lint error. Leaving after the files were committed printed `11 file(s) git tracked under the home that left are now deletions to commit`. It fails on `With everything committed`. Once the panel has saved a draft, walkdown's own draft writer leaves drafts/.gitignore (`*`, `!.gitignore`) in the home. After that, `commit all` itself prints `✗ git keeps .walkdown/blueprints/202610-search/drafts out by .../drafts/.gitignore:1 * — the tree says everything is committed ... and git disagrees`, reports `tracked: spec, threads, runs, evidence`, and `walkdown lint` exits 1 with that [tracking] error. I reproduced it the other way round: billing committed in full linted clean (`tracked: everything`), and one POST /api/draft from `walkdown serve` on 4767 turned the same lint into 1 error. So a blueprint whose person chose `everything` is not fully committed. walkdown's own tools put it into a state its own lint calls an error, and the only remedies it suggests are to switch to the spec standard or delete a file walkdown wrote.",
+      "threads": [
+        "f9cef766-42a0-457a-b07c-f332623d5043"
+      ]
+    },
+    {
+      "rule": "locations.default.folder-names-are-yours",
+      "status": "pass",
+      "statement_hash": "sha256:20a203168083",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-08Z/locations.default.folder-names-are-yours.txt"
+      ],
+      "reasoning": "On machine A I made committed homes at .walkdown/blueprints/202610-search, 0002-search and billing/api/invoices with `blueprints new --folder`. `blueprints new inner --folder 202610-search/inner` was refused (`a home inside a home is refused`), so I copied a walkdown-made home to 202610-search/nested to stand for a repo that arrives with one. On machine B I cloned the repo into a fresh home. `blueprints import .` refused the nested home, naming both folders (`.../202610-search/nested is a blueprint inside .../202610-search — a home inside a home is refused, and not offered`), and offered exactly 0002-search, 202610-search and billing/api/invoices. `--all` listed those three, each under its own folder. The 0002-search folder became row 0001-rp-search, so the number in the folder name was not read. A listing diff of .walkdown before and after showed NO-FOLDER-RENAMED. From the clone root, `blueprints new checkout` made 202610-checkout, and `--folder my-cart-stuff` and `--folder 2024-old/deep` were taken as given. Side observations, not this rule's steps: (1) `blueprints new search --folder 0002-search` when `search` already exists silently re-ran setup on 202610-search and ignored --folder without saying so. (2) `blueprints new` run from any subdirectory of a registered checkout (src/, .walkdown/) refuses with `the project label repo is another checkout's (<the same checkout>)`, because bin/commands/blueprints-new.js:58 takes cwd as the checkout root.",
+      "threads": []
+    },
+    {
+      "rule": "locations.default.records-yml-informs",
+      "status": "pass",
+      "statement_hash": "sha256:26e8fb639e2a",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-08Z/locations.default.records-yml-informs.txt"
+      ],
+      "reasoning": "I committed a home whose records.yml says `evidence: ../evidence`, cloned it twice (m1 and m2), and gave each clone its own WALKDOWN_HOME as a separate machine, then ran `blueprints import . --all` in each. On m2 I ran `records move evidence --to $T/m2-shots`, which printed `recorded in <home2>/registry.yml ... No record was edited`, and the registry row gained `evidence: <m2-shots>`. Each machine then recorded a run with evidence by driving walkdown's Playwright reporter with one failing @rule:cart.add.counts test carrying a screenshot (script included in the evidence). On m1 the screenshot was filed at m1/.walkdown/blueprints/evidence/<stamp>/ and the run cites runs/evidence/<stamp>/...png. `where` there says `the blueprint's own records.yml`, and `judge` resolves the evidence key to the same folder. On m2 the screenshot was filed at m2-shots/<stamp>/, with the same logical key in its run. `where` there says `this machine's registry (0001-og-shop), which moved it here`, and `judge` resolves the key to m2-shots. records.yml hashed identical in the origin and both clones afterwards (RECORDS-YML-UNCHANGED), and m2's git status was clean. One honest aside: on m1, where records.yml points outside the home, git sees the evidence as untracked, and `where` says so with a ✗ line.",
+      "threads": []
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-once",
+      "status": "pass",
+      "statement_hash": "sha256:49cd12caf11c",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/upgrade-moves-once.txt"
+      ],
+      "reasoning": "I built the old layout with main's own pre-0014 CLI (8bcc2ca) in a scratch home, not by hand: ~/.walkdown/config.yml, a personal home ~/.walkdown/blueprints/0001-shop/blueprint/ with prototype.root ../sketches/, a committed home .walkdown/blueprints/0001-app/blueprint/ in a repo with origin acme/shop, its .walkdown/config.yml and shared .gitignore, a CLAUDE.md pointer naming both blueprints, threads n-0001, q-0002, n-0003 (with a reply) and n-0004, hash --write, and an agent run (pass, with statement_hash) plus a checks run (pass/fail) in each home. Before the upgrade, the new CLI's status, threads and lint each exit 2 with 'An upgrade is due ... Run `walkdown upgrade` to move them, once. Nothing was changed.', and a hash of every file shows nothing changed; --dry-run changes nothing either. `walkdown upgrade` then turned config.yml into profile.yml; flattened both homes (no blueprint/, walkdown.yml became spec.yml, storyboard and features moved up, prototype.root rewritten to sketches/ and resolving to the same folder); wrote records.yml in both and a standard .gitignore (runs/ evidence/ drafts/) in the committed home; removed .walkdown/config.yml and the shared .gitignore; moved the personal home to ~/.walkdown/projects/shop/blueprints/0001-shop/, folder name kept; gave the rows IDs 0001-sp-shop and 0002-sp-app with project shop; and renamed each thread to <uuid>.yml with id n-0001 etc. and the reply kept. status afterwards shows the same cells as main's status before: shop.s.works pass/pass, shop.s.fails fail, app likewise, and the same threads. A second upgrade prints 'Nothing to upgrade', and the file hashes are identical. I also tried two variants. In the first, a no-remote repo had two homes committed in full (no shared .gitignore), runs moved off the home by the old `records move`, and prototype.root ../../../../design/. The runs override survived, prototype resolved to the same folder, and no .gitignore was invented. In the second, a fresh clone was upgraded on a second machine. The personal home gets no .gitignore, which is how a personal home is made today, so I read 'its own .gitignore' as meaning the committed homes. Outside the GIVEN: on a machine with no ~/.walkdown at all, status and import in an old-layout clone don't say an upgrade is due; import says 'no spec.yml there', though `walkdown upgrade` fixes it.",
+      "threads": []
+    },
+    {
+      "rule": "locations.pointer.placed-where-agents-read",
+      "status": "pass",
+      "statement_hash": "sha256:0315ecba8c84",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/pointer-placed-where-agents-read.txt"
+      ],
+      "reasoning": "In fresh git repos I committed a first blueprint (`blueprints new a --commit spec`). With no agent file, CLAUDE.md is created holding only the fenced pointer. With exactly one of CLAUDE.md, AGENTS.md, GEMINI.md, .github/copilot-instructions.md or CONVENTIONS.md, the pointer is appended to that file under the person's text and no CLAUDE.md is made beside it. With CLAUDE.md, AGENTS.md and copilot-instructions.md present, none is touched and the report says '? several agent files - `walkdown pointer --into <file>`  CLAUDE.md, AGENTS.md, .github/copilot-instructions.md'. `walkdown pointer --into AGENTS.md` then settles it in that file alone. A personal `blueprints new` adds nothing to the tree, and a later `blueprints commit spec` adds the pointer to the existing AGENTS.md; `--commit all` behaves the same. Edges I noted, none against the THEN lines as written: AGENTS.md symlinked to CLAUDE.md counts as two files and nothing is written; a repo whose only agent file is .cursorrules (not on walkdown's list) gets a new CLAUDE.md; a lowercase claude.md is used on macOS's case-insensitive disk; and run from a subdirectory, walkdown treats that directory as the project and puts CLAUDE.md there, as the help's 'project where you stand' says.",
+      "threads": []
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "fail",
+      "statement_hash": "sha256:fd33259c4a4e",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/pointer-owns-only-its-block.txt"
+      ],
+      "reasoning": "Most of it holds. With a CLAUDE.md of the person's words above the block, plus words they added below it, the second commit (`blueprints new b --commit spec`) leaves the file byte-identical. So do a personal-then-committed third, renames with and without --folder, `commit all` and un-committing two of three. Un-committing the last removes exactly the marker lines and what lies between them. Two break attempts miss the rule. (1) 'Every line outside the markers is untouched throughout' / 'removes the block and nothing else': when the person's file ends in blank lines ('Below.\\n\\n\\n'), un-committing the last blueprint also removes one of them. Expected 'Below.$ $ $', actual 'Below.$ $'. removePointer's final rest.replace(/\\n{3,}$/, '\\n\\n') trims the person's end of file. With CRLF lines and text after the end marker, the kept text also lost its \\r. (2) 'It writes the paragraph once': if the person deletes the block from CLAUDE.md after the first commit, the next `blueprints new b --commit spec` appends it again ('+ appended CLAUDE.md'). Also seen: a person's edit inside the markers is reverted by the next commit ('~ pointer updated'). That is walkdown's own block, so I don't count it.",
+      "threads": [
+        "52e17fcf-6621-4484-9ac8-7d67cc660db5"
+      ]
+    },
+    {
+      "rule": "locations.pointer.names-no-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:ea412d8747cd",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/pointer-names-no-blueprint.txt"
+      ],
+      "reasoning": "In a repo with origin acme/shop I committed blueprints a (spec), b (all, in folder 2025-bravo-checkout) and orders, which got IDs 0001-sp-a, 0002-sp-b and 0003-sp-orders, then read the CLAUDE.md block. It says the specs are under `.walkdown/blueprints/`, that an agent reads the `AGENTS.md` in the folder of the blueprint it is working on, and that `walkdown blueprints` lists them with their IDs. It also says commands that write take `--blueprint <id>`, with <id> written literally. Searching the block for `a`, `b`, orders, every folder name (202610-a, 2025-bravo-checkout, 202610-orders), every ID, the code-prefixed forms and the project name finds none of them. The block is identical to what `walkdown pointer` prints. Renaming orders to invoices with a new folder leaves it byte-identical. The upgrade evidence also shows an old block that named blueprints rewritten to this fixed paragraph.",
+      "threads": []
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "fail",
+      "statement_hash": "sha256:f561ad6f21be",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/registry-ids-stay-here.txt"
+      ],
+      "reasoning": "I made two repos, hireart_main (no remote) and shop (origin acme/shop), each with a blueprint in a folder named `search`. They got IDs 0001-hm-search and 0002-sp-search. In each I filed a thread (CLI), recorded a run (node:test reporter) and committed the first. A grep for the IDs across both checkouts and homes finds them in no thread, run record, pointer or committed file. `--blueprint 0001-hm-search` works from anywhere, `--blueprint search` works inside each project, and ?bp=0001-hm-search and ?bp=0002-sp-search against a scratch serve on :4753 open each one. Un-commit and re-commit change the row's home and keep 0001-hm-search. Forgetting 0002, then 0003 and 0004, and making new ones gave 0003, 0004 and 0005; no number came back. MISS on 'moving the checkout changes the path on the row and keeps the ID'. After `mv hireart_main hireart_moved`: status says 'No blueprint here'; `blueprints` lists 0001-hm-search '(gone)' at the old path; `--blueprint 0001-hm-search` says 'either nothing registered it, or its spec is gone'; `blueprints import . --all` and importing the folder are refused ('the project code `hm` is another project's'), and so is --project hireart_main --code hm ('label ... is another project's'). The only way back was forget then import, which gave a new ID 0006-hm-search and a new label hireart_moved. A personal blueprint in a moved checkout ends up as a second row (0003-ns-jot, project notes2). Expected: the row's path updated and the ID kept. Actual: the ID is lost. A second gap against the statement 'No file walkdown writes outside ~/.walkdown/registry.yml contains it': `walkdown serve` writes ~/.walkdown/cache/claims.json holding \"id\": \"0001-hm-search\" and \"0002-sp-search\". It is a cache in ~/.walkdown, never committed, so it is less serious.",
+      "threads": [
+        "af8bbf4d-7d69-4371-be04-85fcfb4dc488"
+      ]
+    },
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "pass",
+      "statement_hash": "sha256:81ff13fccdce",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/registry-projects-are-labels.txt"
+      ],
+      "reasoning": "A repo in directory work-tree-of-shop with origin git@github.com:acme/shop.git got label `shop`, from the remote and not the directory. A no-remote repo `notes` got `notes`. The next blueprint in shop reported '+ another  added to `shop`, beside `storefront`', and a third 'beside `storefront`, `checkout`'. A separate clone with the same origin joined shop too, which fits the origin-remote rule. Then a different repo in a directory named `shop` with no remote, whose label shop and code sp are both taken. With no terminal it was refused: '✗ the project label `shop` is another checkout's (...). Nothing was made.' and 'Choose another with `--project <label>` and `--code <two or three letters>`'. The registry was byte-identical and no home was made. --project shop2 alone was then refused on code `sp`, and --project shop2 --code s2 registered. Through a pty (expect), the taken label was asked for again until a free one was typed (shop refused, boutique taken), and with --code sp a taken code was asked for until free (nt refused, so taken). Nothing was registered until then, and the registry diff shows only the new row. Ctrl-C at the prompt registers nothing either, but prints a raw AbortError stack trace (cosmetic).",
+      "threads": []
+    },
+    {
+      "rule": "locations.travel.judged-against-a-spec",
+      "status": "pass",
+      "statement_hash": "sha256:e055b263a9d3",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-03Z/travel-judged-against-a-spec.txt"
+      ],
+      "reasoning": "In a committed blueprint `travel`, a node:test run recorded spec_hash sha256:98d8d3b9028d. Through a scratch serve on :4750 I then wrote a signed walkdown verdict (POST /api/walkdowns, which wrote a second run record), a thread (POST /api/threads) and a draft (POST /api/draft), and declared a sweep from the CLI. After each, the spec hash in `walkdown judge --json`'s record skeleton was still 98d8d3b9028d, and all three run records carry it. Rewording t.s.two's statement moved it to 4001b947b6df, and restoring the words brought it back. Moving features/a.yml verbatim to features/b.yml gave 810d0a1621e6, so the same words in a different feature file are a different spec. These left it at 98d8d3b9028d: appending to AGENTS.md, records.yml and .gitignore, and adding NOTES.txt, prototype/screens/home.html, features/README.md, a nested features/old/a.yml, other.yml and runs/stray.json. Comments added to storyboard.yml or spec.yml and a new features/c.yaml each moved it. Older runs keep the hash they were recorded against. (One `status` call hit a ReferenceError because lib/status.js was being edited in the worktree at that moment; run again, it printed normally.)",
+      "threads": []
+    },
+    {
+      "rule": "locations.threads.uuid-is-the-identity",
+      "status": "fail",
+      "statement_hash": "sha256:945e5cd8fc01",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/uuid-is-the-identity.txt"
+      ],
+      "reasoning": "I made one repo with two --commit spec blueprints. b filed n-0001 and n-0002 and a filed n-0003 to n-0005, then a run record citing n-0004 was committed. Branches left and right each filed a note in a. Both came out as n-0006, in files named f58cecc9-....yml and cd893943-....yml, and each file's uuid: matches its name. Merging left (fast-forward) and then right (a true ort merge) added one file each, with zero conflicts. After the merge the question filed in b came out q-0007, numbered across the project. writeRunRecord turned threads ['n-0003'] into n-0003's UUID, and status reads that UUID back as n-0003. A shared label (n-0006) was kept as written, since it is ambiguous. `threads reply` by UUID landed in the UUID-named file, and a reply to the shared n-0006 was refused with both UUIDs named. The old 2026-09-01 record kept its shasum, and status still resolves its n-0004. So THEN lines 1, 2, 3 and 5 hold. THEN line 4 does not hold for the path the agent tier actually uses. `walkdown judge` prints a record skeleton that the agent writes by hand and tells a failing judge to put the thread's id in the result. But `threads new --json` returns only {\"id\":\"n-0008\",...} with no uuid, so a judge-written record written now names its thread by label. That record never passes through writeRunRecord's label-to-UUID step. A smaller gap: writeRunRecord turns labels into UUIDs only among the filing blueprint's own threads, so a result in a that cites b's n-0001 was written as 'n-0001'.",
+      "threads": [
+        "27c00c74-fb20-4a6f-8053-6770ed22e449"
+      ]
+    },
+    {
+      "rule": "locations.threads.clashing-labels-ask",
+      "status": "fail",
+      "statement_hash": "sha256:d6cf9b7d1abb",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/clashing-labels-ask.txt"
+      ],
+      "reasoning": "I merged two real branches that each filed n-0006 in blueprint a, and b then filed n-0007. `walkdown threads` printed 'n-0006 labels 2 threads: <older>, <newer>' and named `walkdown threads relabel n-0006`. `walkdown lint`, plain and --json, gave a label-clash warning naming both UUIDs. `threads show n-0006` refused (exit 2), listing both. `threads relabel n-0006` with no terminal changed nothing (all shasums equal) and printed '`walkdown threads relabel <newer-uuid> --yes` does it'. At a pty, answering n and answering with a bare Enter both changed nothing. Answering y gave the newer thread n-0008, the next free label across the project past b's n-0007, and kept n-0006 under aliases. Afterwards `threads show n-0006` said 'n-0006 has labelled 2 threads. It labels <older> now (this one)' and '<newer> was n-0006, and is n-0008 now'. Only the relabelled thread's file changed, only in id: and aliases:. The run record citing n-0006 and every reply were byte-identical, and both the list and lint went quiet. Then I tried to break it. On a third real clash at n-0010, I named the OLDER thread by its UUID: 0a0b8208, created 02:32:23.643Z, which is also the first UUID the clash warning lists. walkdown said 'The newer one would be relabelled: 0a0b8208...'. When I agreed, it moved the older thread to n-0011, and the newer 7f1a75ed (created 02:32:24.848Z) kept n-0010. planRelabel takes any thread named by UUID as its target. So the statement 'relabels the newer one' fails, and so does THEN line 3 ('Agreeing gives the newer thread the next free label'), and the prompt shown to the person is false about which thread it moves.",
+      "threads": [
+        "a7d91d8e-55c4-4c95-956a-f0b40b5c9ee0"
+      ]
+    },
+    {
+      "rule": "locations.worktree.same-project",
+      "status": "fail",
+      "statement_hash": "sha256:a28e38241c7c",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-01Z/worktree-same-project.txt"
+      ],
+      "reasoning": "I registered shop (--commit spec, origin https://github.com/acme/shop.git) and made a Claude Code worktree where Claude Code puts them, <repo>/.claude/worktrees/feature-x (its EnterWorktree tool creates them 'inside .claude/worktrees/'). I also made an Archon clone under fakehome/.archon/workspaces/acme/shop/source with a worktree at worktrees/task-1, an unrelated clone with a different origin, and a plain directory. Several parts held. The Archon worktree answered as 0001-sp-shop, and where said 'this branch's copy, a clone of ...shop's origin (github.com/acme/shop)'. An ssh-form origin matched too. The unrelated clone and the plain directory were 'not a blueprint', and status exited 2. The registry was unchanged after every where and status. `blueprints new` in the Archon worktree, both default and --commit spec, added 0002 to project shop and made the home in the registered checkout or ~/.walkdown, never in the worktree. A worktree placed beside the checkout also worked: it was matched as 'a git worktree of ...' and blueprints new added search under shop/.walkdown. The Claude Code worktree at its real place failed. Because it sits inside the registered checkout's directory, walkdown matched it by containment as the checkout itself. where --json had worktree: null, gave no 'which way it was matched', and pointed spec and threads at the main checkout, not the worktree. Worse, `blueprints new search` there, both default and --commit spec, refused with 'the project label `shop` is another checkout's (.../code/shop). Nothing was made.' THEN lines 1 and 4 therefore fail for Claude Code worktrees. test/worktree.test.js passes only because it puts the worktree beside the checkout. A minor note: blueprints new --commit spec from a beside-worktree wrote a .gitignore but reported 'tracked: everything'.",
+      "threads": [
+        "97ff4700-e318-4816-b61f-c52873beda2c"
+      ]
+    },
+    {
+      "rule": "locations.worktree.branch-spec-shared-records",
+      "status": "fail",
+      "statement_hash": "sha256:303430aff403",
+      "evidence": [
+        "runs/evidence/2026-10-06T02-26-02Z/worktree-branch-spec-shared-records.txt"
+      ],
+      "reasoning": "I ran the same script with two layouts, each in a fresh --commit spec project. In each, branch reword committed 'puts exactly one in the cart'. In the worktree I filed a thread, recorded checks with node --test and lib/node-test-reporter.js, wrote files to the evidence and drafts paths that where (and the judge prompt) resolve, started serve --port 4791 and fetched /api/blueprint plain, with ?bp=shop and with ?bp=0001-sp-shop. Then I removed the worktree, and repeated the run step with a --commit all blueprint. With the worktree beside the checkout, every THEN line held. status read 'exactly one' while main read its own wording. The thread landed in the worktree's threads/. The run landed in code/shop/.walkdown/blueprints/shop/runs, stamped git_sha 5d49e4a (the worktree's HEAD) and branch reword. Evidence and drafts resolved to the checkout and survived `git worktree remove`. The --commit all ledger's run was written into the worktree. All three /api/blueprint calls served 'exactly one'. In Claude Code's real place, <repo>/.claude/worktrees/reword, almost every line failed. status read 'puts one in the cart', main's wording. The thread landed in the checkout's threads/, not the worktree's. The run was stamped git_sha 3cc78a3, the checkout's commit, not the worktree's f67632b, and had no branch field. The --commit all run landed in the checkout, not the worktree. serve, with or without ?bp=, served main's wording. Only 'deleting the worktree loses nothing' held there. The rule's GIVEN names 'the Claude Code worktree', so this layout is the one the rule is about.",
+      "threads": [
+        "c3b6f10b-0a4a-4e6a-80d7-37409c00f844"
+      ]
+    }
+  ]
+}

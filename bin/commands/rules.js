@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util';
-import { resolveLocations } from '../../lib/locations.js';
+import { nameOf, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { applyMove, planMove } from '../../lib/rules-move.js';
 import { applyRename, planRename } from '../../lib/rules-rename.js';
@@ -31,21 +31,24 @@ function move(args) {
 
   const here = resolveLocations({});
   const project = (here.ambiguous ? here.config.registry.candidates : here.spec?.path ? [here.id] : [])
-    .map((id) => ({ id, dir: resolveLocations({ blueprint: id }).spec?.path }))
+    // By the name an ID ends with: the ID is this machine's, and what a move
+    // writes - `copied_from` - is read on every machine (ADR 0014 §2).
+    .map((full) => ({ id: nameOf(full), full, dir: resolveLocations({ blueprint: full }).spec?.path }))
     .filter((b) => b.dir);
   if (project.length < 2) {
     console.error(red('This project has one blueprint, so there is nowhere to move rules to.'));
     console.error(dim('`walkdown blueprints new <name>` gives it another.'));
     return end(2);
   }
-  const to = project.find((b) => b.id === values.to);
+  const named = (b, want) => b.id === want || b.full === want;
+  const to = project.find((b) => named(b, values.to));
   if (!to) {
     console.error(red(`✗ \`${values.to}\` is not a blueprint of this project — a rule moves only between blueprints of one project (${project.map((b) => b.id).join(', ')})`));
     console.error(dim('Nothing was moved.'));
     return end(2);
   }
   const holders = values.blueprint
-    ? project.filter((b) => b.id === values.blueprint)
+    ? project.filter((b) => named(b, values.blueprint))
     : project.filter((b) => b.id !== to.id && planMove({ from: b, to, what, project }).picks.length === what.length);
   if (holders.length !== 1) {
     console.error(
@@ -101,7 +104,9 @@ function rename(args) {
   const project = values.blueprint
     ? here.spec?.path ? [{ id: here.id, dir: here.spec.path }] : []
     : (here.ambiguous ? here.config.registry.candidates : here.spec?.path ? [here.id] : [])
-        .map((id) => ({ id, dir: resolveLocations({ blueprint: id }).spec?.path }))
+        // By the name an ID ends with: the ID is this machine's, and what a move
+    // writes - `copied_from` - is read on every machine (ADR 0014 §2).
+    .map((full) => ({ id: nameOf(full), full, dir: resolveLocations({ blueprint: full }).spec?.path }))
         .filter((b) => b.dir);
   if (!project.length) {
     console.error(red(`✗ ${here.spec?.why ?? 'no blueprint here'}`));

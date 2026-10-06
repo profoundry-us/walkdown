@@ -52,7 +52,8 @@ function project({ commit = 'none' } = {}) {
     assert.equal(made.status, 0, made.stderr);
   }
   const specOf = (id) => JSON.parse(wd(['where', '--blueprint', id, '--json']).stdout).spec.path;
-  const homeOf = (id) => join(specOf(id), '..');
+  // A home is one folder now (ADR 0014 §5): the spec is the home.
+  const homeOf = (id) => specOf(id);
   for (const id of ['a', 'b']) {
     writeFileSync(
       join(specOf(id), 'features', `${id}.yml`),
@@ -191,7 +192,7 @@ test('lint accepts a sibling blueprint\'s rule and thread, and still flags what 
   assert.ok(again.some((f) => f.message.includes('unknown thread "n-9999"')), 'a thread no blueprint holds still warns');
 });
 
-test('a new thread\'s id is unique across the project\'s blueprints @rule:locations.several.thread-ids-unique', () => {
+test('a new thread\'s label is numbered across the project\'s blueprints, and its file is its UUID @rule:locations.threads.uuid-is-the-identity', () => {
   const p = project();
   const file = (bp, kind = 'note', extra = []) => {
     const r = p.wd(['threads', 'new', '--blueprint', bp, '--rule', `${bp}.s.works`, '--body', 'seen', '--kind', kind, ...extra, '--json']);
@@ -203,38 +204,85 @@ test('a new thread\'s id is unique across the project\'s blueprints @rule:locati
   assert.equal(file('b'), 'n-0006', 'b counts past a');
   assert.equal(file('a', 'question', ['--option', 'Yes :: do it', '--option', 'No :: leave it']), 'q-0007');
 
-  // Ids that already collide stay as they are.
+  // Every file is named by its thread's UUID, with the label inside it.
+  const aThreads = join(p.homeOf('a'), 'threads');
+  for (const f of readdirSync(aThreads).filter((f) => f.endsWith('.yml'))) {
+    const [uuid] = f.split('.yml');
+    assert.match(uuid, /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, f);
+    assert.match(readFileSync(join(aThreads, f), 'utf8'), new RegExp(`^uuid: ${uuid}$`, 'm'));
+  }
+
+  // Labels that already collide stay as they are, and the next counts past both.
   const bThreads = join(p.homeOf('b'), 'threads');
-  writeFileSync(join(bThreads, 'n-0001.yml'), readFileSync(join(p.homeOf('a'), 'threads', 'n-0001.yml'), 'utf8'));
+  const n1 = threadAt(aThreads, 'n-0001');
+  writeFileSync(join(bThreads, 'copied.yml'), readFileSync(n1, 'utf8'));
   assert.equal(file('b'), 'n-0008');
-  assert.ok(existsSync(join(bThreads, 'n-0001.yml')) && existsSync(join(p.homeOf('a'), 'threads', 'n-0001.yml')));
+  assert.ok(existsSync(join(bThreads, 'copied.yml')) && existsSync(n1));
+
+  // A run record written now names a thread by its UUID; one already in the
+  // ledger keeps its label, unchanged, and both are read as the label.
+  const runs = join(p.homeOf('a'), 'runs');
+  mkdirSync(runs, { recursive: true });
+  const old = join(runs, '2026-09-01T00-00-00Z-local-01.json');
+  const oldText = JSON.stringify({ run_id: '2026-09-01T00-00-00Z-local-01', created: '2026-09-01T00:00:00Z', actor: 'sam', kind: 'walkdown', target: 'local', results: [{ rule: 'a.s.works', status: 'fail', threads: ['n-0001'] }] });
+  writeFileSync(old, oldText);
+  const wrote = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      `import { writeRunRecord } from ${JSON.stringify(join(REPO, 'lib', 'run-record.js'))};
+       const { record } = writeRunRecord({ blueprintDir: ${JSON.stringify(p.homeOf('a'))}, cwd: process.cwd(), target: 'local', actor: 'sam', kind: 'walkdown',
+         results: [{ rule: 'a.s.works', status: 'fail', threads: ['n-0002', 'n-0006'] }] });
+       console.log(JSON.stringify(record));`,
+    ],
+    { cwd: p.shop, encoding: 'utf8', env: p.env },
+  );
+  assert.equal(wrote.status, 0, wrote.stderr);
+  const n2 = readFileSync(threadAt(aThreads, 'n-0002'), 'utf8').match(/^uuid: (.+)$/m)[1];
+  // n-0006 is b's: a label is the project's, and so is the lookup.
+  const n6 = readFileSync(threadAt(bThreads, 'n-0006'), 'utf8').match(/^uuid: (.+)$/m)[1];
+  assert.deepEqual(JSON.parse(wrote.stdout).results[0].threads, [n2, n6], 'each label became its UUID');
+  // And filing says the UUID, so a hand-written record can cite it.
+  const filed = JSON.parse(p.wd(['threads', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'again', '--json']).stdout);
+  assert.match(filed.uuid, /^[0-9a-f-]{36}$/);
+  assert.equal(readFileSync(old, 'utf8'), oldText, 'the old record is not edited');
+  const st = JSON.parse(p.wd(['status', '--blueprint', 'a', '--json']).stdout);
+  assert.match(JSON.stringify(st.rows.find((r) => r.rule === 'a.s.works')), /"threads":\["n-0002","n-0006"\]/, 'and read back as their labels');
 });
 
-test('the pointer names every blueprint, and says writes need --blueprint @rule:locations.pointer.names-every-blueprint', () => {
+test('the pointer names no blueprint, and is the same paragraph with one blueprint or two @rule:locations.pointer.names-no-blueprint', () => {
   const p = project({ commit: 'spec' });
   const claude = join(p.shop, 'CLAUDE.md');
   const block = () => readFileSync(claude, 'utf8');
-  // init placed it, and the second init brought it up to date with both.
-  assert.match(block(), /- `a` in `\.walkdown\/blueprints\/0001-a\/blueprint\/`/);
-  assert.match(block(), /- `b` in `\.walkdown\/blueprints\/0002-b\/blueprint\/`/);
-  assert.match(block(), /need `--blueprint <id>`/);
+  // The first commit placed it.
+  assert.match(block(), /specs are walkdown blueprints, under `\.walkdown\/blueprints\/`/);
+  assert.match(block(), /read and follow the `AGENTS\.md` in the\s+folder of the blueprint you are working on/);
+  assert.match(block(), /`walkdown blueprints` lists them\s+with their IDs/);
+  assert.match(block(), /commands that write take `--blueprint <id>`/);
+  // No name, no folder, no ID.
+  for (const id of ['a', 'b']) {
+    const row = JSON.parse(p.wd(['where', '--blueprint', id, '--json']).stdout);
+    assert.doesNotMatch(block(), new RegExp(`\`${id}\``), `${id} is not named`);
+    assert.equal(block().includes(row.id), false, `${id}'s ID is not in it`);
+    assert.equal(block().includes(row.spec.path.split('/').at(-1)), false, `${id}'s folder is not in it`);
+  }
+  assert.equal(block().includes(p.home), false, 'no machine path in a committed file');
 
   const again = p.wd(['pointer', '--into', 'CLAUDE.md']);
   assert.equal(again.status, 0, again.stderr);
   assert.match(again.stdout, /already current/);
   assert.equal(block().split('<!-- walkdown:begin -->').length, 2, 'once');
 
-  // b leaves the repository: the pointer stays, for a, and names b by id -
-  // never by a path into one person's home.
-  const out = p.wd(['blueprints', 'new', 'b', '--commit', 'none']);
+  // b leaves the repository: nothing in the paragraph was about b, so
+  // nothing in it changes.
+  const before = block();
+  const out = p.wd(['blueprints', 'commit', 'none', '--blueprint', 'b']);
   assert.equal(out.status, 0, out.stderr);
-  assert.match(block(), /- `a` in `\.walkdown\/blueprints\/0001-a\/blueprint\/`/);
-  assert.match(block(), /- `b`, kept outside this repository - `walkdown where --blueprint b` finds it/);
-  assert.equal(block().includes(p.home), false, 'no machine path in a committed file');
-  assert.doesNotMatch(out.stdout, /not even a pointer/);
+  assert.equal(block(), before);
 });
 
-test('a project with one blueprint keeps its one-line pointer and files every result as before @rule:locations.pointer.names-every-blueprint @rule:locations.several.results-filed-by-rule', () => {
+test('a project with one blueprint gets the same paragraph, and files every result as before @rule:locations.pointer.names-no-blueprint @rule:locations.several.results-filed-by-rule', () => {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-solo-')));
   roots.push(root);
   const solo = join(root, 'solo');
@@ -245,7 +293,9 @@ test('a project with one blueprint keeps its one-line pointer and files every re
   delete env.WALKDOWN_RECORD_HOME;
   delete env.WALKDOWN_SPEC;
   assert.equal(spawnSync(process.execPath, [CLI, 'blueprints', 'new', '--commit', 'spec'], { cwd: solo, env }).status, 0);
-  assert.match(readFileSync(join(solo, 'CLAUDE.md'), 'utf8'), /This project's spec is the walkdown blueprint in `\.walkdown\/blueprints\/0001-solo\/blueprint\/`\./);
+  const text = readFileSync(join(solo, 'CLAUDE.md'), 'utf8');
+  assert.match(text, /specs are walkdown blueprints, under `\.walkdown\/blueprints\/`/);
+  assert.doesNotMatch(text, /solo/, 'not even the only one is named');
 
   writeFileSync(join(solo, 'x.test.js'), `import { test } from 'node:test';\ntest('t ${tag('not.in.this.blueprint')}', () => {});\n`);
   const out = spawnSync(process.execPath, ['--test', `--test-reporter=${REPORTER}`, '--test-reporter-destination=stdout'], { cwd: solo, encoding: 'utf8', env });
@@ -285,7 +335,7 @@ test('a framed screen is served without ?bp= when its file is one file, and refu
     assert.equal(await one.text(), '<p>only a</p>');
     const two = await at('/prototype/screens/both.html');
     assert.equal(two.status, 409);
-    assert.match((await two.json()).error, /different file in a and b/);
+    assert.match((await two.json()).error, /different file in \d{4}-[a-z0-9]+-a and \d{4}-[a-z0-9]+-b/);
     const none = await at('/prototype/screens/nowhere.html');
     assert.equal(none.status, 404);
     assert.match((await none.json()).error, /is in no blueprint registered here/);

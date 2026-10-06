@@ -7,7 +7,7 @@ command: [sweep, --why, every check again]
 exit: 2
 expect:
   - 'Several blueprints are registered'
-  - 'checkout, search'
+  - '0001-sp-checkout, 0002-sp-search'
   - '^Choose one with `--blueprint <id>` \(e\.g\. `--blueprint checkout`\)\.$'
 anchors:
   - { id: cli.refusal, match: '^(Several blueprints|Choose one)' }

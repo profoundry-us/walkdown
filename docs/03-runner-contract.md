@@ -8,7 +8,7 @@ three-part contract any project can satisfy in its config.
 
 Framework-agnosticism lives in **configuration and per-project instructions, not codegen**:
 because the test author is an agent, "support a framework" means telling the agent (in
-`walkdown.yml` + CLAUDE.md) where checks live and how to tag them — not shipping a
+`spec.yml` + CLAUDE.md) where checks live and how to tag them — not shipping a
 generator.
 
 ## Part 1 — Linkage: how a test declares its rule
@@ -42,7 +42,7 @@ flag checks written against an older wording.
 ## Part 2 — Execution: command templates
 
 ```yaml
-# blueprint/walkdown.yml
+# <home>/spec.yml (it was blueprint/walkdown.yml until ADR 0014)
 blueprint: acme-store
 prototype:
   root: prototype/          # storyboard `prototype:` paths resolve against this;
@@ -124,7 +124,7 @@ directly — status, failure message, duration, screenshot/trace paths as eviden
   custom metadata, so the lister prints `rule:<id> <file>:<line>` per tagged example).
   Adapters are small enough that an agent can write a new one on demand.
 
-Either tier ends the same way: walkdown appends a run record to `blueprint/runs/`
+Either tier ends the same way: walkdown appends a run record to the home's `runs/`
 (schema in [05-runs-ledger.md](05-runs-ledger.md)).
 
 ## Lint rules (`walkdown lint`)
@@ -142,7 +142,7 @@ Either tier ends the same way: walkdown appends a run record to `blueprint/runs/
 ## CLI surface (v1)
 
 ```
-walkdown init                      # scaffold blueprint/ in a project
+walkdown blueprints new           # scaffold a home in a project (was `init`)
 walkdown status [--target X]       # derived per-rule status table (see 05)
 walkdown lint                      # the checks above
 walkdown run [--target X] [--rule ID]

@@ -11,9 +11,13 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Added
 
-- `walkdown blueprints rename <id> <new-id>` changes a blueprint's id in the registry,
-  its folder name (keeping the number), its `walkdown.yml`, the repository's
-  `.walkdown/config.yml` and the agent pointer. Rules, threads and runs are untouched.
+- `walkdown upgrade` moves an install laid out before
+  [ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md) to the new
+  layout, once. `--dry-run` says what it would move. Until it has run, every command that
+  loads a blueprint exits 2, says an upgrade is due and changes nothing.
+- `walkdown blueprints rename <id> <new-name> [--folder <folder>]` changes the name in a
+  blueprint's ID, keeping its number and code. `--folder` renames the home folder too.
+  Rules, threads and runs are untouched.
 - `walkdown records list` says where each kind of record is kept.
 - A refused `walkdown threads set` says that nothing changed and that its reply did not
   land.
@@ -37,6 +41,26 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Changed
 
+- Where walkdown keeps its files
+  ([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)).
+  `walkdown upgrade` makes every move below:
+  - A blueprint's home is one folder: `spec.yml` (was `blueprint/walkdown.yml`),
+    `storyboard.yml`, `features/`, `AGENTS.md`, `records.yml`, its own `.gitignore`,
+    `threads/`, `runs/`, `evidence/` and `drafts/`. There is no `blueprint/` folder inside it.
+  - `~/.walkdown/config.yml` is `~/.walkdown/profile.yml`. A repository's
+    `.walkdown/config.yml` and `.walkdown/.gitignore` are gone.
+  - Registry IDs are `NNNN-<code>-<name>`, numbered on this machine (`0001-wd-walkdown`).
+    Each row names its project by a short label and code, and its checkout by path.
+    Inside a project, a blueprint's bare name works wherever its ID does. A personal home
+    lives at `~/.walkdown/projects/<label>/blueprints/`.
+  - A thread is stored as `threads/<uuid>.yml`. Its `n-NNNN` is a label, which two
+    branches can give out twice, and its uuid is what identifies it. Attachments are named
+    after the uuid.
+  - `walkdown blueprints import <path>` takes what it is pointed at: one blueprint's
+    folder registers that one, and a repository lists its blueprints and asks which. With
+    no terminal it needs `--all` or `--only <folders>`. `walkdown blueprints add` is gone.
+  - The pointer `blueprints new` writes into `CLAUDE.md` / `AGENTS.md` is fixed text
+    that names no blueprint.
 - The command line is nouns and verbs
   ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)). A noun alone lists,
   and `walkdown <noun> help` lists its verbs. `walkdown help` groups every command under

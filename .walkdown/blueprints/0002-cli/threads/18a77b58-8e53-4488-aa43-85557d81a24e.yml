@@ -1,0 +1,13 @@
+id: n-0380
+uuid: 18a77b58-8e53-4488-aa43-85557d81a24e
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:50:47.411Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: open
+body: "Found while judging: `blueprints import .` on a repository holding
+  exactly one blueprint still asks for --all with no terminal. And `import
+  <repo> --only <unknown>` exits 0 with 'already listed every blueprint' when
+  every folder is already listed."

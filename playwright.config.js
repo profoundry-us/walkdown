@@ -61,8 +61,13 @@ export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
  * whoever first writes into it.
  */
 const prePin = process.env.WALKDOWN_HOME;
-delete process.env.WALKDOWN_HOME;
-const SPEC = new URL(`./${HOME}/blueprint`, import.meta.url).pathname;
+// The home a run of record files through: WALKDOWN_RECORD_HOME where it is
+// named (empty: the default one), as for the node:test reporter; else the
+// one this run was started under.
+const RECORD_HOME = 'WALKDOWN_RECORD_HOME' in process.env ? process.env.WALKDOWN_RECORD_HOME || null : (prePin ?? null);
+if (RECORD_HOME) process.env.WALKDOWN_HOME = RECORD_HOME;
+else delete process.env.WALKDOWN_HOME;
+const SPEC = new URL(`./${HOME}`, import.meta.url).pathname;
 const OF_RECORD = RECORD ? resolveLocations({ spec: SPEC }) : null;
 const EVIDENCE = OF_RECORD?.evidence.path ?? null;
 /*
@@ -75,7 +80,7 @@ const RECORD_DIR = OF_RECORD?.spec.path ?? null;
 if (prePin !== undefined) process.env.WALKDOWN_HOME = prePin;
 
 /*
- * Locations resolve from ~/.walkdown/config.yml, so pin the home at a scratch
+ * Locations resolve from ~/.walkdown/registry.yml, so pin the home at a scratch
  * directory before anything spawns. Set here rather than in globalSetup because
  * the web servers are launched from this config and would otherwise inherit the
  * developer's own - and a suite whose result depends on whose laptop ran it is
@@ -103,12 +108,12 @@ export const FIXTURE = `http://localhost:${FIXTURE_PORT}/extension.html?wd=${
  * The checks resolve this address to the server the run actually started; see
  * `declaredResolvesHere` in checks/panel.spec.js. It is exported for that.
  */
-export const DECLARED = parse(readFileSync(new URL(`./${HOME}/blueprint/walkdown.yml`, import.meta.url), 'utf8'))
+export const DECLARED = parse(readFileSync(new URL(`./${HOME}/spec.yml`, import.meta.url), 'utf8'))
   ?.runner?.targets?.local?.base_url ?? WD_ORIGIN;
 
 /* The same, for the example project — read from its blueprint, never hardcoded. */
 export const EXAMPLE_DECLARED = parse(
-  readFileSync(new URL(`./example/${EXAMPLE_HOME}/blueprint/walkdown.yml`, import.meta.url), 'utf8'),
+  readFileSync(new URL(`./example/${EXAMPLE_HOME}/spec.yml`, import.meta.url), 'utf8'),
 )?.runner?.targets?.local?.base_url ?? EXAMPLE_ORIGIN;
 
 /*
@@ -142,12 +147,12 @@ export default defineConfig({
   // Adopters write ['walkdown/reporter']; inside the package itself that alias
   // cannot self-resolve from Playwright's own module scope, so point at the file.
   reporter: RECORD
-    ? [['list'], ['./lib/playwright-reporter.js', { dir: RECORD_DIR, home: prePin ?? null, baseUrl: DECLARED, evidenceDir: EVIDENCE }]]
+    ? [['list'], ['./lib/playwright-reporter.js', { dir: RECORD_DIR, home: RECORD_HOME, baseUrl: DECLARED, evidenceDir: EVIDENCE }]]
     : [['list']],
   use: {
     /*
      * The system under test is walkdown itself, so this is walkdown's own
-     * address — the one blueprint/walkdown.yml declares for the local target.
+     * address — the one the home's spec.yml declares for the local target.
      * The reporter stamps it onto every run, and a run made against some other
      * address is evidence about some other system (verdict-belongs-to-a-place).
      * Fixture pages are navigated to by absolute URL; they are the host that

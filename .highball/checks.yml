@@ -59,7 +59,7 @@ checks:
   # protection the link was buying (n-0186).
   - id: agents-conventions-copied
     name: Every blueprint carries the shipped agent conventions
-    run: diff -q .walkdown/blueprints/0001-walkdown/blueprint/AGENTS.md lib/templates/AGENTS.md && diff -q .walkdown/blueprints/0002-cli/blueprint/AGENTS.md lib/templates/AGENTS.md && diff -q example/.walkdown/blueprints/0001-example/blueprint/AGENTS.md lib/templates/AGENTS.md
+    run: diff -q .walkdown/blueprints/0001-walkdown/AGENTS.md lib/templates/AGENTS.md && diff -q .walkdown/blueprints/0002-cli/AGENTS.md lib/templates/AGENTS.md && diff -q example/.walkdown/blueprints/0001-example/AGENTS.md lib/templates/AGENTS.md
     fast: true
 
   # (skills-copied retired with ADR 0010: the shipped skills are the plugin's

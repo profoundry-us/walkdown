@@ -29,13 +29,15 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { specHash } from '../lib/hash.js';
+import { siblingsOf } from '../lib/project.js';
+import { byUuid } from '../lib/run-record.js';
 import { resolveLocations, SPEC_FILE } from '../lib/locations.js';
 import { settleByAgentPass } from '../lib/threads.js';
 import { parse } from '../vendor/yaml.js';
 
 const HERE = dirname(new URL(import.meta.url).pathname);
 const ROOT = join(HERE, '..');
-const BP = join(ROOT, '.walkdown', 'blueprints', '0001-walkdown', 'blueprint');
+const BP = join(ROOT, '.walkdown', 'blueprints', '0001-walkdown');
 const BASE = process.env.WALKDOWN_SITTING_URL ?? 'http://localhost:4700';
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -1243,7 +1245,7 @@ const STATES = [
      */
     name: 'embed-pin-files-against-the-page-project',
     url: '/as-built/review.html',
-    config: { bp: 'example/blueprint', server: BASE },
+    config: { bp: 'example', server: BASE },
     steps: [
       ['no-writes'],
       ['top', '(d) => d.defaultView.walkdownEmbed.setPinMode(true)'],
@@ -1719,7 +1721,7 @@ function evidenceRoot() {
   try {
     return resolveLocations({ spec: BP }).evidence.path;
   } catch {
-    return join(BP, 'runs', 'evidence');
+    return join(BP, 'evidence');
   }
 }
 
@@ -2057,7 +2059,9 @@ function record(file) {
   }
   const outs = [...byHolder].map(([id, results]) => {
     const spec = specOf(id);
-    return { id, spec, run: { ...base, spec_hash: specHash(spec), results }, out: join(resolveLocations({ spec }).runs.path, `${base.run_id}.json`) };
+    // A thread named by its label is written as its UUID (ADR 0014 §9).
+    const named = byUuid(results, () => [resolveLocations({ spec }).threads.path, ...siblingsOf(spec).map((x) => x.threads)]);
+    return { id, spec, run: { ...base, spec_hash: specHash(spec), results: named }, out: join(resolveLocations({ spec }).runs.path, `${base.run_id}.json`) };
   });
   /*
    * And into the runs directory the ledger actually keeps, which stopped

@@ -38,6 +38,7 @@ Threads
   walkdown threads show <id>
   walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]]
   walkdown threads set <id> --status <s> | --verify | --reopen | --waive [--reason <text>] [--reply <text>]
+  walkdown threads relabel <label|uuid> [--yes]
 
 Rules and verdicts
   walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]

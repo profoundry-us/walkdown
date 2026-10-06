@@ -83,6 +83,12 @@ export const VERBS = {
       return thread([id, ...rest]);
     },
   },
+  relabel: {
+    usage: 'walkdown threads relabel <label|uuid> [--yes] [--blueprint <id>] [--json]',
+    about:
+      'Give the newer of two threads sharing a label (a merge can leave two) the next free\nlabel, keeping the old one as its alias. Asks first; with no terminal, --yes.',
+    run: async (args) => (await import('./threads-relabel.js')).run(args),
+  },
 };
 
 function usage(verb) {

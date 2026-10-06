@@ -1,0 +1,23 @@
+id: n-0369
+uuid: 2b5f205f-af5b-4903-aee4-9994bbfacc01
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:42:57.969Z
+anchor:
+  rule: commands.blueprints.commit-moves-the-home
+status: addressed
+body: "Agent judging found lint silent about a folder-name clash: a personal
+  home whose folder a teammate has committed under .walkdown/blueprints/ is
+  refused by `blueprints commit`, but `walkdown lint` said 0 warnings before and
+  after. Also: a refused commit left registry.yml.lock behind for ~10s
+  (process.exit inside build skipped the release), and `commit none` left the
+  home's walkdown-written .gitignore in the personal home."
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:17Z
+    body: Lint now warns when a home kept on this machine has a folder name already
+      committed in its checkout, and names `blueprints rename --folder`. A
+      refusal releases the registry lock on exit, wherever it exits from. A home
+      moved out drops the .gitignore walkdown wrote. Covered in
+      test/judged-edges.test.js.

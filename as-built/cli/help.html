@@ -62,14 +62,15 @@
       <div class="ln">Getting ready</div>
       <div class="ln">  walkdown init [--force]</div>
       <div class="ln">  walkdown skills [--into &lt;dir&gt;] [--project] [--force]</div>
+      <div class="ln">  walkdown upgrade [--dry-run]</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.help.blueprints">
       <div class="ln">Blueprints</div>
       <div class="ln">  walkdown blueprints [list] [--stale]</div>
-      <div class="ln">  walkdown blueprints new [&lt;id&gt;] [--dir &lt;root&gt;] [--commit none|spec|all]</div>
-      <div class="ln">  walkdown blueprints import &lt;path&gt; [--all|--only &lt;ids&gt;] [--id &lt;name&gt;] [--ephemeral] [--why &lt;reason&gt;]</div>
-      <div class="ln">  walkdown blueprints rename &lt;id&gt; &lt;new-id&gt;</div>
+      <div class="ln">  walkdown blueprints new [&lt;name&gt;] [--folder &lt;folder&gt;] [--commit none|spec|all] [--project &lt;label&gt;] [--code &lt;pc&gt;]</div>
+      <div class="ln">  walkdown blueprints import &lt;path&gt; [--all|--only &lt;folders&gt;] [--ephemeral] [--why &lt;reason&gt;]</div>
+      <div class="ln">  walkdown blueprints rename &lt;id&gt; &lt;new-name&gt; [--folder &lt;folder&gt;]</div>
       <div class="ln">  walkdown blueprints commit &lt;none|spec|all&gt; [--blueprint &lt;id&gt;]</div>
       <div class="ln">  walkdown blueprints forget &lt;id&gt;</div>
       <div class="ln">  walkdown pointer [--dir &lt;root&gt;] [--into &lt;file&gt;]</div>
@@ -89,6 +90,7 @@
       <div class="ln">  walkdown threads show &lt;id&gt;</div>
       <div class="ln">  walkdown threads reply &lt;id&gt; &lt;text&gt; [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]]</div>
       <div class="ln">  walkdown threads set &lt;id&gt; --status &lt;s&gt; | --verify | --reopen | --waive [--reason &lt;text&gt;] [--reply &lt;text&gt;]</div>
+      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; [--yes]</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.help.verdicts">
@@ -100,6 +102,7 @@
       <div class="ln">  walkdown judge &lt;rule-id&gt; [--target &lt;name&gt;] [--serve &lt;origin&gt;] [--blueprint &lt;id&gt;] [--json]</div>
       <div class="ln">  walkdown sweep --why &lt;reason&gt; [--tiers checks,agent] [--blueprint &lt;id&gt;] [--target &lt;name&gt;]</div>
       <div class="ln">  walkdown rules move &lt;rule|story|feature&gt;... --to &lt;blueprint&gt; [--dry-run]</div>
+      <div class="ln">  walkdown rules rename &lt;rule&gt; &lt;new-id&gt; [--dry-run]</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.help.panel">

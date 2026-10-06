@@ -76,7 +76,7 @@ function apart({ runner = {}, withEntry = true } = {}) {
       join(home, 'registry.yml'),
       // A registry row (ADR 0003): the home is where every record path
       // derives from, and the project is the code the spec describes.
-      `blueprints:\n  - id: apart\n    project: ${code}\n    home: ${join(home, 'blueprints', '0001-apart')}\n    registered: { by: init, at: '2026-01-01T00:00:00Z' }\n`,
+      `blueprints:\n  - id: 0001-fx-apart\n    project: fx\n    code: fx\n    checkout: ${code}\n    home: ${join(home, 'blueprints', '0001-apart')}\n    registered: { by: init, at: '2026-01-01T00:00:00Z' }\n`,
     );
   return { root, home, code, spec };
 }
@@ -86,7 +86,7 @@ test('the code root is the repository, not the home the spec sits in @rule:locat
   const bp = loadBlueprint(spec);
   assert.equal(bp.codeRoot, code, 'where the code is');
   assert.notEqual(bp.codeRoot, bp.projectRoot, 'and it is NOT the blueprint parent here');
-  assert.ok(bp.projectRoot.includes('0001-apart'), 'which is inside the walkdown home');
+  assert.ok(bp.dir.endsWith('0001-apart'), 'which is a home in the walkdown home');
 });
 
 test('runner commands execute in the code, where the suite actually is', () => {
@@ -148,9 +148,9 @@ test('a check for a rule that never asked for checks, or never recorded, is said
   assert.match(found[0].message, /never recorded/);
 
   // Recorded once: nothing to say.
-  mkdirSync(join(spec, '..', 'runs'), { recursive: true });
+  mkdirSync(join(spec, 'runs'), { recursive: true });
   writeFileSync(
-    join(spec, '..', 'runs', '2026-01-02T00-00-00Z-local-01.json'),
+    join(spec, 'runs', '2026-01-02T00-00-00Z-local-01.json'),
     JSON.stringify({ run_id: '2026-01-02T00-00-00Z-local-01', created: '2026-01-02T00:00:00Z', kind: 'checks', actor: 'ci', target: 'local', results: [{ rule: 'd.s.thing', status: 'pass' }] }),
   );
   assert.equal(coverage(loadBlueprint(spec)).length, 0);

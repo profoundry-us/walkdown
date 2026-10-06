@@ -1,0 +1,18 @@
+id: n-0376
+uuid: f9cef766-42a0-457a-b07c-f332623d5043
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:43:12.523Z
+anchor:
+  rule: locations.default.in-repo-on-request
+status: addressed
+body: Agent judging found that saving a draft writes drafts/.gitignore with '*'
+  and '!.gitignore'. After that, a home committed with `commit all` reports
+  drafts kept out by git. `walkdown lint` exits 1 with a tracking error over a
+  file walkdown itself wrote.
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:19Z
+    body: A draft save no longer writes drafts/.gitignore; the home's own .gitignore
+      decides. `walkdown upgrade` removes the one an earlier walkdown wrote.

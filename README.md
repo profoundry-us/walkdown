@@ -83,7 +83,9 @@ lists its verbs ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.m
 
 ```
 walkdown init [--force]
-walkdown blueprints new [<id>] [--dir <project-root>] [--commit none|spec|all]
+walkdown blueprints new [<name>] [--dir <project-root>] [--commit none|spec|all]
+walkdown blueprints import <path> [--all|--only <folders>]
+walkdown upgrade [--dry-run]
 walkdown skills [--into <dir>] [--project] [--force]
 walkdown where [<kind>] [--blueprint <id>] [--json]
 walkdown pointer [--dir <project-root>] [--into <file>]
@@ -95,11 +97,12 @@ walkdown threads [--rule <id>] [--all] [--json]
 walkdown threads show <id> [--json]
 ```
 
-`blueprints new` scaffolds `blueprint/` for a project — config and storyboard templates, a
-feature template, and **`blueprint/AGENTS.md`**: the conventions any AI agent working
+`blueprints new` scaffolds a home for a project — one flat folder holding a `spec.yml`
+and storyboard template, a feature template, and **`AGENTS.md`**: the conventions any AI agent working
 in the repo follows (read the blueprint first, carry anchors, tag checks with rule
 ids, work the agent queue, claim-never-accept, never touch `prototype/`);
-`walkdown pointer --into CLAUDE.md` tells agents where it is. `init` links the clone into Claude Code as the
+`walkdown pointer --into CLAUDE.md` tells agents where the specs are, in a fixed paragraph
+that names no blueprint. `init` links the clone into Claude Code as the
 **`walkdown` plugin** (`~/.claude/skills/walkdown`, one link, so updating the
 clone updates it): `/walkdown:judge` (the agent-walkdown ritual — evidence
 screenshots, judgment, run record, fail threads), `/walkdown:incorporate` (fold
@@ -156,23 +159,23 @@ runs is picked up without a restart.
   — so fading, ghosting and pinning on the app surface all work. It is not evidence:
   what it shows is the design.
 - **Pin mode** — with the embed snippet in a page (`<script
-  src="http://localhost:4700/embed.js" data-walkdown data-bp="example/blueprint">`),
+  src="http://localhost:4700/embed.js" data-walkdown data-bp="example">`),
   clicking a real element pins a note or question to its anchor; the thread lands in
-  `blueprint/threads/` with rule, screen, element, and author attached. **Escape** leaves
+  the home's `threads/` with rule, screen, element, and author attached. **Escape** leaves
   pin mode (closing an open form first), as does clicking the badge again. Standalone
   pages (opened without the panel) resolve their screen from the URL and post to the
   same server — including HTTPS staging pages, via the Private-Network-Access preflight.
   `data-bp` names the blueprint; omit it and pins file against the blueprint `walkdown
   serve` was started in, which a server started outside any project does not have.
 - **Human walkdowns** — Start walkdown (your name arrives from git identity), judge
-  rules, Finish: the session is appended to `blueprint/runs/` as a hash-stamped
+  rules, Finish: the session is appended to the home's `runs/` as a hash-stamped
   `kind: walkdown` record, satisfying `human` verify requirements. A feedback box rides
   above the verdict buttons — anything written is filed as a note thread on the rule
   and linked into the run result, and a **fail is refused until it has a why** (the
   note, or a pin dropped during the session; failing arms pin mode so the note lands
   where the problem is). Rules with no build evidence show **Approve / Refine** instead
   of Pass / Fail — sign-off on the spec, recorded as `approved`/`refining`, never
-  counted as verification. Each verdict is written to `blueprint/drafts/` the moment it
+  counted as verification. Each verdict is written to the home's `drafts/` the moment it
   is given, so an unfinished sitting survives a reload or a closed browser and shows up
   in `walkdown status` as in progress; the ledger still gains exactly one record, at
   Finish, which deletes the draft. Drafts are working state — the directory ignores its
@@ -189,7 +192,7 @@ runs is picked up without a restart.
   The same mutations are available from the terminal:
   `walkdown threads reply n-0002 --as-agent "fixed in run …" --status addressed`,
   then `walkdown threads set n-0002 --verify` as yourself. Who a mutation records under is
-  never an argument — it is the `identity:` in your `~/.walkdown/config.yml`. An agent
+  never an argument — it is the `identity:` in your `~/.walkdown/profile.yml`. An agent
   working for you records under *your* name, because it is your instruction; `--as-agent`
   adds the provenance beside it, and refuses `verified` and `waived` outright.
 
@@ -229,18 +232,18 @@ positioned against host elements and have no business carrying a design system.
 
 ## walkdown's own blueprint
 
-walkdown is specified with itself: [blueprint/](blueprint/) holds the tool's own
-rules (starting with thread-lifecycle governance), verified by the repo's node:test
-suite — tests tagged by name (`... @rule:<id>`), recorded by the **node:test
+walkdown is specified with itself: [.walkdown/blueprints/](.walkdown/blueprints/) holds
+the tool's own rules (starting with thread-lifecycle governance) in two blueprints, `walkdown`
+for the panel and the embed and `cli` for the rest, verified by the repo's node:test suite — tests tagged by name (`... @rule:<id>`), recorded by the **node:test
 reporter** (`walkdown/node-reporter`, the third emitter alongside Playwright and
 RSpec). `walkdown run` here runs the tool's checks through its own runner contract.
-`docs/` remains the design (why); `blueprint/` is the verifiable what.
+`docs/` remains the design (why); the blueprints are the verifiable what.
 
 ## Playwright reporter
 
 The write side of the loop: add `['walkdown/reporter']` to a project's Playwright
-`reporter` array and every `npx playwright test` run appends a run record to
-`blueprint/runs/` — per-rule results aggregated from `@rule:` tags, current
+`reporter` array and every `npx playwright test` run appends a run record to the
+home's `runs/` — per-rule results aggregated from `@rule:` tags, current
 `statement_hash` stamped (so future staleness is detectable), failure screenshots as
 evidence, and git provenance (`<sha>-dirty` on an unclean tree). `WALKDOWN_TARGET` sets the target
 (default `local`); who it is recorded under is `ci` under CI and your configured

@@ -2,7 +2,7 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, statSync }
 import { homedir } from 'node:os';
 import { dirname, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
-import { canon, canRemember, KINDS, rememberLocation, resolveLocations } from '../../lib/locations.js';
+import { canon, canRemember, KINDS, readRegistry, registryPath, rememberLocation, resolveLocations, tilde } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { MoveFailed, moveDir } from '../../lib/standard.js';
 import { end, severalHere } from './context.js';
@@ -31,6 +31,19 @@ export function run(args) {
     return end(2);
   }
 
+  /*
+   * A registry that does not parse is said as itself (n-0206). Read, it
+   * answers with no rows, and the refusal below would blame the directory.
+   */
+  const { error } = readRegistry();
+  if (error) {
+    console.error(
+      red(
+        `${tilde(registryPath())} cannot be written back (${String(error).split('\n')[0]}). The move is not made: a choice that cannot be written down is not a choice. Fix that file first.`,
+      ),
+    );
+    return end(2);
+  }
   const loc = resolveLocations({ blueprint: values.blueprint });
   if (loc.ambiguous) severalHere(loc);
   /*

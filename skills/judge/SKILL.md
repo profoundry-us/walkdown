@@ -23,7 +23,7 @@ verify requirement).
    screen's setup, both surfaces' addresses resolved through the target, the
    anchors the steps name, where evidence goes, the run-record shape, and the
    governance — the built-in lines plus whatever the project's own
-   `governance:` list in `walkdown.yml` adds. Read the whole prompt before
+   `governance:` list in `spec.yml` adds. Read the whole prompt before
    driving; the statement is authoritative and the steps elaborate it.
    `--target <name>` picks another configured target's addresses.
 

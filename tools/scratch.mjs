@@ -45,7 +45,7 @@ const TMP = join(root, 'tmp', 'scratch');
 const homeOf = (id) => {
   const spec = resolveLocations({ blueprint: id, cwd: root }).spec?.path;
   if (!spec) die(`no blueprint \`${id}\` is registered for this repository`);
-  return join('.walkdown', 'blueprints', basename(dirname(spec)));
+  return join('.walkdown', 'blueprints', basename(spec));
 };
 const STAMP = '.scratch.json';
 /* Long enough for any sitting, short enough that a forgotten space is gone
@@ -97,8 +97,11 @@ function make(label, why, port, id = 'walkdown') {
   mkdirSync(path, { recursive: true });
   // The home as it is laid out - and no drafts: a half-finished sitting is one
   // person's working state, and a copy of it is nobody's.
-  for (const part of ['blueprint', 'threads', 'runs'])
-    cpSync(join(root, HOME, part), join(path, HOME, part), { recursive: true });
+  // One folder since ADR 0014; its evidence is linked below, not copied.
+  cpSync(join(root, HOME), join(path, HOME), {
+    recursive: true,
+    filter: (src) => !/\/(evidence|drafts)(\/|$)/.test(src.slice(join(root, HOME).length)),
+  });
   // `prototype.root` resolves against the code root, which is this directory;
   // the as-built drawings the app paths name are served from it too.
   symlinkSync(join(root, 'prototype'), join(path, 'prototype'), 'dir');
@@ -120,7 +123,7 @@ function make(label, why, port, id = 'walkdown') {
    * new inside the copy where `clean` takes it away, and narrows the sharp
    * edge to deliberately reaching into a stamp that already existed.
    */
-  const real = resolveLocations({ spec: join(root, HOME, 'blueprint') }).evidence.path;
+  const real = resolveLocations({ spec: join(root, HOME) }).evidence.path;
   const shared = real && existsSync(real) ? readdirSync(real) : [];
   mkdirSync(join(path, HOME, 'evidence'), { recursive: true });
   for (const entry of shared) symlinkSync(join(real, entry), join(path, HOME, 'evidence', entry));
@@ -130,32 +133,22 @@ function make(label, why, port, id = 'walkdown') {
    * for the copy alone (ADR 0003). The real project's row lives in the real
    * registry; a server reading this one cannot see it, so the real ledger is
    * not one `?bp=` away (q-0149) - which is what checks/checkspace.mjs has
-   * always done. The copy carries a manifest too, so it is what a checkout
-   * looks like; `import` would register it from this file.
+   * always done.
    */
-  mkdirSync(join(path, '.walkdown'), { recursive: true });
-  writeFileSync(
-    join(path, '.walkdown', 'config.yml'),
-    [
-      '# A scratch copy for judging. Serve it with WALKDOWN_HOME pointed at its',
-      '# home/, whose registry names this copy and nothing else.',
-      'blueprints:',
-      '  - id: blueprint',
-      `    home: ${basename(HOME)}`,
-      '',
-    ].join('\n'),
-  );
   mkdirSync(join(path, 'home'), { recursive: true });
   writeFileSync(
-    join(path, 'home', 'config.yml'),
+    join(path, 'home', 'profile.yml'),
     `identity:\n  username: scratch-${label}\n  name: A scratch sitting (${label})\n`,
   );
   writeFileSync(
     join(path, 'home', 'registry.yml'),
     [
+      'next: 2',
       'blueprints:',
-      '  - id: blueprint',
-      `    project: ${path}`,
+      `  - id: 0001-sc-${id}`,
+      `    project: scratch-${label}`,
+      '    code: sc',
+      `    checkout: ${path}`,
       `    home: ${join(path, HOME)}`,
       // Not `ephemeral:` - a scratch row is reached by standing in the copy,
       // which an ephemeral row never is; the home it lives in is the throwaway.
@@ -172,7 +165,7 @@ function make(label, why, port, id = 'walkdown') {
    * copy is retargeted here, once, and the serve line below matches.
    */
   if (port != null) {
-    const yml = join(path, HOME, 'blueprint', 'walkdown.yml');
+    const yml = join(path, HOME, 'spec.yml');
     const before = readFileSync(yml, 'utf8');
     const after = before.replace(
       /^(\s*base_url:\s*http:\/\/localhost:)\d+/gm,

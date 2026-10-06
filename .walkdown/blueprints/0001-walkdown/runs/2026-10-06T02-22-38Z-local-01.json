@@ -1,0 +1,48 @@
+{
+  "run_id": "2026-10-06T02-22-38Z-local-01",
+  "created": "2026-10-06T02:22:38Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "5d8403d-dirty",
+  "tree_hash": "sha256:3a09648c9daa",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.start.address-keeps-the-pick",
+      "status": "pass",
+      "statement_hash": "sha256:f81b1c70e65f",
+      "duration_ms": 6,
+      "checks": [
+        "test/serve.test.js:204"
+      ]
+    },
+    {
+      "rule": "panel.signoff.approved-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:95480ac5b8ed",
+      "duration_ms": 58,
+      "checks": [
+        "test/serve.test.js:494"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:6a69c42a5b6c",
+      "duration_ms": 7,
+      "checks": [
+        "test/serve.test.js:700"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.as-built-drawing",
+      "status": "pass",
+      "statement_hash": "sha256:098b9682020b",
+      "duration_ms": 11,
+      "checks": [
+        "test/serve.test.js:715"
+      ]
+    }
+  ]
+}

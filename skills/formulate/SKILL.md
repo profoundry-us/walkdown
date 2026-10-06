@@ -18,7 +18,7 @@ derives from it.
    (`checkout.submit`) for elements that lack them.
 
 2. **Storyboard first.** One entry per screen/state in
-   `blueprint/storyboard.yml`: stable id, per-surface locators
+   the home's `storyboard.yml`: stable id, per-surface locators
    (`prototype:` path, `app:` path), declared `anchors`. A screen the source
    implies but doesn't show gets `prototype: null` plus a design-request
    thread (see ownership rules). States (modal open, error showing) are

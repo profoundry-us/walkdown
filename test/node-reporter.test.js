@@ -36,8 +36,10 @@ test('node:test reporter records tagged tests as a hash-stamped run', () => {
     join(home, 'registry.yml'),
     [
       'blueprints:',
-      '  - id: node-fixture',
-      `    project: ${root}`,
+      '  - id: 0001-fx-node-fixture',
+      '    project: fx',
+      '    code: fx',
+      `    checkout: ${root}`,
       `    home: ${root}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',

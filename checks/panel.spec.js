@@ -1713,7 +1713,7 @@ test('the identity is a username to record under and a full name to show, both e
    * configured identity, and this says which one and where it comes from.
    */
   await expect(actorShown).not.toHaveJSProperty('tagName', 'INPUT');
-  await expect(page.getByTestId('settings.actor-source')).toContainText(/config\.yml/);
+  await expect(page.getByTestId('settings.actor-source')).toContainText(/profile\.yml/);
 
   // The display name is only ever shown, so it stays the panel's to change:
   // editing it moves the strip's name and leaves the recorded handle put.
@@ -2746,7 +2746,7 @@ test('times read in the zone the person declared, and Settings says which @rule:
   await page.getByTestId('panel.actor-name').click();
   const zone = page.getByTestId('settings.timezone');
   await expect(zone).toHaveText('Asia/Tokyo');
-  await expect(zone).toHaveAttribute('title', /config\.yml/);
+  await expect(zone).toHaveAttribute('title', /profile\.yml/);
   await expect(zone).not.toHaveJSProperty('tagName', 'INPUT');
   await page.keyboard.press('Escape');
 

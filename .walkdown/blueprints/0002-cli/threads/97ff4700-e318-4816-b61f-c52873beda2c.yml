@@ -1,0 +1,22 @@
+id: n-0374
+uuid: 97ff4700-e318-4816-b61f-c52873beda2c
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T02:43:12.029Z
+anchor:
+  rule: locations.worktree.same-project
+status: addressed
+body: "Agent judging found a worktree kept inside its checkout is read as the
+  checkout itself. Claude Code makes them at <repo>/.claude/worktrees/<name>.
+  There, `where --json` shows worktree: null and points spec and threads at the
+  main checkout. `blueprints new` there refuses with 'the project label `shop`
+  is another checkout's'. test/worktree.test.js only put the worktree beside the
+  checkout."
+replies:
+  - author: agent
+    created: 2026-10-06T02:51:18Z
+    body: "checkoutFor now sees a worktree kept inside its checkout: git's top level
+      is deeper than the checkout and shares its repository.
+      test/worktree.test.js covers <repo>/.claude/worktrees/<name> beside the
+      sibling layout."

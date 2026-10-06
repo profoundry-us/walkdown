@@ -41,7 +41,7 @@ start.
 
    The target you judge against — a dev server, a review app, staging — exists
    to absorb what judging does to it. Anything more this project needs you to
-   know is in its `governance:` lines in `walkdown.yml`, and every judge
+   know is in its `governance:` lines in `spec.yml`, and every judge
    prompt carries them. Follow them.
 
 3. **Judge, one rule at a time.** For each owed rule, `walkdown judge
