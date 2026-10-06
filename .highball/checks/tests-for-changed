@@ -26,7 +26,10 @@ const SLOW = new Set([
   // the edit hook was killed at its budget on every change near init.
   "several", "several-project", "rules-move", "cli",
   // ADR 0012: every command spawned on throwaway machines, ~10s.
-  "commands"
+  "commands",
+  // ADR 0014: real git repos, clones and moves on throwaway machines -
+  // judged-edges alone is 13s.
+  "judged-edges", "worktree", "upgrade", "thread-labels", "folder-names", "records-yml"
 ]);
 
 const changed = (process.env.HIGHBALL_CHANGED_FILES ?? "")

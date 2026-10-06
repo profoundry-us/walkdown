@@ -1,5 +1,5 @@
 import { existsSync, renameSync } from 'node:fs';
-import { dirname, isAbsolute, join, relative } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   canon,
@@ -94,6 +94,32 @@ export async function run(args) {
     nextDir = join(dirname(homeDir), f);
     if (canon(nextDir) !== homeDir && existsSync(nextDir)) {
       console.error(red(`${tilde(nextDir)} already exists — nothing was renamed.`));
+      return end(2);
+    }
+    /*
+     * The same folder name on the other side - committed in the checkout for
+     * a home kept on this machine, or kept here for a committed one - is a
+     * home `blueprints commit` would then refuse, and lint would warn of. A
+     * rename is not the way to make that clash (n-0381).
+     */
+    const rootOf = (dir) => {
+      for (let d = dir; d !== dirname(d); d = dirname(d)) if (basename(d) === 'blueprints') return d;
+      return null;
+    };
+    const key = rootOf(homeDir) ? relative(rootOf(homeDir), nextDir) : null;
+    const checkout = row.checkout ? canon(expand(String(row.checkout))) : null;
+    const roots = new Set([
+      ...(checkout ? [join(checkout, '.walkdown', 'blueprints')] : []),
+      ...rows
+        .filter((r) => r !== row && !r.ephemeral && (r.project ?? null) === project && r.home)
+        .map((r) => rootOf(canon(expand(String(r.home)))))
+        .filter(Boolean),
+    ]);
+    roots.delete(rootOf(homeDir));
+    const clash = key && [...roots].map((r) => join(r, key)).find((d) => existsSync(join(d, 'spec.yml')));
+    if (clash) {
+      console.error(red(`${tilde(clash)} already holds a blueprint of project \`${project}\` under the folder name \`${key}\` — choose another.`));
+      console.error(dim('Nothing was renamed.'));
       return end(2);
     }
   }

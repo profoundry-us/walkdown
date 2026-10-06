@@ -489,3 +489,19 @@ test('runs moved inside the checkout follow a move past a fresh clone, and a pat
     assert.equal(m.rows()[0].runs.replace(/^~/, process.env.HOME), join(old, 'wd-runs'));
   }
 });
+
+test('rename --folder refuses a folder name a committed sibling already has @rule:commands.blueprints.rename', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  ok(m.cli(shop, 'blueprints', 'new', 'a', '--folder', '202610-a'));
+  ok(m.cli(shop, 'blueprints', 'new', 'b', '--folder', '202610-search', '--commit', 'spec'));
+  const before = readFileSync(join(m.home, 'registry.yml'), 'utf8');
+  const r = m.cli(shop, 'blueprints', 'rename', 'a', 'a2', '--folder', '202610-search');
+  assert.equal(r.status, 2, r.stdout + r.stderr);
+  assert.match(r.stderr, /already holds a blueprint of project `shop` under the folder name `202610-search`/);
+  assert.equal(readFileSync(join(m.home, 'registry.yml'), 'utf8'), before, 'nothing was renamed');
+  // And the other way: a committed home onto a folder name kept on this machine.
+  const back = m.cli(shop, 'blueprints', 'rename', 'b', 'b2', '--folder', '202610-a');
+  assert.equal(back.status, 2, back.stdout + back.stderr);
+  ok(m.cli(shop, 'blueprints', 'rename', 'a', 'a2', '--folder', '202610-free'));
+});
