@@ -1,0 +1,17 @@
+id: n-0402
+uuid: 3dfd29fd-8cc9-4a69-b6fd-abd34855912a
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T14:24:56.328Z
+anchor:
+  rule: locations.registry.projects-are-labels
+status: open
+body: No command renames a project or changes its code. After the upgrade put
+  the example in a project labelled walkdown-2 with code w2, Topher wanted it as
+  walkdown-example with code we, which makes its ID 0002-we-example. blueprints
+  rename changes only the name at the end of an ID, so the row was changed by a
+  script calling readRegistry and writeRegistry under the registry lock. A
+  projects rename command would give that a supported door. It would refuse a
+  label or code another project holds, and rewrite every row of the project
+  together.
