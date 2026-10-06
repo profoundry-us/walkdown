@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-06T02:51:01.322Z
 anchor:
   rule: commands.blueprints.new-makes-one
-status: open
+status: answered
 body: "Found while judging: `blueprints new` run from a subdirectory of a
   registered checkout refuses. It says 'the project label `repo` is another
   checkout's', naming that same checkout. Since ADR 0014 a project is a
@@ -17,3 +17,9 @@ options:
       own
   - label: Stay a second project
     why: Keep n-0214's deliberate case, and give it a label of its own
+replies:
+  - author: topher
+    created: 2026-10-06T18:56:53Z
+    body: We should probably just ask. I think either case is valid, but I think the
+      default usage will be same-project (just pointing to a subdirectory).
+    answer: true

@@ -1,10 +1,11 @@
-import { existsSync, renameSync } from 'node:fs';
+import { existsSync, mkdirSync, renameSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   canon,
   codeOf,
   expand,
+  personalHomes,
   nameOf,
   numberOf,
   readRegistry,
@@ -44,6 +45,13 @@ export async function run(args) {
   }
   if (!NAME.test(next)) {
     console.error(red(`\`${next}\` is not a name — lowercase letters, digits and dashes, starting with a letter or digit.`));
+    console.error(dim('Nothing was renamed.'));
+    return end(2);
+  }
+  // A name shaped like an ID is read as one: `--blueprint 0001-sp-a` would
+  // reach blueprint 0001, never the one renamed to it.
+  if (/^\d{4}-[a-z0-9]{2,3}-/.test(next)) {
+    console.error(red(`\`${next}\` reads as an ID, so it could never name this blueprint — give the name alone (the part after \`NNNN-pc-\`).`));
     console.error(dim('Nothing was renamed.'));
     return end(2);
   }
@@ -110,6 +118,7 @@ export async function run(args) {
     const checkout = row.checkout ? canon(expand(String(row.checkout))) : null;
     const roots = new Set([
       ...(checkout ? [join(checkout, '.walkdown', 'blueprints')] : []),
+      ...(project ? [canon(personalHomes(String(project)))] : []),
       ...rows
         .filter((r) => r !== row && !r.ephemeral && (r.project ?? null) === project && r.home)
         .map((r) => rootOf(canon(expand(String(r.home)))))
@@ -130,6 +139,8 @@ export async function run(args) {
 
   const said = [];
   if (nextDir !== homeDir) {
+    // `--folder teams/cart` may name a folder that does not exist yet.
+    mkdirSync(dirname(nextDir), { recursive: true });
     renameSync(homeDir, nextDir);
     said.push([green('~ folder'), tilde(homeDir), `now ${relative(dirname(homeDir), nextDir)}`]);
   }

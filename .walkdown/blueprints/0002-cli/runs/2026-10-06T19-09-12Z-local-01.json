@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T19-09-12Z-local-01",
+  "created": "2026-10-06T19:09:12Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c2a77b9-dirty",
+  "note": "Agent-tier rejudge of commands.blueprints.rename after c2a77b9 (n-0381), driven in fresh mktemp trees with scratch WALKDOWN_HOMEs and real git repos.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "fail",
+      "statement_hash": "sha256:8877c6d6eba1",
+      "evidence": [
+        "runs/evidence/2026-10-06T19-07-23Z/rename-rejudge.txt"
+      ],
+      "reasoning": "The n-0381 fix holds in both directions. `rename a a2 --folder 202610-search` (a personal home, the folder name a committed sibling holds) and `rename b b2 --folder 202610-a` (the reverse) both exit 2, name the clashing folder, and leave the registry, the personal tree and the repository byte for byte as they were, with no lock left behind. A teammate's unregistered committed folder is caught too. The given/when/then passes as written: `rename b search` changes only the ID's name (number and code kept, folder unchanged, git status clean). `--folder 202610-search` shows in git as pure renames and nothing else. Records hash the same under the new folder. `status --blueprint search` matches what `status --blueprint b` printed except for the path in its header line. `rename a search` and `rename a \"Not An Id\"` are refused and change nothing. Two edges still break it. (1) A name shaped like an ID is accepted: in a fresh project, `rename b 0001-sp-a` makes `0002-sp-0001-sp-a`, and the success line says `--blueprint 0001-sp-a` now names it. That string already resolves to blueprint a (`where` confirms), so the new name is one the project already uses and can never reach this blueprint, which is what THEN 4 says is refused. (2) `--folder nest/deeper` is let through the folder check, whose own error invites 'a path below where this one stands', but when the parent folder is missing it crashes with an uncaught ENOENT stack trace (exit 1). Nothing changed, but this is a crash, not a refusal, on a --folder form the command offers. Smaller and outside the THEN lines: a lone committed home with no personal sibling can still be renamed onto an unregistered folder left in the personal root, and `commit none` then refuses it. The clash check finds the personal root only through sibling rows.",
+      "threads": [
+        "dd886de3-3066-43b5-8867-e30d24b26f18"
+      ]
+    }
+  ]
+}

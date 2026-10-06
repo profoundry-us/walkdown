@@ -505,3 +505,28 @@ test('rename --folder refuses a folder name a committed sibling already has @rul
   assert.equal(back.status, 2, back.stdout + back.stderr);
   ok(m.cli(shop, 'blueprints', 'rename', 'a', 'a2', '--folder', '202610-free'));
 });
+
+test('rename refuses a name shaped like an ID, makes a nested folder, and finds the personal root alone @rule:commands.blueprints.rename', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  ok(m.cli(shop, 'blueprints', 'new', 'a', '--folder', '202610-a'));
+  ok(m.cli(shop, 'blueprints', 'new', 'b', '--folder', '202610-b', '--commit', 'spec'));
+  const a = m.rows().find((r) => r.id.endsWith('-a'));
+  const idShaped = m.cli(shop, 'blueprints', 'rename', 'b', a.id);
+  assert.equal(idShaped.status, 2, idShaped.stdout + idShaped.stderr);
+  assert.match(idShaped.stderr, /reads as an ID/);
+  // A folder below one that does not exist yet.
+  ok(m.cli(shop, 'blueprints', 'rename', 'b', 'b', '--folder', 'teams/b'));
+  assert.ok(existsSync(join(shop, '.walkdown', 'blueprints', 'teams', 'b', 'spec.yml')));
+
+  // A lone committed home, and a folder of that name left in the personal root.
+  const n2 = machine();
+  const solo = n2.repo('solo');
+  ok(n2.cli(solo, 'blueprints', 'new', 'c', '--folder', '202610-c', '--commit', 'spec'));
+  const left = join(n2.home, 'projects', 'solo', 'blueprints', '202610-old');
+  mkdirSync(left, { recursive: true });
+  writeFileSync(join(left, 'spec.yml'), 'blueprint: old\n');
+  const onto = n2.cli(solo, 'blueprints', 'rename', 'c', 'c', '--folder', '202610-old');
+  assert.equal(onto.status, 2, onto.stdout + onto.stderr);
+  assert.match(onto.stderr, /already holds a blueprint of project `solo`/);
+});

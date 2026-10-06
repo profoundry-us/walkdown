@@ -1,0 +1,21 @@
+id: n-0403
+uuid: dd886de3-3066-43b5-8867-e30d24b26f18
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T19:09:11.926Z
+anchor:
+  rule: commands.blueprints.rename
+status: addressed
+body: "Two edges break rename. A name shaped like an ID is accepted: rename b
+  0001-sp-a makes 0002-sp-0001-sp-a, and --blueprint 0001-sp-a then reaches
+  blueprint a. And --folder nest/deeper crashes with ENOENT when nest/ does not
+  exist. Also, a lone committed home could be renamed onto a folder left in the
+  personal root, because the clash check found that root only through sibling
+  rows. Evidence: runs/evidence/2026-10-06T19-07-23Z/rename-rejudge.txt."
+replies:
+  - author: agent
+    created: 2026-10-06T19:09:12Z
+    body: rename now refuses a name shaped like an ID, makes the parent folders
+      --folder names, and always checks the project's personal root as well as
+      the checkout. A judged-edges test covers all three.
