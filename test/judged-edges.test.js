@@ -530,3 +530,27 @@ test('rename refuses a name shaped like an ID, makes a nested folder, and finds 
   assert.equal(onto.status, 2, onto.stdout + onto.stderr);
   assert.match(onto.stderr, /already holds a blueprint of project `solo`/);
 });
+
+test('rename --folder never puts a home inside a home, its own or a sibling\'s @rule:commands.blueprints.rename', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  ok(m.cli(shop, 'blueprints', 'new', 'a', '--folder', '202610-a'));
+  ok(m.cli(shop, 'blueprints', 'new', 'c', '--folder', '202610-c'));
+  const before = readFileSync(join(m.home, 'registry.yml'), 'utf8');
+  for (const into of ['202610-a/sub', '202610-c/sub']) {
+    const r = m.cli(shop, 'blueprints', 'rename', 'a', 'a', '--folder', into);
+    assert.equal(r.status, 2, `${into}: ${r.stdout}${r.stderr}`);
+    assert.match(r.stderr, /never inside another/, into);
+  }
+  assert.equal(readFileSync(join(m.home, 'registry.yml'), 'utf8'), before, 'nothing was renamed');
+  ok(m.cli(shop, 'blueprints', 'rename', 'a', 'a', '--folder', 'teams/a'));
+});
+
+test('rename --folder is read from the blueprints folder, wherever the home sits now @rule:commands.blueprints.rename', () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  ok(m.cli(shop, 'blueprints', 'new', 'a', '--folder', 'teams/a', '--commit', 'spec'));
+  ok(m.cli(shop, 'blueprints', 'rename', 'a', 'a', '--folder', 'teams/a2'));
+  assert.ok(existsSync(join(shop, '.walkdown', 'blueprints', 'teams', 'a2', 'spec.yml')));
+  assert.ok(!existsSync(join(shop, '.walkdown', 'blueprints', 'teams', 'teams')));
+});

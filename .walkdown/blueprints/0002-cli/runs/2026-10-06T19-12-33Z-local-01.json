@@ -1,0 +1,216 @@
+{
+  "run_id": "2026-10-06T19-12-33Z-local-01",
+  "created": "2026-10-06T19:12:33Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "9958c95-dirty",
+  "tree_hash": "sha256:ce86a03e6a7a",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.new-makes-one",
+      "status": "pass",
+      "statement_hash": "sha256:20c77e403ea3",
+      "duration_ms": 633,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:212"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "pass",
+      "statement_hash": "sha256:8877c6d6eba1",
+      "duration_ms": 4353,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:280",
+        "test/judged-edges.test.js:493",
+        "test/judged-edges.test.js:509",
+        "test/judged-edges.test.js:534"
+      ]
+    },
+    {
+      "rule": "commands.shape.help-by-noun",
+      "status": "pass",
+      "statement_hash": "sha256:db2770fb32c4",
+      "duration_ms": 238,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:125"
+      ]
+    },
+    {
+      "rule": "commands.init.this-machine-only",
+      "status": "pass",
+      "statement_hash": "sha256:af678ac1a152",
+      "duration_ms": 765,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:141"
+      ]
+    },
+    {
+      "rule": "locations.several.new-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:a3cdd067af7b",
+      "duration_ms": 262,
+      "checks": [
+        "test/cli.test.js:16"
+      ]
+    },
+    {
+      "rule": "commands.init.names-what-is-missing",
+      "status": "pass",
+      "statement_hash": "sha256:cd70779d9a55",
+      "duration_ms": 344,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:184"
+      ]
+    },
+    {
+      "rule": "commands.shape.old-forms-say-the-new",
+      "status": "pass",
+      "statement_hash": "sha256:1a91b698c42f",
+      "duration_ms": 1125,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:95"
+      ]
+    },
+    {
+      "rule": "locations.several.reads-cover-all",
+      "status": "pass",
+      "statement_hash": "sha256:a7b80479ff35",
+      "duration_ms": 2098,
+      "checks": [
+        "test/cli.test.js:16"
+      ]
+    },
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "pass",
+      "statement_hash": "sha256:687a1c86cfdf",
+      "duration_ms": 4029,
+      "checks": [
+        "test/cli.test.js:16",
+        "test/commands.test.js:342"
+      ]
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:f0c27cd71949",
+      "duration_ms": 1062,
+      "checks": [
+        "test/cli.test.js:16"
+      ]
+    },
+    {
+      "rule": "commands.shape.noun-then-verb",
+      "status": "pass",
+      "statement_hash": "sha256:0e1ac5bc5c43",
+      "duration_ms": 1979,
+      "checks": [
+        "test/commands.test.js:65"
+      ]
+    },
+    {
+      "rule": "commands.init.one-skill-installer",
+      "status": "pass",
+      "statement_hash": "sha256:491cd8cc7d17",
+      "duration_ms": 257,
+      "checks": [
+        "test/commands.test.js:167"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:7170e620ca41",
+      "duration_ms": 2358,
+      "checks": [
+        "test/commands.test.js:238",
+        "test/judged-edges.test.js:42",
+        "test/judged-edges.test.js:62"
+      ]
+    },
+    {
+      "rule": "commands.records.move",
+      "status": "pass",
+      "statement_hash": "sha256:93e58454e522",
+      "duration_ms": 409,
+      "checks": [
+        "test/commands.test.js:324"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "duration_ms": 483,
+      "checks": [
+        "test/judged-edges.test.js:72"
+      ]
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:b55ca34f14f7",
+      "duration_ms": 816,
+      "checks": [
+        "test/judged-edges.test.js:93",
+        "test/judged-edges.test.js:209"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:fd33259c4a4e",
+      "duration_ms": 1043,
+      "checks": [
+        "test/judged-edges.test.js:105",
+        "test/judged-edges.test.js:224"
+      ]
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:f561ad6f21be",
+      "duration_ms": 5974,
+      "checks": [
+        "test/judged-edges.test.js:132",
+        "test/judged-edges.test.js:236",
+        "test/judged-edges.test.js:253",
+        "test/judged-edges.test.js:270",
+        "test/judged-edges.test.js:298",
+        "test/judged-edges.test.js:319",
+        "test/judged-edges.test.js:375",
+        "test/judged-edges.test.js:406",
+        "test/judged-edges.test.js:438",
+        "test/judged-edges.test.js:454"
+      ]
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:b31372ab894d",
+      "duration_ms": 996,
+      "checks": [
+        "test/judged-edges.test.js:154",
+        "test/judged-edges.test.js:195"
+      ]
+    },
+    {
+      "rule": "locations.threads.uuid-is-the-identity",
+      "status": "pass",
+      "statement_hash": "sha256:945e5cd8fc01",
+      "duration_ms": 329,
+      "checks": [
+        "test/judged-edges.test.js:172"
+      ]
+    }
+  ]
+}

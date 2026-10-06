@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T19-13-39Z-local-01",
+  "created": "2026-10-06T19:13:39Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "9958c95-dirty",
+  "note": "Agent-tier rejudge #2 of commands.blueprints.rename after 9958c95 (n-0403), driven in fresh mktemp trees with scratch WALKDOWN_HOMEs and real git repos.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "fail",
+      "statement_hash": "sha256:8877c6d6eba1",
+      "evidence": [
+        "runs/evidence/2026-10-06T19-11-25Z/rename-rejudge2.txt"
+      ],
+      "reasoning": "All three earlier repros are fixed. `rename b 0001-sp-a` (and `0002-sp-b`, `0001-xyz-q`) is refused as reading like an ID, and the registry is unchanged; every near-ID name it still accepts (`0001-sp`, `1-sp-a`, `0001`, `sp-a`, ...) is reached by `--blueprint <name>` as the renamed blueprint. `--folder nest/deeper` now creates `nest/` and moves the home. A lone committed home onto an unregistered personal folder is refused. n-0381 holds both ways, leaves the registry and both trees unchanged with no lock, and a nested clash (`--folder teams/cart` onto a committed `teams/cart`) is refused too. Current name with a new folder works, and so does a home whose project is labelled from a folder outside any repository. But nested `--folder` opened a new break: it lets a home be moved inside a blueprint folder. (1) `rename a a --folder 202610-a/sub` (into its own folder) still crashes with an uncaught `EINVAL` stack trace, exit 1. Nothing changes, but it is a crash, not a refusal. (2) `rename a a --folder 202610-c/sub` succeeds and puts a's home inside sibling c's home. The committed form does the same, and git shows only renames. Then `rename c c --folder 202610-c2` carries a along with it, so `walkdown blueprints` lists `0001-sp-a ... (gone)` and `status --blueprint a` finds nothing. `blueprints forget c` offers an `rm -rf` of c's folder, which now also holds a. A rename should leave a blueprint's records as they were, and one rename can now leave them where nothing finds them. The clash check only looks for a `spec.yml` at the same relative key. It never asks whether the target is inside the home itself, or inside any registered home, and it never asks whether a registered home is inside the target.",
+      "threads": [
+        "f0f452b6-cd9e-4e1c-af74-db47c4388913"
+      ]
+    }
+  ]
+}

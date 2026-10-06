@@ -6,6 +6,7 @@ import {
   codeOf,
   expand,
   personalHomes,
+  within,
   nameOf,
   numberOf,
   readRegistry,
@@ -95,11 +96,17 @@ export async function run(args) {
   if (values.folder) {
     const f = values.folder;
     if (isAbsolute(f) || f.split('/').some((p) => !p || p === '.' || p === '..')) {
-      console.error(red(`\`${f}\` is not a folder name — give a name, or a path below where this one stands.`));
+      console.error(red(`\`${f}\` is not a folder name — give a name, or a path below the blueprints folder.`));
       console.error(dim('Nothing was renamed.'));
       return end(2);
     }
-    nextDir = join(dirname(homeDir), f);
+    // Read from the blueprints folder, as a home's folder name is: from the
+    // home's own parent, a nested home's `--folder teams/b` landed in teams/teams/b.
+    const base = (() => {
+      for (let d = homeDir; d !== dirname(d); d = dirname(d)) if (basename(d) === 'blueprints') return d;
+      return dirname(homeDir);
+    })();
+    nextDir = join(base, f);
     if (canon(nextDir) !== homeDir && existsSync(nextDir)) {
       console.error(red(`${tilde(nextDir)} already exists — nothing was renamed.`));
       return end(2);
@@ -125,6 +132,29 @@ export async function run(args) {
         .filter(Boolean),
     ]);
     roots.delete(rootOf(homeDir));
+    /*
+     * A home is one folder, never inside another or holding one: moved into
+     * a sibling's folder, a rename of that sibling carries it off where
+     * nothing finds it, and into its own folder it cannot move at all.
+     */
+    const homes = rows.filter((r) => r !== row && r.home).map((r) => canon(expand(String(r.home))));
+    const root = rootOf(homeDir) ?? dirname(homeDir);
+    let up = dirname(nextDir);
+    let holder = null;
+    for (; !holder && up.length >= root.length && within(up, root); up = dirname(up))
+      if (canon(up) === homeDir || existsSync(join(up, 'spec.yml'))) holder = up;
+    const held = homes.find((h) => h !== canon(nextDir) && within(h, nextDir));
+    if (holder || held) {
+      console.error(
+        red(
+          holder
+            ? `${tilde(nextDir)} is inside ${tilde(holder)}, which is a blueprint's home — a home is one folder, never inside another.`
+            : `${tilde(nextDir)} would hold ${tilde(held)}, another blueprint's home — a home is one folder, never around another.`,
+        ),
+      );
+      console.error(dim('Nothing was renamed.'));
+      return end(2);
+    }
     const clash = key && [...roots].map((r) => join(r, key)).find((d) => existsSync(join(d, 'spec.yml')));
     if (clash) {
       console.error(red(`${tilde(clash)} already holds a blueprint of project \`${project}\` under the folder name \`${key}\` — choose another.`));
