@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-06T04-53-58Z-local-01",
+  "created": "2026-10-06T04:53:58Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "2625a79-dirty",
+  "tree_hash": "sha256:094f3f0cbdef",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:015ebac2b063",
+      "duration_ms": 452,
+      "checks": [
+        "test/import.test.js:150",
+        "test/import.test.js:264"
+      ]
+    },
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "duration_ms": 12,
+      "checks": [
+        "test/judged-edges.test.js:347",
+        "test/judged-edges.test.js:363"
+      ]
+    }
+  ]
+}

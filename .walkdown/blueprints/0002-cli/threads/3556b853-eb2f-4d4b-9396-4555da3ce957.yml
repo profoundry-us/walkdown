@@ -1,0 +1,21 @@
+id: n-0399
+uuid: 3556b853-eb2f-4d4b-9396-4555da3ce957
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T04:53:31.668Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "A moved checkout whose only uncommitted records are a draft still loses
+  to a fresh clone at the old path. So does a row whose runs were moved by
+  records move. Import counts only run files, so the row stays on the clone, and
+  the sitting saved in drafts reads null. Evidence:
+  runs/evidence/2026-10-06T04-52-16Z/ids-stay-here-seventh.txt."
+replies:
+  - author: agent
+    created: 2026-10-06T04:53:32Z
+    body: Import now counts runs, evidence and drafts, each unless the row moved
+      that kind, so a draft or evidence alone shows which tree moved, and a row
+      with moved runs is judged by what it keeps at home. A judged-edges test
+      covers both.

@@ -194,7 +194,7 @@ export async function run(args) {
     if (moved) {
       for (const id of moved.ids)
         console.log(
-          `  ${green('~ moved')}    ${dim(`\`${id}\` belongs to ${tilde(top)} now, still as \`${id}\` — its records are here, and ${tilde(moved.from)} is a fresh clone without them`)}`,
+          `  ${green('~ moved')}    ${dim(`\`${id}\` belongs to ${tilde(top)} now, still as \`${id}\` — ${tilde(moved.from)} is a fresh clone without the records this tree holds`)}`,
         );
       wt = checkoutFor(top, readRegistry().rows);
     }

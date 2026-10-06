@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-06T04-53-31Z-local-01",
+  "created": "2026-10-06T04:53:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2625a79-dirty",
+  "note": "Rejudge of panel.rules.evidence-visible after f4c6239 (checkSnippet runs to where a check's brackets close). Judged in the built-in browser at 1440x900 on a fresh scratch copy ev-visible2 served at :4791 with its own WALKDOWN_HOME. The runs shown were FIXTURES written into the scratch copy only: a checks run for this rule (old hash, so it reads stale) with refs checks/panel.spec.js:1161, :1212, :2621, :3788 and test/judged-edges.test.js:363; a second checks run on panel.start.which-project with :2621; and an agent walkdown run attaching PNG, .txt, .json and .html files. The check files were copied into the copy. Nothing was written to the real ledger.",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "evidence": [
+        "runs/evidence/2026-10-06T05-05-00Z/01-evidence-rows.jpg",
+        "runs/evidence/2026-10-06T05-05-00Z/02-evidence-modal-four-kinds.jpg",
+        "runs/evidence/2026-10-06T05-05-00Z/03-source-1161-ends-at-its-close.jpg",
+        "runs/evidence/2026-10-06T05-05-00Z/04-source-3788-ends-at-its-close.jpg",
+        "runs/evidence/2026-10-06T05-05-00Z/05-source-2621-which-project.jpg",
+        "runs/evidence/2026-10-06T05-05-00Z/probe-check-source.txt",
+        "runs/evidence/2026-10-06T05-05-00Z/probe-evidence.json"
+      ],
+      "reasoning": "Check source now shows each check in full. In detail.source-modal the 50-line test at checks/panel.spec.js:1161 runs to its own '});' at 1210, with GitHub #L1161-L1210. The test at :3788 stops at 3815, not 3821, with #L3788-L3815. The three-line-opener test at :1212 reads 1212-1242, and the judged-edges tests at :347 and :363, whose strings hold braces and quotes, read 347-361 and 363-373. On its own rule, panel.start.which-project, :2621 (a double-quoted title holding an apostrophe) reads 2621-2662 with #L2621-L2662. Every served snippet matches the file's lines exactly, and every GitHub link opens in a new tab. :2621 does not appear under evidence-visible because it is tagged for another rule, which is right. The other THEN lines still hold. detail.evidence reads 'checks/local ~ stale · topher' and 'agent ✓ pass · agent', and 'Evidence — open 4' (detail.evidence-open) sits inside the agent row. That opens detail.evidence-modal over the full viewport with blur(6px): the PNG as a loaded picture, the .txt and .json as text, and the .html as a new-tab link. Every file name sits on a 90%-opaque dark chip. Check source is a real button, and its modal is blurred and full-viewport the same way. A rule with no runs reads 'agent ○ never run'."
+    }
+  ]
+}

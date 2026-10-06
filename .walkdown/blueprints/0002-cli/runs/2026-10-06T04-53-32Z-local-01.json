@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-06T04-53-32Z-local-01",
+  "created": "2026-10-06T04:53:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2625a79-dirty",
+  "note": "Seventh sitting at 2625a79: n-0398 fixed, but a moved checkout whose gitignored records are a draft (or whose runs were moved by records move) is still left behind a fresh clone.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "fail",
+      "statement_hash": "sha256:f561ad6f21be",
+      "evidence": [
+        "runs/evidence/2026-10-06T04-52-16Z/ids-stay-here-seventh.txt"
+      ],
+      "reasoning": "Drove bin/walkdown.js at 2625a79 in a fresh /tmp tree with WALKDOWN_HOME=$S/home (profile sam), bare origins and real clones. All serves used --port 0. The n-0398 repro is fixed. pub had a committed, pushed home with an eng pass; it was mv'd to pub-old and the origin re-cloned at pub. 'import . --all' in pub-old said '~ moved', the row now names pub-old with 0001-pb-site, and eng still reads accepted from pub-old, from the clone and from outside. The sweep-only chain also holds: an unpushed move, then a push, a second move and a reclone. Both times it said '~ moved', and later sweeps from either tree land in the moved tree's runs. When both trees hold runs, the moved tree stays a branch copy, as intended. Its own earlier sweep is then unread. The earlier cases hold: unpushed reclone, different-origin repo at the old path, personal no-remote rename named back with --project, and a pushed mix of committed and personal homes, where both rows moved. THEN 1, 2, 3 and 5 hold. 0010-hm-search and 0011-sp-search were given. --blueprint and ?bp= take the ID anywhere and 'search' inside each project; outside a project the name is refused, or answered 409 with both candidates. The only ID outside registry.yml is in home/cache/claims.json (q-0384). After a forget, next stayed 12. THEN 4 still fails when the moved tree's only uncommitted records are not runs, because reclaimFromClone looks for runs/*.json and nothing else. Repro: drf has a committed, pushed home; a sitting in progress is saved as drafts/local.json; then mv drf drf-old and git clone origin drf. 'import . --all' in drf-old says 'already listed as 0005-dr-ui'. The row still names drf, 'where drafts' answers drf's (empty) drafts, and GET /api/draft from a serve in drf-old returns null. The sitting is lost to walkdown. The same happens when the runs were moved by records move. The row skips reclaim because it has 'runs:', so it stays on the fresh clone rec. The verdicts survive in the moved runs folder, but rec-old's draft returns null. In both cases moving the checkout did not change the path on the row.",
+      "threads": [
+        "3556b853-eb2f-4d4b-9396-4555da3ce957"
+      ]
+    }
+  ]
+}

@@ -402,3 +402,35 @@ test('a pushed home keeps its ID when its checkout moves and the origin is clone
   const w = JSON.parse(ok(m.cli(pub, 'where', '--json')).stdout);
   assert.equal(w.runs.path, runs.replace(pub, old));
 });
+
+test('a moved checkout whose only records are a draft, or whose runs were moved, still keeps its ID @rule:locations.registry.ids-stay-here', () => {
+  for (const variant of ['draft', 'runs-moved']) {
+    const m = machine();
+    const base = join(root, `m${n}`);
+    mkdirSync(base, { recursive: true });
+    const origin = join(base, 'origin.git');
+    git(base, 'init', '-q', '--bare', origin);
+    const app = join(base, 'app');
+    git(base, 'clone', '-q', origin, app);
+    ok(m.cli(app, 'blueprints', 'new', 'ui', '--folder', 'ui', '--commit', 'spec'));
+    const home = join(app, '.walkdown', 'blueprints', 'ui');
+    git(app, 'add', '-A');
+    git(app, 'commit', '-q', '-m', 'ui');
+    git(app, 'push', '-q', 'origin', 'HEAD');
+    if (variant === 'draft') {
+      mkdirSync(join(home, 'drafts'), { recursive: true });
+      writeFileSync(join(home, 'drafts', 'local.json'), '{}');
+    } else {
+      ok(m.cli(app, 'records', 'move', 'runs', '--to', join(base, 'kept-runs')));
+      mkdirSync(join(home, 'evidence', 'x'), { recursive: true });
+      writeFileSync(join(home, 'evidence', 'x', 'a.txt'), 'seen');
+    }
+    const [row] = m.rows();
+    const old = join(base, 'app-old');
+    renameSync(app, old);
+    git(base, 'clone', '-q', origin, app);
+    const r = ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
+    assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), variant);
+    assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), old, variant);
+  }
+});
