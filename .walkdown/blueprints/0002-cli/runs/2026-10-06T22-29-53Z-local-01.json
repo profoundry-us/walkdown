@@ -1,0 +1,67 @@
+{
+  "run_id": "2026-10-06T22-29-53Z-local-01",
+  "created": "2026-10-06T22:29:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "360afa3-dirty",
+  "note": "Agent tier, six cli rules, each judged against the person's note marked addressed after its last agent verdict and against its statement. Driven with bin/walkdown.js from the working tree on fresh mktemp machines with real git repos; as-built/cli screens read as Topher would. Hashes checked ok with `hash --blueprint cli`. Not recorded; no threads filed.",
+  "spec_hash": "sha256:bc4ebe001cb6",
+  "results": [
+    {
+      "rule": "commands.records.move",
+      "status": "pass",
+      "statement_hash": "sha256:93e58454e522",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/records-move.txt"
+      ],
+      "reasoning": "I judged this against n-0422 ('are we guessing the blueprint based on the folder we are in?'). The machine was a real repo holding checkout (committed) and search (in ~/.walkdown). `records move evidence|runs --to <path>` with no --blueprint was refused from five folders: the root, checkout's committed folder, checkout/threads, search's ~/.walkdown home and src/deep. Each refusal exited 2, said it acts on one blueprint, listed both IDs and gave the example, and a shasum of the whole machine showed nothing changed. In a one-blueprint project it was refused the same way, naming 0003-sl-solo. With --blueprint search, run from src/deep, the evidence moved to the new place and the registry recorded it, as `walkdown move` did, and `where evidence` named the new path. The records-move screen shows the command with --blueprint checkout and says from, to and where it was recorded, in plain lines. No folder is guessed any more."
+    },
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "pass",
+      "statement_hash": "sha256:687a1c86cfdf",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/one-verb-per-change.txt"
+      ],
+      "reasoning": "I judged this against n-0406, which asks every threads write to need --blueprint even when a label could only be in one blueprint. On the same two-blueprint machine, n-0001 was held only by checkout and n-0002 and q-0003 only by search. threads new, reply (note and question), set (two forms) and relabel with no --blueprint were each refused from five folders, including inside each home and a deep folder: 30 refusals, each exiting 2 and listing the IDs, with the whole machine unchanged. A one-blueprint project refused threads new the same way. The labels alone were never enough. Named, the verbs each did one thing. `threads show`, a read, needed no flag and changed nothing. `reply` added the message and left the note open. `set --status addressed --reply` landed both together. `set q-0003 --status verified --reply` was refused whole, saying the reply did not land, and a label from the other blueprint was not found in this one. The threads-show screen is a plain read. The threads-set-refused screen carries --blueprint and says 'illegal transition open → verified for a note' followed by 'Nothing was changed, and the reply did not land', which a reader can follow."
+    },
+    {
+      "rule": "locations.default.folder-names-are-yours",
+      "status": "pass",
+      "statement_hash": "sha256:81e31fdc5b44",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/folder-names-are-yours.txt"
+      ],
+      "reasoning": "I judged this against n-0355, which asks that the 202610- part be the person's to choose and never generated. On a fresh machine this session, `blueprints new checkout` made a folder named checkout. `--folder 202610-checkout` made exactly that folder. `--folder 202610-search/sub` was refused as a home inside a home. Imported homes kept whatever folder names they had, and no number was read from those names. The rejudge evidence from 22-21-53Z also shows the inner-home-by-path fix. Every 2026xx- prefix on any as-built cli page is a folder a fixture chose, and none is generated. The import-any-folder screen lists the three homes by their own folder names and refuses the nested one, naming both folders, which shows the point plainly. init-another shows a new blueprint landing in a folder named search."
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:ba36d9b498af",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/ids-stay-here.txt"
+      ],
+      "reasoning": "I judged this against n-0421, which said the moved-checkout screen was meaningless, and q-0384, which counts ~/.walkdown/cache as inside. Two projects with a blueprint `search` got 0001-hm-search and 0002-sp-search. After a thread and a sweep run in each, a commit, a pointer written into AGENTS.md and a serve /api/whose call that filled the cache, a grep for any ID across the machine outside WALKDOWN_HOME found nothing. Inside it, only registry.yml and cache/claims.json held one, which is what the reworded statement allows. Moving a committed checkout and running `import . --all` kept 0001-sp-checkout and printed '~ moved ~/shop-moved/.walkdown/blueprints/checkout keeps its ID `0001-sp-checkout`: it was at ~/shop, which no longer exists'. The as-built screen is drawn at ~/shop-moved, and the line now says what happened in plain words. blueprints-two-searches shows the two IDs for two `search`es plainly. Two things are off, though neither breaks the claim. The agent's reply on n-0421 quotes the line ending 'and this machine now finds it at ~/shop-moved', which is not what it prints. And the footer '<n> blueprint(s) indexed' counts every blueprint on the machine, not those this import touched: on a machine that also held `notes` it said '2 blueprint(s) indexed' for one moved blueprint. The screen's fixture has one blueprint, so it happens to read right there."
+    },
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "pass",
+      "statement_hash": "sha256:a1b53e39c8a9",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/projects-are-labels.txt"
+      ],
+      "reasoning": "I judged this against n-0402, where Topher could not read 'the project label `shop` is another checkout's (~/shop)'. The blueprints-new-label-taken screen is now drawn at its real folder, `~/work/shop $ walkdown blueprints new search`. It says 'This machine already has a project called `shop`, at ~/shop. ~/work/shop is another checkout, so its project needs a name of its own. Nothing was made.' Under it is the exact command, `walkdown blueprints new search --project work-shop --code ws`. Read alone, it says what happened, why, and what to type. Earlier this session I ran both suggested commands, the work-shop/ws one and the shop-2/s2 one that appears once those were taken, and each registered with exit 0. Nothing was written while refused, and with a terminal the person was asked for a label until a free one was typed."
+    },
+    {
+      "rule": "locations.several.new-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:97e403e3c1ba",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/new-makes-another.txt"
+      ],
+      "reasoning": "I judged this against n-0355, which asked for no generated month prefix. Earlier this session, `blueprints new checkout` beside `search` made ~/.walkdown/projects/shop/blueprints/checkout and said it was added to `shop`, beside `search`. It was idempotent, a name another project uses got its own ID, and serve and claims reported both. The init-another screen shows the second blueprint landing in .../blueprints/search with no prefix, and '+ another added to `shop`, beside `checkout`', which makes the point plainly. One line would puzzle a reader, though it is not this rule's: 'tracked: nothing  ~/shop is not a git repository'. It appears because the fixture's .git is an empty folder, so the screen claims the project is not a repository."
+    }
+  ]
+}

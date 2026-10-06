@@ -1,0 +1,18 @@
+# A thread where the agent spoke for itself, then relayed the person's words with its own beside them.
+screen: threads-show-relayed
+title: A relayed reply keeps the person's words apart from the agent's
+rule: threads.lifecycle.acts-for-a-person
+fixture: g3-relayed
+command: [threads, show, n-0001]
+exit: 0
+expect:
+  - '^  ↳ agent · Oct 2, 2026, 9:00 AM CDT$'
+  - '^    I traced it to the card form: the decline never reaches the page\.$'
+  - '^  ↳ topher · via agent · Oct 2, 2026, 9:00 AM CDT$'
+  - '^    Leave the cart as it is when a card is declined\.$'
+  - '^    ┆ agent added:$'
+  - '^    ┆ Relayed from the chat; the cart is kept today\.$'
+anchors:
+  - { id: cli.thread.own, match: '^  ↳ agent ·|^    I traced' }
+  - { id: cli.thread.relayed, match: '^  ↳ topher · via agent|^    Leave the cart' }
+  - { id: cli.thread.added, match: '^    ┆ ' }

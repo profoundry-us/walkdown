@@ -6,7 +6,7 @@ fixture: one-blueprint
 command: [blueprints, new, search]
 exit: 0
 expect:
-  - '\+ created\s+~/\.walkdown/projects/shop/blueprints/202610-search/spec\.yml'
+  - '\+ created\s+~/\.walkdown/projects/shop/blueprints/search/spec\.yml'
   - '\+ listed\s+~/\.walkdown/registry\.yml  as `0002-sp-search`'
   - '\+ another\s+added to `shop`, beside `checkout` — commands that write take `--blueprint <id>` now'
 anchors:

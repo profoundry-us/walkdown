@@ -1,0 +1,17 @@
+# `walkdown status` once the review target points at pr-2: the pass made at
+# pr-1 fills nothing, and a run that recorded no address still counts.
+screen: status-moved-target
+title: A verdict counts only at the address it was made against
+rule: status.derived.verdict-belongs-to-a-place
+also: [status.derived.addressless-runs-count]
+fixture: g4-moved-target
+command: [status]
+exit: 0
+expect:
+  - '^     RULE\s+REVIEW\s+AGENT'
+  - '^  ○  checkout\.basics\.pays    never '
+  - '^  ○  checkout\.basics\.totals  ✓ pass '
+anchors:
+  - { id: cli.status.header, match: '^\s+RULE\s+REVIEW' }
+  - { id: cli.status.elsewhere, match: 'checkout\.basics\.pays  ' }
+  - { id: cli.status.addressless, match: 'checkout\.basics\.totals  ' }

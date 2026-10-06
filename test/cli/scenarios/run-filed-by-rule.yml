@@ -1,0 +1,15 @@
+# `walkdown run` with no --blueprint, where checkout and search share one suite: each result filed by its rule.
+screen: run-filed-by-rule
+title: One run of the suite files each result in the blueprint holding its rule
+rule: locations.several.results-filed-by-rule
+fixture: g1-shared-suite
+command: [run]
+exit: 0
+expect:
+  - '^walkdown: recorded 1 rule result\(s\) for 0001-sp-checkout → \.\./(home|\.walkdown)/projects/shop/blueprints/checkout/runs/2026-10-02T00-00-00Z-local-01\.json$'
+  - '^walkdown: recorded 1 rule result\(s\) for 0002-sp-search → \.\./(home|\.walkdown)/projects/shop/blueprints/search/runs/2026-10-02T00-00-00Z-local-01\.json$'
+  - '^walkdown: no blueprint in this project holds checkout\.basics\.refunds — not recorded$'
+anchors:
+  - { id: cli.run.tests, match: '^[✓✗–] ' }
+  - { id: cli.run.filed, match: '^walkdown: (recorded|no blueprint)' }
+  - { id: cli.run.done, match: '^recorded: ' }

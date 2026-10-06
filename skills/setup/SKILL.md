@@ -95,7 +95,7 @@ rather commit it: `--commit spec` puts the home in `.walkdown/blueprints/` with
 its own `.gitignore` that keeps runs, evidence and drafts out; `--commit all`
 the same with no `.gitignore`. The honest recommendation is
 `spec` for a team and nothing for an evaluation, and it can be changed later
-with `walkdown blueprints commit <standard>` - the home moves whole.
+with `walkdown blueprints commit <standard> --blueprint <id>` - the home moves whole.
 
 With the spec committed, place the pointer deliberately. If the project has
 several agent files (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`),

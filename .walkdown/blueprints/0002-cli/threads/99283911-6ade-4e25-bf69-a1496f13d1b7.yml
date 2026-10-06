@@ -1,0 +1,18 @@
+id: n-0480
+uuid: 99283911-6ade-4e25-bf69-a1496f13d1b7
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:17.699Z
+anchor:
+  screen: skills-asks-where
+status: open
+body: "Draw what `walkdown skills` prints with no `--into` and no terminal, in a
+  repository whose spec is committed. It lists both places the skills could go,
+  the person's own first, and what each already holds. Then it refuses: nothing
+  was written, because it never picks
+  (`locations.default.skills-are-yours-by-default`). Anchors: cli.prompt,
+  cli.skills.places, cli.skills.refusal, cli.exit.
+  as-built/cli/skills-asks-where.html is the build, from
+  test/cli/scenarios/skills-asks-where.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

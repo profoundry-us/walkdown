@@ -8,6 +8,7 @@ stories:
         origin: prd
         statement: A rule's status for a target is the result of its latest run against that target. A newer run replaces an older one, and a run against one target never changes the status of another.
         verify: [checks]
+        screens: [status-latest-wins]
         steps:
           given:
             - A ledger holding two runs on one rule at one target, and a third on another target
@@ -31,6 +32,7 @@ stories:
         origin: prd
         statement: A pass recorded against older wording of a rule reads as stale, unless a person declared the rewording as words only, with the meaning unchanged.
         verify: [checks]
+        screens: [status-reworded]
         steps:
           given:
             - A pass recorded against a statement or steps that have since changed
@@ -52,6 +54,7 @@ stories:
         statement: A verdict counts only at the address it was made against. Point a target somewhere new and its evidence empties; point it back and the evidence returns.
         because: Aiming a target at a new system should empty its evidence and ask for the walkdown again, rather than inherit a pass earned somewhere that no longer exists.
         verify: [checks]
+        screens: [status-moved-target]
         steps:
           given:
             - A ledger holding passes recorded against the address https://pr-1.review.app
@@ -82,6 +85,7 @@ stories:
         statement: A run that recorded no `base_url` still counts in the status as one of this system's runs.
         because: A run with no `base_url` cannot be shown to belong to any other system, so it is counted as this one's, just as a result with no `statement_hash` already is.
         verify: [checks]
+        screens: [status-moved-target]
         steps:
           given:
             - A run record carrying no address, such as a unit-test runner's
@@ -109,6 +113,7 @@ stories:
         statement: A pass earned by a check stands only while some check in the suite still claims the rule. Once no check references it, whether the check was deleted, renamed or untagged, status shows the rule as stale, not as passing.
         because: An append-only ledger otherwise keeps reporting green long after anything tests it - including for a check untagged because it never exercised the rule it claimed.
         verify: [checks]
+        screens: [status-untagged-check]
         steps:
           given:
             - A ledger holding a checks pass for a rule
@@ -134,6 +139,7 @@ stories:
         origin: prd
         statement: An agent's verdict is evidence, never acceptance. Only a person signing for a role can give that role's signature, and no number of passing checks or agent verdicts supplies it.
         verify: [checks]
+        screens: [status-evidence-not-acceptance]
         steps:
           given:
             - A rule whose checks and agent tiers both pass, with no signature from any role
@@ -161,6 +167,7 @@ stories:
         statement: The agent tier is assumed on every rule rather than declared - a rule is judged by the agent unless it carries an excuse saying why it cannot be.
         because: A tier that must be authored is opt-in; a tier that costs only a run is an obligation. Skipping it should be a decision written down, not a line forgotten.
         verify: [checks]
+        screens: [status-agent-assumed]
         steps:
           given:
             - A rule declaring nothing at all about verification
@@ -187,6 +194,7 @@ stories:
         statement: An excused tier shows its reason where its verdict would have been, in every report. That cell is never empty.
         because: A tier nobody asked for and a tier somebody decided against look identical otherwise, and only one of them is a decision anyone can argue with.
         verify: [checks]
+        screens: [status-excused-tier]
         steps:
           given:
             - A rule excusing a tier, with a reason
@@ -211,6 +219,7 @@ stories:
         statement: Lint refuses an excuse that does not argue its case. It warns when the reason is shorter than a sentence, when the excuse is filed against something that is not a tier, and when one rule excuses both tiers at once.
         because: A one-word excuse tells nobody why a rule was set aside, and excusing both tiers at once is a real choice that should be argued, not an accident nobody noticed.
         verify: [checks]
+        screens: [lint-weak-excuses]
         steps:
           given:
             - Three rules excusing a tier - one with a shrug for a reason, one filed against a word that is not a tier, one excusing both tiers
@@ -244,6 +253,7 @@ stories:
         statement: A rule's sign-off list defaults to engineering and always contains it; a list that omits eng is corrected in the report and flagged by lint.
         because: Somebody has to own that the implementation matches the rule; a rule nobody accepts is a rule nobody owns.
         verify: [checks]
+        screens: [lint-signoff-omits-eng]
         steps:
           given:
             - A rule with no signoff line, and a rule whose signoff names only product
@@ -268,6 +278,7 @@ stories:
         because: People change teams and a signature does not stop meaning what it meant.
         history: Before roles were recorded, the person signing a walkdown was the developer who built it.
         verify: [checks]
+        screens: [status-role-from-the-run]
         steps:
           given:
             - A ledger holding a walkdown recorded under one role and another recorded before roles existed
@@ -299,6 +310,7 @@ stories:
         statement: While a rule is unbuilt, a role's approval of its wording clears the rule from that role's queue. Once the ledger holds a build to judge, that approval no longer clears it.
         because: Approving a spec is not judging a build.
         verify: [checks]
+        screens: [status-approved-wording]
         steps:
           given:
             - A rule with no build verdict in the ledger, approved by a role
@@ -326,6 +338,7 @@ stories:
         history: Two rules sent back on 2026-09-08 were fixed and re-judged the same day and then waited six days, because nothing asked the signer to look again (n-0239, n-0240).
         because: What the rule owes them is a fix, not another look.
         verify: [checks]
+        screens: [status-sent-back]
         steps:
           given:
             - A rule a signer looked at and sent back
@@ -342,6 +355,7 @@ stories:
         origin: walkdown
         statement: A rule passes only when every kind of evidence it asks for has a current pass and every role it names has signed. One role's signature never counts for another, and the human walkdown is those signatures, not a second kind of evidence on top.
         verify: [checks]
+        screens: [status-one-role-signed]
         steps:
           given:
             - A rule naming two roles, with every evidence tier passing
@@ -366,6 +380,7 @@ stories:
         statement: A recorded walkdown carries the roles its signer was acting in. A role the project does not recognise is refused rather than recorded, and an empty list is recorded as no roles stated.
         because: A role the project does not recognise looks like a real signature but counts for nothing, and a signer who stated no roles must not be recorded as having stated some.
         verify: [checks]
+        screens: [run-record-signatures]
         steps:
           given:
             - A walkdown being recorded by somebody signing in a role
@@ -393,6 +408,7 @@ stories:
         statement: A recorded walkdown carries one signature per role, naming the person who accepted in that role. Who typed it is the run's actor, and the two can be different people.
         because: A signature whose signer is not the actor is itself the record that somebody accepted through somebody else; nothing further needs writing down.
         verify: [checks]
+        screens: [status-signed-for-another]
         signoff: [eng, product]
         steps:
           given:
@@ -431,6 +447,7 @@ stories:
         statement: A sweep is a dated marker in the ledger saying that, from here, the tiers it names must earn their verdicts again. Every verdict recorded before it reads as stale, and the runs it supersedes are neither edited nor deleted.
         because: A rule nobody has got back to should be legible as unfinished rather than as passing.
         verify: [checks]
+        screens: [status-after-a-sweep]
         steps:
           given:
             - A ledger where every rule's agent tier passes, from runs recorded last week
@@ -458,6 +475,7 @@ stories:
         statement: A sweep is never a side effect. It is written only when somebody asks for one outright and says why.
         because: It puts work back on the queue for every rule at once; that is a decision, not a consequence of running the suite.
         verify: [checks]
+        screens: [sweep-needs-a-reason]
         steps:
           given:
             - A project with a sweep command available
@@ -484,6 +502,7 @@ stories:
         statement: While a sweep is open, the status report says how much of it is done. For each tier the sweep names, it counts the rules judged since the sweep was declared and the rules not yet judged.
         because: The question "did we miss any?" should be answered by reading, never by remembering.
         verify: [checks]
+        screens: [status-after-a-sweep]
         steps:
           given:
             - An open sweep over the agent tier, partly worked
@@ -558,6 +577,7 @@ stories:
         statement: An attention item waiting on a person's signature names the role it waits on, not merely that it waits on a person.
         because: A queue two people both scroll past is a queue nobody works.
         verify: [checks]
+        screens: [status-names-the-role]
         steps:
           given:
             - A rule still waiting on signatures from two roles
@@ -591,6 +611,7 @@ stories:
         statement: Every record is written under the username of the person who made it, never under their display name. When one person has written under more than one username, all of those usernames are read as that one person.
         because: Records made before the username and the display name were separate things keep their attribution without being rewritten.
         verify: [checks]
+        screens: [run-under-username]
         steps:
           given:
             - A machine whose personal config, or failing that git, knows a username and, perhaps, a full name

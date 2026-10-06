@@ -1,0 +1,13 @@
+# The agent addressing a note with a reply: one line says what moved, under whose name, and what landed.
+screen: threads-set-says-what-changed
+title: A thread change reports what moved
+rule: threads.lifecycle.says-what-it-did
+fixture: a-note
+command: [threads, set, n-0001, --status, addressed, --as-agent, --reply, A declined card now shows the bank's message., --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ n-0001 open → addressed · by agent · \+1 reply$'
+  - '^  rule checkout\.basics\.pays$'
+anchors:
+  - { id: cli.thread.moved, match: '^✓ n-0001 ' }
+  - { id: cli.thread.next, match: '^  walkdown threads show' }

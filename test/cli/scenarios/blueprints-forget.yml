@@ -8,7 +8,7 @@ exit: 0
 expect:
   - '^  - forgotten `0002-sp-search`  ~/\.walkdown/registry\.yml$'
   - '^ +Its files are untouched — only the registration is gone\.$'
-  - '`rm -rf ~/\.walkdown/projects/shop/blueprints/202610-search` deletes it\.$'
+  - '`rm -rf ~/\.walkdown/projects/shop/blueprints/search` deletes it\.$'
 anchors:
   - { id: cli.forget.row, match: '^  - forgotten' }
   - { id: cli.forget.files, match: '^ +(Its files|~/\.walkdown/projects)' }

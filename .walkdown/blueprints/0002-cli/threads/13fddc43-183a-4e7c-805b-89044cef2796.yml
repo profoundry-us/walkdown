@@ -1,0 +1,18 @@
+id: n-0457
+uuid: 13fddc43-183a-4e7c-805b-89044cef2796
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:33.947Z
+anchor:
+  screen: status-moved-target
+status: open
+body: "Draw what `walkdown status` prints once the review target points at
+  https://pr-2.review.app: `pays`, which passed only at pr-1, reading never, and
+  `totals`, whose passing run recorded no address, still passing
+  (status.derived.verdict-belongs-to-a-place,
+  status.derived.addressless-runs-count). Anchors: cli.prompt,
+  cli.status.header, cli.status.elsewhere, cli.status.addressless, cli.exit.
+  as-built/cli/status-moved-target.html is the build, from
+  test/cli/scenarios/status-moved-target.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

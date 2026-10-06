@@ -9,6 +9,7 @@ stories:
         statement: walkdown runs from a clone with nothing installed - no package registry, no build step, no network.
         because: The projects that most need their requirements made legible are the governed ones, where installing anything is a conversation rather than a command.
         verify: [checks]
+        screens: [clone-config-by-path]
         signoff: [eng, product]
         steps:
           given:
@@ -32,6 +33,7 @@ stories:
         statement: In Claude Code, walkdown's skills and commands are listed under walkdown's own name, as `/walkdown:judge` and `/walkdown:lint` are, and nothing else in the clone is.
         because: One tool's skills should read as one tool's, and typing `/walkdown:` should show everything it offers.
         verify: [checks, agent]
+        screens: [plugin-skills]
         signoff: [eng, product]
         steps:
           given:
@@ -53,6 +55,7 @@ stories:
         because: A copied skill is a snapshot that goes stale with nothing to say so, and refreshing it overwrites whatever the person changed.
         history: Until 0.3.0 the skills were copied. The 0.2.0 upgrade needed `init --force`, and rehearsing it overwrote four of Topher's copies (2026-10-01, ADR 0010).
         verify: [checks]
+        screens: [skills-again]
         signoff: [eng, product]
         steps:
           given:
@@ -73,6 +76,7 @@ stories:
         because: Writing through a link changes whatever the link points at.
         history: walkdown's own installer once wrote through this repository's skill links into its shipped source (n-0197, 2026-09-05).
         verify: [checks]
+        screens: [skills-others-links]
         signoff: [eng]
         steps:
           given:
@@ -91,6 +95,7 @@ stories:
         statement: Installing the skills for Claude Code with `--force` also removes the copies an earlier version of walkdown left in Claude Code's skills folder, and keeps any copy the person edited.
         because: Left in place, the copies make Claude Code list every skill twice. An edited copy is the person's own work.
         verify: [checks]
+        screens: [skills-old-copies]
         signoff: [eng, product]
         steps:
           given:

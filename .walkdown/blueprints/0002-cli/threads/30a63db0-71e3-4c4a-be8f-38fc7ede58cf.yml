@@ -14,3 +14,13 @@ body: "Draw what `walkdown blueprints new search` prints in a second checkout
   as-built/cli/blueprints-new-label-taken.html is the build, from
   test/cli/scenarios/blueprints-new-label-taken.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-06T21:50:27Z
+    body: 'The build changed under this request: the refusal now reads "This machine
+      already has a project called `shop`, at ~/shop. ~/work/shop is another
+      checkout, so its project needs a name of its own. Nothing was made." and
+      then gives a command that works, `walkdown blueprints new search --project
+      work-shop --code ws` (Topher on n-0402: the old lines meant nothing to
+      him). as-built/cli/blueprints-new-label-taken.html is recaptured; the
+      anchors are the same two.'

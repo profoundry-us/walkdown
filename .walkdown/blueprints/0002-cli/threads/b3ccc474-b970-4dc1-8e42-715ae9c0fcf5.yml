@@ -1,0 +1,17 @@
+id: n-0471
+uuid: b3ccc474-b970-4dc1-8e42-715ae9c0fcf5
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:36.786Z
+anchor:
+  screen: threads-set-says-what-changed
+status: open
+body: 'Draw what `walkdown threads set n-0001 --status addressed --as-agent
+  --reply "…" --blueprint checkout` prints: one line naming the thread, the
+  status it left and the one it reached, whose name the move is under and that
+  one reply landed, then the command that reads it in full
+  (threads.lifecycle.says-what-it-did). Anchors: cli.prompt, cli.thread.moved,
+  cli.thread.next, cli.exit. as-built/cli/threads-set-says-what-changed.html is
+  the build, from test/cli/scenarios/threads-set-says-what-changed.yml, in the
+  frame tools/cli-captures.mjs --frame prints.'

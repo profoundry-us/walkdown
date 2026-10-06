@@ -1,0 +1,17 @@
+# `walkdown status <rule>` where checks and the agent both pass and nobody
+# has signed: pending, and eng not yet.
+screen: status-evidence-not-acceptance
+title: Passing evidence is not a signature
+rule: status.derived.human-tier-distinct
+fixture: g4-evidence-only
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '^checkout\.basics\.pays · pending$'
+  - '^    checks/local   ✓ pass '
+  - '^    agent          ✓ pass '
+  - '^    eng            ○ not yet$'
+anchors:
+  - { id: cli.status.verdict, match: '^checkout\.basics\.pays · ' }
+  - { id: cli.status.evidence, match: '^    (checks/local|agent) |^                   Paid with' }
+  - { id: cli.status.acceptance, match: '^    eng  ' }

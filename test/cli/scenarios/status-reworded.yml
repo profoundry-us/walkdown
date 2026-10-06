@@ -1,0 +1,16 @@
+# `walkdown status` after both rules' wording changed: `pays` reworded with
+# --reword keeps its pass, `totals` given a new meaning reads stale.
+screen: status-reworded
+title: A pass on older wording is stale unless the rewording was words only
+rule: status.derived.stale-never-passes
+fixture: g4-reworded
+command: [status]
+exit: 0
+expect:
+  - '^  ○  checkout\.basics\.pays    ✓ pass '
+  - '^  ○  checkout\.basics\.totals  ~ stale '
+  - '^0 verified, 2 pending, 0 failing$'
+anchors:
+  - { id: cli.status.reworded, match: 'checkout\.basics\.pays  ' }
+  - { id: cli.status.stale, match: 'checkout\.basics\.totals  ' }
+  - { id: cli.status.summary, match: '^\d+ verified, \d+ pending' }

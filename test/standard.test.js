@@ -67,10 +67,12 @@ test('two checkouts sharing a name are two projects, and each answers for itself
     walkdown(s.home, ['blueprints', 'new'], one);
     const refused = walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], two, false);
     assert.equal(refused.status, 2);
-    assert.match(refused.stderr, /label `app` is another checkout's/);
-    assert.match(refused.stderr, /--project <label>/);
+    assert.match(refused.stderr, /^✗ This machine already has a project called `app`, at .*\/one\/app\. .*\/two\/app is another checkout, so its project needs a name of its own\. Nothing was made\.$/m);
+    const suggested = refused.stderr.match(/^  Name it with `--project <label>`, e\.g\. `walkdown (blueprints new --project two-app --code ta)`\.$/m);
+    assert.ok(suggested, refused.stderr);
     assert.equal(readRegistry().rows.length, 1, 'nothing registered until it has a label of its own');
-    walkdown(s.home, ['blueprints', 'new', '--commit', 'spec', '--project', 'app-two', '--code', 'a2'], two);
+    // The command it suggests works as given.
+    walkdown(s.home, [...suggested[1].split(' '), '--commit', 'spec'], two);
 
     const locOne = resolveLocations({ cwd: one });
     const locTwo = resolveLocations({ cwd: two });
@@ -79,10 +81,10 @@ test('two checkouts sharing a name are two projects, and each answers for itself
     assert.notEqual(locOne.id, locTwo.id);
     assert.notEqual(locOne.spec.path, locTwo.spec.path);
     assert.ok(locTwo.spec.path.startsWith(join(two, '.walkdown') + '/'), 'two answers with its own');
-    assert.deepEqual(readRegistry().rows.map((r) => r.project).sort(), ['app', 'app-two']);
+    assert.deepEqual(readRegistry().rows.map((r) => r.project).sort(), ['app', 'two-app']);
 
     // The write door: a note filed standing in `two` lands in `two`.
-    const filed = walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'here', '--as-agent'], two, false);
+    const filed = walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'here', '--as-agent', '--blueprint', locTwo.id], two, false);
     // (`thread new` may refuse for reasons of its own on an empty scaffold;
     // what matters is that nothing landed in `one`.)
     assert.equal(existsSync(join(locOne.threads.path)), false, `one's ledger untouched: ${filed.stdout}`);
@@ -135,7 +137,7 @@ test('a blueprints row in profile.yml is set aside and named; the registry row c
     assert.match(said, /registers nothing/);
 
     // The same decision made through the door that exists lands on the row.
-    walkdown(s.home, ['records', 'move', 'evidence', '--to', join(s.root, 'ev')], repo);
+    walkdown(s.home, ['records', 'move', 'evidence', '--to', join(s.root, 'ev'), '--blueprint', 'repo'], repo);
     assert.equal(resolveLocations({ cwd: repo }).evidence.path, join(s.root, 'ev'));
     const row = readRegistry().rows.find((r) => r.checkout === repo);
     assert.equal(row.evidence, join(s.root, 'ev'));
@@ -259,12 +261,12 @@ test('move refuses a directory nothing declares, and touches nobody else’s ent
 
     const r = walkdown(s.home, ['records', 'move', 'drafts', '--to', join(stranger, 'dr')], stranger, false);
     assert.equal(r.status, 2, r.stdout);
-    assert.match(r.stderr, /Nothing registered contains this directory/);
+    assert.match(r.stderr, /No blueprint here: nothing registered contains this directory/);
     assert.equal(readFileSync(join(s.home, 'registry.yml'), 'utf8'), before, 'the listed project is untouched');
     assert.equal(existsSync(join(stranger, 'dr')), false);
 
     // And from inside the listed one, it moves the listed one's.
-    const ok = walkdown(s.home, ['records', 'move', 'drafts', '--to', join(s.root, 'dr')], listed);
+    const ok = walkdown(s.home, ['records', 'move', 'drafts', '--to', join(s.root, 'dr'), '--blueprint', 'app'], listed);
     assert.match(ok.stdout, /moved drafts/);
     assert.equal(resolveLocations({ cwd: listed }).drafts.path, join(s.root, 'dr'));
   } finally {

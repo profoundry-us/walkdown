@@ -3,7 +3,7 @@ screen: threads-set-refused
 title: A refused status change lands no reply either
 rule: commands.threads.one-verb-per-change
 fixture: a-note
-command: [threads, set, n-0001, --status, verified, --as-agent, --reply, fixed in 1a2b3c]
+command: [threads, set, n-0001, --status, verified, --as-agent, --reply, fixed in 1a2b3c, --blueprint, checkout]
 exit: 2
 expect:
   - 'open → verified'

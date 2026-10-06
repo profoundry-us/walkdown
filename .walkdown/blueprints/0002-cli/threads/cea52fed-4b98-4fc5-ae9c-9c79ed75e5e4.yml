@@ -1,0 +1,16 @@
+id: n-0468
+uuid: cea52fed-4b98-4fc5-ae9c-9c79ed75e5e4
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:36.213Z
+anchor:
+  screen: thread-waived
+status: open
+body: "Draw a waived note's record as `cat` prints it: the waived status, the
+  reason kept as topher's reply, and waived_by naming him
+  (threads.lifecycle.reasoned-endings). Anchors: cli.prompt, cli.thread.status,
+  cli.thread.reason, cli.thread.waived-by, cli.exit.
+  as-built/cli/thread-waived.html is the build, from
+  test/cli/scenarios/thread-waived.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

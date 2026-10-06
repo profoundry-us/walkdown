@@ -1,0 +1,13 @@
+# `walkdown status <rule>` after the evidence moved out of the repository: the run still cites its key.
+screen: status-evidence-key
+title: A verdict cites its evidence by key, wherever the evidence went
+rule: locations.travel.evidence-by-key
+fixture: g1-evidence-moved
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '^    agent          ✓ pass  2026-10-02T00-00-00Z-local-01 · Oct 2, 2026, 9:00 AM CDT$'
+  - '^                   evidence: runs/evidence/2026-10-02T00-00-00Z/app-checkout\.png$'
+anchors:
+  - { id: cli.status.cell, match: '^    agent  ' }
+  - { id: cli.status.evidence, match: '^                   evidence: ' }

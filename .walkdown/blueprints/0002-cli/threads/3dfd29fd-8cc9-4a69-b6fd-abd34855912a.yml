@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T14:24:56.328Z
 anchor:
   rule: locations.registry.projects-are-labels
-status: open
+status: settled
 body: No command renames a project or changes its code. After the upgrade put
   the example in a project labelled walkdown-2 with code w2, Topher wanted it as
   walkdown-example with code we, which makes its ID 0002-we-example. blueprints
@@ -31,3 +31,16 @@ replies:
       made.
         Choose another with `--project <label>` and `--code <two or three letters>`.
       ```
+  - author: agent
+    created: 2026-10-06T22:21:57Z
+    body: 'Rewritten. The refusal now says what happened in words: "This machine
+      already has a project called `shop`, at ~/shop. ~/work/shop is another
+      checkout, so its project needs a name of its own. Nothing was made." Below
+      it is the exact command to run, `walkdown blueprints new search --project
+      work-shop --code ws`. The rule was reworded to match, and the
+      blueprints-new-label-taken screen was recaptured.'
+  - author: agent
+    via: verdict
+    created: 2026-10-06T22:29:53Z
+    body: Settled by the agent's pass on locations.registry.projects-are-labels
+      (2026-10-06T22-29-53Z-local-01).

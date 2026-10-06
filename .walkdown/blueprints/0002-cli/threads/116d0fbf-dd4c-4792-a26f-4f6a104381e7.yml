@@ -1,0 +1,16 @@
+id: n-0470
+uuid: 116d0fbf-dd4c-4792-a26f-4f6a104381e7
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:36.595Z
+anchor:
+  screen: threads-new-on-retired
+status: open
+body: 'Draw what `walkdown threads new --rule checkout.basics.pays --body "…"
+  --blueprint checkout` prints when that rule is retired: the refusal, and the
+  retirement note quoted so the person knows where the concern lives now
+  (threads.lifecycle.not-on-a-retired-rule). Anchors: cli.prompt, cli.refusal,
+  cli.exit. as-built/cli/threads-new-on-retired.html is the build, from
+  test/cli/scenarios/threads-new-on-retired.yml, in the frame
+  tools/cli-captures.mjs --frame prints.'

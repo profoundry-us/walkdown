@@ -1,0 +1,15 @@
+# `walkdown lint` over a rule whose signoff names only product, and one whose
+# signoff is empty; the rule with no signoff line is not named.
+screen: lint-signoff-omits-eng
+title: Lint flags a signoff list that leaves out engineering
+rule: status.acceptance.signoff-defaults-to-eng
+fixture: g4-signoff-product
+command: [lint]
+exit: 0
+expect:
+  - 'checkout\.basics\.totals: signoff \[product\] omits eng, but engineering always signs'
+  - 'checkout\.basics\.receipt: signoff is empty — omit it to mean `\[eng\]`'
+  - '0 errors, 2 warning\(s\)$'
+anchors:
+  - { id: cli.lint.omits-eng, match: 'checkout\.basics\.totals: ' }
+  - { id: cli.lint.empty, match: 'checkout\.basics\.receipt: ' }

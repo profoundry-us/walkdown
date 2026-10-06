@@ -3,11 +3,11 @@ screen: records-move
 title: records move moves one kind and the registry says where
 rule: commands.records.move
 fixture: one-blueprint
-command: [records, move, evidence, --to, ../evidence-kept]
+command: [records, move, evidence, --to, ../evidence-kept, --blueprint, checkout]
 exit: 0
 expect:
   - '^moved evidence$'
-  - '^  from ~/\.walkdown/projects/shop/blueprints/202610-checkout/evidence$'
+  - '^  from ~/\.walkdown/projects/shop/blueprints/checkout/evidence$'
   - '^  to   ~/evidence-kept$'
   - '^  recorded in ~/\.walkdown/registry\.yml$'
 anchors:

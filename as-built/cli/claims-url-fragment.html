@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  AS-BUILT: claims-url-fragment
+
+  What `walkdown claims --url "http://localhost:3000/cart#coupon"` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/claims-url-fragment.yml - the same run test/cli.test.js
+  checks against screens.identity.fragment-is-identity. Paths, times and hashes are made steady so
+  the fade shows what changed and nothing else. Regenerated, never edited: the
+  redlines live in as-built/redlines.json under "cli/claims-url-fragment".
+
+  The design is prototype-cli/screens/claims-url-fragment.html. Nothing here is
+  evidence; a verdict given against this page is a verdict about a drawing of
+  the build.
+-->
+<html lang="en" data-theme="redline">
+<head>
+  <meta charset="utf-8">
+  <title>As-built &mdash; The URL's fragment names a screen of its own</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+  .as-built-ring { position: fixed; inset: 4px; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); border-radius: 10px; }
+  .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
+    background: oklch(72% 0.17 25); border-top-right-radius: 6px; }
+  .as-built-notes { position: fixed; right: 12px; bottom: 12px; z-index: 11; width: 320px; max-height: 50vh; overflow-y: auto;
+    padding: 10px 12px; border: 1px dashed oklch(72% 0.17 25); border-radius: 6px;
+    background: oklch(26% 0.042 25 / .96); color: oklch(93% 0.015 40);
+    font: 11.5px/1.5 system-ui, sans-serif; }
+  .as-built-notes summary { cursor: pointer; font-weight: 700; color: oklch(78% 0.15 30); letter-spacing: .04em; }
+  .as-built-notes ul { margin: 6px 0 0; padding-left: 16px; }
+  .as-built-notes li { margin: 4px 0; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown claims --url "http://localhost:3000/cart#coupon"</div>
+      <div data-testid="cli.claims.url">
+      <div class="ln">http://localhost:3000/cart#coupon</div>
+      </div>
+      <div data-testid="cli.claims.screen">
+      <div class="ln">  0001-sp-checkout — screen cart-coupon (target local)</div>
+      </div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+  <div class="as-built-ring"></div>
+  <div class="as-built-label">As-built</div>
+</body>
+</html>

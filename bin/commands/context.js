@@ -5,7 +5,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadBlueprint } from '../../lib/blueprint.js';
-import { nameOf, resolveLocations, SPEC_FILE, tilde, upgradeDue } from '../../lib/locations.js';
+import { nameOf, projectIdsAt, resolveLocations, SPEC_FILE, tilde, upgradeDue } from '../../lib/locations.js';
 
 /*
  * How a command finishes. process.exit() tears the process down before Node
@@ -49,6 +49,28 @@ export function upgradeOrExit() {
   console.error('An upgrade is due — walkdown keeps its files differently now (ADR 0014):');
   for (const d of due) console.error(`  · ${d}`);
   console.error('Run `walkdown upgrade` to move them, once. Nothing was changed.');
+  process.exit(2);
+}
+
+/*
+ * A WRITE NAMES ITS BLUEPRINT (locations.several.writes-name-one). Every
+ * command that writes into a blueprint, or acts on one, is told which with
+ * `--blueprint`: never the folder it is run in, never a project's only
+ * blueprint, never the one blueprint a thread label happens to be in. A
+ * choice made for the person is one they cannot see (n-0406, n-0422).
+ *
+ * @param {string | undefined | null} value what --blueprint said
+ * @param {string} command what the person typed after `walkdown`
+ * @returns {string}
+ */
+export function namedOrExit(value, command) {
+  if (value) return value;
+  upgradeOrExit();
+  const ids = projectIdsAt();
+  if (!ids.length) noBlueprintHere(resolveLocations({}), undefined);
+  const which = ids.length === 1 ? `This project's blueprint is ${ids[0]}` : `This project's blueprints are ${ids.join(', ')}`;
+  console.error(`\`walkdown ${command}\` acts on one blueprint, and does not choose it for you. ${which}.`);
+  console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${nameOf(ids[0])}\`).`);
   process.exit(2);
 }
 

@@ -1,0 +1,18 @@
+id: n-0475
+uuid: 9318c4e4-c5a0-4690-a98c-dd689d44e6a3
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:16.746Z
+anchor:
+  screen: lint-across-blueprints
+status: open
+body: "Draw what `walkdown lint --blueprint search` prints when search shares a
+  suite with checkout. One of search's rules came from a thread of checkout's.
+  Lint names nothing about checkout's rule tags or checkout's thread. It names
+  only what no blueprint in the project holds: one tag and one thread id
+  (`locations.several.lint-reads-the-project`). Anchors: cli.prompt,
+  cli.lint.errors, cli.lint.warnings, cli.lint.summary, cli.exit.
+  as-built/cli/lint-across-blueprints.html is the build, from
+  test/cli/scenarios/lint-across-blueprints.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

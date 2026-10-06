@@ -25,7 +25,7 @@ rule the agent tier has not judged, or judged before it went stale) and
    statement/steps, or create a new rule? New rules: id extends the story
    (`story.id` + `.slug`), `origin: thread:<id>`, honest `verify` list
    (`checks` only for what a script can prove; `agent`/`human` for judgment).
-2. **Statement edits** → immediately `walkdown hash --write`.
+2. **Statement edits** → immediately `walkdown hash --write --blueprint <id>`.
 3. **Screens.** If the change needs a screen or state the storyboard lacks,
    add it — and check design coverage. If design hasn't drawn it: set
    `prototype: null`, optionally sketch under `proposals/` (**never** touch
@@ -43,8 +43,8 @@ rule the agent tier has not judged, or judged before it went stale) and
    `/walkdown:judge` on each until none is left. The person you hand this to
    should never be the first to look at it.
 7. **Close the thread** — only via the CLI so the transition is validated:
-   `walkdown threads reply <id> --as-agent "<what changed, which files,
-   which rule(s), which run re-verified it>" --status incorporated`. It records
+   `walkdown threads set <id> --status incorporated --as-agent --reply "<what
+   changed, which files, which rule(s), which run re-verified it>" --blueprint <bp>`. It records
    under the human you are working for — that is whose instruction it was —
    and `--as-agent` says a machine typed it.
 
@@ -55,8 +55,8 @@ fix it (spec change? follow the incorporation steps; implementation-only?
 just fix, carrying anchors) → re-verify with a run (`walkdown run --rule ...`,
 and an agent walkdown via the judge skill (`/walkdown:judge`) whenever the rule asks for
 the agent tier, which is the default) →
-`walkdown threads reply <id> --as-agent "<fix + evidence>"
---status addressed`.
+`walkdown threads set <id> --status addressed --as-agent --reply "<fix +
+evidence>" --blueprint <bp>`.
 
 ## Never
 

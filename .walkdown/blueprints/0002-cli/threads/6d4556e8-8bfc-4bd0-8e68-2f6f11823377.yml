@@ -1,0 +1,17 @@
+id: n-0461
+uuid: 6d4556e8-8bfc-4bd0-8e68-2f6f11823377
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:34.701Z
+anchor:
+  screen: status-role-from-the-run
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints where a walkdown
+  recorded before roles existed and one recorded under product both passed it:
+  eng signed by sam from the first, product signed by topher from the second,
+  though topher's profile says design today
+  (status.acceptance.role-comes-from-the-run). Anchors: cli.prompt,
+  cli.status.acceptance, cli.exit. as-built/cli/status-role-from-the-run.html is
+  the build, from test/cli/scenarios/status-role-from-the-run.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

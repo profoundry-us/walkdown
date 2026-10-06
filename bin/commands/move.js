@@ -5,7 +5,7 @@ import { parseArgs } from 'node:util';
 import { canon, canRemember, KINDS, readRegistry, registryPath, rememberLocation, resolveLocations, tilde } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { MoveFailed, moveDir } from '../../lib/standard.js';
-import { end, severalHere } from './context.js';
+import { end, namedOrExit, severalHere } from './context.js';
 
 /*
  * `walkdown move`: relocate one kind of record, and write down that you did.
@@ -23,7 +23,7 @@ export function run(args) {
   });
   const kind = positionals[0];
   if (!KINDS.includes(kind)) {
-    console.error(`walkdown records move <kind> --to <path>\n  kind is one of: ${KINDS.join(', ')}`);
+    console.error(`walkdown records move <kind> --to <path> --blueprint <id>\n  kind is one of: ${KINDS.join(', ')}`);
     return end(2);
   }
   if (!values.to) {
@@ -44,7 +44,7 @@ export function run(args) {
     );
     return end(2);
   }
-  const loc = resolveLocations({ blueprint: values.blueprint });
+  const loc = resolveLocations({ blueprint: namedOrExit(values.blueprint, 'records move') });
   if (loc.ambiguous) severalHere(loc);
   /*
    * Only a listed project's records move. Standing in a directory nothing

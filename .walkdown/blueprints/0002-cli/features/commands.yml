@@ -135,15 +135,20 @@ stories:
         screens: [blueprints-new, init-another]
         steps:
           given:
-            - A git project `shop` with no blueprint, on a machine that has run `walkdown init`
+            - A git project `shop` with no blueprint, on a machine that has run `walkdown init`, and a plain folder `shop/api` inside it
           when:
             - "`walkdown blueprints new` is run, then again, then `walkdown blueprints new search`"
+            - "`walkdown blueprints new` is run in `shop/api`, with a terminal and without one, then with `--project api`"
           then:
-            - The first makes and registers `shop` in `~/.walkdown/projects/shop/blueprints/`, in a folder named for this month, and adds nothing to the repository
+            - The first makes and registers `shop` in `~/.walkdown/projects/shop/blueprints/shop/`, a folder named after the blueprint, and adds nothing to the repository
             - The second reports everything up to date
-            - The third makes `search` beside `shop`, and says that commands which write now take `--blueprint`
+            - The third makes `search` beside `shop`
+            - In `shop/api` it asks whether the new blueprint joins the project `shop`, and joining is the answer if the person just presses Enter
+            - With no terminal it joins `shop`, and says that `--project <label>` makes a project of its own instead
+            - The blueprint made in `shop/api` is named `api`, never taken for `shop`'s own
+            - With `--project api` it is a project of its own, and nothing is asked
             - "`--commit spec|all` and `--dir` act as they did on `init`"
-          statement_hash: sha256:20c77e403ea3
+          statement_hash: sha256:90fc601d7dd0
       - id: commands.blueprints.commit-moves-the-home
         statement: "`walkdown blueprints commit <none|spec|all>` moves a blueprint's home between `~/.walkdown/projects/<project>/blueprints/` and the repository's `.walkdown/blueprints/`, keeping its folder name and its ID."
         because: "Whether a spec is committed is decided per blueprint, sometimes long after it was made."

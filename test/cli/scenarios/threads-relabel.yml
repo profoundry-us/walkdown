@@ -3,12 +3,12 @@ screen: threads-relabel
 title: threads relabel says what it would do and asks first
 rule: locations.threads.clashing-labels-ask
 fixture: clashing-labels
-command: [threads, relabel, n-0001]
+command: [threads, relabel, n-0001, --blueprint, checkout]
 exit: 2
 expect:
   - '^n-0001 labels 2 threads\. The newer one would be relabelled:$'
   - '^  n-0001 → n-0002, keeping n-0001 as its alias; 00000000-0000-4000-8000-000000000002 keeps n-0001$'
-  - '^Nothing was changed\. `walkdown threads relabel 00000000-0000-4000-8000-000000000001 --yes` does it\.$'
+  - '^Nothing was changed\. `walkdown threads relabel 00000000-0000-4000-8000-000000000001 --yes --blueprint checkout` does it\.$'
 anchors:
   - { id: cli.relabel.plan, match: '^(n-0001 labels|  )' }
   - { id: cli.relabel.ask, match: '^Nothing was changed' }

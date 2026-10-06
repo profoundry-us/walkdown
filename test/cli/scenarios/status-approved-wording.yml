@@ -1,0 +1,16 @@
+# `walkdown status` where eng approved the wording of two rules, and only
+# `totals` has been built since: only it is asked of a person again.
+screen: status-approved-wording
+title: Approving the wording covers a rule only until it is built
+rule: status.acceptance.approval-covers-only-the-unbuilt
+fixture: g4-approved
+command: [status]
+exit: 0
+expect:
+  - '^  ○  checkout\.basics\.pays    never   never   ✍︎ eng '
+  - '^  ○  checkout\.basics\.totals  ✓ pass  ✓ pass  ✍︎ eng '
+  - '^  NEEDS A HUMAN$'
+  - '^  ◆ walk down checkout\.basics\.totals — eng has not accepted it yet$'
+anchors:
+  - { id: cli.status.table, match: '^  ○  checkout' }
+  - { id: cli.status.queue, match: '^  NEEDS A HUMAN$|^  ◆ walk down' }

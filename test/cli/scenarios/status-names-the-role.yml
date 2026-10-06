@@ -1,0 +1,13 @@
+# `walkdown status` for a rule built, judged by the agent, and owed by two roles.
+screen: status-names-the-role
+title: Each signature owed names its role
+rule: status.attention.names-the-role
+fixture: g3-two-roles-owed
+command: [status]
+exit: 0
+expect:
+  - '^  ◆ walk down checkout\.basics\.pays — eng has not accepted it yet$'
+  - '^  ◆ walk down checkout\.basics\.pays — product has not accepted it yet$'
+anchors:
+  - { id: cli.status.accepted, match: '^\s+RULE|^  ○  checkout' }
+  - { id: cli.attention.human, match: '^  NEEDS A HUMAN|^  ◆ walk down' }

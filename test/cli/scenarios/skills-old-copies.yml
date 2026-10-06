@@ -1,0 +1,14 @@
+# `walkdown skills --force` over copies an earlier walkdown left: the released one goes, the edited one stays.
+screen: skills-old-copies
+title: --force removes an earlier walkdown's copies and keeps an edited one
+rule: delivery.plugin.old-copies-make-way
+fixture: g1-old-copies
+command: [skills, --into, ../claude/skills, --force]
+exit: 0
+expect:
+  - '^  \+ linked  ~/\.claude/skills/walkdown → ~/src/walkdown$'
+  - '^  - removed \(an earlier walkdown''s copy\)  ~/\.claude/skills/walkdown-judge$'
+  - '^  ! kept \(an earlier copy, edited — remove it yourself\)  ~/\.claude/skills/walkdown-setup$'
+anchors:
+  - { id: cli.skills.link, match: '^  \+ linked' }
+  - { id: cli.skills.copies, match: '^  (- removed|! kept)' }

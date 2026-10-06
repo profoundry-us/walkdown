@@ -1,13 +1,12 @@
-# A command that writes, with two blueprints standing here and none named.
+# A command that writes, with none named: it never chooses one for you.
 screen: writes-refused-among-several
-title: A write refused until --blueprint names one
+title: A write is refused until --blueprint names its blueprint
 rule: locations.several.writes-name-one
 fixture: two-blueprints
 command: [sweep, --why, every check again]
 exit: 2
 expect:
-  - 'Several blueprints are registered'
-  - '0001-sp-checkout, 0002-sp-search'
+  - '^`walkdown sweep` acts on one blueprint, and does not choose it for you\. This project''s blueprints are 0001-sp-checkout, 0002-sp-search\.$'
   - '^Choose one with `--blueprint <id>` \(e\.g\. `--blueprint checkout`\)\.$'
 anchors:
-  - { id: cli.refusal, match: '^(Several blueprints|Choose one)' }
+  - { id: cli.refusal, match: '^(`walkdown sweep`|Choose one)' }

@@ -1,0 +1,13 @@
+id: n-0494
+uuid: 79e7fe35-562d-4669-b730-0c49c82beb18
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:09.357Z
+anchor:
+  rule: locations.default.prototype-beside-the-spec
+status: open
+body: 'Found while drawing cli screens. `walkdown where` prints a prototype row
+  and a proposals row, but `walkdown where prototype` is refused: No such
+  location "prototype". Try: spec, code, runs, threads, evidence, drafts. A row
+  the full listing prints should be askable by name.'

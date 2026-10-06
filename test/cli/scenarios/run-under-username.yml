@@ -1,0 +1,13 @@
+# The run sam's signed walkdown left, on a machine that knows him as sam and as Sam Shopper.
+screen: run-under-username
+title: A verdict is written under the username, never the full name
+rule: status.attribution.username-is-the-record
+fixture: g3-sam-signs
+cat: home/projects/shop/blueprints/checkout/runs/*.json
+exit: 0
+expect:
+  - '^  "actor": "sam",$'
+  - '^      "signer": "sam"$'
+anchors:
+  - { id: cli.run.actor, match: '"actor"' }
+  - { id: cli.run.signer, match: '"role"|"signer"' }

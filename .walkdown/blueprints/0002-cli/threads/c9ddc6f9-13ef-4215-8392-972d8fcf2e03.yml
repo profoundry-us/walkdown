@@ -1,0 +1,17 @@
+id: n-0440
+uuid: c9ddc6f9-13ef-4215-8392-972d8fcf2e03
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:11:59.359Z
+anchor:
+  screen: claims-url-fragment
+status: open
+body: "Draw what `walkdown claims --url http://localhost:3000/cart#coupon`
+  prints where the storyboard declares both /cart and /cart#coupon: the address,
+  and the blueprint claiming it on the screen cart-coupon rather than the cart
+  page behind it (screens.identity.fragment-is-identity). Anchors: cli.prompt,
+  cli.claims.url, cli.claims.screen, cli.exit.
+  as-built/cli/claims-url-fragment.html is the build, from
+  test/cli/scenarios/claims-url-fragment.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

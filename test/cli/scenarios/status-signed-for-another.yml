@@ -1,0 +1,14 @@
+# `walkdown status <rule>` after topher drove a walkdown and Pat accepted
+# for product beside him: product's signature is Pat's.
+screen: status-signed-for-another
+title: A signature names who accepted, not who typed it
+rule: status.acceptance.signature-names-its-signer
+fixture: g4-signed-for-pat
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '^    eng            ✓ signed by topher  '
+  - '^    product        ✓ signed by pat, recorded by topher  '
+anchors:
+  - { id: cli.status.own, match: '^    eng  ' }
+  - { id: cli.status.proxy, match: '^    product  ' }

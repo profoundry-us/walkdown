@@ -1,0 +1,13 @@
+id: n-0499
+uuid: 7941a1c7-6676-4e6d-9a36-9d80f3b0b412
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:10.305Z
+anchor:
+  rule: ownership.design.request-on-a-screen
+status: open
+body: Found while drawing cli screens. `walkdown threads new --screen cart
+  --reason request` prints "✓ n-0002 opened · note" and never says it was filed
+  as a design request, which is the one thing a person filing it wants
+  confirmed.

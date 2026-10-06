@@ -1,10 +1,11 @@
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import {
   canon,
   checkoutFor,
   defaultLabel,
+  codeOf,
   deriveCode,
   describeFolder,
   expand,
@@ -81,7 +82,47 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
    */
   const live = () => readRegistry().rows.filter((r) => r?.registered && r.home);
   const wt = checkoutFor(root, live());
-  const checkout = wt?.worktree ? wt.checkout : root;
+  /*
+   * A FOLDER INSIDE A REGISTERED CHECKOUT (q-0385). Usually it is the same
+   * project, pointed at a part of it, so joining is the default: asked at a
+   * terminal, done without one and said. `--project` with another label keeps
+   * it a project of its own, the case n-0214 kept on purpose.
+   */
+  let joined = false;
+  if (wt && !wt.worktree && wt.checkout !== root && verb !== 'commit') {
+    const theirs = projectOf(wt.checkout, readRegistry().rows);
+    if (theirs && (!project || project === theirs.label)) {
+      if (project || !process.stdin.isTTY) {
+        joined = true;
+        if (!project)
+          console.log(
+            dim(`  ${tilde(root)} is inside ${tilde(wt.checkout)}, so this blueprint joins its project \`${theirs.label}\`. \`--project <label>\` makes a project of its own instead.`),
+          );
+      } else {
+        const rl = createInterface({ input: process.stdin, output: process.stdout });
+        const answer = await rl.question(`${tilde(root)} is inside ${tilde(wt.checkout)}, the project \`${theirs.label}\`. Add this blueprint to \`${theirs.label}\`? [Y/n] `);
+        rl.close();
+        joined = !/^\s*n/i.test(answer);
+      }
+    }
+  }
+  /*
+   * `commit` acts on the blueprint --blueprint names, wherever it is run: its
+   * project is that row's checkout, or the checkout of the home or project
+   * standing here, never the folder the command happened to start in.
+   */
+  const commitCheckout = () => {
+    const rows = live().filter((r) => r.checkout);
+    const at = (r) => canon(expand(String(r.checkout)));
+    const named = id?.trim() && isRegistryId(id.trim()) ? rows.find((r) => String(r.id) === id.trim()) : null;
+    if (named) return at(named);
+    const home = rows.find((r) => {
+      const h = canon(expand(String(r.home)));
+      return canon(root) === h || canon(root).startsWith(`${h}/`);
+    });
+    return home ? at(home) : (wt?.checkout ?? root);
+  };
+  const checkout = verb === 'commit' ? commitCheckout() : wt?.worktree || joined ? wt.checkout : root;
   const mine = () =>
     live().filter((r) => !r.ephemeral && r.checkout && canon(expand(String(r.checkout))) === checkout);
 
@@ -91,7 +132,8 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     return process.exit(2);
   }
   const defaultName = slug(basename(checkout));
-  const want = wanted ? (isRegistryId(wanted) ? wanted : slug(wanted)) : null;
+  // Made from a folder inside the project, it is named for that folder, never taken for the project's own.
+  const want = wanted ? (isRegistryId(wanted) ? wanted : slug(wanted)) : joined ? slug(basename(root)) : null;
 
   /*
    * WHICH BLUEPRINT OF THE PROJECT'S (ADR 0011 §1). Idempotent on the project
@@ -108,6 +150,12 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
   {
     const here = mine();
     const names = here.map((r) => nameOf(r.id));
+    // A folder inside the project named like the project's own blueprint is not that blueprint.
+    if (joined && !wanted && want === defaultName && names.includes(want)) {
+      console.error(red(`\`${want}\` is already the name of ${tilde(checkout)}'s own blueprint, so this one needs a name of its own. Nothing was made.`));
+      console.error(dim(`  Name it: \`walkdown blueprints new ${want}-${slug(basename(dirname(root)))}\`, or \`--project <label>\` for a project of its own.`));
+      return process.exit(2);
+    }
     if (!want && here.length > 1 && !names.includes(defaultName)) {
       console.error(red(`This project holds several blueprints (${names.join(', ')}) and none is \`${defaultName}\`.`));
       console.error(
@@ -161,12 +209,32 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
       const pc = c ?? deriveCode(l);
       const codeTaken = rows.some((r) => String(r.code) === pc);
       if (!labelTaken && !codeTaken) return { label: l, code: pc, fresh: true };
+      const holder = rows.find((r) => (labelTaken ? String(r.project) === l : String(r.code) === pc));
+      const where = tilde(String(holder.checkout ?? holder.home));
       const what = labelTaken
-        ? `the project label \`${l}\` is another checkout's (${tilde(String(rows.find((r) => String(r.project) === l).checkout))})`
-        : `the project code \`${pc}\` is \`${rows.find((r) => String(r.code) === pc).project}\`'s`;
+        ? `This machine already has a project called \`${l}\`, at ${where}. ${tilde(checkout)} is another checkout, so its project needs a name of its own`
+        : `The project code \`${pc}\` is already the project \`${holder.project}\`'s, at ${where}, and every ID carries its project's code`;
       if (!process.stdin.isTTY) {
+        // A label and a code nobody has, so the command below simply works.
+        const labels = new Set(rows.map((r) => String(r.project)));
+        const codes = new Set(rows.map((r) => String(r.code ?? codeOf(r.id))));
+        const near = slug(`${basename(dirname(checkout))}-${l}`);
+        let free = labelTaken ? (labels.has(near) ? null : near) : l;
+        for (let i = 2; !free; i++) if (!labels.has(`${l}-${i}`)) free = `${l}-${i}`;
+        let freeCode = deriveCode(free);
+        for (const ch of 'abcdefghijklmnopqrstuvwxyz') {
+          if (!codes.has(freeCode)) break;
+          freeCode = `${free[0]}${ch}`;
+        }
+        const named = wanted ? ` ${wanted}` : '';
         console.error(red(`✗ ${what}. Nothing was made.`));
-        console.error(dim('  Choose another with `--project <label>` and `--code <two or three letters>`.'));
+        console.error(
+          dim(
+            labelTaken
+              ? `  Name it with \`--project <label>\`, e.g. \`walkdown blueprints new${named} --project ${free} --code ${freeCode}\`.`
+              : `  Choose another with \`--code <two or three letters>\`, e.g. \`walkdown blueprints new${named} --code ${freeCode}\`.`,
+          ),
+        );
         return null;
       }
       const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -360,8 +428,8 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         ' — and git keeps every version of every screenshot forever.' +
         '\n  `walkdown blueprints commit spec` writes the ignore file back.',
     };
-    const several = mine().length > 1;
-    const idFlag = several ? ` --blueprint ${name}` : '';
+    // Every write names its blueprint (locations.several.writes-name-one).
+    const idFlag = ` --blueprint ${name}`;
     const said = ignore?.action === 'kept-differs' ? "  Committed, by the home's own .gitignore, which differs from walkdown's and was left as it is." : say[commit];
     console.log(dim(said.replace(/`walkdown blueprints commit (\w+)`/g, (_, std) => `\`walkdown blueprints commit ${std}${idFlag}\``)));
     /*

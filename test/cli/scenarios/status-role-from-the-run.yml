@@ -1,0 +1,15 @@
+# `walkdown status <rule>` where a walkdown from before roles existed and
+# one recorded under product both passed: eng from the first, product from
+# the second, whatever topher's profile says today.
+screen: status-role-from-the-run
+title: A signature counts for the role its run was recorded under
+rule: status.acceptance.role-comes-from-the-run
+fixture: g4-roles-on-runs
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '· signed by eng, product ·'
+  - '^    eng            ✓ signed by sam  '
+  - '^    product        ✓ signed by topher  '
+anchors:
+  - { id: cli.status.acceptance, match: '^    (eng|product)  ' }

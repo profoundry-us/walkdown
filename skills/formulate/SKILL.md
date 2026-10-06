@@ -44,7 +44,7 @@ derives from it.
    The template AGENTS.md has the checklist ("Writing a rule"); ADR 0004
    has the before/after pairs.
 
-5. **Hash.** `walkdown hash --write` stamps every statement.
+5. **Hash.** `walkdown hash --write --blueprint <id>` stamps every statement.
 
 6. **Questions, not guesses.** Everything the source doesn't answer (empty
    states, error copy, edge flows) becomes a question thread anchored to the

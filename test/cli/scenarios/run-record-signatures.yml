@@ -1,0 +1,18 @@
+# A walkdown run as the ledger keeps it: the signatures it was recorded
+# with, a role and a person each, beside the actor who drove it.
+screen: run-record-signatures
+title: A walkdown run carries the roles it was signed in
+rule: status.acceptance.roles-recorded-on-the-run
+fixture: g4-signed-for-pat
+cat: home/projects/shop/blueprints/checkout/runs/*.json
+exit: 0
+expect:
+  - '^  "actor": "topher",$'
+  - '^  "signatures": \[$'
+  - '^      "role": "eng",$'
+  - '^      "role": "product",$'
+  - '^      "signer": "pat"$'
+  - '^  "kind": "walkdown",$'
+anchors:
+  - { id: cli.run.actor, match: '"actor"' }
+  - { id: cli.run.signatures, match: '^  "signatures"|^    [{}]|^      "(role|signer)"|^  \],$' }

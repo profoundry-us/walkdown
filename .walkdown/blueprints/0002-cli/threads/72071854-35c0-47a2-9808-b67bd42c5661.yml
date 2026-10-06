@@ -1,0 +1,17 @@
+id: n-0479
+uuid: 72071854-35c0-47a2-9808-b67bd42c5661
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:17.510Z
+anchor:
+  screen: run-filed-by-rule
+status: open
+body: "Draw what `walkdown run` prints with no `--blueprint`, where checkout and
+  search share one test suite. The suite runs once. Each result is recorded in
+  the blueprint that holds its rule, under one run id. The tag neither blueprint
+  holds is named as not recorded (`locations.several.results-filed-by-rule`).
+  Anchors: cli.prompt, cli.run.tests, cli.run.filed, cli.run.done, cli.exit.
+  as-built/cli/run-filed-by-rule.html is the build, from
+  test/cli/scenarios/run-filed-by-rule.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

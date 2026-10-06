@@ -1,0 +1,15 @@
+# `walkdown status <rule>` for a rule excusing the agent tier: the reason
+# sits where the agent's verdict would have been.
+screen: status-excused-tier
+title: An excused tier shows its reason where its verdict would be
+rule: status.evidence.excuse-says-why
+fixture: g4-excused
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '· verify checks · signed by eng ·'
+  - '^    agent          · excused$'
+  - '^                   The payment page is the bank''s, and no agent may type a real card into it\.$'
+anchors:
+  - { id: cli.status.verify, match: '^  story .* · verify ' }
+  - { id: cli.status.excuse, match: '^    agent          · excused|^                   The payment page' }

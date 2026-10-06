@@ -1,0 +1,13 @@
+# `walkdown skills` run a second time: the one link is already there, and nothing changes.
+screen: skills-again
+title: Run again, the skills link is up to date
+rule: delivery.plugin.one-link
+fixture: g1-plugin-linked
+command: [skills, --into, ../claude/skills]
+exit: 0
+expect:
+  - '^  · up to date  ~/\.claude/skills/walkdown → ~/src/walkdown$'
+  - '^  Updating the clone updates them; there is nothing to copy again\.$'
+anchors:
+  - { id: cli.skills.link, match: '^  [+·!] ' }
+  - { id: cli.skills.note, match: '^  (Claude Code loads|Updating the clone)' }

@@ -1,0 +1,19 @@
+id: n-0478
+uuid: 503fa564-9b90-4434-b15a-e2e75732c732
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:17.319Z
+anchor:
+  screen: lint-steps-and-length
+status: open
+body: "Draw what `walkdown lint --no-checks` prints for a feature with two
+  faulty rules. One has a statement and no steps. The other has a three-sentence
+  statement and a because that tells a story. The missing steps show as an error
+  saying a check is built from them. The long statement and long because show as
+  warnings saying what each is for (`ownership.authoring.steps-are-required`,
+  `ownership.authoring.statement-reads-at-a-glance`). Anchors: cli.prompt,
+  cli.lint.errors, cli.lint.warnings, cli.lint.summary, cli.exit.
+  as-built/cli/lint-steps-and-length.html is the build, from
+  test/cli/scenarios/lint-steps-and-length.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

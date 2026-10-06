@@ -8,6 +8,7 @@ stories:
         origin: prd
         statement: A thread status change outside its kind's lifecycle is rejected.
         verify: [checks]
+        screens: [threads-transition-refused]
         steps:
           given:
             - A note (open > addressed > verified | reopen | waived) or a question (open > answered > incorporated | reopen | waived), where every ending may reopen and a recorded decision never moves
@@ -21,6 +22,7 @@ stories:
         origin: prd
         statement: Only a person who has said who they are can set a thread to verified or waived. A name the machine guessed, an actor named "agent" in any spelling, or a change a machine says it typed are all rejected.
         verify: [checks]
+        screens: [threads-verify-nobody-named]
         steps:
           given:
             - A thread in a state from which verified or waived is legal
@@ -49,6 +51,7 @@ stories:
         because: A reader must be able to tell which sentences a person actually said, and a record that names them as author of a machine's paragraph says the opposite.
         history: For a month every sentence an agent typed was filed under the person it worked for with `via agent` beside the name - and since nearly every sentence in a thread is one the agent typed, the board filled with "topher via agent" over paragraphs Topher never wrote (2026-09-17). `said` and `added` split a relayed message into the person's words and the machine's.
         verify: [checks]
+        screens: [threads-show-relayed]
         steps:
           given:
             - A machine whose personal config says who is sitting at it
@@ -68,6 +71,7 @@ stories:
         origin: prd
         statement: Waiving a thread records who waived it and why, and reopening one requires a reason. Both reasons are kept as replies on the thread.
         verify: [checks]
+        screens: [thread-waived]
         unverifiable:
           agent: The passing case needs a completed waive, and waiving is a human-only transition an agent may never perform (blueprint/AGENTS.md). The reopen half could be walked; the waive half cannot, so the tier cannot honestly hold.
         steps:
@@ -87,6 +91,7 @@ stories:
         because: Why a note exists decides whose look closes it, and a machine's account of what it saw is not a person's words.
         history: "Of 185 notes waiting on Topher's verify on 2026-09-14, 105 had nothing human in them and 90 wore his name over a judge's finding (ADR 0005)."
         verify: [checks]
+        screens: [thread-finding]
         signoff: [eng, product]
         steps:
           given:
@@ -107,6 +112,7 @@ stories:
         because: The person's acceptance already exists as their verdict on the rule; asking for it again, note by note, asks for what they have given. A note the person never wrote is not theirs to accept.
         history: Under ADR 0005 only a finding and feedback closed on the pass; a request and an open note stayed, and a rule just passed still queued its person to press Done, and the verify queue was one nobody worked (2026-09-18, ADR 0006). An agent's addressed note was then queued to its person as one "of yours" to verify, though they had never read it (n-0338, 2026-10-01).
         verify: [checks]
+        screens: [threads-closed-by-a-pass]
         signoff: [eng, product]
         steps:
           given:
@@ -127,6 +133,7 @@ stories:
         statement: A command that changes a thread reports what changed rather than printing the thread back. It says which status the thread left, which status it reached, whose name the change was recorded under, and how many replies landed.
         because: Output that looks the same whether or not anything happened is output nobody can act on.
         verify: [checks]
+        screens: [threads-set-says-what-changed]
         steps:
           given:
             - A thread, and a command that will reply to it, transition it, or both
@@ -156,6 +163,7 @@ stories:
         because: A retired rule is a decision already recorded, and a thread on it re-opens that decision where no walk will reach it.
         history: q-0317 and q-0335 were both filed on screens.ownership.one-claimant, which ADR 0001 had retired, and each asked again what its retirement note already said (2026-09-22).
         verify: [checks]
+        screens: [threads-new-on-retired]
         signoff: [eng, product]
         steps:
           given:

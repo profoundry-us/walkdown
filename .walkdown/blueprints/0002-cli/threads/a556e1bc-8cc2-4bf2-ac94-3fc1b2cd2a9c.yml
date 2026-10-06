@@ -1,0 +1,14 @@
+id: n-0495
+uuid: a556e1bc-8cc2-4bf2-ac94-3fc1b2cd2a9c
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:09.549Z
+anchor:
+  rule: status.attention.agent-tier-queued
+status: open
+body: Found while drawing cli screens. For a rule whose agent verdict is stale,
+  `walkdown status` prints "judge checkout.basics.receipt — the agent tier is
+  stale on it, and no signer is asked until it has" (bin/commands/status.js
+  around line 357). "until it has" only follows "has never judged it", so the
+  stale version reads as a broken sentence. The queueing itself is right.

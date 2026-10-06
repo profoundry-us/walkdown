@@ -1,0 +1,13 @@
+# `walkdown status` after two commits that touch neither the rules nor their code: the pass still counts.
+screen: status-after-commits
+title: An unrelated commit leaves a pass a pass
+rule: locations.travel.provenance-not-currency
+fixture: g1-later-commits
+command: [status]
+exit: 0
+expect:
+  - '^  ○  checkout\.basics\.pays  ✓ pass  never  ○ eng     —\s*$'
+  - '^0 verified, 1 pending, 0 failing$'
+anchors:
+  - { id: cli.status.header, match: '^\s+RULE\s+LOCAL' }
+  - { id: cli.status.row, match: 'checkout\.basics\.pays  ✓ pass' }

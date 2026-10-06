@@ -1,0 +1,11 @@
+# Filing a note on a rule that has been retired.
+screen: threads-new-on-retired
+title: A new thread on a retired rule is refused with its note
+rule: threads.lifecycle.not-on-a-retired-rule
+fixture: g3-retired-rule
+command: [threads, new, --rule, checkout.basics.pays, --body, Still broken on a declined card., --blueprint, checkout]
+exit: 2
+expect:
+  - '^checkout\.basics\.pays is retired - a new thread goes on the rule or screen that carries it now\. Its note: Split in two; a card charge is checkout\.basics\.charges now\.$'
+anchors:
+  - { id: cli.refusal, match: '^checkout\.basics\.pays is retired' }

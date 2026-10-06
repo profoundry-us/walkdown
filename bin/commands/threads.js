@@ -23,8 +23,8 @@ export const VERBS = {
   },
   new: {
     usage:
-      'walkdown threads new --rule <id> | --screen <id> --body <text> [--kind note|question] [--element <sel>]\n' +
-      '                     [--reason <why>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]] [--blueprint <id>] [--json]',
+      'walkdown threads new --rule <id> | --screen <id> --body <text> --blueprint <id> [--kind note|question] [--element <sel>]\n' +
+      '                     [--reason <why>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]] [--json]',
     about:
       'Open a thread on a rule, or on a screen alone (a design request). --body says what was\nseen; with --as-agent, --said carries what the person said and --added what the\nmachine put beside it.',
     run: (args) => thread(['new', ...args]),
@@ -43,7 +43,7 @@ export const VERBS = {
     },
   },
   reply: {
-    usage: 'walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]] [--as-is] [--attach <file>]... [--blueprint <id>] [--json]',
+    usage: 'walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]] [--as-is] [--attach <file>]... --blueprint <id> [--json]',
     about:
       "Say something on a thread and leave its status as it was. With --as-agent and --said,\nthe text is a person's words relayed; it is under their name with the machine marked.",
     run: (args) => {
@@ -70,7 +70,7 @@ export const VERBS = {
   set: {
     usage:
       'walkdown threads set <id> --status <s> | --verify | --reopen | --waive | --option "<label> :: <why>"...\n' +
-      '                     [--reason <text>] [--reply <text>] [--as-agent [--said <text>] [--added <text>]] [--blueprint <id>] [--json]',
+      '                     --blueprint <id> [--reason <text>] [--reply <text>] [--as-agent [--said <text>] [--added <text>]] [--json]',
     about:
       'Change a thread: its status, or the choices a question offers. Transitions are checked\n(a note: open → addressed → verified | reopen | waived; a question: open → answered →\nincorporated | reopen | waived). Verified and waived need a named person; waiving and\nreopening need --reason. --reply lands with the change, or neither lands.',
     run: (args) => {
@@ -84,7 +84,7 @@ export const VERBS = {
     },
   },
   relabel: {
-    usage: 'walkdown threads relabel <label|uuid> [--yes] [--blueprint <id>] [--json]',
+    usage: 'walkdown threads relabel <label|uuid> --blueprint <id> [--yes] [--json]',
     about:
       'Give the newer of two threads sharing a label (a merge can leave two) the next free\nlabel, keeping the old one as its alias. Asks first; with no terminal, --yes.',
     run: async (args) => (await import('./threads-relabel.js')).run(args),

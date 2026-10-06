@@ -6,9 +6,9 @@ fixture: [git-repo, two-blueprints]
 command: [blueprints, commit, spec, --blueprint, search]
 exit: 0
 expect:
-  - '^  → moved    ~/\.walkdown/projects/shop/blueprints/202610-search$'
-  - '^ +to ~/shop/\.walkdown/blueprints/202610-search — the whole home, no record edited, the ID kept$'
-  - '^  \+ written  ~/shop/\.walkdown/blueprints/202610-search/\.gitignore$'
+  - '^  → moved    ~/\.walkdown/projects/shop/blueprints/search$'
+  - '^ +to ~/shop/\.walkdown/blueprints/search — the whole home, no record edited, the ID kept$'
+  - '^  \+ written  ~/shop/\.walkdown/blueprints/search/\.gitignore$'
 anchors:
   - { id: cli.commit.moved, match: '^  → moved|^ +to ~/shop' }
   - { id: cli.commit.gitignore, match: '\.gitignore$' }

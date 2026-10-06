@@ -1,0 +1,16 @@
+id: n-0491
+uuid: 24255af2-de0d-451e-8135-24e5bfa555e2
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:08.796Z
+anchor:
+  rule: screens.identity.query-is-not-identity
+status: open
+body: "Found while drawing cli screens. `walkdown claims --url` drops the query,
+  so a storyboard with `orders` at /orders and `orders-returns` at
+  /orders?tab=returns answers `screen orders` for /orders?tab=returns. The
+  declared query should win. The cause is two matchers: `bestClaim` in
+  lib/claims.js, which claims and the registry index use, ignores queries, while
+  `matchScreen` in lib/screen-match.js, which the panel and embed use, honours
+  them. That also breaks screens.identity.one-matcher."

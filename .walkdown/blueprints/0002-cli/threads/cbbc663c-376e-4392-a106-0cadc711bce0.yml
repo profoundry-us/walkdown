@@ -6,8 +6,16 @@ author: agent
 created: 2026-10-06T02:50:47.924Z
 anchor:
   rule: locations.keeping.upgrade-moves-once
-status: open
+status: verified
 body: "Found while judging: on a machine with no ~/.walkdown at all, `status`
   and `blueprints import . --all` in an old-layout clone never say an upgrade is
   due. Import says 'no spec.yml there' instead. `walkdown upgrade` then fixes
   it."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-06T21:11:04Z
+    body: Verified by topher's pass on locations.keeping.upgrade-moves-once
+      (2026-10-06T21-11-04Z-local-01).
+verified_by: topher
+verified_via: 2026-10-06T21-11-04Z-local-01

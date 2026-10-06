@@ -240,6 +240,15 @@ screens:
       - cli.where.kinds
       - cli.exit
 
+  - id: blueprints-two-searches
+    title: Each blueprint has an ID this machine gave it
+    prototype: null
+    app: { path: /as-built/cli/blueprints-two-searches.html }
+    anchors:
+      - cli.prompt
+      - cli.ids.list
+      - cli.exit
+
   - id: import-moved-checkout
     title: A moved checkout keeps its blueprint's ID
     prototype: null
@@ -402,4 +411,506 @@ screens:
     anchors:
       - cli.prompt
       - cli.thread.ids
+      - cli.exit
+
+  - id: claims-url-fragment
+    title: "The URL's fragment names a screen of its own"
+    prototype: null
+    app: { path: /as-built/cli/claims-url-fragment.html }
+    anchors:
+      - cli.prompt
+      - cli.claims.url
+      - cli.claims.screen
+      - cli.exit
+
+  - id: clone-config-by-path
+    title: "The config names the clone's reporter by its path, with nothing to install"
+    prototype: null
+    app: { path: /as-built/cli/clone-config-by-path.html }
+    anchors:
+      - cli.prompt
+      - cli.config.reporter
+      - cli.config.formatter
+      - cli.exit
+
+  - id: lint-across-blueprints
+    title: "Lint accepts what names another blueprint's rule or thread"
+    prototype: null
+    app: { path: /as-built/cli/lint-across-blueprints.html }
+    anchors:
+      - cli.prompt
+      - cli.lint.errors
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-no-design-request
+    title: "Lint names an undrawn screen nobody has asked design for"
+    prototype: null
+    app: { path: /as-built/cli/lint-no-design-request.html }
+    anchors:
+      - cli.prompt
+      - cli.lint.drift
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-signoff-omits-eng
+    title: "Lint flags a signoff list that leaves out engineering"
+    prototype: null
+    app: { path: /as-built/cli/lint-signoff-omits-eng.html }
+    anchors:
+      - cli.prompt
+      - cli.lint.omits-eng
+      - cli.lint.empty
+      - cli.exit
+
+  - id: lint-steps-and-length
+    title: "A rule with no steps is an error; a statement grown into a paragraph is a warning"
+    prototype: null
+    app: { path: /as-built/cli/lint-steps-and-length.html }
+    anchors:
+      - cli.prompt
+      - cli.lint.errors
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-weak-excuses
+    title: "Lint names an excuse that does not argue its case"
+    prototype: null
+    app: { path: /as-built/cli/lint-weak-excuses.html }
+    anchors:
+      - cli.prompt
+      - cli.lint.thin
+      - cli.lint.not-a-tier
+      - cli.lint.both-tiers
+      - cli.exit
+
+  - id: plugin-skills
+    title: "The walkdown plugin holds walkdown's five skills and nothing else"
+    prototype: null
+    app: { path: /as-built/cli/plugin-skills.html }
+    anchors:
+      - cli.prompt
+      - cli.plugin.skills
+      - cli.plugin.count
+      - cli.exit
+
+  - id: records-move-refused
+    title: "Moving records into a folder that holds some is refused"
+    prototype: null
+    app: { path: /as-built/cli/records-move-refused.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit
+
+  - id: reply-refused-voice
+    title: "The machine's reply is refused when it misses the voice"
+    prototype: null
+    app: { path: /as-built/cli/reply-refused-voice.html }
+    anchors:
+      - cli.prompt
+      - cli.voice.fault
+      - cli.voice.way-past
+      - cli.unchanged
+      - cli.exit
+
+  - id: rules-move
+    title: "rules move takes a story to another blueprint with its verdicts"
+    prototype: null
+    app: { path: /as-built/cli/rules-move.html }
+    anchors:
+      - cli.prompt
+      - cli.rules-move.done
+      - cli.rules-move.records
+      - cli.exit
+
+  - id: run-filed-by-rule
+    title: "One run of the suite files each result in the blueprint holding its rule"
+    prototype: null
+    app: { path: /as-built/cli/run-filed-by-rule.html }
+    anchors:
+      - cli.prompt
+      - cli.run.tests
+      - cli.run.filed
+      - cli.run.done
+      - cli.exit
+
+  - id: run-files-in-home
+    title: "A test adapter files its run in the home outside the repository"
+    prototype: null
+    app: { path: /as-built/cli/run-files-in-home.html }
+    anchors:
+      - cli.prompt
+      - cli.run.tests
+      - cli.run.filed
+      - cli.run.done
+      - cli.exit
+
+  - id: run-record-signatures
+    title: "A walkdown run carries the roles it was signed in"
+    prototype: null
+    app: { path: /as-built/cli/run-record-signatures.html }
+    anchors:
+      - cli.prompt
+      - cli.run.actor
+      - cli.run.signatures
+      - cli.exit
+
+  - id: run-under-username
+    title: "A verdict is written under the username, never the full name"
+    prototype: null
+    app: { path: /as-built/cli/run-under-username.html }
+    anchors:
+      - cli.prompt
+      - cli.run.actor
+      - cli.run.signer
+      - cli.exit
+
+  - id: skills-again
+    title: "Run again, the skills link is up to date"
+    prototype: null
+    app: { path: /as-built/cli/skills-again.html }
+    anchors:
+      - cli.prompt
+      - cli.skills.link
+      - cli.skills.note
+      - cli.exit
+
+  - id: skills-asks-where
+    title: "skills asks where they go and writes nothing on its own"
+    prototype: null
+    app: { path: /as-built/cli/skills-asks-where.html }
+    anchors:
+      - cli.prompt
+      - cli.skills.places
+      - cli.skills.refusal
+      - cli.exit
+
+  - id: skills-old-copies
+    title: "--force removes an earlier walkdown's copies and keeps an edited one"
+    prototype: null
+    app: { path: /as-built/cli/skills-old-copies.html }
+    anchors:
+      - cli.prompt
+      - cli.skills.link
+      - cli.skills.copies
+      - cli.exit
+
+  - id: skills-others-links
+    title: "Links walkdown did not make are left alone, even with --force"
+    prototype: null
+    app: { path: /as-built/cli/skills-others-links.html }
+    anchors:
+      - cli.prompt
+      - cli.skills.link
+      - cli.skills.left
+      - cli.exit
+
+  - id: status-after-a-sweep
+    title: "After a sweep, older verdicts read stale and the rest is counted"
+    prototype: null
+    app: { path: /as-built/cli/status-after-a-sweep.html }
+    anchors:
+      - cli.prompt
+      - cli.status.rows
+      - cli.sweep.head
+      - cli.sweep.owed
+      - cli.exit
+
+  - id: status-after-commits
+    title: "An unrelated commit leaves a pass a pass"
+    prototype: null
+    app: { path: /as-built/cli/status-after-commits.html }
+    anchors:
+      - cli.prompt
+      - cli.status.header
+      - cli.status.row
+      - cli.exit
+
+  - id: status-agent-assumed
+    title: "A rule that declares nothing is judged by the agent"
+    prototype: null
+    app: { path: /as-built/cli/status-agent-assumed.html }
+    anchors:
+      - cli.prompt
+      - cli.status.verify
+      - cli.status.evidence
+      - cli.exit
+
+  - id: status-approved-wording
+    title: "Approving the wording covers a rule only until it is built"
+    prototype: null
+    app: { path: /as-built/cli/status-approved-wording.html }
+    anchors:
+      - cli.prompt
+      - cli.status.table
+      - cli.status.queue
+      - cli.exit
+
+  - id: status-design-agent
+    title: "A design request waits for the design agent, apart from the building agent's queue"
+    prototype: null
+    app: { path: /as-built/cli/status-design-agent.html }
+    anchors:
+      - cli.prompt
+      - cli.status.design-queue
+      - cli.status.agent-queue
+      - cli.exit
+
+  - id: status-evidence-key
+    title: "A verdict cites its evidence by key, wherever the evidence went"
+    prototype: null
+    app: { path: /as-built/cli/status-evidence-key.html }
+    anchors:
+      - cli.prompt
+      - cli.status.cell
+      - cli.status.evidence
+      - cli.exit
+
+  - id: status-evidence-not-acceptance
+    title: "Passing evidence is not a signature"
+    prototype: null
+    app: { path: /as-built/cli/status-evidence-not-acceptance.html }
+    anchors:
+      - cli.prompt
+      - cli.status.verdict
+      - cli.status.evidence
+      - cli.status.acceptance
+      - cli.exit
+
+  - id: status-excused-tier
+    title: "An excused tier shows its reason where its verdict would be"
+    prototype: null
+    app: { path: /as-built/cli/status-excused-tier.html }
+    anchors:
+      - cli.prompt
+      - cli.status.verify
+      - cli.status.excuse
+      - cli.exit
+
+  - id: status-latest-wins
+    title: "The latest run at each target is the rule's status there"
+    prototype: null
+    app: { path: /as-built/cli/status-latest-wins.html }
+    anchors:
+      - cli.prompt
+      - cli.status.verdict
+      - cli.status.local
+      - cli.status.staging
+      - cli.exit
+
+  - id: status-moved-target
+    title: "A verdict counts only at the address it was made against"
+    prototype: null
+    app: { path: /as-built/cli/status-moved-target.html }
+    anchors:
+      - cli.prompt
+      - cli.status.header
+      - cli.status.elsewhere
+      - cli.status.addressless
+      - cli.exit
+
+  - id: status-names-the-role
+    title: "Each signature owed names its role"
+    prototype: null
+    app: { path: /as-built/cli/status-names-the-role.html }
+    anchors:
+      - cli.prompt
+      - cli.status.accepted
+      - cli.attention.human
+      - cli.exit
+
+  - id: status-one-role-signed
+    title: "A rule passes only once every role it names has signed"
+    prototype: null
+    app: { path: /as-built/cli/status-one-role-signed.html }
+    anchors:
+      - cli.prompt
+      - cli.status.verdict
+      - cli.status.evidence
+      - cli.status.acceptance
+      - cli.exit
+
+  - id: status-reworded
+    title: "A pass on older wording is stale unless the rewording was words only"
+    prototype: null
+    app: { path: /as-built/cli/status-reworded.html }
+    anchors:
+      - cli.prompt
+      - cli.status.reworded
+      - cli.status.stale
+      - cli.status.summary
+      - cli.exit
+
+  - id: status-role-from-the-run
+    title: "A signature counts for the role its run was recorded under"
+    prototype: null
+    app: { path: /as-built/cli/status-role-from-the-run.html }
+    anchors:
+      - cli.prompt
+      - cli.status.acceptance
+      - cli.exit
+
+  - id: status-sent-back
+    title: "A rule sent back reads as failing"
+    prototype: null
+    app: { path: /as-built/cli/status-sent-back.html }
+    anchors:
+      - cli.prompt
+      - cli.status.verdict
+      - cli.status.sent-back
+      - cli.exit
+
+  - id: status-signed-for-another
+    title: "A signature names who accepted, not who typed it"
+    prototype: null
+    app: { path: /as-built/cli/status-signed-for-another.html }
+    anchors:
+      - cli.prompt
+      - cli.status.own
+      - cli.status.proxy
+      - cli.exit
+
+  - id: status-untagged-check
+    title: "A checks pass no check claims any more is stale"
+    prototype: null
+    app: { path: /as-built/cli/status-untagged-check.html }
+    anchors:
+      - cli.prompt
+      - cli.status.unbacked
+      - cli.status.backed
+      - cli.exit
+
+  - id: sweep-needs-a-reason
+    title: "A sweep is refused until somebody says why"
+    prototype: null
+    app: { path: /as-built/cli/sweep-needs-a-reason.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.sweep.why
+      - cli.exit
+
+  - id: thread-finding
+    title: "A finding says why it exists and is signed by the agent"
+    prototype: null
+    app: { path: /as-built/cli/thread-finding.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.reason
+      - cli.thread.author
+      - cli.exit
+
+  - id: thread-screen-request
+    title: "A thread filed on a screen alone is a design request"
+    prototype: null
+    app: { path: /as-built/cli/thread-screen-request.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.reason
+      - cli.thread.anchor
+      - cli.exit
+
+  - id: thread-stamps-utc
+    title: "Every time a record keeps is an instant in UTC"
+    prototype: null
+    app: { path: /as-built/cli/thread-stamps-utc.html }
+    anchors:
+      - cli.prompt
+      - cli.record.created
+      - cli.record.reply-created
+      - cli.exit
+
+  - id: thread-waived
+    title: "A waived note keeps who waived it and why"
+    prototype: null
+    app: { path: /as-built/cli/thread-waived.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.status
+      - cli.thread.reason
+      - cli.thread.waived-by
+      - cli.exit
+
+  - id: threads-closed-by-a-pass
+    title: "A signed pass closes every note on the rule"
+    prototype: null
+    app: { path: /as-built/cli/threads-closed-by-a-pass.html }
+    anchors:
+      - cli.prompt
+      - cli.threads.other-rule
+      - cli.threads.decision
+      - cli.threads.closed-open
+      - cli.exit
+
+  - id: threads-new-on-retired
+    title: "A new thread on a retired rule is refused with its note"
+    prototype: null
+    app: { path: /as-built/cli/threads-new-on-retired.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit
+
+  - id: threads-set-says-what-changed
+    title: "A thread change reports what moved"
+    prototype: null
+    app: { path: /as-built/cli/threads-set-says-what-changed.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.moved
+      - cli.thread.next
+      - cli.exit
+
+  - id: threads-show-relayed
+    title: "A relayed reply keeps the person's words apart from the agent's"
+    prototype: null
+    app: { path: /as-built/cli/threads-show-relayed.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.own
+      - cli.thread.relayed
+      - cli.thread.added
+      - cli.exit
+
+  - id: threads-transition-refused
+    title: "A question cannot be incorporated before it is answered"
+    prototype: null
+    app: { path: /as-built/cli/threads-transition-refused.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.unchanged
+      - cli.exit
+
+  - id: threads-verify-nobody-named
+    title: "Verifying waits for a person who has said who they are"
+    prototype: null
+    app: { path: /as-built/cli/threads-verify-nobody-named.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.unchanged
+      - cli.exit
+
+  - id: where-fresh-machine
+    title: "Asking where things live writes nothing"
+    prototype: null
+    app: { path: /as-built/cli/where-fresh-machine.html }
+    anchors:
+      - cli.prompt
+      - cli.where.config
+      - cli.where.nothing
+      - cli.exit
+
+  - id: where-prototype-beside
+    title: "The prototype is found beside the spec before the code"
+    prototype: null
+    app: { path: /as-built/cli/where-prototype-beside.html }
+    anchors:
+      - cli.prompt
+      - cli.where.prototype
+      - cli.where.proposals
       - cli.exit

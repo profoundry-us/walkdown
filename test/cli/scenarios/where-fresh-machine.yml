@@ -1,0 +1,15 @@
+# `walkdown where` on a machine with no ~/.walkdown: a full answer, and nothing written.
+screen: where-fresh-machine
+title: Asking where things live writes nothing
+rule: locations.answer.asking-writes-nothing
+fixture: fresh-machine
+command: [where]
+exit: 0
+expect:
+  - '^  config    ~/\.walkdown/profile\.yml$'
+  - '^            not present — every default applies$'
+  - '^            the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it$'
+  - '^Nothing was written\. See docs/08-locations\.md for the resolution order\.$'
+anchors:
+  - { id: cli.where.config, match: '^  config  |^            (not present|~/\.walkdown/registry|the registry)' }
+  - { id: cli.where.nothing, match: '^Nothing was written' }

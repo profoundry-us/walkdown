@@ -1,0 +1,13 @@
+# `walkdown claims --url` on a page's fragment state, where the storyboard declares both.
+screen: claims-url-fragment
+title: The URL's fragment names a screen of its own
+rule: screens.identity.fragment-is-identity
+fixture: g2-routes
+command: [claims, --url, 'http://localhost:3000/cart#coupon']
+exit: 0
+expect:
+  - '^http://localhost:3000/cart#coupon$'
+  - '^  0001-sp-checkout — screen cart-coupon \(target local\)$'
+anchors:
+  - { id: cli.claims.url, match: '^http' }
+  - { id: cli.claims.screen, match: '— screen ' }

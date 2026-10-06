@@ -1,0 +1,15 @@
+id: n-0465
+uuid: a11b5fff-5519-4740-a069-46dd3f6a81d5
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:35.466Z
+anchor:
+  screen: sweep-needs-a-reason
+status: open
+body: "Draw what `walkdown sweep --blueprint checkout` prints with no --why: the
+  refusal asking for a reason, and the two lines saying why a sweep needs one
+  (status.sweep.deliberate). Anchors: cli.prompt, cli.refusal, cli.sweep.why,
+  cli.exit. as-built/cli/sweep-needs-a-reason.html is the build, from
+  test/cli/scenarios/sweep-needs-a-reason.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

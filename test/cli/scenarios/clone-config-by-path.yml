@@ -1,0 +1,15 @@
+# The spec.yml `blueprints new` writes: the clone's own reporter and formatter, by path.
+screen: clone-config-by-path
+title: The config names the clone's reporter by its path, with nothing to install
+rule: delivery.install.clone-is-the-install
+fixture: one-blueprint
+cat: home/projects/shop/blueprints/checkout/spec.yml
+exit: 0
+expect:
+  - '^  # Playwright — add \[''~/src/walkdown/lib/playwright-reporter\.js''\] to the reporter array in playwright\.config\.$'
+  - '^  # That is this clone''s reporter by path, because the clone is the install and$'
+  - '^  # nothing puts a `walkdown` package in your node_modules\.'
+  - '^  # RSpec — the formatter is in this clone, loaded by its path; no gem to add:$'
+anchors:
+  - { id: cli.config.reporter, match: '^  # (Playwright|That is this clone|nothing puts|installed as a package)' }
+  - { id: cli.config.formatter, match: '^  # RSpec' }

@@ -10,9 +10,8 @@
 import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
-import { findThreads } from '../../lib/threads.js';
 import { planRelabel, relabelThread } from '../../lib/writes.js';
-import { candidatesHere, end, loadOrExit } from './context.js';
+import { end, loadOrExit, namedOrExit } from './context.js';
 
 const firstLine = (t) => String(t?.body ?? '').trim().split('\n')[0].slice(0, 80);
 
@@ -28,12 +27,10 @@ export async function run(args) {
   });
   const name = positionals[0];
   if (!name) {
-    console.error('Usage: walkdown threads relabel <label|uuid> [--yes] [--blueprint <id>] [--json]');
+    console.error('Usage: walkdown threads relabel <label|uuid> --blueprint <id> [--yes] [--json]');
     return end(2);
   }
-  // The blueprint holding the name, where only one of the project's does.
-  const holding = values.blueprint ? [] : candidatesHere().filter((bp) => findThreads(loadOrExit(bp).threads, name).length);
-  const blueprint = loadOrExit(values.blueprint ?? (holding.length === 1 ? holding[0] : undefined));
+  const blueprint = loadOrExit(namedOrExit(values.blueprint, 'threads relabel'));
 
   let plan;
   try {
@@ -51,7 +48,7 @@ export async function run(args) {
   if (!values.yes) {
     if (!process.stdin.isTTY) {
       say();
-      console.error(yellow(`\nNothing was changed. \`walkdown threads relabel ${plan.uuid} --yes\` does it.`));
+      console.error(yellow(`\nNothing was changed. \`walkdown threads relabel ${plan.uuid} --yes --blueprint ${values.blueprint}\` does it.`));
       return end(2);
     }
     say();

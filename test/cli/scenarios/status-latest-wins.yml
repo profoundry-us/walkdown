@@ -1,0 +1,18 @@
+# `walkdown status <rule>` where local passed on Monday and failed on
+# Wednesday, and staging passed on Tuesday: each target its own latest.
+screen: status-latest-wins
+title: The latest run at each target is the rule's status there
+rule: status.derived.latest-wins
+fixture: g4-latest-wins
+command: [status, checkout.basics.pays]
+exit: 1
+expect:
+  - '^checkout\.basics\.pays · failing$'
+  - '^    checks/local   ✗ fail  \S+-local-01 · '
+  - '^                   Wednesday: the payment form never submitted$'
+  - '^    checks/staging ✓ pass  \S+-staging-01 · '
+  - '^                   Tuesday: the card payment went through$'
+anchors:
+  - { id: cli.status.verdict, match: '^checkout\.basics\.pays · ' }
+  - { id: cli.status.local, match: '^    checks/local |^                   Wednesday' }
+  - { id: cli.status.staging, match: '^    checks/staging |^                   Tuesday' }

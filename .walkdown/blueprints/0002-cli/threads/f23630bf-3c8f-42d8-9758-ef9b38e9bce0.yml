@@ -1,0 +1,17 @@
+id: n-0447
+uuid: f23630bf-3c8f-42d8-9758-ef9b38e9bce0
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:31.163Z
+anchor:
+  screen: run-record-signatures
+status: open
+body: "Draw a walkdown run record as the ledger keeps it, the file `cat` prints:
+  the actor who drove the walk, and the signatures it was recorded with, a role
+  and a person each, eng by topher and product by pat
+  (status.acceptance.roles-recorded-on-the-run). Anchors: cli.prompt,
+  cli.run.actor, cli.run.signatures, cli.exit.
+  as-built/cli/run-record-signatures.html is the build, from
+  test/cli/scenarios/run-record-signatures.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

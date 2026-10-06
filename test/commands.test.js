@@ -66,7 +66,7 @@ test('a noun alone lists, and each noun takes its verbs @rule:commands.shape.nou
   const m = machine();
   try {
     oneRule(m);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.', '--blueprint', 'checkout']);
     for (const noun of ['blueprints', 'threads', 'records']) {
       const bare = m.wd([noun]);
       const list = m.wd([noun, 'list']);
@@ -96,7 +96,7 @@ test('every retired form exits 2, changes nothing, and prints the form that repl
   const m = machine();
   try {
     oneRule(m);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.', '--blueprint', 'checkout']);
     const before = { home: snapshot(m.home), shop: snapshot(m.shop) };
     const cases = [
       [['thread', 'n-0001', '--reply', 'ok'], 'walkdown threads reply n-0001 ok'],
@@ -218,7 +218,7 @@ test('blueprints new makes one outside the repository, again changes nothing, an
     assert.equal(first.status, 0, first.stderr);
     assert.deepEqual(registry(m).map((r) => nm(r.id)), ['shop'], 'named for the directory');
     const personal = join(m.home, 'projects', 'shop', 'blueprints');
-    assert.deepEqual(readdirSync(personal).map((f) => f.replace(/^\d{6}-/, 'YYYYMM-')), ['YYYYMM-shop'], 'in a folder named for this month');
+    assert.deepEqual(readdirSync(personal), ['shop'], 'in a folder named after the blueprint');
     assert.ok(existsSync(join(personal, readdirSync(personal)[0], 'spec.yml')));
     assert.deepEqual(snapshot(m.shop), shop, 'nothing added to the repository');
 
@@ -232,6 +232,42 @@ test('blueprints new makes one outside the repository, again changes nothing, an
     assert.deepEqual(registry(m).map((r) => nm(r.id)).sort(), ['search', 'shop']);
   } finally {
     m.done();
+  }
+});
+
+test('with no terminal, blueprints new in a folder inside the checkout joins its project, named for the folder, and --project makes one of its own @rule:commands.blueprints.new-makes-one', () => {
+  const m = machine();
+  try {
+    m.ok(['init']);
+    m.ok(['blueprints', 'new']);
+    const api = join(m.shop, 'api');
+    mkdirSync(api);
+
+    const joined = m.wd(['blueprints', 'new'], api);
+    assert.equal(joined.status, 0, joined.stderr);
+    const said = joined.stdout + joined.stderr;
+    assert.match(said, /api is inside .*shop, so this blueprint joins its project `shop`\. `--project <label>` makes a project of its own instead\./);
+    const rows = registry(m);
+    assert.deepEqual(rows.map((r) => nm(r.id)), ['shop', 'api'], "named for the folder, never taken for shop's own");
+    assert.deepEqual(rows.map((r) => r.project), ['shop', 'shop'], 'in the project `shop`');
+
+  } finally {
+    m.done();
+  }
+  // The same folder with --project api is a project of its own, and nothing is asked.
+  const n = machine();
+  try {
+    n.ok(['init']);
+    n.ok(['blueprints', 'new']);
+    const api = join(n.shop, 'api');
+    mkdirSync(api);
+    const separate = n.wd(['blueprints', 'new', '--project', 'api'], api);
+    assert.equal(separate.status, 0, separate.stderr);
+    assert.doesNotMatch(separate.stdout + separate.stderr, /joins its project/);
+    const row = registry(n).find((r) => nm(r.id) === 'api');
+    assert.equal(row?.project, 'api', 'a project of its own');
+  } finally {
+    n.done();
   }
 });
 
@@ -329,7 +365,7 @@ test('records move moves one kind and the registry says where @rule:commands.rec
     mkdirSync(evidence, { recursive: true });
     writeFileSync(join(evidence, 'shot.png'), 'png');
     const to = join(m.root, 'elsewhere', 'evidence');
-    const r = m.wd(['records', 'move', 'evidence', '--to', to]);
+    const r = m.wd(['records', 'move', 'evidence', '--to', to, '--blueprint', 'shop']);
     assert.equal(r.status, 0, r.stderr);
     assert.equal(readFileSync(join(to, 'shot.png'), 'utf8'), 'png');
     assert.equal(m.ok(['where', 'evidence']).stdout.trim(), to);
@@ -343,8 +379,8 @@ test('show reads, reply says, set changes, and a refused change lands nothing @r
   const m = machine();
   try {
     oneRule(m);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.']);
-    m.ok(['threads', 'new', '--kind', 'question', '--rule', 'checkout.basics.pays', '--body', 'Which cards?']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Declined cards do nothing.', '--blueprint', 'checkout']);
+    m.ok(['threads', 'new', '--kind', 'question', '--rule', 'checkout.basics.pays', '--body', 'Which cards?', '--blueprint', 'checkout']);
     const threads = m.ok(['where', 'threads']).stdout.trim();
     const ids = JSON.parse(m.ok(['threads', 'list', '--json']).stdout).map((t) => t.id).sort();
     const [note, question] = [ids.find((i) => i.startsWith('n-')), ids.find((i) => i.startsWith('q-'))];
@@ -354,27 +390,27 @@ test('show reads, reply says, set changes, and a refused change lands nothing @r
     m.ok(['threads', 'show', note]);
     assert.deepEqual(snapshot(threads), before, 'show changes nothing');
 
-    m.ok(['threads', 'reply', note, 'done']);
+    m.ok(['threads', 'reply', note, 'done', '--blueprint', 'checkout']);
     assert.equal(read(note).status, 'open', 'a reply leaves the status');
     assert.equal(read(note).replies.at(-1).body, 'done');
 
-    m.ok(['threads', 'reply', note, '--as-agent', 'flags first']);
+    m.ok(['threads', 'reply', note, '--as-agent', 'flags first', '--blueprint', 'checkout']);
     assert.equal(read(note).replies.at(-1).body, 'flags first', 'the text is found after the flags too');
 
-    m.ok(['threads', 'set', note, '--status', 'addressed', '--reply', 'fixed in 1a2b3c']);
+    m.ok(['threads', 'set', note, '--status', 'addressed', '--reply', 'fixed in 1a2b3c', '--blueprint', 'checkout']);
     assert.equal(read(note).status, 'addressed');
     assert.equal(read(note).replies.at(-1).body, 'fixed in 1a2b3c', 'the reply landed with the change');
 
-    m.ok(['threads', 'set', question, '--status', 'answered', '--reply', 'Visa only.']);
+    m.ok(['threads', 'set', question, '--status', 'answered', '--reply', 'Visa only.', '--blueprint', 'checkout']);
     const settled = snapshot(threads);
-    const refused = m.wd(['threads', 'set', question, '--status', 'open', '--reply', 'never mind']);
+    const refused = m.wd(['threads', 'set', question, '--status', 'open', '--reply', 'never mind', '--blueprint', 'checkout']);
     assert.equal(refused.status, 2);
     assert.match(refused.stderr, /reply did not land/);
     assert.deepEqual(snapshot(threads), settled, 'refused whole');
 
     // reply refuses a status, and set refuses to be a bare reply.
-    assert.equal(m.wd(['threads', 'reply', note, 'x', '--status', 'open']).status, 2);
-    assert.equal(m.wd(['threads', 'set', note, '--reply', 'x']).status, 2);
+    assert.equal(m.wd(['threads', 'reply', note, 'x', '--status', 'open', '--blueprint', 'checkout']).status, 2);
+    assert.equal(m.wd(['threads', 'set', note, '--reply', 'x', '--blueprint', 'checkout']).status, 2);
   } finally {
     m.done();
   }

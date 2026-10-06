@@ -1,0 +1,16 @@
+# `walkdown threads reply --as-agent` with a sentence chained on dashes.
+screen: reply-refused-voice
+title: The machine's reply is refused when it misses the voice
+rule: ownership.authoring.machine-words-pass-the-voice
+fixture: a-note
+command: [threads, reply, n-0001, 'Fixed the declined card - the pay button now waits for the bank and shows its message - and a retry is offered under it.', --as-agent, --blueprint, checkout]
+exit: 2
+expect:
+  - '^the machine''s words do not pass the voice \(docs/13-voice\.md\):$'
+  - '^  - dash-clause: two thoughts bolted on with dashes \("Fixed the declined card - the pay button now waits for th…"\) — give the second its own sentence, or cut it$'
+  - '^Reword them, or file them as they are with --as-is\.$'
+  - '^Nothing was changed, and the reply did not land\.$'
+anchors:
+  - { id: cli.voice.fault, match: '^the machine''s words|^  - ' }
+  - { id: cli.voice.way-past, match: '^Reword them' }
+  - { id: cli.unchanged, match: '^Nothing was changed' }

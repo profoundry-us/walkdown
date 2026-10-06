@@ -1,0 +1,15 @@
+# A note a person filed with `--reason finding`: its record says why it exists, and whose account it is.
+screen: thread-finding
+title: A finding says why it exists and is signed by the agent
+rule: threads.lifecycle.says-why-it-exists
+fixture: g3-a-finding
+cat: home/projects/shop/blueprints/checkout/threads/*.yml
+exit: 0
+expect:
+  - '^kind: note$'
+  - '^reason: finding$'
+  - '^author: agent$'
+  - '^status: open$'
+anchors:
+  - { id: cli.thread.reason, match: '^reason: ' }
+  - { id: cli.thread.author, match: '^author: ' }

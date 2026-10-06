@@ -6,7 +6,7 @@ fixture: one-blueprint
 command: [where]
 exit: 0
 expect:
-  - '^  spec      ~/\.walkdown/projects/shop/blueprints/202610-checkout$'
+  - '^  spec      ~/\.walkdown/projects/shop/blueprints/checkout$'
   - '^            this machine''s registry \(0001-sp-checkout\)$'
   - '^            the blueprint''s own records\.yml \(0001-sp-checkout\)$'
   - '^            this machine''s registry, which says which checkout the blueprint belongs to$'

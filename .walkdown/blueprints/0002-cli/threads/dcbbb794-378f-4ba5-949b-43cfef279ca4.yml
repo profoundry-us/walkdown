@@ -6,8 +6,25 @@ author: topher
 created: 2026-10-06T20:01:30.497Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: open
+status: addressed
 body: The screen for this one doesn't make a lot of sense to me. It's talking
   about import? And it says "still - the row named ~/shop, which is gone". That
   is practically meaningless in this context; I have no idea what it's about or
   wh it's there.
+replies:
+  - author: agent
+    created: 2026-10-06T22:21:58Z
+    body: 'Reworded. The moved line now reads "keeps its ID `X`: it was at ~/shop,
+      which no longer exists, and this machine now finds it at ~/shop-moved".
+      There is a new screen, blueprints-two-searches, for the IDs-stay-here
+      half: two projects each with a `search`, two IDs, no ID written anywhere
+      but registry.yml.'
+  - author: agent
+    created: 2026-10-06T22:30:11Z
+    body: 'A correction to my reply above, which quoted the screen wrongly. The
+      moved line reads in full: "~
+      moved  ~/shop-moved/.walkdown/blueprints/checkout keeps its ID
+      `0001-sp-checkout`: it was at ~/shop, which no longer exists". The
+      blueprints-two-searches screen shows the two projects and their two IDs.
+      That IDs are written nowhere else is checked by the agent tier, not
+      drawn.'

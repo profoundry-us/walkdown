@@ -1,0 +1,16 @@
+id: n-0455
+uuid: dc36de72-98e1-4581-a028-55504c88e9c8
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:33.569Z
+anchor:
+  screen: status-excused-tier
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints for a rule
+  excusing the agent tier: verify reading checks alone, and the agent row marked
+  excused with its reason, whole, where the verdict would have been
+  (status.evidence.excuse-says-why). Anchors: cli.prompt, cli.status.verify,
+  cli.status.excuse, cli.exit. as-built/cli/status-excused-tier.html is the
+  build, from test/cli/scenarios/status-excused-tier.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

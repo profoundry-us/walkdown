@@ -11,6 +11,7 @@ stories:
         because: A stamp that depends on where it was written means a different moment on every machine that reads it, and a bare date says nothing about which day it meant.
         history: "`walkdown hash --write --reword` stamped `at: 2026-09-14` under an entry whose reason said 2026-09-13 - the UTC date, sliced bare, at one in the morning (n-0290)."
         verify: [checks]
+        screens: [thread-stamps-utc]
         signoff: [eng]
         steps:
           given:

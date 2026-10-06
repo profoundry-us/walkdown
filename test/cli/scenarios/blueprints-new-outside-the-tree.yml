@@ -6,7 +6,7 @@ fixture: git-repo
 command: [blueprints, new, checkout]
 exit: 0
 expect:
-  - '^  \+ created  ~/\.walkdown/projects/shop/blueprints/202610-checkout/spec\.yml$'
+  - '^  \+ created  ~/\.walkdown/projects/shop/blueprints/checkout/spec\.yml$'
   - '^  In ~/\.walkdown, which git never sees\. Nothing was added to this repository\.$'
   - '^  tracked: nothing  every path is outside the repository, where git never looks$'
 anchors:

@@ -1,0 +1,12 @@
+# `walkdown records move` into a folder that already holds records: refused, nothing merged.
+screen: records-move-refused
+title: Moving records into a folder that holds some is refused
+rule: locations.keeping.moving-is-a-decision
+fixture: g1-records-taken
+command: [records, move, evidence, --to, ../evidence-kept, --blueprint, checkout]
+exit: 2
+expect:
+  - '^~/evidence-kept already holds 1 file\(s\)\.$'
+  - '^Two ledgers merged into one directory is an edit of both\. Pick an empty destination\.$'
+anchors:
+  - { id: cli.refusal, match: '^(~/evidence-kept already|Two ledgers)' }

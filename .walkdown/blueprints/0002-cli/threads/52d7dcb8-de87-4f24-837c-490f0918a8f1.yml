@@ -13,3 +13,12 @@ body: "Draw what `walkdown blueprints import . --all` prints in a checkout moved
   cli.moved.done, cli.exit. as-built/cli/import-moved-checkout.html is the
   build, from test/cli/scenarios/import-moved-checkout.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-06T21:50:27Z
+    body: 'The build changed under this request: the moved line now says "keeps its
+      ID `0001-sp-checkout`: it was at ~/shop, which no longer exists" rather
+      than "still — the row named ~/shop, which is gone" (Topher on n-0421). The
+      folder is `checkout` now, no month in front (n-0355). A second screen for
+      the same rule, blueprints-two-searches (n-0439), shows the IDs themselves.
+      as-built/cli/import-moved-checkout.html is recaptured.'

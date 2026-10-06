@@ -1,0 +1,16 @@
+id: n-0443
+uuid: f805a660-19c2-4345-9ce0-38d721ec4d70
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:30.232Z
+anchor:
+  screen: records-move-refused
+status: open
+body: "Draw what `walkdown records move evidence --to ../evidence-kept` prints
+  when that folder already holds records: the destination named with how many
+  files it holds, and the refusal that merging two ledgers would edit both, so
+  it wants an empty one (locations.keeping.moving-is-a-decision). Anchors:
+  cli.prompt, cli.refusal, cli.exit. as-built/cli/records-move-refused.html is
+  the build, from test/cli/scenarios/records-move-refused.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

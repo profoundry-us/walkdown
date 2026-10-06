@@ -1,0 +1,15 @@
+# `walkdown rules move` of checkout's story into search: the rules, their thread and the run behind them.
+screen: rules-move
+title: rules move takes a story to another blueprint with its verdicts
+rule: locations.several.rules-move
+fixture: g1-before-move
+command: [rules, move, checkout.basics, --blueprint, checkout, --to, search]
+exit: 0
+expect:
+  - '^✓ moved 2 rule\(s\) from `checkout` to `search`: checkout\.basics\.pays, checkout\.basics\.totals$'
+  - '^  1 thread\(s\) moved, keeping their ids: n-0001$'
+  - '^  1 run record\(s\) copied, holding only these rules'' results, and 0 sweep\(s\)$'
+  - '^checkout''s run records are unchanged\.'
+anchors:
+  - { id: cli.rules-move.done, match: '^(✓ moved|  \d+ (thread|run record|piece))' }
+  - { id: cli.rules-move.records, match: '^checkout''s run records are unchanged' }

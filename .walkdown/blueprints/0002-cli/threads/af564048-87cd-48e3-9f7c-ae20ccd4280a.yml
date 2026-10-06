@@ -1,0 +1,18 @@
+id: n-0477
+uuid: af564048-87cd-48e3-9f7c-ae20ccd4280a
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:17.127Z
+anchor:
+  screen: lint-signoff-omits-eng
+status: open
+body: "Draw what `walkdown lint` prints over two rules: one whose signoff names
+  only product, and one whose signoff is empty. The first is flagged because
+  engineering always signs. The second is flagged because leaving the field out
+  already means eng. A rule with no signoff line is not named
+  (`status.acceptance.signoff-defaults-to-eng`). Anchors: cli.prompt,
+  cli.lint.omits-eng, cli.lint.empty, cli.exit.
+  as-built/cli/lint-signoff-omits-eng.html is the build, from
+  test/cli/scenarios/lint-signoff-omits-eng.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

@@ -1,0 +1,15 @@
+# `walkdown lint` on search, which shares a suite with checkout and cites checkout's thread: only what nobody holds is named.
+screen: lint-across-blueprints
+title: Lint accepts what names another blueprint's rule or thread
+rule: locations.several.lint-reads-the-project
+fixture: g1-lint-across
+command: [lint, --blueprint, search]
+exit: 1
+expect:
+  - '^  ✗ \[coverage\] checkout\.basics\.refunds: a check references this rule id, but no such rule exists$'
+  - '^  ⚠ \[drift\] search/features/search\.yml › search\.basics\.recent: origin references unknown thread "n-0099"$'
+  - '^✗ 2 rules, 0 screens, 0 anchors, 0 threads, 1 runs — 1 error\(s\), 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.errors, match: '^ERRORS$|^  ✗ ' }
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^✗ \d+ rules' }

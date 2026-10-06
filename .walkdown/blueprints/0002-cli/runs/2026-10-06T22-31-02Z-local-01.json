@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-06T22-31-02Z-local-01",
+  "created": "2026-10-06T22:31:02Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "360afa3-dirty",
+  "note": "Agent-tier re-confirmation of locations.registry.ids-stay-here after the correction reply on n-0421. The build is unchanged; I re-read the thread and the as-built screen and reused the evidence from 2026-10-06T22-28-35Z. Hash checked ok. Not recorded; no thread replies.",
+  "spec_hash": "sha256:bc4ebe001cb6",
+  "results": [
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:ba36d9b498af",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-28-35Z/ids-stay-here.txt"
+      ],
+      "reasoning": "I re-confirmed this after the correction reply on n-0421, and nothing in the build has changed. The evidence from 2026-10-06T22-28-35Z covers two projects with a blueprint `search` each, given 0001-hm-search and 0002-sp-search. Each had a thread and a sweep run, hireart_main was committed, a pointer was written, and serve's /api/whose filled the cache. After that, no file outside ~/.walkdown held an ID, and inside it only registry.yml and cache/claims.json did, which the statement reworded per q-0384 allows. A moved committed checkout kept 0001-sp-checkout through `import . --all`. I re-read as-built/cli/import-moved-checkout.html. It is drawn at `~/shop-moved $` and says '~ moved ~/shop-moved/.walkdown/blueprints/checkout keeps its ID `0001-sp-checkout`: it was at ~/shop, which no longer exists', which tells a reader what happened. The correction reply now quotes that line exactly and says plainly that 'written nowhere else' is checked by the agent tier, not drawn. So the thread no longer promises anything the screen lacks, and the statement still holds. One thing is still open and lies outside this rule: the footer '<n> blueprint(s) indexed' counts every registered blueprint rather than those the import touched. It read '2' for one moved blueprint on a machine that also held `notes`."
+    }
+  ]
+}

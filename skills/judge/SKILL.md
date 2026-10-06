@@ -18,7 +18,7 @@ verify requirement).
    `agent` and whose agent cell is `never`, `stale`, or worth re-judging after
    a change.
 
-2. **Assemble each rule's prompt.** `walkdown judge <rule-id>` prints
+2. **Assemble each rule's prompt.** `walkdown judge <rule-id> --blueprint <id>` prints
    everything the judging needs to start: the statement, the steps, any
    screen's setup, both surfaces' addresses resolved through the target, the
    anchors the steps name, where evidence goes, the run-record shape, and the
@@ -92,11 +92,11 @@ verify requirement).
 7. **Fails spawn threads.** For each failing rule, create a note anchored to
    the exact rule/screen/element, citing the evidence pair
    (`walkdown threads new --kind note --rule <id> --body <text> --as-agent
-   --reason finding`, or POST `/api/threads` while serve runs). Put the
+   --reason finding --blueprint <id>`, or POST `/api/threads` while serve runs). Put the
    thread id in that result's `threads` array. A finding is authored
    `agent` and is yours to close, never a person's: once the fix is made
    and a later pass of yours judges it, `walkdown status` asks you to settle
-   it (`walkdown threads set <id> --status settled --as-agent`). A person's
+   it (`walkdown threads set <id> --status settled --as-agent --blueprint <bp>`). A person's
    signed pass on the rule closes it too.
 
 8. **Close out.** `walkdown lint` (the record must validate), then

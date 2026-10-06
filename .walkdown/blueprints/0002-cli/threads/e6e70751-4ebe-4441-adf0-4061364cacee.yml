@@ -1,0 +1,16 @@
+id: n-0449
+uuid: e6e70751-4ebe-4441-adf0-4061364cacee
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:31.551Z
+anchor:
+  screen: skills-again
+status: open
+body: "Draw what `walkdown skills --into ~/.claude/skills` prints when
+  walkdown's link is already there: the one link reported up to date, pointing
+  at the clone, and the note that updating the clone updates the skills with
+  nothing to copy again (delivery.plugin.one-link). Anchors: cli.prompt,
+  cli.skills.link, cli.skills.note, cli.exit. as-built/cli/skills-again.html is
+  the build, from test/cli/scenarios/skills-again.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

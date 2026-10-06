@@ -1,0 +1,14 @@
+# `walkdown status <rule>` for a rule that says nothing about how it is
+# verified: the agent tier is asked of it, and no checks tier.
+screen: status-agent-assumed
+title: A rule that declares nothing is judged by the agent
+rule: status.evidence.agent-assumed
+fixture: g4-says-nothing
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '· verify agent · signed by eng ·'
+  - '^    agent          never$'
+anchors:
+  - { id: cli.status.verify, match: '^  story .* · verify ' }
+  - { id: cli.status.evidence, match: '^    agent  ' }

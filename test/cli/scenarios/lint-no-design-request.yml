@@ -1,0 +1,13 @@
+# `walkdown lint` on a storyboard with two undrawn screens, one with a design request.
+screen: lint-no-design-request
+title: Lint names an undrawn screen nobody has asked design for
+rule: ownership.drift.design-requests-required
+fixture: g2-undrawn-screens
+command: [lint, --no-checks]
+exit: 0
+expect:
+  - '^  ⚠ \[drift\] checkout/storyboard\.yml › cart: screen has no design and no open design request — file one with `walkdown threads new --screen <id> --blueprint 0001-sp-checkout` \(a proposal alone is not a request\)$'
+  - '^✓ 1 rules, 2 screens, 0 anchors, 1 threads, 0 runs — 0 errors, 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.drift, match: '^  ⚠ \[drift\]' }
+  - { id: cli.lint.summary, match: '^✓ \d+ rules' }

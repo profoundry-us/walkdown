@@ -126,7 +126,7 @@ test(`in a worktree ${layout} the branch spec and threads are read there, and ig
   assert.doesNotMatch(JSON.stringify(json(m.cli(m.shop, 'status', '--json'))), /exactly one/, 'and main still reads its own');
 
   // A thread lands in the worktree's tree.
-  const filed = m.cli(wt, 'threads', 'new', '--rule', 'cart.add.one', '--body', 'Seen on the branch.', '--as-agent');
+  const filed = m.cli(wt, 'threads', 'new', '--rule', 'cart.add.one', '--body', 'Seen on the branch.', '--as-agent', '--blueprint', 'shop');
   assert.equal(filed.status, 0, filed.stdout + filed.stderr);
   assert.equal(readdirSync(join(branchHome, 'threads')).filter((x) => x.endsWith('.yml')).length, 1);
   assert.ok(!existsSync(join(m.home_, 'threads')) || !readdirSync(join(m.home_, 'threads')).some((x) => x.endsWith('.yml')));

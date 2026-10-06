@@ -1,0 +1,18 @@
+id: n-0482
+uuid: 9f3e426f-016d-41a2-938e-645aa9de54c4
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:18.077Z
+anchor:
+  screen: status-after-a-sweep
+status: open
+body: "Draw what `walkdown status` prints after a sweep over the checks tier,
+  with one of three rules checked again since. The two older checks verdicts
+  read stale, and the agent column is untouched. The sweep section names the
+  marker and its reason. It counts 1/3 judged, 2 to go, and lists the two still
+  owed (`status.sweep.declares-a-floor`, `status.sweep.says-what-is-left`).
+  Anchors: cli.prompt, cli.status.rows, cli.sweep.head, cli.sweep.owed,
+  cli.exit. as-built/cli/status-after-a-sweep.html is the build, from
+  test/cli/scenarios/status-after-a-sweep.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

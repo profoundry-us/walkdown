@@ -6,8 +6,16 @@ author: agent
 created: 2026-10-06T02:50:48.183Z
 anchor:
   rule: locations.threads.clashing-labels-ask
-status: open
+status: verified
 body: "Found while judging: a branch merge left `a`'s n-0007 beside `b`'s
   n-0007, one label in two blueprints of one project. Labels are numbered across
   the project, but neither `threads` nor `lint` says so; the clash check reads
   one blueprint."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-06T21:11:04Z
+    body: Verified by topher's pass on locations.threads.clashing-labels-ask
+      (2026-10-06T21-11-04Z-local-01).
+verified_by: topher
+verified_via: 2026-10-06T21-11-04Z-local-01

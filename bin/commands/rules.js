@@ -1,9 +1,9 @@
 import { parseArgs } from 'node:util';
-import { nameOf, resolveLocations } from '../../lib/locations.js';
+import { nameOf, projectIdsAt, resolveLocations } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { applyMove, planMove } from '../../lib/rules-move.js';
 import { applyRename, planRename } from '../../lib/rules-rename.js';
-import { end } from './context.js';
+import { end, namedOrExit } from './context.js';
 import { dispatch } from './noun.js';
 
 /*
@@ -11,7 +11,8 @@ import { dispatch } from './noun.js';
  *
  * The rules, their threads and the history behind their verdicts go to
  * another blueprint of the same project. Which blueprint they come from is
- * the one that holds them, so `--blueprint` is only needed where two do.
+ * named with `--blueprint`, as every write names its blueprint
+ * (locations.several.writes-name-one).
  */
 function move(args) {
   const { values, positionals } = parseArgs({
@@ -25,12 +26,13 @@ function move(args) {
   });
   const what = positionals;
   if (!what.length || !values.to) {
-    console.error('walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run] [--blueprint <from>]');
+    console.error('walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]');
     return end(2);
   }
+  const from = namedOrExit(values.blueprint, 'rules move');
 
-  const here = resolveLocations({});
-  const project = (here.ambiguous ? here.config.registry.candidates : here.spec?.path ? [here.id] : [])
+  // Every blueprint of the project, wherever in it this is run.
+  const project = projectIdsAt()
     // By the name an ID ends with: the ID is this machine's, and what a move
     // writes - `copied_from` - is read on every machine (ADR 0014 §2).
     .map((full) => ({ id: nameOf(full), full, dir: resolveLocations({ blueprint: full }).spec?.path }))
@@ -47,17 +49,9 @@ function move(args) {
     console.error(dim('Nothing was moved.'));
     return end(2);
   }
-  const holders = values.blueprint
-    ? project.filter((b) => named(b, values.blueprint))
-    : project.filter((b) => b.id !== to.id && planMove({ from: b, to, what, project }).picks.length === what.length);
+  const holders = project.filter((b) => named(b, from));
   if (holders.length !== 1) {
-    console.error(
-      red(
-        holders.length
-          ? `\`${what.join(' ')}\` is in ${holders.map((b) => `\`${b.id}\``).join(' and ')} — choose the one to move it out of with \`--blueprint <from>\` (e.g. \`--blueprint ${holders[0].id}\`).`
-          : `No one blueprint in this project holds all of ${what.map((w) => `\`${w}\``).join(', ')}.`,
-      ),
-    );
+    console.error(red(`✗ \`${from}\` is not a blueprint of this project (${project.map((b) => b.id).join(', ')}). Nothing was moved.`));
     return end(2);
   }
 
@@ -97,17 +91,15 @@ function rename(args) {
   });
   const [from, to] = positionals;
   if (!from || !to || positionals.length !== 2) {
-    console.error('walkdown rules rename <rule> <new-id> [--dry-run] [--blueprint <id>]');
+    console.error('walkdown rules rename <rule> <new-id> --blueprint <id> [--dry-run]');
     return end(2);
   }
-  const here = resolveLocations({ blueprint: values.blueprint ?? null });
-  const project = values.blueprint
-    ? here.spec?.path ? [{ id: here.id, dir: here.spec.path }] : []
-    : (here.ambiguous ? here.config.registry.candidates : here.spec?.path ? [here.id] : [])
-        // By the name an ID ends with: the ID is this machine's, and what a move
-    // writes - `copied_from` - is read on every machine (ADR 0014 §2).
-    .map((full) => ({ id: nameOf(full), full, dir: resolveLocations({ blueprint: full }).spec?.path }))
-        .filter((b) => b.dir);
+  const here = resolveLocations({ blueprint: namedOrExit(values.blueprint, 'rules rename') });
+  if (here.ambiguous) {
+    console.error(red(`✗ ${here.config.registry.why ?? `\`${values.blueprint}\` names more than one blueprint`}`));
+    return end(2);
+  }
+  const project = here.spec?.path ? [{ id: here.id, dir: here.spec.path }] : [];
   if (!project.length) {
     console.error(red(`✗ ${here.spec?.why ?? 'no blueprint here'}`));
     return end(2);
@@ -148,13 +140,13 @@ function rename(args) {
 
 export const VERBS = {
   move: {
-    usage: 'walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run] [--blueprint <from>]',
+    usage: 'walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]',
     about:
       "Move rules to another blueprint of the same project, with their threads. The run\nrecords and evidence behind their verdicts are copied, so nothing is judged or signed\nagain, and the source's records are never edited. --dry-run says what would move.",
     run: move,
   },
   rename: {
-    usage: 'walkdown rules rename <rule> <new-id> [--dry-run] [--blueprint <id>]',
+    usage: 'walkdown rules rename <rule> <new-id> --blueprint <id> [--dry-run]',
     about:
       "Give a rule a new id. The old id stays on the rule under `formerly:`, so the run\nrecords, threads and tests that name it still count for it, and no verdict is lost.\nIts threads are anchored to the new id. --dry-run says what would change.",
     run: rename,

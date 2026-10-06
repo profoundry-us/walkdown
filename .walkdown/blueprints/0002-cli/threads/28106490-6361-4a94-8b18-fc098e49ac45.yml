@@ -1,0 +1,17 @@
+id: n-0453
+uuid: 28106490-6361-4a94-8b18-fc098e49ac45
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:33.191Z
+anchor:
+  screen: status-evidence-key
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints after the
+  blueprint's evidence was moved out of the repository: the agent's pass still
+  standing, and its picture cited by the logical key runs/evidence/..., never by
+  a path on anyone's disk (locations.travel.evidence-by-key). Anchors:
+  cli.prompt, cli.status.cell, cli.status.evidence, cli.exit.
+  as-built/cli/status-evidence-key.html is the build, from
+  test/cli/scenarios/status-evidence-key.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

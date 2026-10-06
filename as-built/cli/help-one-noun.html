@@ -61,8 +61,8 @@
       <div class="ln">      --rule keeps those anchored to one rule.</div>
       </div>
       <div class="ln"></div>
-      <div class="ln">  walkdown threads new --rule &lt;id&gt; | --screen &lt;id&gt; --body &lt;text&gt; [--kind note|question] [--element &lt;sel&gt;]</div>
-      <div class="ln">                     [--reason &lt;why&gt;] [--option "&lt;label&gt; :: &lt;why&gt;"]... [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]] [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">  walkdown threads new --rule &lt;id&gt; | --screen &lt;id&gt; --body &lt;text&gt; --blueprint &lt;id&gt; [--kind note|question] [--element &lt;sel&gt;]</div>
+      <div class="ln">                     [--reason &lt;why&gt;] [--option "&lt;label&gt; :: &lt;why&gt;"]... [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]] [--json]</div>
       <div class="ln">      Open a thread on a rule, or on a screen alone (a design request). --body says what was</div>
       <div class="ln">      seen; with --as-agent, --said carries what the person said and --added what the</div>
       <div class="ln">      machine put beside it.</div>
@@ -70,18 +70,18 @@
       <div class="ln">  walkdown threads show &lt;id&gt; [--blueprint &lt;id&gt;] [--json]</div>
       <div class="ln">      One thread in full: its anchor, its body and every reply. Changes nothing.</div>
       <div class="ln"></div>
-      <div class="ln">  walkdown threads reply &lt;id&gt; &lt;text&gt; [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]] [--as-is] [--attach &lt;file&gt;]... [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">  walkdown threads reply &lt;id&gt; &lt;text&gt; [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]] [--as-is] [--attach &lt;file&gt;]... --blueprint &lt;id&gt; [--json]</div>
       <div class="ln">      Say something on a thread and leave its status as it was. With --as-agent and --said,</div>
       <div class="ln">      the text is a person's words relayed; it is under their name with the machine marked.</div>
       <div class="ln"></div>
       <div class="ln">  walkdown threads set &lt;id&gt; --status &lt;s&gt; | --verify | --reopen | --waive | --option "&lt;label&gt; :: &lt;why&gt;"...</div>
-      <div class="ln">                     [--reason &lt;text&gt;] [--reply &lt;text&gt;] [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]] [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">                     --blueprint &lt;id&gt; [--reason &lt;text&gt;] [--reply &lt;text&gt;] [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]] [--json]</div>
       <div class="ln">      Change a thread: its status, or the choices a question offers. Transitions are checked</div>
       <div class="ln">      (a note: open → addressed → verified | reopen | waived; a question: open → answered →</div>
       <div class="ln">      incorporated | reopen | waived). Verified and waived need a named person; waiving and</div>
       <div class="ln">      reopening need --reason. --reply lands with the change, or neither lands.</div>
       <div class="ln"></div>
-      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; [--yes] [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; --blueprint &lt;id&gt; [--yes] [--json]</div>
       <div class="ln">      Give the newer of two threads sharing a label (a merge can leave two) the next free</div>
       <div class="ln">      label, keeping the old one as its alias. Asks first; with no terminal, --yes.</div>
       <div class="ln"></div>

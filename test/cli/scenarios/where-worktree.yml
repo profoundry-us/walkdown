@@ -8,7 +8,7 @@ command: [where]
 exit: 0
 expect:
   - '^walkdown where — 0001-sp-checkout$'
-  - '^  spec      ~/shop-wt/\.walkdown/blueprints/202610-checkout$'
+  - '^  spec      ~/shop-wt/\.walkdown/blueprints/checkout$'
   - '^            this branch''s copy, a git worktree of ~/shop \(0001-sp-checkout\)$'
   - '^            a git worktree of ~/shop, on reword$'
 anchors:

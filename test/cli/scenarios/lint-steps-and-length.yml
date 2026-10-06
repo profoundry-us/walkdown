@@ -1,0 +1,17 @@
+# `walkdown lint` on a rule with no steps, and one whose statement and because have grown long.
+screen: lint-steps-and-length
+title: A rule with no steps is an error; a statement grown into a paragraph is a warning
+rule: ownership.authoring.steps-are-required
+also: [ownership.authoring.statement-reads-at-a-glance]
+fixture: g2-authoring
+command: [lint, --no-checks]
+exit: 1
+expect:
+  - '^  ✗ \[schema\] checkout/features/refunds\.yml › refunds\.basics\.partial: rule has no steps — given/when/then is what a check gets built from, and a statement alone leaves it to be invented$'
+  - '^  ⚠ \[statement-reads-as-a-paragraph\] checkout/features/refunds\.yml › refunds\.basics\.to-the-card: the statement is 50 words in 3 sentence\(s\) — say the goal in one breath and let the steps carry the rest$'
+  - '^  ⚠ \[because-carries-history\] checkout/features/refunds\.yml › refunds\.basics\.to-the-card: the because is 40 words — a reason is timeless; what happened, with its date or count, belongs in `history:`$'
+  - '^✗ 3 rules, 0 screens, 0 anchors, 0 threads, 0 runs — 1 error\(s\), 2 warning\(s\)$'
+anchors:
+  - { id: cli.lint.errors, match: '^ERRORS$|^  ✗ ' }
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^✗ \d+ rules' }

@@ -1,3 +1,4 @@
+import { blueprintFlag } from '../../lib/locations.js';
 import { parseArgs } from 'node:util';
 import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
 import { defaultActor } from '../../lib/identity.js';
@@ -7,7 +8,7 @@ import { getThread, labelOwners } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, offer, openThread } from '../../lib/writes.js';
-import { candidatesHere, end, loadOrExit } from './context.js';
+import { candidatesHere, end, loadOrExit, namedOrExit } from './context.js';
 import { readFileSync } from 'node:fs';
 import { basename, extname } from 'node:path';
 
@@ -42,7 +43,16 @@ export function run(args) {
     console.error('`walkdown threads help` lists show, reply, set and new.');
     process.exit(2);
   }
-  let blueprint = loadOrExit(values.blueprint ?? holderOf(id));
+  const verb =
+    id === 'new'
+      ? 'new'
+      : values.status || values.verify || values.reopen || values.waive || values.option?.length
+        ? 'set'
+        : values.reply != null || values.said != null || values.added != null
+          ? 'reply'
+          : null;
+  // A change names its blueprint; reading one finds it (locations.several.writes-name-one).
+  let blueprint = loadOrExit(verb ? namedOrExit(values.blueprint, `threads ${verb}`) : (values.blueprint ?? holderOf(id)));
 
   /*
    * Who this runs as is not an argument. There was a `--actor <name>` here,
@@ -276,7 +286,7 @@ export function run(args) {
     // A label two threads share is named, both of them, and never guessed.
     console.error(`${id} labels ${owners.holding.length} threads:`);
     for (const o of owners.holding) console.error(`  ${o.uuid}  ${String(o.created ?? '')}  ${String(o.body ?? '').trim().split('\n')[0].slice(0, 80)}`);
-    console.error(`Name one by its UUID, or \`walkdown threads relabel ${id}\` gives the newer one a label of its own.`);
+    console.error(`Name one by its UUID, or \`walkdown threads relabel ${id}${blueprintFlag(blueprint.dir)}\` gives the newer one a label of its own.`);
     process.exit(2);
   }
   if (!t) {
@@ -419,11 +429,11 @@ function attachFiles(paths) {
 }
 
 /*
- * Which blueprint holds a thread, among several registered for the project.
- * A thread id that only one of them has names its blueprint on its own;
- * there is nothing to guess (ADR 0011 §2). Anything else - a new thread, an
- * id two hold or none does - leaves the choice where it was, and loadOrExit
- * refuses with the ids.
+ * Which blueprint holds a thread, among several registered for the project,
+ * for `threads show` alone: reading a thread chooses nothing. A change to one
+ * names its blueprint (locations.several.writes-name-one). An id two hold or
+ * none does leaves the choice where it was, and loadOrExit refuses with the
+ * ids.
  */
 function holderOf(id) {
   if (id === 'new') return undefined;

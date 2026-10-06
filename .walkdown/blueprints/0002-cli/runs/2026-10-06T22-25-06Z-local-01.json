@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-06T22-25-06Z-local-01",
+  "created": "2026-10-06T22:25:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "360afa3-dirty",
+  "note": "Agent-tier rejudge of the two fails from judge7 (n-0489, n-0490), driving bin/walkdown.js from the working tree on fresh mktemp machines with real git repos. Hashes checked ok with `hash --blueprint cli`. Not recorded; no threads filed.",
+  "spec_hash": "sha256:bc4ebe001cb6",
+  "results": [
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:2d83cc44a48d",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-21-53Z/writes-name-one.txt"
+      ],
+      "reasoning": "I rejudged on a fresh scratch machine. ~/shop is a real git repo with a committed and b kept in ~/.walkdown, each with a rule and a thread. All 11 writes ran with no --blueprint from six folders: the root, a's committed folder, a/features, b's ~/.walkdown home, b/features and shop/src/deep. All 96 runs exited 2, said the command acts on one blueprint, listed 0001-sp-a and 0002-sp-b, and gave the --blueprint example. A shasum of every file on the machine was identical before and after. Both earlier repros are fixed. `blueprints commit spec|none --blueprint b`, short or full ID, now moves b from inside a's folder, from a/features, from shop/src/deep, from b's own ~/.walkdown home and from inside b's committed features/, and a's files were unchanged throughout. Inside b's ~/.walkdown home, short --blueprint b now resolves for sweep, threads new/reply/set, hash --write and judge. The sweep landed in b's runs and none in a's. A thread label only a holds was still refused without --blueprint. A one-blueprint project kept in ~/.walkdown refused from inside its home and from a deep folder, naming 0003-cr-c, and changed nothing. An unregistered folder alone said 'No blueprint here'. One open point, which I did not count against the rule: standing inside a home, status, lint, threads and where report that home alone, with no sections. lib/locations.js:844 says this is deliberate, and the then-line saying reads cover every blueprint names no folder to run them from."
+    },
+    {
+      "rule": "locations.default.folder-names-are-yours",
+      "status": "pass",
+      "statement_hash": "sha256:81e31fdc5b44",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-21-53Z/folder-names-are-yours.txt"
+      ],
+      "reasoning": "I re-ran the repro on three fresh scratch machines, each with a committed copy of a repo holding homes at 202610-search, 0002-search, billing/api/invoices and 202610-search/inner. `import .` offered the three homes by folder and refused inner, naming both folders. --all registered the three under IDs that read no number from their folder names (0001-sp-search for folder 0002-search). Every way of importing inner by its path is now refused with 'a home inside a home is refused. Nothing was registered.' and both folders named, with the disk unchanged. I tried a relative path, a trailing slash, `import .` from inside inner, before or after the outer was registered, and --only 202610-search/inner. --ephemeral was refused as the original. The outer imported by its path registers alone, so two homes never end up nested in the registry. `blueprints new checkout` made a folder named checkout. `--folder 202610-checkout` was taken as given, and `--folder 202610-search/sub` was refused as a home inside a home. No folder was renamed: the spec.yml list after the runs held only the additions."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Verifying a note on a machine where nobody has said who is sitting at it.
+screen: threads-verify-nobody-named
+title: Verifying waits for a person who has said who they are
+rule: threads.lifecycle.claim-never-accept
+fixture: g3-addressed-nobody-named
+command: [threads, set, n-0001, --verify, --blueprint, checkout]
+exit: 2
+expect:
+  - '^"verified" is recorded under a person''s name, and this machine only has a guess \(sam, from git\)\. Say who you are in ~/\.walkdown/profile\.yml under `identity:` — a login name is not a decision$'
+  - '^Nothing was changed\.$'
+anchors:
+  - { id: cli.refusal, match: '^"verified" is recorded' }
+  - { id: cli.unchanged, match: '^Nothing was changed' }

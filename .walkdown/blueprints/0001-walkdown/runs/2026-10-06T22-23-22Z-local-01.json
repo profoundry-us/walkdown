@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-06T22-23-22Z-local-01",
+  "created": "2026-10-06T22:23:22Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "360afa3-dirty",
+  "tree_hash": "sha256:19bf10cdff4b",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "duration_ms": 9,
+      "checks": [
+        "test/judged-edges.test.js:392",
+        "test/judged-edges.test.js:408"
+      ]
+    },
+    {
+      "rule": "panel.start.open-a-folder",
+      "status": "pass",
+      "statement_hash": "sha256:5ace895ac628",
+      "duration_ms": 312,
+      "checks": [
+        "test/standard.test.js:215"
+      ]
+    }
+  ]
+}

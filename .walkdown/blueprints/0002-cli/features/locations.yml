@@ -70,6 +70,7 @@ stories:
         statement: The agent procedures walkdown ships install into your own skills directory and never into a repository unless a team asks for it.
         because: In your own skills directory they work in every project on the machine; a committed skill is a copy of walkdown's own source that walkdown cannot keep current afterwards.
         verify: [checks]
+        screens: [skills-asks-where]
         signoff: [eng, product]
         steps:
           given:
@@ -123,6 +124,7 @@ stories:
         because: A home outside the repository can only keep its design beside the spec, and neither layout should need a path to one person's disk in the shared config.
         history: "GitHub issue #17. With the home outside the repository, `prototype: { root: prototype/ }` looked in the repository, and every design page and stand-in was a 404."
         verify: [checks]
+        screens: [where-prototype-beside]
         signoff: [eng]
         steps:
           given:
@@ -154,9 +156,9 @@ stories:
           then:
             - The three homes are found and offered, each under its own folder
             - The home inside another home is refused, and both folders are named
-            - "`blueprints new` suggests a folder named for this month, such as `202610-checkout`, and accepts any other name it is given"
+            - "`blueprints new` names the folder after the blueprint, such as `checkout`, adding no number or date, and takes any other name given with `--folder`, such as `202610-checkout`"
             - No folder is renumbered or renamed to suit walkdown
-          statement_hash: sha256:20a203168083
+          statement_hash: sha256:81e31fdc5b44
       - origin: walkdown
         created_at: 2026-10-05
         verify:
@@ -203,6 +205,7 @@ stories:
         statement: "Asking where something lives creates nothing: no directory, no config file, no placeholder."
         because: The command a confused person reaches for first must not itself change what they were confused about.
         verify: [checks]
+        screens: [where-fresh-machine]
         steps:
           given:
             - A project with no `~/.walkdown` at all
@@ -337,6 +340,7 @@ stories:
         because: A run filed where nothing reads it is a pass nobody sees, and the adapter is the one place a person cannot watch.
         history: "GitHub issue #16. The RSpec formatter found the blueprint by walking up from the code, never reached a home outside the repository, and recorded nothing while every spec passed."
         verify: [checks]
+        screens: [run-files-in-home]
         signoff: [eng]
         steps:
           given:
@@ -358,14 +362,14 @@ stories:
         created_at: 2026-10-05
         verify:
           - checks
-        screens: [import-moved-checkout]
+        screens: [blueprints-two-searches, import-moved-checkout]
         signoff:
           - eng
           - product
         id: locations.registry.ids-stay-here
-        statement: Every registered blueprint has an ID that this machine gave it, such as `0002-wd-cli`. No file walkdown writes outside `~/.walkdown/registry.yml` contains it.
+        statement: Every registered blueprint has an ID that this machine gave it, such as `0002-wd-cli`. No file walkdown writes outside `~/.walkdown/` contains it.
         because: Two people's machines can number the same blueprint differently without either repository being wrong.
-        history: Registry ids had to be unique on the whole machine, so a second project's `search` was refused or renamed, and a repository's own instructions named a blueprint this machine called something else (ADR 0014 (2026-10-05)).
+        history: Registry ids had to be unique on the whole machine, so a second project's `search` was refused or renamed, and a repository's own instructions named a blueprint this machine called something else (ADR 0014 (2026-10-05)). The statement said `registry.yml` alone until Topher chose to count the machine's own cache, which never travels, as inside (q-0384).
         steps:
           given:
             - A machine with two projects, `hireart_main` and `shop`, each with a blueprint whose folder is named `search`
@@ -374,10 +378,10 @@ stories:
           then:
             - Each gets an ID made of four digits, its project's code and a description, such as `0003-ha-search` and `0004-sh-search`
             - "`--blueprint` and `?bp=` accept the ID, and inside a project they also accept the description alone"
-            - The thread, the run record, the pointer and the committed home hold no ID
+            - The thread, the run record, the pointer and the committed home hold no ID; files under `~/.walkdown/`, such as its cache, may
             - Committing, un-committing or moving the checkout changes the path on the row and keeps the ID
             - A number once given is never given again, even after its blueprint is forgotten
-          statement_hash: sha256:f561ad6f21be
+          statement_hash: sha256:ba36d9b498af
       - origin: walkdown
         created_at: 2026-10-05
         verify:
@@ -398,8 +402,8 @@ stories:
             - The first is labelled `shop`, from the remote, and the second `notes`, from the directory
             - The second blueprint in `shop` is reported as added to `shop`, beside the one already there
             - A label or code that is already taken is offered for the person to change, and nothing is registered until they do
-            - With no terminal to ask, it is refused, and the refusal says how to choose a label and code
-          statement_hash: sha256:81ff13fccdce
+            - With no terminal to ask, it is refused. The refusal names the checkout that already has the label or code, says this one needs its own, and gives a command with a label and code that are free
+          statement_hash: sha256:a1b53e39c8a9
 
   - id: locations.keeping
     title: A ledger already written is never orphaned or edited
@@ -426,6 +430,7 @@ stories:
         statement: Moving records relocates the files unchanged and writes the new place on the blueprint's row in this machine's registry. A destination that already holds records is refused.
         because: The records are append-only, and dropping one set into a directory that already holds another would change both.
         verify: [checks]
+        screens: [records-move-refused]
         steps:
           given:
             - A blueprint whose runs live in the repository
@@ -507,6 +512,7 @@ stories:
         statement: A run names the evidence it left by a logical key rather than a filesystem path, and the server resolves that key per machine.
         because: A screenshot filed on one laptop must still be findable from another, and no ledger entry should be pinned to the disk of whoever recorded it.
         verify: [checks]
+        screens: [status-evidence-key]
         steps:
           given:
             - A run recorded while evidence lived in the repository
@@ -548,6 +554,7 @@ stories:
         statement: A run records which commit it saw so a person can look it up later. A newer commit never makes an older verdict stop counting.
         because: Provenance tells a person digging into a verdict where to look; an unrelated commit must not turn a board from green to grey.
         verify: [checks]
+        screens: [status-after-commits]
         steps:
           given:
             - A ledger of passing verdicts
@@ -655,7 +662,7 @@ stories:
         formerly: [locations.several.init-makes-another]
         statement: "`walkdown blueprints new <name>` gives a project that already has a blueprint a second one, in a home of its own. Running the same command again changes nothing."
         because: Two unrelated features in one project each want their own rules, threads and runs, kept out of the repository like the first.
-        history: "On 2026-10-02 a project on Topher's work machine could not get a second blueprint without committing it to the repository (issue #20, ADR 0011). The id changed from init-makes-another, because the rule is about `blueprints new`, not `init` (n-0355)." #20, ADR 0011).
+        history: "On 2026-10-02 a project on Topher's work machine could not get a second blueprint without committing it to the repository (issue #20, ADR 0011). The id changed from init-makes-another, because the rule is about `blueprints new`, not `init` (n-0355). Its folder was named for the month it was made, `202610-checkout`, until Topher asked that a numbering be the person's to choose (n-0355)."
         origin: walkdown
         created_at: 2026-10-02
         verify: [checks]
@@ -667,13 +674,13 @@ stories:
           when:
             - "`walkdown blueprints new checkout` is run in `shop`, then the same again, then with no name"
           then:
-            - The first makes a home for `checkout` beside `search`'s, registers it with an ID, and says it joined `shop` beside `search`
+            - The first makes a home for `checkout` beside `search`'s, in a folder named `checkout`, registers it with an ID, and says it joined `shop` beside `search`
             - The second reports everything up to date and creates nothing
             - With no name, it means the name it would give the project anyway, and reuses that blueprint. If none has that name, it refuses and names them
             - A name another project already uses is not refused, and gets an ID of its own
-            - With several blueprints in the project, `blueprints commit` needs `--blueprint`, and without it refuses and names the choices
+            - "`blueprints commit` names its blueprint with `--blueprint`, as every write does, and without it refuses and names the choices"
             - "`walkdown serve` lists both, and `walkdown claims` reports both when both claim a page"
-          statement_hash: sha256:a3cdd067af7b
+          statement_hash: sha256:97e403e3c1ba
 
       - id: locations.several.reads-cover-all
         statement: With several blueprints in a project, `status`, `lint`, `threads` and `where` run with no `--blueprint` report on every one, each under its ID.
@@ -700,8 +707,9 @@ stories:
               why: ADR 0014 renamed the files it names; what it asks of the build is unchanged
 
       - id: locations.several.writes-name-one
-        statement: With several blueprints in a project, a command that writes or acts on one blueprint refuses until `--blueprint` names it, and the refusal lists the ids.
-        because: Guessing would file a thread or a verdict under the wrong blueprint.
+        statement: A command that writes into a blueprint or acts on one refuses until `--blueprint` names it, however many blueprints the project holds and whichever folder it is run from, and the refusal lists the project's blueprints.
+        because: A command that picks its blueprint from the folder it is run in files a thread, a verdict or a moved folder under a blueprint nobody named, and says nothing about it.
+        history: Until 2026-10-06 a write chose for itself where it could, from the blueprint folder it was run in, a project of one blueprint, or a thread label only one blueprint held. Topher asked for `--blueprint` on every write (n-0406, n-0422).
         origin: walkdown
         created_at: 2026-10-02
         verify: [checks]
@@ -709,20 +717,20 @@ stories:
         screens: [writes-refused-among-several]
         steps:
           given:
-            - A project with blueprints a and b
+            - A project with blueprints a and b, and a project with blueprint c alone
           when:
-            - "`hash --write`, `threads new`, a change to a thread, `judge`, `sweep` and `records move` are run with no `--blueprint`, then with `--blueprint b`"
+            - "`hash --write`, `threads new`, `threads reply`, `threads set`, `threads relabel`, `judge`, `sweep`, `records move`, `rules rename`, `rules move` and `blueprints commit` are run with no `--blueprint`, at the repository's root and inside a's folder, then with `--blueprint b`"
+            - The same are run in c's project with no `--blueprint`
           then:
-            - Each exits with status 2, says several blueprints are registered here, names a and b, and says `--blueprint` picks one
+            - Each exits with status 2 having changed nothing, says it acts on one blueprint, lists the project's blueprints, and says `--blueprint` picks one, with an example
+            - Inside a's folder it is refused the same way, and a is not chosen for it
+            - In c's project it is refused the same way, naming c
             - With `--blueprint b`, each acts on b alone
-            - A thread id that only one of them holds is changed without `--blueprint`
+            - A thread label is not enough without `--blueprint`, even one only b holds
             - "\"No blueprint here\" is said only where none is registered"
+            - "Reads are not among them: `status`, `lint`, `threads`, `threads show` and `where` read every blueprint in the project, a section each"
             - "`walkdown run` is not among them: it runs the project's suite and files each result by rule (locations.several.results-filed-by-rule)"
-          statement_hash: sha256:f0c27cd71949
-          reworded:
-            - hash: sha256:de5bdad5a7a4
-              at: 2026-10-05T02:28:57Z
-              why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
+          statement_hash: sha256:2d83cc44a48d
 
       - id: locations.several.results-filed-by-rule
         statement: In a project with several blueprints, a recorded test run files each result in the blueprint that holds its rule, and `walkdown run` with no `--blueprint` runs the suite once for the whole project.
@@ -731,6 +739,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-02
         verify: [checks]
+        screens: [run-filed-by-rule]
         signoff: [eng, product]
         steps:
           given:
@@ -752,6 +761,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-02
         verify: [checks]
+        screens: [lint-across-blueprints]
         signoff: [eng]
         steps:
           given:
@@ -809,6 +819,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-02
         verify: [checks]
+        screens: [rules-move]
         signoff: [eng, product]
         steps:
           given:
@@ -889,7 +900,7 @@ stories:
           - eng
           - product
         id: locations.worktree.same-project
-        statement: A worktree of a registered checkout belongs to that checkout's project. That is so when git says they share a repository, or when their `origin` remotes match.
+        statement: A worktree belongs to the project of the registered checkout it shares a git repository with, or whose `origin` remote it has.
         because: Agents build in worktrees, and the records they make there belong to the project.
         history: A worktree resolved to the main checkout, reading its spec, filing threads into its tree and stamping runs with its commit (ADR 0014 (2026-10-05)).
         steps:
@@ -902,7 +913,11 @@ stories:
             - The unrelated clone is not a project
             - No worktree gets a registry row
             - "`blueprints new` in a worktree adds the blueprint to `shop`, and the home is made in the registered checkout's place, not in the worktree"
-          statement_hash: sha256:a28e38241c7c
+          statement_hash: sha256:961047131fb4
+          reworded:
+            - hash: sha256:a28e38241c7c
+              at: 2026-10-06T21:38:32Z
+              why: Topher asked for plainer words than 'That is so when' (n-0392); what it asks of the build is unchanged
       - origin: walkdown
         created_at: 2026-10-05
         verify:

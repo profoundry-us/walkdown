@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-06T02:50:48.442Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: answered
+status: incorporated
 body: The statement says no file walkdown writes outside
   ~/.walkdown/registry.yml holds an ID, and ~/.walkdown/cache/claims.json does.
   It is a machine-local cache that serve rebuilds, never committed. Is the rule
@@ -20,4 +20,8 @@ replies:
     created: 2026-10-06T20:00:40Z
     body: Reword the rule
     answer: true
+  - author: agent
+    created: 2026-10-06T22:21:58Z
+    body: "Folded in: locations.registry.ids-stay-here now says IDs are written
+      nowhere outside `~/.walkdown/`, with the reworded statement re-hashed."
 chosen: Reword the rule

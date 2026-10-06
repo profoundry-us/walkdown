@@ -107,6 +107,7 @@ test('a repository of its own inside a registered checkout is not that checkout 
   assert.match(status.stderr, /202610-pack is a blueprint this machine has not imported — `walkdown blueprints import /);
   const filed = m.cli(home, 'threads', 'new', '--rule', 'checkout.basics.works', '--body', 'x');
   assert.equal(filed.status, 2, 'nothing is filed in the outer blueprint\'s ledger');
+  assert.match(filed.stderr, /202610-pack is a blueprint this machine has not imported/, 'refused as the unimported home it is');
   assert.ok(!existsSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')) || !readdirSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')).length);
   // The outer checkout still answers for itself.
   assert.match(m.cli(store, 'where').stdout, /0001-st-checkout|checkout/);
@@ -183,7 +184,7 @@ test('a checkout that moved keeps its IDs when it is imported where it went @rul
   const moved = join(root, `m${n}`, 'hireart_moved');
   renameSync(repo, moved);
   const imported = ok(m.cli(moved, 'blueprints', 'import', moved, '--all'));
-  assert.match(imported.stdout, new RegExp(`~ moved .* as \`${before[0].id}\`, still`));
+  assert.match(imported.stdout, new RegExp(`~ moved .* keeps its ID \`${before[0].id}\``));
   const after_ = m.rows();
   assert.deepEqual(after_.map((r) => r.id), before.map((r) => r.id), 'every ID kept');
   for (const r of after_) {
@@ -465,7 +466,7 @@ test('a moved checkout whose only records are a draft, or whose runs were moved,
       mkdirSync(join(home, 'drafts'), { recursive: true });
       writeFileSync(join(home, 'drafts', 'local.json'), '{}');
     } else {
-      ok(m.cli(app, 'records', 'move', 'runs', '--to', join(base, 'kept-runs')));
+      ok(m.cli(app, 'records', 'move', 'runs', '--to', join(base, 'kept-runs'), '--blueprint', 'ui'));
       mkdirSync(join(home, 'evidence', 'x'), { recursive: true });
       writeFileSync(join(home, 'evidence', 'x', 'a.txt'), 'seen');
     }
@@ -483,7 +484,7 @@ test('a checkout moved with its runs moved into a folder inside it keeps its led
   const m = machine();
   const inn = m.repo('inn');
   ok(m.cli(inn, 'blueprints', 'new', 'web', '--folder', 'web', '--commit', 'spec'));
-  ok(m.cli(inn, 'records', 'move', 'runs', '--to', join(inn, 'wd-runs')));
+  ok(m.cli(inn, 'records', 'move', 'runs', '--to', join(inn, 'wd-runs'), '--blueprint', 'web'));
   writeFileSync(join(inn, 'wd-runs', '2026-10-01T00-00-00Z-local-01.json'), '{}');
   const [row] = m.rows();
   const old = join(root, `m${n}`, 'inn-old');
@@ -507,7 +508,7 @@ test('runs moved inside the checkout follow a move past a fresh clone, and a pat
     git(base, 'clone', '-q', origin, ric);
     writeFileSync(join(ric, '.gitignore'), 'wd-runs/\n');
     ok(m.cli(ric, 'blueprints', 'new', 'web', '--folder', 'web', '--commit', 'spec'));
-    ok(m.cli(ric, 'records', 'move', 'runs', '--to', join(ric, 'wd-runs')));
+    ok(m.cli(ric, 'records', 'move', 'runs', '--to', join(ric, 'wd-runs'), '--blueprint', 'web'));
     writeFileSync(join(ric, 'wd-runs', '2026-10-01T00-00-00Z-local-01.json'), '{}');
     git(ric, 'add', '-A');
     git(ric, 'commit', '-q', '-m', 'web');
@@ -526,7 +527,7 @@ test('runs moved inside the checkout follow a move past a fresh clone, and a pat
     const caps = m.repo('Caps');
     ok(m.cli(caps, 'blueprints', 'new', 'web', '--folder', 'web', '--commit', 'spec'));
     const lower = join(root, `m${n}`, 'caps', 'wd-runs');
-    ok(m.cli(caps, 'records', 'move', 'runs', '--to', lower));
+    ok(m.cli(caps, 'records', 'move', 'runs', '--to', lower, '--blueprint', 'web'));
     const old = join(root, `m${n}`, 'Caps-old');
     renameSync(caps, old);
     ok(m.cli(old, 'blueprints', 'import', '.', '--all'));

@@ -6,8 +6,17 @@ author: agent
 created: 2026-10-06T02:50:47.411Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: verified
 body: "Found while judging: `blueprints import .` on a repository holding
   exactly one blueprint still asks for --all with no terminal. And `import
   <repo> --only <unknown>` exits 0 with 'already listed every blueprint' when
   every folder is already listed."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-06T21:11:04Z
+    body: Verified by topher's pass on
+      commands.blueprints.import-takes-what-it-is-pointed-at
+      (2026-10-06T21-11-04Z-local-01).
+verified_by: topher
+verified_via: 2026-10-06T21-11-04Z-local-01

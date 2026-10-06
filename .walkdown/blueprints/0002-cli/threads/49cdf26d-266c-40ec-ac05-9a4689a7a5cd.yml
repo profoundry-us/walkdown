@@ -1,0 +1,16 @@
+id: n-0448
+uuid: 49cdf26d-266c-40ec-ac05-9a4689a7a5cd
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:31.356Z
+anchor:
+  screen: run-under-username
+status: open
+body: "Draw the run record sam's signed walkdown left, as `cat` prints it, on a
+  machine that knows him as sam and as Sam Shopper: the actor and the eng
+  signature both under the username, and the full name nowhere
+  (status.attribution.username-is-the-record). Anchors: cli.prompt,
+  cli.run.actor, cli.run.signer, cli.exit. as-built/cli/run-under-username.html
+  is the build, from test/cli/scenarios/run-under-username.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

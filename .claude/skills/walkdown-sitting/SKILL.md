@@ -21,7 +21,7 @@ than it reads as stale, so a rule nobody got back to is legible as unfinished
 instead of passing. Nothing is deleted — the ledger is append-only and the
 marker records who asked and why.
 
-    walkdown sweep --tiers agent --why "the panel was split into sixteen modules"
+    walkdown sweep --tiers agent --why "the panel was split into sixteen modules" --blueprint walkdown
 
 **Ask the human before declaring one** unless they have already said to. It is
 their call, it shows up in the report until the sitting finishes, and an
@@ -45,7 +45,7 @@ start.
    prompt carries them. Follow them.
 
 3. **Judge, one rule at a time.** For each owed rule, `walkdown judge
-   <rule-id>` assembles the prompt — statement, steps, setup, both surfaces'
+   <rule-id> --blueprint <id>` assembles the prompt — statement, steps, setup, both surfaces'
    addresses, anchors, evidence key, record shape, governance — and the rest
    is yours: drive your own browser, look, and try to break it. Read the
    statement before anything else; it is authoritative and the steps
@@ -75,7 +75,7 @@ start.
 
 5. **Fails spawn threads.** A failing rule gets a note anchored to the exact
    rule and element, citing the evidence (`walkdown threads new --kind note
-   --rule <id> --body <text> --as-agent --reason finding`), and its id goes
+   --rule <id> --body <text> --as-agent --reason finding --blueprint <id>`), and its id goes
    in that result's `threads`. Something you noticed that is not a fail is
    an `--reason observation`, which you settle yourself once it is fixed.
 

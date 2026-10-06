@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-06T02:51:01.322Z
 anchor:
   rule: commands.blueprints.new-makes-one
-status: answered
+status: incorporated
 body: "Found while judging: `blueprints new` run from a subdirectory of a
   registered checkout refuses. It says 'the project label `repo` is another
   checkout's', naming that same checkout. Since ADR 0014 a project is a
@@ -23,3 +23,9 @@ replies:
     body: We should probably just ask. I think either case is valid, but I think the
       default usage will be same-project (just pointing to a subdirectory).
     answer: true
+  - author: agent
+    created: 2026-10-06T22:21:58Z
+    body: 'Folded in: `blueprints new` in a folder inside a registered checkout asks
+      "Add this blueprint to `shop`? [Y/n]" at a terminal, and without one joins
+      and says so, naming `--project <label>` as the way to make a project of
+      its own. commands.blueprints.new-makes-one carries the new THEN lines.'

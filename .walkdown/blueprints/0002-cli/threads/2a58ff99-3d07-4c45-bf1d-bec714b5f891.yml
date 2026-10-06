@@ -1,0 +1,17 @@
+id: n-0496
+uuid: 2a58ff99-3d07-4c45-bf1d-bec714b5f891
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:09.739Z
+anchor:
+  rule: status.attention.blocked-queues
+status: open
+body: "Found while drawing cli screens. A rule that demands checks, has no check
+  claiming it and has no run sits in two queues: \"cover checkout.basics.pays\"
+  in AGENT QUEUE and \"walk down checkout.basics.pays — eng has not accepted it
+  yet\" in NEEDS A HUMAN. The rule says a cover item is never a person's and
+  nothing sits in two queues. In lib/status.js around 593-625 an unbuilt rule
+  gets a human judge item meant as approving the wording, but the CLI words it
+  \"walk down\". Repro: the lived-in-home fixture in tools/cli-scenarios.mjs,
+  then `walkdown status`."

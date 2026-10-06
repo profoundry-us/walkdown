@@ -1,0 +1,13 @@
+# The thread `walkdown threads new --screen receipt` filed, with no rule and no --reason.
+screen: thread-screen-request
+title: A thread filed on a screen alone is a design request
+rule: ownership.design.request-on-a-screen
+fixture: g2-undrawn-screens
+cat: home/projects/shop/blueprints/checkout/threads/*.yml
+exit: 0
+expect:
+  - '^reason: request$'
+  - '^anchor:\n  screen: receipt\nstatus: open$'
+anchors:
+  - { id: cli.thread.reason, match: '^reason: request$' }
+  - { id: cli.thread.anchor, match: '^anchor:$|^  screen: ' }

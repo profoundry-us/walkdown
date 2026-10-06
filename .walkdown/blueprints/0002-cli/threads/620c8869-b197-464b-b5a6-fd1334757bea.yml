@@ -1,0 +1,15 @@
+id: n-0492
+uuid: 620c8869-b197-464b-b5a6-fd1334757bea
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:08.982Z
+anchor:
+  rule: screens.identity.one-matcher
+status: open
+body: "Found while drawing cli screens. Two matchers decide which screen a URL
+  is: `bestClaim` in lib/claims.js (the claims command, the registry index) and
+  `matchScreen` in lib/screen-match.js (the panel, the embed, lib/api.js). They
+  disagree on a declared query: /orders?tab=returns is `orders` to claims and
+  `orders-returns` to the panel. See the thread on
+  screens.identity.query-is-not-identity."

@@ -1,0 +1,17 @@
+id: n-0462
+uuid: 78929a18-0858-46fc-9b25-2d73551111c2
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:34.893Z
+anchor:
+  screen: status-sent-back
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints where every tier
+  passes and eng looked and sent it back: the rule failing rather than pending,
+  and eng's row saying sent back by topher with what he said
+  (status.acceptance.sent-back-is-a-fail). Anchors: cli.prompt,
+  cli.status.verdict, cli.status.sent-back, cli.exit.
+  as-built/cli/status-sent-back.html is the build, from
+  test/cli/scenarios/status-sent-back.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

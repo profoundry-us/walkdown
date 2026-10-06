@@ -17,7 +17,7 @@ export const VERBS = {
   new: {
     usage: 'walkdown blueprints new [<name>] [--folder <folder>] [--dir <project-root>] [--commit none|spec|all] [--project <label>] [--code <pc>] [--force]',
     about:
-      "Make a blueprint for the project where you stand: a home folder holding the spec, its\nthreads, runs, evidence and drafts, and an ID on this machine. The name defaults to the\nproject directory's; the folder to this month and the name (202610-search), or --folder.\nBy default the home is in ~/.walkdown and the repository gets nothing; --commit spec puts\nit in .walkdown/blueprints/ with its own .gitignore keeping runs, evidence and drafts out,\nand --commit all the same with none. Run again, it changes nothing.",
+      "Make a blueprint for the project where you stand: a home folder holding the spec, its\nthreads, runs, evidence and drafts, and an ID on this machine. The name defaults to the\nproject directory's; the folder to the name (search), or --folder (202610-search).\nBy default the home is in ~/.walkdown and the repository gets nothing; --commit spec puts\nit in .walkdown/blueprints/ with its own .gitignore keeping runs, evidence and drafts out,\nand --commit all the same with none. Run again, it changes nothing.",
     run: async (args) => {
       const { values, positionals } = parseArgs({
         args,
@@ -58,9 +58,9 @@ export const VERBS = {
     run: async (args) => (await import('./blueprints-rename.js')).run(args),
   },
   commit: {
-    usage: 'walkdown blueprints commit <none|spec|all> [--blueprint <id>] [--force]',
+    usage: 'walkdown blueprints commit <none|spec|all> --blueprint <id> [--force]',
     about:
-      "Move a blueprint's whole home into the repository, or back out: none keeps it in\n~/.walkdown, spec commits the spec and its threads, all commits everything. With\nseveral blueprints in the project, --blueprint says which.",
+      "Move a blueprint's whole home into the repository, or back out: none keeps it in\n~/.walkdown, spec commits the spec and its threads, all commits everything.\n--blueprint says which.",
     run: async (args) => {
       const { values, positionals } = parseArgs({
         args,
@@ -68,8 +68,10 @@ export const VERBS = {
         options: { blueprint: { type: 'string' }, dir: { type: 'string' }, force: { type: 'boolean', default: false } },
       });
       if (positionals.length !== 1) return usage('commit');
+      const { namedOrExit } = await import('./context.js');
+      const id = namedOrExit(values.blueprint, `blueprints commit ${positionals[0]}`);
       const { make } = await import('./blueprints-new.js');
-      return make({ verb: 'commit', id: values.blueprint ?? null, dir: values.dir, commit: positionals[0], force: values.force });
+      return make({ verb: 'commit', id, dir: values.dir, commit: positionals[0], force: values.force });
     },
   },
   forget: {

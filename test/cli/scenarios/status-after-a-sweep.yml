@@ -1,0 +1,20 @@
+# `walkdown status` after a sweep over the checks tier, with one rule checked again since.
+screen: status-after-a-sweep
+title: After a sweep, older verdicts read stale and the rest is counted
+rule: status.sweep.declares-a-floor
+also: [status.sweep.says-what-is-left]
+fixture: g3-swept
+command: [status]
+exit: 0
+expect:
+  - '^  ○  checkout\.basics\.pays     ✓ pass   ✓ pass  ○ eng     —      $'
+  - '^  ○  checkout\.basics\.totals   ~ stale  ✓ pass  ○ eng     —      $'
+  - '^  ○  checkout\.basics\.receipt  ~ stale  ✓ pass  ○ eng     —      $'
+  - '^  SWEEP checks on local — 1/3 judged, 2 to go$'
+  - '^  2026-10-02T00-00-00Z-local-01 by topher — the payment form was rewritten$'
+  - '^  ◇ checkout\.basics\.totals$'
+  - '^  ◇ checkout\.basics\.receipt$'
+anchors:
+  - { id: cli.status.rows, match: '^  ○  checkout' }
+  - { id: cli.sweep.head, match: '^  SWEEP |^  2026-' }
+  - { id: cli.sweep.owed, match: '^  ◇ ' }

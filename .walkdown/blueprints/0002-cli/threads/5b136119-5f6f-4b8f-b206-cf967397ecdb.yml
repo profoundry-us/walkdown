@@ -1,0 +1,18 @@
+id: n-0488
+uuid: 5b136119-5f6f-4b8f-b206-cf967397ecdb
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:19.219Z
+anchor:
+  screen: where-prototype-beside
+status: open
+body: "Draw what `walkdown where` prints for a home outside the repository that
+  keeps its design beside its spec. The code has a prototype folder too. The
+  prototype row is answered beside the spec, with `prototype.root` named. The
+  proposals row falls back to the code, because nothing of that name is beside
+  the spec (`locations.default.prototype-beside-the-spec`). Anchors: cli.prompt,
+  cli.where.prototype, cli.where.proposals, cli.exit.
+  as-built/cli/where-prototype-beside.html is the build, from
+  test/cli/scenarios/where-prototype-beside.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

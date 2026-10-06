@@ -265,7 +265,7 @@ test('the pointer names no blueprint, and is the same paragraph with one bluepri
     const row = JSON.parse(p.wd(['where', '--blueprint', id, '--json']).stdout);
     assert.doesNotMatch(block(), new RegExp(`\`${id}\``), `${id} is not named`);
     assert.equal(block().includes(row.id), false, `${id}'s ID is not in it`);
-    assert.equal(block().includes(row.spec.path.split('/').at(-1)), false, `${id}'s folder is not in it`);
+    assert.equal(block().includes(`blueprints/${row.spec.path.split('/').at(-1)}`), false, `${id}'s folder is not in it`);
   }
   assert.equal(block().includes(p.home), false, 'no machine path in a committed file');
 

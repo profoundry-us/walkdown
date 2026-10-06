@@ -1,0 +1,13 @@
+id: n-0501
+uuid: 77dc4cbb-a437-4dd0-adce-eca762168219
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:23.721Z
+anchor:
+  rule: commands.blueprints.forget-keeps-the-files
+status: open
+body: "Found while judging the locations rules. A forgotten home kept in
+  ~/.walkdown cannot be registered again: `blueprints new` refuses the existing
+  folder, and `blueprints import` refuses it as a folder outside any repository.
+  The files are kept, but nothing can take them back."

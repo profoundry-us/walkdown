@@ -61,9 +61,9 @@ files and never one conflict ([02-blueprint-schema.md](02-blueprint-schema.md)).
 
 **The team names the folder, and walkdown reads any name.** A home is any folder under
 `.walkdown/blueprints/` that holds a `spec.yml`, at any depth — `202610-search/`,
-`0002-search/`, `billing/api/invoices/` for a pack. `blueprints new` suggests this month and
-the name (`202610-search`), because a date says how old a blueprint is and never has to be
-reallocated, and takes any other name it is given. walkdown never reads a number or a date
+`0002-search/`, `billing/api/invoices/` for a pack. `blueprints new` names the folder after
+the blueprint (`search`) and takes any other name given with `--folder`: a numbering, by
+date or by count, is the team's to choose, never walkdown's (n-0355). walkdown never reads a number or a date
 out of the name. The filesystem keeps homes apart: two blueprints cannot be one folder. A
 home inside another home is refused, with both folders named.
 
@@ -88,7 +88,7 @@ longer has; they are kept because the ledger is append-only and the reasoning is
 worth reading against this one.
 
 **Nothing committed — the default.** The home is
-`~/.walkdown/projects/<project>/blueprints/<YYYYMM-name>/` (it was
+`~/.walkdown/projects/<project>/blueprints/<name>/` (it was
 `~/.walkdown/blueprints/NNNN-name/` until ADR 0014). The repository gets *nothing*: no
 `.walkdown/`, no ignore rule, no `AGENTS.md`, not even a pointer. Trying walkdown alters no
 tree, and abandoning it is deleting one directory in your own home. The row that named it
@@ -116,7 +116,7 @@ one blueprint's choice could edit another's; `walkdown upgrade` splits it into a
 home.
 
 ```
-walkdown blueprints commit spec
+walkdown blueprints commit spec --blueprint checkout
 ```
 
 **Another blueprint in the same project.** A project can hold several, each in its own
@@ -131,14 +131,16 @@ ADR 0014 it was refused by `new` and prefixed by `import`.
 walkdown blueprints new billing
 ```
 
-Rules move between them with `walkdown rules move <rule|story|feature>... --to <id>`:
+Rules move between them with `walkdown rules move <rule|story|feature>... --blueprint <from> --to <id>`:
 their threads move, and the run records, sweeps and evidence behind their verdicts are
 copied, so nothing is judged or signed again. `--dry-run` first. The destination's
 targets must point where the verdicts were recorded, or the move refuses.
 
 With several, `status`, `lint`, `threads` and `where` report on every one, a section each,
 and `--json` answers `{ "blueprints": [ … ] }`. Everything that writes refuses until
-`--blueprint <id>` says which, except a thread id only one of them holds.
+`--blueprint <id>` says which, with one blueprint or several and wherever it is run from:
+a write never takes its blueprint from the folder it stands in, nor from a thread label
+only one of them holds (locations.several.writes-name-one).
 
 **Everything committed.** The same home, and no `.gitignore` at all. Runs and evidence
 arrive in pull requests, which is a thing a team can genuinely want and should not have
@@ -146,7 +148,7 @@ to assemble by hand — a negation chain in git is easy to write wrong, and a wr
 silently commits nothing or everything.
 
 ```
-walkdown blueprints commit all
+walkdown blueprints commit all --blueprint checkout
 ```
 
 Nothing records which arrangement a project chose. **The tree is the answer**: a home
@@ -417,7 +419,7 @@ where <kind>` prints one path alone, for scripts. It has no write mode at all: t
 to be a `--fix` (and a `walkdown migrate` before it) that folded the homes an older layout
 had left behind into the config, and with that layout gone there is nothing left to fold.
 
-`walkdown records move <kind> --to <path>` relocates one kind and records the choice on the row
+`walkdown records move <kind> --to <path> --blueprint <id>` relocates one kind and records the choice on the row
 that resolved — never one found by name (n-0153). A destination that already holds
 records is refused rather than merged, because two ledgers in one directory would be an
 edit of both. A directory nothing registered contains has no row to remember a move in,
@@ -584,7 +586,7 @@ to declare one, and `walkdown lint` errors when a declared entry names no home o
 record kind pointing nowhere. That is the alarm for a config that does not match what the
 tools write: an agent reading it can put the tree right.
 
-`walkdown records move <kind> --to <where>` relocates one kind and records it on the registry
+`walkdown records move <kind> --to <where> --blueprint <id>` relocates one kind and records it on the registry
 row, leaving every record's contents alone and `records.yml` as it was. It is the only thing
 that moves records, and a person asks for it.
 

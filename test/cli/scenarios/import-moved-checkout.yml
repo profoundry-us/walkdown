@@ -7,7 +7,7 @@ cwd: shop-moved
 command: [blueprints, import, ., --all]
 exit: 0
 expect:
-  - '^  ~ moved    ~/shop-moved/\.walkdown/blueprints/202610-checkout  as `0001-sp-checkout`, still — the row named ~/shop, which is gone$'
+  - '^  ~ moved    ~/shop-moved/\.walkdown/blueprints/checkout  keeps its ID `0001-sp-checkout`: it was at ~/shop, which no longer exists$'
 anchors:
   - { id: cli.moved.row, match: '^  ~ moved' }
   - { id: cli.moved.done, match: 'indexed' }

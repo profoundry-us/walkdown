@@ -1,0 +1,18 @@
+id: n-0476
+uuid: 51dd9e43-7608-4844-b5fd-1106288f3e32
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:16.934Z
+anchor:
+  screen: lint-no-design-request
+status: open
+body: "Draw what `walkdown lint --no-checks` prints for a storyboard with two
+  undrawn screens, cart and receipt. Only receipt has a design request. Cart is
+  named under drift as having no design and no open request, with the command
+  that files one. Receipt is not named at all
+  (`ownership.drift.design-requests-required`). Anchors: cli.prompt,
+  cli.lint.drift, cli.lint.summary, cli.exit.
+  as-built/cli/lint-no-design-request.html is the build, from
+  test/cli/scenarios/lint-no-design-request.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

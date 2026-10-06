@@ -8,6 +8,7 @@ stories:
         origin: thread:n-0020
         statement: A screen is identified by its origin, path and fragment. So a state the URL fragment expresses, such as a modal, a drawer, a tab or an SPA route, is a screen in its own right and not a footnote on the page behind it.
         verify: [checks]
+        screens: [claims-url-fragment]
         steps:
           given:
             - A storyboard holding both a page and a fragment state of that page

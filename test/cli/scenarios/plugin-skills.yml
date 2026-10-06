@@ -1,0 +1,18 @@
+# What Claude Code finds through walkdown's link: the plugin's skills, and nothing else of the clone's.
+screen: plugin-skills
+title: The walkdown plugin holds walkdown's five skills and nothing else
+rule: delivery.plugin.named-for-walkdown
+fixture: g1-plugin-linked
+tree: claude/skills/walkdown/skills
+exit: 0
+expect:
+  - '^claude/skills/walkdown/skills$'
+  - '^├── backlog$'
+  - '^├── formulate$'
+  - '^├── incorporate$'
+  - '^├── judge$'
+  - '^└── setup$'
+  - '^5 directories, 5 files$'
+anchors:
+  - { id: cli.plugin.skills, match: '^[├└│ ]' }
+  - { id: cli.plugin.count, match: '^\d+ directories, \d+ files$' }

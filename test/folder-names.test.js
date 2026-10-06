@@ -80,10 +80,10 @@ test('any folder holding a spec.yml is a home, whatever it is called @rule:locat
   // No number is read out of a folder name: 0002-search is not ID number 2.
   for (const r of rows()) assert.match(r.id, /^000[1-3]-[a-z0-9]{2,3}-/);
 
-  // `blueprints new` suggests a folder for this month, and takes any other name.
+  // `blueprints new` suggests a folder named after the blueprint, and takes any other name.
   const suggested = cli('blueprints', 'new', 'checkout', '--commit', 'spec');
   assert.equal(suggested.status, 0, suggested.stdout + suggested.stderr);
-  assert.ok(readdirSync(bps).some((f) => /^\d{6}-checkout$/.test(f)), readdirSync(bps).join(', '));
+  assert.ok(readdirSync(bps).includes('checkout'), readdirSync(bps).join(', '));
   const named = cli('blueprints', 'new', 'cart', '--commit', 'spec', '--folder', 'teams/cart');
   assert.equal(named.status, 0, named.stdout + named.stderr);
   assert.ok(statSync(join(bps, 'teams', 'cart', 'spec.yml')).isFile());
@@ -98,4 +98,37 @@ test('any folder holding a spec.yml is a home, whatever it is called @rule:locat
   const ids = rows().map((r) => r.id);
   for (const [file, text] of Object.entries(files(repo)))
     for (const id of ids) assert.ok(!text.includes(id), `${file} holds ${id}`);
+});
+
+test('a home inside a home is refused by its path, as the scan refuses it, and the outer one alone is registered @rule:locations.default.folder-names-are-yours', () => {
+  const wd = join(root, 'home-nested');
+  mkdirSync(wd, { recursive: true });
+  const repo = join(root, 'nested');
+  mkdirSync(repo, { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: repo });
+  const outer = join(repo, '.walkdown', 'blueprints', '202610-search');
+  const inner = join(outer, 'inner');
+  mkdirSync(inner, { recursive: true });
+  writeFileSync(join(outer, 'spec.yml'), 'blueprint: search\n');
+  writeFileSync(join(inner, 'spec.yml'), 'blueprint: inner\n');
+  const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
+  const cli = (...args) => spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
+  const rows = () => {
+    try {
+      return parse(readFileSync(join(wd, 'registry.yml'), 'utf8'))?.blueprints ?? [];
+    } catch {
+      return [];
+    }
+  };
+
+  const r = cli('blueprints', 'import', inner);
+  assert.equal(r.status, 2, `${r.stdout}${r.stderr}`);
+  assert.match(r.stderr, /a home inside a home is refused\. Nothing was registered\./);
+  assert.deepEqual(rows(), [], 'the registry holds no row');
+  // The outer one is a home like any other, as `import <repo> --all` treats it: one row, never two nested.
+  const o = cli('blueprints', 'import', outer);
+  assert.equal(o.status, 0, `${o.stdout}${o.stderr}`);
+  assert.equal(rows().length, 1);
+  assert.equal(cli('blueprints', 'import', inner).status, 2, 'still refused once its outer home is registered');
+  assert.equal(rows().length, 1);
 });

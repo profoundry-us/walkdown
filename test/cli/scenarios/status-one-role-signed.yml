@@ -1,0 +1,18 @@
+# `walkdown status <rule>` for a rule naming eng and product, every tier
+# passing and eng alone signed: still pending.
+screen: status-one-role-signed
+title: A rule passes only once every role it names has signed
+rule: status.acceptance.verdict-needs-every-role
+fixture: g4-one-of-two
+command: [status, checkout.basics.pays]
+exit: 0
+expect:
+  - '^checkout\.basics\.pays · pending$'
+  - '^    checks/local   ✓ pass '
+  - '^    agent          ✓ pass '
+  - '^    eng            ✓ signed by topher  '
+  - '^    product        ○ not yet$'
+anchors:
+  - { id: cli.status.verdict, match: '^checkout\.basics\.pays · ' }
+  - { id: cli.status.evidence, match: '^    (checks/local|agent) ' }
+  - { id: cli.status.acceptance, match: '^    (eng|product)  ' }

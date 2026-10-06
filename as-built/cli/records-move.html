@@ -2,7 +2,7 @@
 <!--
   AS-BUILT: records-move
 
-  What `walkdown records move evidence --to ../evidence-kept` printed, run by tools/cli-captures.mjs
+  What `walkdown records move evidence --to ../evidence-kept --blueprint checkout` printed, run by tools/cli-captures.mjs
   from test/cli/scenarios/records-move.yml - the same run test/cli.test.js
   checks against commands.records.move. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
@@ -50,10 +50,10 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown records move evidence --to ../evidence-kept</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown records move evidence --to ../evidence-kept --blueprint checkout</div>
       <div data-testid="cli.records-move.paths">
       <div class="ln">moved evidence</div>
-      <div class="ln">  from ~/.walkdown/projects/shop/blueprints/202610-checkout/evidence</div>
+      <div class="ln">  from ~/.walkdown/projects/shop/blueprints/checkout/evidence</div>
       <div class="ln">  to   ~/evidence-kept</div>
       <div class="ln">  recorded in ~/.walkdown/registry.yml</div>
       </div>

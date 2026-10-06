@@ -59,7 +59,7 @@ test('records.yml says where records usually live, and a registry row may say ot
 
   // The second moves its evidence, and files it where its registry row says.
   const kept = join(root, 'second-evidence');
-  const moved = second(clone, 'records', 'move', 'evidence', '--to', kept);
+  const moved = second(clone, 'records', 'move', 'evidence', '--to', kept, '--blueprint', 'shop');
   assert.equal(moved.status, 0, moved.stdout + moved.stderr);
   const b = where(second, clone);
   assert.equal(b.path, kept);

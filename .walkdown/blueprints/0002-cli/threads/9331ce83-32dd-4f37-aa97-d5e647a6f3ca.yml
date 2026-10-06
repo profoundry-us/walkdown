@@ -1,0 +1,18 @@
+id: n-0474
+uuid: 9331ce83-32dd-4f37-aa97-d5e647a6f3ca
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:16.557Z
+anchor:
+  screen: clone-config-by-path
+status: open
+body: "Draw what `cat spec.yml` shows for a blueprint `walkdown blueprints new`
+  just made. The runner block names this clone's Playwright reporter by its file
+  path. A line says the clone is the install, and that nothing puts a walkdown
+  package in node_modules. The RSpec formatter loads from the clone, with no gem
+  to add (`delivery.install.clone-is-the-install`). Anchors: cli.prompt,
+  cli.config.reporter, cli.config.formatter, cli.exit.
+  as-built/cli/clone-config-by-path.html is the build, from
+  test/cli/scenarios/clone-config-by-path.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

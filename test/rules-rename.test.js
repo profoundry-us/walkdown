@@ -59,7 +59,7 @@ function fixture() {
       '',
     ].join('\n'),
   );
-  assert.equal(wd(['hash', '--write']).status, 0);
+  assert.equal(wd(['hash', '--write', '--blueprint', 'shop']).status, 0);
   const hash = readFileSync(join(features, 'shop.yml'), 'utf8').match(/statement_hash: (sha256:[0-9a-f]+)/)[1];
   mkdirSync(at.runs.path, { recursive: true });
   const put = (name, record) =>
@@ -98,7 +98,7 @@ test('a renamed rule keeps its verdicts, its threads follow it, and its old tag 
   const { wd, at, features, runsBefore } = fixture();
   const before = cells(wd, 'shop.cart.init-adds');
 
-  const r = wd(['rules', 'rename', 'shop.cart.init-adds', 'shop.cart.add']);
+  const r = wd(['rules', 'rename', 'shop.cart.init-adds', 'shop.cart.add', '--blueprint', 'shop']);
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /renamed/);
 
@@ -134,7 +134,7 @@ test('a renamed rule keeps its verdicts, its threads follow it, and its old tag 
 
 test('a taken id, a former id of another rule, or a non-id is refused and nothing changes @rule:commands.rules.rename', () => {
   const { wd, features } = fixture();
-  assert.equal(wd(['rules', 'rename', 'shop.cart.init-adds', 'shop.cart.add']).status, 0);
+  assert.equal(wd(['rules', 'rename', 'shop.cart.init-adds', 'shop.cart.add', '--blueprint', 'shop']).status, 0);
   const text = readFileSync(join(features, 'shop.yml'), 'utf8');
 
   for (const [to, says] of [
@@ -143,7 +143,7 @@ test('a taken id, a former id of another rule, or a non-id is refused and nothin
     ['Not An Id', /is not a rule id/],
   ]) {
     const from = to === 'shop.cart.init-adds' ? 'shop.cart.remove' : 'shop.cart.add';
-    const r = wd(['rules', 'rename', from, to]);
+    const r = wd(['rules', 'rename', from, to, '--blueprint', 'shop']);
     assert.equal(r.status, 2, to);
     assert.match(r.stderr, says, to);
     assert.match(r.stderr, /Nothing was renamed/);

@@ -1,0 +1,17 @@
+id: n-0483
+uuid: eb055ba7-998a-409d-947e-9a7a11f2bd43
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:18.268Z
+anchor:
+  screen: status-after-commits
+status: open
+body: "Draw what `walkdown status` prints after two commits that touch neither
+  the rules nor their code. The recorded checks pass still reads as a pass. The
+  commit a run saw is kept for looking up, and never ages a verdict
+  (`locations.travel.provenance-not-currency`). Anchors: cli.prompt,
+  cli.status.header, cli.status.row, cli.exit.
+  as-built/cli/status-after-commits.html is the build, from
+  test/cli/scenarios/status-after-commits.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

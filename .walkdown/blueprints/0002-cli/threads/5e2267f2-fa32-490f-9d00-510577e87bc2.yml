@@ -1,0 +1,16 @@
+id: n-0458
+uuid: 5e2267f2-fa32-490f-9d00-510577e87bc2
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:34.136Z
+anchor:
+  screen: status-names-the-role
+status: open
+body: "Draw what `walkdown status` prints for a rule built and judged by the
+  agent, still owed by eng and product: two items in NEEDS A HUMAN, each naming
+  the role it waits on (status.attention.names-the-role). Anchors: cli.prompt,
+  cli.status.accepted, cli.attention.human, cli.exit.
+  as-built/cli/status-names-the-role.html is the build, from
+  test/cli/scenarios/status-names-the-role.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

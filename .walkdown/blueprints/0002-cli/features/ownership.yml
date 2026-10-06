@@ -8,6 +8,7 @@ stories:
         origin: prd
         statement: Lint flags any screen that has no design and no open design request. Filing one clears the flag.
         verify: [checks]
+        screens: [lint-no-design-request]
         steps:
           given:
             - "A storyboard screen with no design (`prototype: null`) and no note anchored to it"
@@ -33,6 +34,7 @@ stories:
         because: Who designs differs between projects. What holds on every one is that the builder does not draw.
         history: Decided in ADR 0009 on 2026-10-01 (GitHub issue #2). On Topher's own projects an agent designs; at work a designer does.
         verify: [checks]
+        screens: [status-design-agent]
         signoff: [eng, product]
         steps:
           given:
@@ -56,6 +58,7 @@ stories:
         because: The screen that most needs a request is one that design has not drawn, and it often has no rule yet to anchor to.
         history: AGENTS.md told agents to file a design request anchored to the screen while `walkdown thread new` refused any thread without `--rule` (found 2026-09-29, deferred until ADR 0009 was decided).
         verify: [checks]
+        screens: [thread-screen-request]
         signoff: [eng]
         steps:
           given:
@@ -82,6 +85,7 @@ stories:
         statement: Every rule carries given/when/then steps. A rule without them is reported as an error, not as a warning.
         because: The steps are what a check is built from; a statement standing alone leaves whoever implements it to invent the detail and whoever judges it with nothing to judge against.
         verify: [checks]
+        screens: [lint-steps-and-length]
         steps:
           given:
             - A rule carrying a statement and no steps, and a retired rule carrying neither
@@ -111,6 +115,7 @@ stories:
         because: A rule is read by product and design before it is built, and a statement restating its own steps hides what it wants.
         history: Twenty-two of 132 statements had grown past forty-five words, every one restating its then-steps, and were reworded in one sitting (ADR 0004, 2026-09-13).
         verify: [checks]
+        screens: [lint-steps-and-length]
         steps:
           given:
             - A rule whose statement runs past forty-five words or three sentences, and one whose because runs past thirty-five words
@@ -130,6 +135,7 @@ stories:
         because: Most of the prose on a board is the machine's, and a sentence that failed a stranger is cheaper to fix before it is filed than to find after.
         history: Twenty-one of the agent's own observations read as one paragraph each, dashes chaining three thoughts, and Topher asked for a voice and a check against it before anything is saved (n-0323, 2026-09-20).
         verify: [checks]
+        screens: [reply-refused-voice]
         steps:
           given:
             - A thread the machine is about to reply on, and a rule whose statement runs past forty words

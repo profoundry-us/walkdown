@@ -19,8 +19,9 @@ separate agent (`design.by: agent`), never by the agent building it.
 There is still one test suite. Every recorded run files each result in the
 blueprint holding its rule, so `npm run test:record` and `npm run checks` are
 unchanged. Reads (`status`, `lint`, `threads`, `where`) cover both, a section
-each; anything that writes takes `--blueprint walkdown` or `--blueprint cli`.
-A rule changes blueprints with `walkdown rules move <rule> --to <id>`, which
+each; anything that writes takes `--blueprint walkdown` or `--blueprint cli`, wherever
+it is run from: no write chooses a blueprint for you.
+A rule changes blueprints with `walkdown rules move <rule> --blueprint <from> --to <id>`, which
 keeps its verdicts.
 
 ## The CLI's screens are scenarios
@@ -153,7 +154,7 @@ cell stale only because of one waits on the sitting, not on this turn.
 
 `/walkdown:judge` is for a rule or the handful a change touched. For everything
 at once — after a big refactor, or on a cadence of days — there is
-`walkdown-sitting`. Both skills are prompt-driven now: `walkdown judge <rule>`
+`walkdown-sitting`. Both skills are prompt-driven now: `walkdown judge <rule> --blueprint <id>`
 assembles each rule's prompt and the agent drives its own browser. This repo
 also keeps an interim scripted harness for when a whole board must be
 photographed cheaply:
@@ -209,7 +210,7 @@ slider will show it.
 
 To make "did we skip any?" answerable, declare a sweep first:
 
-    node bin/walkdown.js sweep --tiers agent --why "..."
+    node bin/walkdown.js sweep --tiers agent --why "..." --blueprint walkdown
 
 Every verdict older than the marker then reads as stale, so an unjudged rule is
 visibly unjudged. Nothing is deleted — the ledger is append-only, which is why

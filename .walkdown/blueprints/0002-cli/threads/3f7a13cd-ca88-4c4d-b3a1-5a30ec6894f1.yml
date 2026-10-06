@@ -1,0 +1,16 @@
+id: n-0467
+uuid: 3f7a13cd-ca88-4c4d-b3a1-5a30ec6894f1
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:35.845Z
+anchor:
+  screen: thread-screen-request
+status: open
+body: 'Draw the thread file `walkdown threads new --screen receipt` wrote with
+  no rule and no --reason, as `cat` prints it: the reason "request", and an
+  anchor holding the screen alone (ownership.design.request-on-a-screen).
+  Anchors: cli.prompt, cli.thread.reason, cli.thread.anchor, cli.exit.
+  as-built/cli/thread-screen-request.html is the build, from
+  test/cli/scenarios/thread-screen-request.yml, in the frame
+  tools/cli-captures.mjs --frame prints.'

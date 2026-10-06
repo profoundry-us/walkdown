@@ -3,7 +3,7 @@ import { defaultActor } from '../../lib/identity.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { writeSweep } from '../../lib/run-record.js';
 import { TIERS } from '../../lib/vocab.js';
-import { end, loadOrExit } from './context.js';
+import { end, loadOrExit, namedOrExit } from './context.js';
 
 /*
  * Declare a sweep. The only thing in walkdown that writes one - checks runs,
@@ -20,7 +20,7 @@ export function run(args) {
       why: { type: 'string' },
     },
   });
-  const blueprint = loadOrExit(values.blueprint);
+  const blueprint = loadOrExit(namedOrExit(values.blueprint, 'sweep'));
   const tiers = (values.tiers ?? 'checks,agent')
     .split(',')
     .map((t) => t.trim())

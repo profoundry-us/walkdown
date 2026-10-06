@@ -1,0 +1,17 @@
+# A waived note's record: who waived it, and the reason kept as a reply.
+screen: thread-waived
+title: A waived note keeps who waived it and why
+rule: threads.lifecycle.reasoned-endings
+fixture: g3-waived
+cat: home/projects/shop/blueprints/checkout/threads/*.yml
+exit: 0
+expect:
+  - '^status: waived$'
+  - '^replies:$'
+  - '^  - author: topher$'
+  - '^    body: Declined cards move to the payments team\.$'
+  - '^waived_by: topher$'
+anchors:
+  - { id: cli.thread.status, match: '^status: ' }
+  - { id: cli.thread.reason, match: '^replies:|^  - author|^    (created|body):' }
+  - { id: cli.thread.waived-by, match: '^waived_by: ' }

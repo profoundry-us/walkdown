@@ -71,7 +71,7 @@
       <div class="ln">  walkdown blueprints new [&lt;name&gt;] [--folder &lt;folder&gt;] [--commit none|spec|all] [--project &lt;label&gt;] [--code &lt;pc&gt;]</div>
       <div class="ln">  walkdown blueprints import &lt;path&gt; [--all|--only &lt;folders&gt;] [--ephemeral] [--why &lt;reason&gt;]</div>
       <div class="ln">  walkdown blueprints rename &lt;id&gt; &lt;new-name&gt; [--folder &lt;folder&gt;]</div>
-      <div class="ln">  walkdown blueprints commit &lt;none|spec|all&gt; [--blueprint &lt;id&gt;]</div>
+      <div class="ln">  walkdown blueprints commit &lt;none|spec|all&gt; --blueprint &lt;id&gt;</div>
       <div class="ln">  walkdown blueprints forget &lt;id&gt;</div>
       <div class="ln">  walkdown pointer [--dir &lt;root&gt;] [--into &lt;file&gt;]</div>
       </div>
@@ -79,30 +79,30 @@
       <div data-testid="cli.help.records">
       <div class="ln">Records</div>
       <div class="ln">  walkdown records [list] [--blueprint &lt;id&gt;] [--json]</div>
-      <div class="ln">  walkdown records move &lt;kind&gt; --to &lt;path&gt; [--blueprint &lt;id&gt;]</div>
+      <div class="ln">  walkdown records move &lt;kind&gt; --to &lt;path&gt; --blueprint &lt;id&gt;</div>
       <div class="ln">  walkdown where [&lt;kind&gt;] [--blueprint &lt;id&gt;] [--json]</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.help.threads">
       <div class="ln">Threads</div>
       <div class="ln">  walkdown threads [list] [--rule &lt;id&gt;] [--all] [--blueprint &lt;id&gt;] [--json]</div>
-      <div class="ln">  walkdown threads new --rule &lt;id&gt; | --screen &lt;id&gt; --body &lt;text&gt; [--kind note|question] ...</div>
+      <div class="ln">  walkdown threads new --rule &lt;id&gt; | --screen &lt;id&gt; --body &lt;text&gt; --blueprint &lt;id&gt; [--kind note|question] ...</div>
       <div class="ln">  walkdown threads show &lt;id&gt;</div>
-      <div class="ln">  walkdown threads reply &lt;id&gt; &lt;text&gt; [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]]</div>
-      <div class="ln">  walkdown threads set &lt;id&gt; --status &lt;s&gt; | --verify | --reopen | --waive [--reason &lt;text&gt;] [--reply &lt;text&gt;]</div>
-      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; [--yes]</div>
+      <div class="ln">  walkdown threads reply &lt;id&gt; &lt;text&gt; --blueprint &lt;id&gt; [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]]</div>
+      <div class="ln">  walkdown threads set &lt;id&gt; --status &lt;s&gt; | --verify | --reopen | --waive --blueprint &lt;id&gt; [--reason &lt;text&gt;] [--reply &lt;text&gt;]</div>
+      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; --blueprint &lt;id&gt; [--yes]</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.help.verdicts">
       <div class="ln">Rules and verdicts</div>
       <div class="ln">  walkdown status [&lt;rule-id&gt;] [--blueprint &lt;id&gt;] [--target &lt;name&gt;] [--json]</div>
       <div class="ln">  walkdown lint [--blueprint &lt;id&gt;] [--no-checks] [--json]</div>
-      <div class="ln">  walkdown hash [--blueprint &lt;id&gt;] [--write [--reword &lt;why&gt;]]</div>
+      <div class="ln">  walkdown hash [--blueprint &lt;id&gt;] [--write [--reword &lt;why&gt;]]    (--write needs --blueprint)</div>
       <div class="ln">  walkdown run [--target &lt;name&gt;] [--rule &lt;id&gt;] [--blueprint &lt;id&gt;]</div>
-      <div class="ln">  walkdown judge &lt;rule-id&gt; [--target &lt;name&gt;] [--serve &lt;origin&gt;] [--blueprint &lt;id&gt;] [--json]</div>
-      <div class="ln">  walkdown sweep --why &lt;reason&gt; [--tiers checks,agent] [--blueprint &lt;id&gt;] [--target &lt;name&gt;]</div>
-      <div class="ln">  walkdown rules move &lt;rule|story|feature&gt;... --to &lt;blueprint&gt; [--dry-run]</div>
-      <div class="ln">  walkdown rules rename &lt;rule&gt; &lt;new-id&gt; [--dry-run]</div>
+      <div class="ln">  walkdown judge &lt;rule-id&gt; --blueprint &lt;id&gt; [--target &lt;name&gt;] [--serve &lt;origin&gt;] [--json]</div>
+      <div class="ln">  walkdown sweep --why &lt;reason&gt; --blueprint &lt;id&gt; [--tiers checks,agent] [--target &lt;name&gt;]</div>
+      <div class="ln">  walkdown rules move &lt;rule|story|feature&gt;... --blueprint &lt;from&gt; --to &lt;blueprint&gt; [--dry-run]</div>
+      <div class="ln">  walkdown rules rename &lt;rule&gt; &lt;new-id&gt; --blueprint &lt;id&gt; [--dry-run]</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.help.panel">
@@ -111,8 +111,9 @@
       <div class="ln">  walkdown claims [--blueprint &lt;id&gt;] [--url &lt;address&gt;] [--json]</div>
       </div>
       <div class="ln"></div>
-      <div class="ln">--blueprint &lt;id&gt; names one of several blueprints standing here: reads cover them</div>
-      <div class="ln">all without it, and anything that writes asks for it.</div>
+      <div class="ln">--blueprint &lt;id&gt; names a blueprint. Reads cover every blueprint in the project</div>
+      <div class="ln">without it; anything that writes into one needs it, wherever it is run from.</div>
+      <div class="ln">`walkdown blueprints` lists the IDs.</div>
     <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>

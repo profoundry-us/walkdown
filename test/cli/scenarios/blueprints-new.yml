@@ -5,11 +5,11 @@ rule: commands.blueprints.new-makes-one
 command: [blueprints, new]
 exit: 0
 expect:
-  - '^  \+ created  ~/\.walkdown/projects/shop/blueprints/202610-shop/spec\.yml$'
+  - '^  \+ created  ~/\.walkdown/projects/shop/blueprints/shop/spec\.yml$'
   - '^  \+ listed   ~/\.walkdown/registry\.yml  as `0001-sp-shop`$'
   - '^  \+ project  `shop`, a new project on this machine, code `sp`$'
   - 'Nothing was added to this repository'
-  - '`walkdown blueprints commit spec` moves the home into the repository'
+  - '`walkdown blueprints commit spec --blueprint shop` moves the home into the repository'
 anchors:
   - { id: cli.new.created, match: '^  \+ (created|listed|project)' }
   - { id: cli.new.spec, match: '^  spec:' }

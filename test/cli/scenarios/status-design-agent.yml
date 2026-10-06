@@ -1,0 +1,14 @@
+# `walkdown status` for a blueprint whose spec.yml says `design.by: agent`.
+screen: status-design-agent
+title: A design request waits for the design agent, apart from the building agent's queue
+rule: ownership.design.declared-per-blueprint
+fixture: g2-design-by-agent
+command: [status]
+exit: 0
+expect:
+  - '^  DESIGN QUEUE — for the design agent, never the agent building the app$'
+  - '^  ◆ draw receipt — design request n-0001$'
+  - '^  AGENT QUEUE$'
+anchors:
+  - { id: cli.status.design-queue, match: '^  DESIGN QUEUE|^  ◆ draw ' }
+  - { id: cli.status.agent-queue, match: '^  AGENT QUEUE|^  ◆ cover ' }

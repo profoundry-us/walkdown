@@ -1,0 +1,82 @@
+{
+  "run_id": "2026-10-06T22-14-47Z-local-01",
+  "created": "2026-10-06T22:14:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "360afa3-dirty",
+  "note": "Agent tier, 7 cli rules, judged from scratch by driving bin/walkdown.js (working tree 360afa3-dirty) in fresh mktemp machines (HOME=root, WALKDOWN_HOME=root/home, profile sam), real git repos, pty/expect for terminal cases, serve on ports 4791/4792. Not recorded; no threads filed.",
+  "spec_hash": "sha256:bc4ebe001cb6",
+  "results": [
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "fail",
+      "statement_hash": "sha256:2d83cc44a48d",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/writes-name-one.txt"
+      ],
+      "reasoning": "I ran all eleven writes with no --blueprint: at the root of a real repo holding a (committed) and b (kept in ~/.walkdown), inside a's folder, inside a/features, and at the root and in features/ of a one-blueprint project c. All 64 runs exited 2, said the command acts on one blueprint, listed the IDs and gave the --blueprint example. A shasum of every file on the scratch machine was identical before and after. A thread label only one blueprint held was refused without --blueprint, and with --blueprint b, run from inside a, threads new/reply/set, hash --write, sweep, judge, rules rename and records move acted on b alone and left a's files unchanged. Two things break the rule. First, `blueprints commit <spec|none> --blueprint <id>` works only at the checkout root. From inside a's folder, from a/features, from .walkdown/ and from shop/src/deep it says 'No blueprint `b` in this project', even given the full ID 0002-sp-b or a itself, so a named commit does not act on b. Second, inside b's own home in ~/.walkdown/projects/shop/blueprints/b, which is the default place for a home and the exact path on b's registry row, every write says 'No blueprint here: nothing registered contains this directory' and does not list the project's blueprints. That breaks 'refused the same way' and '\"No blueprint here\" is said only where none is registered'. There, --blueprint b is also refused ('No blueprint for `b`'), though the full ID works. Also noted: inside a's committed folder, status and threads report a alone with no section header, not every blueprint in the project.",
+      "threads": [
+        "12879417-5d9b-4ae2-9828-a679854f1970"
+      ]
+    },
+    {
+      "rule": "locations.default.folder-names-are-yours",
+      "status": "fail",
+      "statement_hash": "sha256:81e31fdc5b44",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/folder-names-are-yours.txt"
+      ],
+      "reasoning": "I built a real repo with homes at .walkdown/blueprints/202610-search, 0002-search and billing/api/invoices, plus 202610-search/inner, and imported it on a fresh machine. `blueprints import .` offered the three homes by folder and refused inner, naming both folders. --all registered them as 0001-sp-search (folder 0002-search) and 0002-sp-search (folder 202610-search), so no number was read from a folder name. `blueprints new checkout` used a folder named checkout with no number. `--folder 202610-checkout` and `--folder billing/pay` were taken as given, and a diff of the folder list showed only additions. `--folder 202610-search/sub` was refused as a home inside a home. The refusal does not hold when the nested home is named by its path: `walkdown blueprints import .walkdown/blueprints/202610-search/inner` registered it (0004-sp-inner, exit 0). On a second fresh machine, importing inner by path and then its outer 202610-search registered both, so two homes nest inside one another. That breaks the THEN line 'The home inside another home is refused, and both folders are named'.",
+      "threads": [
+        "476e5401-b2a8-456d-8e9a-23f6efa511bb"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.new-makes-one",
+      "status": "pass",
+      "statement_hash": "sha256:90fc601d7dd0",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/new-makes-one.txt"
+      ],
+      "reasoning": "I used a real git repo `shop` after `walkdown init`. The first `blueprints new` made and registered 0001-sp-shop in ~/.walkdown/projects/shop/blueprints/shop, and git status stayed empty. The second reported every file up to date. `blueprints new search` made search beside shop. In shop/api with no terminal it joined shop, said `--project <label>` makes a project of its own, and named the blueprint api (0003-sp-api), not shop. Run there again, it stayed api. Under a real pty the question offered [Y/n] and Enter joined shop (0004-sp-web). Answering n made project web2. With --project pay nothing was asked and it became project pay. --project shop, the parent's label, joined shop quietly. --project books made a project books. Four levels deep (shop/a/b/c/deep) it joined shop. A nested git repo (shop/vendor/lib) did not join: it became project lib, and with a terminal no join question was asked. --commit spec from a subfolder put the home in the checkout's .walkdown/blueprints/docs, and --dir from another repo joined shop as asked. No THEN line broke."
+    },
+    {
+      "rule": "locations.several.new-makes-another",
+      "status": "pass",
+      "statement_hash": "sha256:97e403e3c1ba",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/new-makes-another.txt"
+      ],
+      "reasoning": "I used real repos shop and other, each with a blueprint `search` kept in ~/.walkdown. `blueprints new checkout` in shop made ~/.walkdown/projects/shop/blueprints/checkout beside search, registered 0003-sp-checkout, and said 'added to `shop`, beside `search`'. Run a second time, it reported everything up to date and the disk snapshot was identical. With no name and no blueprint called shop, it refused and named search and checkout. Once a blueprint `shop` existed, a no-name run reused it. The other project's `search` got its own ID (0002-oh-search) and was not refused. `blueprints commit spec` with no --blueprint refused and listed the IDs. With both storyboards claiming /cart, `walkdown claims` reported both, and so did serve's /api/whose on port 4791. Serve's blueprint list held both. Serve's banner said 'started outside a registered project' although it was started in ~/shop. That is serve's wording, not this rule's."
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:ba36d9b498af",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/ids-stay-here.txt"
+      ],
+      "reasoning": "I registered hireart_main and shop, each with a blueprint folder named search. They got 0001-hm-search and 0002-sp-search: four digits, the project's code and the description. I filed a thread and recorded a sweep run in each, wrote a pointer, and committed hireart_main's home. A grep for any ID across the whole machine outside WALKDOWN_HOME found nothing, including in the threads, run records, pointer and committed home. Inside WALKDOWN_HOME only registry.yml held one. --blueprint took the full ID anywhere and `search` alone inside each project, and outside a project the bare description was refused. On serve (port 4792), ?bp= took the ID and the description. Committing, un-committing and moving the checkout to ~/hireart_moved (then `blueprints import . --all`) changed the row's path and kept 0001-hm-search. After forgetting 0002-sp-search the next blueprint got 0003, and the registry's next is 4, so the number was not reused. Seen in passing: a forgotten home kept in ~/.walkdown cannot be registered again, because new refuses the folder and import refuses a folder outside a repository. That belongs to forget."
+    },
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "pass",
+      "statement_hash": "sha256:a1b53e39c8a9",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/projects-are-labels.txt"
+      ],
+      "reasoning": "A repo in a directory named acme-shop-checkout, with origin acme/shop, was labelled shop from the remote (0001-sp-checkout). A repo `notes` with no remote was labelled notes. A second blueprint in shop was reported as added to `shop`, beside `checkout`. In an unrelated repo at ~/work/shop, with no terminal, `blueprints new search` exited 2 with 'Nothing was made' and an identical disk snapshot. The refusal named ~/acme-shop-checkout as holding the label and suggested `--project work-shop --code ws`. Running that exact command worked (0004-ws-search). In a third clash at ~/old/work/shop, with work-shop and ws now taken, the suggestion changed to shop-2/s2, and that command also worked. Under expect with a terminal, the label prompt waited with nothing written. Typing the taken label `shop` asked again, and typing tmpshop registered 0007-ts-search. When only the code was taken, a terminal asked for a code, and without a terminal a free code was chosen. As a reviewer I noticed one thing: the as-built screen blueprints-new-label-taken draws its prompt as `~/shop $` though the scenario runs in work/shop, because tools/cli-captures.mjs:94 hardcodes the prompt. The same is true of where-worktree and import-moved-checkout. It misdrawing the screen does not change the behaviour."
+    },
+    {
+      "rule": "locations.worktree.same-project",
+      "status": "pass",
+      "statement_hash": "sha256:961047131fb4",
+      "evidence": [
+        "runs/evidence/2026-10-06T22-00-32Z/same-project.txt"
+      ],
+      "reasoning": "I set up a registered real checkout ~/shop (origin acme/shop, blueprints checkout outside and search committed), a git worktree at shop/.claude/worktrees/feat-x, and Archon's own clone at ~/.archon/workspaces/acme/shop/source with a worktree ../worktrees/task-1 made from it. In the Claude Code worktree, `where` and `status` answered as shop's blueprints with 'a git worktree of ~/shop, on feat-x'. In the Archon worktree, which shares no repository with ~/shop, they answered as shop's with 'a clone of ~/shop's origin (github.com/acme/shop), on task-1'. So both ways of matching are named. An unrelated clone with another origin was not a project, and status said 'No blueprint here'. registry.yml was byte-identical after every where and status, so no worktree got a row. `blueprints new pay` in the worktree joined shop, with the home in ~/.walkdown/projects/shop. `blueprints new refunds --commit spec` in the Archon worktree joined shop and made the home at ~/shop/.walkdown/blueprints/refunds, with checkout ~/shop on the row, and the worktree's git status was empty. The reworded statement still holds."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+id: n-0464
+uuid: ff0b1bad-3802-403b-aaa1-a86702ea27c5
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:35.275Z
+anchor:
+  screen: status-untagged-check
+status: open
+body: "Draw what `walkdown status` prints after the check suite stopped tagging
+  `pays`: its recorded checks pass reading stale because nothing claims the rule
+  now, beside `totals`, still tagged and still passing
+  (status.derived.unbacked-pass-goes-stale). Anchors: cli.prompt,
+  cli.status.unbacked, cli.status.backed, cli.exit.
+  as-built/cli/status-untagged-check.html is the build, from
+  test/cli/scenarios/status-untagged-check.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

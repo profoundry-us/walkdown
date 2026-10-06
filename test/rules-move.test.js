@@ -134,7 +134,7 @@ test('a story moves with its threads, and its verdicts and signatures read the s
   assert.equal(before.add.agent, 'pass');
   const ledger = f.snapshot();
 
-  const dry = f.wd(['rules', 'move', 'shop.cart', '--to', 'b', '--dry-run']);
+  const dry = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b', '--dry-run']);
   assert.equal(dry.status, 0, dry.stderr);
   assert.match(dry.stdout, /2 rule\(s\) from `a` to `b`: shop\.cart\.add, shop\.cart\.remove/);
   assert.match(dry.stdout, /1 thread\(s\) moved, keeping their ids: n-0001/);
@@ -144,7 +144,7 @@ test('a story moves with its threads, and its verdicts and signatures read the s
   assert.deepEqual(f.runsOf(f.B), [], 'the dry run changed nothing');
   assert.ok(readFileSync(join(f.A.spec.path, 'features', 'shop.yml'), 'utf8').includes('shop.cart.add'));
 
-  const moved = f.wd(['rules', 'move', 'shop.cart', '--to', 'b']);
+  const moved = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b']);
   assert.equal(moved.status, 0, moved.stderr);
   assert.match(moved.stdout, /✓ moved 2 rule\(s\)/);
 
@@ -192,7 +192,7 @@ test('a story moves with its threads, and its verdicts and signatures read the s
 
 test('one rule moves into a story of the same id, created for it @rule:locations.several.rules-move', () => {
   const f = fixture();
-  const out = f.wd(['rules', 'move', 'shop.pay.card', '--to', 'b']);
+  const out = f.wd(['rules', 'move', 'shop.pay.card', '--blueprint', 'a', '--to', 'b']);
   assert.equal(out.status, 0, out.stderr);
   const bYaml = readFileSync(join(f.B.spec.path, 'features', 'shop.yml'), 'utf8');
   assert.match(bYaml, /- id: shop\.pay\n\s+title: Paying\n\s+statement: As a shopper I pay\.\n\s+rules:\n\s+- id: shop\.pay\.card/);
@@ -201,10 +201,10 @@ test('one rule moves into a story of the same id, created for it @rule:locations
 
 test('several selections move as one, and a later move copies each run once more without doubling a sweep @rule:locations.several.rules-move', () => {
   const f = fixture();
-  const one = f.wd(['rules', 'move', 'shop.cart.add', 'shop.pay', '--to', 'b']);
+  const one = f.wd(['rules', 'move', 'shop.cart.add', 'shop.pay', '--blueprint', 'a', '--to', 'b']);
   assert.equal(one.status, 0, one.stderr);
   assert.match(one.stdout, /2 rule\(s\) from `a` to `b`: shop\.cart\.add, shop\.pay\.card/);
-  const later = f.wd(['rules', 'move', 'shop.cart.remove', '--to', 'b']);
+  const later = f.wd(['rules', 'move', 'shop.cart.remove', '--blueprint', 'a', '--to', 'b']);
   assert.equal(later.status, 0, later.stderr);
   const copies = f.runsOf(f.B).map((n) => JSON.parse(readFileSync(join(f.B.runs.path, n), 'utf8')));
   assert.equal(copies.filter((c) => c.kind === 'sweep').length, 1, 'one sweep, however many moves');
@@ -221,7 +221,7 @@ test('a move is refused, and nothing moves, when the rule is already there, the 
   writeFileSync(join(f.B.spec.path, 'features', 'clash.yml'), 'feature: clash\nstories:\n  - id: x\n    rules:\n      - id: shop.cart.add\n        statement: Another.\n');
   f.git('add', '-A');
   f.git('commit', '-qm', 'clash');
-  const clash = f.wd(['rules', 'move', 'shop.cart', '--to', 'b']);
+  const clash = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b']);
   assert.equal(clash.status, 2, clash.stderr + clash.stdout);
   assert.match(clash.stderr, /`b` already has a rule `shop\.cart\.add`/);
   assert.match(clash.stderr, /Nothing was moved/);
@@ -236,16 +236,16 @@ test('a move is refused, and nothing moves, when the rule is already there, the 
   writeFileSync(bCfg, readFileSync(bCfg, 'utf8').replace('base_url: http://localhost:3000', 'base_url: http://localhost:4999'));
   f.git('add', '-A');
   f.git('commit', '-qm', 'elsewhere');
-  const astray = f.wd(['rules', 'move', 'shop.pay', '--to', 'b']);
+  const astray = f.wd(['rules', 'move', 'shop.pay', '--blueprint', 'a', '--to', 'b']);
   assert.equal(astray.status, 2, astray.stdout);
   assert.match(astray.stderr, /1 verdict\(s\) were recorded at http:\/\/localhost:3000, but `b`'s target `local` points at http:\/\/localhost:4999 — they would read as never there/);
 
-  const elsewhere = f.wd(['rules', 'move', 'shop.pay', '--to', 'nowhere']);
+  const elsewhere = f.wd(['rules', 'move', 'shop.pay', '--blueprint', 'a', '--to', 'nowhere']);
   assert.equal(elsewhere.status, 2);
   assert.match(elsewhere.stderr, /`nowhere` is not a blueprint of this project/);
 
   writeFileSync(join(f.A.spec.path, 'features', 'shop.yml'), `${was}# an edit nobody committed\n`);
-  const dirty = f.wd(['rules', 'move', 'shop.pay', '--to', 'b']);
+  const dirty = f.wd(['rules', 'move', 'shop.pay', '--blueprint', 'a', '--to', 'b']);
   assert.equal(dirty.status, 2);
   assert.match(dirty.stderr, /`a` has uncommitted changes to its features/);
   assert.equal(unchanged(), `${was}# an edit nobody committed\n`);

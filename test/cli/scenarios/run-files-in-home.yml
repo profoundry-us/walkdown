@@ -1,0 +1,15 @@
+# `walkdown run` for a home kept outside the repository: the node reporter files where `where` says runs go.
+screen: run-files-in-home
+title: A test adapter files its run in the home outside the repository
+rule: locations.answer.adapters-file-where-walkdown-says
+fixture: g1-suite-outside
+command: [run, --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ a card payment goes through @rule[:]checkout\.basics\.pays$'
+  - '^walkdown: recorded 1 rule result\(s\) → \.\./(home|\.walkdown)/projects/shop/blueprints/checkout/runs/2026-10-02T00-00-00Z-local-01\.json$'
+  - '^recorded: 2026-10-02T00-00-00Z-local-01\.json — `walkdown status` for the picture$'
+anchors:
+  - { id: cli.run.tests, match: '^[✓✗–] ' }
+  - { id: cli.run.filed, match: '^walkdown: recorded' }
+  - { id: cli.run.done, match: '^recorded: ' }

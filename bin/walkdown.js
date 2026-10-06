@@ -23,39 +23,40 @@ Blueprints
   walkdown blueprints new [<name>] [--folder <folder>] [--commit none|spec|all] [--project <label>] [--code <pc>]
   walkdown blueprints import <path> [--all|--only <folders>] [--ephemeral] [--why <reason>]
   walkdown blueprints rename <id> <new-name> [--folder <folder>]
-  walkdown blueprints commit <none|spec|all> [--blueprint <id>]
+  walkdown blueprints commit <none|spec|all> --blueprint <id>
   walkdown blueprints forget <id>
   walkdown pointer [--dir <root>] [--into <file>]
 
 Records
   walkdown records [list] [--blueprint <id>] [--json]
-  walkdown records move <kind> --to <path> [--blueprint <id>]
+  walkdown records move <kind> --to <path> --blueprint <id>
   walkdown where [<kind>] [--blueprint <id>] [--json]
 
 Threads
   walkdown threads [list] [--rule <id>] [--all] [--blueprint <id>] [--json]
-  walkdown threads new --rule <id> | --screen <id> --body <text> [--kind note|question] ...
+  walkdown threads new --rule <id> | --screen <id> --body <text> --blueprint <id> [--kind note|question] ...
   walkdown threads show <id>
-  walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]]
-  walkdown threads set <id> --status <s> | --verify | --reopen | --waive [--reason <text>] [--reply <text>]
-  walkdown threads relabel <label|uuid> [--yes]
+  walkdown threads reply <id> <text> --blueprint <id> [--as-agent [--said <text>] [--added <text>]]
+  walkdown threads set <id> --status <s> | --verify | --reopen | --waive --blueprint <id> [--reason <text>] [--reply <text>]
+  walkdown threads relabel <label|uuid> --blueprint <id> [--yes]
 
 Rules and verdicts
   walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
   walkdown lint [--blueprint <id>] [--no-checks] [--json]
-  walkdown hash [--blueprint <id>] [--write [--reword <why>]]
+  walkdown hash [--blueprint <id>] [--write [--reword <why>]]    (--write needs --blueprint)
   walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
-  walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--blueprint <id>] [--json]
-  walkdown sweep --why <reason> [--tiers checks,agent] [--blueprint <id>] [--target <name>]
-  walkdown rules move <rule|story|feature>... --to <blueprint> [--dry-run]
-  walkdown rules rename <rule> <new-id> [--dry-run]
+  walkdown judge <rule-id> --blueprint <id> [--target <name>] [--serve <origin>] [--json]
+  walkdown sweep --why <reason> --blueprint <id> [--tiers checks,agent] [--target <name>]
+  walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]
+  walkdown rules rename <rule> <new-id> --blueprint <id> [--dry-run]
 
 The panel
   walkdown serve [--blueprint <id>] [--port <n>]
   walkdown claims [--blueprint <id>] [--url <address>] [--json]
 
---blueprint <id> names one of several blueprints standing here: reads cover them
-all without it, and anything that writes asks for it.
+--blueprint <id> names a blueprint. Reads cover every blueprint in the project
+without it; anything that writes into one needs it, wherever it is run from.
+\`walkdown blueprints\` lists the IDs.
 `;
 
 /* What each command that is not a noun does, for `walkdown <command> --help`. */

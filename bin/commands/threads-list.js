@@ -1,3 +1,4 @@
+import { blueprintFlag } from '../../lib/locations.js';
 import { parseArgs } from 'node:util';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim, yellow } from '../../lib/report/tty.js';
@@ -62,6 +63,6 @@ function report(threads, values) {
 function clashes(blueprint) {
   for (const { label, threads } of labelClashes(blueprint.threads)) {
     console.log(yellow(`\n  ! ${label} labels ${threads.length} threads: ${threads.map((t) => t.uuid).join(', ')}`));
-    console.log(dim(`    \`walkdown threads relabel ${label}\` gives the newer one a label of its own`));
+    console.log(dim(`    \`walkdown threads relabel ${label}${blueprintFlag(blueprint.dir)}\` gives the newer one a label of its own`));
   }
 }

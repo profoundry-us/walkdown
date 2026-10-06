@@ -1,0 +1,138 @@
+{
+  "run_id": "2026-10-06T21-11-04Z-local-01",
+  "created": "2026-10-06T21:11:04Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "360afa3-dirty",
+  "spec_hash": "sha256:66a604ba66d8",
+  "results": [
+    {
+      "rule": "locations.several.new-makes-another",
+      "status": "fail",
+      "statement_hash": "sha256:a3cdd067af7b",
+      "threads": [
+        "4737a67f-5d0c-400b-b21b-031917fa60cf"
+      ]
+    },
+    {
+      "rule": "locations.several.writes-name-one",
+      "status": "pass",
+      "statement_hash": "sha256:f0c27cd71949"
+    },
+    {
+      "rule": "commands.blueprints.rename",
+      "status": "pass",
+      "statement_hash": "sha256:8877c6d6eba1",
+      "threads": [
+        "dd886de3-3066-43b5-8867-e30d24b26f18",
+        "f0f452b6-cd9e-4e1c-af74-db47c4388913"
+      ]
+    },
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "skipped",
+      "threads": [
+        "9e78d4a3-4195-4d95-939b-d14480f06f02"
+      ]
+    },
+    {
+      "rule": "commands.init.one-skill-installer",
+      "status": "pass",
+      "statement_hash": "sha256:491cd8cc7d17"
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:7170e620ca41"
+    },
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c"
+    },
+    {
+      "rule": "commands.blueprints.forget-keeps-the-files",
+      "status": "pass",
+      "statement_hash": "sha256:ba872b7a43cd"
+    },
+    {
+      "rule": "commands.rules.rename",
+      "status": "pass",
+      "statement_hash": "sha256:baa430aa4d1f"
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-once",
+      "status": "pass",
+      "statement_hash": "sha256:49cd12caf11c"
+    },
+    {
+      "rule": "locations.threads.clashing-labels-ask",
+      "status": "pass",
+      "statement_hash": "sha256:d6cf9b7d1abb"
+    },
+    {
+      "rule": "locations.default.folder-names-are-yours",
+      "status": "pass",
+      "statement_hash": "sha256:20a203168083",
+      "threads": [
+        "b0227e61-d8dd-44c1-960b-07f222ad9dd4"
+      ]
+    },
+    {
+      "rule": "locations.default.records-yml-informs",
+      "status": "pass",
+      "statement_hash": "sha256:26e8fb639e2a"
+    },
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "fail",
+      "statement_hash": "sha256:81ff13fccdce",
+      "threads": [
+        "3dfd29fd-8cc9-4a69-b6fd-abd34855912a"
+      ]
+    },
+    {
+      "rule": "locations.worktree.same-project",
+      "status": "pass",
+      "statement_hash": "sha256:a28e38241c7c",
+      "threads": [
+        "1fa6c19f-6c6b-4715-91ba-1bef4b791110"
+      ]
+    },
+    {
+      "rule": "commands.records.move",
+      "status": "fail",
+      "statement_hash": "sha256:93e58454e522",
+      "threads": [
+        "47c46bdc-d737-4bef-a89a-047ff8042f75"
+      ]
+    },
+    {
+      "rule": "locations.default.nothing-in-the-tree",
+      "status": "pass",
+      "statement_hash": "sha256:f06360e3e6e5"
+    },
+    {
+      "rule": "locations.default.home-is-one-folder",
+      "status": "pass",
+      "statement_hash": "sha256:2eadd5cdafaf"
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:b55ca34f14f7"
+    }
+  ]
+}

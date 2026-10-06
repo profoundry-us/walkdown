@@ -1,0 +1,13 @@
+id: n-0498
+uuid: 7790384a-132a-4bc8-8ef0-f4d298fdf286
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:10.116Z
+anchor:
+  rule: threads.lifecycle.says-why-it-exists
+status: open
+body: "Found while drawing cli screens. No CLI read prints a thread's reason:
+  `threads show` and `threads` both say only \"note\", for a finding, a request
+  or a plain note alike. So the reason can only be seen with `cat` of the
+  record."

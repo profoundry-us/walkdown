@@ -1,0 +1,18 @@
+id: n-0456
+uuid: 8707a938-74ee-4ced-906f-d3b23f5c8b68
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:33.758Z
+anchor:
+  screen: status-latest-wins
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints where local
+  passed on Monday and failed on Wednesday, and staging passed on Tuesday: the
+  rule failing, checks/local carrying Wednesday's fail and its message,
+  checks/staging carrying its own pass untouched by local's newer run
+  (status.derived.latest-wins). Anchors: cli.prompt, cli.status.verdict,
+  cli.status.local, cli.status.staging, cli.exit.
+  as-built/cli/status-latest-wins.html is the build, from
+  test/cli/scenarios/status-latest-wins.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

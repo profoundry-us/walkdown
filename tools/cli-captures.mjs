@@ -89,9 +89,11 @@ function terminal(scenario, out) {
     body.push(`      <div class="ln">${esc(line)}</div>`);
     if (closes.has(i)) body.push('      </div>');
   });
+  // The folder the command ran in, as the scenario's cwd says (default ~/shop).
+  const at = scenario.cwd ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}` : '~/shop';
   return [
-    `    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>`,
-    `    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> ${esc(typed(scenario))}</div>`,
+    `    <div class="term-bar"><i></i><i></i><i></i><span>${esc(at)}</span></div>`,
+    `    <div class="ln prompt" data-testid="cli.prompt"><b>${esc(at)} $</b> ${esc(typed(scenario))}</div>`,
     ...body,
     `    <div class="ln exit${out.status ? ' bad' : ''}" data-testid="cli.exit">[exit ${out.status}]</div>`,
   ].join('\n');

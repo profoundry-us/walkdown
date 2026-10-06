@@ -15,7 +15,7 @@
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; A project label already taken is refused, saying how to choose another</title>
+  <title>As-built &mdash; A project name already taken is refused, with a command that works</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -49,13 +49,13 @@
 </head>
 <body>
   <div class="term">
-    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown blueprints new search</div>
+    <div class="term-bar"><i></i><i></i><i></i><span>~/work/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/work/shop $</b> walkdown blueprints new search</div>
       <div data-testid="cli.label.refused">
-      <div class="ln">✗ the project label `shop` is another checkout's (~/shop). Nothing was made.</div>
+      <div class="ln">✗ This machine already has a project called `shop`, at ~/shop. ~/work/shop is another checkout, so its project needs a name of its own. Nothing was made.</div>
       </div>
       <div data-testid="cli.label.choose">
-      <div class="ln">  Choose another with `--project &lt;label&gt;` and `--code &lt;two or three letters&gt;`.</div>
+      <div class="ln">  Name it with `--project &lt;label&gt;`, e.g. `walkdown blueprints new search --project work-shop --code ws`.</div>
       </div>
     <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
   </div>

@@ -4,7 +4,7 @@ import { collectRules, excuseFor, signoffList, verifyList } from '../../lib/blue
 import { formatHash, specHash } from '../../lib/hash.js';
 import { gitSha, treeHash } from '../../lib/run-record.js';
 import { screenFlow } from '../../lib/status.js';
-import { end, loadOrExit } from './context.js';
+import { end, loadOrExit, namedOrExit } from './context.js';
 
 /*
  * The first step toward prompt-driven judging (docs/11-architecture.md,
@@ -36,11 +36,11 @@ export function run(args) {
   const id = positionals[0];
   if (!id || positionals.length > 1) {
     console.error(
-      'Usage: walkdown judge <rule-id> [--target <name>] [--serve <origin>] [--port <n>] [--blueprint <id>] [--json]',
+      'Usage: walkdown judge <rule-id> --blueprint <id> [--target <name>] [--serve <origin>] [--port <n>] [--json]',
     );
     process.exit(2);
   }
-  const blueprint = loadOrExit(values.blueprint);
+  const blueprint = loadOrExit(namedOrExit(values.blueprint, 'judge'));
   const { config, storyboard } = blueprint;
   // The evidence path below is written to BY HAND from this printout, so a
   // fresh project's tentative home is made real before it is promised.
@@ -277,7 +277,7 @@ export function run(args) {
     '    `--reason finding` (authored agent, and yours to settle once a later pass judges the fix); put its',
     '    UUID in the result (`threads new --json` prints it), never its label, which two branches can share.',
     '  - Then `walkdown status`: a note you wrote on this rule that your pass has now judged is',
-    '    listed for you to settle (`walkdown threads set <id> --status settled --as-agent`).',
+    '    listed for you to settle (`walkdown threads set <id> --status settled --as-agent --blueprint <id>`).',
     `  - The ledger is append-only: one new record, at the end, and no record ever edited.`,
     // n-0200: the record above names the TARGET's address while the copy
     // is served elsewhere, and a verdict recorded at the copy's port fills

@@ -1,0 +1,15 @@
+# `walkdown where` for a home outside the repository that keeps its own design: the prototype row.
+screen: where-prototype-beside
+title: The prototype is found beside the spec before the code
+rule: locations.default.prototype-beside-the-spec
+fixture: g1-prototype-beside
+command: [where]
+exit: 0
+expect:
+  - '^  prototype ~/\.walkdown/projects/shop/blueprints/checkout/prototype$'
+  - '^            `prototype\.root: prototype/`, beside the spec$'
+  - '^  proposals ~/shop/proposals  \(does not exist yet\)$'
+  - '^            in the code — nothing of that name beside the spec$'
+anchors:
+  - { id: cli.where.prototype, match: '^  prototype |^            `prototype\.root' }
+  - { id: cli.where.proposals, match: '^  proposals |^            in the code' }

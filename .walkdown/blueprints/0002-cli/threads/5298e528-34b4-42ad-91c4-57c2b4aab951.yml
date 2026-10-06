@@ -1,0 +1,17 @@
+id: n-0463
+uuid: 5298e528-34b4-42ad-91c4-57c2b4aab951
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:35.085Z
+anchor:
+  screen: status-signed-for-another
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints after topher
+  drove a walkdown and Pat accepted for product beside him: eng signed by
+  topher, and product signed by pat, recorded by topher
+  (status.acceptance.signature-names-its-signer). Anchors: cli.prompt,
+  cli.status.own, cli.status.proxy, cli.exit.
+  as-built/cli/status-signed-for-another.html is the build, from
+  test/cli/scenarios/status-signed-for-another.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

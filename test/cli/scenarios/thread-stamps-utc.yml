@@ -1,0 +1,13 @@
+# A thread with a reply, as the record keeps it, on a machine whose clock is in Chicago.
+screen: thread-stamps-utc
+title: Every time a record keeps is an instant in UTC
+rule: time.records.stored-as-utc
+fixture: g2-note-addressed
+cat: home/projects/shop/blueprints/checkout/threads/*.yml
+exit: 0
+expect:
+  - '^created: 2026-10-02T00:00:00Z$'
+  - '^    created: 2026-10-02T00:00:00Z$'
+anchors:
+  - { id: cli.record.created, match: '^created: ' }
+  - { id: cli.record.reply-created, match: '^    created: ' }

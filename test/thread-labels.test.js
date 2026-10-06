@@ -115,7 +115,7 @@ test('two threads sharing a label are named, and relabelled only when a person a
   const listed = cli(f, ['threads']);
   assert.equal(listed.status, 0, listed.stderr);
   assert.match(listed.stdout, new RegExp(`n-0006 labels 2 threads: ${OLDER}, ${NEWER}`));
-  assert.match(listed.stdout, /`walkdown threads relabel n-0006`/);
+  assert.match(listed.stdout, new RegExp(`\`walkdown threads relabel n-0006 --blueprint ${f.id}\``));
   const linted = cli(f, ['lint', '--json']);
   const clash = JSON.parse(linted.stdout).findings?.find?.((x) => x.category === 'label-clash') ??
     JSON.parse(linted.stdout).blueprints?.flatMap((b) => b.findings).find((x) => x.category === 'label-clash');
@@ -136,7 +136,7 @@ test('two threads sharing a label are named, and relabelled only when a person a
   const asked = cli(f, ['threads', 'relabel', 'n-0006']);
   assert.equal(asked.status, 2, asked.stdout);
   assert.match(asked.stdout, new RegExp(NEWER), 'the newer one is the one it would move');
-  assert.match(asked.stderr, new RegExp(`Nothing was changed\\. \`walkdown threads relabel ${NEWER} --yes\` does it`));
+  assert.match(asked.stderr, new RegExp(`Nothing was changed\\. \`walkdown threads relabel ${NEWER} --yes --blueprint ${f.id}\` does it`));
   assert.deepEqual(snapshot(f.bp), before, 'and nothing was');
 
   // Declining at a terminal changes nothing either.

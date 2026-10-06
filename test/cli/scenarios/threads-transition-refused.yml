@@ -1,0 +1,13 @@
+# `walkdown threads set` asking a question to skip its answer: the lifecycle refuses.
+screen: threads-transition-refused
+title: A question cannot be incorporated before it is answered
+rule: threads.lifecycle.validated-transitions
+fixture: g3-a-question
+command: [threads, set, q-0002, --status, incorporated, --blueprint, checkout]
+exit: 2
+expect:
+  - '^illegal transition open → incorporated for a question$'
+  - '^Nothing was changed\.$'
+anchors:
+  - { id: cli.refusal, match: '^illegal transition' }
+  - { id: cli.unchanged, match: '^Nothing was changed' }

@@ -1,0 +1,17 @@
+id: n-0454
+uuid: 7b22d50b-2e65-4838-a860-19bc41e50e4e
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:33.381Z
+anchor:
+  screen: status-evidence-not-acceptance
+status: open
+body: "Draw what `walkdown status checkout.basics.pays` prints where the checks
+  and the agent walkdown both pass and nobody has signed: the rule still
+  pending, both evidence lines green, and eng reading not yet
+  (status.derived.human-tier-distinct). Anchors: cli.prompt, cli.status.verdict,
+  cli.status.evidence, cli.status.acceptance, cli.exit.
+  as-built/cli/status-evidence-not-acceptance.html is the build, from
+  test/cli/scenarios/status-evidence-not-acceptance.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

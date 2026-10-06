@@ -49,8 +49,8 @@
 </head>
 <body>
   <div class="term">
-    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown where</div>
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop-wt</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop-wt $</b> walkdown where</div>
       <div class="ln">walkdown where — 0001-sp-checkout</div>
       <div class="ln"></div>
       <div class="ln">  config    ~/.walkdown/profile.yml</div>
@@ -61,16 +61,16 @@
       <div class="ln">            the `.walkdown` the registered home sits in</div>
       <div class="ln"></div>
       <div data-testid="cli.worktree.spec">
-      <div class="ln">  spec      ~/shop-wt/.walkdown/blueprints/202610-checkout</div>
+      <div class="ln">  spec      ~/shop-wt/.walkdown/blueprints/checkout</div>
       <div class="ln">            this branch's copy, a git worktree of ~/shop (0001-sp-checkout)</div>
       </div>
-      <div class="ln">  runs      ~/shop/.walkdown/blueprints/202610-checkout/runs</div>
+      <div class="ln">  runs      ~/shop/.walkdown/blueprints/checkout/runs</div>
       <div class="ln">            the blueprint's own records.yml (0001-sp-checkout), read from the registered home's — git ignores runs, so every worktree shares them</div>
-      <div class="ln">  threads   ~/shop-wt/.walkdown/blueprints/202610-checkout/threads</div>
+      <div class="ln">  threads   ~/shop-wt/.walkdown/blueprints/checkout/threads</div>
       <div class="ln">            the blueprint's own records.yml (0001-sp-checkout)</div>
-      <div class="ln">  evidence  ~/shop/.walkdown/blueprints/202610-checkout/evidence</div>
+      <div class="ln">  evidence  ~/shop/.walkdown/blueprints/checkout/evidence</div>
       <div class="ln">            the blueprint's own records.yml (0001-sp-checkout), read from the registered home's — git ignores evidence, so every worktree shares them</div>
-      <div class="ln">  drafts    ~/shop/.walkdown/blueprints/202610-checkout/drafts</div>
+      <div class="ln">  drafts    ~/shop/.walkdown/blueprints/checkout/drafts</div>
       <div class="ln">            the blueprint's own records.yml (0001-sp-checkout), read from the registered home's — git ignores drafts, so every worktree shares them</div>
       <div data-testid="cli.worktree.code">
       <div class="ln">  code      ~/shop-wt</div>
@@ -82,7 +82,7 @@
       <div class="ln">            in the code — nothing of that name beside the spec</div>
       <div class="ln">  tracked   spec, threads — the rest is outside the repository</div>
       <div class="ln">            asked git: no rule keeps any of it out</div>
-      <div class="ln">            the tree says: ~/shop-wt/.walkdown/blueprints/202610-checkout/.gitignore keeps out runs/, evidence/, drafts/ — delete it to commit everything</div>
+      <div class="ln">            the tree says: ~/shop-wt/.walkdown/blueprints/checkout/.gitignore keeps out runs/, evidence/, drafts/ — delete it to commit everything</div>
       <div class="ln"></div>
       <div class="ln">Nothing was written. See docs/08-locations.md for the resolution order.</div>
     <div class="ln exit" data-testid="cli.exit">[exit 0]</div>

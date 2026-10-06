@@ -1,0 +1,12 @@
+id: n-0500
+uuid: eb088e66-0d8e-46b5-9080-325b1a1eccb5
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:18:10.496Z
+anchor:
+  rule: locations.answer.serve-starts-anywhere
+status: open
+body: Found while judging locations.several.writes-name-one. `walkdown serve`
+  started in a project holding several blueprints says in its banner that it
+  "started outside a registered project".

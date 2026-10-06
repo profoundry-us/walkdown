@@ -1,0 +1,17 @@
+# Every thread, after topher's walkdown signed for eng passed checkout.basics.pays.
+screen: threads-closed-by-a-pass
+title: A signed pass closes every note on the rule
+rule: threads.lifecycle.closes-where-it-was-asked
+fixture: g3-signed-pass
+command: [threads, --all]
+exit: 0
+expect:
+  - '^  n-0005  note     open         rule checkout\.basics\.totals$'
+  - '^  n-0004  note     recorded     rule checkout\.basics\.pays$'
+  - '^  n-0003  note     verified     rule checkout\.basics\.pays$'
+  - '^  n-0002  note     verified     rule checkout\.basics\.pays$'
+  - '^  n-0001  note     verified     rule checkout\.basics\.pays$'
+anchors:
+  - { id: cli.threads.other-rule, match: '^  n-0005|^      The total ignores' }
+  - { id: cli.threads.decision, match: '^  n-0004|^      A declined card keeps' }
+  - { id: cli.threads.closed-open, match: '^  n-0003|^      The pay button flickers' }

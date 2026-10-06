@@ -1,7 +1,8 @@
+import { blueprintFlag } from '../../lib/locations.js';
 import { parseArgs } from 'node:util';
 import { runHashCommand } from '../../lib/hash-cmd.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
-import { end, loadOrExit } from './context.js';
+import { end, loadOrExit, namedOrExit } from './context.js';
 
 export function run(args) {
   const { values } = parseArgs({
@@ -20,7 +21,7 @@ export function run(args) {
     console.error('--reword wants a reason - the old hash is kept on your word, and the file says whose.');
     return end(2);
   }
-  const blueprint = loadOrExit(values.blueprint);
+  const blueprint = loadOrExit(values.write ? namedOrExit(values.blueprint, 'hash --write') : values.blueprint);
   const { rows, changedFiles, exitCode } = runHashCommand(blueprint, {
     write: values.write,
     reword: values.reword ?? null,
@@ -40,7 +41,7 @@ export function run(args) {
   if (values.write) console.log(`\n${changedFiles} file(s) updated`);
   else if (exitCode)
     console.log(
-      `\n${red('stale/missing hashes')} — run \`walkdown hash --write\`; add \`--reword "<why>"\` if only the words changed, and the verdicts stay current`,
+      `\n${red('stale/missing hashes')} — run \`walkdown hash --write${blueprintFlag(blueprint.dir)}\`; add \`--reword "<why>"\` if only the words changed, and the verdicts stay current`,
     );
   return end(exitCode);
 }

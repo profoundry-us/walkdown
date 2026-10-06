@@ -1,0 +1,17 @@
+id: n-0445
+uuid: 79ed74bf-0b38-4b14-8bb2-c2f3cccec0c5
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:30.606Z
+anchor:
+  screen: rules-move
+status: open
+body: "Draw what `walkdown rules move checkout.basics --blueprint checkout --to
+  search` prints: how many rules moved and which, the thread that went with them
+  keeping its id, the run record copied with only their results, and that
+  checkout's own records are unchanged (locations.several.rules-move). Anchors:
+  cli.prompt, cli.rules-move.done, cli.rules-move.records, cli.exit.
+  as-built/cli/rules-move.html is the build, from
+  test/cli/scenarios/rules-move.yml, in the frame tools/cli-captures.mjs --frame
+  prints."

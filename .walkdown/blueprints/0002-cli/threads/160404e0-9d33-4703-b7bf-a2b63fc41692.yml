@@ -1,0 +1,17 @@
+id: n-0473
+uuid: 160404e0-9d33-4703-b7bf-a2b63fc41692
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:37.523Z
+anchor:
+  screen: where-fresh-machine
+status: open
+body: "Draw what `walkdown where` prints on a machine with no ~/.walkdown at
+  all: every row answered, the profile and registry named though neither exists,
+  and the closing line that nothing was written
+  (locations.answer.asking-writes-nothing). Anchors: cli.prompt,
+  cli.where.config, cli.where.nothing, cli.exit.
+  as-built/cli/where-fresh-machine.html is the build, from
+  test/cli/scenarios/where-fresh-machine.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

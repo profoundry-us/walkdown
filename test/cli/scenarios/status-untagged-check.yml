@@ -1,0 +1,14 @@
+# `walkdown status` after the suite stopped tagging `pays`: its old checks
+# pass reads stale, while `totals`, still tagged, passes.
+screen: status-untagged-check
+title: A checks pass no check claims any more is stale
+rule: status.derived.unbacked-pass-goes-stale
+fixture: g4-untagged
+command: [status]
+exit: 0
+expect:
+  - '^  ○  checkout\.basics\.pays    ~ stale '
+  - '^  ○  checkout\.basics\.totals  ✓ pass '
+anchors:
+  - { id: cli.status.unbacked, match: 'checkout\.basics\.pays  ' }
+  - { id: cli.status.backed, match: 'checkout\.basics\.totals  ' }

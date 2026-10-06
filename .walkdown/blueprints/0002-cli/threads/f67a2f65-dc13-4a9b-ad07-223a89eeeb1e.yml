@@ -1,0 +1,18 @@
+id: n-0481
+uuid: f67a2f65-dc13-4a9b-ad07-223a89eeeb1e
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:17.888Z
+anchor:
+  screen: skills-others-links
+status: open
+body: "Draw what `walkdown skills --force` prints in a skills folder holding
+  walkdown's own link. Beside it sit two links somebody else made, at names
+  walkdown would use. Walkdown's link reads up to date. Each of theirs is left
+  alone as a link walkdown did not make, `--force` or not
+  (`delivery.plugin.never-through-a-link`). Anchors: cli.prompt,
+  cli.skills.link, cli.skills.left, cli.exit.
+  as-built/cli/skills-others-links.html is the build, from
+  test/cli/scenarios/skills-others-links.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

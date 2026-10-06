@@ -1,0 +1,15 @@
+# `walkdown status <rule>` where every tier passes and eng sent it back:
+# failing, with what the signer said.
+screen: status-sent-back
+title: A rule sent back reads as failing
+rule: status.acceptance.sent-back-is-a-fail
+fixture: g4-sent-back
+command: [status, checkout.basics.pays]
+exit: 1
+expect:
+  - '^checkout\.basics\.pays · failing$'
+  - '^    eng            ✗ sent back by topher  '
+  - '^                   The spinner never stops after a declined card\.$'
+anchors:
+  - { id: cli.status.verdict, match: '^checkout\.basics\.pays · ' }
+  - { id: cli.status.sent-back, match: '^    eng  |^                   The spinner' }

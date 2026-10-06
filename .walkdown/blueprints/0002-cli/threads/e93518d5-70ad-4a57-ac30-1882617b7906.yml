@@ -1,0 +1,17 @@
+id: n-0442
+uuid: e93518d5-70ad-4a57-ac30-1882617b7906
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:30.047Z
+anchor:
+  screen: plugin-skills
+status: open
+body: "Draw what `tree` shows of the skills folder Claude Code finds through
+  walkdown's link: the five skills walkdown ships - backlog, formulate,
+  incorporate, judge, setup - under the plugin named walkdown, and nothing else
+  of the clone's, not walkdown-sitting (delivery.plugin.named-for-walkdown).
+  Anchors: cli.prompt, cli.plugin.skills, cli.plugin.count, cli.exit.
+  as-built/cli/plugin-skills.html is the build, from
+  test/cli/scenarios/plugin-skills.yml, in the frame tools/cli-captures.mjs
+  --frame prints."

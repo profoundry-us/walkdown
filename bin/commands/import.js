@@ -150,6 +150,15 @@ export async function run(args) {
       );
       return end(2);
     }
+    // A home inside a home is refused named by its path, as the scan refuses it (n-0490).
+    const pair = checkout
+      ? findHomes(checkout).nested.find((n) => canon(n.inner) === canon(homeDir))
+      : null;
+    if (pair) {
+      console.error(red(`✗ ${tilde(pair.inner)} is a blueprint inside ${tilde(pair.outer)} — a home inside a home is refused. Nothing was registered.`));
+      console.error(dim('  Move the inner one out to a folder of its own under .walkdown/blueprints/, then import it.'));
+      return end(2);
+    }
     const already = listedHomes().get(canon(homeDir));
     if (already) {
       console.log(`  ${dim('· already listed')} ${tilde(homeDir)}  ${dim(`as \`${already}\``)}`);
@@ -168,7 +177,7 @@ export async function run(args) {
     const moved = top ? repointMovedCheckout(top, values.project ?? null) : null;
     if (moved) {
       for (const id of moved.ids)
-        console.log(`  ${green('~ moved')}    ${dim(`\`${id}\` belongs to ${tilde(top)} now, still as \`${id}\` — the row named ${tilde(moved.from)}, which is gone`)}`);
+        console.log(`  ${green('~ moved')}    ${dim(`\`${id}\` keeps its ID: it was at ${tilde(moved.from)}, which no longer exists, and this machine now finds it at ${tilde(top)}`)}`);
       return end(0);
     }
     const here = top ? readRegistry().rows.filter((r) => r?.registered && r.checkout && canon(expand(String(r.checkout))) === top) : [];
@@ -325,7 +334,7 @@ function finish(chosen, checkout, values, known = []) {
   for (const w of written) {
     if (w.from) {
       // The checkout moved: the same blueprint, by the same ID.
-      console.log(`  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`as \`${w.id}\`, still — the row named ${tilde(w.from)}, which is gone`)}`);
+      console.log(`  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`keeps its ID \`${w.id}\`: it was at ${tilde(w.from)}, which no longer exists`)}`);
       continue;
     }
     console.log(`  ${w.kept ? dim('· already listed') : green('+ listed')}   ${tilde(w.dir)}  ${dim(`as \`${w.id}\``)}`);

@@ -1,0 +1,27 @@
+id: n-0490
+uuid: 476e5401-b2a8-456d-8e9a-23f6efa511bb
+kind: note
+reason: finding
+author: agent
+created: 2026-10-06T22:14:34.246Z
+anchor:
+  rule: locations.default.folder-names-are-yours
+status: settled
+body: Judged on a scratch machine (evidence
+  2026-10-06T22-00-32Z/folder-names-are-yours.txt). A home inside a home is
+  refused only by the scan. `blueprints import .` refuses the nested home and
+  names both folders, and `new --folder 202610-search/sub` is refused. But
+  `blueprints import .walkdown/blueprints/202610-search/inner` registers the
+  inner home, and importing its parent next registers that too, so two homes end
+  up nested one inside the other.
+replies:
+  - author: agent
+    created: 2026-10-06T22:25:07Z
+    body: "Fixed and rejudged: the agent pass in the run recorded after
+      2026-10-06T22-21-53Z cites evidence/2026-10-06T22-21-53Z/. A unit test
+      covers each repro."
+  - author: agent
+    via: verdict
+    created: 2026-10-06T22:29:53Z
+    body: Settled by the agent's pass on locations.default.folder-names-are-yours
+      (2026-10-06T22-29-53Z-local-01).

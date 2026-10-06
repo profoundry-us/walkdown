@@ -1,0 +1,17 @@
+# `walkdown skills` with no --into and no terminal: every place they could go, and none chosen.
+screen: skills-asks-where
+title: skills asks where they go and writes nothing on its own
+rule: locations.default.skills-are-yours-by-default
+fixture: committed-spec
+command: [skills]
+exit: 2
+expect:
+  - '^  Where should the skills go\? 2 places to put them\.$'
+  - '^  1  ~/\.claude/skills$'
+  - '^     yours — Claude Code, as the walkdown plugin: one link to this clone, every project$'
+  - '^  2  ~/shop/\.claude/skills$'
+  - '^     nothing here yet$'
+  - '^Nothing written: there is no terminal to ask, and this never picks for you\.$'
+anchors:
+  - { id: cli.skills.places, match: '^  (\d  |   )' }
+  - { id: cli.skills.refusal, match: '^(Nothing written|  `--into)' }

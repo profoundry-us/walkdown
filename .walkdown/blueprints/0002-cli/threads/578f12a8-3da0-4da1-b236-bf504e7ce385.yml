@@ -1,0 +1,18 @@
+id: n-0484
+uuid: 578f12a8-3da0-4da1-b236-bf504e7ce385
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:13:18.457Z
+anchor:
+  screen: status-design-agent
+status: open
+body: "Draw what `walkdown status` prints for a blueprint whose spec.yml says
+  `design.by: agent`. A design request is open on the undrawn receipt screen.
+  The request sits in a DESIGN QUEUE, titled for the design agent and never the
+  agent building the app. It is set apart from the AGENT QUEUE below it
+  (`ownership.design.declared-per-blueprint`). Anchors: cli.prompt,
+  cli.status.design-queue, cli.status.agent-queue, cli.exit.
+  as-built/cli/status-design-agent.html is the build, from
+  test/cli/scenarios/status-design-agent.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

@@ -1,0 +1,17 @@
+id: n-0452
+uuid: dce2a508-c425-469f-9e8b-f4fbc01715d9
+kind: note
+reason: request
+author: agent
+created: 2026-10-06T22:12:32.825Z
+anchor:
+  screen: status-approved-wording
+status: open
+body: "Draw what `walkdown status` prints where eng approved the wording of two
+  rules and only `totals` has been built since: both marked approved, `pays`
+  asking nobody, and `totals` back in NEEDS A HUMAN for a real signature
+  (status.acceptance.approval-covers-only-the-unbuilt). Anchors: cli.prompt,
+  cli.status.table, cli.status.queue, cli.exit.
+  as-built/cli/status-approved-wording.html is the build, from
+  test/cli/scenarios/status-approved-wording.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

@@ -144,7 +144,7 @@ export const FIXTURES = {
     m.ok(['blueprints', 'new', 'checkout']);
     for (const f of readdirSync(join(m.specOf('checkout'), 'features'))) rmSync(join(m.specOf('checkout'), 'features', f));
     feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.', '--blueprint', 'checkout']);
   },
   /* `shop` with one blueprint, `checkout`. */
   'one-blueprint'(m) {
@@ -163,6 +163,14 @@ export const FIXTURES = {
     feature(m, 'search', 'search', [['finds', 'A search for a product finds it.']]);
   },
   /* `shop` with `checkout`, and a second checkout called shop at ~/work/shop, whose label and code are both taken. */
+  /* Two projects on one machine, each with a blueprint called `search`. */
+  'two-searches'(m) {
+    m.ok(['blueprints', 'new', 'search']);
+    const other = join(m.root, 'hireart_main');
+    mkdirSync(join(other, '.git'), { recursive: true });
+    const r = m.wd(['blueprints', 'new', 'search'], other);
+    if (r.status !== 0) throw new Error(`fixture: blueprints new search in hireart_main exited ${r.status}\n${r.stderr}`);
+  },
   'second-shop'(m) {
     m.ok(['blueprints', 'new', 'checkout']);
     mkdirSync(join(m.root, 'work', 'shop', '.git'), { recursive: true });
@@ -178,8 +186,8 @@ export const FIXTURES = {
     const home = m.specOf('checkout');
     for (const f of readdirSync(join(home, 'features'))) rmSync(join(home, 'features', f));
     feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.']);
-    m.ok(['sweep', '--why', 'every check again']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.', '--blueprint', 'checkout']);
+    m.ok(['sweep', '--why', 'every check again', '--blueprint', 'checkout']);
     mkdirSync(join(home, 'evidence', '2026-10-02T00-00-00Z'), { recursive: true });
     writeFileSync(join(home, 'evidence', '2026-10-02T00-00-00Z', 'app-checkout.png'), '');
     mkdirSync(join(home, 'drafts'), { recursive: true });
@@ -230,7 +238,7 @@ export const FIXTURES = {
     const home = m.specOf('checkout');
     for (const f of readdirSync(join(home, 'features'))) rmSync(join(home, 'features', f));
     feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.', '--blueprint', 'checkout']);
   },
   /* `shop` a real git repository with an origin, and one commit. */
   'git-repo'(m) {
@@ -277,7 +285,7 @@ export const FIXTURES = {
   /* `checkout` where a merge left two threads labelled n-0001. */
   'clashing-labels'(m) {
     FIXTURES['a-note'](m);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The receipt shows the wrong total.']);
+    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The receipt shows the wrong total.', '--blueprint', 'checkout']);
     const dir = join(m.specOf('checkout'), 'threads');
     for (const f of readdirSync(dir)) {
       const p = join(dir, f);
@@ -305,6 +313,28 @@ export const FIXTURES = {
   },
 };
 
+/*
+ * More fixtures, a file per group of screens in tools/cli-fixtures/, each
+ * exporting an object of them by name: `(m, h) => ...`, where `h` holds the
+ * helpers here (feature, git, realRepo, committedHome, and the base fixtures
+ * by name). A name two files share is refused, so one group's machine is
+ * never quietly another's.
+ */
+const MORE = new URL('./cli-fixtures/', import.meta.url).pathname;
+for (const f of (() => {
+  try {
+    return readdirSync(MORE).filter((n) => n.endsWith('.mjs')).sort();
+  } catch {
+    return [];
+  }
+})()) {
+  const extra = (await import(join(MORE, f))).default;
+  for (const [name, fn] of Object.entries(extra)) {
+    if (FIXTURES[name]) throw new Error(`tools/cli-fixtures/${f}: fixture "${name}" is already defined`);
+    FIXTURES[name] = (m) => fn(m, { feature, git, realRepo, committedHome, fixtures: FIXTURES });
+  }
+}
+
 /**
  * Text as anyone reading it should see it, whoever's machine ran it.
  *
@@ -317,6 +347,8 @@ export function steady(text, m, uuids = new Map()) {
     // HOME is the machine's root, so a path walkdown shortens itself reads
     // ~/home - the same ~/.walkdown a person would see.
     .replace(/~\/home\b/g, '~/.walkdown')
+    // and a path printed relative to the code reaches it as ../home.
+    .replace(/(^|[\s(])((?:\.\.\/)+)home\//gm, '$1$2.walkdown/')
     .replaceAll(`as \`${userInfo().username}\``, 'as `sam`')
     .replace(/^(\s+· node\s+)\S+/m, '$124.0.0')
     .replace(/^(\s+· git\s+)\S.*$/m, '$12.50.1')

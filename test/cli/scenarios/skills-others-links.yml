@@ -1,0 +1,14 @@
+# `walkdown skills --force` beside links somebody else made: walkdown's is up to date, theirs are left.
+screen: skills-others-links
+title: Links walkdown did not make are left alone, even with --force
+rule: delivery.plugin.never-through-a-link
+fixture: g1-someone-elses-links
+command: [skills, --into, ../claude/skills, --force]
+exit: 0
+expect:
+  - '^  · up to date  ~/\.claude/skills/walkdown → ~/src/walkdown$'
+  - '^  ! left alone \(a link walkdown did not make\)  ~/\.claude/skills/walkdown-judge$'
+  - '^  ! left alone \(a link walkdown did not make\)  ~/\.claude/skills/walkdown-incorporate$'
+anchors:
+  - { id: cli.skills.link, match: '^  · up to date' }
+  - { id: cli.skills.left, match: '^  ! left alone' }

@@ -1,0 +1,17 @@
+# `walkdown lint` over three excuses that do not argue: a shrug, one filed
+# against a word that is not a tier, and one excusing both tiers.
+screen: lint-weak-excuses
+title: Lint names an excuse that does not argue its case
+rule: status.evidence.excuse-must-argue
+fixture: g4-weak-excuses
+command: [lint]
+exit: 0
+expect:
+  - 'checkout\.basics\.pays: the agent excuse is too thin to argue with'
+  - 'checkout\.basics\.totals: unverifiable names "human", which is not a tier \(checks\|agent\)'
+  - 'checkout\.basics\.receipt: both tiers are excused'
+  - '0 errors, 3 warning\(s\)$'
+anchors:
+  - { id: cli.lint.thin, match: 'checkout\.basics\.pays: ' }
+  - { id: cli.lint.not-a-tier, match: 'checkout\.basics\.totals: ' }
+  - { id: cli.lint.both-tiers, match: 'checkout\.basics\.receipt: ' }
