@@ -1,0 +1,19 @@
+id: n-0396
+uuid: 4f5f2200-b07c-4216-bf1e-ae464c9852dc
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T04:23:35.757Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "A serve started inside a project refuses ?bp=search with 409 when two
+  projects each have a search. --blueprint takes the bare name inside the
+  project, but ?bp= matches every row on the machine. Evidence:
+  runs/evidence/2026-10-06T03-49-18Z/ids-stay-here-fifth.txt."
+replies:
+  - author: agent
+    created: 2026-10-06T04:33:09Z
+    body: Serve now resolves a bare ?bp= name through the registry pick, as
+      --blueprint does, so inside a project it means that project's. A
+      judged-edges test covers it.

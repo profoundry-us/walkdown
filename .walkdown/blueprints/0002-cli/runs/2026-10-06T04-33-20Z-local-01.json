@@ -1,0 +1,172 @@
+{
+  "run_id": "2026-10-06T04-33-20Z-local-01",
+  "created": "2026-10-06T04:33:20Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "e0e416d-dirty",
+  "tree_hash": "sha256:9e36007be874",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c",
+      "duration_ms": 647,
+      "checks": [
+        "test/import.test.js:173",
+        "test/import.test.js:223"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.forget-keeps-the-files",
+      "status": "pass",
+      "statement_hash": "sha256:ba872b7a43cd",
+      "duration_ms": 604,
+      "checks": [
+        "test/import.test.js:371"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:7170e620ca41",
+      "duration_ms": 906,
+      "checks": [
+        "test/judged-edges.test.js:42",
+        "test/judged-edges.test.js:62"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "duration_ms": 551,
+      "checks": [
+        "test/judged-edges.test.js:72"
+      ]
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:b55ca34f14f7",
+      "duration_ms": 1309,
+      "checks": [
+        "test/judged-edges.test.js:93",
+        "test/judged-edges.test.js:209"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:fd33259c4a4e",
+      "duration_ms": 1584,
+      "checks": [
+        "test/judged-edges.test.js:105",
+        "test/judged-edges.test.js:224"
+      ]
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:f561ad6f21be",
+      "duration_ms": 4320,
+      "checks": [
+        "test/judged-edges.test.js:132",
+        "test/judged-edges.test.js:236",
+        "test/judged-edges.test.js:253",
+        "test/judged-edges.test.js:270",
+        "test/judged-edges.test.js:298",
+        "test/judged-edges.test.js:319"
+      ]
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:b31372ab894d",
+      "duration_ms": 2010,
+      "checks": [
+        "test/judged-edges.test.js:154",
+        "test/judged-edges.test.js:195"
+      ]
+    },
+    {
+      "rule": "locations.threads.uuid-is-the-identity",
+      "status": "pass",
+      "statement_hash": "sha256:945e5cd8fc01",
+      "duration_ms": 811,
+      "checks": [
+        "test/judged-edges.test.js:172"
+      ]
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:be08ebbb3f59",
+      "duration_ms": 301,
+      "checks": [
+        "test/serve.test.js:408",
+        "test/serve.test.js:1131"
+      ]
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:43e88185b989",
+      "duration_ms": 75,
+      "checks": [
+        "test/serve.test.js:907"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:0306629cf026",
+      "duration_ms": 269,
+      "checks": [
+        "test/serve.test.js:979",
+        "test/serve.test.js:1131"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:1c0b2e99daa0",
+      "duration_ms": 303,
+      "checks": [
+        "test/serve.test.js:1021",
+        "test/serve.test.js:1090"
+      ]
+    },
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:8fc3f6d54231",
+      "duration_ms": 610,
+      "checks": [
+        "test/serve.test.js:1198",
+        "test/serve.test.js:1239",
+        "test/serve.test.js:1310"
+      ]
+    },
+    {
+      "rule": "locations.worktree.same-project",
+      "status": "pass",
+      "statement_hash": "sha256:a28e38241c7c",
+      "duration_ms": 1989,
+      "checks": [
+        "test/worktree.test.js:64"
+      ]
+    },
+    {
+      "rule": "locations.worktree.branch-spec-shared-records",
+      "status": "pass",
+      "statement_hash": "sha256:303430aff403",
+      "duration_ms": 6916,
+      "checks": [
+        "test/worktree.test.js:114",
+        "test/worktree.test.js:188"
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@
  * is one finding, tagged with the rule it failed.
  */
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -293,4 +293,53 @@ test('a moved checkout keeps its IDs though something new now stands at its old 
   assert.equal(m.rows().find((r) => r.id === menu.id).checkout.replace(/^~/, process.env.HOME), deli2);
   assert.match(ok(m.cli(deli2, 'blueprints', 'import', '.', '--project', 'deli')).stdout, /already listed/);
   assert.notEqual(m.cli(deli, 'status').status, 0, 'and the new repository at the old path is nobody\'s');
+});
+
+test('a moved checkout keeps its IDs when its origin is cloned back at the old path @rule:locations.registry.ids-stay-here', () => {
+  const m = machine();
+  const app = m.repo('app');
+  git(app, 'remote', 'add', 'origin', 'https://example.com/acme/origin-app.git');
+  writeFileSync(join(app, 'README.md'), 'app\n');
+  git(app, 'add', '-A');
+  git(app, 'commit', '-q', '-m', 'first');
+  ok(m.cli(app, 'blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search'));
+  const [row] = m.rows();
+  const old = join(root, `m${n}`, 'app-old');
+  renameSync(app, old);
+  // The same origin, cloned back where the checkout was - without the unpushed home.
+  mkdirSync(app);
+  git(app, 'init', '-q');
+  git(app, 'remote', 'add', 'origin', 'https://example.com/acme/origin-app.git');
+  const r = ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
+  assert.equal(m.rows().length, 1, 'no second row');
+  assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), old);
+});
+
+test('inside a project, ?bp= takes the name alone though another project has one too @rule:locations.registry.ids-stay-here', async () => {
+  const m = machine();
+  const shop = m.repo('shop');
+  const deli = m.repo('deli');
+  ok(m.cli(shop, 'blueprints', 'new', 'search'));
+  ok(m.cli(deli, 'blueprints', 'new', 'search'));
+  const ours = m.rows().find((r) => r.project === 'shop');
+  const child = spawn(process.execPath, [CLI, 'serve', '--port', '0'], { cwd: shop, env: m.env });
+  try {
+    const out = await new Promise((yes, no) => {
+      let said = '';
+      const timer = setTimeout(() => no(new Error(`no answer: ${said}`)), 10_000);
+      const take = (d) => {
+        said += d;
+        if (/review:\s+http:\/\/localhost:\d+/.test(said)) clearTimeout(timer), yes(said);
+      };
+      child.stdout.on('data', take);
+      child.stderr.on('data', take);
+    });
+    const port = out.match(/localhost:(\d+)/)[1];
+    const r = await fetch(`http://localhost:${port}/api/blueprint?bp=search`);
+    assert.equal(r.status, 200, await r.clone().text());
+    assert.equal((await r.json()).key, ours.home.replace(/^~/, process.env.HOME));
+  } finally {
+    child.kill();
+  }
 });

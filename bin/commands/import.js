@@ -189,10 +189,16 @@ export async function run(args) {
    */
   const wt = checkoutFor(top, readRegistry().rows);
   const checkout = wt?.worktree ? wt.checkout : top;
+  /*
+   * A home the checkout has a copy of is the checkout's. One it has no copy
+   * of is this tree's own - a moved checkout whose origin was cloned back at
+   * its old path matches that clone by origin, and is still not its
+   * worktree (locations.registry.ids-stay-here).
+   */
   const at_ = (h) => {
     if (!wt?.worktree) return h;
     const there = canon(join(wt.checkout, relative(wt.worktree, h.dir)));
-    return isHome(there) ? { ...h, dir: there } : h;
+    return isHome(there) ? { ...h, dir: there } : { ...h, checkout: top };
   };
   const listed = listedHomes();
   const isListed = (h) => listed.has(canon(at_(h).dir));
@@ -259,7 +265,7 @@ function finish(chosen, checkout, values, known = []) {
     let row;
     try {
       row = register({
-        checkout: values.ephemeral ? null : checkout,
+        checkout: values.ephemeral ? null : (h.checkout ?? checkout),
         homeDir: h.dir,
         by: 'import',
         project: values.project ?? null,

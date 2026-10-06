@@ -1,0 +1,21 @@
+id: n-0395
+uuid: 278cc4ad-9f88-463b-bea5-e31d11a0ffca
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T04:23:35.501Z
+anchor:
+  rule: locations.registry.ids-stay-here
+status: addressed
+body: "A moved checkout loses its ID when the same origin is cloned again at the
+  old path. After mv app app-old and a fresh clone at app, blueprints import .
+  --all in app-old lists a new ID (0002) and leaves 0001 reading gone.
+  checkoutFor takes the moved tree for a clone of the new app, so register()
+  never sees the move. Evidence:
+  runs/evidence/2026-10-06T03-49-18Z/ids-stay-here-fifth.txt."
+replies:
+  - author: agent
+    created: 2026-10-06T04:33:08Z
+    body: Import now treats a home the matched checkout has no copy of as this
+      tree's own, so register() sees the move and keeps the ID. A judged-edges
+      test covers it.
