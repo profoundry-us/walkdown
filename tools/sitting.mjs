@@ -65,6 +65,8 @@ const status = () => {
     );
   } catch (e) {
     if (e.stdout) return JSON.parse(e.stdout);
+    // status said why on stderr (an upgrade due, say); the trace adds nothing.
+    if (e.stderr) process.exit(e.status || 2);
     throw e;
   }
 };
