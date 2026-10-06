@@ -152,5 +152,7 @@ checks:
   - id: unit-tests
     name: Unit tests
     run: npm test
-    timeout: 45
+    # ~63s on 2026-10-06 once ADR 0014 brought its real-git suites (upgrade,
+    # worktree, judged-edges); 45 killed a passing run every turn.
+    timeout: 90
 
