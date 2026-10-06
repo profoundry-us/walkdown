@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-06T04-44-05Z-local-01",
+  "created": "2026-10-06T04:44:05Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b9528f9-dirty",
+  "tree_hash": "sha256:fceeaa1c6115",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "fail",
+      "statement_hash": "sha256:64152f558d3f",
+      "duration_ms": 17176,
+      "checks": [
+        "checks/panel.spec.js:1244"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-06T04-44-05Z/panel-the-steps-are-read-o-b123b-e-waits-behind-a-disclosure-test-failed-1.png",
+        "runs/evidence/2026-10-06T04-44-05Z/panel-the-steps-are-read-o-b123b-e-waits-behind-a-disclosure-error-context.md"
+      ]
+    }
+  ]
+}

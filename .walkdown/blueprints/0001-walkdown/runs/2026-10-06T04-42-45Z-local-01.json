@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-06T04-42-45Z-local-01",
+  "created": "2026-10-06T04:42:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b9528f9-dirty",
+  "note": "Agent tier for panel.rules.evidence-visible, judged in the built-in browser (1440x900) on scratch copy ev-visible served at :4791 with its own WALKDOWN_HOME. The runs shown were FIXTURES written into the scratch copy only: a checks run (actor topher, statement hash deliberately old so it reads stale, refs checks/panel.spec.js:1161/1212/3788) and an agent walkdown run attaching a PNG, a .txt transcript, a .json and an .html file; checks/panel.spec.js was copied into the copy so Check source had a tree to read. panel.rules.counts-legible (no runs in the copy) served as the no-runs rule. Nothing was written to the real ledger.",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "fail",
+      "statement_hash": "sha256:79686951989e",
+      "evidence": [
+        "runs/evidence/2026-10-06T04-45-00Z/01-evidence-rows.jpg",
+        "runs/evidence/2026-10-06T04-45-00Z/02-evidence-modal.jpg",
+        "runs/evidence/2026-10-06T04-45-00Z/03-evidence-modal-four-kinds.jpg",
+        "runs/evidence/2026-10-06T04-45-00Z/04-check-source-modal.jpg",
+        "runs/evidence/2026-10-06T04-45-00Z/05-check-source-1161-cut-at-40-lines.jpg",
+        "runs/evidence/2026-10-06T04-45-00Z/06-no-runs-says-never-run.jpg",
+        "runs/evidence/2026-10-06T04-45-00Z/probe-check-source.txt",
+        "runs/evidence/2026-10-06T04-45-00Z/probe-evidence-modal.json"
+      ],
+      "reasoning": "Most of the rule holds. detail.evidence names each verify type with its latest result, producer and staleness ('checks/local ~ stale · topher · just now', 'agent ✓ pass · agent · just now'), and the agent run's files hang under the agent row as an indented '└ Evidence — open 4' button (detail.evidence-open), not as a tier of their own. That opens detail.evidence-modal over the whole 1440x900 viewport with backdrop-filter blur(6px). The PNG renders as a loaded picture (naturalWidth 1280), the .txt and .json as readable text, and the .html as an 'Open …' link in a new tab that serves 200; nothing is a broken image. Every caption sits on a 90%-opaque dark chip. A rule with no runs (counts-legible) reads 'agent ○ never run'. Check source is a real button (detail.technical-disclosure) that opens detail.source-modal over the whole desk, blurred, with each check's ref on a dark chip and an 'Open on GitHub ↗' link with target=_blank. It fails on 'each check in full'. lib/api.js checkSnippet cuts a check at 40 lines, so the 50-line test at checks/panel.spec.js:1161 (it ends at line 1210) is served as lines 1161-1200. It stops mid-expression at `.locator('img')`, and its GitHub link reads #L1161-L1200, so the link is cut short too (probe-check-source.txt, 05-check-source-1161-cut-at-40-lines.jpg). The cut also runs the other way: the test at :3788 ends at 3815, but the snippet runs to 3821 into the next test's leading comment, because only an opener ends the snippet, never the closing '});'.",
+      "threads": [
+        "d87f4a0e-fd20-459a-904a-8113cd416826"
+      ]
+    }
+  ]
+}

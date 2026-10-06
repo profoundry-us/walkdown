@@ -1,0 +1,134 @@
+{
+  "run_id": "2026-10-06T04-45-39Z-local-01",
+  "created": "2026-10-06T04:45:39Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b9528f9-dirty",
+  "tree_hash": "sha256:c6aa15f9b70e",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "commands.blueprints.commit-moves-the-home",
+      "status": "pass",
+      "statement_hash": "sha256:7170e620ca41",
+      "duration_ms": 796,
+      "checks": [
+        "test/judged-edges.test.js:42",
+        "test/judged-edges.test.js:62"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "duration_ms": 496,
+      "checks": [
+        "test/judged-edges.test.js:72"
+      ]
+    },
+    {
+      "rule": "locations.default.in-repo-on-request",
+      "status": "pass",
+      "statement_hash": "sha256:b55ca34f14f7",
+      "duration_ms": 1043,
+      "checks": [
+        "test/judged-edges.test.js:93",
+        "test/judged-edges.test.js:209"
+      ]
+    },
+    {
+      "rule": "locations.pointer.owns-only-its-block",
+      "status": "pass",
+      "statement_hash": "sha256:fd33259c4a4e",
+      "duration_ms": 1334,
+      "checks": [
+        "test/judged-edges.test.js:105",
+        "test/judged-edges.test.js:224"
+      ]
+    },
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:f561ad6f21be",
+      "duration_ms": 3831,
+      "checks": [
+        "test/judged-edges.test.js:132",
+        "test/judged-edges.test.js:236",
+        "test/judged-edges.test.js:253",
+        "test/judged-edges.test.js:270",
+        "test/judged-edges.test.js:298",
+        "test/judged-edges.test.js:319"
+      ]
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:b31372ab894d",
+      "duration_ms": 1452,
+      "checks": [
+        "test/judged-edges.test.js:154",
+        "test/judged-edges.test.js:195"
+      ]
+    },
+    {
+      "rule": "locations.threads.uuid-is-the-identity",
+      "status": "pass",
+      "statement_hash": "sha256:945e5cd8fc01",
+      "duration_ms": 468,
+      "checks": [
+        "test/judged-edges.test.js:172"
+      ]
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:be08ebbb3f59",
+      "duration_ms": 241,
+      "checks": [
+        "test/serve.test.js:408",
+        "test/serve.test.js:1131"
+      ]
+    },
+    {
+      "rule": "locations.default.one-home-per-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:43e88185b989",
+      "duration_ms": 60,
+      "checks": [
+        "test/serve.test.js:907"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.acts-for-a-person",
+      "status": "pass",
+      "statement_hash": "sha256:0306629cf026",
+      "duration_ms": 224,
+      "checks": [
+        "test/serve.test.js:979",
+        "test/serve.test.js:1131"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.claim-never-accept",
+      "status": "pass",
+      "statement_hash": "sha256:1c0b2e99daa0",
+      "duration_ms": 258,
+      "checks": [
+        "test/serve.test.js:1021",
+        "test/serve.test.js:1090"
+      ]
+    },
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:8fc3f6d54231",
+      "duration_ms": 478,
+      "checks": [
+        "test/serve.test.js:1198",
+        "test/serve.test.js:1239",
+        "test/serve.test.js:1310"
+      ]
+    }
+  ]
+}

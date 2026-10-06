@@ -343,3 +343,31 @@ test('inside a project, ?bp= takes the name alone though another project has one
     child.kill();
   }
 });
+
+test('check source shows each check in full: past 40 lines, and not into the next @rule:panel.rules.evidence-visible', async () => {
+  const { checkSnippet } = await import('../lib/api.js');
+  const dir = join(root, 'snippet');
+  mkdirSync(join(dir, 'checks'), { recursive: true });
+  const long = Array.from({ length: 48 }, (_, i) => `  await step(${i});`);
+  writeFileSync(
+    join(dir, 'checks', 'a.spec.js'),
+    ["test('long', async () => {", ...long, '});', '', '// the next check says why', "test('next', async () => {", '  await step();', '});', ''].join('\n'),
+  );
+  const first = checkSnippet(dir, 'checks/a.spec.js:1').source.split('\n');
+  assert.equal(first.length, 50, 'opener, 48 lines and its close');
+  assert.equal(first.at(-1), '});');
+  const second = checkSnippet(dir, 'checks/a.spec.js:53').source;
+  assert.equal(second, "test('next', async () => {\n  await step();\n});");
+});
+
+test('check source keeps a check whose opener spans lines, and an rspec example to its end @rule:panel.rules.evidence-visible', async () => {
+  const { checkSnippet } = await import('../lib/api.js');
+  const dir = join(root, 'snippet2');
+  mkdirSync(join(dir, 'spec'), { recursive: true });
+  writeFileSync(join(dir, 'spec', 'a.spec.js'), "test('x', {\n  tag: '@rule:a.b.c',\n}, () => {\n  expect('}').ok();\n});\n\ntest('y', () => {});\n");
+  assert.equal(checkSnippet(dir, 'spec/a.spec.js:1').source, "test('x', {\n  tag: '@rule:a.b.c',\n}, () => {\n  expect('}').ok();\n});");
+  writeFileSync(join(dir, 'spec', 'b.spec.js'), "test('z', () => {\n  expect(t).toMatch(/walkdown's \\(own\\)/);\n});\n\ntest('w', () => {});\n");
+  assert.equal(checkSnippet(dir, 'spec/b.spec.js:1').source.split('\n').length, 3, 'a regex holding a quote and an escaped bracket');
+  writeFileSync(join(dir, 'spec', 'a_spec.rb'), "  it 'works' do\n    expect(1).to eq 1\n  end\n\n  it 'next' do\n  end\n");
+  assert.equal(checkSnippet(dir, 'spec/a_spec.rb:1').source, "  it 'works' do\n    expect(1).to eq 1\n  end");
+});

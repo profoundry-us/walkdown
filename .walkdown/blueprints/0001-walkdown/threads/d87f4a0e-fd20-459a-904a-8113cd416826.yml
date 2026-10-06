@@ -1,0 +1,21 @@
+id: n-0397
+uuid: d87f4a0e-fd20-459a-904a-8113cd416826
+kind: note
+reason: observation
+author: agent
+created: 2026-10-06T04:42:44.929Z
+anchor:
+  rule: panel.rules.evidence-visible
+  element: detail.source-modal
+status: addressed
+body: "Check source cuts a check at 40 lines or at the next opener, not at its
+  own close. The 50-line check at checks/panel.spec.js:1161 stops at 1200
+  mid-expression, and the one at 3788 runs on into the next check's comment. The
+  GitHub links are cut the same way. Evidence:
+  evidence/2026-10-06T04-45-00Z/05-check-source-1161-cut-at-40-lines.jpg."
+replies:
+  - author: agent
+    created: 2026-10-06T04:42:45Z
+    body: checkSnippet now shows a check from its opener to the line back at its
+      indent, keeping a closing }); or end and stopping before the next check. A
+      judged-edges test covers a 48-line body and a following check.

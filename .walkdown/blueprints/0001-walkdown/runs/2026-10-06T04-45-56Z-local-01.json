@@ -1,0 +1,42 @@
+{
+  "run_id": "2026-10-06T04-45-56Z-local-01",
+  "created": "2026-10-06T04:45:56Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b9528f9-dirty",
+  "tree_hash": "sha256:c6aa15f9b70e",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "duration_ms": 7811,
+      "checks": [
+        "checks/panel.spec.js:1161",
+        "checks/panel.spec.js:1212",
+        "checks/panel.spec.js:3788"
+      ]
+    },
+    {
+      "rule": "panel.rules.steps-not-an-appendix",
+      "status": "pass",
+      "statement_hash": "sha256:64152f558d3f",
+      "duration_ms": 2338,
+      "checks": [
+        "checks/panel.spec.js:1244"
+      ]
+    },
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:7241796d7522",
+      "duration_ms": 2282,
+      "checks": [
+        "checks/panel.spec.js:2477"
+      ]
+    }
+  ]
+}
