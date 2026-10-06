@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T03:13:48.202Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "Second sitting: a moved checkout whose blueprints are all personal cannot
   keep its IDs. Import there says 'Nothing at … is a blueprint', importing the
   personal home is refused, and `blueprints new --project shop` says the label
@@ -18,3 +18,8 @@ replies:
       homes now re-points the rows whose checkout is gone. It matches by the
       label the new place would get, and only when those rows name one old
       checkout. IDs, labels, codes and homes are kept."
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

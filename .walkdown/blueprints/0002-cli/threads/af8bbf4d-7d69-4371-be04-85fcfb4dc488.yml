@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:43:13.024Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: Agent judging found that moving a checkout loses its ID. After mv
   hireart_main hireart_moved, the row reads (gone). Import in the new place is
   refused, because the project's own label and code are 'another project's'.
@@ -19,3 +19,8 @@ replies:
     body: Importing a moved checkout now finds the row whose checkout is gone and
       whose home sat at the same place. Every row of that checkout is
       re-pointed, keeping its ID, label and code. The claims cache is q-0384.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

@@ -364,8 +364,8 @@ test('check source keeps a check whose opener spans lines, and an rspec example 
   const { checkSnippet } = await import('../lib/api.js');
   const dir = join(root, 'snippet2');
   mkdirSync(join(dir, 'spec'), { recursive: true });
-  writeFileSync(join(dir, 'spec', 'a.spec.js'), "test('x', {\n  tag: '@rule:a.b.c',\n}, () => {\n  expect('}').ok();\n});\n\ntest('y', () => {});\n");
-  assert.equal(checkSnippet(dir, 'spec/a.spec.js:1').source, "test('x', {\n  tag: '@rule:a.b.c',\n}, () => {\n  expect('}').ok();\n});");
+  writeFileSync(join(dir, 'spec', 'a.spec.js'), "test('x', {\n  tag: '@smoke',\n}, () => {\n  expect('}').ok();\n});\n\ntest('y', () => {});\n");
+  assert.equal(checkSnippet(dir, 'spec/a.spec.js:1').source, "test('x', {\n  tag: '@smoke',\n}, () => {\n  expect('}').ok();\n});");
   writeFileSync(join(dir, 'spec', 'b.spec.js'), "test('z', () => {\n  expect(t).toMatch(/walkdown's \\(own\\)/);\n});\n\ntest('w', () => {});\n");
   assert.equal(checkSnippet(dir, 'spec/b.spec.js:1').source.split('\n').length, 3, 'a regex holding a quote and an escaped bracket');
   writeFileSync(join(dir, 'spec', 'a_spec.rb'), "  it 'works' do\n    expect(1).to eq 1\n  end\n\n  it 'next' do\n  end\n");

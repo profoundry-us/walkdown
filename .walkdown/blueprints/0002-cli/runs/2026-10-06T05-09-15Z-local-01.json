@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-06T05-09-15Z-local-01",
+  "created": "2026-10-06T05:09:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a988e19-dirty",
+  "note": "Tenth sitting at a988e19: n-0401 fixed; every THEN line holds.",
+  "spec_hash": "sha256:242f4e9d8408",
+  "results": [
+    {
+      "rule": "locations.registry.ids-stay-here",
+      "status": "pass",
+      "statement_hash": "sha256:f561ad6f21be",
+      "evidence": [
+        "runs/evidence/2026-10-06T05-08-39Z/ids-stay-here-tenth.txt"
+      ],
+      "reasoning": "Drove bin/walkdown.js at a988e19 in a fresh /tmp tree with WALKDOWN_HOME=$S/home (profile sam), bare origins and real clones. All serves used --port 0. ric is fixed. Runs were moved into ric/wd-runs, an eng walkdown was recorded and pushed, then the checkout was mv'd and the origin re-cloned at ric. Import in ric-old says '~ moved'; the row reads checkout and home in ric-old and runs ric-old/wd-runs, and eng stays accepted. A sweep from the fresh clone lands in ric-old/wd-runs. The /tmp spelling (records move --to /tmp/... for a /private/tmp checkout) and the case spelling (caps/wd-runs for Caps) both follow a plain mv, to nca-old/wd-runs and Caps-old/wd-runs, and eng stays accepted. Three new tries hold. Drafts and evidence moved via the /tmp spelling, then push, mv and re-clone: both were re-pointed and the draft is served. A checkout renamed by letter case only (cas to Cas): the row keeps the old spelling, but on this case-insensitive disk it is the same folder, and status and new runs work. A checkout holding a committed home and a personal home whose runs were moved into the checkout, then push, mv and re-clone: both rows moved and the personal runs path followed. The earlier cases hold: the pub verdict, the drf draft, gitignored threads, four kinds moved into the checkout, unpushed re-clone, different-origin repo at the old path, deli --project, and both trees holding runs staying a branch copy. THEN 1, 2, 3 and 5 hold. 0015-hm-search and 0016-sp-search were given. --blueprint and ?bp= take the ID anywhere and 'search' inside each project, including a subfolder; outside a project the name is refused, or answered 409. The only ID outside registry.yml is home/cache/claims.json (q-0384). After a forget, the next blueprint got 0017. Every THEN line holds against everything I could reasonably construct."
+    }
+  ]
+}

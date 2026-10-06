@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T04:59:42.746Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "A checkout moved with a plain mv loses its ledger when records move had
   put its runs in a folder inside it. Import re-points the checkout and the home
   but keeps runs on the old path, so eng acceptance drops, and records move
@@ -19,3 +19,8 @@ replies:
       paths along when they sat inside the old checkout, and import counts
       threads kept out of git as records too. A judged-edges test covers the inn
       case.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

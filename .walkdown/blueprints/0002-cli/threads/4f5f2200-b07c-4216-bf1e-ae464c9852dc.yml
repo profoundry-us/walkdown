@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T04:23:35.757Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "A serve started inside a project refuses ?bp=search with 409 when two
   projects each have a search. --blueprint takes the bare name inside the
   project, but ?bp= matches every row on the machine. Evidence:
@@ -17,3 +17,8 @@ replies:
     body: Serve now resolves a bare ?bp= name through the registry pick, as
       --blueprint does, so inside a project it means that project's. A
       judged-edges test covers it.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

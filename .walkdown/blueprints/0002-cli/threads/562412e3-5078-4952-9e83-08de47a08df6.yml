@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T03:32:51.307Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "Third sitting: a checkout with no remote and only personal homes, renamed
   (mv deli deli2), cannot keep its ID. Import says 'Nothing at . is a
   blueprint', and `blueprints new --project deli` says the label is another
@@ -18,3 +18,8 @@ replies:
       gone checkout's rows here, keeping every ID. Where nothing matches, the
       refusal names each project whose checkout is gone and that exact command.
       Nothing is guessed. Covered in test/judged-edges.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

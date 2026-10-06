@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T05:06:02.404Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "Two moves still lose the ledger. Runs moved into a folder inside the
   checkout are not followed past a fresh clone at the old path, because import
   skips any kind the row moved. And a runs path spelled through the /tmp
@@ -19,3 +19,8 @@ replies:
       the checkout included. Paths are compared by real name, ignoring case
       where the disk does, so a /tmp or other-case spelling follows a move. A
       judged-edges test covers the re-clone and the case spelling.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T04:48:07.727Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "A pushed committed home loses its records when its checkout moves and the
   origin is cloned at the old path. Import in the moved tree says already
   listed, the row keeps the fresh clone, and the moved tree's runs go unread.
@@ -19,3 +19,8 @@ replies:
       holds a committed home's runs and the registered checkout holds none, so
       the ID stays and the fresh clone reads the moved tree's records. A
       judged-edges test covers it.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-06T05-10-53Z-local-01",
+  "created": "2026-10-06T05:10:53Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "a988e19-dirty",
+  "tree_hash": "sha256:ebc0d36d37b3",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.rules.evidence-visible",
+      "status": "pass",
+      "statement_hash": "sha256:79686951989e",
+      "duration_ms": 9,
+      "checks": [
+        "test/judged-edges.test.js:347",
+        "test/judged-edges.test.js:363"
+      ]
+    }
+  ]
+}

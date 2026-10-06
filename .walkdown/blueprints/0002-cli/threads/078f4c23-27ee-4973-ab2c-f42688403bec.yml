@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T03:48:58.547Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: settled
 body: "Fourth sitting: once a new repository stands at a moved checkout's old
   path, the move is not seen. Re-pointing keyed on the old directory being gone.
   A committed home then imports as a new ID, and a personal one cannot be named
@@ -18,3 +18,8 @@ replies:
       whatever stands at the old path. A project named with --project moves even
       if its old path holds a new repository. A second import of an already
       re-pointed checkout says 'already listed'.
+  - author: agent
+    via: verdict
+    created: 2026-10-06T05:09:15Z
+    body: Settled by the agent's pass on locations.registry.ids-stay-here
+      (2026-10-06T05-09-15Z-local-01).
