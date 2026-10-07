@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T13:33:56.438Z
 anchor:
   rule: status.attribution.username-is-the-record
-status: addressed
+status: settled
 body: Judged 2026-10-07 (evidence
   2026-10-07T13-18-14Z/username-is-the-record.txt). The emitters disagree
   outside an upgraded machine. Before an upgrade, bare rspec records
@@ -23,3 +23,8 @@ replies:
       GIT_CONFIG_* removed), then the account the process runs as. Before, rspec
       skipped git and took the terminal login. test/rspec-adapter.test.js
       compares the two across three machines."
+  - author: agent
+    via: verdict
+    created: 2026-10-07T13:54:44Z
+    body: Settled by the agent's pass on status.attribution.username-is-the-record
+      (2026-10-07T13-54-43Z-local-01).

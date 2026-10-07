@@ -18,6 +18,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, before, test } from 'node:test';
+import { fileRun } from '../lib/filing.js';
 import { runChecks } from '../lib/run-cmd.js';
 
 // Absolute, because the suite runs rspec in another directory and the hook
@@ -205,5 +206,24 @@ test('rspec and the CLI name the same person, whatever this machine has said or 
     both({ 'profile.yml': 'name: Pat\n' }),
     { rspec: 'ghpat', cli: 'ghpat' },
     'a profile with no username',
+  );
+});
+
+test('a JS reporter asks who ran it from the code, where a repository keeps its own git identity, never from the home (n-0513) @rule:status.attribution.username-is-the-record', () => {
+  const asked = [];
+  const { written } = fileRun({
+    perTest: [{ ruleId: RULE, status: 'pass', durationMs: 1 }],
+    target: 'local',
+    actor: (dir) => {
+      asked.push(dir);
+      return 'someone';
+    },
+    cwd: code,
+  });
+  assert.equal(written.length, 1);
+  assert.deepEqual(
+    asked.map((d) => realpathSync(d)),
+    [realpathSync(code)],
+    'the checkout, not the home in WALKDOWN_HOME',
   );
 });

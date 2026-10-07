@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-07T13-54-43Z-local-01",
+  "created": "2026-10-07T13:54:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7365c4b-dirty",
+  "note": "Agent tier rejudge of two cli rules against the working tree: 7365c4b plus the uncommitted lib/filing.js change (n-0516) and bin/commands/upgrade.js change. Driven with node bin/walkdown.js on fresh mktemp HOMEs with WALKDOWN_HOME=$HOME/.walkdown and real git repos. The pre-ADR-0014 machine was made with main's old CLI (git archive 8bcc2ca). Real rspec, node:test and Playwright were run. Hashes checked ok with `hash --blueprint cli`. Not recorded; no threads filed.",
+  "spec_hash": "sha256:e8d78fe918f6",
+  "results": [
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:be08ebbb3f59",
+      "evidence": [
+        "runs/evidence/2026-10-07T14-00-00Z/username-is-the-record.txt"
+      ],
+      "reasoning": "I judged this against n-0516, which has lib/filing.js ask for the actor from the blueprint's code root rather than its home. On a machine set up by init and blueprints new, whose home is outside the repository, I compared seven emitters per case: rspec bare and through `walkdown run`, node:test and Playwright through `walkdown run`, and node:test and Playwright bare. Every emitter recorded the same username in each case. With profile.yml naming topher-x, all recorded topher-x. With config.yml only, before an upgrade, `walkdown run` refuses and the three bare runs recorded topher-x. With no profile, a global github.user gave ghpat, unchanged when GIT_CONFIG_* named mallory in the environment. A global email alone gave pat.e, and no git identity at all gave topherfangio from the account. The case I failed last time, github.user set only in ~/app/.git/config, now gives repo-only from all seven. A user.email set only in that config gives work from all seven. So the reporters and the formatter now follow one chain and ask the same repository: profile, then git, then the account. This holds whether the person declared a name or git supplies it. None of these runs fell back to a display name. The run-under-username screen shows actor and signer as the username, which is the rule's point."
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-once",
+      "status": "pass",
+      "statement_hash": "sha256:49cd12caf11c",
+      "evidence": [
+        "runs/evidence/2026-10-07T14-00-00Z/upgrade-moves-once.txt"
+      ],
+      "reasoning": "This is a quick pass after the change to `upgrade --code` on a machine with nothing to upgrade, on a fresh old machine made by the pre-ADR-0014 CLI. On that machine, `status` says an upgrade is due and exits 2. The codes a, abcd, ' ' and '', and --code zz outside a repository, are each refused, and a hash of every file shows nothing changed. `--code hr` in ~/shop upgrades whole, with shop and app taking hr and hireart becoming h0. `--code ha` in ~/hireart gives 0001-ha-hireart-main with formerly IDs on every row. The old personal folder and both config.yml files are gone, threads are renamed to UUIDs, and status shows every run and note as before. Once upgraded, a plain `walkdown upgrade` says nothing to do and exits 0. `--code hx`, `--code ha` and `--code zz --dry-run` now exit 2 with 'Nothing to upgrade, so `--code hx` was not used: a project's code is chosen when it is first registered or upgraded. Nothing was changed.' The hash shows nothing moved. A malformed code is still refused as malformed first. A former ID still resolves from /, and in ~/other its own blueprint shop wins over the former ID. The silent drop I noted last time is gone, and nothing else moved."
+    }
+  ]
+}

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T13:33:56.633Z
 anchor:
   rule: locations.keeping.upgrade-moves-once
-status: addressed
+status: settled
 body: "Judged 2026-10-07 (evidence 2026-10-07T13-18-14Z/upgrade-moves-once.txt).
   Two defects. `walkdown upgrade --code hr`, where hr is another project's
   derived code, is refused only inside the registry step, after the profile, the
@@ -23,3 +23,8 @@ replies:
       outside any repository. A home a stopped run had already moved is
       recognised rather than refused. A name in the project standing here now
       beats a former ID. Tested in test/upgrade.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-07T13:52:30Z
+    body: Settled by the agent's pass on locations.keeping.upgrade-moves-once
+      (2026-10-07T13-52-30Z-local-01).

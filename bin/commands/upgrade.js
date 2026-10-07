@@ -54,6 +54,14 @@ export async function run(args) {
     }
   }
   const { steps } = planUpgrade();
+  if (!steps.length && code !== null) {
+    console.error(
+      red(
+        `✗ Nothing to upgrade, so \`--code ${code}\` was not used: a project's code is chosen when it is first registered or upgraded. Nothing was changed.`,
+      ),
+    );
+    return end(2);
+  }
   if (!steps.length) {
     console.log(
       dim(

@@ -125,9 +125,11 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Fixed
 
-- The RSpec formatter reads who you are from `~/.walkdown/profile.yml`, and from
-  `config.yml` on a machine not yet upgraded. It read only `config.yml`, so after
-  `walkdown upgrade` every RSpec run was recorded under the OS login.
+- Every reporter records a run under the same person. The RSpec formatter reads
+  `~/.walkdown/profile.yml` (it read only `config.yml`, so after `walkdown upgrade` every
+  RSpec run was recorded under the OS login), then git, then the account it runs as, as
+  the CLI does. The node:test and Playwright reporters ask git from the code, where a
+  repository's own identity is, not from a home kept in `~/.walkdown`.
 - `walkdown blueprints commit` finds its blueprint wherever it is run; it worked only at
   the checkout's root. Standing inside a home kept in `~/.walkdown` answers as that
   home's project.

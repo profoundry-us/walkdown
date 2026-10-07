@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-07T13-52-30Z-local-01",
+  "created": "2026-10-07T13:52:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7365c4b-dirty",
+  "note": "Agent tier rejudge of one walkdown rule after n-0515 (7365c4b), against its statement and the thread-panel and rule-detail screens. Driven in the built-in browser against scratch copy judge-onestream2, served from inside the copy with its own home on :4743, the port the governance block assigns. GET /api/blueprint named the copy. Copy cleaned afterwards. Hash checked ok with `hash --blueprint walkdown`. Not recorded; no threads filed.",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:d3d0b129a2e7",
+      "evidence": [
+        "runs/evidence/2026-10-07T13-55-00Z/one-stream-probe.json",
+        "runs/evidence/2026-10-07T13-55-00Z/app-thread-panel-n-0517.png",
+        "runs/evidence/2026-10-07T13-55-00Z/app-thread-panel-cont-hover.png",
+        "runs/evidence/2026-10-07T13-55-00Z/app-rule-detail-conversation.png",
+        "runs/evidence/2026-10-07T13-55-00Z/app-rule-detail-history.png",
+        "runs/evidence/2026-10-07T13-55-00Z/app-embed-popover-n-0517.png",
+        "runs/evidence/2026-10-07T13-55-00Z/app-embed-popover-rule-card.png"
+      ],
+      "reasoning": "I judged this after n-0515, which keeps a sentence's full stop out of an evidence key, and looked again at the rest of the rule. On the copy at :4743 I filed two pins on the review screen. n-0517's opening note had the evidence key five times: ending a sentence with a full stop, before a comma, inside brackets, mid-line and before a question mark. It also had n-0001 and the rule id ending a sentence. The note got two quick replies from the person, one with a line break, and one from the agent. In the panel's thread screen, all five keys read exactly 'runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt', with the punctuation left outside. Clicking one opened the evidence modal on the file's own contents. In the standalone popover on as-built/review.html, all five are anchors to that file with target _blank, and each answered 200. The rest holds as in my last pass. The opening note has the same .wd-msg shape as every reply, and the two quick replies are continuations without a name or tile. There is a Today divider and line breaks are kept. The rule id is a link, a pinned thread id is a button that opens in place, and the unpinned n-0001 links out to the panel in a new tab. The pin's dot is the topmost element at its own centre and opens its popover. The Playwright re-drive of the thread, the hovered continuation, the rule's conversation with History, and the popover with its rule card raised no page errors. The browser pane was hidden for part of the sitting, so I drove those clicks as DOM clicks through javascript_tool and not as pointer clicks."
+    }
+  ]
+}

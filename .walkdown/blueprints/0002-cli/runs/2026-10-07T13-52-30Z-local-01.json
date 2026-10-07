@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-10-07T13-52-30Z-local-01",
+  "created": "2026-10-07T13:52:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7365c4b-dirty",
+  "note": "Agent tier rejudge of two cli rules after n-0513 and n-0514 (7365c4b). Driven with node bin/walkdown.js from the working tree on fresh mktemp HOMEs with WALKDOWN_HOME=$HOME/.walkdown and real git repos. The pre-ADR-0014 machine was made with main's old CLI (git archive 8bcc2ca). The half-moved machine was made by the previous build: 693d955 plus the --code diff judged earlier, rebuilt in a throwaway tree. Real rspec, node:test and Playwright were run. Hashes checked ok with `hash --blueprint cli`. Not recorded; no threads filed.",
+  "spec_hash": "sha256:e8d78fe918f6",
+  "results": [
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "fail",
+      "statement_hash": "sha256:be08ebbb3f59",
+      "evidence": [
+        "runs/evidence/2026-10-07T13-40-00Z/username-is-the-record.txt"
+      ],
+      "reasoning": "I judged this against n-0513, which has the RSpec formatter follow defaultActor's chain and identity.js read config.yml when there is no profile.yml. On a machine set up by init and blueprints new, I compared seven emitters per case: rspec bare and through `walkdown run`, node:test and Playwright through `walkdown run`, and node:test and Playwright bare. Every emitter recorded the same username in five cases: profile.yml naming topher-x; config.yml only, before an upgrade, where `walkdown run` refuses and the three bare runs record topher-x; no profile with git's github.user ghpat; no profile with only the email, giving pat.e; and no git identity at all, giving topherfangio from getpwuid and not getlogin's root. GIT_CONFIG_* injected into the environment was ignored by all three. That fixes both cases I failed before. One case still splits, though. With no profile and the git identity set only in the repository's own .git/config, rspec records repo-only, while the node:test and Playwright reporters record topherfangio. The JS reporters ask git from the blueprint's home (lib/filing.js calls actor(b.dir), and a home under ~/.walkdown is in no repository), while the formatter asks from the checkout it runs in. A per-repository git identity is common, and `blueprints new` without `init` leaves no profile, so one person's runs land under two usernames. That still misses 'every record is written under the username of the person who made it'. The case is narrow, and a machine set up by `init` is unaffected. The run-under-username screen is unchanged and fine.",
+      "threads": [
+        "4581b91f-65cd-4e54-b9cc-9632d7787f62"
+      ]
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-once",
+      "status": "pass",
+      "statement_hash": "sha256:49cd12caf11c",
+      "evidence": [
+        "runs/evidence/2026-10-07T13-40-00Z/upgrade-moves-once.txt"
+      ],
+      "reasoning": "I judged this against n-0514 on the same old machine as before: hireart_main and shop as personal homes, app committed, each with a passing run and an n-000x note. `status` said an upgrade was due and exited 2. The codes a, abcd, a-b, 'h a', ÄB, ' ' and '' were each refused, as was --code zz from a folder in no repository, and a hash of every file showed nothing changed. `--code hr` in ~/shop, which refused halfway last time, now runs through: shop and app take hr and hireart is bumped to h0. `--code ha` in ~/hireart gives 0001-ha-hireart-main with formerly: hireart_main. In both runs the profile was renamed, homes were flattened and got records.yml, both config.yml files went, personal homes moved under projects/<label>/ keeping their names, and threads got UUIDs and kept their labels. Status showed every verdict, and a second run said nothing to do. To check the 'already another project's' refusal, I upgraded the machine and then gave it an old-layout clone, ~/web. `upgrade --code ha` and `--code sp` there were refused as hireart's and shop's, with nothing changed. `--code wb` upgraded it, and the import that followed registered it as 0004-wb-web. I made the stuck machine with the previous build's `upgrade --code hr`, which leaves hireart's home moved and the registry naming the old path. A plain `walkdown upgrade` now recognises the moved home and finishes, and status in both projects shows every verdict. Former IDs still resolve from /. In ~/other, whose own blueprint is shop, `--blueprint shop` now picks 0004-ot-shop, and the sweep landed there and not in ~/shop. One small point: `--code` on a machine already upgraded says 'Nothing to upgrade' and drops the code without a word."
+    }
+  ]
+}

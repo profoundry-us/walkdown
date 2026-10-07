@@ -233,6 +233,9 @@ test('upgrade --code gives the project it is run in the code chosen, and refuses
   const [row] = parse(readFileSync(join(wd, 'registry.yml'), 'utf8')).blueprints;
   assert.equal(row.code, 'ha');
   assert.match(row.id, /^\d{4}-ha-hireart-main$/);
+  const again = cli('upgrade', '--code', 'hx');
+  assert.equal(again.status, 2, 'a code with nothing to upgrade is said, not dropped');
+  assert.match(again.stderr, /Nothing to upgrade, so `--code hx` was not used/);
 });
 
 test('a code another project would have derived is taken by the one that chose it, and a name here beats a former ID (n-0514) @rule:locations.keeping.upgrade-moves-once', () => {

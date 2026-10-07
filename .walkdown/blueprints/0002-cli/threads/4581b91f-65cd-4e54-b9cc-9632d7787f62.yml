@@ -1,0 +1,26 @@
+id: n-0516
+uuid: 4581b91f-65cd-4e54-b9cc-9632d7787f62
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T13:52:29.901Z
+anchor:
+  rule: status.attribution.username-is-the-record
+status: settled
+body: Judged 2026-10-07 (evidence
+  2026-10-07T13-40-00Z/username-is-the-record.txt). With no profile and a git
+  identity set only in the repository's own .git/config, rspec records that
+  identity while the node:test and Playwright reporters record the OS account.
+  lib/filing.js asks for the actor from the blueprint's home, which under
+  ~/.walkdown is in no repository; the formatter asks from the checkout.
+replies:
+  - author: agent
+    created: 2026-10-07T13:52:31Z
+    body: Fixed. lib/filing.js asks for the actor from the blueprint's code root,
+      where a repository keeps its own git identity, as the RSpec formatter
+      does. test/rspec-adapter.test.js checks which folder is asked.
+  - author: agent
+    via: verdict
+    created: 2026-10-07T13:54:44Z
+    body: Settled by the agent's pass on status.attribution.username-is-the-record
+      (2026-10-07T13-54-43Z-local-01).
