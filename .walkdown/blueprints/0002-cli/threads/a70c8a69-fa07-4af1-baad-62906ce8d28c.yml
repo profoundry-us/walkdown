@@ -1,0 +1,14 @@
+id: n-0504
+uuid: a70c8a69-fa07-4af1-baad-62906ce8d28c
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T02:55:32.285Z
+anchor:
+  rule: commands.threads.one-verb-per-change
+status: open
+body: Found while judging. `walkdown threads show n-0099`, for a label no
+  blueprint holds, in a project with two blueprints, says "Several blueprints
+  are registered for ~/shop … Choose one with `--blueprint <id>`". With
+  `--blueprint checkout` it says `No thread "n-0099"`. show is a read and needs
+  no flag, so it should say the label is in no blueprint.

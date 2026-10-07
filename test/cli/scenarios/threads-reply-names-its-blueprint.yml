@@ -1,0 +1,13 @@
+# A thread write with no --blueprint, in a project with one blueprint whose only thread it is.
+screen: threads-reply-names-its-blueprint
+title: A reply is refused until --blueprint names the blueprint, even with only one
+rule: commands.threads.one-verb-per-change
+also: [locations.several.writes-name-one]
+fixture: a-note
+command: [threads, reply, n-0001, fixed in 1a2b3c, --as-agent]
+exit: 2
+expect:
+  - '^`walkdown threads reply` acts on one blueprint, and does not choose it for you\. This project''s blueprint is 0001-sp-checkout\.$'
+  - '^Choose one with `--blueprint <id>` \(e\.g\. `--blueprint checkout`\)\.$'
+anchors:
+  - { id: cli.refusal, match: '^(`walkdown threads reply`|Choose one)' }

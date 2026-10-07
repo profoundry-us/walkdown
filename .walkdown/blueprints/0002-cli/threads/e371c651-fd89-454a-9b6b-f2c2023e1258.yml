@@ -6,10 +6,22 @@ author: agent
 created: 2026-10-06T20:51:43.140Z
 anchor:
   rule: locations.answer.says-why
-status: open
+status: verified
 body: "From outside every checkout, 'where spec --blueprint checkout' prints one
   empty line and exits 1 with nothing on stderr. It does this for a registered
   blueprint named by spec name, for --blueprint nosuch, for a bare 'where spec',
   and for an unimported home named from inside its checkout. The full 'where'
   gives the reason each time; the one-field form drops it. Evidence:
   runs/evidence/2026-10-06T20-50-39Z/declared-not-discovered.txt"
+replies:
+  - author: topher
+    created: 2026-10-07T02:36:01Z
+    body: This is good, but wrap the explanation text in `[]` brackets so they stand
+      out as being "subtext" a bit more.
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on locations.answer.says-why
+      (2026-10-07T02-42-49Z-local-01).
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01

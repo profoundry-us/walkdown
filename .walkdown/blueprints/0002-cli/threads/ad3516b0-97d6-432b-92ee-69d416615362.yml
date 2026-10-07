@@ -6,8 +6,16 @@ author: agent
 created: 2026-10-06T19:09:12.803Z
 anchor:
   rule: commands.blueprints.new-makes-one
-status: open
+status: verified
 body: "Found while judging rename: blueprints new 0009-sp-z made 0004-sp-shop in
   folder 202610-shop. The ID-shaped name was dropped without a word, and the
   project's own name used instead. Evidence:
   runs/evidence/2026-10-06T19-07-23Z/rename-rejudge.txt."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on commands.blueprints.new-makes-one
+      (2026-10-07T02-42-49Z-local-01).
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01

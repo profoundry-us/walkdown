@@ -714,7 +714,7 @@ stories:
         created_at: 2026-10-02
         verify: [checks]
         signoff: [eng]
-        screens: [writes-refused-among-several]
+        screens: [writes-refused-among-several, threads-reply-names-its-blueprint]
         steps:
           given:
             - A project with blueprints a and b, and a project with blueprint c alone

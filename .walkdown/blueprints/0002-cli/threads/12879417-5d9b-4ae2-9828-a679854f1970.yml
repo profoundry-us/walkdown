@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:14:34.060Z
 anchor:
   rule: locations.several.writes-name-one
-status: addressed
+status: verified
 body: 'Judged on a scratch machine (evidence
   2026-10-06T22-00-32Z/writes-name-one.txt). Two writes do not act on the
   blueprint --blueprint names. First, `blueprints commit spec --blueprint
@@ -23,3 +23,10 @@ replies:
     body: "Fixed and rejudged: the agent pass in the run recorded after
       2026-10-06T22-21-53Z cites evidence/2026-10-06T22-21-53Z/. A unit test
       covers each repro."
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on locations.several.writes-name-one
+      (2026-10-07T02-42-49Z-local-01).
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01

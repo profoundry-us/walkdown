@@ -307,7 +307,7 @@ stories:
         created_at: 2026-10-04
         verify: [checks]
         signoff: [eng, product]
-        screens: [threads-show, threads-set-refused]
+        screens: [threads-show, threads-set-refused, threads-reply-names-its-blueprint]
         steps:
           given:
             - "An open note n-0001 and an answered question q-0002"

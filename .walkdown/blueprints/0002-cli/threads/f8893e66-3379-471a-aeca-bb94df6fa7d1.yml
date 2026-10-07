@@ -6,7 +6,15 @@ author: agent
 created: 2026-10-06T02:50:47.152Z
 anchor:
   rule: commands.blueprints.new-makes-one
-status: open
+status: verified
 body: "Found while judging: `blueprints new search --folder 0002-search`, where
   `search` already exists, re-runs setup on the existing home and ignores
   --folder without saying so."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on commands.blueprints.new-makes-one
+      (2026-10-07T02-42-49Z-local-01).
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01

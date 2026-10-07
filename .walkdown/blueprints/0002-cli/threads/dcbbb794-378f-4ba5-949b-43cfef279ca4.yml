@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-06T20:01:30.497Z
 anchor:
   rule: locations.registry.ids-stay-here
-status: addressed
+status: verified
 body: The screen for this one doesn't make a lot of sense to me. It's talking
   about import? And it says "still - the row named ~/shop, which is gone". That
   is practically meaningless in this context; I have no idea what it's about or
@@ -28,3 +28,10 @@ replies:
       blueprints-two-searches screen shows the two projects and their two IDs.
       That IDs are written nowhere else is checked by the agent tier, not
       drawn.'
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on locations.registry.ids-stay-here
+      (2026-10-07T02-42-49Z-local-01).
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01

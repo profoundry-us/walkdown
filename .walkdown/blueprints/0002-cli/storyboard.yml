@@ -914,3 +914,12 @@ screens:
       - cli.where.prototype
       - cli.where.proposals
       - cli.exit
+
+  - id: threads-reply-names-its-blueprint
+    title: "A reply is refused until --blueprint names the blueprint, even with only one"
+    prototype: null
+    app: { path: /as-built/cli/threads-reply-names-its-blueprint.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit

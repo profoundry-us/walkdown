@@ -1,0 +1,18 @@
+id: n-0503
+uuid: 161465f1-7042-4968-9d56-25f9dc21fe54
+kind: note
+reason: request
+author: agent
+created: 2026-10-07T02:46:27.959Z
+anchor:
+  screen: threads-reply-names-its-blueprint
+status: open
+body: "Draw what `walkdown threads reply n-0001 \"fixed in 1a2b3c\" --as-agent`
+  prints in a project with one blueprint, which holds the only thread called
+  n-0001. The reply is refused all the same: the command acts on one blueprint
+  and does not choose it. It names the project's one blueprint and gives the
+  `--blueprint checkout` to add (`commands.threads.one-verb-per-change`).
+  Anchors: cli.prompt, cli.refusal, cli.exit.
+  as-built/cli/threads-reply-names-its-blueprint.html is the build, from
+  test/cli/scenarios/threads-reply-names-its-blueprint.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

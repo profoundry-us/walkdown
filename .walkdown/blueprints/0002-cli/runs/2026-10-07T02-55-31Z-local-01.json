@@ -1,0 +1,40 @@
+{
+  "run_id": "2026-10-07T02-55-31Z-local-01",
+  "created": "2026-10-07T02:55:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b3cddee-dirty",
+  "note": "Agent tier, three cli rules whose thread was verified after their last agent verdict (n-0406, n-0437, n-0438), each judged against its statement. Driven with bin/walkdown.js from the working tree on fresh mktemp machines with real git repos; as-built/cli screens read as Topher would. Hashes checked ok with `hash --blueprint cli`. Not recorded; no threads filed. Topher's latest comments (brackets around explanations on n-0437, line breaks on n-0438) are wording requests and were not judged as defects.",
+  "spec_hash": "sha256:5c62e607d838",
+  "results": [
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "pass",
+      "statement_hash": "sha256:687a1c86cfdf",
+      "evidence": [
+        "runs/evidence/2026-10-07T02-54-31Z/one-verb-per-change.txt"
+      ],
+      "reasoning": "I judged this against n-0406 and Topher's last reply on it, that no screen showed a write refused without --blueprint. On a machine with checkout and search, `threads show n-0001` printed the thread, exited 0 and left every file as it was. `threads reply n-0001 \"done\" --blueprint checkout` added the reply and said 'still open'. `threads set n-0001 --status addressed --reply ...` showed open → addressed with +1 reply, and both landed. Two lifecycle refusals with a reply, verified by an agent and a bogus status, each said 'Nothing was changed, and the reply did not land' and left the machine unchanged. An answered question reopened only with --reason, and that is the lifecycle working. `thread new` is redirected to `threads new` with the same flags. On a fresh one-blueprint machine with one thread, the moment threads-reply-names-its-blueprint draws, every write was refused without --blueprint: reply, set, set with --reply, relabel and new. Each refusal named the verb and the project's one ID and changed nothing. The same refusal came from inside the home. The new screen says this plainly. The command has no flag, and the refusal says why and what to add, so it answers Topher's comment. threads-show and threads-set-refused still read right. One defect is outside the claim. In a two-blueprint project, `threads show` of a label no blueprint holds says 'Several blueprints are registered for ~/shop ... Choose one with --blueprint'. With --blueprint it says 'No thread \"n-0099\"'. A read that needs no flag should not tell a person to add one when the label does not exist."
+    },
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:b31372ab894d",
+      "evidence": [
+        "runs/evidence/2026-10-07T02-54-31Z/says-why.txt"
+      ],
+      "reasoning": "I judged this against n-0437 and the statement. The full `walkdown where` gave a reason under every path it printed, for a blueprint kept in ~/.walkdown and for a committed one. The spec said 'this machine's registry (<id>)'. Runs, threads, evidence and drafts each said 'the blueprint's own records.yml (<id>)', including a threads path records.yml sent to ../shared-threads. After `records move evidence`, evidence said 'this machine's registry (<id>), which moved it here'. In a git worktree the spec said 'this branch's copy, a git worktree of ~/shop', and code said it was a worktree on branch feature. With records.yml removed, every kind said 'the home this machine registered', which is the built-in default. Each reason names the decision a person would argue with, so every reason the statement lists showed up. The where-says-why screen reads the same way. Its 'tracked … ~/shop is not a git repository' line is true of the fixture, whose .git is an empty folder, but would puzzle a reader who knows shop is a repo. The n-0437 finding is not fixed: it reproduces exactly. Outside every checkout, `where spec --blueprint checkout` prints one empty line to stdout, nothing to stderr, and exits 1. So do `where spec --blueprint nosuch` (inside the checkout too), bare `where spec`, and `where spec --blueprint <unimported home>`. Topher's pass verified the thread, but no fix landed. I did not fail the rule on it, because a silent refusal reports no path, and the statement is about the paths walkdown reports. It is still a refusal that gives no reason, and it should be fixed or reopened."
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "evidence": [
+        "runs/evidence/2026-10-07T02-54-31Z/declared-not-discovered.txt"
+      ],
+      "reasoning": "I judged this against n-0438 and the statement. In a real repo with checkout and search committed and registered, plus a teammate's committed `reports` home nobody imported, each registered home answered for itself from inside it. That held in a subfolder too, each with its own thread, and `where` named the registry row that answered. Standing in reports or its features folder, and naming it with --blueprint, status, threads and threads new each refused. The refusal named ~/shop/.walkdown/blueprints/reports and gave the exact `walkdown blueprints import` command, and the machine was unchanged. `blueprints` listed reports as a folder 'left standing, and not guessed at'. The folder above the checkout answered nothing. So did a lookalike folder holding a .walkdown with a full home and no git. Extra homes that only a clone or a worktree held were refused the same way. A clone whose origin matches answered as the registered blueprint. That is locations.worktree.same-project matching a registered row, not discovery. The status-unimported screen reads plainly: nothing registered, which folder holds a home, and the command that registers it. The n-0438 finding is not fixed: it reproduces exactly. A separate git repository at ~/shop/vendor/lib, inside the registered checkout's folder, is refused with 'nothing registered contains this directory', and with a home of its own it says the same before naming the home. Refusing is right and keeps the claim, but the sentence reads false standing inside ~/shop. Topher's pass verified the thread with no fix behind it. His line-break request is wording."
+    }
+  ]
+}

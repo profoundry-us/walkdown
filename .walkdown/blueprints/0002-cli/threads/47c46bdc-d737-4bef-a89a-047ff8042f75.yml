@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-06T20:12:17.787Z
 anchor:
   rule: commands.records.move
-status: addressed
+status: verified
 body: Here is another one where I would expect us to need to pass the blueprint.
   Are we guessing the blueprint based on the folder we are in?
 replies:
@@ -15,3 +15,10 @@ replies:
     body: No longer guessed. `records move` takes `--blueprint` like every other
       write, and is refused without it, wherever it is run. The records-move
       screen now shows the flag.
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on commands.records.move
+      (2026-10-07T02-42-49Z-local-01).
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01

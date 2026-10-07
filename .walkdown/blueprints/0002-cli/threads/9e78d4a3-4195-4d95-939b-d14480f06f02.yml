@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-06T19:29:09.899Z
 anchor:
   rule: commands.threads.one-verb-per-change
-status: addressed
+status: verified
 body: Does this command need the blueprint passed? We might have multiple
   blueprints with `n-0001` notes on them. Or is it figuring out the blueprint
   based on the current directory?
@@ -20,3 +20,22 @@ replies:
       exception, since it files each result in the blueprint that holds its
       rule. A write without the flag is refused, lists the IDs and changes
       nothing (locations.several.writes-name-one, reworded)."
+  - author: topher
+    created: 2026-10-07T02:32:44Z
+    body: This looks good but the "as-built" doesn't show the new functionality; it
+      still shows a command that doesn't pass `--blueprint` as working.
+  - author: topher
+    via: verdict
+    created: 2026-10-07T02:42:49Z
+    body: Verified by topher's pass on commands.threads.one-verb-per-change
+      (2026-10-07T02-42-49Z-local-01).
+  - author: agent
+    created: 2026-10-07T02:47:34Z
+    body: "You were right that no screen showed it. threads-show is a read, which
+      needs no flag, and threads-set-refused already passes one. There is now a
+      screen of a thread write refused without `--blueprint`:
+      threads-reply-names-its-blueprint, a reply in a project with one blueprint
+      and one thread, still refused with the flag to add. Its design request is
+      n-0503."
+verified_by: topher
+verified_via: 2026-10-07T02-42-49Z-local-01
