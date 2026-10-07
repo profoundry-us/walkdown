@@ -115,6 +115,15 @@ checks:
     run: npm run --silent lint
     fast: true
 
+  # Biome owns formatting, but `biome lint` never looks at it, so with only the
+  # check above 103 files drifted before anyone noticed (2026-10-07). This is
+  # `biome check`: the formatter and import order as well. `biome check --write .`
+  # fixes what it finds; the bundles are built from src/, so rebuild after.
+  - id: source-format
+    name: Every source file is formatted the way biome formats it
+    run: npm run --silent check:format
+    fast: true
+
   # lib/ is typed the way SvelteKit and webpack are typed: JSDoc annotations
   # over plain JS, checked by tsc with no build step, so clone-is-the-install
   # survives. checkJs means the checker reads the code itself - an annotation
