@@ -58,16 +58,32 @@ export function run(args) {
    */
   const only = positionals[0];
   if (only) {
-    const cellOf = (l) => (only === 'spec' || only === 'code' || KINDS.includes(only) ? l[only] : null);
+    // The prototype and proposals rows the full report prints are askable too (n-0494).
+    const design = (l) => Object.fromEntries(designRows(l));
+    const cellOf = (l) =>
+      only === 'spec' || only === 'code' || KINDS.includes(only)
+        ? l[only]
+        : only === 'prototype' || only === 'proposals'
+          ? (design(l)[only] ?? { path: null, why: l.spec?.why ?? 'no blueprint answers here' })
+          : null;
     if (!cellOf(loc)) {
-      console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}.`);
+      console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}, prototype, proposals.`);
       return end(2);
     }
+    /*
+     * No path is still an answer with a reason (n-0437): the path goes to
+     * stdout for a script, and the reason it is empty to stderr for the person.
+     */
+    const missing = (id, cell) => {
+      if (!cell.path) console.error(`No ${only} path${id ? ` for ${id}` : ''}.\n  [${cell.why}]`);
+    };
     if (each.length > 1) {
       for (const { id, loc: l } of each) console.log(`${id}\t${cellOf(l).path ?? ''}`);
+      for (const { id, loc: l } of each) missing(id, cellOf(l));
       return end(each.every(({ loc: l }) => cellOf(l).path) ? 0 : 1);
     }
-    console.log(cellOf(loc).path ?? '');
+    if (cellOf(loc).path) console.log(cellOf(loc).path);
+    else missing(loc.blueprint ? loc.id : null, cellOf(loc));
     return end(cellOf(loc).path ? 0 : 1);
   }
 
@@ -78,6 +94,12 @@ export function run(args) {
   console.log(dim('\nNothing was written. See docs/08-locations.md for the resolution order.'));
   return end(0);
 }
+
+/*
+ * The reason under a path, in brackets so it reads as subtext and not as a
+ * second path (n-0437).
+ */
+const sub = (text, colour = dim) => colour(`[${text}]`);
 
 /* One blueprint's locations, printed for a person. */
 function report(loc) {
@@ -90,9 +112,9 @@ function report(loc) {
    */
   const cfg = loc.config.exists
     ? loc.config.error
-      ? red(`unreadable — ${loc.config.error}`)
-      : dim('yours — identity and defaults; registers nothing')
-    : dim('not present — every default applies');
+      ? sub(`unreadable — ${loc.config.error}`, red)
+      : sub('yours — identity and defaults; registers nothing')
+    : sub('not present — every default applies');
   console.log(`  ${'config'.padEnd(9)} ${loc.config.path}`);
   console.log(`  ${''.padEnd(9)} ${cfg}`);
   // A row this file no longer reads - a `blueprints:` list from before the
@@ -111,11 +133,11 @@ function report(loc) {
     `  ${''.padEnd(9)} ${
       reg.exists
         ? reg.error
-          ? red(`unreadable — ${reg.error}`)
+          ? sub(`unreadable — ${reg.error}`, red)
           : reg.matched
-            ? green(`the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`)
-            : dim(`the registry — what this machine knows about; ${loc.config.registry.why ?? 'no row answers here'}`)
-        : dim('the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it')
+            ? sub(`the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`, green)
+            : sub(`the registry — what this machine knows about; ${loc.config.registry.why ?? 'no row answers here'}`)
+        : sub('the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it')
     }`,
   );
   // A row in the registry nothing wrote (ADR 0003 §5): set aside, and said
@@ -133,13 +155,13 @@ function report(loc) {
    * most needs to see (locations.answer.registry-is-the-only-door).
    */
   console.log(`  ${'answers'.padEnd(9)} ${loc.walkdown.path ?? dim('—')}`);
-  console.log(`  ${''.padEnd(9)} ${dim(loc.walkdown.why)}`);
+  console.log(`  ${''.padEnd(9)} ${sub(loc.walkdown.why)}`);
   console.log('');
 
   const row = (label, cell) => {
     const missing = cell.missing ? yellow('  (does not exist yet)') : '';
     console.log(`  ${label.padEnd(9)} ${cell.path ?? dim('—')}${missing}`);
-    console.log(`  ${''.padEnd(9)} ${dim(cell.why)}`);
+    console.log(`  ${''.padEnd(9)} ${sub(cell.why)}`);
   };
   row('spec', loc.spec);
   for (const kind of KINDS) row(kind, loc[kind]);
@@ -161,8 +183,8 @@ function report(loc) {
    */
   const t = tracking(loc);
   console.log(`  ${'tracked'.padEnd(9)} ${t.words}`);
-  console.log(`  ${''.padEnd(9)} ${dim(t.why)}`);
-  if (loc.standard) console.log(`  ${''.padEnd(9)} ${dim(`the tree says: ${loc.standard.why}`)}`);
+  console.log(`  ${''.padEnd(9)} ${sub(t.why)}`);
+  if (loc.standard) console.log(`  ${''.padEnd(9)} ${sub(`the tree says: ${loc.standard.why}`)}`);
   for (const f of t.findings)
     console.log(`  ${''.padEnd(9)} ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
 
@@ -189,7 +211,11 @@ function designRows(loc) {
   const cell = (path) => ({
     path,
     missing: !existsSync(path),
-    why: path.startsWith(join(loc.spec.path, '')) ? 'beside the spec' : 'in the code — nothing of that name beside the spec',
+    why: path.startsWith(join(loc.spec.path, ''))
+      ? 'beside the spec'
+      : bp.codeRoot && path.startsWith(join(bp.codeRoot, ''))
+        ? 'in the code — nothing of that name beside the spec'
+        : 'outside both the spec and the code',
   });
   const proto = prototypeDir(bp);
   return [

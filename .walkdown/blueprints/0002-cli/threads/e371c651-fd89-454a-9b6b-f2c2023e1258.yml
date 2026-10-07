@@ -23,5 +23,13 @@ replies:
     created: 2026-10-07T02:42:49Z
     body: Verified by topher's pass on locations.answer.says-why
       (2026-10-07T02-42-49Z-local-01).
+  - author: agent
+    created: 2026-10-07T03:15:30Z
+    body: 'Fixed now; your pass verified this before anything had been done.
+      `walkdown where spec` with no answer prints nothing on stdout, so a script
+      still reads an empty answer, and prints "No spec path." with the reason on
+      stderr. Every reason `where` gives, in the full report too, is now in
+      brackets as you asked. Screens: where-spec-unanswered (new) and
+      where-says-why (recaptured).'
 verified_by: topher
 verified_via: 2026-10-07T02-42-49Z-local-01

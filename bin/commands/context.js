@@ -132,8 +132,13 @@ export function noBlueprintHere(loc, blueprintId) {
   const where = loc.config.registry?.path ?? loc.config.path;
   // A home standing here, or called that, or in this checkout, that nothing
   // has imported: the reason names its folder and the import that registers it.
-  if (/has not imported|`walkdown blueprints import /.test(loc.spec?.why ?? '')) {
-    console.error(`No blueprint ${blueprintId ? `for \`${blueprintId}\`` : 'here'}: ${loc.spec.why}.`);
+  // The reason, then what to do, a line each (n-0438): one sentence carrying
+  // three clauses was hard to read.
+  const why = loc.spec?.why ?? '';
+  if (/has not imported|`walkdown blueprints (import|new)`?|is a repository of its own|name it by its ID/.test(why)) {
+    const [head, ...rest] = why.split(' — ');
+    console.error(`No blueprint ${blueprintId ? `for \`${blueprintId}\`` : 'here'}: ${head}.`);
+    for (const part of rest.join(' — ').split('; ')) if (part) console.error(`  ${part[0].toUpperCase()}${part.slice(1)}.`);
     process.exit(2);
   }
   console.error(

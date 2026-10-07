@@ -1,0 +1,40 @@
+{
+  "run_id": "2026-10-07T03-42-53Z-local-01",
+  "created": "2026-10-07T03:42:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b9dc5a6-dirty",
+  "note": "Agent tier rejudge of three cli rules after n-0507, n-0508 and n-0509, each judged against its statement and that note. Driven with bin/walkdown.js from the working tree on fresh mktemp machines with real git repos, plus a scratch blueprint for the status rule. The real blueprint was only read. Hashes checked ok with `hash --blueprint cli`. Not recorded, and no threads touched.",
+  "spec_hash": "sha256:e8d78fe918f6",
+  "results": [
+    {
+      "rule": "locations.answer.says-why",
+      "status": "pass",
+      "statement_hash": "sha256:b31372ab894d",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-36-44Z/says-why.txt"
+      ],
+      "reasoning": "I rejudged this against n-0507 and the statement. The machine had shop, holding checkout and search, and shop-two, holding a second checkout. From ~, `where spec --blueprint search` now gives '[a name alone means a blueprint of the project you are in, and you are in no project — outside its project, name it by its ID: `--blueprint 0002-sp-search`]' on stderr, exit 1. Where two projects share a name, it offers both IDs. Inside another project, ~/other, it says '~/other has no `search`' instead. status, threads, lint and the write `threads new` were refused with the same reason on line one and the ID on the line below, exit 2. The suggested ID answered. Inside shop the bare name still answers, and an unregistered `nosuch` still says no registered blueprint `nosuch`, which is true. So the reason now names the decision that was made. An absolute `prototype.root` reads '[..., outside both the spec and the code]'. Relative roots still read 'beside the spec' or 'in the code', and the full `where` keeps every reason in brackets. One edge is left, which does not break the claim. A relative root that climbs out of the spec folder (`../design`) and is found from the spec is still labelled '[in the code — nothing of that name beside the spec]'. The beside-the-spec test only looks for paths under the spec folder."
+    },
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "pass",
+      "statement_hash": "sha256:a1b53e39c8a9",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-36-44Z/projects-are-labels.txt"
+      ],
+      "reasoning": "I rejudged this against n-0508 and the statement. The screen's case is unchanged and right: a second checkout called shop gets a plain refusal, and `--project work-shop --code ws`, run as printed, registered it. With a code taken and `--project mine` given, the suggestion is now `walkdown blueprints new b --project mine --code mn`. Run as printed, it filed b under project `mine`, and the machine was unchanged while refused. The same held for `--project shop-y --code sp`, which became shop-y/sy. With no terminal, `--code shop`, `--code X` and `--code a` were each refused with \"`shop` is not a project code — two or three lowercase letters or digits. Nothing was made.\", and the machine was unchanged. A valid code then registered with no leftover folder in the way. At a terminal, I typed shop, ws, an empty line and then r2x. Each wrong answer was asked again with its own reason, and r2x registered as 0006-r2x-c. A taken label typed at the label prompt was asked again, and zshop registered. Two notes. First, when both label and code are taken, the suggested label joins the checkout's parent folder to the typed label (`tmp-…-shop` on my machine, so `<user>-shop` under a real home). It is free and it works, but it reads oddly. Second, I could not drive input ending at the prompt, because script(1) never passes EOF to the terminal, so that case is unjudged."
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "statement_hash": "sha256:1aef4eaeadde",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-36-44Z/sent-back-is-a-fail.txt"
+      ],
+      "reasoning": "I rejudged this against n-0509 on a scratch blueprint with four rules, each verify [agent] and signoff [eng], all sent back by sam. Every one read ✗ failing and none was in sam's queue. After the send-back, by-pass and by-set each got an addressed finding, and observation got only an observation, settled with a reply. Each addressed rule went to the agent as 'judge again'. After a newer agent pass, by-pass and by-set were in NEEDS A HUMAN, each naming its thread. I settled n-0002 with settleByAgentPass and n-0003 with `threads set --status settled --as-agent`, the command the queue gives. Both rules stayed in sam's queue, so the n-0402 regression is gone whichever way a note is settled. The observation-only rule never entered sam's queue. before-send-back, whose only fix was claimed and settled before its send-back, was not requeued either. A fresh signed pass from sam cleared all four. One case goes against the second step, the trade n-0509 chose. A finding settled outright as 'Filed by mistake; withdrawn.' is read as a claimed fix, so sam is asked to look again though nothing changed. The reason field decides and the reply wording does not. An extra look costs less than the silent drop it replaced, so I pass the rule and flag this case."
+    }
+  ]
+}

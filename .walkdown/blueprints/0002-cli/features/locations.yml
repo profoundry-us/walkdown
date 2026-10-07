@@ -189,7 +189,7 @@ stories:
         statement: "Every path walkdown reports says why it was chosen: a flag on the command line, this machine's registry, the blueprint's own `records.yml`, a worktree of a registered checkout, or the built-in default."
         because: A person who disagrees with where something is needs to know which decision to argue with.
         verify: [checks]
-        screens: [where-says-why]
+        screens: [where-says-why, where-spec-unanswered]
         steps:
           given:
             - A project with some paths defaulted and some configured
@@ -275,7 +275,7 @@ stories:
         statement: walkdown answers only for blueprints somebody registered on this machine; it never goes looking for one.
         because: A repository may hold several blueprints without them bleeding into each other.
         verify: [checks]
-        screens: [status-unimported]
+        screens: [status-unimported, status-nested-repository]
         signoff: [eng, product]
         steps:
           given:

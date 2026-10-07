@@ -6,6 +6,8 @@ fixture: unimported-home
 command: [status]
 exit: 2
 expect:
-  - '^No blueprint here: nothing registered contains this directory — ~/shop holds 1 blueprint folder\(s\) \(202610-search\); `walkdown blueprints import ~/shop` registers them\.$'
+  - '^No blueprint here: nothing registered contains this directory\.$'
+  - '^  ~/shop holds a blueprint folder \(202610-search\)\.$'
+  - '^  `walkdown blueprints import ~/shop` registers it\.$'
 anchors:
-  - { id: cli.refusal, match: '^No blueprint here' }
+  - { id: cli.refusal, match: '^(No blueprint here|  ~/shop holds|  `walkdown blueprints import)' }

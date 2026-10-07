@@ -1,0 +1,67 @@
+{
+  "run_id": "2026-10-07T03-34-14Z-local-01",
+  "created": "2026-10-07T03:34:14Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b9dc5a6-dirty",
+  "note": "Agent tier, five cli rules, judged against each rule's statement and the note last addressed on it (n-0437, n-0438, n-0494, n-0402) and, for sent-back-is-a-fail, the lib/status.js change. Driven with bin/walkdown.js from the working tree on fresh mktemp machines with real git repos, plus a scratch blueprint for the status rule. The real blueprint was only read. as-built/cli screens were read as Topher would. Hashes checked ok with `hash --blueprint cli`. Not recorded, and no threads filed.",
+  "spec_hash": "sha256:e8d78fe918f6",
+  "results": [
+    {
+      "rule": "locations.answer.says-why",
+      "status": "fail",
+      "statement_hash": "sha256:b31372ab894d",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-25-38Z/says-why.txt"
+      ],
+      "reasoning": "I judged this against n-0437 and the statement. Most of the fix holds. Every reason under a path in the full `walkdown where` is now in brackets, on two blueprints (one kept in ~/.walkdown, one committed). `where <kind>` with no path prints nothing on stdout, and on stderr prints 'No <kind> path[ for <id>].' with the bracketed reason, exit 1. With several blueprints it prints `id<TAB>` lines on stdout and one reason per missing blueprint on stderr. The where-says-why and where-spec-unanswered screens read cleanly. The where-spec-unanswered screen picks `cart`, a name nothing registered, so its reason is true there. But n-0437's first case still gives a reason that is false. The case is a registered blueprint named by its spec name from outside its checkout. From ~, `walkdown where spec --blueprint checkout` says '[no registered blueprint `checkout` — `walkdown blueprints` lists them]', and `walkdown blueprints` lists 0001-sp-checkout right under it. The same name answers from ~/shop, and the ID answers from ~. What decided it is the rule that outside a project --blueprint takes only an ID, not a missing registration. So the reason points the person at the wrong decision, which is what this rule exists to prevent. A smaller wrong reason: with an absolute `prototype.root`, the row says '[`prototype.root: ~/design-abs`, in the code — nothing of that name beside the spec]', though ~/design-abs is not in the code.",
+      "threads": [
+        "65f5aba3-a09c-4392-88d6-65cdde7b3579"
+      ]
+    },
+    {
+      "rule": "locations.answer.declared-not-discovered",
+      "status": "pass",
+      "statement_hash": "sha256:e6a814857fe7",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-25-38Z/declared-not-discovered.txt"
+      ],
+      "reasoning": "I judged this against n-0438 and the statement. The machine was a fresh clone of a teammate's repo holding committed checkout and search homes, with nothing imported. status, threads and lint were refused from the root, from a deep folder and from inside a home, exit 2, and a shasum showed the machine unchanged. Each refusal now puts the reason on its first line and what to do on the lines below. For example: 'No blueprint here: nothing registered contains this directory.' / '~/shop holds 2 blueprint folders (checkout, search).' / '`walkdown blueprints import ~/shop` registers them.' The singular and plural forms read right. With search imported and checkout not, search answered, and `where` named the registry row and how it was reached. checkout, whether stood in or named with --blueprint, was refused with its folder and the exact import. In a `git init` repository at ~/shop/vendor/lib, status and threads say '~/shop/vendor/lib is a repository of its own inside ~/shop.', then 'Nothing registered belongs to it.' and the two ways on. Both ways work: `blueprints new` there made its own project `lib`, and ~/shop still answered for search. The status-unimported and status-nested-repository screens match what I drove and read plainly. One leftover, which does not break the claim: a cloned repository inside ~/shop that holds an unimported home of its own still opens with 'nothing registered contains this directory'. That is the sentence n-0438 found false inside a registered checkout, because the holds-a-folder reason is chosen before the repository-of-its-own one. Its import advice is right."
+    },
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:a30a7a594efd",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-25-38Z/prototype-beside-the-spec.txt"
+      ],
+      "reasoning": "I judged this against n-0494 and the statement. `walkdown where prototype` and `walkdown where proposals` now answer like the other kinds, and the refusal for an unknown kind lists both. Two blueprints were set up with `prototype.root: prototype/`. checkout, kept in ~/.walkdown, had a prototype/ beside its spec and the code had one too, and it answered beside the spec. search, committed with nothing beside its spec, answered ~/shop/prototype. The full `where` reasons agree: '[`prototype.root: prototype/`, beside the spec]' and '[..., in the code — nothing of that name beside the spec]'. With no root declared, `where prototype` exits 1 and gives '[spec.yml declares no `prototype.root`]' on stderr. A proposals/ made beside checkout's spec took over from the code's. `walkdown serve` served /prototype/screens/pay.html?bp=<id> from the same directory `where` named for each blueprint: 'beside the spec' for checkout and 'in the code' for search. The design pages and `where` read one directory. The where-prototype-beside screen shows the prototype row beside the spec and the proposals row in the code, each with a bracketed reason, and it reads right."
+    },
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "fail",
+      "statement_hash": "sha256:a1b53e39c8a9",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-25-38Z/projects-are-labels.txt"
+      ],
+      "reasoning": "I judged this against n-0402 and the statement. The part Topher sent back is fixed. With no terminal, the blueprints-new-label-taken refusal says 'This machine already has a project called `shop`, at ~/shop. ~/work/shop is another checkout, so its project needs a name of its own. Nothing was made.' It gives the exact command, and the machine was unchanged. I ran `--project work-shop --code ws` as printed and it registered 0004-ws-search. A third checkout was then offered shop-2/s2, which also worked. Labels came from the remote (shop) and the directory (notes), and a second blueprint in shop was reported 'added to `shop`, beside `checkout`'. With a terminal, a taken label typed again was asked again, and a free one registered. The rest of the last two steps fails in two ways. First, with a code taken, the suggested command drops the label the person named: `blueprints new b --project mine --code ws` suggests `walkdown blueprints new b --code mn`. Run as printed, that files b under project `q`, the folder's name, with a code derived from 'mine'. The step asks for 'a command with a label and code that are free', and the person's own name is lost. Second, with a terminal, typing an invalid code ('shop') at the code prompt exits 2 and leaves an unregistered home at ~/.walkdown/projects/rr/blueprints/c. `walkdown blueprints` then reports that folder as one no registry row names. Rerunning with a valid code is refused with '~/.walkdown/projects/rr/blueprints/c already exists and is not a blueprint walkdown can take'. So the person is not offered the change again, and something was made before they made it.",
+      "threads": [
+        "d5d4c1e2-fc46-4062-b4e7-43fd24d637fd"
+      ]
+    },
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "fail",
+      "statement_hash": "sha256:1aef4eaeadde",
+      "evidence": [
+        "runs/evidence/2026-10-07T03-25-38Z/sent-back-is-a-fail.txt"
+      ],
+      "reasoning": "I judged the lib/status.js change on a scratch blueprint with two rules, each verify [agent] and signoff [eng]. Both had an agent pass, then sam sent both back. Each read ✗ failing and neither was in sam's queue. The agent filed a finding on each and addressed it, and each went to the AGENT QUEUE as 'judge again'. After a newer agent pass, both were in NEEDS A HUMAN, each naming its thread, and the agent was told to 'settle n-000x ... close it'. I then settled them two ways. n-0001 was settled by settleByAgentPass, which writes a `via: verdict` reply, and goes-through stayed in sam's queue, which is the new behaviour. n-0002 was settled with `walkdown threads set n-0002 --status settled --as-agent`. That is the command the AGENT QUEUE line and the judge governance give, and it writes no verdict reply. After it, declined-says-so dropped out of NEEDS A HUMAN, though its fix was claimed after the send-back and judged by a newer pass. Only tools/sitting.mjs calls settleByAgentPass, so on the prompt-driven path every rule a person sent back still leaves their queue the moment the agent does what status tells it. That is n-0402 again. The third step fails for the documented flow. A fresh signed pass did clear the rules, and a send-back with no fix stayed out of the queue. The real blueprint, read only, has projects-are-labels in the AGENT QUEUE and not yet in NEEDS A HUMAN, because the agent's later reply on n-0402 is read as a newer fix claim.",
+      "threads": [
+        "198ff0db-e014-4fa0-adf3-b8ce41f00e2e"
+      ]
+    }
+  ]
+}

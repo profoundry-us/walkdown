@@ -7,9 +7,9 @@ command: [where]
 exit: 0
 expect:
   - '^  config    ~/\.walkdown/profile\.yml$'
-  - '^            not present — every default applies$'
-  - '^            the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it$'
+  - '^            \[not present — every default applies\]$'
+  - '^            \[the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it\]$'
   - '^Nothing was written\. See docs/08-locations\.md for the resolution order\.$'
 anchors:
-  - { id: cli.where.config, match: '^  config  |^            (not present|~/\.walkdown/registry|the registry)' }
+  - { id: cli.where.config, match: '^  config  |^            \[(not present|~/\.walkdown/registry|the registry)' }
   - { id: cli.where.nothing, match: '^Nothing was written' }

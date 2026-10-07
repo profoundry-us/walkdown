@@ -7,9 +7,9 @@ command: [where]
 exit: 0
 expect:
   - '^  prototype ~/\.walkdown/projects/shop/blueprints/checkout/prototype$'
-  - '^            `prototype\.root: prototype/`, beside the spec$'
+  - '^            \[`prototype\.root: prototype/`, beside the spec\]$'
   - '^  proposals ~/shop/proposals  \(does not exist yet\)$'
-  - '^            in the code — nothing of that name beside the spec$'
+  - '^            \[in the code — nothing of that name beside the spec\]$'
 anchors:
-  - { id: cli.where.prototype, match: '^  prototype |^            `prototype\.root' }
-  - { id: cli.where.proposals, match: '^  proposals |^            in the code' }
+  - { id: cli.where.prototype, match: '^  prototype |^            \[`prototype\.root' }
+  - { id: cli.where.proposals, match: '^  proposals |^            \[in the code' }

@@ -1,0 +1,16 @@
+id: n-0506
+uuid: a05cd570-74c6-48c1-baf6-45cdc1a66d83
+kind: note
+reason: request
+author: agent
+created: 2026-10-07T03:10:25.237Z
+anchor:
+  screen: where-spec-unanswered
+status: open
+body: "Draw what `walkdown where spec --blueprint cart` prints when no blueprint
+  is called cart. Nothing goes to stdout, so a script reads an empty answer. The
+  person reads why on stderr, in brackets like every reason `where` gives
+  (`locations.answer.says-why`). Anchors: cli.prompt, cli.where.none, cli.why,
+  cli.exit. as-built/cli/where-spec-unanswered.html is the build, from
+  test/cli/scenarios/where-spec-unanswered.yml, in the frame
+  tools/cli-captures.mjs --frame prints."

@@ -205,6 +205,23 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     let l = project ?? defaultLabel(checkout);
     let c = code ?? null;
     for (;;) {
+      /*
+       * A code that is no code is refused here, before anything is made: let
+       * through, the register refused it after the home was scaffolded, and
+       * the home it left blocked the next try.
+       */
+      if (c !== null && !/^[a-z0-9]{2,3}$/.test(c)) {
+        const bad = `\`${c}\` is not a project code — two or three lowercase letters or digits`;
+        if (!process.stdin.isTTY) {
+          console.error(red(`✗ ${bad}. Nothing was made.`));
+          return null;
+        }
+        const rl = createInterface({ input: process.stdin, output: process.stdout });
+        console.log(yellow(`! ${bad}.`));
+        c = (await rl.question(`  A two- or three-letter code for \`${l}\`: `)).trim().toLowerCase() || null;
+        rl.close();
+        continue;
+      }
       const labelTaken = rows.some((r) => String(r.project) === l);
       const pc = c ?? deriveCode(l);
       const codeTaken = rows.some((r) => String(r.code) === pc);
@@ -232,7 +249,7 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
           dim(
             labelTaken
               ? `  Name it with \`--project <label>\`, e.g. \`walkdown blueprints new${named} --project ${free} --code ${freeCode}\`.`
-              : `  Choose another with \`--code <two or three letters>\`, e.g. \`walkdown blueprints new${named} --code ${freeCode}\`.`,
+              : `  Choose another with \`--code <two or three letters>\`, e.g. \`walkdown blueprints new${named}${project ? ` --project ${l}` : ''} --code ${freeCode}\`.`,
           ),
         );
         return null;

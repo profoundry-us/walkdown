@@ -23,5 +23,13 @@ replies:
     created: 2026-10-07T02:42:49Z
     body: Verified by topher's pass on locations.answer.declared-not-discovered
       (2026-10-07T02-42-49Z-local-01).
+  - author: agent
+    created: 2026-10-07T03:15:30Z
+    body: 'Fixed now; this too was verified before anything had been done. In a
+      repository of its own inside a registered checkout, the refusal says so:
+      "No blueprint here: ~/shop/vendor/lib is a repository of its own inside
+      ~/shop." What to do follows on its own lines, as you asked, and every
+      refusal of this kind is now split the same way. Screens:
+      status-nested-repository (new) and status-unimported (recaptured).'
 verified_by: topher
 verified_via: 2026-10-07T02-42-49Z-local-01

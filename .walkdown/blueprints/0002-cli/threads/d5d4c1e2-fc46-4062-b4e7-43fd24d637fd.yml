@@ -1,0 +1,27 @@
+id: n-0508
+uuid: d5d4c1e2-fc46-4062-b4e7-43fd24d637fd
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T03:34:14.351Z
+anchor:
+  rule: locations.registry.projects-are-labels
+status: settled
+body: Judged 2026-10-07 (evidence 2026-10-07T03-25-38Z/projects-are-labels.txt).
+  With `--project mine --code ws` and ws taken, the suggestion drops `--project
+  mine`, so the command as printed files the blueprint under the folder's
+  project. And a code typed at the prompt that is no code (shop) exits 2 instead
+  of asking again, leaving an unregistered home that blocks the next try.
+replies:
+  - author: agent
+    created: 2026-10-07T03:34:33Z
+    body: 'Fixed. The code-taken suggestion keeps the `--project` given, and run as
+      printed it files the blueprint under that project. A code that is no code
+      is refused before anything is made: at a terminal it asks again, and
+      without one it says "Nothing was made". Tested in
+      test/project-codes.test.js.'
+  - author: agent
+    via: verdict
+    created: 2026-10-07T03:42:53Z
+    body: Settled by the agent's pass on locations.registry.projects-are-labels
+      (2026-10-07T03-42-53Z-local-01).

@@ -1,0 +1,25 @@
+id: n-0509
+uuid: 198ff0db-e014-4fa0-adf3-b8ce41f00e2e
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T03:34:14.553Z
+anchor:
+  rule: status.acceptance.sent-back-is-a-fail
+status: settled
+body: Judged 2026-10-07 (evidence 2026-10-07T03-25-38Z/sent-back-is-a-fail.txt).
+  A fix settled by an agent pass returns a sent-back rule to its signer, but one
+  settled with `threads set --status settled`, as the agent queue says to, does
+  not, so the rule drops out of NEEDS A HUMAN again. The claim should not depend
+  on how the note was settled.
+replies:
+  - author: agent
+    created: 2026-10-07T03:34:34Z
+    body: Fixed. Any settled note counts as the fix, however it was settled, except
+      an observation, which is a remark put away and claims nothing (n-0353 was
+      one). Tested in test/acceptance.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-07T03:42:53Z
+    body: Settled by the agent's pass on status.acceptance.sent-back-is-a-fail
+      (2026-10-07T03-42-53Z-local-01).

@@ -923,3 +923,23 @@ screens:
       - cli.prompt
       - cli.refusal
       - cli.exit
+
+  - id: status-nested-repository
+    title: "A repository inside a checkout is said to be a repository of its own"
+    prototype: null
+    app: { path: /as-built/cli/status-nested-repository.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.refusal.next
+      - cli.exit
+
+  - id: where-spec-unanswered
+    title: "An empty answer from where still says why"
+    prototype: null
+    app: { path: /as-built/cli/where-spec-unanswered.html }
+    anchors:
+      - cli.prompt
+      - cli.where.none
+      - cli.why
+      - cli.exit

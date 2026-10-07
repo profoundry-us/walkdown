@@ -1,0 +1,15 @@
+# A repository of its own inside a registered checkout, with no blueprint: refused, and said for what it is.
+screen: status-nested-repository
+title: A repository inside a checkout is said to be a repository of its own
+rule: locations.answer.declared-not-discovered
+fixture: nested-repository
+cwd: shop/vendor/lib
+command: [status]
+exit: 2
+expect:
+  - '^No blueprint here: ~/shop/vendor/lib is a repository of its own inside ~/shop\.$'
+  - '^  Nothing registered belongs to it\.$'
+  - '^  `walkdown blueprints new` starts a blueprint for it, or run walkdown from ~/shop for that project\.$'
+anchors:
+  - { id: cli.refusal, match: '^No blueprint here' }
+  - { id: cli.refusal.next, match: '^  (Nothing registered|`walkdown blueprints new`)' }

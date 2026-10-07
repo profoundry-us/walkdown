@@ -7,9 +7,9 @@ command: [where]
 exit: 0
 expect:
   - '^  spec      ~/\.walkdown/projects/shop/blueprints/checkout$'
-  - '^            this machine''s registry \(0001-sp-checkout\)$'
-  - '^            the blueprint''s own records\.yml \(0001-sp-checkout\)$'
-  - '^            this machine''s registry, which says which checkout the blueprint belongs to$'
+  - '^            \[this machine''s registry \(0001-sp-checkout\)\]$'
+  - '^            \[the blueprint''s own records\.yml \(0001-sp-checkout\)\]$'
+  - '^            \[this machine''s registry, which says which checkout the blueprint belongs to\]$'
 anchors:
-  - { id: cli.why.spec, match: '^  spec  |^            this machine''s registry \(' }
-  - { id: cli.why.records, match: '^  (runs|threads|evidence|drafts)  |^            the blueprint''s own records\.yml' }
+  - { id: cli.why.spec, match: '^  spec  |^            \[this machine''s registry \(' }
+  - { id: cli.why.records, match: '^  (runs|threads|evidence|drafts)  |^            \[the blueprint''s own records\.yml' }

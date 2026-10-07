@@ -85,7 +85,7 @@ test('an unimported home standing in a partly imported checkout is named, with t
   assert.doesNotMatch(where.stdout, /no row for this project/);
   const named = m.cli(repo, 'status', '--blueprint', 'three');
   assert.equal(named.status, 2);
-  assert.match(named.stderr, /not imported — `walkdown blueprints import/);
+  assert.match(named.stderr, /not imported\.\n  `walkdown blueprints import/);
   // Standing in an imported one answers for that one alone.
   assert.match(m.cli(join(repo, '.walkdown', 'blueprints', '202610-one'), 'where').stdout, /0001-rp-one/);
 });
@@ -104,7 +104,7 @@ test('a repository of its own inside a registered checkout is not that checkout 
 
   const status = m.cli(home, 'status');
   assert.equal(status.status, 2, status.stdout);
-  assert.match(status.stderr, /202610-pack is a blueprint this machine has not imported — `walkdown blueprints import /);
+  assert.match(status.stderr, /202610-pack is a blueprint this machine has not imported\.\n  `walkdown blueprints import /);
   const filed = m.cli(home, 'threads', 'new', '--rule', 'checkout.basics.works', '--body', 'x');
   assert.equal(filed.status, 2, 'nothing is filed in the outer blueprint\'s ledger');
   assert.match(filed.stderr, /202610-pack is a blueprint this machine has not imported/, 'refused as the unimported home it is');
@@ -122,7 +122,7 @@ test('an unimported home named outright is named, by folder or spec name, with o
   for (const name of ['202610-search', 'search']) {
     const r = m.cli(shop, 'status', '--blueprint', name);
     assert.equal(r.status, 2);
-    assert.match(r.stderr, /202610-search is a blueprint this machine has not imported — `walkdown blueprints import /, name);
+    assert.match(r.stderr, /202610-search is a blueprint this machine has not imported\.\n  `walkdown blueprints import /, name);
   }
   // A spec name that is not the folder's, with a registry present.
   const orders = join(shop, '.walkdown', 'blueprints', 'orphan-orders');

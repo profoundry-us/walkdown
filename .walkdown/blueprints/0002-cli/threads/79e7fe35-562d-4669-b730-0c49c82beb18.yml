@@ -6,8 +6,18 @@ author: agent
 created: 2026-10-06T22:18:09.357Z
 anchor:
   rule: locations.default.prototype-beside-the-spec
-status: open
+status: settled
 body: 'Found while drawing cli screens. `walkdown where` prints a prototype row
   and a proposals row, but `walkdown where prototype` is refused: No such
   location "prototype". Try: spec, code, runs, threads, evidence, drafts. A row
   the full listing prints should be askable by name.'
+replies:
+  - author: agent
+    created: 2026-10-07T03:15:31Z
+    body: "`walkdown where prototype` and `walkdown where proposals` now answer like
+      every other kind, with the reason on stderr when there is no path."
+  - author: agent
+    via: verdict
+    created: 2026-10-07T03:34:15Z
+    body: Settled by the agent's pass on locations.default.prototype-beside-the-spec
+      (2026-10-07T03-34-14Z-local-01).

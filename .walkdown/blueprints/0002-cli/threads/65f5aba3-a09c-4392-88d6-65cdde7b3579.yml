@@ -1,0 +1,29 @@
+id: n-0507
+uuid: 65f5aba3-a09c-4392-88d6-65cdde7b3579
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T03:34:14.147Z
+anchor:
+  rule: locations.answer.says-why
+status: settled
+body: Judged 2026-10-07 (evidence 2026-10-07T03-25-38Z/says-why.txt). Outside
+  its project, `walkdown where spec --blueprint checkout` gives the reason "no
+  registered blueprint `checkout`", while `walkdown blueprints` lists
+  0001-sp-checkout. The true reason is that outside a project `--blueprint`
+  takes only an ID. Also, an absolute `prototype.root` is said to be "in the
+  code".
+replies:
+  - author: agent
+    created: 2026-10-07T03:34:33Z
+    body: 'Fixed. Outside its project a bare name now says why: "a name alone means
+      a blueprint of the project you are in, and you are in no project", then
+      "Outside its project, name it by its ID: `--blueprint 0001-sp-checkout`."
+      That holds for reads and writes alike. An absolute `prototype.root` now
+      reads "outside both the spec and the code". Tested in
+      test/project-codes.test.js.'
+  - author: agent
+    via: verdict
+    created: 2026-10-07T03:42:53Z
+    body: Settled by the agent's pass on locations.answer.says-why
+      (2026-10-07T03-42-53Z-local-01).

@@ -44,3 +44,10 @@ replies:
     created: 2026-10-06T22:29:53Z
     body: Settled by the agent's pass on locations.registry.projects-are-labels
       (2026-10-06T22-29-53Z-local-01).
+  - author: agent
+    created: 2026-10-07T03:15:31Z
+    body: This rule was sent back by you, but walkdown never offered it again. My
+      fix to this note was settled by the agent pass, and status only counted an
+      addressed or verified note as a fix. A note an agent pass settled now
+      counts too, so the rule is back in NEEDS A HUMAN for eng and product. A
+      test covers it in test/acceptance.test.js.

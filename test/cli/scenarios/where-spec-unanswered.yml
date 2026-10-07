@@ -1,0 +1,14 @@
+# Asking for one path walkdown has no answer for: nothing on stdout, and the reason on stderr.
+screen: where-spec-unanswered
+title: An empty answer from where still says why
+rule: locations.answer.says-why
+fixture: one-blueprint
+cwd: .
+command: [where, spec, --blueprint, cart]
+exit: 1
+expect:
+  - '^No spec path\.$'
+  - '^  \[no registered blueprint `cart` — `walkdown blueprints` lists them\]$'
+anchors:
+  - { id: cli.where.none, match: '^No spec path' }
+  - { id: cli.why, match: '^  \[' }

@@ -90,7 +90,7 @@ function terminal(scenario, out) {
     if (closes.has(i)) body.push('      </div>');
   });
   // The folder the command ran in, as the scenario's cwd says (default ~/shop).
-  const at = scenario.cwd ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}` : '~/shop';
+  const at = scenario.cwd === '.' ? '~' : scenario.cwd ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}` : '~/shop';
   return [
     `    <div class="term-bar"><i></i><i></i><i></i><span>${esc(at)}</span></div>`,
     `    <div class="ln prompt" data-testid="cli.prompt"><b>${esc(at)} $</b> ${esc(typed(scenario))}</div>`,

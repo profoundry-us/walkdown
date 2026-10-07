@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: status-unimported
+  AS-BUILT: status-nested-repository
 
   What `walkdown status` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/status-unimported.yml - the same run test/cli.test.js
+  from test/cli/scenarios/status-nested-repository.yml - the same run test/cli.test.js
   checks against locations.answer.declared-not-discovered. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/status-unimported".
+  redlines live in as-built/redlines.json under "cli/status-nested-repository".
 
-  The design is prototype-cli/screens/status-unimported.html. Nothing here is
+  The design is prototype-cli/screens/status-nested-repository.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; An unimported home is no blueprint, and the refusal names it</title>
+  <title>As-built &mdash; A repository inside a checkout is said to be a repository of its own</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -49,12 +49,14 @@
 </head>
 <body>
   <div class="term">
-    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown status</div>
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop/vendor/lib</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop/vendor/lib $</b> walkdown status</div>
       <div data-testid="cli.refusal">
-      <div class="ln">No blueprint here: nothing registered contains this directory.</div>
-      <div class="ln">  ~/shop holds a blueprint folder (202610-search).</div>
-      <div class="ln">  `walkdown blueprints import ~/shop` registers it.</div>
+      <div class="ln">No blueprint here: ~/shop/vendor/lib is a repository of its own inside ~/shop.</div>
+      </div>
+      <div data-testid="cli.refusal.next">
+      <div class="ln">  Nothing registered belongs to it.</div>
+      <div class="ln">  `walkdown blueprints new` starts a blueprint for it, or run walkdown from ~/shop for that project.</div>
       </div>
     <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
   </div>

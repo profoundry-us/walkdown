@@ -65,7 +65,7 @@ test('a manifest registers nothing; import does, and the row answers from any de
   const before = resolveLocations({ cwd: repo });
   assert.equal(before.blueprint, null, 'the clone declares it, and this machine has not met it');
   assert.match(before.spec.why, /nothing registered contains this directory/);
-  assert.match(before.spec.why, /holds 1 blueprint folder\(s\) \(0001-shared/, 'the folder is named');
+  assert.match(before.spec.why, /holds a blueprint folder \(0001-shared/, 'the folder is named');
   assert.match(before.spec.why, /walkdown blueprints import/, 'and so is the door');
 
   const r = walkdown(home, ['blueprints', 'import', '.', '--all'], repo);

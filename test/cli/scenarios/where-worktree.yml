@@ -9,8 +9,8 @@ exit: 0
 expect:
   - '^walkdown where — 0001-sp-checkout$'
   - '^  spec      ~/shop-wt/\.walkdown/blueprints/checkout$'
-  - '^            this branch''s copy, a git worktree of ~/shop \(0001-sp-checkout\)$'
-  - '^            a git worktree of ~/shop, on reword$'
+  - '^            \[this branch''s copy, a git worktree of ~/shop \(0001-sp-checkout\)\]$'
+  - '^            \[a git worktree of ~/shop, on reword\]$'
 anchors:
   - { id: cli.worktree.spec, match: '^  spec  |this branch''s copy' }
   - { id: cli.worktree.code, match: '^  code  |a git worktree of ~/shop, on' }

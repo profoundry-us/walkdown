@@ -1,0 +1,18 @@
+id: n-0505
+uuid: 50cd55df-e6b9-4403-9a5d-d3731e2af8a8
+kind: note
+reason: request
+author: agent
+created: 2026-10-07T03:10:25.039Z
+anchor:
+  screen: status-nested-repository
+status: open
+body: "Draw what `walkdown status` prints when run in ~/shop/vendor/lib, a
+  repository of its own cloned inside the registered checkout ~/shop. It is
+  refused, and the refusal says what the folder is: a repository of its own
+  inside ~/shop, which nothing registered belongs to. What to do comes on its
+  own lines below (`locations.answer.declared-not-discovered`). Anchors:
+  cli.prompt, cli.refusal, cli.refusal.next, cli.exit.
+  as-built/cli/status-nested-repository.html is the build, from
+  test/cli/scenarios/status-nested-repository.yml, in the frame
+  tools/cli-captures.mjs --frame prints."
