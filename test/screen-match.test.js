@@ -3,7 +3,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { appUrlOf, locationOfUrl, matchScreen, screenKey, splitScreenRef } from '../lib/screen-match.js';
+import {
+  appUrlOf,
+  locationOfUrl,
+  matchScreen,
+  screenKey,
+  splitScreenRef,
+} from '../lib/screen-match.js';
 
 const at = (url) => locationOfUrl('http://localhost:4310' + url);
 
@@ -83,7 +89,10 @@ test('an app path written as a whole URL keeps its origin apart from its path (#
   const here = locationOfUrl(standIn);
   assert.equal(matchScreen(screens, here).screen.id, 'party-id-types');
   // The same path on the app's own origin is not the stand-in.
-  assert.equal(matchScreen(screens, locationOfUrl('http://localhost:3000/stand-in/party-id-types')), null);
+  assert.equal(
+    matchScreen(screens, locationOfUrl('http://localhost:3000/stand-in/party-id-types')),
+    null,
+  );
   // Its key carries the origin, so two blueprints' stand-ins at one path
   // on different servers are not the same page.
   assert.equal(screenKey(standIn), standIn);
@@ -135,7 +144,7 @@ test('the extension ships the same panel and embed the server does @rule:panel.d
  * how ?rule= arrived on the extension's page on 2026-09-16 and opened
  * nothing, while every check passed against the served page.
  */
-test('both of walkdown\'s own pages read the same address @rule:panel.start.address-opens-what-it-names', () => {
+test("both of walkdown's own pages read the same address @rule:panel.start.address-opens-what-it-names", () => {
   const root = new URL('../', import.meta.url).pathname;
   const served = readFileSync(join(root, 'lib', 'viewer', 'review.html'), 'utf8');
   const extension = readFileSync(join(root, 'extension', 'boot-host.js'), 'utf8');
@@ -156,5 +165,9 @@ test('an app path resolves against base_url the way a link does, so a whole URL 
   assert.equal(appUrlOf('/orders', null), null);
   // The panel's frame and the server's picture both take it from here.
   for (const src of ['src/panel/vocab.js', 'lib/serve.js'])
-    assert.match(readFileSync(join(import.meta.dirname, '..', src), 'utf8'), /appUrlOf\(screen\.app\.path/, src);
+    assert.match(
+      readFileSync(join(import.meta.dirname, '..', src), 'utf8'),
+      /appUrlOf\(screen\.app\.path/,
+      src,
+    );
 });

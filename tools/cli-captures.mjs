@@ -90,7 +90,12 @@ function terminal(scenario, out) {
     if (closes.has(i)) body.push('      </div>');
   });
   // The folder the command ran in, as the scenario's cwd says (default ~/shop).
-  const at = scenario.cwd === '.' ? '~' : scenario.cwd ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}` : '~/shop';
+  const at =
+    scenario.cwd === '.'
+      ? '~'
+      : scenario.cwd
+        ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}`
+        : '~/shop';
   return [
     `    <div class="term-bar"><i></i><i></i><i></i><span>${esc(at)}</span></div>`,
     `    <div class="ln prompt" data-testid="cli.prompt"><b>${esc(at)} $</b> ${esc(typed(scenario))}</div>`,
@@ -145,19 +150,28 @@ const all = scenarios();
 const want = args.filter((a) => !a.startsWith('--'));
 const unknown = want.filter((w) => !all.some((s) => s.screen === w));
 if (unknown.length) {
-  console.error(`no scenario draws ${unknown.join(', ')} — the screens are ${all.map((s) => s.screen).join(', ')}`);
+  console.error(
+    `no scenario draws ${unknown.join(', ')} — the screens are ${all.map((s) => s.screen).join(', ')}`,
+  );
   process.exit(2);
 }
 mkdirSync(OUT, { recursive: true });
 let failed = 0;
 for (const s of all.filter((x) => !want.length || want.includes(x.screen))) {
   const out = run(s);
-  const missing = (s.anchors ?? []).map((a) => a.id).filter((id) => !placeAnchors(out.text.split('\n'), s.anchors).has(id));
+  const missing = (s.anchors ?? [])
+    .map((a) => a.id)
+    .filter((id) => !placeAnchors(out.text.split('\n'), s.anchors).has(id));
   const wrongExit = out.status !== s.exit;
   writeFileSync(join(OUT, `${s.screen}.html`), page(s, out, redlines[`cli/${s.screen}`]));
-  const warn = [wrongExit && `exit ${out.status}, the scenario says ${s.exit}`, missing.length && `no line for ${missing.join(', ')}`].filter(Boolean);
+  const warn = [
+    wrongExit && `exit ${out.status}, the scenario says ${s.exit}`,
+    missing.length && `no line for ${missing.join(', ')}`,
+  ].filter(Boolean);
   if (warn.length) failed++;
-  console.log(`${warn.length ? '!' : '✓'} as-built/cli/${s.screen}.html${warn.length ? `  — ${warn.join('; ')}` : ''}`);
+  console.log(
+    `${warn.length ? '!' : '✓'} as-built/cli/${s.screen}.html${warn.length ? `  — ${warn.join('; ')}` : ''}`,
+  );
 }
 // Drawn either way - a picture of a broken run is still the build - but said.
 process.exit(failed ? 1 : 0);

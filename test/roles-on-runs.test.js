@@ -6,7 +6,7 @@
  * is the panel's, and its check belongs in checks/. This is about what ends up
  * on disk, which no browser can see.
  */
-import { declaredHome } from '../tools/test-home.mjs';
+
 import assert from 'node:assert/strict';
 import {
   mkdirSync,
@@ -22,10 +22,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 import { defaultActor } from '../lib/identity.js';
-import { deriveStatus } from '../lib/status.js';
 import { normalizeRoles, normalizeSignatures, writeRunRecord } from '../lib/run-record.js';
 import { createWalkdownServer } from '../lib/serve.js';
+import { deriveStatus } from '../lib/status.js';
 import { ROLES } from '../lib/vocab.js';
+import { declaredHome } from '../tools/test-home.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-roles-'));
 /*
@@ -90,7 +91,10 @@ const post = (body) =>
 const recordFor = (runId) =>
   JSON.parse(
     readFileSync(
-      join(h.runs, readdirSync(h.runs).find((f) => f.includes(runId))),
+      join(
+        h.runs,
+        readdirSync(h.runs).find((f) => f.includes(runId)),
+      ),
       'utf8',
     ),
   );
@@ -117,7 +121,7 @@ test('a run carries the roles its signer was acting in @rule:status.acceptance.r
   for (const roles of [undefined, null, [], ['', '  ']]) {
     const { record: r } = writeRunRecord({
       blueprintDir: direct.spec,
-    runsDir: direct.runs,
+      runsDir: direct.runs,
       target: 'local',
       actor: 'topher',
       kind: 'walkdown',
@@ -297,7 +301,11 @@ test('a signature is refused where nobody, or a machine, is named as the signer 
   ]);
   assert.throws(() => normalizeSignatures([{ role: 'wizard', signer: 'sam' }]), /unknown role/);
   assert.throws(
-    () => normalizeSignatures([{ role: 'eng', signer: 'a' }, { role: 'eng', signer: 'b' }]),
+    () =>
+      normalizeSignatures([
+        { role: 'eng', signer: 'a' },
+        { role: 'eng', signer: 'b' },
+      ]),
     /signs once/,
   );
 

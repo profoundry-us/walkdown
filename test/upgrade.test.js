@@ -6,7 +6,17 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { after, test } from 'node:test';
@@ -38,7 +48,10 @@ const write = (file, text) => {
 
 /** An old home: blueprint/ holding the spec, with threads/ and runs/ beside it. */
 function oldHome(home, name, rule) {
-  write(join(home, 'blueprint', 'walkdown.yml'), `blueprint: ${name}\nrunner:\n  targets:\n    local: { base_url: http://localhost:3000 }\n`);
+  write(
+    join(home, 'blueprint', 'walkdown.yml'),
+    `blueprint: ${name}\nrunner:\n  targets:\n    local: { base_url: http://localhost:3000 }\n`,
+  );
   write(join(home, 'blueprint', 'storyboard.yml'), 'screens: []\n');
   write(
     join(home, 'blueprint', 'features', 'f.yml'),
@@ -50,7 +63,14 @@ function oldHome(home, name, rule) {
   );
   write(
     join(home, 'runs', '2026-09-01T00-00-00Z-local-01.json'),
-    JSON.stringify({ run_id: '2026-09-01T00-00-00Z-local-01', created: '2026-09-01T00:00:00Z', actor: 'sam', kind: 'checks', target: 'local', results: [{ rule, status: 'pass' }] }),
+    JSON.stringify({
+      run_id: '2026-09-01T00-00-00Z-local-01',
+      created: '2026-09-01T00:00:00Z',
+      actor: 'sam',
+      kind: 'checks',
+      target: 'local',
+      results: [{ rule, status: 'pass' }],
+    }),
   );
 }
 
@@ -65,7 +85,10 @@ test('upgrade moves the old layout once, keeping every folder name and verdict @
   oldHome(join(wd, 'blueprints', '0003-shop'), 'shop', 'shop.s.works');
   // The repository: a manifest, a shared .gitignore, and a committed home.
   write(join(repo, '.walkdown', 'config.yml'), 'blueprints:\n  - id: app\n    home: 0001-app\n');
-  write(join(repo, '.walkdown', '.gitignore'), 'blueprints/*/runs/\nblueprints/*/evidence/\nblueprints/*/drafts/\n');
+  write(
+    join(repo, '.walkdown', '.gitignore'),
+    'blueprints/*/runs/\nblueprints/*/evidence/\nblueprints/*/drafts/\n',
+  );
   oldHome(join(repo, '.walkdown', 'blueprints', '0001-app'), 'app', 'app.s.works');
   write(
     join(wd, 'registry.yml'),
@@ -83,7 +106,8 @@ test('upgrade moves the old layout once, keeping every folder name and verdict @
     ].join('\n'),
   );
   const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
-  const cli = (...args) => spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
+  const cli = (...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
 
   // `status` says an upgrade is due, names the command, and changes nothing.
   const before = { wd: tree(wd), repo: tree(repo) };
@@ -106,8 +130,14 @@ test('upgrade moves the old layout once, keeping every folder name and verdict @
   assert.ok(!existsSync(join(wd, 'blueprints')), 'the old personal folder is gone');
   for (const home of [personal, committed]) {
     assert.ok(!existsSync(join(home, 'blueprint')), `${home} has no blueprint/ folder`);
-    assert.match(readFileSync(join(home, 'spec.yml'), 'utf8'), /^blueprint: /, 'walkdown.yml became spec.yml');
-    assert.ok(existsSync(join(home, 'storyboard.yml')) && existsSync(join(home, 'features', 'f.yml')));
+    assert.match(
+      readFileSync(join(home, 'spec.yml'), 'utf8'),
+      /^blueprint: /,
+      'walkdown.yml became spec.yml',
+    );
+    assert.ok(
+      existsSync(join(home, 'storyboard.yml')) && existsSync(join(home, 'features', 'f.yml')),
+    );
     assert.ok(existsSync(join(home, 'records.yml')), 'each home gets a records.yml');
     // Each thread gets a UUID, and its file is renamed to it, keeping its label.
     const [file, ...more] = readdirSync(join(home, 'threads'));
@@ -134,7 +164,11 @@ test('upgrade moves the old layout once, keeping every folder name and verdict @
   assert.equal(st.status, 0, st.stdout + st.stderr);
   const cells = JSON.stringify(JSON.parse(st.stdout));
   for (const rule of ['shop.s.works', 'app.s.works'])
-    assert.match(cells, new RegExp(`"rule":"${rule.replace(/\./g, '\\.')}"[^{}]*?"verdict"`), `${rule} is read`);
+    assert.match(
+      cells,
+      new RegExp(`"rule":"${rule.replace(/\./g, '\\.')}"[^{}]*?"verdict"`),
+      `${rule} is read`,
+    );
   assert.equal((cells.match(/"state":"pass"/g) ?? []).length, 2, 'both passes survive');
 
   // Run again, it reports nothing to do, and moves nothing.
@@ -143,4 +177,34 @@ test('upgrade moves the old layout once, keeping every folder name and verdict @
   assert.equal(again.status, 0);
   assert.match(again.stdout + again.stderr, /[Nn]othing to (do|upgrade)/);
   assert.deepEqual({ wd: tree(wd), repo: tree(repo) }, after_);
+});
+
+test('an ID from before the upgrade still reaches its blueprint, from inside its project or out (n-0511) @rule:locations.keeping.upgrade-moves-once', () => {
+  const wd = join(root, 'home-formerly');
+  const repo = join(root, 'shop_main');
+  mkdirSync(repo, { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: repo });
+  write(join(wd, 'config.yml'), 'identity:\n  username: sam\n');
+  oldHome(join(wd, 'blueprints', '0002-shop-main'), 'shop_main', 'shop.s.works');
+  write(
+    join(wd, 'registry.yml'),
+    `blueprints:\n  - id: shop_main\n    project: ${repo}\n    home: ${join(wd, 'blueprints', '0002-shop-main')}\n    registered: { by: init, at: '2026-09-01T00:00:00Z' }\n`,
+  );
+  const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
+  const cli = (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  assert.equal(cli(repo, 'upgrade').status, 0);
+  const [row] = parse(readFileSync(join(wd, 'registry.yml'), 'utf8')).blueprints;
+  assert.notEqual(row.id, 'shop_main', 'the underscore does not survive into the new ID');
+  assert.equal(row.formerly, 'shop_main');
+
+  for (const cwd of [repo, root]) {
+    const where = cli(cwd, 'where', 'spec', '--blueprint', 'shop_main');
+    assert.equal(where.status, 0, `${cwd}: ${where.stderr}`);
+    assert.equal(
+      where.stdout.trim(),
+      cli(cwd, 'where', 'spec', '--blueprint', row.id).stdout.trim(),
+    );
+    assert.equal(cli(cwd, 'status', '--blueprint', 'shop_main').status, 0, cwd);
+  }
 });

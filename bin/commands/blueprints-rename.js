@@ -5,14 +5,14 @@ import {
   canon,
   codeOf,
   expand,
-  personalHomes,
-  within,
   nameOf,
   numberOf,
+  personalHomes,
   readRegistry,
   registryPath,
   registryPick,
   tilde,
+  within,
   writeRegistry,
 } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
@@ -45,14 +45,22 @@ export async function run(args) {
     return end(2);
   }
   if (!NAME.test(next)) {
-    console.error(red(`\`${next}\` is not a name — lowercase letters, digits and dashes, starting with a letter or digit.`));
+    console.error(
+      red(
+        `\`${next}\` is not a name — lowercase letters, digits and dashes, starting with a letter or digit.`,
+      ),
+    );
     console.error(dim('Nothing was renamed.'));
     return end(2);
   }
   // A name shaped like an ID is read as one: `--blueprint 0001-sp-a` would
   // reach blueprint 0001, never the one renamed to it.
   if (/^\d{4}-[a-z0-9]{2,3}-/.test(next)) {
-    console.error(red(`\`${next}\` reads as an ID, so it could never name this blueprint — give the name alone (the part after \`NNNN-pc-\`).`));
+    console.error(
+      red(
+        `\`${next}\` reads as an ID, so it could never name this blueprint — give the name alone (the part after \`NNNN-pc-\`).`,
+      ),
+    );
     console.error(dim('Nothing was renamed.'));
     return end(2);
   }
@@ -65,14 +73,20 @@ export async function run(args) {
   const row = pick.picked && !pick.picked.ephemeral ? pick.picked : null;
   if (!row) {
     console.error(
-      red(pick.candidates.length > 1 ? pick.why : `No blueprint \`${want}\` in ${tilde(registryPath())}. \`walkdown blueprints\` lists them.`),
+      red(
+        pick.candidates.length > 1
+          ? pick.why
+          : `No blueprint \`${want}\` in ${tilde(registryPath())}. \`walkdown blueprints\` lists them.`,
+      ),
     );
     return end(2);
   }
   const id = String(row.id);
   const homeDir = row.home ? canon(expand(String(row.home))) : null;
   if (!homeDir || !existsSync(homeDir)) {
-    console.error(red(`\`${id}\` names no folder on disk${homeDir ? ` (${tilde(homeDir)})` : ''}.`));
+    console.error(
+      red(`\`${id}\` names no folder on disk${homeDir ? ` (${tilde(homeDir)})` : ''}.`),
+    );
     return end(2);
   }
   /*
@@ -81,9 +95,15 @@ export async function run(args) {
    * that - but `--blueprint search` would stop meaning anything.
    */
   const project = row.project ?? null;
-  const sibling = rows.find((r) => r !== row && !r.ephemeral && (r.project ?? null) === project && nameOf(r.id) === next);
+  const sibling = rows.find(
+    (r) => r !== row && !r.ephemeral && (r.project ?? null) === project && nameOf(r.id) === next,
+  );
   if (sibling) {
-    console.error(red(`\`${next}\` is already a blueprint in project \`${project}\` (\`${sibling.id}\`) — choose another name.`));
+    console.error(
+      red(
+        `\`${next}\` is already a blueprint in project \`${project}\` (\`${sibling.id}\`) — choose another name.`,
+      ),
+    );
     console.error(dim('Nothing was renamed.'));
     return end(2);
   }
@@ -96,14 +116,17 @@ export async function run(args) {
   if (values.folder) {
     const f = values.folder;
     if (isAbsolute(f) || f.split('/').some((p) => !p || p === '.' || p === '..')) {
-      console.error(red(`\`${f}\` is not a folder name — give a name, or a path below the blueprints folder.`));
+      console.error(
+        red(`\`${f}\` is not a folder name — give a name, or a path below the blueprints folder.`),
+      );
       console.error(dim('Nothing was renamed.'));
       return end(2);
     }
     // Read from the blueprints folder, as a home's folder name is: from the
     // home's own parent, a nested home's `--folder teams/b` landed in teams/teams/b.
     const base = (() => {
-      for (let d = homeDir; d !== dirname(d); d = dirname(d)) if (basename(d) === 'blueprints') return d;
+      for (let d = homeDir; d !== dirname(d); d = dirname(d))
+        if (basename(d) === 'blueprints') return d;
       return dirname(homeDir);
     })();
     nextDir = join(base, f);
@@ -118,7 +141,8 @@ export async function run(args) {
      * rename is not the way to make that clash (n-0381).
      */
     const rootOf = (dir) => {
-      for (let d = dir; d !== dirname(d); d = dirname(d)) if (basename(d) === 'blueprints') return d;
+      for (let d = dir; d !== dirname(d); d = dirname(d))
+        if (basename(d) === 'blueprints') return d;
       return null;
     };
     const key = rootOf(homeDir) ? relative(rootOf(homeDir), nextDir) : null;
@@ -155,9 +179,14 @@ export async function run(args) {
       console.error(dim('Nothing was renamed.'));
       return end(2);
     }
-    const clash = key && [...roots].map((r) => join(r, key)).find((d) => existsSync(join(d, 'spec.yml')));
+    const clash =
+      key && [...roots].map((r) => join(r, key)).find((d) => existsSync(join(d, 'spec.yml')));
     if (clash) {
-      console.error(red(`${tilde(clash)} already holds a blueprint of project \`${project}\` under the folder name \`${key}\` — choose another.`));
+      console.error(
+        red(
+          `${tilde(clash)} already holds a blueprint of project \`${project}\` under the folder name \`${key}\` — choose another.`,
+        ),
+      );
       console.error(dim('Nothing was renamed.'));
       return end(2);
     }
@@ -174,9 +203,12 @@ export async function run(args) {
     renameSync(homeDir, nextDir);
     said.push([green('~ folder'), tilde(homeDir), `now ${relative(dirname(homeDir), nextDir)}`]);
   }
-  const renamed = rows.map((r) => (r === row ? { ...r, id: nextId, ...(nextDir !== homeDir ? { home: tilde(nextDir) } : {}) } : r));
+  const renamed = rows.map((r) =>
+    r === row ? { ...r, id: nextId, ...(nextDir !== homeDir ? { home: tilde(nextDir) } : {}) } : r,
+  );
   writeRegistry(renamed, counter);
-  if (nextId !== id) said.push([green('~ registry'), tilde(registryPath()), `\`${id}\` is \`${nextId}\``]);
+  if (nextId !== id)
+    said.push([green('~ registry'), tilde(registryPath()), `\`${id}\` is \`${nextId}\``]);
 
   try {
     const { refreshIndex } = await import('../../lib/registry.js');
@@ -187,6 +219,10 @@ export async function run(args) {
 
   for (const [mark, at, what] of said) console.log(`  ${mark}  ${at}  ${dim(what)}`);
   console.log(`\n✓ \`${id}\` is now \`${nextId}\`. Its rules, threads and runs are as they were.`);
-  console.log(dim(`  \`--blueprint ${next}\` names it inside its project, \`--blueprint ${nextId}\` anywhere.`));
+  console.log(
+    dim(
+      `  \`--blueprint ${next}\` names it inside its project, \`--blueprint ${nextId}\` anywhere.`,
+    ),
+  );
   return end(0);
 }

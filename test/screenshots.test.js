@@ -4,7 +4,14 @@ import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { candidates, closeBrowser, elsewhere, openBrowser, pictureOf, resolvedVia } from '../lib/screenshots.js';
+import {
+  candidates,
+  closeBrowser,
+  elsewhere,
+  openBrowser,
+  pictureOf,
+  resolvedVia,
+} from '../lib/screenshots.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-shots-'));
 after(async () => {
@@ -13,8 +20,12 @@ after(async () => {
 });
 
 test('an address can be answered elsewhere, origin for origin, and only that origin @rule:panel.dock.storyboard', () => {
-  const rules = 'http://localhost:4700=http://localhost:4713, http://app.test=http://127.0.0.1:9000';
-  assert.equal(resolvedVia('http://localhost:4700/as-built/review.html?x=1#top', rules), 'http://localhost:4713/as-built/review.html?x=1#top');
+  const rules =
+    'http://localhost:4700=http://localhost:4713, http://app.test=http://127.0.0.1:9000';
+  assert.equal(
+    resolvedVia('http://localhost:4700/as-built/review.html?x=1#top', rules),
+    'http://localhost:4713/as-built/review.html?x=1#top',
+  );
   assert.equal(resolvedVia('http://app.test/login', rules), 'http://127.0.0.1:9000/login');
   assert.equal(resolvedVia('http://localhost:4710/', rules), null);
   assert.equal(resolvedVia('http://localhost:4700/', ''), null);
@@ -24,8 +35,14 @@ test('an address can be answered elsewhere, origin for origin, and only that ori
 test('where a page landed is said only when it left the address it was asked for @rule:panel.dock.storyboard', () => {
   assert.equal(elsewhere('http://a.test/app/home', 'http://a.test/app/home'), null);
   assert.equal(elsewhere('http://a.test/app/home', 'http://a.test/app/home#tab'), null);
-  assert.equal(elsewhere('http://a.test/app/home', 'http://a.test/login?next=/app/home'), 'http://a.test/login?next=/app/home');
-  assert.equal(elsewhere('http://a.test/app/home', 'https://sso.example/authorize'), 'https://sso.example/authorize');
+  assert.equal(
+    elsewhere('http://a.test/app/home', 'http://a.test/login?next=/app/home'),
+    'http://a.test/login?next=/app/home',
+  );
+  assert.equal(
+    elsewhere('http://a.test/app/home', 'https://sso.example/authorize'),
+    'https://sso.example/authorize',
+  );
 });
 
 /*
@@ -60,7 +77,7 @@ test('a page that redirects to a sign-in is photographed as where it landed, and
  * be found in the project being served as well. A project directory holding
  * Playwright is enough; one holding nothing adds nothing.
  */
-test('the browser is looked for in the project being served, after walkdown\'s own tree @rule:panel.dock.storyboard', () => {
+test("the browser is looked for in the project being served, after walkdown's own tree @rule:panel.dock.storyboard", () => {
   const project = join(root, 'with-playwright');
   // A stand-in package of the project's own, so the lookup cannot be
   // answered from this tree's node_modules by following a link back.

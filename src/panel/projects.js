@@ -35,7 +35,8 @@ export function projectsHeld() {
   const byId = new Map();
   for (const bp of S.blueprints) {
     const id = projectIdOf(bp) ?? bp.key ?? bp.id;
-    if (!byId.has(id)) byId.set(id, { id, root: bp.project?.root ?? null, blueprints: [], claims: [] });
+    if (!byId.has(id))
+      byId.set(id, { id, root: bp.project?.root ?? null, blueprints: [], claims: [] });
     const row = byId.get(id);
     row.blueprints.push(bp);
     if (S.claimants.some((m) => m.key === bp.key)) row.claims.push(bp);

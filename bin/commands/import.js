@@ -16,21 +16,21 @@
  * by its ID and never by standing somewhere.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { createInterface } from 'node:readline/promises';
 import { basename, dirname, join, relative } from 'node:path';
+import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 import {
   canon,
   checkoutFor,
-  reclaimFromClone,
   describeFolder,
   expand,
   findHomes,
-  goneCheckouts,
   gitRoot,
+  goneCheckouts,
   isHome,
   isOldHome,
   readRegistry,
+  reclaimFromClone,
   register,
   repointMovedCheckout,
   SPEC_FILE,
@@ -69,7 +69,8 @@ function describe(dir) {
 function checkoutOf(homeDir) {
   let d = dirname(homeDir);
   for (let i = 0; i < 16 && d !== dirname(d); i++, d = dirname(d))
-    if (basename(d) === 'blueprints' && basename(dirname(d)) === '.walkdown') return dirname(dirname(d));
+    if (basename(d) === 'blueprints' && basename(dirname(d)) === '.walkdown')
+      return dirname(dirname(d));
   return null;
 }
 
@@ -106,7 +107,11 @@ export async function run(args) {
     return end(2);
   }
   if (isOldHome(dir) && !isHome(dir)) {
-    console.error(red(`${tilde(dir)} is laid out the way walkdown laid homes out before ADR 0014 (blueprint/walkdown.yml).`));
+    console.error(
+      red(
+        `${tilde(dir)} is laid out the way walkdown laid homes out before ADR 0014 (blueprint/walkdown.yml).`,
+      ),
+    );
     console.error(dim('  `walkdown upgrade` flattens it; import it after.'));
     return end(2);
   }
@@ -155,8 +160,16 @@ export async function run(args) {
       ? findHomes(checkout).nested.find((n) => canon(n.inner) === canon(homeDir))
       : null;
     if (pair) {
-      console.error(red(`✗ ${tilde(pair.inner)} is a blueprint inside ${tilde(pair.outer)} — a home inside a home is refused. Nothing was registered.`));
-      console.error(dim('  Move the inner one out to a folder of its own under .walkdown/blueprints/, then import it.'));
+      console.error(
+        red(
+          `✗ ${tilde(pair.inner)} is a blueprint inside ${tilde(pair.outer)} — a home inside a home is refused. Nothing was registered.`,
+        ),
+      );
+      console.error(
+        dim(
+          '  Move the inner one out to a folder of its own under .walkdown/blueprints/, then import it.',
+        ),
+      );
       return end(2);
     }
     const already = listedHomes().get(canon(homeDir));
@@ -168,28 +181,51 @@ export async function run(args) {
   }
 
   // ---- a repository ----------------------------------------------------------
-  const top = (gitRoot(dir) && canon(gitRoot(dir)) === dir) || existsSync(join(dir, '.walkdown')) ? dir : null;
+  const top =
+    (gitRoot(dir) && canon(gitRoot(dir)) === dir) || existsSync(join(dir, '.walkdown'))
+      ? dir
+      : null;
   const { homes, nested } = top ? findHomes(top) : { homes: [], nested: [] };
   for (const n of nested)
-    console.error(red(`✗ ${tilde(n.inner)} is a blueprint inside ${tilde(n.outer)} — a home inside a home is refused, and not offered.`));
+    console.error(
+      red(
+        `✗ ${tilde(n.inner)} is a blueprint inside ${tilde(n.outer)} — a home inside a home is refused, and not offered.`,
+      ),
+    );
   if (!homes.length) {
     // A checkout that moved, whose blueprints are all kept on this machine.
     const moved = top ? repointMovedCheckout(top, values.project ?? null) : null;
     if (moved) {
       for (const id of moved.ids)
-        console.log(`  ${green('~ moved')}    ${dim(`\`${id}\` keeps its ID: it was at ${tilde(moved.from)}, which no longer exists, and this machine now finds it at ${tilde(top)}`)}`);
+        console.log(
+          `  ${green('~ moved')}    ${dim(`\`${id}\` keeps its ID: it was at ${tilde(moved.from)}, which no longer exists, and this machine now finds it at ${tilde(top)}`)}`,
+        );
       return end(0);
     }
-    const here = top ? readRegistry().rows.filter((r) => r?.registered && r.checkout && canon(expand(String(r.checkout))) === top) : [];
+    const here = top
+      ? readRegistry().rows.filter(
+          (r) => r?.registered && r.checkout && canon(expand(String(r.checkout))) === top,
+        )
+      : [];
     if (here.length) {
-      console.log(`${dim('· already listed')} ${tilde(top)}: ${here.map((r) => `\`${r.id}\``).join(', ')}`);
+      console.log(
+        `${dim('· already listed')} ${tilde(top)}: ${here.map((r) => `\`${r.id}\``).join(', ')}`,
+      );
       return end(0);
     }
-    console.error(red(`Nothing at ${at} is a blueprint — no spec.yml there, and no .walkdown/blueprints/ holding one.`));
+    console.error(
+      red(
+        `Nothing at ${at} is a blueprint — no spec.yml there, and no .walkdown/blueprints/ holding one.`,
+      ),
+    );
     // A project whose checkout went missing may be this one, moved; the
     // person says so, and nothing is guessed.
     for (const g of top ? goneCheckouts() : [])
-      console.error(dim(`  \`${g.label}\`'s checkout ${g.checkout} is gone — if this is it, \`walkdown blueprints import ${at} --project ${g.label}\` points it here.`));
+      console.error(
+        dim(
+          `  \`${g.label}\`'s checkout ${g.checkout} is gone — if this is it, \`walkdown blueprints import ${at} --project ${g.label}\` points it here.`,
+        ),
+      );
     console.error(dim('  `walkdown blueprints new` inside that project starts one.'));
     return end(2);
   }
@@ -226,7 +262,9 @@ export async function run(args) {
   const known = homes.filter(isListed);
   const show = (h, i) => {
     const d = describe(h.dir).description;
-    const mark = isListed(h) ? dim(`  · already listed as \`${listed.get(canon(at_(h).dir))}\``) : '';
+    const mark = isListed(h)
+      ? dim(`  · already listed as \`${listed.get(canon(at_(h).dir))}\``)
+      : '';
     return `  ${i === null ? '' : `${i + 1}. `}${h.folder}${d ? dim(` — ${d}`) : ''}${mark}`;
   };
   if (!fresh.length) {
@@ -236,13 +274,23 @@ export async function run(args) {
   }
 
   let chosen = fresh;
-  const named = (h, w) => w === h.folder || w === basename(h.folder) || w === describeFolder(h.folder);
+  const named = (h, w) =>
+    w === h.folder || w === basename(h.folder) || w === describeFolder(h.folder);
   if (values.only) {
-    const want = [...new Set(values.only.split(',').map((s) => s.trim()).filter(Boolean))];
+    const want = [
+      ...new Set(
+        values.only
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ),
+    ];
     chosen = fresh.filter((h) => want.some((w) => named(h, w)));
     const missing = want.filter((w) => !fresh.some((h) => named(h, w)));
     if (missing.length) {
-      console.error(red(`${tilde(top)} holds no unlisted blueprint folder called ${missing.join(', ')}.`));
+      console.error(
+        red(`${tilde(top)} holds no unlisted blueprint folder called ${missing.join(', ')}.`),
+      );
       console.error(dim(`  it holds: ${homes.map((h) => h.folder).join(', ')}`));
       return end(2);
     }
@@ -300,12 +348,24 @@ function finish(chosen, checkout, values, known = []) {
     }
     if (row.action === 'label-taken' || row.action === 'code-taken') {
       console.error(
-        red(`✗ the project ${row.action === 'label-taken' ? 'label' : 'code'} \`${row.taken}\` is another project's on this machine. Nothing more was imported.`),
+        red(
+          `✗ the project ${row.action === 'label-taken' ? 'label' : 'code'} \`${row.taken}\` is another project's on this machine. Nothing more was imported.`,
+        ),
       );
-      console.error(dim('  Choose another with `--project <label>` and `--code <two or three letters>`.'));
+      console.error(
+        dim('  Choose another with `--project <label>` and `--code <two or three letters>`.'),
+      );
       return end(2);
     }
-    written.push({ ...h, id: row.id, project: row.project, path: row.path, beside: row.beside ?? [], kept: row.action === 'kept', from: row.from ?? null });
+    written.push({
+      ...h,
+      id: row.id,
+      project: row.project,
+      path: row.path,
+      beside: row.beside ?? [],
+      kept: row.action === 'kept',
+      from: row.from ?? null,
+    });
   }
   /*
    * Claims are indexed at import, so routing never has to load a spec (ADR
@@ -334,10 +394,14 @@ function finish(chosen, checkout, values, known = []) {
   for (const w of written) {
     if (w.from) {
       // The checkout moved: the same blueprint, by the same ID.
-      console.log(`  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`keeps its ID \`${w.id}\`: it was at ${tilde(w.from)}, which no longer exists`)}`);
+      console.log(
+        `  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`keeps its ID \`${w.id}\`: it was at ${tilde(w.from)}, which no longer exists`)}`,
+      );
       continue;
     }
-    console.log(`  ${w.kept ? dim('· already listed') : green('+ listed')}   ${tilde(w.dir)}  ${dim(`as \`${w.id}\``)}`);
+    console.log(
+      `  ${w.kept ? dim('· already listed') : green('+ listed')}   ${tilde(w.dir)}  ${dim(`as \`${w.id}\``)}`,
+    );
     if (!w.kept)
       console.log(
         `  ${''.padEnd(10)} ${dim(
@@ -348,6 +412,7 @@ function finish(chosen, checkout, values, known = []) {
       );
   }
   for (const k of known) console.log(`  ${dim(`· already listed  ${k.folder}`)}`);
-  if (indexed !== null) console.log(dim(`\n  ${indexed} blueprint(s) indexed · \`walkdown blueprints\` lists them`));
+  if (indexed !== null)
+    console.log(dim(`\n  ${indexed} blueprint(s) indexed · \`walkdown blueprints\` lists them`));
   return end(0);
 }

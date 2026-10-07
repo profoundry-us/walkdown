@@ -1,4 +1,3 @@
-import { declaredHome, threadAt } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -7,6 +6,7 @@ import { after, beforeEach, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { MSG } from '../lib/message-stream.js';
 import { defer, offer, openThread, transition } from '../lib/writes.js';
+import { declaredHome, threadAt } from '../tools/test-home.mjs';
 import { parse } from '../vendor/yaml.js';
 
 /*
@@ -47,10 +47,17 @@ test('a question offers its choices as data, and the answer names one @rule:thre
     { label: 'Retire it', why: 'which-project asks the same thing' },
     { label: 'Reword it' },
   ]);
-  assert.deepEqual(onDisk(id).options, [{ label: 'Retire it', why: 'which-project asks the same thing' }, { label: 'Reword it' }]);
+  assert.deepEqual(onDisk(id).options, [
+    { label: 'Retire it', why: 'which-project asks the same thing' },
+    { label: 'Reword it' },
+  ]);
 
   // The answer records the label beside the reply; the stream marks it.
-  transition(load(), id, { status: 'answered', reason: 'Yes - the other screen asks it.', chosen: 'Retire it' });
+  transition(load(), id, {
+    status: 'answered',
+    reason: 'Yes - the other screen asks it.',
+    chosen: 'Retire it',
+  });
   const t = onDisk(id);
   assert.equal(t.status, 'answered');
   assert.equal(t.chosen, 'Retire it');
@@ -62,13 +69,22 @@ test('a question offers its choices as data, and the answer names one @rule:thre
 
 test('a choice the question never offered is refused, and so are malformed choices @rule:threads.question.one-ask', () => {
   const { id } = ask([{ label: 'A' }, { label: 'B' }]);
-  assert.throws(() => transition(load(), id, { status: 'answered', reason: 'C', chosen: 'C' }), /not one of the choices/);
+  assert.throws(
+    () => transition(load(), id, { status: 'answered', reason: 'C', chosen: 'C' }),
+    /not one of the choices/,
+  );
   assert.equal(onDisk(id).status, 'open');
   assert.throws(() => ask([{ label: 'Only one' }]), /two to six/);
   assert.throws(() => ask([{ label: 'Same' }, { label: 'Same' }]), /share a label/);
   assert.throws(() => ask([{ label: '' }, { label: 'B' }]), /needs a label/);
   assert.throws(
-    () => openThread(load(), { kind: 'note', body: 'A note.', anchor: { rule: 'demo.main.thing' }, options: [{ label: 'A' }, { label: 'B' }] }),
+    () =>
+      openThread(load(), {
+        kind: 'note',
+        body: 'A note.',
+        anchor: { rule: 'demo.main.thing' },
+        options: [{ label: 'A' }, { label: 'B' }],
+      }),
     /a note offers none/,
   );
 });
@@ -88,11 +104,24 @@ test('later stamps the ask deferred and changes nothing else @rule:threads.quest
 
 test('choices go on a question already asked, once, while it is open @rule:threads.question.one-ask', () => {
   const { id } = ask(null);
-  offer(load(), id, [{ label: 'Leave it', why: 'a hand edit gets what it asked for' }, { label: 'Say so in the rule' }]);
-  assert.deepEqual(onDisk(id).options.map((o) => o.label), ['Leave it', 'Say so in the rule']);
+  offer(load(), id, [
+    { label: 'Leave it', why: 'a hand edit gets what it asked for' },
+    { label: 'Say so in the rule' },
+  ]);
+  assert.deepEqual(
+    onDisk(id).options.map((o) => o.label),
+    ['Leave it', 'Say so in the rule'],
+  );
   assert.throws(() => offer(load(), id, [{ label: 'A' }, { label: 'B' }]), /already offers/);
   transition(load(), id, { status: 'answered', reason: 'The first.', chosen: 'Leave it' });
   assert.equal(onDisk(id).chosen, 'Leave it');
-  const note = openThread(load(), { kind: 'note', body: 'A note.', anchor: { rule: 'demo.main.thing' } });
-  assert.throws(() => offer(load(), note.id, [{ label: 'A' }, { label: 'B' }]), /not an open question/);
+  const note = openThread(load(), {
+    kind: 'note',
+    body: 'A note.',
+    anchor: { rule: 'demo.main.thing' },
+  });
+  assert.throws(
+    () => offer(load(), note.id, [{ label: 'A' }, { label: 'B' }]),
+    /not an open question/,
+  );
 });

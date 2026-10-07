@@ -48,13 +48,19 @@ export function forget(args) {
       (r) => nameOf(r.id) === want && r.checkout && within(here, canon(expand(String(r.checkout)))),
     );
     if (named.length > 1) {
-      console.error(red(`${named.length} blueprints here are called \`${want}\` (${named.map((r) => r.id).join(', ')}) — name one by its ID.`));
+      console.error(
+        red(
+          `${named.length} blueprints here are called \`${want}\` (${named.map((r) => r.id).join(', ')}) — name one by its ID.`,
+        ),
+      );
       return end(2);
     }
     row = named[0];
   }
   if (!row) {
-    console.error(`No blueprint \`${want}\` in ${tilde(registryPath())}. \`walkdown blueprints\` lists them.`);
+    console.error(
+      `No blueprint \`${want}\` in ${tilde(registryPath())}. \`walkdown blueprints\` lists them.`,
+    );
     return end(2);
   }
   // The registry is the only door (ADR 0003): a row there is the whole
@@ -69,7 +75,11 @@ export function forget(args) {
    * will ever mention it again, so it is named, with how to delete it.
    */
   if (within(home, canon(projectsDir())))
-    console.log(dim(`            ${tilde(home)} is still on disk and nothing else will mention it; \`rm -rf ${tilde(home)}\` deletes it.`));
+    console.log(
+      dim(
+        `            ${tilde(home)} is still on disk and nothing else will mention it; \`rm -rf ${tilde(home)}\` deletes it.`,
+      ),
+    );
   return end(0);
 }
 
@@ -80,7 +90,11 @@ export function list(args) {
   const live = all.filter((p) => !p?.ephemeral);
   const scratch = all.filter((p) => p?.ephemeral);
   if (!all.length) {
-    console.log(dim('No blueprints. `walkdown blueprints new` starts one, `walkdown blueprints import <path>` registers one.'));
+    console.log(
+      dim(
+        'No blueprints. `walkdown blueprints new` starts one, `walkdown blueprints import <path>` registers one.',
+      ),
+    );
     return end(0);
   }
   const width = Math.max(14, ...all.map((p) => String(p.id).length));
@@ -101,20 +115,30 @@ export function list(args) {
    * there and leaves the decision, an import included, to a person.
    */
   const claimed = new Set(all.map((p) => canon(expand(String(p.spec)))));
-  const places = [
-    ...new Set(live.map((p) => p.checkout).filter(Boolean)),
-  ].map((c) => [c, findHomes(c).homes.map((h) => h.dir)]);
+  const places = [...new Set(live.map((p) => p.checkout).filter(Boolean))].map((c) => [
+    c,
+    findHomes(c).homes.map((h) => h.dir),
+  ]);
   if (existsSync(projectsDir()))
     for (const label of readdirSync(projectsDir())) {
       const dir = join(projectsDir(), label, 'blueprints');
-      if (existsSync(dir)) places.push([dir, findHomes(dir, { flat: true }).homes.map((h) => h.dir)]);
+      if (existsSync(dir))
+        places.push([dir, findHomes(dir, { flat: true }).homes.map((h) => h.dir)]);
     }
   for (const [where, homes] of places) {
     const orphans = homes.filter((h) => !claimed.has(canon(h)));
     if (!orphans.length) continue;
-    console.log(yellow(`\n  ${orphans.length} blueprint folder(s) in ${tilde(where)} that no registry row names:`));
+    console.log(
+      yellow(
+        `\n  ${orphans.length} blueprint folder(s) in ${tilde(where)} that no registry row names:`,
+      ),
+    );
     for (const d of orphans) console.log(`    ${tilde(d)}`);
-    console.log(dim('    Left standing, and not guessed at. `walkdown blueprints import <folder>` registers one.'));
+    console.log(
+      dim(
+        '    Left standing, and not guessed at. `walkdown blueprints import <folder>` registers one.',
+      ),
+    );
   }
   if (scratch.length) {
     console.log(`\n  ${dim('Ephemeral')}`);

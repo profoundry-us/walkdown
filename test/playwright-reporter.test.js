@@ -15,8 +15,8 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import WalkdownReporter from '../lib/playwright-reporter.js';
 import { resolveLocations } from '../lib/locations.js';
+import WalkdownReporter from '../lib/playwright-reporter.js';
 
 const home = mkdtempSync(join(tmpdir(), 'wd-reporter-home-'));
 const prevHome = process.env.WALKDOWN_HOME;

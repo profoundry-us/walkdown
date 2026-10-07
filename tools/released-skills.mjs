@@ -21,7 +21,8 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const OUT = join(ROOT, 'lib', 'released-skills.json');
 const SHIPPED = ['setup', 'formulate', 'judge', 'incorporate', 'backlog'];
 const sha = (text) => `sha256:${createHash('sha256').update(text).digest('hex')}`;
-const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+const git = (...args) =>
+  execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 const show = (tag, path) => {
   try {
     return git('show', `${tag}:${path}`);
@@ -55,7 +56,10 @@ const current = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).ver
 if (!(current in versions)) {
   const here = {};
   for (const short of SHIPPED) {
-    const copy = copyAt((p) => (existsSync(join(ROOT, p)) ? readFileSync(join(ROOT, p), 'utf8') : null), short);
+    const copy = copyAt(
+      (p) => (existsSync(join(ROOT, p)) ? readFileSync(join(ROOT, p), 'utf8') : null),
+      short,
+    );
     if (copy != null) here[`walkdown-${short}`] = sha(copy);
   }
   versions[current] = here;

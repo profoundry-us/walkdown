@@ -12,6 +12,7 @@ import { declareProject, suiteHome, threadAt } from '../tools/test-home.mjs';
 
 /** This file's own personal home — declaring into a shared one races. */
 const HOME = suiteHome('status');
+
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -166,8 +167,14 @@ test('the report gives design requests a queue of their own, named for who draws
   );
   const plain = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
   const queues = (out) => {
-    const design = plain(out).split('DESIGN QUEUE')[1]?.split(/\n\s*\n/)[0] ?? '';
-    const agent = plain(out).split('AGENT QUEUE')[1]?.split(/\n\s*\n/)[0] ?? '';
+    const design =
+      plain(out)
+        .split('DESIGN QUEUE')[1]
+        ?.split(/\n\s*\n/)[0] ?? '';
+    const agent =
+      plain(out)
+        .split('AGENT QUEUE')[1]
+        ?.split(/\n\s*\n/)[0] ?? '';
     return { design, agent, all: plain(out) };
   };
 

@@ -5,7 +5,15 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -26,10 +34,15 @@ function machine(name) {
     const at = join(home, dir);
     mkdirSync(at, { recursive: true });
     execFileSync('git', ['init', '-q'], { cwd: at });
-    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '--allow-empty', '-m', 'i'], { cwd: at });
+    execFileSync(
+      'git',
+      ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '--allow-empty', '-m', 'i'],
+      { cwd: at },
+    );
     return at;
   };
-  const cli = (cwd, ...args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env, input: '' });
+  const cli = (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env, input: '' });
   const rows = () => parse(readFileSync(join(wd, 'registry.yml'), 'utf8'))?.blueprints ?? [];
   return { home, wd, repo, cli, rows };
 }
@@ -52,7 +65,10 @@ test('a code that is no code is refused before anything is made, so the next try
   const q = m.repo('q');
   const r = m.cli(q, 'blueprints', 'new', 'c', '--project', 'rr', '--code', 'shop');
   assert.equal(r.status, 2, r.stderr);
-  assert.match(r.stderr, /`shop` is not a project code — two or three lowercase letters or digits\. Nothing was made\./);
+  assert.match(
+    r.stderr,
+    /`shop` is not a project code — two or three lowercase letters or digits\. Nothing was made\./,
+  );
   assert.equal(existsSync(join(m.wd, 'projects', 'rr')), false, 'no home was made');
   assert.equal(m.cli(q, 'blueprints', 'new', 'c', '--project', 'rr', '--code', 'rr').status, 0);
 });
@@ -61,11 +77,18 @@ test('outside its project a bare name is refused with the ID that reaches it, ne
   const m = machine('bare-name');
   m.cli(m.repo('shop'), 'blueprints', 'new', 'checkout');
   const id = String(m.rows()[0].id);
-  for (const args of [['where', 'spec', '--blueprint', 'checkout'], ['status', '--blueprint', 'checkout']]) {
+  for (const args of [
+    ['where', 'spec', '--blueprint', 'checkout'],
+    ['status', '--blueprint', 'checkout'],
+  ]) {
     const r = m.cli(m.home, ...args);
     assert.notEqual(r.status, 0, args.join(' '));
     assert.doesNotMatch(r.stderr, /no registered blueprint|nothing registered it/, args.join(' '));
     assert.match(r.stderr, new RegExp(`name it by its ID: \`--blueprint ${id}\``), args.join(' '));
   }
-  assert.equal(m.cli(m.home, 'where', 'spec', '--blueprint', id).status, 0, 'and the ID works there');
+  assert.equal(
+    m.cli(m.home, 'where', 'spec', '--blueprint', id).status,
+    0,
+    'and the ID works there',
+  );
 });

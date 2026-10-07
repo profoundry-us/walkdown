@@ -63,24 +63,21 @@ without it; anything that writes into one needs it, wherever it is run from.
 const ABOUT = {
   upgrade:
     "Move walkdown's files from the layout before ADR 0014 to the current one, once:\nthe profile, each home flattened around its spec.yml, registry rows given IDs\nand projects, threads given UUIDs. Folder names and verdicts are kept. With\n--dry-run it says what it would do and changes nothing.",
-  run:
-    'Run the project\'s checks via the runner contract (run_all, or run_for_rule\nwith --rule), injecting the target\'s env and WALKDOWN_TARGET. The\nreporter/formatter records the run.',
+  run: "Run the project's checks via the runner contract (run_all, or run_for_rule\nwith --rule), injecting the target's env and WALKDOWN_TARGET. The\nreporter/formatter records the run.",
   status:
     'Derived per-rule verification from the runs ledger: latest checks per target,\nthe latest agent walkdown, which roles have accepted the rule, and open\nthreads. With a rule id: that rule in full (statement, evidence, the excuses\nfor any tier it does not ask for, who has signed and who has not, threads).',
-  lint:
-    'Validate the blueprint: schema, ids, storyboard refs, staleness, check\ncoverage (the rule tags in the test files, or runner.list), threads, and runs.',
-  hash:
-    'Report statement_hash status for every rule - the hash pins the statement and\nthe steps; --write updates missing/stale hashes in place (formatting\npreserved), and every verdict on a re-stamped rule reads stale. --reword\n"<why>" keeps the old hash under steps.reworded so the verdicts stay current:\nthe words changed, the rule did not.',
+  lint: 'Validate the blueprint: schema, ids, storyboard refs, staleness, check\ncoverage (the rule tags in the test files, or runner.list), threads, and runs.',
+  hash: 'Report statement_hash status for every rule - the hash pins the statement and\nthe steps; --write updates missing/stale hashes in place (formatting\npreserved), and every verdict on a re-stamped rule reads stale. --reword\n"<why>" keeps the old hash under steps.reworded so the verdicts stay current:\nthe words changed, the rule did not.',
   judge:
     'Print the judging prompt for one rule — statement, steps, setup, screens with\nreal addresses, where evidence goes and how a verdict is recorded — ready to\npaste into any agent with a browser. The first step toward prompt-driven\njudging (docs/11-architecture.md): the prompt ends where the reader begins,\nand this judges nothing.',
   sweep:
     'Ask for the named tiers to be judged again from scratch. Verdicts recorded\nbefore the sweep read as stale, so a rule nobody gets back to is legible as\nunfinished rather than as passing. Nothing is deleted - the ledger stays\nappend-only and the marker says why. Deliberate on purpose: nothing else in\nwalkdown ever writes one.',
   where:
-    'Print where this project\'s pieces live and why each was chosen - the spec, the\nruns, the threads, the evidence, the drafts, and the repository a run\'s\ngit_sha comes from. With a kind (spec, code, runs, threads, evidence, drafts)\nprints that one path alone, for scripts. Reads the personal config and the\nworking tree, and writes nothing at all.',
+    "Print where this project's pieces live and why each was chosen - the spec, the\nruns, the threads, the evidence, the drafts, and the repository a run's\ngit_sha comes from. With a kind (spec, code, runs, threads, evidence, drafts)\nprints that one path alone, for scripts. Reads the personal config and the\nworking tree, and writes nothing at all.",
   pointer:
-    'Print the paragraph that tells an AI agent this project has a spec, or place\nit with --into <file>. Which file agents read is a project\'s own business -\nCLAUDE.md, AGENTS.md, a pack-level file in a monorepo - so walkdown asks\nrather than assuming. Idempotent: it replaces its own marked block and touches\nno other line.',
+    "Print the paragraph that tells an AI agent this project has a spec, or place\nit with --into <file>. Which file agents read is a project's own business -\nCLAUDE.md, AGENTS.md, a pack-level file in a monorepo - so walkdown asks\nrather than assuming. Idempotent: it replaces its own marked block and touches\nno other line.",
   skills:
-    'Install the agent procedures walkdown ships - formulate, judge, incorporate,\nbacklog, setup. With no flags it shows every place they can go and what is\nalready in each, then ASKS - it never picks for you, and with no terminal to\nask it writes nothing and says so. --into <dir> names a directory outright;\n--project is the repository\'s one copy, at the root\'s .claude/skills wherever\nin the tree you run it, to be committed and shared. Your own directory\n(~/.claude/skills) works in every project and touches no repository. A copy\nyou have edited is kept, not overwritten, unless --force.',
+    "Install the agent procedures walkdown ships - formulate, judge, incorporate,\nbacklog, setup. With no flags it shows every place they can go and what is\nalready in each, then ASKS - it never picks for you, and with no terminal to\nask it writes nothing and says so. --into <dir> names a directory outright;\n--project is the repository's one copy, at the root's .claude/skills wherever\nin the tree you run it, to be committed and shared. Your own directory\n(~/.claude/skills) works in every project and touches no repository. A copy\nyou have edited is kept, not overwritten, unless --force.",
   serve:
     'Start the local viewer: status board, side-by-side prototype/app with the\nembed (pinning), and human walkdown recording. Also serves /embed.js and the\npin/walkdown API.',
 };
@@ -91,7 +88,22 @@ const NOUNS = ['blueprints', 'records', 'threads', 'rules'];
 /* Forms ADR 0012 retired: refused with the form that replaced them. */
 const OLD = new Set(['thread', 'import', 'move', 'blueprint']);
 
-const COMMANDS = new Set(['init', 'upgrade', 'skills', 'pointer', 'where', 'status', 'lint', 'hash', 'run', 'judge', 'sweep', 'serve', 'claims', ...NOUNS]);
+const COMMANDS = new Set([
+  'init',
+  'upgrade',
+  'skills',
+  'pointer',
+  'where',
+  'status',
+  'lint',
+  'hash',
+  'run',
+  'judge',
+  'sweep',
+  'serve',
+  'claims',
+  ...NOUNS,
+]);
 
 const [cmd, ...rest] = process.argv.slice(2);
 if (OLD.has(cmd)) {
@@ -113,7 +125,9 @@ if (!COMMANDS.has(cmd)) {
 // stack trace pointing at node internals. One answer, here, for all of them:
 // a noun lists its verbs (bin/commands/noun.js), anything else says what it does.
 if (!NOUNS.includes(cmd) && (rest.includes('--help') || rest.includes('-h'))) {
-  const usage = HELP.split('\n').filter((l) => l.startsWith(`  walkdown ${cmd} `) || l === `  walkdown ${cmd}`);
+  const usage = HELP.split('\n').filter(
+    (l) => l.startsWith(`  walkdown ${cmd} `) || l === `  walkdown ${cmd}`,
+  );
   console.log(`${usage.map((l) => `Usage: ${l.trim()}`).join('\n')}\n\n${ABOUT[cmd] ?? ''}`.trim());
   process.exit(0);
 }

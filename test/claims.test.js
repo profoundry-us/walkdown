@@ -73,8 +73,14 @@ test('one blueprint claiming a page twice is its own business @rule:screens.owne
 test('a url resolves to the blueprints that claim it @rule:screens.ownership.routes-by-page', () => {
   const a = bp('a', 'http://localhost:3000', [{ id: 'home', app: { path: '/index.html' } }]);
   const b = bp('b', 'http://localhost:4310', [{ id: 'admin', app: { path: '/admin.html' } }]);
-  assert.deepEqual(blueprintsForUrl([a, b], 'http://localhost:4310/admin.html').map((m) => m.id), ['b']);
-  assert.deepEqual(blueprintsForUrl([a, b], 'http://localhost:3000/index.html').map((m) => m.id), ['a']);
+  assert.deepEqual(
+    blueprintsForUrl([a, b], 'http://localhost:4310/admin.html').map((m) => m.id),
+    ['b'],
+  );
+  assert.deepEqual(
+    blueprintsForUrl([a, b], 'http://localhost:3000/index.html').map((m) => m.id),
+    ['a'],
+  );
   // An address nobody claims is not guessed at.
   assert.deepEqual(blueprintsForUrl([a, b], 'http://elsewhere.test/page'), []);
 });
@@ -87,8 +93,14 @@ test('two blueprints claiming one page both answer, and neither is preferred @ru
    */
   const a = bp('a', 'http://localhost:3000', [{ id: 'home', app: { path: '/' } }]);
   const b = bp('b', 'http://localhost:3000', [{ id: 'hero-test', app: { path: '/' } }]);
-  assert.deepEqual(blueprintsForUrl([a, b], 'http://localhost:3000/').map((m) => m.id), ['a', 'b']);
-  assert.deepEqual(sharedPages([a, b]).map((x) => x.key), ['http://localhost:3000/']);
+  assert.deepEqual(
+    blueprintsForUrl([a, b], 'http://localhost:3000/').map((m) => m.id),
+    ['a', 'b'],
+  );
+  assert.deepEqual(
+    sharedPages([a, b]).map((x) => x.key),
+    ['http://localhost:3000/'],
+  );
 });
 
 test('an enumerated fragment beats the page it lives on @rule:screens.ownership.routes-by-page', () => {
@@ -108,7 +120,8 @@ test('an enumerated fragment beats the page it lives on @rule:screens.ownership.
 test('an app path written as a whole URL is claimed on its own origin, not glued to base_url (#15) @rule:screens.surfaces.stand-in-app', () => {
   const standIn = 'http://localhost:4700/stand-in/party-id-types';
   const [claim] = claimsOf(
-    bp('app', 'http://localhost:3000', [{ id: 'party-id-types', app: { path: standIn } }]).blueprint,
+    bp('app', 'http://localhost:3000', [{ id: 'party-id-types', app: { path: standIn } }])
+      .blueprint,
   );
   assert.equal(claim.key, standIn);
   assert.equal(claim.origin, 'http://localhost:4700');

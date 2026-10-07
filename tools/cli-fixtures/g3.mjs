@@ -19,7 +19,10 @@ function checked(m, ...names) {
   mkdirSync(join(m.shop, 'tests'), { recursive: true });
   writeFileSync(
     join(m.shop, 'tests', 'checkout.test.js'),
-    names.map((r) => `checkout.basics.${r}`).map((id) => `test('${id} @rule:${id}', () => {});`).join('\n') + '\n',
+    names
+      .map((r) => `checkout.basics.${r}`)
+      .map((id) => `test('${id} @rule:${id}', () => {});`)
+      .join('\n') + '\n',
   );
 }
 
@@ -80,19 +83,35 @@ function record(m, runs) {
       else writeRunRecord({ blueprintDir: bp.dir, runsDir: bp.at.runs.path, codeRoot: bp.codeRoot, target: 'local',
         actor: r.actor, kind: r.kind, results: stamp(r.results), date: r.at ? new Date(r.at) : new Date(Date.now() + 2000) });
     }`;
-  const r = spawnSync(process.execPath, ['--input-type=module', '-e', code], { cwd: m.shop, env: m.env, encoding: 'utf8' });
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', code], {
+    cwd: m.shop,
+    env: m.env,
+    encoding: 'utf8',
+  });
   if (r.status !== 0) throw new Error(`fixture: recording runs exited ${r.status}\n${r.stderr}`);
 }
 
 const LAST_WEEK = '2026-09-28T15:00:00Z';
 const pays = 'checkout.basics.pays';
-const note = (m, body, ...more) => m.ok(['threads', 'new', '--rule', pays, '--body', body, ...more, '--blueprint', 'checkout']);
+const note = (m, body, ...more) =>
+  m.ok(['threads', 'new', '--rule', pays, '--body', body, ...more, '--blueprint', 'checkout']);
 
 export default {
   /* n-0001 addressed by the agent, on a machine where nobody has written down who is sitting here. */
   'g3-addressed-nobody-named'(m, h) {
     h.fixtures['a-note'](m);
-    m.ok(['threads', 'set', 'n-0001', '--status', 'addressed', '--as-agent', '--reply', "A declined card now shows the bank's message.", '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'set',
+      'n-0001',
+      '--status',
+      'addressed',
+      '--as-agent',
+      '--reply',
+      "A declined card now shows the bank's message.",
+      '--blueprint',
+      'checkout',
+    ]);
     writeFileSync(join(m.home, 'profile.yml'), 'identity: {}\n');
   },
   /* An open question on checkout.basics.pays, q-0002, beside the note. */
@@ -103,14 +122,29 @@ export default {
   /* n-0001 with the agent's own reply, then the person's words relayed with the agent's beside them. */
   'g3-relayed'(m, h) {
     h.fixtures['a-note'](m);
-    const reply = (...args) => m.ok(['threads', 'reply', 'n-0001', ...args, '--as-agent', '--blueprint', 'checkout']);
+    const reply = (...args) =>
+      m.ok(['threads', 'reply', 'n-0001', ...args, '--as-agent', '--blueprint', 'checkout']);
     reply('I traced it to the card form: the decline never reaches the page.');
-    reply('--said', 'Leave the cart as it is when a card is declined.', '--added', 'Relayed from the chat; the cart is kept today.');
+    reply(
+      '--said',
+      'Leave the cart as it is when a card is declined.',
+      '--added',
+      'Relayed from the chat; the cart is kept today.',
+    );
   },
   /* n-0001 waived by topher, with his reason. */
   'g3-waived'(m, h) {
     h.fixtures['a-note'](m);
-    m.ok(['threads', 'set', 'n-0001', '--waive', '--reason', 'Declined cards move to the payments team.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'set',
+      'n-0001',
+      '--waive',
+      '--reason',
+      'Declined cards move to the payments team.',
+      '--blueprint',
+      'checkout',
+    ]);
   },
   /* A finding topher filed from the CLI with no --as-agent: the only thread on checkout. */
   'g3-a-finding'(m, h) {
@@ -126,24 +160,65 @@ export default {
    */
   'g3-signed-pass'(m, h) {
     h.fixtures['one-blueprint'](m);
-    rules(m, [['pays', 'A card payment goes through.', { verify: ['checks', 'agent'], signoff: ['eng'] }], ['totals', 'The total is the sum of the cart.']]);
+    rules(m, [
+      ['pays', 'A card payment goes through.', { verify: ['checks', 'agent'], signoff: ['eng'] }],
+      ['totals', 'The total is the sum of the cart.'],
+    ]);
     checked(m, 'pays', 'totals');
     note(m, 'The pay button does nothing on a declined card.');
     note(m, 'The receipt total is off by the shipping fee.', '--reason', 'finding', '--as-agent');
     note(m, 'The pay button flickers on load.');
     note(m, 'A declined card keeps the cart.', '--reason', 'decision');
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.totals', '--body', 'The total ignores the coupon.', '--blueprint', 'checkout']);
-    m.ok(['threads', 'set', 'n-0001', '--status', 'addressed', '--as-agent', '--reply', 'Declines show the bank message now.', '--blueprint', 'checkout']);
-    m.ok(['threads', 'set', 'n-0002', '--status', 'addressed', '--as-agent', '--reply', 'Shipping is in the receipt total now.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.totals',
+      '--body',
+      'The total ignores the coupon.',
+      '--blueprint',
+      'checkout',
+    ]);
+    m.ok([
+      'threads',
+      'set',
+      'n-0001',
+      '--status',
+      'addressed',
+      '--as-agent',
+      '--reply',
+      'Declines show the bank message now.',
+      '--blueprint',
+      'checkout',
+    ]);
+    m.ok([
+      'threads',
+      'set',
+      'n-0002',
+      '--status',
+      'addressed',
+      '--as-agent',
+      '--reply',
+      'Shipping is in the receipt total now.',
+      '--blueprint',
+      'checkout',
+    ]);
     record(m, [{ signed: [{ role: 'eng' }], results: [{ rule: pays, status: 'pass' }] }]);
   },
   /* checkout.basics.pays retired, its concern moved; and a note filed on it before it was. */
   'g3-retired-rule'(m, h) {
     h.fixtures['one-blueprint'](m);
-    rules(m, [['pays', 'A card payment goes through.'], ['charges', 'A card is charged once for the cart.']]);
+    rules(m, [
+      ['pays', 'A card payment goes through.'],
+      ['charges', 'A card is charged once for the cart.'],
+    ]);
     note(m, 'The pay button does nothing on a declined card.');
     rules(m, [
-      ['pays', 'A card payment goes through.', { retired: 'Split in two; a card charge is checkout.basics.charges now.' }],
+      [
+        'pays',
+        'A card payment goes through.',
+        { retired: 'Split in two; a card charge is checkout.basics.charges now.' },
+      ],
       ['charges', 'A card is charged once for the cart.'],
     ]);
   },
@@ -159,29 +234,53 @@ export default {
       ['receipt', 'The receipt lists what was bought.', { verify: ['checks', 'agent'] }],
     ]);
     checked(m, 'pays', 'totals', 'receipt');
-    const all = ['pays', 'totals', 'receipt'].map((r) => ({ rule: `checkout.basics.${r}`, status: 'pass' }));
+    const all = ['pays', 'totals', 'receipt'].map((r) => ({
+      rule: `checkout.basics.${r}`,
+      status: 'pass',
+    }));
     record(m, [
       { kind: 'checks', actor: 'topher', at: LAST_WEEK, results: all },
       { kind: 'walkdown', actor: 'agent', at: LAST_WEEK, results: all },
     ]);
-    m.ok(['sweep', '--tiers', 'checks', '--why', 'the payment form was rewritten', '--blueprint', 'checkout']);
+    m.ok([
+      'sweep',
+      '--tiers',
+      'checks',
+      '--why',
+      'the payment form was rewritten',
+      '--blueprint',
+      'checkout',
+    ]);
     record(m, [{ kind: 'checks', actor: 'topher', results: [{ rule: pays, status: 'pass' }] }]);
   },
   /* checkout.basics.pays built, judged by the agent, and waiting on eng and product to sign. */
   'g3-two-roles-owed'(m) {
     m.ok(['blueprints', 'new', 'checkout']);
-    rules(m, [['pays', 'A card payment goes through.', { verify: ['checks', 'agent'], signoff: ['eng', 'product'] }]]);
+    rules(m, [
+      [
+        'pays',
+        'A card payment goes through.',
+        { verify: ['checks', 'agent'], signoff: ['eng', 'product'] },
+      ],
+    ]);
     checked(m, 'pays');
     record(m, [
       { kind: 'checks', actor: 'topher', at: LAST_WEEK, results: [{ rule: pays, status: 'pass' }] },
-      { kind: 'walkdown', actor: 'agent', at: LAST_WEEK, results: [{ rule: pays, status: 'pass' }] },
+      {
+        kind: 'walkdown',
+        actor: 'agent',
+        at: LAST_WEEK,
+        results: [{ rule: pays, status: 'pass' }],
+      },
     ]);
   },
   /* sam, who has said his username and his full name, passing checkout.basics.pays signed for eng. */
   'g3-sam-signs'(m, h) {
     writeFileSync(join(m.home, 'profile.yml'), 'identity:\n  username: sam\n  name: Sam Shopper\n');
     h.fixtures['one-blueprint'](m);
-    rules(m, [['pays', 'A card payment goes through.', { verify: ['checks', 'agent'], signoff: ['eng'] }]]);
+    rules(m, [
+      ['pays', 'A card payment goes through.', { verify: ['checks', 'agent'], signoff: ['eng'] }],
+    ]);
     record(m, [{ signed: [{ role: 'eng' }], results: [{ rule: pays, status: 'pass' }] }]);
   },
 };

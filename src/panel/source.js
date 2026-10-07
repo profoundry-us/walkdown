@@ -65,7 +65,9 @@ export async function openSource(rule) {
             return `<figure class="mb-3 w-full" data-check="${esc(c.ref)}">
         <figcaption class="mb-1 flex items-center gap-2 rounded bg-neutral/90 px-2 py-1 font-mono text-[11px] text-neutral-content">
           <span>${esc(c.ref)}</span>${
-            c.recorded ? `<span class="text-warning">· was ${esc(c.recorded)} when last recorded</span>` : ''
+            c.recorded
+              ? `<span class="text-warning">· was ${esc(c.recorded)} when last recorded</span>`
+              : ''
           }${
             link
               ? `<a class="link ml-auto font-sans text-[11px] no-underline" target="_blank" rel="noreferrer"
@@ -83,6 +85,7 @@ export async function openSource(rule) {
           .join('')
       : '<div class="text-[12px]">No source recorded for this rule.</div>';
   } catch {
-    if (layer?.querySelector('.wdp-source') === box) box.textContent = 'walkdown server unreachable.';
+    if (layer?.querySelector('.wdp-source') === box)
+      box.textContent = 'walkdown server unreachable.';
   }
 }

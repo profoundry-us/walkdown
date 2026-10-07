@@ -124,7 +124,10 @@ test('a reference previews the rule or thread it names, and nothing for one unkn
   assert.doesNotMatch(thread, /second paragraph/);
   assert.doesNotMatch(thread, /Opens in walkdown/);
   // Feedback is the default reason, so it is not worth a chip.
-  assert.doesNotMatch(MSG.preview({ thread: { id: 'n-1', kind: 'note', reason: 'feedback', status: 'open' } }), /feedback/);
+  assert.doesNotMatch(
+    MSG.preview({ thread: { id: 'n-1', kind: 'note', reason: 'feedback', status: 'open' } }),
+    /feedback/,
+  );
 
   assert.equal(MSG.preview({}), '');
   assert.equal(MSG.preview({ rule: undefined, thread: undefined }), '');
@@ -144,7 +147,10 @@ test('the first line of a body is its opening paragraph as plain words, cut to f
  * (n-0202). A note's opening message is its body, unchanged.
  */
 test('a question opens with its first line as the headline; a note does not @rule:threads.conversation.one-stream', () => {
-  const q = MSG.opening('question', 'Should the prompt hand out a port?\n\nContext: two judges collided.');
+  const q = MSG.opening(
+    'question',
+    'Should the prompt hand out a port?\n\nContext: two judges collided.',
+  );
   assert.match(q, /^<div class="wd-ask">/);
   assert.match(q, /wd-ask">Should the prompt hand out a port\?<\/div>/);
   assert.match(q, /Context: two judges collided\./);
@@ -154,7 +160,10 @@ test('a question opens with its first line as the headline; a note does not @rul
   assert.doesNotMatch(MSG.opening('note', 'First line.\n\nMore.'), /wd-ask/);
   // And the stream draws it on the opening message alone, never a reply.
   const html = MSG.stream({
-    kind: 'question', author: 'topher', created: '2026-01-01T00:00:00Z', body: 'Which?\nContext.',
+    kind: 'question',
+    author: 'topher',
+    created: '2026-01-01T00:00:00Z',
+    body: 'Which?\nContext.',
     replies: [{ author: 'agent', created: '2026-01-01T01:00:00Z', body: 'This one.\nBecause.' }],
   });
   assert.equal((html.match(/wd-ask/g) ?? []).length, 1);
@@ -181,11 +190,18 @@ test('a relayed message keeps the person’s face, and the machine’s addition 
   assert.doesNotMatch(faces[0], /wd-bot/);
   assert.match(html, /wd-mark/, 'and the mark is drawn');
   // The addition, apart and named.
-  assert.match(html, /The label reads wrong\.[^]*class="wd-added"[^]*agent added[^]*Seen at 375 too/);
+  assert.match(
+    html,
+    /The label reads wrong\.[^]*class="wd-added"[^]*agent added[^]*Seen at 375 too/,
+  );
   // The agent's own reply is the robot, and carries no addition of its own.
   assert.match(faces[1], /wd-bot/);
   assert.equal((html.match(/wd-added"/g) ?? []).length, 1);
   // Nothing relayed, nothing marked.
-  const plain = MSG.stream({ author: 'topher', created: '2026-09-17T10:00:00Z', body: 'typed by hand' });
+  const plain = MSG.stream({
+    author: 'topher',
+    created: '2026-09-17T10:00:00Z',
+    body: 'typed by hand',
+  });
   assert.doesNotMatch(plain, /wd-relayed|wd-mark|wd-added/);
 });

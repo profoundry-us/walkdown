@@ -8,7 +8,16 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -20,7 +29,11 @@ const root = realpathSync(mkdtempSync(join(tmpdir(), 'walkdown-worktree-')));
 after(() => rmSync(root, { recursive: true, force: true }));
 
 const git = (cwd, ...args) =>
-  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
 
 let n = 0;
 function machine() {
@@ -33,7 +46,8 @@ function machine() {
   git(shop, 'remote', 'add', 'origin', 'https://github.com/acme/shop.git');
   writeFileSync(join(shop, 'README.md'), 'shop\n');
   const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home };
-  const cli = (cwd, ...args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const cli = (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
   const made = cli(shop, 'blueprints', 'new', '--commit', 'spec', '--folder', 'shop');
   assert.equal(made.status, 0, made.stdout + made.stderr);
   const home_ = join(shop, '.walkdown', 'blueprints', 'shop');
@@ -53,7 +67,14 @@ function machine() {
   );
   git(shop, 'add', '-A');
   git(shop, 'commit', '-q', '-m', 'shop');
-  return { home, shop, home_, env, cli, registry: () => parse(readFileSync(join(home, 'registry.yml'), 'utf8')) };
+  return {
+    home,
+    shop,
+    home_,
+    env,
+    cli,
+    registry: () => parse(readFileSync(join(home, 'registry.yml'), 'utf8')),
+  };
 }
 
 const json = (r) => {
@@ -102,88 +123,142 @@ test('a worktree of a registered checkout answers as its project, by git or by o
   const search = m.registry().blueprints.find((r) => r.id.endsWith('-search'));
   assert.ok(search, 'the new blueprint is registered');
   assert.equal(search.project, m.registry().blueprints[0].project, 'in shop');
-  assert.ok(!m.registry().blueprints.some((r) => /worktrees|m1-beside/.test(String(r.checkout ?? '')) || String(r.home).includes('worktrees')), 'the worktree is no checkout');
-  assert.ok(!existsSync(join(cc, '.walkdown', 'blueprints', 'search')), 'and nothing was made in the worktree');
+  assert.ok(
+    !m
+      .registry()
+      .blueprints.some(
+        (r) =>
+          /worktrees|m1-beside/.test(String(r.checkout ?? '')) ||
+          String(r.home).includes('worktrees'),
+      ),
+    'the worktree is no checkout',
+  );
+  assert.ok(
+    !existsSync(join(cc, '.walkdown', 'blueprints', 'search')),
+    'and nothing was made in the worktree',
+  );
 });
 
 for (const [layout, at] of [
   ['beside the checkout', (m) => join(root, `m${n}-wt`)],
   // Claude Code's own place for them: inside the repository.
-  ['inside the checkout, as Claude Code makes them', (m) => join(m.shop, '.claude', 'worktrees', 'reword')],
+  [
+    'inside the checkout, as Claude Code makes them',
+    (m) => join(m.shop, '.claude', 'worktrees', 'reword'),
+  ],
 ])
-test(`in a worktree ${layout} the branch spec and threads are read there, and ignored records go to the registered home @rule:locations.worktree.branch-spec-shared-records`, async () => {
-  const m = machine();
-  const wt = at(m);
-  git(m.shop, 'worktree', 'add', '-q', '-b', 'reword', wt);
-  assert.match(JSON.stringify(json(m.cli(wt, 'where', '--json'))), /a git worktree of/, 'where says how it was matched');
-  const branchHome = join(wt, '.walkdown', 'blueprints', 'shop');
+  test(`in a worktree ${layout} the branch spec and threads are read there, and ignored records go to the registered home @rule:locations.worktree.branch-spec-shared-records`, async () => {
+    const m = machine();
+    const wt = at(m);
+    git(m.shop, 'worktree', 'add', '-q', '-b', 'reword', wt);
+    assert.match(
+      JSON.stringify(json(m.cli(wt, 'where', '--json'))),
+      /a git worktree of/,
+      'where says how it was matched',
+    );
+    const branchHome = join(wt, '.walkdown', 'blueprints', 'shop');
 
-  // A branch that rewords a rule reads as the branch has it.
-  const f = join(branchHome, 'features', 'cart.yml');
-  writeFileSync(f, readFileSync(f, 'utf8').replace('puts one in the cart', 'puts exactly one in the cart'));
-  const st = json(m.cli(wt, 'status', '--json'));
-  assert.match(JSON.stringify(st), /puts exactly one in the cart/);
-  assert.doesNotMatch(JSON.stringify(json(m.cli(m.shop, 'status', '--json'))), /exactly one/, 'and main still reads its own');
+    // A branch that rewords a rule reads as the branch has it.
+    const f = join(branchHome, 'features', 'cart.yml');
+    writeFileSync(
+      f,
+      readFileSync(f, 'utf8').replace('puts one in the cart', 'puts exactly one in the cart'),
+    );
+    const st = json(m.cli(wt, 'status', '--json'));
+    assert.match(JSON.stringify(st), /puts exactly one in the cart/);
+    assert.doesNotMatch(
+      JSON.stringify(json(m.cli(m.shop, 'status', '--json'))),
+      /exactly one/,
+      'and main still reads its own',
+    );
 
-  // A thread lands in the worktree's tree.
-  const filed = m.cli(wt, 'threads', 'new', '--rule', 'cart.add.one', '--body', 'Seen on the branch.', '--as-agent', '--blueprint', 'shop');
-  assert.equal(filed.status, 0, filed.stdout + filed.stderr);
-  assert.equal(readdirSync(join(branchHome, 'threads')).filter((x) => x.endsWith('.yml')).length, 1);
-  assert.ok(!existsSync(join(m.home_, 'threads')) || !readdirSync(join(m.home_, 'threads')).some((x) => x.endsWith('.yml')));
+    // A thread lands in the worktree's tree.
+    const filed = m.cli(
+      wt,
+      'threads',
+      'new',
+      '--rule',
+      'cart.add.one',
+      '--body',
+      'Seen on the branch.',
+      '--as-agent',
+      '--blueprint',
+      'shop',
+    );
+    assert.equal(filed.status, 0, filed.stdout + filed.stderr);
+    assert.equal(
+      readdirSync(join(branchHome, 'threads')).filter((x) => x.endsWith('.yml')).length,
+      1,
+    );
+    assert.ok(
+      !existsSync(join(m.home_, 'threads')) ||
+        !readdirSync(join(m.home_, 'threads')).some((x) => x.endsWith('.yml')),
+    );
 
-  // A run lands in the registered checkout's runs, stamped with the worktree's commit and branch.
-  writeFileSync(join(wt, 'change.txt'), 'x\n');
-  git(wt, 'add', '-A');
-  git(wt, 'commit', '-q', '-m', 'branch work');
-  const sha = git(wt, 'rev-parse', '--short', 'HEAD');
-  const record = (dir) =>
-    execFileSync(
-      process.execPath,
-      [
-        '--input-type=module',
-        '-e',
-        `import { writeRunRecord } from ${JSON.stringify(RECORD)};
+    // A run lands in the registered checkout's runs, stamped with the worktree's commit and branch.
+    writeFileSync(join(wt, 'change.txt'), 'x\n');
+    git(wt, 'add', '-A');
+    git(wt, 'commit', '-q', '-m', 'branch work');
+    const sha = git(wt, 'rev-parse', '--short', 'HEAD');
+    const record = (dir) =>
+      execFileSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          `import { writeRunRecord } from ${JSON.stringify(RECORD)};
          const { file, record } = writeRunRecord({ blueprintDir: ${JSON.stringify(dir)}, cwd: process.cwd(), target: 'local', actor: 'sam',
            results: [{ rule: 'cart.add.one', status: 'pass' }] });
          console.log(JSON.stringify({ file, record }));`,
-      ],
-      { cwd: dir === branchHome ? wt : m.shop, encoding: 'utf8', env: m.env },
+        ],
+        { cwd: dir === branchHome ? wt : m.shop, encoding: 'utf8', env: m.env },
+      );
+    const run = JSON.parse(record(branchHome));
+    assert.ok(
+      run.file.startsWith(join(m.home_, 'runs')),
+      `${run.file} is in the registered home's runs`,
     );
-  const run = JSON.parse(record(branchHome));
-  assert.ok(run.file.startsWith(join(m.home_, 'runs')), `${run.file} is in the registered home's runs`);
-  assert.match(run.record.git_sha, new RegExp(`^${sha}`));
-  assert.equal(run.record.branch, 'reword');
+    assert.match(run.record.git_sha, new RegExp(`^${sha}`));
+    assert.equal(run.record.branch, 'reword');
 
-  // `serve` started in the worktree serves the branch's spec.
-  const child = spawn(process.execPath, [CLI, 'serve', '--port', '0'], { cwd: wt, env: m.env });
-  try {
-    const out = await new Promise((ok, no) => {
-      let said = '';
-      const timer = setTimeout(() => no(new Error(`no answer: ${said}`)), 10_000);
-      const take = (d) => {
-        said += d;
-        if (/review:\s+http:\/\/localhost:\d+/.test(said)) {
-          clearTimeout(timer);
-          ok(said);
-        }
-      };
-      child.stdout.on('data', take);
-      child.stderr.on('data', take);
-    });
-    const port = out.match(/localhost:(\d+)/)[1];
-    for (const q of ['', `?bp=shop`]) {
-      const body = await (await fetch(`http://localhost:${port}/api/blueprint${q}`)).text();
-      assert.match(body, /puts exactly one in the cart/, `served${q || ' by default'} as the branch has it`);
-      assert.equal(JSON.parse(body).key, m.home_, 'under the key the registry knows, which every write names');
+    // `serve` started in the worktree serves the branch's spec.
+    const child = spawn(process.execPath, [CLI, 'serve', '--port', '0'], { cwd: wt, env: m.env });
+    try {
+      const out = await new Promise((ok, no) => {
+        let said = '';
+        const timer = setTimeout(() => no(new Error(`no answer: ${said}`)), 10_000);
+        const take = (d) => {
+          said += d;
+          if (/review:\s+http:\/\/localhost:\d+/.test(said)) {
+            clearTimeout(timer);
+            ok(said);
+          }
+        };
+        child.stdout.on('data', take);
+        child.stderr.on('data', take);
+      });
+      const port = out.match(/localhost:(\d+)/)[1];
+      for (const q of ['', `?bp=shop`]) {
+        const body = await (await fetch(`http://localhost:${port}/api/blueprint${q}`)).text();
+        assert.match(
+          body,
+          /puts exactly one in the cart/,
+          `served${q || ' by default'} as the branch has it`,
+        );
+        assert.equal(
+          JSON.parse(body).key,
+          m.home_,
+          'under the key the registry knows, which every write names',
+        );
+      }
+    } finally {
+      child.kill();
     }
-  } finally {
-    child.kill();
-  }
 
-  // Deleting the worktree loses no run.
-  git(m.shop, 'worktree', 'remove', '--force', wt);
-  assert.ok(existsSync(run.file), 'the run outlived the worktree');
-});
+    // Deleting the worktree loses no run.
+    git(m.shop, 'worktree', 'remove', '--force', wt);
+    assert.ok(existsSync(run.file), 'the run outlived the worktree');
+  });
 
 test('a blueprint that commits its runs writes them into the worktree @rule:locations.worktree.branch-spec-shared-records', () => {
   const m = machine();
@@ -195,5 +270,9 @@ test('a blueprint that commits its runs writes them into the worktree @rule:loca
   git(m.shop, 'worktree', 'add', '-q', '-b', 'more', wt);
   const id = m.registry().blueprints.find((r) => r.id.endsWith('-ledger')).id;
   const where = json(m.cli(wt, 'where', '--json', '--blueprint', id));
-  assert.equal(where.runs.path, join(wt, '.walkdown', 'blueprints', 'ledger', 'runs'), JSON.stringify(where.runs));
+  assert.equal(
+    where.runs.path,
+    join(wt, '.walkdown', 'blueprints', 'ledger', 'runs'),
+    JSON.stringify(where.runs),
+  );
 });

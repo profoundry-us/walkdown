@@ -167,10 +167,7 @@ function make(label, why, port, id = 'walkdown') {
   if (port != null) {
     const yml = join(path, HOME, 'spec.yml');
     const before = readFileSync(yml, 'utf8');
-    const after = before.replace(
-      /^(\s*base_url:\s*http:\/\/localhost:)\d+/gm,
-      `$1${port}`,
-    );
+    const after = before.replace(/^(\s*base_url:\s*http:\/\/localhost:)\d+/gm, `$1${port}`);
     if (after === before) die(`${yml} has no localhost base_url to retarget`);
     writeFileSync(yml, after);
   }
@@ -248,11 +245,16 @@ const flag = (name) => {
 };
 if (cmd === 'new')
   make(
-    rest.find((a) => !a.startsWith('--') && ![flag('why'), flag('port'), flag('blueprint')].includes(a)),
+    rest.find(
+      (a) => !a.startsWith('--') && ![flag('why'), flag('port'), flag('blueprint')].includes(a),
+    ),
     flag('why'),
     flag('port'),
     flag('blueprint') ?? undefined,
   );
 else if (cmd === 'list') list();
 else if (cmd === 'clean') clean(rest);
-else die('usage: scratch new <label> --why "..." [--port <n>] [--blueprint <id>] | list | clean <label>… | clean --stale');
+else
+  die(
+    'usage: scratch new <label> --why "..." [--port <n>] [--blueprint <id>] | list | clean <label>… | clean --stale',
+  );

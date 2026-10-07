@@ -71,17 +71,26 @@ const STATES = {
       ['wait', 400],
       ['sr', `r => r.querySelector('[data-tfilter="all"]').click()`],
       ['wait', 400],
-      ['sr', `r => (r.querySelector('[data-open-thread="n-0004"]') ?? r.querySelector('.wd-row[data-open-thread]')).click()`],
+      [
+        'sr',
+        `r => (r.querySelector('[data-open-thread="n-0004"]') ?? r.querySelector('.wd-row[data-open-thread]')).click()`,
+      ],
       ['wait', 1500],
     ],
   },
   settings: {
-    steps: [['sr', `r => r.querySelector('#wdp-desk-btn').click()`], ['wait', 800]],
+    steps: [
+      ['sr', `r => r.querySelector('#wdp-desk-btn').click()`],
+      ['wait', 800],
+    ],
   },
   // The gate itself rises only for a project holding several blueprints; the
   // Blueprints tab draws the same rows with the same anchors.
   'choose-blueprint': {
-    steps: [['sr', `r => r.querySelector('[data-tab="blueprints"]').click()`], ['wait', 600]],
+    steps: [
+      ['sr', `r => r.querySelector('[data-tab="blueprints"]').click()`],
+      ['wait', 600],
+    ],
   },
   // The extension's shape with a server that answers nothing: first run.
   start: { host: { srv: 'http://localhost:1' }, steps: [['wait', 3000]] },
@@ -165,7 +174,9 @@ const BLOCK = new Set(
     ' ',
   ),
 );
-const VOID = new Set('br img input meta link hr path circle line rect polyline polygon source wbr'.split(' '));
+const VOID = new Set(
+  'br img input meta link hr path circle line rect polyline polygon source wbr'.split(' '),
+);
 
 /*
  * A pretty-printer for one purpose: a line per block so the page can be read
@@ -184,7 +195,8 @@ function pretty(html) {
     if (out.length && !out[out.length - 1].endsWith('\n')) out.push('\n');
     out.push('  '.repeat(depth));
   };
-  const re = /<!--[\s\S]*?-->|<\/([a-zA-Z0-9-]+)\s*>|<([a-zA-Z0-9-]+)((?:\s+[^\s=>/]+(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?)>|[^<]+/g;
+  const re =
+    /<!--[\s\S]*?-->|<\/([a-zA-Z0-9-]+)\s*>|<([a-zA-Z0-9-]+)((?:\s+[^\s=>/]+(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?)>|[^<]+/g;
   for (const m of html.matchAll(re)) {
     const [tok, close, open, , self] = m;
     if (tok.startsWith('<!--')) continue;
@@ -204,7 +216,11 @@ function pretty(html) {
         continue;
       }
       const last = out.slice(-3).join('');
-      if (BLOCK.has(t) && /<\/?[a-zA-Z0-9-]+[^>]*>\s*$/.test(last) && BLOCK.has((last.match(/<\/?([a-zA-Z0-9-]+)[^>]*>\s*$/) ?? [])[1]?.toLowerCase()))
+      if (
+        BLOCK.has(t) &&
+        /<\/?[a-zA-Z0-9-]+[^>]*>\s*$/.test(last) &&
+        BLOCK.has((last.match(/<\/?([a-zA-Z0-9-]+)[^>]*>\s*$/) ?? [])[1]?.toLowerCase())
+      )
         nl();
       out.push(tok);
     } else {
@@ -223,7 +239,9 @@ function pretty(html) {
   return out.join('');
 }
 
-const PLACEHOLDER = (style) => `<div data-testid="panel.app-frame" title="the application under review" class="grid place-items-center text-center text-[12px] leading-relaxed" style="${style}; color: oklch(50% 0.03 25)">
+const PLACEHOLDER = (
+  style,
+) => `<div data-testid="panel.app-frame" title="the application under review" class="grid place-items-center text-center text-[12px] leading-relaxed" style="${style}; color: oklch(50% 0.03 25)">
   <div>THE APP &mdash; the page under review, framed at the chosen viewport.<br>The as-built cannot frame a page: this box stands where the frame stands.</div>
 </div>`;
 
@@ -249,7 +267,9 @@ function wrap(id, raw, streamCss) {
   if (frame)
     html = html.replace(
       frame[0],
-      PLACEHOLDER(frame[1].replace('background: rgb(255, 255, 255)', 'background: oklch(97% 0.01 40)')),
+      PLACEHOLDER(
+        frame[1].replace('background: rgb(255, 255, 255)', 'background: oklch(97% 0.01 40)'),
+      ),
     );
   const stream = html.includes('wd-msg')
     ? `\n<!-- The conversation's own rules, as the panel carries them (lib/message-stream.js MSG.css). -->\n<style>${streamCss.trim()}</style>`
@@ -260,7 +280,10 @@ function wrap(id, raw, streamCss) {
 <link rel="stylesheet" href="/walkdown.css">
 <style>${MARK_CSS}</style>${stream}
 </head>`;
-  html = html.replace('<html lang="en" data-theme="redline">', `<html lang="en" data-theme="redline">\n${head}`);
+  html = html.replace(
+    '<html lang="en" data-theme="redline">',
+    `<html lang="en" data-theme="redline">\n${head}`,
+  );
   const marks = `
   <div class="as-built-ring" aria-hidden="true"></div>
   <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div>

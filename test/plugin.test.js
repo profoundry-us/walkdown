@@ -34,7 +34,11 @@ const byPath = (rows, path) => rows.find((r) => r.path === path)?.action;
 test('the clone is one plugin named walkdown, carrying its skills and two commands and nothing else @rule:delivery.plugin.named-for-walkdown', () => {
   const plugin = json('.claude-plugin/plugin.json');
   assert.equal(plugin.name, 'walkdown');
-  assert.equal(plugin.version, json('package.json').version, 'the plugin is at the clone\'s version');
+  assert.equal(
+    plugin.version,
+    json('package.json').version,
+    "the plugin is at the clone's version",
+  );
   const market = json('.claude-plugin/marketplace.json');
   assert.deepEqual(
     market.plugins.map((p) => [p.name, p.source]),
@@ -45,9 +49,15 @@ test('the clone is one plugin named walkdown, carrying its skills and two comman
   const skills = readdirSync(join(CLONE, 'skills')).sort();
   assert.deepEqual(skills, ['backlog', 'formulate', 'incorporate', 'judge', 'setup']);
   for (const short of skills) {
-    const head = readFileSync(join(CLONE, 'skills', short, 'SKILL.md'), 'utf8').split('\n').slice(0, 3);
+    const head = readFileSync(join(CLONE, 'skills', short, 'SKILL.md'), 'utf8')
+      .split('\n')
+      .slice(0, 3);
     assert.equal(head[0], '---');
-    assert.equal(head[1], `name: ${short}`, 'named without a prefix, so it reads walkdown:' + short);
+    assert.equal(
+      head[1],
+      `name: ${short}`,
+      'named without a prefix, so it reads walkdown:' + short,
+    );
     assert.match(head[2], /^description: .+/);
   }
   assert.deepEqual(readdirSync(join(CLONE, 'commands')).sort(), ['lint.md', 'status.md']);
@@ -70,7 +80,10 @@ test('the clone is one plugin named walkdown, carrying its skills and two comman
 function fakeClone(name) {
   const dir = join(root, name);
   mkdirSync(join(dir, 'skills', 'judge'), { recursive: true });
-  writeFileSync(join(dir, 'skills', 'judge', 'SKILL.md'), '---\nname: judge\ndescription: one\n---\nv1\n');
+  writeFileSync(
+    join(dir, 'skills', 'judge', 'SKILL.md'),
+    '---\nname: judge\ndescription: one\n---\nv1\n',
+  );
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' });
   git('init', '-q');
   git('-c', 'user.email=t@t', '-c', 'user.name=t', 'add', '.');
@@ -94,7 +107,10 @@ test('Claude Code gets one link to the clone, and updating the clone updates the
 
   // Another version checked out: read through the link, it is that version,
   // with nothing run in between.
-  writeFileSync(join(clone.dir, 'skills', 'judge', 'SKILL.md'), '---\nname: judge\ndescription: two\n---\nv2\n');
+  writeFileSync(
+    join(clone.dir, 'skills', 'judge', 'SKILL.md'),
+    '---\nname: judge\ndescription: two\n---\nv2\n',
+  );
   clone.git('-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qam', 'v2');
   clone.git('checkout', '-q', 'HEAD~1');
   assert.match(readFileSync(join(at, 'skills', 'judge', 'SKILL.md'), 'utf8'), /v1/);
@@ -115,21 +131,35 @@ test('the installer never writes through a link, and leaves alone links it did n
   mkdirSync(join(into, 'walkdown-judge'), { recursive: true });
   symlinkSync(join(elsewhere, 'pack'), join(into, 'walkdown'));
   symlinkSync(join(elsewhere, 'judge.md'), join(into, 'walkdown-judge', 'SKILL.md'));
-  const before = () => [readFileSync(join(elsewhere, 'pack', 'SKILL.md'), 'utf8'), readFileSync(join(elsewhere, 'judge.md'), 'utf8')];
+  const before = () => [
+    readFileSync(join(elsewhere, 'pack', 'SKILL.md'), 'utf8'),
+    readFileSync(join(elsewhere, 'judge.md'), 'utf8'),
+  ];
   const was = before();
 
   for (const force of [false, true]) {
     const rows = installSkills(into, { link: true, force, released: new Map() });
     assert.equal(byPath(rows, join(into, 'walkdown')), 'someone-elses-link', `force=${force}`);
-    assert.equal(byPath(rows, join(into, 'walkdown-judge')), 'someone-elses-link', `force=${force}`);
-    assert.equal(realpathSync(join(into, 'walkdown')), realpathSync(join(elsewhere, 'pack')), 'the link still points where it did');
+    assert.equal(
+      byPath(rows, join(into, 'walkdown-judge')),
+      'someone-elses-link',
+      `force=${force}`,
+    );
+    assert.equal(
+      realpathSync(join(into, 'walkdown')),
+      realpathSync(join(elsewhere, 'pack')),
+      'the link still points where it did',
+    );
   }
   assert.deepEqual(before(), was, 'every file a link points at is unchanged');
 
   // Walkdown's own link, beside them, is up to date.
   const mine = join(root, 'links-mine');
   installSkills(mine, { link: true, released: new Map() });
-  assert.equal(byPath(installSkills(mine, { link: true, released: new Map() }), join(mine, 'walkdown')), 'up-to-date');
+  assert.equal(
+    byPath(installSkills(mine, { link: true, released: new Map() }), join(mine, 'walkdown')),
+    'up-to-date',
+  );
 
   // And copies, for another agent, refuse a link the same way.
   const copies = join(root, 'links-copies');
@@ -147,13 +177,23 @@ test('--force removes the copies an earlier walkdown left, and keeps an edited o
   // Released: an OLDER judge than today's, and today's setup.
   const released = new Map([
     ['walkdown-judge', new Set([sha(older)])],
-    ['walkdown-setup', new Set([sha(skillFiles().find((s) => s.name === 'walkdown-setup').content)])],
+    [
+      'walkdown-setup',
+      new Set([sha(skillFiles().find((s) => s.name === 'walkdown-setup').content)]),
+    ],
   ]);
-  for (const [name, text] of [['walkdown-judge', older], ['walkdown-setup', 'edited by its person\n']]) {
+  for (const [name, text] of [
+    ['walkdown-judge', older],
+    ['walkdown-setup', 'edited by its person\n'],
+  ]) {
     mkdirSync(join(into, name), { recursive: true });
     writeFileSync(join(into, name, 'SKILL.md'), text);
   }
-  assert.notEqual(older, current, 'the copy matches a released version that is not the current one');
+  assert.notEqual(
+    older,
+    current,
+    'the copy matches a released version that is not the current one',
+  );
 
   const plain = installSkills(into, { link: true, released });
   assert.equal(byPath(plain, join(into, 'walkdown')), 'linked', 'the link is made either way');
@@ -165,17 +205,24 @@ test('--force removes the copies an earlier walkdown left, and keeps an edited o
   assert.equal(byPath(forced, join(into, 'walkdown-judge')), 'removed');
   assert.equal(byPath(forced, join(into, 'walkdown-setup')), 'kept-edited');
   assert.equal(existsSync(join(into, 'walkdown-judge')), false);
-  assert.equal(readFileSync(join(into, 'walkdown-setup', 'SKILL.md'), 'utf8'), 'edited by its person\n');
+  assert.equal(
+    readFileSync(join(into, 'walkdown-setup', 'SKILL.md'), 'utf8'),
+    'edited by its person\n',
+  );
 });
 
 test('the duplicate warning gives the command that removes them @rule:delivery.plugin.old-copies-make-way', () => {
   const personal = join(root, 'cli-personal');
   mkdirSync(join(personal, 'walkdown-judge'), { recursive: true });
   writeFileSync(join(personal, 'walkdown-judge', 'SKILL.md'), 'edited\n');
-  const out = execFileSync('node', [join(CLONE, 'bin', 'walkdown.js'), 'skills', '--into', personal], {
-    encoding: 'utf8',
-    env: { ...process.env, WALKDOWN_SKILLS_DIR: personal, NO_COLOR: '1' },
-  });
+  const out = execFileSync(
+    'node',
+    [join(CLONE, 'bin', 'walkdown.js'), 'skills', '--into', personal],
+    {
+      encoding: 'utf8',
+      env: { ...process.env, WALKDOWN_SKILLS_DIR: personal, NO_COLOR: '1' },
+    },
+  );
   assert.match(out, /linked .*walkdown/);
   assert.match(out, /duplicate .*walkdown-judge/);
   assert.match(out, /`walkdown skills --force`/);
@@ -185,7 +232,16 @@ test('another agent gets copies named walkdown-<name> in the folder named @rule:
   const into = join(root, 'other-agent');
   const rows = installSkills(into);
   assert.ok(rows.every((r) => r.action === 'created'));
-  assert.deepEqual(readdirSync(into).sort(), ['walkdown-backlog', 'walkdown-formulate', 'walkdown-incorporate', 'walkdown-judge', 'walkdown-setup']);
-  assert.match(readFileSync(join(into, 'walkdown-judge', 'SKILL.md'), 'utf8'), /^---\nname: walkdown-judge\n/);
-  assert.equal(existsSync(join(into, 'walkdown')), false, 'no link outside Claude Code\'s folder');
+  assert.deepEqual(readdirSync(into).sort(), [
+    'walkdown-backlog',
+    'walkdown-formulate',
+    'walkdown-incorporate',
+    'walkdown-judge',
+    'walkdown-setup',
+  ]);
+  assert.match(
+    readFileSync(join(into, 'walkdown-judge', 'SKILL.md'), 'utf8'),
+    /^---\nname: walkdown-judge\n/,
+  );
+  assert.equal(existsSync(join(into, 'walkdown')), false, "no link outside Claude Code's folder");
 });

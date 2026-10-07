@@ -47,7 +47,14 @@ function project() {
   );
   const load = () => loadBlueprint(bp, { cwd: h.root });
   const onDisk = (id) => parse(readFileSync(threadAt(load().at.threads.path, id), 'utf8'));
-  return { root, h, bp, load, onDisk, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  return {
+    root,
+    h,
+    bp,
+    load,
+    onDisk,
+    cleanup: () => rmSync(root, { recursive: true, force: true }),
+  };
 }
 
 const RULE = 'demo.main.thing';
@@ -58,12 +65,23 @@ test('a note says why it exists, and the machine signs its own @rule:threads.lif
     // A judge's finding and an agent's observation are the machine's own
     // account: authored agent, never under the person whose machine it is,
     // and never marked as typed FOR that person.
-    const finding = openThread(p.load(), { kind: 'note', body: 'seen', anchor: { rule: RULE }, via: 'agent', reason: 'finding' });
+    const finding = openThread(p.load(), {
+      kind: 'note',
+      body: 'seen',
+      anchor: { rule: RULE },
+      via: 'agent',
+      reason: 'finding',
+    });
     assert.equal(finding.thread.reason, 'finding');
     assert.equal(finding.thread.author, 'agent');
     assert.equal(finding.thread.via, undefined);
     assert.equal(finding.thread.status, 'open');
-    const obs = openThread(p.load(), { kind: 'note', body: 'noticed', anchor: { rule: RULE }, via: 'agent' });
+    const obs = openThread(p.load(), {
+      kind: 'note',
+      body: 'noticed',
+      anchor: { rule: RULE },
+      via: 'agent',
+    });
     assert.equal(obs.thread.reason, 'observation', 'a machine with nothing said is observing');
     assert.equal(obs.thread.author, 'agent');
     // A person's words are feedback, under their name, unless they say otherwise.
@@ -72,32 +90,86 @@ test('a note says why it exists, and the machine signs its own @rule:threads.lif
     assert.equal(fb.thread.author, 'reasons-person');
     // A person's words a machine RELAYS keep the mark - that is what via is
     // for - and what the machine added sits apart from what they said.
-    const dictated = openThread(p.load(), { kind: 'note', body: 'the label reads wrong', anchor: { rule: RULE }, via: 'agent', said: 'the label reads wrong', added: 'and the toast overlaps it' });
+    const dictated = openThread(p.load(), {
+      kind: 'note',
+      body: 'the label reads wrong',
+      anchor: { rule: RULE },
+      via: 'agent',
+      said: 'the label reads wrong',
+      added: 'and the toast overlaps it',
+    });
     assert.equal(dictated.thread.author, 'reasons-person');
     assert.equal(dictated.thread.via, 'agent');
-    assert.equal(dictated.thread.body, 'the label reads wrong', 'the body is what the person said, as typed');
-    assert.equal(dictated.thread.added, 'and the toast overlaps it', 'the machine\'s words are apart from theirs');
-    assert.equal(dictated.thread.reason, 'feedback', 'relayed words are the person\'s: feedback, not an observation');
+    assert.equal(
+      dictated.thread.body,
+      'the label reads wrong',
+      'the body is what the person said, as typed',
+    );
+    assert.equal(
+      dictated.thread.added,
+      'and the toast overlaps it',
+      "the machine's words are apart from theirs",
+    );
+    assert.equal(
+      dictated.thread.reason,
+      'feedback',
+      "relayed words are the person's: feedback, not an observation",
+    );
     // A machine's own words, filed as feedback on purpose, are still its own.
-    const own = openThread(p.load(), { kind: 'note', body: 'said', anchor: { rule: RULE }, via: 'agent', reason: 'request' });
+    const own = openThread(p.load(), {
+      kind: 'note',
+      body: 'said',
+      anchor: { rule: RULE },
+      via: 'agent',
+      reason: 'request',
+    });
     assert.equal(own.thread.author, 'agent');
     assert.equal(own.thread.via, undefined);
     // A decision is a record: filed closed, in no queue.
-    const dec = openThread(p.load(), { kind: 'note', body: 'we decided', anchor: { rule: RULE }, reason: 'decision' });
+    const dec = openThread(p.load(), {
+      kind: 'note',
+      body: 'we decided',
+      anchor: { rule: RULE },
+      reason: 'decision',
+    });
     assert.equal(dec.thread.status, 'recorded');
     assert.equal(p.onDisk(dec.id).status, 'recorded');
     // A word nothing knows is refused, and a question carries none.
-    assert.throws(() => openThread(p.load(), { kind: 'note', body: 'x', anchor: { rule: RULE }, reason: 'hunch' }), /unknown reason/);
-    assert.throws(() => openThread(p.load(), { kind: 'question', body: 'x?', anchor: { rule: RULE }, reason: 'feedback' }), /question carries no reason/);
+    assert.throws(
+      () =>
+        openThread(p.load(), { kind: 'note', body: 'x', anchor: { rule: RULE }, reason: 'hunch' }),
+      /unknown reason/,
+    );
+    assert.throws(
+      () =>
+        openThread(p.load(), {
+          kind: 'question',
+          body: 'x?',
+          anchor: { rule: RULE },
+          reason: 'feedback',
+        }),
+      /question carries no reason/,
+    );
     const q = openThread(p.load(), { kind: 'question', body: 'x?', anchor: { rule: RULE } });
     assert.equal(q.thread.reason, undefined);
     // An empty reason is no reason: the default answers, and a machine's
     // note still signs as the machine (n-0295).
-    const blank = openThread(p.load(), { kind: 'note', body: 'blank', anchor: { rule: RULE }, via: 'agent', reason: '  ' });
+    const blank = openThread(p.load(), {
+      kind: 'note',
+      body: 'blank',
+      anchor: { rule: RULE },
+      via: 'agent',
+      reason: '  ',
+    });
     assert.equal(blank.thread.reason, 'observation');
     assert.equal(blank.thread.author, 'agent');
     assert.equal(blank.thread.via, undefined);
-    const blankPerson = openThread(p.load(), { kind: 'note', body: 'blank', anchor: { rule: RULE }, reason: '' });
+    const blankPerson = openThread(p.load(), {
+      kind: 'note',
+      body: 'blank',
+      anchor: { rule: RULE },
+      reason: '',
+    });
     assert.equal(blankPerson.thread.reason, 'feedback');
   } finally {
     p.cleanup();
@@ -109,8 +181,18 @@ test('the agent settles the notes it wrote, never a person’s or a design reque
   try {
     // An observation, and any other note the agent wrote: its own to end.
     for (const reason of ['observation', 'finding', 'feedback']) {
-      const t = openThread(p.load(), { kind: 'note', body: reason, anchor: { rule: RULE }, via: 'agent', reason });
-      const done = mutateThread(p.load(), t.id, { body: 'changed it', status: 'settled', via: 'agent' });
+      const t = openThread(p.load(), {
+        kind: 'note',
+        body: reason,
+        anchor: { rule: RULE },
+        via: 'agent',
+        reason,
+      });
+      const done = mutateThread(p.load(), t.id, {
+        body: 'changed it',
+        status: 'settled',
+        via: 'agent',
+      });
       assert.equal(done.thread.status, 'settled', reason);
       assert.equal(p.onDisk(t.id).status, 'settled', reason);
     }
@@ -121,7 +203,13 @@ test('the agent settles the notes it wrote, never a person’s or a design reque
       { reason: 'request', via: 'agent' },
     ];
     for (const { reason, via } of refused) {
-      const t = openThread(p.load(), { kind: 'note', body: reason, anchor: { rule: RULE }, reason, via });
+      const t = openThread(p.load(), {
+        kind: 'note',
+        body: reason,
+        anchor: { rule: RULE },
+        reason,
+        via,
+      });
       assert.throws(
         () => mutateThread(p.load(), t.id, { status: 'settled', via: 'agent' }),
         /only a note the agent wrote is settled/,
@@ -146,20 +234,28 @@ test('the agent’s pass settles the addressed notes it wrote, and nothing of a 
     for (const id of [finding, request, persons, elsewhere])
       mutateThread(p.load(), id, { body: 'fixed', status: 'addressed', via: 'agent' });
 
-    const settled = settleByAgentPass(p.load(), { rule: RULE, runId: 'agent-run', created: '2099-01-01T00:00:00Z' });
+    const settled = settleByAgentPass(p.load(), {
+      rule: RULE,
+      runId: 'agent-run',
+      created: '2099-01-01T00:00:00Z',
+    });
     assert.deepEqual(settled, [finding]);
     const t = p.onDisk(finding);
     assert.equal(t.status, 'settled');
     assert.equal(t.verified_by, undefined);
     assert.match(t.replies.at(-1).body, /Settled by the agent's pass on .* \(agent-run\)/);
     assert.equal(t.replies.at(-1).via, 'verdict');
-    for (const id of [request, persons, elsewhere]) assert.equal(p.onDisk(id).status, 'addressed', id);
+    for (const id of [request, persons, elsewhere])
+      assert.equal(p.onDisk(id).status, 'addressed', id);
     assert.equal(p.onDisk(unaddressed).status, 'open');
 
     // A fix claimed after the pass is not what the pass judged.
     const later = file('finding', 'agent');
     mutateThread(p.load(), later, { body: 'fixed', status: 'addressed', via: 'agent' });
-    assert.deepEqual(settleByAgentPass(p.load(), { rule: RULE, runId: 'old', created: '2020-01-01T00:00:00Z' }), []);
+    assert.deepEqual(
+      settleByAgentPass(p.load(), { rule: RULE, runId: 'old', created: '2020-01-01T00:00:00Z' }),
+      [],
+    );
   } finally {
     p.cleanup();
   }
@@ -169,7 +265,13 @@ test('a signed pass ends every task note on the rule that was said before it @ru
   const p = project();
   try {
     const file = (reason, rule = RULE) =>
-      openThread(p.load(), { kind: 'note', body: reason, anchor: { rule }, reason, via: reason === 'finding' ? 'agent' : null }).id;
+      openThread(p.load(), {
+        kind: 'note',
+        body: reason,
+        anchor: { rule },
+        reason,
+        via: reason === 'finding' ? 'agent' : null,
+      }).id;
     const finding = file('finding');
     const feedback = file('feedback');
     const request = file('request');
@@ -231,7 +333,15 @@ test('a signed pass ends every task note on the rule that was said before it @ru
     });
     assert.deepEqual(unsigned.closed, []);
     assert.equal(p.onDisk(later).status, 'addressed');
-    assert.deepEqual(closeByVerdict(p.load(), { rule: RULE, signer: 'agent', runId: 'x', created: '2099-01-01T00:00:00Z' }), []);
+    assert.deepEqual(
+      closeByVerdict(p.load(), {
+        rule: RULE,
+        signer: 'agent',
+        runId: 'x',
+        created: '2099-01-01T00:00:00Z',
+      }),
+      [],
+    );
   } finally {
     p.cleanup();
   }
@@ -249,15 +359,31 @@ test('the browser doors carry the reason and say what a pass closed @rule:thread
       body: JSON.stringify(body),
     }).then(async (r) => ({ ok: r.ok, data: await r.json() }));
   try {
-    const dec = await post('/api/threads', { kind: 'note', body: 'we decided', reason: 'decision', anchor: { rule: RULE } });
+    const dec = await post('/api/threads', {
+      kind: 'note',
+      body: 'we decided',
+      reason: 'decision',
+      anchor: { rule: RULE },
+    });
     assert.ok(dec.ok, JSON.stringify(dec.data));
     assert.equal(p.onDisk(dec.data.id).status, 'recorded');
-    const bad = await post('/api/threads', { kind: 'note', body: 'x', reason: 'hunch', anchor: { rule: RULE } });
+    const bad = await post('/api/threads', {
+      kind: 'note',
+      body: 'x',
+      reason: 'hunch',
+      anchor: { rule: RULE },
+    });
     assert.equal(bad.ok, false);
 
-    const fb = await post('/api/threads', { kind: 'note', body: 'my note', anchor: { rule: RULE } });
+    const fb = await post('/api/threads', {
+      kind: 'note',
+      body: 'my note',
+      anchor: { rule: RULE },
+    });
     assert.equal(p.onDisk(fb.data.id).reason, 'feedback');
-    assert.ok((await post(`/api/threads/${fb.data.id}/status`, { status: 'addressed', via: 'agent' })).ok);
+    assert.ok(
+      (await post(`/api/threads/${fb.data.id}/status`, { status: 'addressed', via: 'agent' })).ok,
+    );
     const sealed = await post('/api/walkdowns', {
       target: 'local',
       signatures: [{ role: 'eng', signer: 'reasons-person' }],

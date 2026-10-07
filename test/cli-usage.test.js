@@ -10,8 +10,7 @@ import { execFileSync } from 'node:child_process';
 import { test } from 'node:test';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
-const run = (args) =>
-  execFileSync(process.execPath, [CLI, ...args], { encoding: 'utf8' });
+const run = (args) => execFileSync(process.execPath, [CLI, ...args], { encoding: 'utf8' });
 
 test('a subcommand asked for --help prints the usage and exits 0', () => {
   for (const cmd of ['threads', 'blueprints', 'status', 'judge', 'init']) {

@@ -56,7 +56,9 @@ function apart({ runner = {}, withEntry = true } = {}) {
   // spec's side of the world will not find it.
   writeFileSync(
     join(code, 'spec', 'workflows', 'a_spec.rb'),
-    ["it 'does the thing', " + "rule: 'd.s.thing' do", '  expect(1).to eq(1)', 'end', ''].join('\n'),
+    ["it 'does the thing', " + "rule: 'd.s.thing' do", '  expect(1).to eq(1)', 'end', ''].join(
+      '\n',
+    ),
   );
 
   const spec = join(home, 'blueprints', '0001-apart');
@@ -139,7 +141,10 @@ test('{results} is absolute under the code root, and nameable in the blueprint',
 test('a check for a rule that never asked for checks, or never recorded, is said', () => {
   const { spec } = apart({ runner: { lines: [] } });
   const feature = join(spec, 'features', 'd.yml');
-  const coverage = (bp) => lint(bp, { checks: false }).findings.filter((f) => f.category === 'coverage' && f.subject === 'd.s.thing');
+  const coverage = (bp) =>
+    lint(bp, { checks: false }).findings.filter(
+      (f) => f.category === 'coverage' && f.subject === 'd.s.thing',
+    );
 
   // The fixture's rule asks for checks and has one - and no run yet.
   let found = coverage(loadBlueprint(spec));
@@ -151,7 +156,14 @@ test('a check for a rule that never asked for checks, or never recorded, is said
   mkdirSync(join(spec, 'runs'), { recursive: true });
   writeFileSync(
     join(spec, 'runs', '2026-01-02T00-00-00Z-local-01.json'),
-    JSON.stringify({ run_id: '2026-01-02T00-00-00Z-local-01', created: '2026-01-02T00:00:00Z', kind: 'checks', actor: 'ci', target: 'local', results: [{ rule: 'd.s.thing', status: 'pass' }] }),
+    JSON.stringify({
+      run_id: '2026-01-02T00-00-00Z-local-01',
+      created: '2026-01-02T00:00:00Z',
+      kind: 'checks',
+      actor: 'ci',
+      target: 'local',
+      results: [{ rule: 'd.s.thing', status: 'pass' }],
+    }),
   );
   assert.equal(coverage(loadBlueprint(spec)).length, 0);
 
@@ -182,7 +194,12 @@ test('authoring.location resolves into the code, so coverage sees the suite', ()
   // still unrecorded, which is a different finding - the test above this.)
   const { findings } = lint(bp);
   assert.equal(
-    findings.filter((f) => f.category === 'coverage' && f.subject === 'd.s.thing' && /no check references/.test(f.message)).length,
+    findings.filter(
+      (f) =>
+        f.category === 'coverage' &&
+        f.subject === 'd.s.thing' &&
+        /no check references/.test(f.message),
+    ).length,
     0,
     'no "no check references this rule" for a rule whose check exists',
   );

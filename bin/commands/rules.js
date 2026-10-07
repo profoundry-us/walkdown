@@ -26,7 +26,9 @@ function move(args) {
   });
   const what = positionals;
   if (!what.length || !values.to) {
-    console.error('walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]');
+    console.error(
+      'walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]',
+    );
     return end(2);
   }
   const from = namedOrExit(values.blueprint, 'rules move');
@@ -35,7 +37,11 @@ function move(args) {
   const project = projectIdsAt()
     // By the name an ID ends with: the ID is this machine's, and what a move
     // writes - `copied_from` - is read on every machine (ADR 0014 §2).
-    .map((full) => ({ id: nameOf(full), full, dir: resolveLocations({ blueprint: full }).spec?.path }))
+    .map((full) => ({
+      id: nameOf(full),
+      full,
+      dir: resolveLocations({ blueprint: full }).spec?.path,
+    }))
     .filter((b) => b.dir);
   if (project.length < 2) {
     console.error(red('This project has one blueprint, so there is nowhere to move rules to.'));
@@ -45,13 +51,21 @@ function move(args) {
   const named = (b, want) => b.id === want || b.full === want;
   const to = project.find((b) => named(b, values.to));
   if (!to) {
-    console.error(red(`✗ \`${values.to}\` is not a blueprint of this project — a rule moves only between blueprints of one project (${project.map((b) => b.id).join(', ')})`));
+    console.error(
+      red(
+        `✗ \`${values.to}\` is not a blueprint of this project — a rule moves only between blueprints of one project (${project.map((b) => b.id).join(', ')})`,
+      ),
+    );
     console.error(dim('Nothing was moved.'));
     return end(2);
   }
   const holders = project.filter((b) => named(b, from));
   if (holders.length !== 1) {
-    console.error(red(`✗ \`${from}\` is not a blueprint of this project (${project.map((b) => b.id).join(', ')}). Nothing was moved.`));
+    console.error(
+      red(
+        `✗ \`${from}\` is not a blueprint of this project (${project.map((b) => b.id).join(', ')}). Nothing was moved.`,
+      ),
+    );
     return end(2);
   }
 
@@ -69,12 +83,20 @@ function move(args) {
   ];
   if (values['dry-run']) {
     console.log(`Would move ${lines.join('\n  ')}`.replace('Would move ', 'Would move:\n  '));
-    console.log(dim(`\nNothing was changed. Without --dry-run, ${plan.from.id}'s run records stay as they are; the copies say where they came from.`));
+    console.log(
+      dim(
+        `\nNothing was changed. Without --dry-run, ${plan.from.id}'s run records stay as they are; the copies say where they came from.`,
+      ),
+    );
     return end(0);
   }
   applyMove(plan);
   console.log(`${green('✓ moved')} ${lines.join('\n  ')}`);
-  console.log(dim(`\n${plan.from.id}'s run records are unchanged. \`walkdown status --blueprint ${plan.to.id}\` shows the moved rules with the verdicts they had.`));
+  console.log(
+    dim(
+      `\n${plan.from.id}'s run records are unchanged. \`walkdown status --blueprint ${plan.to.id}\` shows the moved rules with the verdicts they had.`,
+    ),
+  );
   return end(0);
 }
 
@@ -96,7 +118,11 @@ function rename(args) {
   }
   const here = resolveLocations({ blueprint: namedOrExit(values.blueprint, 'rules rename') });
   if (here.ambiguous) {
-    console.error(red(`✗ ${here.config.registry.why ?? `\`${values.blueprint}\` names more than one blueprint`}`));
+    console.error(
+      red(
+        `✗ ${here.config.registry.why ?? `\`${values.blueprint}\` names more than one blueprint`}`,
+      ),
+    );
     return end(2);
   }
   const project = here.spec?.path ? [{ id: here.id, dir: here.spec.path }] : [];
@@ -134,13 +160,18 @@ function rename(args) {
   }
   applyRename(plan);
   console.log(`${green('✓ renamed')} ${lines.join('\n  ')}`);
-  console.log(dim(`\nNo run record was edited; they still say \`${from}\` and count for \`${to}\`. Tests tagged \`${from}\` still count, and lint names them so the tag can be updated.`));
+  console.log(
+    dim(
+      `\nNo run record was edited; they still say \`${from}\` and count for \`${to}\`. Tests tagged \`${from}\` still count, and lint names them so the tag can be updated.`,
+    ),
+  );
   return end(0);
 }
 
 export const VERBS = {
   move: {
-    usage: 'walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]',
+    usage:
+      'walkdown rules move <rule|story|feature>... --blueprint <from> --to <blueprint> [--dry-run]',
     about:
       "Move rules to another blueprint of the same project, with their threads. The run\nrecords and evidence behind their verdicts are copied, so nothing is judged or signed\nagain, and the source's records are never edited. --dry-run says what would move.",
     run: move,
@@ -148,7 +179,7 @@ export const VERBS = {
   rename: {
     usage: 'walkdown rules rename <rule> <new-id> --blueprint <id> [--dry-run]',
     about:
-      "Give a rule a new id. The old id stays on the rule under `formerly:`, so the run\nrecords, threads and tests that name it still count for it, and no verdict is lost.\nIts threads are anchored to the new id. --dry-run says what would change.",
+      'Give a rule a new id. The old id stays on the rule under `formerly:`, so the run\nrecords, threads and tests that name it still count for it, and no verdict is lost.\nIts threads are anchored to the new id. --dry-run says what would change.',
     run: rename,
   },
 };

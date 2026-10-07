@@ -1,11 +1,11 @@
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
-import { createInterface } from 'node:readline/promises';
 import { basename, dirname, join, resolve } from 'node:path';
+import { createInterface } from 'node:readline/promises';
 import {
   canon,
   checkoutFor,
-  defaultLabel,
   codeOf,
+  defaultLabel,
   deriveCode,
   describeFolder,
   expand,
@@ -25,8 +25,15 @@ import {
   suggestFolder,
   tilde,
 } from '../../lib/locations.js';
-import { gitView, relocateHome, removePointer, setIgnore, STANDARDS, tracking } from '../../lib/standard.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
+import {
+  gitView,
+  relocateHome,
+  removePointer,
+  STANDARDS,
+  setIgnore,
+  tracking,
+} from '../../lib/standard.js';
 
 /*
  * `walkdown blueprints new` and `walkdown blueprints commit` (ADR 0012, ADR
@@ -47,11 +54,24 @@ const NAME = /^[a-z0-9][a-z0-9._-]*$/i;
  * @param {{ id?: string | null, dir?: string | null, commit?: string | null, force?: boolean,
  *   verb: 'new' | 'commit', folder?: string | null, project?: string | null, code?: string | null }} ask
  */
-export async function make({ id = null, dir = null, commit: asked = null, force = false, verb, folder = null, project = null, code = null }) {
+export async function make({
+  id = null,
+  dir = null,
+  commit: asked = null,
+  force = false,
+  verb,
+  folder = null,
+  project = null,
+  code = null,
+}) {
   if (asked && !STANDARDS.includes(asked)) {
     console.error(`walkdown blueprints commit takes none, spec or all — not "${asked}".`);
-    console.error('  none  the home lives in ~/.walkdown and the repository gets nothing (the default)');
-    console.error('  spec  the home lives in .walkdown/blueprints/; the spec and its threads are committed');
+    console.error(
+      '  none  the home lives in ~/.walkdown and the repository gets nothing (the default)',
+    );
+    console.error(
+      '  spec  the home lives in .walkdown/blueprints/; the spec and its threads are committed',
+    );
     console.error('  all   the same, and the runs and evidence are committed too');
     return process.exit(2);
   }
@@ -70,7 +90,9 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
   ])
     if (error) {
       console.error(red(`${file} does not parse — ${error}`));
-      console.error(dim('  Fix it first: this writes to it, and cannot tell what it already says.'));
+      console.error(
+        dim('  Fix it first: this writes to it, and cannot tell what it already says.'),
+      );
       return process.exit(2);
     }
 
@@ -96,11 +118,15 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         joined = true;
         if (!project)
           console.log(
-            dim(`  ${tilde(root)} is inside ${tilde(wt.checkout)}, so this blueprint joins its project \`${theirs.label}\`. \`--project <label>\` makes a project of its own instead.`),
+            dim(
+              `  ${tilde(root)} is inside ${tilde(wt.checkout)}, so this blueprint joins its project \`${theirs.label}\`. \`--project <label>\` makes a project of its own instead.`,
+            ),
           );
       } else {
         const rl = createInterface({ input: process.stdin, output: process.stdout });
-        const answer = await rl.question(`${tilde(root)} is inside ${tilde(wt.checkout)}, the project \`${theirs.label}\`. Add this blueprint to \`${theirs.label}\`? [Y/n] `);
+        const answer = await rl.question(
+          `${tilde(root)} is inside ${tilde(wt.checkout)}, the project \`${theirs.label}\`. Add this blueprint to \`${theirs.label}\`? [Y/n] `,
+        );
         rl.close();
         joined = !/^\s*n/i.test(answer);
       }
@@ -114,7 +140,8 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
   const commitCheckout = () => {
     const rows = live().filter((r) => r.checkout);
     const at = (r) => canon(expand(String(r.checkout)));
-    const named = id?.trim() && isRegistryId(id.trim()) ? rows.find((r) => String(r.id) === id.trim()) : null;
+    const named =
+      id?.trim() && isRegistryId(id.trim()) ? rows.find((r) => String(r.id) === id.trim()) : null;
     if (named) return at(named);
     const home = rows.find((r) => {
       const h = canon(expand(String(r.home)));
@@ -122,18 +149,31 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     });
     return home ? at(home) : (wt?.checkout ?? root);
   };
-  const checkout = verb === 'commit' ? commitCheckout() : wt?.worktree || joined ? wt.checkout : root;
+  const checkout =
+    verb === 'commit' ? commitCheckout() : wt?.worktree || joined ? wt.checkout : root;
   const mine = () =>
-    live().filter((r) => !r.ephemeral && r.checkout && canon(expand(String(r.checkout))) === checkout);
+    live().filter(
+      (r) => !r.ephemeral && r.checkout && canon(expand(String(r.checkout))) === checkout,
+    );
 
   const wanted = id?.trim() || null;
   if (wanted !== null && !isRegistryId(wanted) && !NAME.test(wanted)) {
-    console.error(red(`\`${id}\` is not a name — letters, digits, dots, dashes and underscores, starting with a letter or digit.`));
+    console.error(
+      red(
+        `\`${id}\` is not a name — letters, digits, dots, dashes and underscores, starting with a letter or digit.`,
+      ),
+    );
     return process.exit(2);
   }
   const defaultName = slug(basename(checkout));
   // Made from a folder inside the project, it is named for that folder, never taken for the project's own.
-  const want = wanted ? (isRegistryId(wanted) ? wanted : slug(wanted)) : joined ? slug(basename(root)) : null;
+  const want = wanted
+    ? isRegistryId(wanted)
+      ? wanted
+      : slug(wanted)
+    : joined
+      ? slug(basename(root))
+      : null;
 
   /*
    * WHICH BLUEPRINT OF THE PROJECT'S (ADR 0011 §1). Idempotent on the project
@@ -152,12 +192,24 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     const names = here.map((r) => nameOf(r.id));
     // A folder inside the project named like the project's own blueprint is not that blueprint.
     if (joined && !wanted && want === defaultName && names.includes(want)) {
-      console.error(red(`\`${want}\` is already the name of ${tilde(checkout)}'s own blueprint, so this one needs a name of its own. Nothing was made.`));
-      console.error(dim(`  Name it: \`walkdown blueprints new ${want}-${slug(basename(dirname(root)))}\`, or \`--project <label>\` for a project of its own.`));
+      console.error(
+        red(
+          `\`${want}\` is already the name of ${tilde(checkout)}'s own blueprint, so this one needs a name of its own. Nothing was made.`,
+        ),
+      );
+      console.error(
+        dim(
+          `  Name it: \`walkdown blueprints new ${want}-${slug(basename(dirname(root)))}\`, or \`--project <label>\` for a project of its own.`,
+        ),
+      );
       return process.exit(2);
     }
     if (!want && here.length > 1 && !names.includes(defaultName)) {
-      console.error(red(`This project holds several blueprints (${names.join(', ')}) and none is \`${defaultName}\`.`));
+      console.error(
+        red(
+          `This project holds several blueprints (${names.join(', ')}) and none is \`${defaultName}\`.`,
+        ),
+      );
       console.error(
         dim(
           verb === 'commit'
@@ -168,8 +220,14 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
       return process.exit(2);
     }
     if (!want && here.length > 1 && asked) {
-      console.error(red(`This project holds several blueprints (${names.join(', ')}); \`blueprints commit\` moves one.`));
-      console.error(dim(`  Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${names[0]}\`).`));
+      console.error(
+        red(
+          `This project holds several blueprints (${names.join(', ')}); \`blueprints commit\` moves one.`,
+        ),
+      );
+      console.error(
+        dim(`  Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${names[0]}\`).`),
+      );
       return process.exit(2);
     }
   }
@@ -183,12 +241,20 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
   if (!exact()) {
     const asName = want && !isRegistryId(want) ? want : defaultName;
     const fresh = findHomes(checkout).homes.filter(
-      (h) => describeFolder(h.folder) === asName && !live().some((r) => canon(expand(String(r.home))) === canon(h.dir)),
+      (h) =>
+        describeFolder(h.folder) === asName &&
+        !live().some((r) => canon(expand(String(r.home))) === canon(h.dir)),
     );
     if (fresh.length === 1) found = fresh[0].dir;
   }
   if (verb === 'commit' && !exact() && !found) {
-    console.error(red(want ? `No blueprint \`${want}\` in this project — \`walkdown blueprints\` lists them.` : 'No blueprint here to commit.'));
+    console.error(
+      red(
+        want
+          ? `No blueprint \`${want}\` in this project — \`walkdown blueprints\` lists them.`
+          : 'No blueprint here to commit.',
+      ),
+    );
     console.error(dim('  `walkdown blueprints new` makes one.'));
     return process.exit(2);
   }
@@ -201,7 +267,9 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
   const label = await (async () => {
     const known = projectOf(checkout, readRegistry().rows);
     if (known) return known;
-    const rows = live().filter((r) => r.project && !(r.checkout && canon(expand(String(r.checkout))) === checkout));
+    const rows = live().filter(
+      (r) => r.project && !(r.checkout && canon(expand(String(r.checkout))) === checkout),
+    );
     let l = project ?? defaultLabel(checkout);
     let c = code ?? null;
     for (;;) {
@@ -218,7 +286,10 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         }
         const rl = createInterface({ input: process.stdin, output: process.stdout });
         console.log(yellow(`! ${bad}.`));
-        c = (await rl.question(`  A two- or three-letter code for \`${l}\`: `)).trim().toLowerCase() || null;
+        c =
+          (await rl.question(`  A two- or three-letter code for \`${l}\`: `))
+            .trim()
+            .toLowerCase() || null;
         rl.close();
         continue;
       }
@@ -226,7 +297,9 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
       const pc = c ?? deriveCode(l);
       const codeTaken = rows.some((r) => String(r.code) === pc);
       if (!labelTaken && !codeTaken) return { label: l, code: pc, fresh: true };
-      const holder = rows.find((r) => (labelTaken ? String(r.project) === l : String(r.code) === pc));
+      const holder = rows.find((r) =>
+        labelTaken ? String(r.project) === l : String(r.code) === pc,
+      );
       const where = tilde(String(holder.checkout ?? holder.home));
       const what = labelTaken
         ? `This machine already has a project called \`${l}\`, at ${where}. ${tilde(checkout)} is another checkout, so its project needs a name of its own`
@@ -257,7 +330,11 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
       const rl = createInterface({ input: process.stdin, output: process.stdout });
       console.log(yellow(`! ${what}.`));
       if (labelTaken) l = (await rl.question('  A label for this project: ')).trim() || l;
-      else c = (await rl.question(`  A two- or three-letter code for \`${l}\`: `)).trim().toLowerCase() || c;
+      else
+        c =
+          (await rl.question(`  A two- or three-letter code for \`${l}\`: `))
+            .trim()
+            .toLowerCase() || c;
       rl.close();
     }
   })();
@@ -283,20 +360,26 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
      * made: register() would refuse it after the home was scaffolded.
      */
     if (!listed && label.fresh) {
-      const rows = live().filter((r) => r.project && !(r.checkout && canon(expand(String(r.checkout))) === checkout));
+      const rows = live().filter(
+        (r) => r.project && !(r.checkout && canon(expand(String(r.checkout))) === checkout),
+      );
       const taken = rows.some((r) => String(r.project) === label.label)
         ? `label \`${label.label}\``
         : rows.some((r) => String(r.code) === label.code)
           ? `code \`${label.code}\``
           : null;
       if (taken) {
-        console.error(red(`✗ the project ${taken} was taken while this ran. Nothing was made; run it again.`));
+        console.error(
+          red(`✗ the project ${taken} was taken while this ran. Nothing was made; run it again.`),
+        );
         return process.exit(2);
       }
     }
     let loc = listed ? resolveLocations({ cwd: checkout, blueprint: String(listed.id) }) : null;
     const siblings = listed ? [] : mine().map((r) => nameOf(r.id));
-    const current = loc?.standard?.name ?? (found ? (isHome(found) && existsSync(join(found, '.gitignore')) ? 'spec' : 'all') : null);
+    const current =
+      loc?.standard?.name ??
+      (found ? (isHome(found) && existsSync(join(found, '.gitignore')) ? 'spec' : 'all') : null);
     const commit = asked ?? current ?? 'none';
 
     /*
@@ -322,7 +405,13 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
      */
     const leaving =
       moved && commit === 'none'
-        ? [...new Set(Object.values(gitView({ root: checkout, paths: { home: moved.from } }).kinds).flatMap((v) => v.tracked))]
+        ? [
+            ...new Set(
+              Object.values(gitView({ root: checkout, paths: { home: moved.from } }).kinds).flatMap(
+                (v) => v.tracked,
+              ),
+            ),
+          ]
         : [];
 
     // ---- the home: the one it has, or a new folder -------------------------
@@ -334,27 +423,61 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         console.error(red(`\`${named}\` is not a folder name.`));
         return process.exit(2);
       }
-      homeDir = commit === 'none' ? join(personalHomes(label.label), named) : join(checkout, '.walkdown', 'blueprints', named);
+      homeDir =
+        commit === 'none'
+          ? join(personalHomes(label.label), named)
+          : join(checkout, '.walkdown', 'blueprints', named);
       if (existsSync(homeDir) && readdirSync(homeDir).length) {
-        console.error(red(`${tilde(homeDir)} already exists and is not a blueprint walkdown can take — choose another folder with --folder.`));
+        console.error(
+          red(
+            `${tilde(homeDir)} already exists and is not a blueprint walkdown can take — choose another folder with --folder.`,
+          ),
+        );
         return process.exit(2);
       }
       const outer = findHomes(checkout).homes.find((h) => homeDir.startsWith(`${h.dir}/`));
       if (outer) {
-        console.error(red(`${tilde(homeDir)} would be inside ${tilde(outer.dir)}, which is a blueprint already — a home inside a home is refused.`));
+        console.error(
+          red(
+            `${tilde(homeDir)} would be inside ${tilde(outer.dir)}, which is a blueprint already — a home inside a home is refused.`,
+          ),
+        );
         return process.exit(2);
       }
       mkdirSync(homeDir, { recursive: true });
     }
-    const name = listed ? nameOf(listed.id) : want && !isRegistryId(want) ? want : found ? describeFolder(found) : defaultName;
+    const name = listed
+      ? nameOf(listed.id)
+      : want && !isRegistryId(want)
+        ? want
+        : found
+          ? describeFolder(found)
+          : defaultName;
     results.push(...scaffold(checkout, { force, specDir: homeDir, commit, name, skills: false }));
 
     // ---- the row ------------------------------------------------------------
     const entry = listed
-      ? { action: /** @type {const} */ ('kept'), id: String(listed.id), path: registryPath(), beside: [], taken: undefined }
-      : register({ checkout, homeDir, by: 'blueprints new', project: label.label, code: label.code, name });
+      ? {
+          action: /** @type {const} */ ('kept'),
+          id: String(listed.id),
+          path: registryPath(),
+          beside: [],
+          taken: undefined,
+        }
+      : register({
+          checkout,
+          homeDir,
+          by: 'blueprints new',
+          project: label.label,
+          code: label.code,
+          name,
+        });
     if (entry.action === 'label-taken' || entry.action === 'code-taken') {
-      console.error(red(`✗ the project ${entry.action === 'label-taken' ? 'label' : 'code'} \`${entry.taken}\` was taken while this ran. Run it again.`));
+      console.error(
+        red(
+          `✗ the project ${entry.action === 'label-taken' ? 'label' : 'code'} \`${entry.taken}\` was taken while this ran. Run it again.`,
+        ),
+      );
       return process.exit(2);
     }
     const ignore = commit === 'none' ? null : setIgnore(homeDir, commit, { force });
@@ -364,7 +487,13 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
      * committed there any more (ADR 0014 §7).
      */
     if (commit === 'none' && moved && !findHomes(checkout).homes.length) {
-      for (const rel of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md', 'CONVENTIONS.md']) {
+      for (const rel of [
+        'CLAUDE.md',
+        'AGENTS.md',
+        'GEMINI.md',
+        '.github/copilot-instructions.md',
+        'CONVENTIONS.md',
+      ]) {
         const what = removePointer(join(checkout, rel));
         if (what === 'removed') results.push({ path: rel, action: 'pointer-removed' });
         else if (what === 'deleted') results.push({ path: rel, action: 'pointer-file-deleted' });
@@ -386,22 +515,29 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     };
     if (moved) {
       console.log(`  ${green('→ moved')}    ${tilde(moved.from)}`);
-      console.log(`  ${''.padEnd(10)} ${dim(`to ${tilde(moved.to)} — the whole home, no record edited, the ID kept`)}`);
+      console.log(
+        `  ${''.padEnd(10)} ${dim(`to ${tilde(moved.to)} — the whole home, no record edited, the ID kept`)}`,
+      );
       for (const g of moved.gone) console.log(`  ${green('- removed')}  ${g}`);
     }
     for (const r of results.filter((r) => !r.action.startsWith('spec-')))
-      console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`);
+      console.log(
+        `  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`,
+      );
     if (ignore) {
       const IGN = {
         written: green('+ written'),
         'up-to-date': dim('· up to date'),
         removed: green('- removed'),
         absent: null,
-        'kept-differs': yellow('! kept (yours differs from the spec standard — --force to rewrite)'),
+        'kept-differs': yellow(
+          '! kept (yours differs from the spec standard — --force to rewrite)',
+        ),
       };
       if (IGN[ignore.action]) console.log(`  ${IGN[ignore.action]}  ${tilde(ignore.path)}`);
     }
-    if (entry.action === 'written') console.log(`  ${green('+ listed')}   ${tilde(entry.path)}  ${dim(`as \`${entry.id}\``)}`);
+    if (entry.action === 'written')
+      console.log(`  ${green('+ listed')}   ${tilde(entry.path)}  ${dim(`as \`${entry.id}\``)}`);
     /*
      * Another blueprint for a project that has one is said as that, with the
      * others named: a mistyped name is a second blueprint nobody meant, and
@@ -412,7 +548,9 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         `  ${green('+ another')}  ${dim(`added to \`${label.label}\`, beside ${siblings.map((i) => `\`${i}\``).join(', ')} — commands that write take \`--blueprint <id>\` now`)}`,
       );
     else if (entry.action === 'written' && label.fresh)
-      console.log(`  ${green('+ project')}  ${dim(`\`${label.label}\`, a new project on this machine, code \`${label.code}\``)}`);
+      console.log(
+        `  ${green('+ project')}  ${dim(`\`${label.label}\`, a new project on this machine, code \`${label.code}\``)}`,
+      );
     /*
      * One directory too deep. A project inside another project's checkout
      * is deliberate where it is meant, so this is not a refusal - the
@@ -422,14 +560,21 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
      */
     const above =
       entry.action === 'written' && label.fresh
-        ? live().filter((r) => r.checkout && !r.ephemeral && checkout.startsWith(`${canon(expand(String(r.checkout)))}/`))
+        ? live().filter(
+            (r) =>
+              r.checkout &&
+              !r.ephemeral &&
+              checkout.startsWith(`${canon(expand(String(r.checkout)))}/`),
+          )
         : [];
     if (above.length)
       console.log(
         `  ${yellow('! above')}    ${dim(`\`${above[0].id}\` already answers for this directory, from ${tilde(String(above[0].checkout))} — this makes two blueprints in two projects, each with its own ledger`)}`,
       );
     if (unready)
-      console.log(`  ${yellow('? you')}      this machine is not set up — \`walkdown init\` says who you are and installs the skills`);
+      console.log(
+        `  ${yellow('? you')}      this machine is not set up — \`walkdown init\` says who you are and installs the skills`,
+      );
 
     console.log(`\n  spec: ${tilde(homeDir)}`);
     const say = {
@@ -447,8 +592,18 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     };
     // Every write names its blueprint (locations.several.writes-name-one).
     const idFlag = ` --blueprint ${name}`;
-    const said = ignore?.action === 'kept-differs' ? "  Committed, by the home's own .gitignore, which differs from walkdown's and was left as it is." : say[commit];
-    console.log(dim(said.replace(/`walkdown blueprints commit (\w+)`/g, (_, std) => `\`walkdown blueprints commit ${std}${idFlag}\``)));
+    const said =
+      ignore?.action === 'kept-differs'
+        ? "  Committed, by the home's own .gitignore, which differs from walkdown's and was left as it is."
+        : say[commit];
+    console.log(
+      dim(
+        said.replace(
+          /`walkdown blueprints commit (\w+)`/g,
+          (_, std) => `\`walkdown blueprints commit ${std}${idFlag}\``,
+        ),
+      ),
+    );
     /*
      * What git tracks NOW, asked of git rather than asserted from the file
      * just written (n-0164, n-0180).
@@ -456,7 +611,8 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
     const after = resolveLocations({ cwd: checkout, blueprint: entry.id });
     const t = tracking(after);
     console.log(`  tracked: ${t.words}  ${dim(t.why)}`);
-    for (const f of t.findings) console.log(`  ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
+    for (const f of t.findings)
+      console.log(`  ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
     if (leaving.length)
       console.log(
         yellow(
@@ -465,8 +621,12 @@ export async function make({ id = null, dir = null, commit: asked = null, force 
         ),
       );
     if (results.some((r) => r.action === 'created')) {
-      console.log(`\nNext: fill in ${dim(join(tilde(homeDir), 'spec.yml'))} (runner commands, targets), sketch your`);
-      console.log(`first feature from its ${dim('features/_template.yml')}, then \`walkdown lint\`.`);
+      console.log(
+        `\nNext: fill in ${dim(join(tilde(homeDir), 'spec.yml'))} (runner commands, targets), sketch your`,
+      );
+      console.log(
+        `first feature from its ${dim('features/_template.yml')}, then \`walkdown lint\`.`,
+      );
       console.log(dim('`walkdown where` shows every path this project uses.'));
     }
     if (!isHome(homeDir)) console.error(red(`  the spec did not land at ${homeDir}`));

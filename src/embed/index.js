@@ -449,7 +449,9 @@ import { icon } from './icons.js';
      * server resolves it to, and anything else goes back to being the words
      * the author typed. A link that does nothing is worse than none.
      */
-    for (const ref of overlay.querySelectorAll('[data-thread-ref], [data-rule-ref], [data-evidence-ref]')) {
+    for (const ref of overlay.querySelectorAll(
+      '[data-thread-ref], [data-rule-ref], [data-evidence-ref]',
+    )) {
       if (ref.dataset.evidenceRef) {
         ref.href = api('/evidence/' + ref.dataset.evidenceRef);
         ref.target = '_blank';
@@ -576,7 +578,11 @@ import { icon } from './icons.js';
    * agent's to settle and a question is answered, not verified.
    */
   function canVerify(pin) {
-    if (!identity?.declared || !identity?.username || String(identity.username).trim().toLowerCase() === 'agent')
+    if (
+      !identity?.declared ||
+      !identity?.username ||
+      String(identity.username).trim().toLowerCase() === 'agent'
+    )
       return false;
     if (pin.kind !== 'note' || pin.status !== 'addressed') return false;
     return ['feedback', 'request', 'finding'].includes(pin.reason ?? 'feedback');
@@ -648,7 +654,10 @@ import { icon } from './icons.js';
     const drawShots = () => {
       strip.innerHTML = shots
         .map(
-          (s, i) => `<span class="relative inline-block"><img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
+          (
+            s,
+            i,
+          ) => `<span class="relative inline-block"><img src="${s.data}" alt="${s.name}" class="h-12 rounded border border-base-300">
             <button type="button" data-drop="${i}" title="Drop this picture" class="btn btn-circle btn-ghost btn-xs absolute -right-1 -top-1 h-4 min-h-0 w-4 bg-base-100 p-0 text-[10px]">✕</button></span>`,
         )
         .join('');
@@ -661,7 +670,9 @@ import { icon } from './icons.js';
     // Paste and drop are the same door: a file from the clipboard, or one
     // dragged from the desk onto the box (n-0328).
     const takeShots = (e) => {
-      const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
+      const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) =>
+        /^image\//.test(f.type),
+      );
       if (!files.length) return;
       e.preventDefault();
       for (const f of files.slice(0, 4 - shots.length)) {

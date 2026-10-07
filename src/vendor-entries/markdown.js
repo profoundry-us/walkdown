@@ -9,5 +9,6 @@
  * "somebody typed <script>" a piece of text rather than a script. The
  * allow-list itself lives beside the renderer (lib/message-stream.js).
  */
-export { marked } from 'marked';
+
 export { default as DOMPurify } from 'dompurify';
+export { marked } from 'marked';

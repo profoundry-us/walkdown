@@ -19,7 +19,15 @@
  * `tmp/test-home` keeps working, and a suite that pins its own scratch
  * home per case (locations.test.js) is unaffected either way.
  */
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { parse, stringify } from '../vendor/yaml.js';
@@ -65,7 +73,14 @@ process.env.WALKDOWN_SKILLS_DIR ??= join(process.env.WALKDOWN_HOME, 'skills');
  * The ID comes back. Inside its checkout `name` reaches it too, the way a
  * person types `--blueprint cli` for `0002-wd-cli`.
  */
-export function register({ id: name, project: checkout, homeDir, ephemeral = null, label = null, code = null }) {
+export function register({
+  id: name,
+  project: checkout,
+  homeDir,
+  ephemeral = null,
+  label = null,
+  code = null,
+}) {
   const home = process.env.WALKDOWN_HOME;
   mkdirSync(home, { recursive: true });
   const path = join(home, 'registry.yml');
@@ -75,7 +90,8 @@ export function register({ id: name, project: checkout, homeDir, ephemeral = nul
   if (already) return already.id;
   const top = Math.max(0, ...listed.map((r) => Number(String(r?.id).match(/^(\d{4})-/)?.[1] ?? 0)));
   const n = Math.max(Number(doc.next) || 1, top + 1);
-  const mine = checkout && !ephemeral ? listed.find((r) => r?.checkout === checkout && !r.ephemeral) : null;
+  const mine =
+    checkout && !ephemeral ? listed.find((r) => r?.checkout === checkout && !r.ephemeral) : null;
   let pl = mine?.project ?? label;
   let pc = mine?.code ?? code;
   if (ephemeral) {
@@ -92,7 +108,11 @@ export function register({ id: name, project: checkout, homeDir, ephemeral = nul
       for (let k = 0; codes.has(pc); k++) pc = `f${k.toString(36).padStart(2, '0')}`.slice(0, 3);
     }
   }
-  const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'blueprint';
+  const slug =
+    String(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'blueprint';
   const id = `${String(n).padStart(4, '0')}-${pc}-${slug}`;
   listed.push({
     id,
@@ -123,9 +143,12 @@ export function register({ id: name, project: checkout, homeDir, ephemeral = nul
  */
 export function declareProject(home, spec, id = 'fixture') {
   if (basename(spec) === 'blueprint')
-    throw new Error(`declareProject: ${spec} is a blueprint/ folder — homes are flat now, with spec.yml in the home itself`);
+    throw new Error(
+      `declareProject: ${spec} is a blueprint/ folder — homes are flat now, with spec.yml in the home itself`,
+    );
   const homeDir = spec;
-  for (const kind of ['threads', 'runs', 'evidence', 'drafts']) mkdirSync(join(homeDir, kind), { recursive: true });
+  for (const kind of ['threads', 'runs', 'evidence', 'drafts'])
+    mkdirSync(join(homeDir, kind), { recursive: true });
   const m = homeDir.match(/^(.*)\/\.walkdown\/blueprints\/[^/]+$/);
   const was = process.env.WALKDOWN_HOME;
   process.env.WALKDOWN_HOME = home;
@@ -154,8 +177,16 @@ export function declaredHome(root, id = 'fixture') {
   const n = String(readdirSync(blueprints).length + 1).padStart(4, '0');
   const home = `${n}-${id}`;
   const homeDir = join(blueprints, home);
-  const kinds = { spec: '.', threads: 'threads', runs: 'runs', evidence: 'evidence', drafts: 'drafts' };
-  const paths = Object.fromEntries(Object.entries(kinds).map(([k, d]) => [k, d === '.' ? homeDir : join(homeDir, d)]));
+  const kinds = {
+    spec: '.',
+    threads: 'threads',
+    runs: 'runs',
+    evidence: 'evidence',
+    drafts: 'drafts',
+  };
+  const paths = Object.fromEntries(
+    Object.entries(kinds).map(([k, d]) => [k, d === '.' ? homeDir : join(homeDir, d)]),
+  );
   for (const p of Object.values(paths)) mkdirSync(p, { recursive: true });
   const rid = register({ id, project: root, homeDir });
   return { root, wd, id: rid, name: id, home, homeDir, ...paths };
@@ -190,7 +221,10 @@ export function threadAt(...parts) {
       if (!/\.ya?ml$/.test(f)) continue;
       if (f === `${name}.yml`) return join(dir, f);
       const text = readFileSync(join(dir, f), 'utf8');
-      if (new RegExp(`^(id|uuid): ['"]?${String(name).replace(/[.]/g, '\\.')}['"]?$`, 'm').test(text)) return join(dir, f);
+      if (
+        new RegExp(`^(id|uuid): ['"]?${String(name).replace(/[.]/g, '\\.')}['"]?$`, 'm').test(text)
+      )
+        return join(dir, f);
     }
   return join(dir, `${name}.yml`);
 }

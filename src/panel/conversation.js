@@ -14,7 +14,16 @@ import { openSettings, requestReload, requestRender } from './shell.js';
 import { D, identityOverride, S, store } from './state.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
-import { HUMAN_ONLY, iAmDeclared, NEEDS_REASON, TERMINAL, threadsFor, threadTouched, whereIdentityLives, whoAmI } from './vocab.js';
+import {
+  HUMAN_ONLY,
+  iAmDeclared,
+  NEEDS_REASON,
+  TERMINAL,
+  threadsFor,
+  threadTouched,
+  whereIdentityLives,
+  whoAmI,
+} from './vocab.js';
 
 /**
  * The handles that resolve to a full name, for every message on screen.
@@ -139,7 +148,11 @@ async function postReply(id, text, actor, key = 'threadShots') {
   const shots = S[key];
   S[key] = [];
   requestRender();
-  const ok = await threadPost(`/api/threads/${id}/replies`, { author: who, body: text, ...(shots.length && { attachments: shots }) });
+  const ok = await threadPost(`/api/threads/${id}/replies`, {
+    author: who,
+    body: text,
+    ...(shots.length && { attachments: shots }),
+  });
   if (ok) {
     pendingReplies.set(
       id,
@@ -206,10 +219,19 @@ export async function threadAct(id, status) {
   if (status === '__answer') {
     // A pick counts as an answer, the way it does on the rule (n-0319).
     const chosen = t.options?.length ? S.askChoice : null;
-    if (!text && !chosen) return say(t.options?.length ? 'Pick one, or write the answer.' : 'Write the answer first \u2014 answering a question records it.');
+    if (!text && !chosen)
+      return say(
+        t.options?.length
+          ? 'Pick one, or write the answer.'
+          : 'Write the answer first \u2014 answering a question records it.',
+      );
     if (
       (await postReply(id, text || chosen, actor)) &&
-      (await threadPost(`/api/threads/${id}/status`, { status: 'answered', actor, ...(chosen ? { chosen } : {}) }))
+      (await threadPost(`/api/threads/${id}/status`, {
+        status: 'answered',
+        actor,
+        ...(chosen ? { chosen } : {}),
+      }))
     ) {
       S.askChoice = null;
       await requestReload();
@@ -279,7 +301,9 @@ export const liveNoteOn = (rule) =>
 export const asksOn = (rule) =>
   threadsFor(rule)
     .filter((t) => t.kind === 'question' && t.status === 'open')
-    .sort((a, b) => String(a.deferred ?? a.created ?? '').localeCompare(String(b.deferred ?? b.created ?? '')));
+    .sort((a, b) =>
+      String(a.deferred ?? a.created ?? '').localeCompare(String(b.deferred ?? b.created ?? '')),
+    );
 export const openQuestionOn = (rule) => asksOn(rule)[0] ?? null;
 
 /**
@@ -290,16 +314,31 @@ export const openQuestionOn = (rule) => asksOn(rule)[0] ?? null;
 export async function answerOnRule(rule, text, chosen = null) {
   const q = openQuestionOn(rule);
   if (!q) return null;
-  if (!text && !chosen) return sayFiling(q.options?.length ? 'Pick one, or write the answer.' : 'Write the answer first \u2014 anything you say here answers the question.');
+  if (!text && !chosen)
+    return sayFiling(
+      q.options?.length
+        ? 'Pick one, or write the answer.'
+        : 'Write the answer first \u2014 anything you say here answers the question.',
+    );
   const actor = whoAmI();
   // The reply carries the words; a pick with no words is still an answer,
   // and says so in the ledger as one line so the thread reads on its own.
   if (!(await postReply(q.id, text || chosen, actor, 'ruleShots'))) return null;
-  if (!(await threadPost(`/api/threads/${q.id}/status`, { status: 'answered', actor, ...(chosen ? { chosen } : {}) }))) return null;
+  if (
+    !(await threadPost(`/api/threads/${q.id}/status`, {
+      status: 'answered',
+      actor,
+      ...(chosen ? { chosen } : {}),
+    }))
+  )
+    return null;
   S.verdictNote = '';
   S.askChoice = null;
   const left = asksOn(rule).length - 1;
-  toast(`<b>${esc(q.id)}</b> answered \u2014 the agent folds it in.${left > 0 ? ` ${left} more on this rule.` : ''}`, { tone: 'success' });
+  toast(
+    `<b>${esc(q.id)}</b> answered \u2014 the agent folds it in.${left > 0 ? ` ${left} more on this rule.` : ''}`,
+    { tone: 'success' },
+  );
   await requestReload();
   return q.id;
 }
@@ -366,7 +405,8 @@ export async function sayOnRule(rule, text, { reopen = false } = {}) {
 export async function waiveOnRule(rule, text) {
   const live = openQuestionOn(rule) ?? liveNoteOn(rule);
   if (!live) return sayFiling('Nothing is open on this rule to waive.');
-  if (!text) return sayFiling('Waiving is recorded with a reason \u2014 write it above, then press again.');
+  if (!text)
+    return sayFiling('Waiving is recorded with a reason \u2014 write it above, then press again.');
   const actor = whoAmI();
   if (isMachineName(actor) || !iAmDeclared()) {
     sayFiling(
@@ -378,9 +418,18 @@ export async function waiveOnRule(rule, text) {
   }
   const shots = S.ruleShots;
   S.ruleShots = [];
-  if (await threadPost(`/api/threads/${live.id}/status`, { status: 'waived', actor, reason: text, ...(shots.length && { attachments: shots }) })) {
+  if (
+    await threadPost(`/api/threads/${live.id}/status`, {
+      status: 'waived',
+      actor,
+      reason: text,
+      ...(shots.length && { attachments: shots }),
+    })
+  ) {
     S.verdictNote = '';
-    toast(`<b>${esc(live.id)}</b> waived \u2014 the rule\u2019s conversation is closed.`, { tone: 'success' });
+    toast(`<b>${esc(live.id)}</b> waived \u2014 the rule\u2019s conversation is closed.`, {
+      tone: 'success',
+    });
     await requestReload();
   } else S.ruleShots = shots;
 }
@@ -427,7 +476,14 @@ export async function postRuleNote(rule, body, reason = 'feedback') {
     headers: { 'content-type': 'application/json' },
     // Why the note exists (ADR 0005 §1): a person's words are feedback
     // unless they say they are a decision or a request to design.
-    body: JSON.stringify({ kind: 'note', author, body, reason, anchor: { rule }, ...(shots.length && { attachments: shots }) }),
+    body: JSON.stringify({
+      kind: 'note',
+      author,
+      body,
+      reason,
+      anchor: { rule },
+      ...(shots.length && { attachments: shots }),
+    }),
   });
   const out = await res.json().catch(() => ({}));
   if (!res.ok) {

@@ -9,7 +9,16 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -39,14 +48,20 @@ function project({ commit = 'none' } = {}) {
   mkdirSync(join(shop, 'test'), { recursive: true });
   mkdirSync(home, { recursive: true });
   spawnSync('git', ['init', '-q'], { cwd: shop });
-  const env = { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' };
+  const env = {
+    ...process.env,
+    WALKDOWN_HOME: home,
+    WALKDOWN_SKILLS_DIR: join(home, 'skills'),
+    NO_COLOR: '1',
+  };
   delete env.WALKDOWN_SPEC;
   delete env.WALKDOWN_RUNS;
   delete env.WALKDOWN_RECORD_HOME;
   // A child `node --test` that inherits this runner's context reports into
   // it instead of running as a suite of its own.
   delete env.NODE_TEST_CONTEXT;
-  const wd = (args, cwd = shop) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const wd = (args, cwd = shop) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
   for (const id of ['a', 'b']) {
     const made = wd(['blueprints', 'new', id, ...(commit === 'none' ? [] : ['--commit', commit])]);
     assert.equal(made.status, 0, made.stderr);
@@ -63,25 +78,41 @@ function project({ commit = 'none' } = {}) {
     writeFileSync(
       cfg,
       readFileSync(cfg, 'utf8')
-        .replace(/ {2}run_all: .*/, `  run_all: "node --test --test-reporter=${REPORTER} --test-reporter-destination=stdout"`)
+        .replace(
+          / {2}run_all: .*/,
+          `  run_all: "node --test --test-reporter=${REPORTER} --test-reporter-destination=stdout"`,
+        )
         .replace(/^ {2}location: .*$/m, '  location: test/'),
     );
     assert.equal(wd(['hash', '--write', '--blueprint', id]).status, 0);
   }
   writeFileSync(
     join(shop, 'test', 'shop.test.js'),
-    ["import { test } from 'node:test';", ...['a.s.works', 'b.s.works', 'nobody.holds.this'].map((r) => `test('${r} ${tag(r)}', () => {});`)].join('\n'),
+    [
+      "import { test } from 'node:test';",
+      ...['a.s.works', 'b.s.works', 'nobody.holds.this'].map(
+        (r) => `test('${r} ${tag(r)}', () => {});`,
+      ),
+    ].join('\n'),
   );
   const runsOf = (id) => {
     const d = join(homeOf(id), 'runs');
-    return existsSync(d) ? readdirSync(d).filter((f) => f.endsWith('.json')).map((f) => JSON.parse(readFileSync(join(d, f), 'utf8'))) : [];
+    return existsSync(d)
+      ? readdirSync(d)
+          .filter((f) => f.endsWith('.json'))
+          .map((f) => JSON.parse(readFileSync(join(d, f), 'utf8')))
+      : [];
   };
   const suite = (extra = {}) =>
-    spawnSync(process.execPath, ['--test', `--test-reporter=${REPORTER}`, '--test-reporter-destination=stdout'], {
-      cwd: shop,
-      encoding: 'utf8',
-      env: { ...env, ...extra },
-    });
+    spawnSync(
+      process.execPath,
+      ['--test', `--test-reporter=${REPORTER}`, '--test-reporter-destination=stdout'],
+      {
+        cwd: shop,
+        encoding: 'utf8',
+        env: { ...env, ...extra },
+      },
+    );
   return { root, home, shop, env, wd, specOf, homeOf, runsOf, suite };
 }
 
@@ -92,8 +123,14 @@ test('a recorded run files each result in the blueprint that holds its rule, und
   const [ra, rb] = [p.runsOf('a'), p.runsOf('b')];
   assert.equal(ra.length, 1, out.stdout);
   assert.equal(rb.length, 1);
-  assert.deepEqual(ra[0].results.map((r) => r.rule), ['a.s.works']);
-  assert.deepEqual(rb[0].results.map((r) => r.rule), ['b.s.works']);
+  assert.deepEqual(
+    ra[0].results.map((r) => r.rule),
+    ['a.s.works'],
+  );
+  assert.deepEqual(
+    rb[0].results.map((r) => r.rule),
+    ['b.s.works'],
+  );
   assert.equal(ra[0].run_id, rb[0].run_id, 'one run, one id');
   assert.match(ra[0].results[0].statement_hash, /^sha256:/, 'stamped against its own blueprint');
   assert.match(out.stdout, /no blueprint in this project holds nobody\.holds\.this — not recorded/);
@@ -112,7 +149,10 @@ test('walkdown run with no --blueprint runs the suite once and files by rule; wi
   assert.equal(one.status, 0, one.stderr);
   assert.equal(p.runsOf('a').length, 2);
   assert.equal(p.runsOf('b').length, 1, 'nothing filed in b');
-  assert.match(one.stdout, /set aside 1 result\(s\) for another blueprint in this project — b\.s\.works/);
+  assert.match(
+    one.stdout,
+    /set aside 1 result\(s\) for another blueprint in this project — b\.s\.works/,
+  );
 });
 
 test('the Playwright reporter files by rule too @rule:locations.several.results-filed-by-rule', async () => {
@@ -123,16 +163,28 @@ test('the Playwright reporter files by rule too @rule:locations.several.results-
     const r = new Reporter({});
     r.onBegin({}, { allTests: () => ['a.s.works', 'b.s.works', 'nobody.holds.this'].map(t) });
     r.onEnd();`;
-  const out = spawnSync(process.execPath, ['--input-type=module', '-e', script], { cwd: p.shop, encoding: 'utf8', env: p.env });
+  const out = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: p.shop,
+    encoding: 'utf8',
+    env: p.env,
+  });
   assert.equal(out.status, 0, out.stderr);
-  assert.deepEqual(p.runsOf('a')[0].results.map((r) => r.rule), ['a.s.works']);
-  assert.deepEqual(p.runsOf('b')[0].results.map((r) => r.rule), ['b.s.works']);
+  assert.deepEqual(
+    p.runsOf('a')[0].results.map((r) => r.rule),
+    ['a.s.works'],
+  );
+  assert.deepEqual(
+    p.runsOf('b')[0].results.map((r) => r.rule),
+    ['b.s.works'],
+  );
   assert.equal(p.runsOf('a')[0].run_id, p.runsOf('b')[0].run_id);
   assert.match(out.stdout, /no blueprint in this project holds nobody\.holds\.this/);
 });
 
 const hasRspec = spawnSync('rspec', ['--version'], { encoding: 'utf8' }).status === 0;
-test('the RSpec formatter files by rule too @rule:locations.several.results-filed-by-rule', { skip: !hasRspec && 'rspec is not installed' }, () => {
+test('the RSpec formatter files by rule too @rule:locations.several.results-filed-by-rule', {
+  skip: !hasRspec && 'rspec is not installed',
+}, () => {
   const p = project();
   mkdirSync(join(p.shop, 'spec'), { recursive: true });
   writeFileSync(
@@ -140,69 +192,167 @@ test('the RSpec formatter files by rule too @rule:locations.several.results-file
     `RSpec.describe 'shop' do\n${['a.s.works', 'b.s.works', 'nobody.holds.this'].map((r) => `  it '${r}', rule: '${r}' do\n    expect(1).to eq(1)\n  end\n`).join('')}end\n`,
   );
   const lib = join(REPO, 'adapters', 'rspec', 'lib');
-  const out = spawnSync('rspec', ['-I', lib, '-r', 'walkdown/formatter', '--format', 'progress', '--format', 'Walkdown::Formatter', 'spec'], {
-    cwd: p.shop,
-    encoding: 'utf8',
-    env: p.env,
-  });
+  const out = spawnSync(
+    'rspec',
+    [
+      '-I',
+      lib,
+      '-r',
+      'walkdown/formatter',
+      '--format',
+      'progress',
+      '--format',
+      'Walkdown::Formatter',
+      'spec',
+    ],
+    {
+      cwd: p.shop,
+      encoding: 'utf8',
+      env: p.env,
+    },
+  );
   assert.equal(out.status, 0, out.stderr + out.stdout);
-  assert.deepEqual(p.runsOf('a')[0].results.map((r) => r.rule), ['a.s.works']);
-  assert.deepEqual(p.runsOf('b')[0].results.map((r) => r.rule), ['b.s.works']);
+  assert.deepEqual(
+    p.runsOf('a')[0].results.map((r) => r.rule),
+    ['a.s.works'],
+  );
+  assert.deepEqual(
+    p.runsOf('b')[0].results.map((r) => r.rule),
+    ['b.s.works'],
+  );
   assert.equal(p.runsOf('a')[0].run_id, p.runsOf('b')[0].run_id);
   assert.match(out.stdout, /no blueprint in this project holds nobody\.holds\.this/);
 });
 
-test('lint accepts a sibling blueprint\'s rule and thread, and still flags what no blueprint holds @rule:locations.several.lint-reads-the-project', () => {
+test("lint accepts a sibling blueprint's rule and thread, and still flags what no blueprint holds @rule:locations.several.lint-reads-the-project", () => {
   const p = project();
   // A rule of a's whose origin is a thread of b's.
-  const filed = p.wd(['threads', 'new', '--blueprint', 'b', '--rule', 'b.s.works', '--body', 'something seen', '--json']);
+  const filed = p.wd([
+    'threads',
+    'new',
+    '--blueprint',
+    'b',
+    '--rule',
+    'b.s.works',
+    '--body',
+    'something seen',
+    '--json',
+  ]);
   assert.equal(filed.status, 0, filed.stderr);
   const bThread = JSON.parse(filed.stdout).id;
   const fa = join(p.specOf('a'), 'features', 'a.yml');
-  writeFileSync(fa, readFileSync(fa, 'utf8').replace('        verify: [checks]', `        origin: thread:${bThread}\n        verify: [checks]`));
+  writeFileSync(
+    fa,
+    readFileSync(fa, 'utf8').replace(
+      '        verify: [checks]',
+      `        origin: thread:${bThread}\n        verify: [checks]`,
+    ),
+  );
   p.wd(['hash', '--write', '--blueprint', 'a']);
 
   const out = p.wd(['lint', '--blueprint', 'a', '--json']);
   const findings = JSON.parse(out.stdout).findings;
   const about = (s) => findings.filter((f) => f.subject === s || f.message.includes(s));
-  assert.deepEqual(about('b.s.works').filter((f) => f.category === 'coverage'), [], 'b\'s tag is b\'s');
-  assert.deepEqual(about(bThread), [], 'b\'s thread is a thread');
-  assert.equal(about('nobody.holds.this').filter((f) => f.level === 'error').length, 1, 'a tag nobody holds is still an error');
+  assert.deepEqual(
+    about('b.s.works').filter((f) => f.category === 'coverage'),
+    [],
+    "b's tag is b's",
+  );
+  assert.deepEqual(about(bThread), [], "b's thread is a thread");
+  assert.equal(
+    about('nobody.holds.this').filter((f) => f.level === 'error').length,
+    1,
+    'a tag nobody holds is still an error',
+  );
 
   // A run record of a's with a result for a rule b now holds - a verdict
   // that moved with its rule - and a thread of a's on a screen of b's.
-  writeFileSync(join(p.specOf('b'), 'storyboard.yml'), 'screens:\n  - id: cart\n    app: { path: /cart }\n');
+  writeFileSync(
+    join(p.specOf('b'), 'storyboard.yml'),
+    'screens:\n  - id: cart\n    app: { path: /cart }\n',
+  );
   mkdirSync(join(p.homeOf('a'), 'runs'), { recursive: true });
   writeFileSync(
     join(p.homeOf('a'), 'runs', '2026-10-01T00-00-00Z-local-01.json'),
-    JSON.stringify({ run_id: '2026-10-01T00-00-00Z-local-01', created: '2026-10-01T00:00:00Z', actor: 't', kind: 'checks', target: 'local', results: [{ rule: 'b.s.works', status: 'pass' }] }),
+    JSON.stringify({
+      run_id: '2026-10-01T00-00-00Z-local-01',
+      created: '2026-10-01T00:00:00Z',
+      actor: 't',
+      kind: 'checks',
+      target: 'local',
+      results: [{ rule: 'b.s.works', status: 'pass' }],
+    }),
   );
-  const onScreen = p.wd(['threads', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'seen on the cart', '--json']);
+  const onScreen = p.wd([
+    'threads',
+    'new',
+    '--blueprint',
+    'a',
+    '--rule',
+    'a.s.works',
+    '--body',
+    'seen on the cart',
+    '--json',
+  ]);
   const sid = JSON.parse(onScreen.stdout).id;
   const tf = threadAt(p.homeOf('a'), 'threads', sid);
-  writeFileSync(tf, readFileSync(tf, 'utf8').replace('  rule: a.s.works', '  rule: a.s.works\n  screen: cart'));
+  writeFileSync(
+    tf,
+    readFileSync(tf, 'utf8').replace('  rule: a.s.works', '  rule: a.s.works\n  screen: cart'),
+  );
   const withSiblings = JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings;
-  assert.deepEqual(withSiblings.filter((f) => /unknown rule "b\.s\.works"|unknown screen "cart"/.test(f.message)), [], 'the project knows them');
+  assert.deepEqual(
+    withSiblings.filter((f) => /unknown rule "b\.s\.works"|unknown screen "cart"/.test(f.message)),
+    [],
+    'the project knows them',
+  );
   writeFileSync(tf, readFileSync(tf, 'utf8').replace('screen: cart', 'screen: nowhere'));
-  assert.ok(JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings.some((f) => f.message.includes('unknown screen "nowhere"')), 'a screen no blueprint has is still an error');
+  assert.ok(
+    JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings.some((f) =>
+      f.message.includes('unknown screen "nowhere"'),
+    ),
+    'a screen no blueprint has is still an error',
+  );
 
-  writeFileSync(fa, readFileSync(fa, 'utf8').replace(`origin: thread:${bThread}`, 'origin: thread:n-9999'));
+  writeFileSync(
+    fa,
+    readFileSync(fa, 'utf8').replace(`origin: thread:${bThread}`, 'origin: thread:n-9999'),
+  );
   p.wd(['hash', '--write', '--blueprint', 'a']);
   const again = JSON.parse(p.wd(['lint', '--blueprint', 'a', '--json']).stdout).findings;
-  assert.ok(again.some((f) => f.message.includes('unknown thread "n-9999"')), 'a thread no blueprint holds still warns');
+  assert.ok(
+    again.some((f) => f.message.includes('unknown thread "n-9999"')),
+    'a thread no blueprint holds still warns',
+  );
 });
 
-test('a new thread\'s label is numbered across the project\'s blueprints, and its file is its UUID @rule:locations.threads.uuid-is-the-identity', () => {
+test("a new thread's label is numbered across the project's blueprints, and its file is its UUID @rule:locations.threads.uuid-is-the-identity", () => {
   const p = project();
   const file = (bp, kind = 'note', extra = []) => {
-    const r = p.wd(['threads', 'new', '--blueprint', bp, '--rule', `${bp}.s.works`, '--body', 'seen', '--kind', kind, ...extra, '--json']);
+    const r = p.wd([
+      'threads',
+      'new',
+      '--blueprint',
+      bp,
+      '--rule',
+      `${bp}.s.works`,
+      '--body',
+      'seen',
+      '--kind',
+      kind,
+      ...extra,
+      '--json',
+    ]);
     assert.equal(r.status, 0, r.stderr);
     return JSON.parse(r.stdout).id;
   };
   const ids = [file('a'), file('a'), file('a'), file('a'), file('a')];
   assert.deepEqual(ids, ['n-0001', 'n-0002', 'n-0003', 'n-0004', 'n-0005']);
   assert.equal(file('b'), 'n-0006', 'b counts past a');
-  assert.equal(file('a', 'question', ['--option', 'Yes :: do it', '--option', 'No :: leave it']), 'q-0007');
+  assert.equal(
+    file('a', 'question', ['--option', 'Yes :: do it', '--option', 'No :: leave it']),
+    'q-0007',
+  );
 
   // Every file is named by its thread's UUID, with the label inside it.
   const aThreads = join(p.homeOf('a'), 'threads');
@@ -224,7 +374,14 @@ test('a new thread\'s label is numbered across the project\'s blueprints, and it
   const runs = join(p.homeOf('a'), 'runs');
   mkdirSync(runs, { recursive: true });
   const old = join(runs, '2026-09-01T00-00-00Z-local-01.json');
-  const oldText = JSON.stringify({ run_id: '2026-09-01T00-00-00Z-local-01', created: '2026-09-01T00:00:00Z', actor: 'sam', kind: 'walkdown', target: 'local', results: [{ rule: 'a.s.works', status: 'fail', threads: ['n-0001'] }] });
+  const oldText = JSON.stringify({
+    run_id: '2026-09-01T00-00-00Z-local-01',
+    created: '2026-09-01T00:00:00Z',
+    actor: 'sam',
+    kind: 'walkdown',
+    target: 'local',
+    results: [{ rule: 'a.s.works', status: 'fail', threads: ['n-0001'] }],
+  });
   writeFileSync(old, oldText);
   const wrote = spawnSync(
     process.execPath,
@@ -242,13 +399,24 @@ test('a new thread\'s label is numbered across the project\'s blueprints, and it
   const n2 = readFileSync(threadAt(aThreads, 'n-0002'), 'utf8').match(/^uuid: (.+)$/m)[1];
   // n-0006 is b's: a label is the project's, and so is the lookup.
   const n6 = readFileSync(threadAt(bThreads, 'n-0006'), 'utf8').match(/^uuid: (.+)$/m)[1];
-  assert.deepEqual(JSON.parse(wrote.stdout).results[0].threads, [n2, n6], 'each label became its UUID');
+  assert.deepEqual(
+    JSON.parse(wrote.stdout).results[0].threads,
+    [n2, n6],
+    'each label became its UUID',
+  );
   // And filing says the UUID, so a hand-written record can cite it.
-  const filed = JSON.parse(p.wd(['threads', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'again', '--json']).stdout);
+  const filed = JSON.parse(
+    p.wd(['threads', 'new', '--blueprint', 'a', '--rule', 'a.s.works', '--body', 'again', '--json'])
+      .stdout,
+  );
   assert.match(filed.uuid, /^[0-9a-f-]{36}$/);
   assert.equal(readFileSync(old, 'utf8'), oldText, 'the old record is not edited');
   const st = JSON.parse(p.wd(['status', '--blueprint', 'a', '--json']).stdout);
-  assert.match(JSON.stringify(st.rows.find((r) => r.rule === 'a.s.works')), /"threads":\["n-0002","n-0006"\]/, 'and read back as their labels');
+  assert.match(
+    JSON.stringify(st.rows.find((r) => r.rule === 'a.s.works')),
+    /"threads":\["n-0002","n-0006"\]/,
+    'and read back as their labels',
+  );
 });
 
 test('the pointer names no blueprint, and is the same paragraph with one blueprint or two @rule:locations.pointer.names-no-blueprint', () => {
@@ -257,7 +425,10 @@ test('the pointer names no blueprint, and is the same paragraph with one bluepri
   const block = () => readFileSync(claude, 'utf8');
   // The first commit placed it.
   assert.match(block(), /specs are walkdown blueprints, under `\.walkdown\/blueprints\/`/);
-  assert.match(block(), /read and follow the `AGENTS\.md` in the\s+folder of the blueprint you are working on/);
+  assert.match(
+    block(),
+    /read and follow the `AGENTS\.md` in the\s+folder of the blueprint you are working on/,
+  );
   assert.match(block(), /`walkdown blueprints` lists them\s+with their IDs/);
   assert.match(block(), /commands that write take `--blueprint <id>`/);
   // No name, no folder, no ID.
@@ -265,7 +436,11 @@ test('the pointer names no blueprint, and is the same paragraph with one bluepri
     const row = JSON.parse(p.wd(['where', '--blueprint', id, '--json']).stdout);
     assert.doesNotMatch(block(), new RegExp(`\`${id}\``), `${id} is not named`);
     assert.equal(block().includes(row.id), false, `${id}'s ID is not in it`);
-    assert.equal(block().includes(`blueprints/${row.spec.path.split('/').at(-1)}`), false, `${id}'s folder is not in it`);
+    assert.equal(
+      block().includes(`blueprints/${row.spec.path.split('/').at(-1)}`),
+      false,
+      `${id}'s folder is not in it`,
+    );
   }
   assert.equal(block().includes(p.home), false, 'no machine path in a committed file');
 
@@ -288,18 +463,38 @@ test('a project with one blueprint gets the same paragraph, and files every resu
   const solo = join(root, 'solo');
   mkdirSync(solo, { recursive: true });
   spawnSync('git', ['init', '-q'], { cwd: solo });
-  const env = { ...process.env, WALKDOWN_HOME: join(root, 'home'), WALKDOWN_SKILLS_DIR: join(root, 'home', 'skills'), NO_COLOR: '1' };
+  const env = {
+    ...process.env,
+    WALKDOWN_HOME: join(root, 'home'),
+    WALKDOWN_SKILLS_DIR: join(root, 'home', 'skills'),
+    NO_COLOR: '1',
+  };
   delete env.NODE_TEST_CONTEXT;
   delete env.WALKDOWN_RECORD_HOME;
   delete env.WALKDOWN_SPEC;
-  assert.equal(spawnSync(process.execPath, [CLI, 'blueprints', 'new', '--commit', 'spec'], { cwd: solo, env }).status, 0);
+  assert.equal(
+    spawnSync(process.execPath, [CLI, 'blueprints', 'new', '--commit', 'spec'], { cwd: solo, env })
+      .status,
+    0,
+  );
   const text = readFileSync(join(solo, 'CLAUDE.md'), 'utf8');
   assert.match(text, /specs are walkdown blueprints, under `\.walkdown\/blueprints\/`/);
   assert.doesNotMatch(text, /solo/, 'not even the only one is named');
 
-  writeFileSync(join(solo, 'x.test.js'), `import { test } from 'node:test';\ntest('t ${tag('not.in.this.blueprint')}', () => {});\n`);
-  const out = spawnSync(process.execPath, ['--test', `--test-reporter=${REPORTER}`, '--test-reporter-destination=stdout'], { cwd: solo, encoding: 'utf8', env });
-  assert.match(out.stdout, /recorded 1 rule result\(s\) →/, 'held or not, filed in the one blueprint, as before');
+  writeFileSync(
+    join(solo, 'x.test.js'),
+    `import { test } from 'node:test';\ntest('t ${tag('not.in.this.blueprint')}', () => {});\n`,
+  );
+  const out = spawnSync(
+    process.execPath,
+    ['--test', `--test-reporter=${REPORTER}`, '--test-reporter-destination=stdout'],
+    { cwd: solo, encoding: 'utf8', env },
+  );
+  assert.match(
+    out.stdout,
+    /recorded 1 rule result\(s\) →/,
+    'held or not, filed in the one blueprint, as before',
+  );
   assert.doesNotMatch(out.stdout, /for solo|not recorded|set aside/);
 });
 
@@ -316,7 +511,10 @@ test('a framed screen is served without ?bp= when its file is one file, and refu
   writeFileSync(join(p.shop, 'as-built', 'home.html'), '<p>as built</p>');
   for (const id of ['a', 'b']) {
     const cfg = join(p.specOf(id), 'spec.yml');
-    writeFileSync(cfg, `${readFileSync(cfg, 'utf8').replace(/^prototype:[\s\S]*?(?=^\S)/m, '')}\nprototype:\n  root: proto-${id}/\n`);
+    writeFileSync(
+      cfg,
+      `${readFileSync(cfg, 'utf8').replace(/^prototype:[\s\S]*?(?=^\S)/m, '')}\nprototype:\n  root: proto-${id}/\n`,
+    );
     mkdirSync(join(p.shop, `proto-${id}`, 'screens'), { recursive: true });
     writeFileSync(join(p.shop, `proto-${id}`, 'screens', 'both.html'), `<p>${id}</p>`);
   }
@@ -335,7 +533,10 @@ test('a framed screen is served without ?bp= when its file is one file, and refu
     assert.equal(await one.text(), '<p>only a</p>');
     const two = await at('/prototype/screens/both.html');
     assert.equal(two.status, 409);
-    assert.match((await two.json()).error, /different file in \d{4}-[a-z0-9]+-a and \d{4}-[a-z0-9]+-b/);
+    assert.match(
+      (await two.json()).error,
+      /different file in \d{4}-[a-z0-9]+-a and \d{4}-[a-z0-9]+-b/,
+    );
     const none = await at('/prototype/screens/nowhere.html');
     assert.equal(none.status, 404);
     assert.match((await none.json()).error, /is in no blueprint registered here/);

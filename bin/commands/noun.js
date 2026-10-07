@@ -26,7 +26,9 @@ export async function dispatch(noun, verbs, args) {
   if (first === undefined || first.startsWith('-')) return verbs[bare].run(args);
   const verb = verbs[first];
   if (!verb) {
-    console.error(`walkdown ${noun}: no verb "${first}". It takes ${Object.keys(verbs).join(', ')}.`);
+    console.error(
+      `walkdown ${noun}: no verb "${first}". It takes ${Object.keys(verbs).join(', ')}.`,
+    );
     console.error(dim(`\`walkdown ${noun} help\` says what each does.`));
     return end(2);
   }
@@ -42,8 +44,14 @@ export function nounHelp(noun, verbs) {
   return [
     `Usage: walkdown ${noun} <${Object.keys(verbs).join('|')}> ...`,
     '',
-    ...Object.entries(verbs).flatMap(([, v]) => [`  ${v.usage}`, ...v.about.split('\n').map((l) => `      ${l}`), '']),
+    ...Object.entries(verbs).flatMap(([, v]) => [
+      `  ${v.usage}`,
+      ...v.about.split('\n').map((l) => `      ${l}`),
+      '',
+    ]),
     // Only a noun whose first verb lists runs it bare; `rules` alone is a usage line.
     ...(Object.keys(verbs)[0] === 'list' ? [`The bare noun is \`walkdown ${noun} list\`.`] : []),
-  ].join('\n').trimEnd();
+  ]
+    .join('\n')
+    .trimEnd();
 }

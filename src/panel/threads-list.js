@@ -89,7 +89,7 @@ export function threadFilterBar() {
   return html`<div class="flex shrink-0 justify-center border-b border-base-300 px-3.5 py-2">
     <div class="join" data-testid="panel.thread-filter">
       ${pick('you', 'Awaiting you', 'A question unanswered, or a fix to verify, on nothing the walk can reach — the same queue walkdown status shows')}
-      ${pick('active', 'Active', 'Every live thread that is not a rule\'s conversation — those live under their rule')}
+      ${pick('active', 'Active', "Every live thread that is not a rule's conversation — those live under their rule")}
       ${pick('all', 'All', 'Every thread ever filed on this blueprint, rule conversations and ended ones included')}
     </div>
   </div>`;

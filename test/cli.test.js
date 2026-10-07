@@ -18,6 +18,7 @@ for (const s of scenarios()) {
     assert.equal(out.status, s.exit, `exit ${out.status}, wanted ${s.exit}\n${out.text}`);
     for (const re of s.expect) assert.match(out.text, re);
     const placed = placeAnchors(out.text.split('\n'), s.anchors);
-    for (const a of s.anchors ?? []) assert.ok(placed.has(a.id), `anchor ${a.id} matched no line:\n${out.text}`);
+    for (const a of s.anchors ?? [])
+      assert.ok(placed.has(a.id), `anchor ${a.id} matched no line:\n${out.text}`);
   });
 }

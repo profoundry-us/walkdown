@@ -1,4 +1,3 @@
-import { declareProject, threadAt } from '../tools/test-home.mjs';
 /*
  * What `walkdown thread` SAYS, as opposed to what it does. The mutations
  * themselves are covered next door in thread-mutations.test.js; this is about
@@ -12,10 +11,13 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
+import { declareProject, threadAt } from '../tools/test-home.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-thread-cli-'));
 after(() => rmSync(root, { recursive: true, force: true }));
+
 import { newFormOf } from '../bin/commands/old-forms.js';
+
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 
 /*
@@ -66,7 +68,10 @@ const GUESSING = identity(null);
 /** A person who has said where they are. The stamps on disk stay UTC. */
 const IN_TOKYO = (() => {
   const home = identity('A Person');
-  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: A Person\n  timezone: Asia/Tokyo\n');
+  writeFileSync(
+    join(home, 'profile.yml'),
+    'identity:\n  username: A Person\n  timezone: Asia/Tokyo\n',
+  );
   return home;
 })();
 
@@ -77,10 +82,14 @@ const IN_TOKYO = (() => {
  * by the same translation the old form's refusal prints.
  */
 const run = (args, dir, home = SAID) =>
-  execFileSync(process.execPath, [CLI, ...newFormOf(['thread', ...args]), '--blueprint', declareProject(home, dir)], {
-    encoding: 'utf8',
-    env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
-  }).replace(/\x1b\[[0-9;]*m/g, '');
+  execFileSync(
+    process.execPath,
+    [CLI, ...newFormOf(['thread', ...args]), '--blueprint', declareProject(home, dir)],
+    {
+      encoding: 'utf8',
+      env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home },
+    },
+  ).replace(/\x1b\[[0-9;]*m/g, '');
 
 test('a transition reports where the thread came from and where it landed @rule:threads.lifecycle.says-what-it-did', () => {
   const bp = fixture('moved', { id: 'n-0001', status: 'addressed' });
@@ -106,17 +115,40 @@ test('a reply with no transition says the status did not move @rule:threads.life
   assert.doesNotMatch(out, /→/, 'nothing moved, so nothing may be reported as having moved');
   // Relaying a person's words is the case the mark exists for: their words
   // under their name, the machine beside it, and what it added kept apart.
-  const relayed = run(['n-0002', '--as-agent', '--said', 'the label reads wrong', '--added', 'seen at 375 too'], bp);
+  const relayed = run(
+    ['n-0002', '--as-agent', '--said', 'the label reads wrong', '--added', 'seen at 375 too'],
+    bp,
+  );
   assert.match(relayed, /by A Person/);
-  assert.match(relayed, /via agent/, 'a machine typing a person\'s words is said beside the name, not instead');
+  assert.match(
+    relayed,
+    /via agent/,
+    "a machine typing a person's words is said beside the name, not instead",
+  );
   const disk = readFileSync(threadAt(threadsOf(bp), 'n-0002'), 'utf8');
-  assert.match(disk, /author: A Person\n\s+via: agent\n[^]*body: the label reads wrong\n\s+added: seen at 375 too/);
+  assert.match(
+    disk,
+    /author: A Person\n\s+via: agent\n[^]*body: the label reads wrong\n\s+added: seen at 375 too/,
+  );
   const read = run(['n-0002'], bp);
-  assert.match(read, /the label reads wrong\n[^]*agent added:[^]*seen at 375 too/, 'the read path draws the addition apart');
+  assert.match(
+    read,
+    /the label reads wrong\n[^]*agent added:[^]*seen at 375 too/,
+    'the read path draws the addition apart',
+  );
   // --added without --said has nothing to sit beside; --said with --reply is two bodies.
-  assert.throws(() => run(['n-0002', '--as-agent', '--added', 'x'], bp), (e) => /--said/.test(String(e.stderr)));
-  assert.throws(() => run(['n-0002', '--as-agent', '--said', 'x', '--reply', 'y'], bp), (e) => /--added/.test(String(e.stderr)));
-  assert.throws(() => run(['n-0002', '--said', 'x'], bp), (e) => /--as-agent/.test(String(e.stderr)));
+  assert.throws(
+    () => run(['n-0002', '--as-agent', '--added', 'x'], bp),
+    (e) => /--said/.test(String(e.stderr)),
+  );
+  assert.throws(
+    () => run(['n-0002', '--as-agent', '--said', 'x', '--reply', 'y'], bp),
+    (e) => /--added/.test(String(e.stderr)),
+  );
+  assert.throws(
+    () => run(['n-0002', '--said', 'x'], bp),
+    (e) => /--as-agent/.test(String(e.stderr)),
+  );
 });
 
 test('every mutation names who it was recorded under @rule:threads.lifecycle.says-what-it-did', () => {
@@ -175,7 +207,11 @@ test('a mutating --json call reports the change, never the thread @rule:threads.
   const doc = JSON.parse(run(['n-0008', '--as-agent', '--status', 'addressed', '--json'], bp));
   assert.equal(doc.was, 'open');
   assert.equal(doc.status, 'addressed');
-  assert.equal(doc.by, 'agent', 'recorded-under survives into the machine format - a machine moves a thread as itself');
+  assert.equal(
+    doc.by,
+    'agent',
+    'recorded-under survives into the machine format - a machine moves a thread as itself',
+  );
   assert.equal(doc.via, undefined, 'and no mark beside it: the actor is the machine');
   assert.equal(doc.replies_added, 0);
   assert.equal(doc.body, undefined, 'a mutation must not print the conversation');
@@ -195,7 +231,7 @@ test('the report names the same person the disk records @rule:threads.lifecycle.
   assert.doesNotMatch(disk, /via:/, 'a person typing is the ordinary case and needs no annotation');
 });
 
-test("a reply to a terminal thread is recorded under its own actor, not the status holder @rule:threads.lifecycle.says-what-it-did", () => {
+test('a reply to a terminal thread is recorded under its own actor, not the status holder @rule:threads.lifecycle.says-what-it-did', () => {
   // Round five (n-0125): the report named the waiver for someone else's
   // reply, putting another person's name on a change they did not make.
   const bp = fixture('terminal', { id: 'n-0010', status: 'waived', waived_by: 'Probe Human' });
@@ -272,7 +308,10 @@ test('thread new opens an anchored thread and reports under whom @rule:threads.l
   assert.match(disk, /via: agent/);
   assert.match(disk, /rule: f\.s\.rule/);
   assert.match(disk, /status: open/);
-  const q = run(['new', '--kind', 'question', '--rule', 'f.s.rule', '--body', 'Which?', '--as-agent'], bp);
+  const q = run(
+    ['new', '--kind', 'question', '--rule', 'f.s.rule', '--body', 'Which?', '--as-agent'],
+    bp,
+  );
   assert.match(q, /q-0002 opened · question/, 'questions take their own prefix');
 });
 
@@ -280,21 +319,30 @@ test('thread new records an anchor as the element id, never the selector for it'
   const bp = ruleFixture('new-anchor');
   // Judges wrote the selector they had been driving, and every such thread
   // read as anchored to something the storyboard never declared.
-  run(['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '[data-testid="start.connect"]'], bp);
+  run(
+    ['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '[data-testid="start.connect"]'],
+    bp,
+  );
   const disk = readFileSync(threadAt(threadsOf(bp), 'n-0001'), 'utf8');
   assert.match(disk, /element: start\.connect$/m);
   assert.doesNotMatch(disk, /data-testid/);
   // Anything that is not that one form is kept as typed.
   run(['new', '--rule', 'f.s.rule', '--body', 'x', '--element', '#by-css > .path'], bp);
-  assert.match(readFileSync(threadAt(threadsOf(bp), 'n-0002'), 'utf8'), /element: "#by-css > \.path"/);
+  assert.match(
+    readFileSync(threadAt(threadsOf(bp), 'n-0002'), 'utf8'),
+    /element: "#by-css > \.path"/,
+  );
 });
 
-test('thread new refuses the machine\'s words that miss the voice in words, and files nothing @rule:ownership.authoring.machine-words-pass-the-voice', () => {
+test("thread new refuses the machine's words that miss the voice in words, and files nothing @rule:ownership.authoring.machine-words-pass-the-voice", () => {
   const bp = ruleFixture('voice-new');
   const long = Array.from({ length: 41 }, (_, i) => `word${i}`).join(' ');
   assert.throws(
     () => run(['new', '--rule', 'f.s.rule', '--body', `${long}.`, '--as-agent'], bp),
-    (err) => err.status === 2 && /long-sentence/.test(String(err.stderr)) && !/at .*writes\.js/.test(String(err.stderr)),
+    (err) =>
+      err.status === 2 &&
+      /long-sentence/.test(String(err.stderr)) &&
+      !/at .*writes\.js/.test(String(err.stderr)),
   );
   assert.throws(() => readFileSync(threadAt(threadsOf(bp), 'n-0001')), 'no refusal filed anything');
 });
@@ -365,7 +413,10 @@ test('--as-agent may claim, and may never accept @rule:threads.lifecycle.claim-n
   const bp = fixture('as-agent', { id: 'n-0013', status: 'addressed' });
   // Claiming is exactly what it is for.
   assert.match(run(['n-0013', '--as-agent', '--reply', 'looked at it'], bp), /\+1 reply/);
-  for (const args of [['n-0013', '--as-agent', '--verify'], ['n-0013', '--as-agent', '--waive', '--reason', 'x']])
+  for (const args of [
+    ['n-0013', '--as-agent', '--verify'],
+    ['n-0013', '--as-agent', '--waive', '--reason', 'x'],
+  ])
     assert.throws(
       () => run(args, bp),
       (err) => err.status === 2 && /never accept it/.test(String(err.stderr)),
@@ -381,22 +432,31 @@ test('--as-agent may claim, and may never accept @rule:threads.lifecycle.claim-n
  * it. A person's own words are never gated - the check is on what the
  * machine writes, not on what it carries.
  */
-test('the machine\'s words are refused when they miss the voice; --as-is files them; a person\'s words are never gated @rule:ownership.authoring.machine-words-pass-the-voice', () => {
+test("the machine's words are refused when they miss the voice; --as-is files them; a person's words are never gated @rule:ownership.authoring.machine-words-pass-the-voice", () => {
   const bp = fixture('voice', { id: 'n-0014', status: 'open' });
-  const chained = 'Looked at it - the pin sits where the step says it should, which is the whole of the claim - and the tooltip opens away from the edge.';
+  const chained =
+    'Looked at it - the pin sits where the step says it should, which is the whole of the claim - and the tooltip opens away from the edge.';
   assert.throws(
     () => run(['n-0014', '--as-agent', '--reply', chained], bp),
-    (err) => err.status === 2 && /do not pass the voice/.test(String(err.stderr)) && /dash-clause/.test(String(err.stderr)) && /--as-is/.test(String(err.stderr)),
+    (err) =>
+      err.status === 2 &&
+      /do not pass the voice/.test(String(err.stderr)) &&
+      /dash-clause/.test(String(err.stderr)) &&
+      /--as-is/.test(String(err.stderr)),
   );
   let disk = readFileSync(threadAt(threadsOf(bp), 'n-0014'), 'utf8');
   assert.doesNotMatch(disk, /Looked at it/, 'a refused reply never lands');
   // What the machine adds beside a person's words is its own, and gated the same.
   assert.throws(
-    () => run(['n-0014', '--as-agent', '--said', 'fix it', '--added', 'It is probably the ghost.'], bp),
+    () =>
+      run(['n-0014', '--as-agent', '--said', 'fix it', '--added', 'It is probably the ghost.'], bp),
     (err) => err.status === 2 && /hedge/.test(String(err.stderr)),
   );
   assert.match(run(['n-0014', '--as-agent', '--reply', chained, '--as-is'], bp), /\+1 reply/);
-  assert.match(run(['n-0014', '--reply', 'Probably fine - I looked - and it is - honestly.'], bp), /\+1 reply/);
+  assert.match(
+    run(['n-0014', '--reply', 'Probably fine - I looked - and it is - honestly.'], bp),
+    /\+1 reply/,
+  );
   disk = readFileSync(threadAt(threadsOf(bp), 'n-0014'), 'utf8');
   assert.match(disk, /Looked at it/);
   assert.match(disk, /Probably fine/);
@@ -443,7 +503,16 @@ test('ten concurrent filers get ten threads, none overwritten', async () => {
         process.execPath,
         [
           CLI,
-          'threads', 'new', '--rule', 'f.s.rule', '--body', `finding ${i}`, '--as-agent', '--blueprint', declareProject(SAID, bp)],
+          'threads',
+          'new',
+          '--rule',
+          'f.s.rule',
+          '--body',
+          `finding ${i}`,
+          '--as-agent',
+          '--blueprint',
+          declareProject(SAID, bp),
+        ],
         { env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID } },
       ),
     ),
@@ -469,13 +538,23 @@ test('a thread is read in the zone the person declared, and the file still says 
   const bp = fixture('zoned', { id: 'n-0009', status: 'open' });
   const out = run(['n-0009'], bp, IN_TOKYO);
   assert.match(out, /Jan 1, 2026, 9:00 AM GMT\+9/, 'midnight UTC is nine in the morning in Tokyo');
-  assert.doesNotMatch(out, /2026-01-01T00:00:00Z/, 'the raw UTC string is what the file says, not what a person reads');
-  assert.match(readFileSync(threadAt(threadsOf(bp), 'n-0009'), 'utf8'), /created: 2026-01-01T00:00:00Z/);
+  assert.doesNotMatch(
+    out,
+    /2026-01-01T00:00:00Z/,
+    'the raw UTC string is what the file says, not what a person reads',
+  );
+  assert.match(
+    readFileSync(threadAt(threadsOf(bp), 'n-0009'), 'utf8'),
+    /created: 2026-01-01T00:00:00Z/,
+  );
 });
 
 test('a zone the machine does not know falls back to its own and says so @rule:time.records.read-in-your-zone', () => {
   const home = identity('A Person');
-  writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: A Person\n  timezone: Mars/Olympus_Mons\n');
+  writeFileSync(
+    join(home, 'profile.yml'),
+    'identity:\n  username: A Person\n  timezone: Mars/Olympus_Mons\n',
+  );
   const bp = fixture('unzoned', { id: 'n-0010', status: 'open' });
   // Reads rather than throws - a typo in the personal config must never take
   // a command down (n-0148) - and the stamp is still a clock, not a raw Z.
@@ -498,10 +577,14 @@ test('a note filed on a screen alone is a design request, and answers for that s
   );
   const lintSays = () => {
     try {
-      return execFileSync(process.execPath, [CLI, 'lint', '--no-checks', '--blueprint', declareProject(SAID, bp)], {
-        encoding: 'utf8',
-        env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID },
-      });
+      return execFileSync(
+        process.execPath,
+        [CLI, 'lint', '--no-checks', '--blueprint', declareProject(SAID, bp)],
+        {
+          encoding: 'utf8',
+          env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: SAID },
+        },
+      );
     } catch (err) {
       return String(err.stdout) + String(err.stderr);
     }
@@ -514,7 +597,11 @@ test('a note filed on a screen alone is a design request, and answers for that s
   assert.match(disk, /screen: undrawn/);
   assert.doesNotMatch(disk, /rule:/, 'no rule was named, so none is recorded');
   assert.match(disk, /reason: request/);
-  assert.doesNotMatch(lintSays(), /no design and no open design request/, 'the request answers for the screen');
+  assert.doesNotMatch(
+    lintSays(),
+    /no design and no open design request/,
+    'the request answers for the screen',
+  );
 
   // A reason given is the reason kept.
   run(['new', '--screen', 'undrawn', '--body', 'An odd screen.', '--reason', 'feedback'], bp);
@@ -532,7 +619,10 @@ test('a thread with neither a rule nor a screen is refused, and so is a screen t
       return String(err.stderr);
     }
   };
-  assert.match(refusal(['new', '--body', 'About what?']), /--rule <id>\), or the screen \(--screen <id>\)/);
+  assert.match(
+    refusal(['new', '--body', 'About what?']),
+    /--rule <id>\), or the screen \(--screen <id>\)/,
+  );
   assert.match(refusal(['new', '--screen', 'nowhere', '--body', 'x']), /No screen "nowhere"/);
   assert.equal(readdirSync(threadsOf(bp)).length, 0, 'nothing was filed');
 });

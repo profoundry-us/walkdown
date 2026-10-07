@@ -5,7 +5,19 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { html, live, nothing, unsafeHTML } from '../../vendor/lit.js';
-import { answerOnRule, asksOn, laterOnRule, liveNoteOn, names, openQuestionOn, openThreadView, pendingReplies, sayFiling, sayOnRule, waiveOnRule } from './conversation.js';
+import {
+  answerOnRule,
+  asksOn,
+  laterOnRule,
+  liveNoteOn,
+  names,
+  openQuestionOn,
+  openThreadView,
+  pendingReplies,
+  sayFiling,
+  sayOnRule,
+  waiveOnRule,
+} from './conversation.js';
 import { tierMarks } from './rules-list.js';
 import { requestReload, requestRender } from './shell.js';
 import { dropCover, dropZone, dropZoneClass, pastedShots, pasteShots } from './thread-pane.js';
@@ -16,12 +28,17 @@ import { dropCover, dropZone, dropZoneClass, pastedShots, pasteShots } from './t
  * particular). A picture dropped on it is held on the box, to go with the
  * next thing the box does - a fail's why most of all (n-0328).
  */
-const ruleZone = dropZone('rule', (e) => pasteShots(e, 'ruleShots'), () => Boolean(S.selected));
+const ruleZone = dropZone(
+  'rule',
+  (e) => pasteShots(e, 'ruleShots'),
+  () => Boolean(S.selected),
+);
+
 import { askOptions } from './ask.js';
 import { openEvidence } from './evidence.js';
 import { openSource } from './source.js';
-import { toast } from './toast.js';
 import { S } from './state.js';
+import { toast } from './toast.js';
 import { api, fire } from './util.js';
 import {
   conversationOf,
@@ -255,12 +272,26 @@ function ruleTurn(r) {
     const asks = mine.find((i) => i.action === 'answer');
     const fixed = mine.find((i) => i.action === 'verify');
     const parts = [];
-    if (asks) parts.push(`The rule asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} \u2014 anything you say below is the answer, and the agent folds it in.`);
+    if (asks)
+      parts.push(
+        `The rule asks ${asks.threads.length === 1 ? 'a question' : `${asks.threads.length} questions`} \u2014 anything you say below is the answer, and the agent folds it in.`,
+      );
     if (fixed) parts.push(`The agent says its fix is done.`);
     if (asks) return { party: 'human', label: 'Your move', text: parts.join(' ') };
-    if (!S.session) parts.push(r.built ? 'Start a walkdown to judge the build.' : 'Start a walkdown to approve the wording, or send it back.');
-    else if (r.built) parts.push(`Pass ends this conversation${live ? ` (${live} note${live === 1 ? '' : 's'})` : ''}; Fail continues it with your why.`);
-    else parts.push('No build yet: Approve signs the wording; Refine sends it back with what should change.');
+    if (!S.session)
+      parts.push(
+        r.built
+          ? 'Start a walkdown to judge the build.'
+          : 'Start a walkdown to approve the wording, or send it back.',
+      );
+    else if (r.built)
+      parts.push(
+        `Pass ends this conversation${live ? ` (${live} note${live === 1 ? '' : 's'})` : ''}; Fail continues it with your why.`,
+      );
+    else
+      parts.push(
+        'No build yet: Approve signs the wording; Refine sends it back with what should change.',
+      );
     return { party: 'human', label: 'Your move', text: parts.join(' ') };
   }
   const theirs = items.filter((i) => i.who === 'agent');
@@ -273,9 +304,17 @@ function ruleTurn(r) {
       cover: 'It owes this rule a check.',
       incorporate: 'It folds your answer into the rule and closes the question.',
     };
-    return { party: 'agent', label: "Agent's move", text: [...new Set(theirs.map((i) => what[i.action]).filter(Boolean))].join(' ') };
+    return {
+      party: 'agent',
+      label: "Agent's move",
+      text: [...new Set(theirs.map((i) => what[i.action]).filter(Boolean))].join(' '),
+    };
   }
-  return { party: 'closed', label: 'Nothing owed', text: 'Nothing waits on anyone here. Replies still land; a fail reopens the conversation.' };
+  return {
+    party: 'closed',
+    label: 'Nothing owed',
+    text: 'Nothing waits on anyone here. Replies still land; a fail reopens the conversation.',
+  };
 }
 
 /*
@@ -293,10 +332,17 @@ function ruleTurn(r) {
 function askCard(r, asked, open) {
   const queue = asksOn(r.rule);
   // Done ones count for the dots, so "2 of 3" stays 3 as the asks go.
-  const done = threadsFor(r.rule).filter((t) => t.kind === 'question' && t.status === 'answered').length;
+  const done = threadsFor(r.rule).filter(
+    (t) => t.kind === 'question' && t.status === 'answered',
+  ).length;
   const total = queue.length + done;
   const at = done + 1;
-  const first = { ...MSG.messages(asked)[0], options: undefined, thread: asked.id, tag: `${asked.id} \u00b7 question \u00b7 open` };
+  const first = {
+    ...MSG.messages(asked)[0],
+    options: undefined,
+    thread: asked.id,
+    tag: `${asked.id} \u00b7 question \u00b7 open`,
+  };
   return html`<div class="relative mt-3 mb-1.5 rounded border border-primary/60 bg-primary/5 px-2 pt-2.5 pb-2 text-[11px] leading-snug"
       data-testid="detail.ask" data-question="${asked.id}">
     <span class="absolute -top-[7px] left-2 rounded bg-primary px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider text-primary-content">The agent asks</span>
@@ -305,7 +351,10 @@ function askCard(r, asked, open) {
       ${Array.from({ length: total }, (_, i) => html`<i class="inline-block h-[6px] w-[6px] rounded-full ${i < done ? 'bg-success' : i === done ? 'bg-primary' : 'bg-base-300'}"></i>`)}
     </span>
     <div class="wd-stream max-h-56 overflow-y-auto" @click=${open}>${unsafeHTML(
-      MSG.stream({ replies: [first] }, { rules: (S.data?.rows ?? []).map((x) => x.rule), names: names() }),
+      MSG.stream(
+        { replies: [first] },
+        { rules: (S.data?.rows ?? []).map((x) => x.rule), names: names() },
+      ),
     )}</div>
     ${askOptions(asked)}
     <textarea id="wdp-answer" data-testid="detail.answer" rows="2" class="textarea textarea-xs mt-1.5 w-full resize-none"
@@ -368,12 +417,24 @@ function ruleMessages(r) {
       const answer = t.kind === 'question' ? answerOf(t) : null;
       return MSG.messages(t).map((m, i) =>
         i
-          ? { ...m, on: t.id, thread: t.id, ...(m === answer ? { tag: `\u21b3 answer \u00b7 ${t.id}`, clamp: true } : {}) }
-          : { ...m, on: t.id, thread: t.id, tag: `${t.id} \u00b7 ${t.kind === 'question' ? 'question' : (t.reason ?? 'feedback')} \u00b7 ${t.status}` },
+          ? {
+              ...m,
+              on: t.id,
+              thread: t.id,
+              ...(m === answer ? { tag: `\u21b3 answer \u00b7 ${t.id}`, clamp: true } : {}),
+            }
+          : {
+              ...m,
+              on: t.id,
+              thread: t.id,
+              tag: `${t.id} \u00b7 ${t.kind === 'question' ? 'question' : (t.reason ?? 'feedback')} \u00b7 ${t.status}`,
+            },
       );
     })
     .sort((a, b) => String(a.created ?? '').localeCompare(String(b.created ?? '')))
-    .map((m, i, list) => (m.tag || i === 0 || list[i - 1].on === m.on ? m : { ...m, tag: `\u21b3 ${m.on}` }));
+    .map((m, i, list) =>
+      m.tag || i === 0 || list[i - 1].on === m.on ? m : { ...m, tag: `\u21b3 ${m.on}` },
+    );
   return { all, messages };
 }
 
@@ -410,7 +471,14 @@ export function historyPane() {
       ${
         messages.length
           ? html`<div class="wd-stream" data-testid="history.stream" @click=${openTagged}>${unsafeHTML(
-              MSG.stream({ replies: messages }, { rules: known, pending: note ? (pendingReplies.get(note.id) ?? []) : [], names: names() }),
+              MSG.stream(
+                { replies: messages },
+                {
+                  rules: known,
+                  pending: note ? (pendingReplies.get(note.id) ?? []) : [],
+                  names: names(),
+                },
+              ),
             )}</div>`
           : html`<p class="text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
       }
@@ -430,14 +498,14 @@ function conversation(r, picked) {
   const placeholder = asked
     ? 'Reply\u2026'
     : folding
-    ? 'Reply\u2026'
-    : S.session
-    ? r.built
-      ? 'Reply, or say why \u2014 for Fail or Waive\u2026'
-      : 'Reply, or say what should change \u2014 for Refine or Waive\u2026'
-    : note
       ? 'Reply\u2026'
-      : 'Start a conversation about this rule\u2026';
+      : S.session
+        ? r.built
+          ? 'Reply, or say why \u2014 for Fail or Waive\u2026'
+          : 'Reply, or say what should change \u2014 for Refine or Waive\u2026'
+        : note
+          ? 'Reply\u2026'
+          : 'Start a conversation about this rule\u2026';
   const open = openTagged;
   /*
    * The last thing said, and a door to the rest (n-0319). The whole stream
@@ -462,7 +530,14 @@ function conversation(r, picked) {
     ${
       last
         ? html`<div class="wd-stream" data-testid="detail.stream" @click=${open}>${unsafeHTML(
-            MSG.stream({ replies: [{ ...last, tag: last.tag ?? `\u21b3 ${last.on}` }] }, { rules: known, pending: note ? (pendingReplies.get(note.id) ?? []) : [], names: names() }),
+            MSG.stream(
+              { replies: [{ ...last, tag: last.tag ?? `\u21b3 ${last.on}` }] },
+              {
+                rules: known,
+                pending: note ? (pendingReplies.get(note.id) ?? []) : [],
+                names: names(),
+              },
+            ),
           )}</div>`
         : html`<p class="pb-1 text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
     }
@@ -567,12 +642,20 @@ export function detailPane() {
     for (const c of tpl.content.querySelectorAll('code')) {
       const tok = c.textContent;
       if (!anchors.has(tok) || c.closest('pre')) continue;
-      c.classList.add('wdp-anchor', 'cursor-help', 'underline', 'decoration-dotted', 'underline-offset-2');
+      c.classList.add(
+        'wdp-anchor',
+        'cursor-help',
+        'underline',
+        'decoration-dotted',
+        'underline-offset-2',
+      );
       c.dataset.anchor = tok;
       c.title = 'Show this on the surface';
     }
     const kids = tpl.content.children;
-    return unsafeHTML(kids.length === 1 && kids[0].tagName === 'P' ? kids[0].innerHTML : tpl.innerHTML);
+    return unsafeHTML(
+      kids.length === 1 && kids[0].tagName === 'P' ? kids[0].innerHTML : tpl.innerHTML,
+    );
   };
   const anchorOf = (e) => e.target?.closest?.('code[data-anchor]');
   const hoverIn = (e) => {
@@ -691,7 +774,9 @@ export function detailPane() {
               navigator.clipboard
                 ?.writeText(r.rule)
                 .then(() => toast(`Copied <code>${r.rule}</code>`, { tone: 'success' }))
-                .catch(() => toast('Could not reach the clipboard.', { tone: 'error' }))}>${r.rule}</button>
+                .catch(() =>
+                  toast('Could not reach the clipboard.', { tone: 'error' }),
+                )}>${r.rule}</button>
         </div>
         <p class="${TEXT} text-[15px] leading-relaxed" data-testid="detail.statement" @mouseover=${hoverIn} @mouseenter=${hoverIn} @mouseout=${hoverOut}>${prose(r.statement)}</p>
         <!-- The reason and the story behind it, under the claim and quieter

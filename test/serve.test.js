@@ -12,7 +12,7 @@
  * If you are here to make a red rule green, write the browser check. Do not
  * re-tag one of these.
  */
-import { register, threadAt } from '../tools/test-home.mjs';
+
 import assert from 'node:assert/strict';
 import {
   existsSync,
@@ -27,10 +27,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
 import { readDraft } from '../lib/draft.js';
-import { SITTING_FIELDS } from '../lib/sitting.js';
 import { formatHash } from '../lib/hash.js';
 import { resolveLocations } from '../lib/locations.js';
 import { createWalkdownServer } from '../lib/serve.js';
+import { SITTING_FIELDS } from '../lib/sitting.js';
+import { register, threadAt } from '../tools/test-home.mjs';
 import { parse } from '../vendor/yaml.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-serve-'));
@@ -59,7 +60,10 @@ let server;
  * "nothing registered" rather than "nobody named".
  */
 const guessing = () => {
-  writeFileSync(join(GUESSING_HOME, 'registry.yml'), readFileSync(join(DECLARED_HOME, 'registry.yml'), 'utf8'));
+  writeFileSync(
+    join(GUESSING_HOME, 'registry.yml'),
+    readFileSync(join(DECLARED_HOME, 'registry.yml'), 'utf8'),
+  );
   process.env.WALKDOWN_HOME = GUESSING_HOME;
 };
 
@@ -298,10 +302,7 @@ test('a pin with no anchored element is kept by position', async () => {
       }),
     })
   ).json();
-  assert.equal(
-    parse(readFileSync(threadAt(threads, stray.id), 'utf8')).anchor.offset,
-    undefined,
-  );
+  assert.equal(parse(readFileSync(threadAt(threads, stray.id), 'utf8')).anchor.offset, undefined);
 
   // Garbage coordinates are dropped rather than persisted.
   const junk = await (
@@ -578,7 +579,13 @@ test('every field a sitting carries survives the door, the writer and the read b
     }),
   }).then((r) => r.json());
   const record = JSON.parse(
-    readFileSync(join(runs, readdirSync(runs).find((f) => f.startsWith(sealed.run_id))), 'utf8'),
+    readFileSync(
+      join(
+        runs,
+        readdirSync(runs).find((f) => f.startsWith(sealed.run_id)),
+      ),
+      'utf8',
+    ),
   );
   assert.deepEqual(record.signatures, FULL.signatures);
   assert.equal(existsSync(join(draftsDir, 'local.json')), false);
@@ -715,7 +722,8 @@ test('a stand-in serves the design as the app, marked as one @rule:screens.surfa
 
 test("an as-built drawing is served as written, from the project's own folder @rule:screens.surfaces.as-built-drawing", async () => {
   mkdirSync(join(root, 'as-built'), { recursive: true });
-  const page = '<!doctype html><html data-theme="redline"><body><h1 data-testid="home.cta">as built</h1></body></html>';
+  const page =
+    '<!doctype html><html data-theme="redline"><body><h1 data-testid="home.cta">as built</h1></body></html>';
   writeFileSync(join(root, 'as-built', 'home.html'), page);
   const res = await fetch(`${base}/as-built/home.html`);
   assert.equal(res.status, 200);
@@ -772,9 +780,7 @@ test('thread reply and status endpoints mutate through the validated path', asyn
   assert.equal(guessVerify.status, 400);
   assert.match((await guessVerify.json()).error, /identity:/);
 
-  const verified = await (
-    await post('/api/threads/n-0001/status', { status: 'verified' })
-  ).json();
+  const verified = await (await post('/api/threads/n-0001/status', { status: 'verified' })).json();
   assert.equal(verified.thread.status, 'verified');
 
   const unknown = await post('/api/threads/zzz/replies', { body: 'x' });
@@ -894,9 +900,7 @@ test('multi-blueprint: sibling blueprints are discovered and ?bp= switches, memb
   assert.deepEqual(ids, ['main', 'sibling']);
   assert.ok(home.blueprints.find((p) => nm(p.id) === 'main').current);
 
-  const sibling = await (
-    await fetch(`${base}/api/blueprint?bp=sibling`)
-  ).json();
+  const sibling = await (await fetch(`${base}/api/blueprint?bp=sibling`)).json();
   assert.equal(sibling.blueprint, 'sibling-app');
   assert.equal(sibling.rows[0].rule, 'f.s.one');
   assert.ok(sibling.blueprints.find((p) => nm(p.id) === 'sibling').current);
@@ -936,7 +940,9 @@ test('two listed blueprints sharing an id are told apart by key, and a bare ?bp=
     const body = await refused.json();
     assert.equal(body.candidates.length, 2);
     const twin = twins.find((p) => p.key.endsWith('/twin'));
-    const picked = await (await fetch(`${base}/api/blueprint?bp=${encodeURIComponent(twin.key)}`)).json();
+    const picked = await (
+      await fetch(`${base}/api/blueprint?bp=${encodeURIComponent(twin.key)}`)
+    ).json();
     assert.equal(picked.blueprint, 'the-twin');
     assert.ok(picked.blueprints.find((p) => p.key === twin.key).current);
     // A write through an ambiguous name lands nowhere.
@@ -967,9 +973,7 @@ test('a pin files against the page\u2019s own project, not the server\u2019s def
   // In the sibling's threads/, carrying this note. Ids are only unique within
   // a blueprint - each has its own ledger - so the check is what the file
   // says, not whether the name happens to be taken in the default project.
-  const filed = parse(
-    readFileSync(threadAt(root, 'sibling', 'threads', res.id), 'utf8'),
-  );
+  const filed = parse(readFileSync(threadAt(root, 'sibling', 'threads', res.id), 'utf8'));
   assert.equal(filed.body, 'Belongs to the sibling.');
   const inDefault = threadAt(threads, res.id);
   if (existsSync(inDefault))
@@ -1156,18 +1160,26 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
   const file = threadAt(threads, id);
   const opened = parse(readFileSync(file, 'utf8'));
   assert.equal(opened.via, 'agent');
-  assert.equal(opened.author, 'serve-person', 'relayed words are the person\'s');
+  assert.equal(opened.author, 'serve-person', "relayed words are the person's");
   assert.equal(opened.body, 'The label reads wrong.', 'as they typed them');
-  assert.equal(opened.added, 'On the second screen, at 375.', 'and the machine\'s addition is apart');
-  assert.equal(opened.reason, 'feedback', 'a person\'s words, so feedback and not an observation');
-  await post(`/api/threads/${id}/replies`, { said: 'Still wrong.', added: 'Checked at 1440 too.', via: 'agent' });
+  assert.equal(
+    opened.added,
+    'On the second screen, at 375.',
+    "and the machine's addition is apart",
+  );
+  assert.equal(opened.reason, 'feedback', "a person's words, so feedback and not an observation");
+  await post(`/api/threads/${id}/replies`, {
+    said: 'Still wrong.',
+    added: 'Checked at 1440 too.',
+    via: 'agent',
+  });
   await post(`/api/threads/${id}/replies`, { body: 'Fixed the label.', via: 'agent' });
   const replies = parse(readFileSync(file, 'utf8')).replies;
   assert.equal(replies.length, 2);
   assert.equal(replies[0].via, 'agent');
   assert.equal(replies[0].author, 'serve-person');
   assert.equal(replies[0].added, 'Checked at 1440 too.');
-  assert.equal(replies[1].author, 'agent', 'the machine\'s own words are its own');
+  assert.equal(replies[1].author, 'agent', "the machine's own words are its own");
   assert.equal(replies[1].via, undefined, 'and need no mark - the author IS the machine');
   assert.equal(replies[1].added, undefined);
   await post(`/api/threads/${id}/status`, { status: 'addressed', reason: 'done', via: 'agent' });
@@ -1176,7 +1188,9 @@ test('via rides through the API on a note, a reply and a move @rule:status.attri
   // The reason is the machine's sentence, recorded as its own reply.
   assert.equal(t.replies.at(-1).author, 'agent');
   // What the embed and the panel read back carries it too.
-  const listed = (await (await fetch(`${base}/api/blueprint`)).json()).threads.find((x) => x.id === id);
+  const listed = (await (await fetch(`${base}/api/blueprint`)).json()).threads.find(
+    (x) => x.id === id,
+  );
   assert.equal(listed.via, 'agent');
   assert.equal(listed.added, 'On the second screen, at 375.');
   // `added` without the person's words is refused: there is nothing for it
@@ -1212,7 +1226,9 @@ test('a server started outside any project offers every registered blueprint, wi
     // The page, the scripts and whose page an address is need no blueprint.
     for (const path of ['/', '/embed.js', '/panel.js', '/walkdown.css'])
       assert.equal((await fetch(at + path)).status, 200, path);
-    const whose = await (await fetch(`${at}/api/whose?url=${encodeURIComponent('http://x.test/home')}`)).json();
+    const whose = await (
+      await fetch(`${at}/api/whose?url=${encodeURIComponent('http://x.test/home')}`)
+    ).json();
     assert.ok(Array.isArray(whose.matches));
 
     // Everything else is asked by name, and says so when it is not.
@@ -1299,7 +1315,9 @@ test('`walkdown serve` starts outside any project rather than refusing @rule:loc
       });
     });
   try {
-    const mainId = parse(readFileSync(join(DECLARED_HOME, 'registry.yml'), 'utf8')).blueprints.find((r) => nm(r.id) === 'main').id;
+    const mainId = parse(readFileSync(join(DECLARED_HOME, 'registry.yml'), 'utf8')).blueprints.find(
+      (r) => nm(r.id) === 'main',
+    ).id;
     assert.match(await run(['--blueprint', mainId]), /a page naming none opens .*walkdown-serve-/);
     assert.match(await run(['--blueprint', 'nobody']), /No blueprint for `nobody`/);
   } finally {
@@ -1320,7 +1338,11 @@ test('a blueprint registered or drawn after the server started is found from its
     'screens:\n  - id: arrival\n    app: { path: /arrival }\n',
   );
   const whose = async () =>
-    (await (await fetch(`${base}/api/whose?url=${encodeURIComponent('http://late.test/arrival')}`)).json()).matches;
+    (
+      await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('http://late.test/arrival')}`)
+      ).json()
+    ).matches;
   assert.deepEqual(await whose(), [], 'nothing claims it before it is registered');
   register({ id: 'late', project: late, homeDir: late });
   const after = await whose();

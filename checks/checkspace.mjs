@@ -78,7 +78,10 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
    * Evidence and drafts are one machine's, and stay behind.
    */
   const homeCopy = (from, to) =>
-    cpSync(from, to, { recursive: true, filter: (src) => !/\/(evidence|drafts)(\/|$)/.test(src.slice(from.length)) });
+    cpSync(from, to, {
+      recursive: true,
+      filter: (src) => !/\/(evidence|drafts)(\/|$)/.test(src.slice(from.length)),
+    });
   homeCopy(join(root, HOME), join(CHECKSPACE, HOME));
   homeCopy(join(root, CLI_HOME), join(CHECKSPACE, CLI_HOME));
   /*
@@ -129,7 +132,8 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     symlinkSync(realEvidence, evLink, 'dir');
   } else if (!existsSync(evLink)) placeholderEvidence(evLink);
   const cliEv = join(CHECKSPACE, CLI_HOME, 'evidence');
-  if (realCliEvidence && existsSync(realCliEvidence) && !existsSync(cliEv)) symlinkSync(realCliEvidence, cliEv, 'dir');
+  if (realCliEvidence && existsSync(realCliEvidence) && !existsSync(cliEv))
+    symlinkSync(realCliEvidence, cliEv, 'dir');
   /*
    * And the two check suites, for the same reason: `authoring.location`
    * resolves against the code root, so without them the copy is a
@@ -164,7 +168,13 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
     join(process.env.WALKDOWN_HOME, 'profile.yml'),
     // A declared zone, and not the one the suite's laptop is in, so a
     // clock read in it is provably the config's and not the browser's.
-    ['identity:', '  username: checks-person', '  name: A Checks Person', '  timezone: Asia/Tokyo', ''].join('\n'),
+    [
+      'identity:',
+      '  username: checks-person',
+      '  name: A Checks Person',
+      '  timezone: Asia/Tokyo',
+      '',
+    ].join('\n'),
   );
 
   /*
@@ -299,7 +309,8 @@ function placeholderEvidence(dir) {
     }
     for (const res of run?.results ?? [])
       for (const p of res?.evidence ?? []) {
-        if (typeof p !== 'string' || !p.startsWith('runs/evidence/') || !/\.(png|jpe?g)$/i.test(p)) continue;
+        if (typeof p !== 'string' || !p.startsWith('runs/evidence/') || !/\.(png|jpe?g)$/i.test(p))
+          continue;
         const file = join(dir, p.slice('runs/evidence/'.length));
         mkdirSync(dirname(file), { recursive: true });
         writeFileSync(file, ONE_PIXEL);

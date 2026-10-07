@@ -75,10 +75,16 @@ const files = (dir, ext) => {
   } catch {
     return [];
   }
-  return out.flatMap((e) => (e.isDirectory() ? files(join(dir, e.name), ext) : e.name.endsWith(ext) ? [join(dir, e.name)] : []));
+  return out.flatMap((e) =>
+    e.isDirectory()
+      ? files(join(dir, e.name), ext)
+      : e.name.endsWith(ext)
+        ? [join(dir, e.name)]
+        : [],
+  );
 };
 
-test('every stamp in this blueprint\'s own records is a UTC instant and none names a zone @rule:time.records.stored-as-utc', () => {
+test("every stamp in this blueprint's own records is a UTC instant and none names a zone @rule:time.records.stored-as-utc", () => {
   const stamped = [];
   for (const f of files(join(HOME, 'threads'), '.yml')) {
     const t = parse(readFileSync(f, 'utf8'));
@@ -95,9 +101,9 @@ test('every stamp in this blueprint\'s own records is a UTC instant and none nam
     const y = parse(readFileSync(f, 'utf8'));
     for (const s of y.stories ?? [])
       for (const r of s.rules ?? [])
+        // The entries before n-0290 were stamped as bare dates; those are
+        // history and stay. Anything written since is an instant.
         for (const w of r.steps?.reworded ?? [])
-          // The entries before n-0290 were stamped as bare dates; those are
-          // history and stay. Anything written since is an instant.
           if (typeof w.at === 'string' && w.at.includes('T')) stamped.push([f, w.at]);
   }
   assert.ok(stamped.length > 500, `the ledger is not empty (${stamped.length})`);

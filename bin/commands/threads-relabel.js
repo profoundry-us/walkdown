@@ -13,7 +13,11 @@ import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { planRelabel, relabelThread } from '../../lib/writes.js';
 import { end, loadOrExit, namedOrExit } from './context.js';
 
-const firstLine = (t) => String(t?.body ?? '').trim().split('\n')[0].slice(0, 80);
+const firstLine = (t) =>
+  String(t?.body ?? '')
+    .trim()
+    .split('\n')[0]
+    .slice(0, 80);
 
 export async function run(args) {
   const { values, positionals } = parseArgs({
@@ -40,20 +44,34 @@ export async function run(args) {
     return end(2);
   }
   const say = () => {
-    console.log(`${plan.from} labels ${plan.keeps.length + 1} threads. The newer one would be relabelled:`);
-    console.log(`  ${plan.uuid}  ${dim(String(plan.thread.created ?? ''))}  ${firstLine(plan.thread)}`);
-    console.log(dim(`  ${plan.from} → ${plan.to}, keeping ${plan.from} as its alias; ${plan.keeps.join(', ')} keeps ${plan.from}`));
+    console.log(
+      `${plan.from} labels ${plan.keeps.length + 1} threads. The newer one would be relabelled:`,
+    );
+    console.log(
+      `  ${plan.uuid}  ${dim(String(plan.thread.created ?? ''))}  ${firstLine(plan.thread)}`,
+    );
+    console.log(
+      dim(
+        `  ${plan.from} → ${plan.to}, keeping ${plan.from} as its alias; ${plan.keeps.join(', ')} keeps ${plan.from}`,
+      ),
+    );
   };
 
   if (!values.yes) {
     if (!process.stdin.isTTY) {
       say();
-      console.error(yellow(`\nNothing was changed. \`walkdown threads relabel ${plan.uuid} --yes --blueprint ${values.blueprint}\` does it.`));
+      console.error(
+        yellow(
+          `\nNothing was changed. \`walkdown threads relabel ${plan.uuid} --yes --blueprint ${values.blueprint}\` does it.`,
+        ),
+      );
       return end(2);
     }
     say();
     const rl = createInterface({ input: process.stdin, output: process.stdout });
-    const said = (await rl.question(`\nRelabel it ${plan.to}? [y/N] `).catch(() => '')).trim().toLowerCase();
+    const said = (await rl.question(`\nRelabel it ${plan.to}? [y/N] `).catch(() => ''))
+      .trim()
+      .toLowerCase();
     rl.close();
     if (said !== 'y' && said !== 'yes') {
       console.log(dim('Nothing was changed.'));
@@ -62,9 +80,17 @@ export async function run(args) {
   }
   const done = relabelThread(blueprint, plan.uuid);
   if (values.json) {
-    console.log(JSON.stringify({ uuid: done.uuid, from: done.from, to: done.to, aliases: [done.from], keeps: done.keeps }, null, 2));
+    console.log(
+      JSON.stringify(
+        { uuid: done.uuid, from: done.from, to: done.to, aliases: [done.from], keeps: done.keeps },
+        null,
+        2,
+      ),
+    );
     return end(0);
   }
-  console.log(`${green('✓')} ${done.uuid} is ${done.to} now. ${done.from} stays as its alias, and still labels ${done.keeps.join(', ')}.`);
+  console.log(
+    `${green('✓')} ${done.uuid} is ${done.to} now. ${done.from} stays as its alias, and still labels ${done.keeps.join(', ')}.`,
+  );
   return end(0);
 }

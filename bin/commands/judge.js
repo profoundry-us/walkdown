@@ -92,10 +92,16 @@ export function run(args) {
    */
   const port =
     values.port ??
-    String(4730 + (Number.parseInt(createHash('sha1').update(id).digest('hex').slice(0, 8), 16) % 60));
+    String(
+      4730 + (Number.parseInt(createHash('sha1').update(id).digest('hex').slice(0, 8), 16) % 60),
+    );
   const appUrl = (s) => (s.app?.path && baseUrl ? baseUrl + s.app.path : null);
   const protoUrl = (s) =>
-    s.prototype ? serve + '/prototype' + s.prototype : s.proposal ? serve + '/proposals' + s.proposal : null;
+    s.prototype
+      ? serve + '/prototype' + s.prototype
+      : s.proposal
+        ? serve + '/proposals' + s.proposal
+        : null;
 
   // The anchors the steps actually name: a dotted backtick token is an anchor
   // by the same convention lint resolves them under (lib/lint.js).
@@ -210,11 +216,13 @@ export function run(args) {
     `You are judging one rule of the "${config?.blueprint ?? 'walkdown'}" blueprint against the running system. Decide for yourself how to earn the verdict — navigate, look, and try to break it. You are producing evidence a person can trust, never their acceptance.`,
     '',
     `RULE ${id}`,
-    rule.statement ?? '(no statement — the blueprint fails lint; judge nothing until it says what it means)',
+    rule.statement ??
+      '(no statement — the blueprint fails lint; judge nothing until it says what it means)',
   );
 
   for (const s of wanted)
-    if (s.app?.setup) say('', `SETUP — ${s.id} is a state, not an address. On arrival:`, `  ${s.app.setup}`);
+    if (s.app?.setup)
+      say('', `SETUP — ${s.id} is a state, not an address. On arrival:`, `  ${s.app.setup}`);
 
   if (rule.steps) {
     say('', 'STEPS');
@@ -268,7 +276,10 @@ export function run(args) {
       .split('\n')
       .map((l) => `  ${l}`),
     ...(hash
-      ? ['', `  The statement_hash above holds only while the statement and steps read exactly as printed.`]
+      ? [
+          '',
+          `  The statement_hash above holds only while the statement and steps read exactly as printed.`,
+        ]
       : []),
     '',
     'GOVERNANCE',
@@ -293,7 +304,7 @@ export function run(args) {
     // through a shared browser. The board names itself; read it first.
     '  - Before trusting any page you open, confirm it is yours: GET /api/blueprint on the origin',
     '    you are driving and check the project it names is your copy. A shared browser can put',
-    '    another judge\'s server in your tab; a verdict earned against the wrong copy is',
+    "    another judge's server in your tab; a verdict earned against the wrong copy is",
     '    indistinguishable in the record from one earned against the right one.',
     ...governance.flatMap(bullet),
   );

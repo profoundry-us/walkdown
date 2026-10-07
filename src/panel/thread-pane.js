@@ -17,7 +17,6 @@ import { requestRender } from './shell.js';
 import { S } from './state.js';
 import { fire } from './util.js';
 
-
 /*
  * Why the note exists, beside its status (ADR 0005 §1): a finding is a
  * judge's, feedback is yours, a decision is a record. Read at a glance,
@@ -29,6 +28,7 @@ const reasonChip = (t) =>
   t.kind === 'note' && t.reason && t.reason !== 'feedback'
     ? html`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
     : nothing;
+
 import { askOptions } from './ask.js';
 import {
   CHIP,
@@ -54,7 +54,6 @@ export const renameChain = (sc, element) => {
   }
   return out;
 };
-
 
 /*
  * How the turn line is drawn, by whose move it is. A person's move is amber,
@@ -286,7 +285,10 @@ export function threadPane() {
         t.kind === 'question' && t.status === 'open'
           ? html`<div class="mt-3 rounded border border-primary/60 bg-primary/5 px-2 pt-2.5 pb-2 text-[11px] leading-snug" data-testid="thread.ask">
               <div class="wd-stream">${unsafeHTML(
-                MSG.stream({ replies: [{ ...MSG.messages(t)[0], options: undefined }] }, { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() }),
+                MSG.stream(
+                  { replies: [{ ...MSG.messages(t)[0], options: undefined }] },
+                  { rules: (S.data?.rows ?? []).map((r) => r.rule), names: names() },
+                ),
               )}</div>
               <!-- The choices, here too (n-0319): a question is answered
                    from wherever it is read, and Answer below sends the
@@ -349,7 +351,6 @@ export function threadPane() {
     </div>
     </div>`;
 }
-
 
 /*
  * A picture pasted into the composer (n-0096): held until the reply is sent,
@@ -430,13 +431,18 @@ export function pasteShots(e, key = 'threadShots') {
   // dragged from the desk onto the box (n-0328). `key` says which box holds
   // them - the thread screen's, or the rule's (n-0328 again: a picture
   // dropped while failing a rule had nowhere to go).
-  const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) => /^image\//.test(f.type));
+  const files = [...(e.clipboardData?.files ?? e.dataTransfer?.files ?? [])].filter((f) =>
+    /^image\//.test(f.type),
+  );
   if (!files.length) return;
   e.preventDefault();
   for (const f of files.slice(0, 4 - S[key].length)) {
     const reader = new FileReader();
     reader.onload = () => {
-      S[key] = [...S[key], { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) }];
+      S[key] = [
+        ...S[key],
+        { name: f.name || 'pasted.png', type: f.type, data: String(reader.result) },
+      ];
       requestRender();
     };
     reader.readAsDataURL(f);

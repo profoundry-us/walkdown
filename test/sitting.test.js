@@ -75,7 +75,11 @@ test('writeDraft puts every field of a sitting on disk @rule:panel.walkdown.draf
 
 test('a session with no start of its own is given one, not left without', () => {
   const drafts = mkdtempSync(join(tmpdir(), 'wd-sitting-'));
-  const { started } = writeDraft(drafts, { actor: 'topher', started: undefined, ...{ verdicts: FULL.verdicts } });
+  const { started } = writeDraft(drafts, {
+    actor: 'topher',
+    started: undefined,
+    ...{ verdicts: FULL.verdicts },
+  });
   assert.match(started, /^\d{4}-\d{2}-\d{2}T/);
 });
 

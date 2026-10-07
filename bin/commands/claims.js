@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { listedBlueprints, loadBlueprint } from '../../lib/blueprint.js';
-import { resolveLocations } from '../../lib/locations.js';
 import { blueprintsForUrl, claimsOf, sharedPages } from '../../lib/claims.js';
+import { resolveLocations } from '../../lib/locations.js';
 import { end } from './context.js';
 
 /*
@@ -26,7 +26,9 @@ export function run(args) {
   const dir = at.spec?.missing ? null : at.spec?.path;
   // Several blueprints standing here is not none: claims reads them all.
   if (!dir && !at.ambiguous) {
-    console.error(`No blueprint here. Nothing registered in ${at.config.registry.path} contains this directory.`);
+    console.error(
+      `No blueprint here. Nothing registered in ${at.config.registry.path} contains this directory.`,
+    );
     return end(2);
   }
   // The set the `.walkdown` here declares - not the one beside wherever the
@@ -49,17 +51,17 @@ export function run(args) {
     // Every claimant, never a pick between them: the order is the config's
     // and means nothing (ADR 0001).
     console.log(values.url);
-    for (const hit of hits) console.log(`  ${hit.id} — screen ${hit.screen} (target ${hit.target})`);
-    if (hits.length > 1) console.log(`\n${hits.length} blueprints claim it. Opening one is a person's choice.`);
+    for (const hit of hits)
+      console.log(`  ${hit.id} — screen ${hit.screen} (target ${hit.target})`);
+    if (hits.length > 1)
+      console.log(`\n${hits.length} blueprints claim it. Opening one is a person's choice.`);
     return end(0);
   }
 
   const shared = sharedPages(listed);
   const total = listed.reduce((n, p) => n + claimsOf(p.blueprint).length, 0);
   if (values.json) {
-    console.log(
-      JSON.stringify({ blueprints: listed.map((p) => p.id), shared }, null, 2),
-    );
+    console.log(JSON.stringify({ blueprints: listed.map((p) => p.id), shared }, null, 2));
     return end(0);
   }
   console.log(`${listed.length} blueprint(s), ${total} claim(s)`);

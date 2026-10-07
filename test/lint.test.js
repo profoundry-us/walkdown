@@ -1,4 +1,3 @@
-import { declaredHome, register } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -8,6 +7,7 @@ import { loadBlueprint } from '../lib/blueprint.js';
 import { formatHash, hashMatches } from '../lib/hash.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
 import { lint } from '../lib/lint.js';
+import { declaredHome, register } from '../tools/test-home.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-test-'));
 after(() => rmSync(root, { recursive: true, force: true }));
@@ -87,7 +87,10 @@ test('with no list command, coverage reads the rule tags in the authoring files,
           '          then: [It holds]',
         ];
       })
-      .reduce((lines, l) => [...lines, l], ['feature: cov', 'stories:', '  - id: demo.cov', '    rules:'])
+      .reduce(
+        (lines, l) => [...lines, l],
+        ['feature: cov', 'stories:', '  - id: demo.cov', '    rules:'],
+      )
       .join('\n'),
   );
   mkdirSync(join(h.root, 'tests'), { recursive: true });
@@ -95,18 +98,29 @@ test('with no list command, coverage reads the rule tags in the authoring files,
     join(h.root, 'tests', 'cov.test.js'),
     // The tag is assembled so this repository's own scan does not read it.
     [
-      ...['demo.cov.tagged', 'no.such.rule'].map((r) => `test('it holds ${'@rule' + ':'}${r}', () => {});`),
+      ...['demo.cov.tagged', 'no.such.rule'].map(
+        (r) => `test('it holds ${'@rule' + ':'}${r}', () => {});`,
+      ),
       // In JavaScript only `@rule:` is a tag; a `rule:` key is code.
       "const fixture = { rule: 'demo.cov.untagged', other: 'rule: not.a.tag' };",
     ].join('\n'),
   );
   // In RSpec, `rule:` metadata is the tag.
-  writeFileSync(join(h.root, 'tests', 'cov_spec.rb'), "it 'holds', rule: 'demo.cov.ruby' do\nend\n");
+  writeFileSync(
+    join(h.root, 'tests', 'cov_spec.rb'),
+    "it 'holds', rule: 'demo.cov.ruby' do\nend\n",
+  );
   const { findings } = lint(load(h), { checks: true });
-  const coverage = findings.filter((f) => f.category === 'coverage' && !/never recorded/.test(f.message));
+  const coverage = findings.filter(
+    (f) => f.category === 'coverage' && !/never recorded/.test(f.message),
+  );
   assert.deepEqual(
     coverage.map((f) => [f.level, f.subject]).sort(),
-    [['error', 'demo.cov.ruby'], ['error', 'no.such.rule'], ['warn', 'demo.cov.untagged']].sort(),
+    [
+      ['error', 'demo.cov.ruby'],
+      ['error', 'no.such.rule'],
+      ['warn', 'demo.cov.untagged'],
+    ].sort(),
     JSON.stringify(coverage),
   );
 });
@@ -196,15 +210,21 @@ test('a declared anchor without a dot is an anchor, not an unknown screen (#6)',
   writeFileSync(
     feature,
     readFileSync(feature, 'utf8').replace(
-      "when: [Click anchor `home.cta`]",
+      'when: [Click anchor `home.cta`]',
       'when: [Click anchor `home.cta`, Look at `level-icon-organization`, Visit `nowhere`, Press `nope.dotted`]',
     ),
   );
   const said = lint(load(h), { checks: false }).findings.map((f) => f.message);
   assert.ok(!said.some((m) => m.includes('level-icon-organization')), said.join('\n'));
   // The dot still tells the two apart for tokens nobody declared.
-  assert.ok(said.some((m) => /unknown screen `nowhere`/.test(m)), said.join('\n'));
-  assert.ok(said.some((m) => /undeclared anchor `nope.dotted`/.test(m)), said.join('\n'));
+  assert.ok(
+    said.some((m) => /unknown screen `nowhere`/.test(m)),
+    said.join('\n'),
+  );
+  assert.ok(
+    said.some((m) => /undeclared anchor `nope.dotted`/.test(m)),
+    said.join('\n'),
+  );
 });
 
 test('answered question warns; waived without waived_by errors', () => {
@@ -265,7 +285,13 @@ test('a statement-only hash is legacy, not stale: it lints, and --write re-stamp
   assert.match(rule.steps.reworded[0].why, /statement alone/);
   // Reworded later, a verdict carrying the legacy hash still counts.
   const file = join(h.spec, 'features', 'demo.yml');
-  writeFileSync(file, readFileSync(file, 'utf8').replace('The visitor can do the thing.', 'The visitor can do the thing, plainly.'));
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8').replace(
+      'The visitor can do the thing.',
+      'The visitor can do the thing, plainly.',
+    ),
+  );
   runHashCommand(load(h), { write: true, reword: 'plainer' });
   assert.ok(hashMatches(legacy, load(h).features[0].data.stories[0].rules[0]));
 });
@@ -280,7 +306,13 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   runHashCommand(load(h), { write: true }); // current form first
   const file = join(h.spec, 'features', 'demo.yml');
   const old = load(h).features[0].data.stories[0].rules[0].steps.statement_hash;
-  writeFileSync(file, readFileSync(file, 'utf8').replace('The visitor can do the thing.', 'The visitor can do the thing, plainly.'));
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8').replace(
+      'The visitor can do the thing.',
+      'The visitor can do the thing, plainly.',
+    ),
+  );
   assert.equal(runHashCommand(load(h)).rows[0].status, 'stale');
   assert.equal(lint(load(h), { checks: false }).exitCode, 1);
 
@@ -299,7 +331,10 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   assert.equal(lint(load(h), { checks: false }).exitCode, 0);
 
   // And the plain re-stamp, which is what a change of meaning gets.
-  writeFileSync(file, readFileSync(file, 'utf8').replace('do the thing, plainly.', 'do the other thing.'));
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8').replace('do the thing, plainly.', 'do the other thing.'),
+  );
   const current = rule.steps.statement_hash;
   runHashCommand(load(h), { write: true });
   const again = load(h).features[0].data.stories[0].rules[0];
@@ -307,14 +342,21 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   assert.equal(hashMatches(current, again), false, 'the meaning moved, so the old hash is gone');
   // And so is every wording before it: a verdict on the pre-rewording words
   // matched through the list, and went on matching after the meaning moved.
-  assert.equal(hashMatches(old, again), false, 'an older rewording no longer names the rule either');
+  assert.equal(
+    hashMatches(old, again),
+    false,
+    'an older rewording no longer names the rule either',
+  );
 });
 
 test('changing a step stales the hash the same as changing the statement', () => {
   const h = writeFixture(join(root, 'stepmove'));
   runHashCommand(load(h), { write: true });
   const file = join(h.spec, 'features', 'demo.yml');
-  writeFileSync(file, readFileSync(file, 'utf8').replace('Click anchor `home.cta`', 'Click anchor `home.other`'));
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8').replace('Click anchor `home.cta`', 'Click anchor `home.other`'),
+  );
   assert.equal(runHashCommand(load(h)).rows[0].status, 'stale');
 });
 
@@ -356,7 +398,10 @@ test('an undesigned screen without a design-request thread warns; with one it pa
 
   // A thread on the screen that is not a design request clears nothing: a
   // question or a note of any other reason is queued where design never sees it.
-  const undrawn = () => lint(load(h), { checks: false }).findings.some((f) => f.category === 'drift' && f.subject === 'specborn');
+  const undrawn = () =>
+    lint(load(h), { checks: false }).findings.some(
+      (f) => f.category === 'drift' && f.subject === 'specborn',
+    );
   writeFileSync(
     join(h.threads, 'q.yml'),
     'id: q-9\nkind: question\nstatus: open\nanchor: { rule: demo.main.thing, screen: specborn }\nbody: what goes here?\n',
@@ -556,9 +601,13 @@ test('a rule with no steps is an error, because a check is built from them @rule
   // A retired rule owes nothing but a resolvable id: it describes something
   // we stopped meaning, so it is registered and then left alone.
   assert.deepEqual(
-    ruleFixture(join(root, 'retired-no-steps'), ['        retired: We stopped meaning this, in a whole sentence.'], {
-      steps: false,
-    }).filter((x) => x.category === 'schema'),
+    ruleFixture(
+      join(root, 'retired-no-steps'),
+      ['        retired: We stopped meaning this, in a whole sentence.'],
+      {
+        steps: false,
+      },
+    ).filter((x) => x.category === 'schema'),
     [],
   );
 });
@@ -595,9 +644,7 @@ test('a run signed under a role that does not exist is named @rule:status.accept
       results: [{ rule: 'demo.main.thing', status: 'pass' }],
     }),
   );
-  const findings = lint(load(h), { checks: false }).findings.filter(
-    (f) => f.category === 'runs',
-  );
+  const findings = lint(load(h), { checks: false }).findings.filter((f) => f.category === 'runs');
   // The write paths refuse this, so a record carrying it was hand-edited or
   // came from a walkdown that knew a role this one does not - either way the
   // rule it meant to accept is silently still waiting, and only lint can say
@@ -650,19 +697,30 @@ test('a statement the length of a paragraph, and a because carrying history, are
   const reason = Array.from({ length: 36 }, (_, i) => `why${i}`).join(' ');
   writeFileSync(
     file,
-    readFileSync(file, 'utf8')
-      .replace('statement: The visitor can do the thing.', `statement: ${long}.\n        because: ${reason}.`),
+    readFileSync(file, 'utf8').replace(
+      'statement: The visitor can do the thing.',
+      `statement: ${long}.\n        because: ${reason}.`,
+    ),
   );
   const { findings } = lint(load(h), { checks: false });
   const codes = findings.map((f) => f.category);
   assert.ok(codes.includes('statement-reads-as-a-paragraph'), codes.join(','));
   assert.ok(codes.includes('because-carries-history'), codes.join(','));
-  assert.match(findings.find((f) => f.category === 'statement-reads-as-a-paragraph').message, /46 words/);
+  assert.match(
+    findings.find((f) => f.category === 'statement-reads-as-a-paragraph').message,
+    /46 words/,
+  );
   // The message says what the field is for, not only what number it crossed.
-  assert.match(findings.find((f) => f.category === 'statement-reads-as-a-paragraph').message, /goal in one breath/);
+  assert.match(
+    findings.find((f) => f.category === 'statement-reads-as-a-paragraph').message,
+    /goal in one breath/,
+  );
   assert.match(findings.find((f) => f.category === 'because-carries-history').message, /history/);
   // Three short sentences trip it too - the count is of breaths, not words.
-  writeFileSync(file, readFileSync(file, 'utf8').replace(`${long}.`, 'One thing. Then another. And a third.'));
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8').replace(`${long}.`, 'One thing. Then another. And a third.'),
+  );
   const again = lint(load(h), { checks: false }).findings.map((f) => f.category);
   assert.ok(again.includes('statement-reads-as-a-paragraph'), again.join(','));
 });
@@ -674,7 +732,10 @@ test('the voice is linted field by field, as warnings that say what to do @rule:
   writeFileSync(
     file,
     readFileSync(file, 'utf8')
-      .replace('statement: The visitor can do the thing.', `statement: ${long}.\n        because: We probably keep its provenance.`)
+      .replace(
+        'statement: The visitor can do the thing.',
+        `statement: ${long}.\n        because: We probably keep its provenance.`,
+      )
       .replace(
         'when: [Click anchor `home.cta`]',
         'when: [Click anchor `home.cta`]\n          then:\n            - Note that it lands - somewhere the reader can see it, which is the point of the trip - and stays',
@@ -682,16 +743,40 @@ test('the voice is linted field by field, as warnings that say what to do @rule:
   );
   const { findings } = lint(load(h), { checks: false });
   const voice = findings.filter((f) => f.category === 'voice');
-  assert.ok(voice.every((f) => f.level === 'warn'), 'a voice fault is a person\'s call, never an error');
+  assert.ok(
+    voice.every((f) => f.level === 'warn'),
+    "a voice fault is a person's call, never an error",
+  );
   const said = voice.map((f) => f.message);
-  assert.ok(said.some((m) => /^statement: a sentence of 41 words/.test(m)), said.join('\n'));
-  assert.ok(said.some((m) => /^because: .*hedges/.test(m)), said.join('\n'));
-  assert.ok(said.some((m) => /^because: .*house word.*where it came from/.test(m)), said.join('\n'));
-  assert.ok(said.some((m) => /^because: .*first person/.test(m)), said.join('\n'));
-  assert.ok(said.some((m) => /^then step: .*throat/.test(m)), said.join('\n'));
-  assert.ok(said.some((m) => /^then step: .*dashes/.test(m)), said.join('\n'));
+  assert.ok(
+    said.some((m) => /^statement: a sentence of 41 words/.test(m)),
+    said.join('\n'),
+  );
+  assert.ok(
+    said.some((m) => /^because: .*hedges/.test(m)),
+    said.join('\n'),
+  );
+  assert.ok(
+    said.some((m) => /^because: .*house word.*where it came from/.test(m)),
+    said.join('\n'),
+  );
+  assert.ok(
+    said.some((m) => /^because: .*first person/.test(m)),
+    said.join('\n'),
+  );
+  assert.ok(
+    said.some((m) => /^then step: .*throat/.test(m)),
+    said.join('\n'),
+  );
+  assert.ok(
+    said.some((m) => /^then step: .*dashes/.test(m)),
+    said.join('\n'),
+  );
   // Every message says what to do, not only what it saw.
-  assert.ok(voice.every((f) => /—/.test(f.message)), said.join('\n'));
+  assert.ok(
+    voice.every((f) => /—/.test(f.message)),
+    said.join('\n'),
+  );
 });
 
 /*
@@ -712,11 +797,22 @@ test('a thread anchored under a renamed anchor resolves through the storyboard @
     'without a rename the old name is undeclared',
   );
   const sbPath = join(h.spec, 'storyboard.yml');
-  writeFileSync(sbPath, `${readFileSync(sbPath, 'utf8')}\n    renames: { home.button: home.cta, home.knob: home.dial }\n`);
+  writeFileSync(
+    sbPath,
+    `${readFileSync(sbPath, 'utf8')}\n    renames: { home.button: home.cta, home.knob: home.dial }\n`,
+  );
   const after = lint(load(h), { checks: false }).findings;
-  assert.ok(!after.some((f) => f.subject === 'n-1'), 'read through the rename, the thread is clean');
   assert.ok(
-    after.some((f) => f.level === 'warn' && f.subject === 'home' && /home\.knob.*home\.dial.*not a declared anchor/.test(f.message)),
+    !after.some((f) => f.subject === 'n-1'),
+    'read through the rename, the thread is clean',
+  );
+  assert.ok(
+    after.some(
+      (f) =>
+        f.level === 'warn' &&
+        f.subject === 'home' &&
+        /home\.knob.*home\.dial.*not a declared anchor/.test(f.message),
+    ),
     'a rename ending nowhere declared is the warning instead',
   );
 });
@@ -729,7 +825,10 @@ test('an open question with no choices warns; with choices, or once answered, it
   let { findings } = lint(load(h), { checks: false });
   assert.ok(findings.some((f) => f.category === 'question-without-choices' && f.subject === 'q-7'));
 
-  writeFileSync(join(h.threads, 'q-7.yml'), at('open', 'options:\n  - label: Left\n  - label: Right\n'));
+  writeFileSync(
+    join(h.threads, 'q-7.yml'),
+    at('open', 'options:\n  - label: Left\n  - label: Right\n'),
+  );
   ({ findings } = lint(load(h), { checks: false }));
   assert.equal(findings.filter((f) => f.category === 'question-without-choices').length, 0);
 
@@ -744,9 +843,13 @@ test('an open thread on a retired rule warns; an addressed one waits on its pers
   const feat = readFileSync(join(h.spec, 'features', 'demo.yml'), 'utf8');
   writeFileSync(
     join(h.spec, 'features', 'demo.yml'),
-    feat.replace('        statement:', '        retired: Withdrawn, and the concern moved elsewhere.\n        statement:'),
+    feat.replace(
+      '        statement:',
+      '        retired: Withdrawn, and the concern moved elsewhere.\n        statement:',
+    ),
   );
-  const at = (status) => `id: n-7\nkind: note\nstatus: ${status}\nanchor: { rule: demo.main.thing }\nbody: about the thing\n`;
+  const at = (status) =>
+    `id: n-7\nkind: note\nstatus: ${status}\nanchor: { rule: demo.main.thing }\nbody: about the thing\n`;
   writeFileSync(join(h.threads, 'n-7.yml'), at('open'));
   let { findings } = lint(load(h), { checks: false });
   assert.ok(findings.some((f) => f.category === 'thread-on-retired-rule' && f.subject === 'n-7'));
@@ -761,7 +864,10 @@ test('design.by is person or agent, and anything else is an error naming both @r
   const h = writeFixture(join(root, 'design-by'));
   const cfg = readFileSync(join(h.spec, 'spec.yml'), 'utf8');
   const errors = (by) => {
-    writeFileSync(join(h.spec, 'spec.yml'), by === undefined ? cfg : `${cfg}\ndesign:\n  by: ${by}\n`);
+    writeFileSync(
+      join(h.spec, 'spec.yml'),
+      by === undefined ? cfg : `${cfg}\ndesign:\n  by: ${by}\n`,
+    );
     return lint(load(h), { checks: false }).findings.filter((f) => f.subject === 'design.by');
   };
   assert.deepEqual(errors(undefined), [], 'saying nothing is allowed: a person draws');

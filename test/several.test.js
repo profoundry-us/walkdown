@@ -7,7 +7,16 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -33,7 +42,12 @@ function machine() {
     spawnSync(process.execPath, [CLI, ...args], {
       cwd,
       encoding: 'utf8',
-      env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' },
+      env: {
+        ...process.env,
+        WALKDOWN_HOME: home,
+        WALKDOWN_SKILLS_DIR: join(home, 'skills'),
+        NO_COLOR: '1',
+      },
     });
   // Personal homes, under the project's label (ADR 0014 §4).
   const personal = join(home, 'projects', 'proj', 'blueprints');
@@ -66,7 +80,11 @@ test('blueprints new <name> gives a project a second blueprint in a home of its 
   const again = m.wd(['blueprints', 'new', 'b']);
   assert.equal(again.status, 0, again.stderr);
   assert.doesNotMatch(again.stdout, /created|another/, 'everything up to date');
-  assert.doesNotMatch(again.stdout, /kept/, "its own spec.yml reads as up to date, not as somebody's edit");
+  assert.doesNotMatch(
+    again.stdout,
+    /kept/,
+    "its own spec.yml reads as up to date, not as somebody's edit",
+  );
   assert.equal(m.homes().length, 2);
 
   // No name means the name `blueprints new` would give the project anyway: proj.
@@ -82,7 +100,10 @@ test('blueprints new <name> gives a project a second blueprint in a home of its 
   assert.match(commit.stderr, /--blueprint <id>/);
   const moved = m.wd(['blueprints', 'commit', 'spec']);
   assert.equal(moved.status, 2);
-  assert.match(moved.stderr, /`walkdown blueprints commit spec` acts on one blueprint.*This project's blueprints are \d{4}-[a-z0-9]+-proj, \d{4}-[a-z0-9]+-b\./s);
+  assert.match(
+    moved.stderr,
+    /`walkdown blueprints commit spec` acts on one blueprint.*This project's blueprints are \d{4}-[a-z0-9]+-proj, \d{4}-[a-z0-9]+-b\./s,
+  );
   assert.match(moved.stderr, /--blueprint <id>/);
   assert.equal(m.homes().length, 2, 'and neither moved');
 
@@ -103,10 +124,18 @@ test('blueprints new <name> gives a project a second blueprint in a home of its 
 
   // Both claim one page: claims reports both, and serve's list holds both.
   for (const h of ['proj', 'b'])
-    writeFileSync(join(m.homeOf(h), 'storyboard.yml'), 'screens:\n  - id: home\n    app: { path: /index.html }\n');
+    writeFileSync(
+      join(m.homeOf(h), 'storyboard.yml'),
+      'screens:\n  - id: home\n    app: { path: /index.html }\n',
+    );
   const claims = m.wd(['claims', '--url', 'http://localhost:3000/index.html', '--json']);
   assert.equal(claims.status, 0, claims.stderr);
-  assert.deepEqual(JSON.parse(claims.stdout).matches.map((x) => nm(x.id)).sort(), ['b', 'proj']);
+  assert.deepEqual(
+    JSON.parse(claims.stdout)
+      .matches.map((x) => nm(x.id))
+      .sort(),
+    ['b', 'proj'],
+  );
   const listed = m.wd(['blueprints']);
   assert.equal(listed.status, 0, listed.stderr);
   assert.match(listed.stdout, /-proj\b/);
@@ -127,17 +156,32 @@ test("committing one blueprint leaves the other's files as they are @rule:locati
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new', 'a', '--commit', 'spec']).status, 0);
   const aHome = m.homeOf('a');
-  assert.ok(aHome.startsWith(join(m.proj, '.walkdown', 'blueprints') + '/'), 'the home sits under the repository');
+  assert.ok(
+    aHome.startsWith(join(m.proj, '.walkdown', 'blueprints') + '/'),
+    'the home sits under the repository',
+  );
   const ignore = join(aHome, '.gitignore');
-  assert.match(readFileSync(ignore, 'utf8'), /^runs\/$/m, 'spec committed: the home keeps runs out');
+  assert.match(
+    readFileSync(ignore, 'utf8'),
+    /^runs\/$/m,
+    'spec committed: the home keeps runs out',
+  );
   const theirs = `${readFileSync(ignore, 'utf8')}# and ours\n`;
   writeFileSync(ignore, theirs);
 
   const all = m.wd(['blueprints', 'new', 'b', '--commit', 'all']);
   assert.equal(all.status, 0, all.stderr);
-  assert.equal(existsSync(join(m.homeOf('b'), '.gitignore')), false, 'everything committed: b has no .gitignore');
+  assert.equal(
+    existsSync(join(m.homeOf('b'), '.gitignore')),
+    false,
+    'everything committed: b has no .gitignore',
+  );
   assert.equal(readFileSync(ignore, 'utf8'), theirs, "a's own .gitignore is a's");
-  assert.equal(existsSync(join(m.proj, '.walkdown', '.gitignore')), false, 'and none is shared between them');
+  assert.equal(
+    existsSync(join(m.proj, '.walkdown', '.gitignore')),
+    false,
+    'and none is shared between them',
+  );
 
   // Nothing again: b moves out whole, and a is still as it was.
   const none = m.wd(['blueprints', 'commit', 'none', '--blueprint', 'b']);
@@ -160,17 +204,26 @@ test('reads report on every blueprint, each under its ID, and on one when named 
     assert.equal(json.status, 0, `${cmd} --json: ${json.stderr}`);
     const answer = JSON.parse(json.stdout);
     assert.deepEqual(Object.keys(answer), ['blueprints']);
-    assert.deepEqual(answer.blueprints.map((b) => nm(b.id)), ['proj', 'b']);
+    assert.deepEqual(
+      answer.blueprints.map((b) => nm(b.id)),
+      ['proj', 'b'],
+    );
 
     const one = m.wd([...cmd, '--blueprint', 'b']);
     assert.equal(one.status, 0);
     assert.doesNotMatch(one.stdout, /━━/, `${cmd} --blueprint b is b alone`);
     const oneJson = JSON.parse(m.wd([...cmd, '--blueprint', 'b', '--json']).stdout);
-    assert.ok(!('blueprints' in (Array.isArray(oneJson) ? {} : oneJson)), 'the single answer, as before');
+    assert.ok(
+      !('blueprints' in (Array.isArray(oneJson) ? {} : oneJson)),
+      'the single answer, as before',
+    );
   }
   // where <kind>: one line each, the ID and the path.
   const ev = m.wd(['where', 'evidence']).stdout.trim().split('\n');
-  assert.deepEqual(ev.map((l) => nm(l.split('\t')[0])), ['proj', 'b']);
+  assert.deepEqual(
+    ev.map((l) => nm(l.split('\t')[0])),
+    ['proj', 'b'],
+  );
   assert.match(ev[1], /\/b\/evidence$/);
 });
 
@@ -220,15 +273,26 @@ const writes = (m, thread) => [
 /* Each of `writes` run at `cwd` is refused, lists `names`, and changes nothing. */
 function refusedEverywhere(m, thread, cwd, names) {
   const listed = names.map((n) => `\\d{4}-[a-z0-9]+-${n}`).join(', ');
-  const said = names.length === 1 ? `This project's blueprint is ${listed}\\.` : `This project's blueprints are ${listed}\\.`;
+  const said =
+    names.length === 1
+      ? `This project's blueprint is ${listed}\\.`
+      : `This project's blueprints are ${listed}\\.`;
   for (const cmd of writes(m, thread)) {
     const before = snapshot(m);
     const r = m.wd(cmd, cwd);
     const what = cmd.slice(0, 2).join(' ');
     assert.equal(r.status, 2, `${what} exits 2: ${r.stderr}${r.stdout}`);
-    assert.match(r.stderr, /acts on one blueprint, and does not choose it for you\./, `${what} says it acts on one`);
+    assert.match(
+      r.stderr,
+      /acts on one blueprint, and does not choose it for you\./,
+      `${what} says it acts on one`,
+    );
     assert.match(r.stderr, new RegExp(said), `${what} lists the project's blueprints`);
-    assert.match(r.stderr, /Choose one with `--blueprint <id>` \(e\.g\. `--blueprint [\w-]+`\)/, `${what} says --blueprint picks one`);
+    assert.match(
+      r.stderr,
+      /Choose one with `--blueprint <id>` \(e\.g\. `--blueprint [\w-]+`\)/,
+      `${what} says --blueprint picks one`,
+    );
     assert.doesNotMatch(r.stderr, /No blueprint here/, `${what}: blueprints are registered here`);
     assert.deepEqual(snapshot(m), before, `${what} changed nothing`);
   }
@@ -239,8 +303,21 @@ function aInTheRepo() {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new', 'a', '--commit', 'spec']).status, 0);
   assert.equal(m.wd(['blueprints', 'new', 'b']).status, 0);
-  writeFileSync(join(m.homeOf('b'), 'storyboard.yml'), 'screens:\n  - id: home\n    app: { path: /index.html }\n');
-  const opened = m.wd(['threads', 'new', '--blueprint', 'b', '--screen', 'home', '--body', 'please draw this', '--json']);
+  writeFileSync(
+    join(m.homeOf('b'), 'storyboard.yml'),
+    'screens:\n  - id: home\n    app: { path: /index.html }\n',
+  );
+  const opened = m.wd([
+    'threads',
+    'new',
+    '--blueprint',
+    'b',
+    '--screen',
+    'home',
+    '--body',
+    'please draw this',
+    '--json',
+  ]);
   assert.equal(opened.status, 0, opened.stderr);
   return { ...m, thread: JSON.parse(opened.stdout).id };
 }
@@ -262,7 +339,11 @@ test('writes refuse until --blueprint names one, at the root and inside a bluepr
   assert.match(filed.stderr, /No rule "x"/);
   const sweep = m.wd(['sweep', '--blueprint', 'b', '--why', 'because', '--tiers', 'agent'], aDir);
   assert.equal(sweep.status, 0, sweep.stderr);
-  assert.equal(readdirSync(join(m.homeOf('b'), 'runs')).length, 1, 'the sweep landed in b, though run inside a');
+  assert.equal(
+    readdirSync(join(m.homeOf('b'), 'runs')).length,
+    1,
+    'the sweep landed in b, though run inside a',
+  );
   const aRuns = join(aDir, 'runs');
   assert.ok(!existsSync(aRuns) || readdirSync(aRuns).length === 0, 'and not in a');
 });
@@ -270,8 +351,21 @@ test('writes refuse until --blueprint names one, at the root and inside a bluepr
 test('a project of one blueprint refuses a write without --blueprint too, naming it @rule:locations.several.writes-name-one', () => {
   const m = machine();
   assert.equal(m.wd(['blueprints', 'new', 'c']).status, 0);
-  writeFileSync(join(m.homeOf('c'), 'storyboard.yml'), 'screens:\n  - id: home\n    app: { path: /index.html }\n');
-  const opened = m.wd(['threads', 'new', '--blueprint', 'c', '--screen', 'home', '--body', 'please draw this', '--json']);
+  writeFileSync(
+    join(m.homeOf('c'), 'storyboard.yml'),
+    'screens:\n  - id: home\n    app: { path: /index.html }\n',
+  );
+  const opened = m.wd([
+    'threads',
+    'new',
+    '--blueprint',
+    'c',
+    '--screen',
+    'home',
+    '--body',
+    'please draw this',
+    '--json',
+  ]);
   assert.equal(opened.status, 0, opened.stderr);
   refusedEverywhere(m, JSON.parse(opened.stdout).id, m.proj, ['c']);
 });
@@ -304,7 +398,10 @@ test('blueprints commit --blueprint works from anywhere below the checkout, and 
 test('inside a home kept in the personal home, a write without --blueprint lists the project, and a short name resolves @rule:locations.several.writes-name-one', () => {
   const m = aInTheRepo();
   const bHome = m.homeOf('b');
-  assert.ok(bHome.startsWith(join(m.home, 'projects', 'proj', 'blueprints') + '/'), "b's home is in the personal home");
+  assert.ok(
+    bHome.startsWith(join(m.home, 'projects', 'proj', 'blueprints') + '/'),
+    "b's home is in the personal home",
+  );
   // Refused as a write among a and b, never "No blueprint here".
   refusedEverywhere(m, m.thread, bHome, ['a', 'b']);
   refusedEverywhere(m, m.thread, join(bHome, 'features'), ['a', 'b']);
@@ -314,7 +411,11 @@ test('inside a home kept in the personal home, a write without --blueprint lists
   assert.equal(reply.status, 0, reply.stderr);
   const sweep = m.wd(['sweep', '--blueprint', 'a', '--why', 'because', '--tiers', 'agent'], bHome);
   assert.equal(sweep.status, 0, sweep.stderr);
-  assert.equal(readdirSync(join(m.homeOf('a'), 'runs')).length, 1, 'the sweep landed in a, though run inside b');
+  assert.equal(
+    readdirSync(join(m.homeOf('a'), 'runs')).length,
+    1,
+    'the sweep landed in a, though run inside b',
+  );
 });
 
 test('a thread id only one blueprint holds is not enough without --blueprint; with it the change lands there @rule:locations.several.writes-name-one', () => {

@@ -12,7 +12,8 @@ import { end } from './context.js';
  * (commands.shape.old-forms-say-the-new). Nothing is run.
  */
 
-const quote = (w) => (/^[\w./:@=+,-]+$/.test(w) ? w : `"${w.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`);
+const quote = (w) =>
+  /^[\w./:@=+,-]+$/.test(w) ? w : `"${w.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
 
 /* Pull `--name value` (or `--name=value`) out of args; returns [value, rest]. */
 function take(args, name) {
@@ -34,19 +35,25 @@ export function newFormOf([cmd, ...args]) {
     const [first, ...rest] = args;
     if (first === 'new') return ['threads', 'new', ...rest];
     if (!first) return ['threads', 'help'];
-    if (rest.some((a) => SETS.some((s) => a === s || a.startsWith(`${s}=`)))) return ['threads', 'set', first, ...rest];
+    if (rest.some((a) => SETS.some((s) => a === s || a.startsWith(`${s}=`))))
+      return ['threads', 'set', first, ...rest];
     const [reply, others] = take(rest, 'reply');
     if (reply !== undefined) return ['threads', 'reply', first, reply, ...others];
-    if (rest.includes('--said') || rest.includes('--added')) return ['threads', 'reply', first, ...rest];
+    if (rest.includes('--said') || rest.includes('--added'))
+      return ['threads', 'reply', first, ...rest];
     return ['threads', 'show', first, ...rest];
   }
   if (cmd === 'import') return ['blueprints', 'import', ...args];
   if (cmd === 'move') return ['records', 'move', ...args];
-  if (cmd === 'blueprint') return args[0] === 'forget' ? ['blueprints', ...args] : ['blueprints', 'list', ...args.slice(1)];
+  if (cmd === 'blueprint')
+    return args[0] === 'forget'
+      ? ['blueprints', ...args]
+      : ['blueprints', 'list', ...args.slice(1)];
   if (cmd === 'init') {
     const [id, a] = take(args, 'id');
     const [commit, b] = take(a, 'commit');
-    if (commit !== undefined) return ['blueprints', 'commit', commit, ...(id ? ['--blueprint', id] : []), ...b];
+    if (commit !== undefined)
+      return ['blueprints', 'commit', commit, ...(id ? ['--blueprint', id] : []), ...b];
     return ['blueprints', 'new', ...(id ? [id] : []), ...b];
   }
   return null;

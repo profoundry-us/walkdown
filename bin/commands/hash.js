@@ -1,6 +1,6 @@
-import { blueprintFlag } from '../../lib/locations.js';
 import { parseArgs } from 'node:util';
 import { runHashCommand } from '../../lib/hash-cmd.js';
+import { blueprintFlag } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { end, loadOrExit, namedOrExit } from './context.js';
 
@@ -14,14 +14,20 @@ export function run(args) {
     },
   });
   if (values.reword != null && !values.write) {
-    console.error('--reword goes with --write: it says why the old hash is kept when the new one is written.');
+    console.error(
+      '--reword goes with --write: it says why the old hash is kept when the new one is written.',
+    );
     return end(2);
   }
   if (values.reword != null && !values.reword.trim()) {
-    console.error('--reword wants a reason - the old hash is kept on your word, and the file says whose.');
+    console.error(
+      '--reword wants a reason - the old hash is kept on your word, and the file says whose.',
+    );
     return end(2);
   }
-  const blueprint = loadOrExit(values.write ? namedOrExit(values.blueprint, 'hash --write') : values.blueprint);
+  const blueprint = loadOrExit(
+    values.write ? namedOrExit(values.blueprint, 'hash --write') : values.blueprint,
+  );
   const { rows, changedFiles, exitCode } = runHashCommand(blueprint, {
     write: values.write,
     reword: values.reword ?? null,

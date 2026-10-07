@@ -22,7 +22,10 @@ export async function loadScreensView() {
  * at a glance. Same rows, same pick, same Detect; only the drawing differs.
  */
 function viewTabs() {
-  const tab = (id, label) => html`<button role="tab" class="tab tab-xs ${S.screensView === id ? 'tab-active' : ''}"
+  const tab = (
+    id,
+    label,
+  ) => html`<button role="tab" class="tab tab-xs ${S.screensView === id ? 'tab-active' : ''}"
     data-testid="panel.screens-view" data-view="${id}" aria-selected="${S.screensView === id}"
     @click=${(e) => fire(e.currentTarget, 'screens-view', { view: id })}>${label}</button>`;
   return html`<div role="tablist" class="tabs tabs-boxed tabs-xs mx-3.5 mb-1 w-fit" data-testid="panel.screens-views">
@@ -51,10 +54,12 @@ function landedMark(img, id) {
     .then((r) => (r.ok ? r.json() : null))
     .then((m) => {
       const frame = img.parentElement;
-      if (!m?.landed || !frame || frame.querySelector('[data-testid="panel.screens-card-landed"]')) return;
+      if (!m?.landed || !frame || frame.querySelector('[data-testid="panel.screens-card-landed"]'))
+        return;
       const tag = document.createElement('span');
       tag.dataset.testid = 'panel.screens-card-landed';
-      tag.className = 'absolute inset-x-0 bottom-0 truncate bg-warning px-1.5 py-0.5 text-[10.5px] font-semibold text-warning-content';
+      tag.className =
+        'absolute inset-x-0 bottom-0 truncate bg-warning px-1.5 py-0.5 text-[10.5px] font-semibold text-warning-content';
       let where = m.landed;
       try {
         const u = new URL(m.landed);
@@ -79,7 +84,11 @@ function board(screens, here) {
       const is = !S.pickedScreen && here?.id === sc.id;
       const design = ghostSource(sc);
       const drawable = Boolean(sc.app?.path || design);
-      const src = drawable ? api(`/api/screenshot?screen=${encodeURIComponent(sc.id)}${redrawn ? `&refresh=1&r=${redrawn}` : ''}`) : null;
+      const src = drawable
+        ? api(
+            `/api/screenshot?screen=${encodeURIComponent(sc.id)}${redrawn ? `&refresh=1&r=${redrawn}` : ''}`,
+          )
+        : null;
       return html`<button class="flex flex-col gap-1 rounded-box border p-1.5 text-left hover:bg-base-200 ${
         on || is ? 'border-primary' : 'border-base-300'
       }" data-screen="${sc.id}" data-testid="panel.screens-card" title="${sc.title ?? sc.id}"
@@ -92,7 +101,8 @@ function board(screens, here) {
                   @load=${(e) => landedMark(e.currentTarget, sc.id)}
                   @error=${(e) => {
                     const gone = document.createElement('span');
-                    gone.className = 'flex h-full items-center justify-center px-2 text-center text-[10.5px] text-warning';
+                    gone.className =
+                      'flex h-full items-center justify-center px-2 text-center text-[10.5px] text-warning';
                     gone.dataset.testid = 'panel.screens-card-undrawn';
                     gone.textContent = 'could not draw it';
                     e.currentTarget.replaceWith(gone);
@@ -147,10 +157,13 @@ export function screensPane() {
       ${auto && here ? html`<span class="ml-auto text-[11px] opacity-50">${here.id}</span>` : nothing}
     </button>
     <div class="mx-3.5 my-1 border-t border-base-300"></div>
-    ${S.screensView === 'board' ? board(screens, here) : screens.map((sc) => {
-      const on = S.pickedScreen === sc.id;
-      const design = ghostSource(sc);
-      return html`<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
+    ${
+      S.screensView === 'board'
+        ? board(screens, here)
+        : screens.map((sc) => {
+            const on = S.pickedScreen === sc.id;
+            const design = ghostSource(sc);
+            return html`<button class="flex w-full items-start gap-2 px-3.5 py-2 text-left hover:bg-base-200"
         data-screen="${sc.id}" @click=${(e) => fire(e.currentTarget, 'pick-screen', { id: sc.id })}>
         <span class="w-3.5 shrink-0 pt-0.5 text-center ${on ? 'text-primary' : 'opacity-30'}">${on ? '\u25c9' : '\u25cb'}</span>
         <span class="min-w-0">
@@ -161,5 +174,6 @@ export function screensPane() {
           design ? (design.proposed ? 'sketch' : 'design') : 'no design'
         }</span>
       </button>`;
-    })}`;
+          })
+    }`;
 }

@@ -43,7 +43,13 @@ function fixture() {
   mkdirSync(join(h.spec, 'features'), { recursive: true });
   writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: ev-fixture\n');
   writeFileSync(join(h.spec, 'storyboard.yml'), 'screens: []\n');
-  return { root, bp: h.spec, h, home, cleanup: () => rmSync(root, { recursive: true, force: true }) };
+  return {
+    root,
+    bp: h.spec,
+    h,
+    home,
+    cleanup: () => rmSync(root, { recursive: true, force: true }),
+  };
 }
 
 /*
@@ -85,7 +91,12 @@ test('with evidence moved out, the same recorded key finds it at the new root @r
     // screenshots.
     const reg = join(f.home, 'registry.yml');
     const doc = parse(readFileSync(reg, 'utf8'));
-    doc.blueprints.find((r) => r.id.endsWith('-ev-fixture')).evidence = join(f.home, 'projects', 'ev-fixture', 'evidence');
+    doc.blueprints.find((r) => r.id.endsWith('-ev-fixture')).evidence = join(
+      f.home,
+      'projects',
+      'ev-fixture',
+      'evidence',
+    );
     writeFileSync(reg, stringify(doc));
     const out = join(f.home, 'projects', 'ev-fixture', 'evidence', 'r1');
     mkdirSync(out, { recursive: true });

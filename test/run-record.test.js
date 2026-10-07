@@ -1,4 +1,3 @@
-import { declaredHome } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -7,6 +6,7 @@ import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { formatHash } from '../lib/hash.js';
 import { aggregateResults, nextRunId, writeRunRecord, writeSweep } from '../lib/run-record.js';
+import { declaredHome } from '../tools/test-home.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-runrec-'));
 after(() => rmSync(root, { recursive: true, force: true }));
@@ -126,7 +126,11 @@ test('a run is stamped with the code repository, not the home the blueprint sits
   git(h.root, 'add', '-A');
   git(h.root, 'commit', '-qm', 'the home, which no verdict is about');
   const homeSha = git(h.root, 'rev-parse', '--short', 'HEAD');
-  assert.notEqual(codeSha, homeSha, 'the two trees must be distinguishable for this to mean anything');
+  assert.notEqual(
+    codeSha,
+    homeSha,
+    'the two trees must be distinguishable for this to mean anything',
+  );
 
   const { record } = writeRunRecord({
     blueprintDir: h.spec,
@@ -138,7 +142,11 @@ test('a run is stamped with the code repository, not the home the blueprint sits
     results: [{ rule: 'demo.thing', status: 'pass' }],
     date: new Date('2026-09-05T03:00:00Z'),
   });
-  assert.equal(record.git_sha, codeSha, 'the sha names the code, so a person can go and look at it');
+  assert.equal(
+    record.git_sha,
+    codeSha,
+    'the sha names the code, so a person can go and look at it',
+  );
   assert.notEqual(record.git_sha, homeSha);
 
   const swept = writeSweep({

@@ -10,6 +10,7 @@ import { declareProject, suiteHome } from '../tools/test-home.mjs';
 
 /** This file's own personal home — declaring into a shared one races. */
 const HOME = suiteHome('judge');
+
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -51,9 +52,7 @@ function fixture(name, governance = []) {
       '      base_url: http://localhost:9999',
       '    staging:',
       '      base_url: https://staging.example.test',
-      ...(governance.length
-        ? ['governance:', ...governance.map((g) => `  - ${g}`)]
-        : []),
+      ...(governance.length ? ['governance:', ...governance.map((g) => `  - ${g}`)] : []),
     ].join('\n'),
   );
   writeFileSync(
@@ -170,7 +169,11 @@ test('excused and retired rules end the conversation instead of prompting', () =
   const bp = fixture('silent');
   const excused = run(['demo.main.excused'], bp);
   assert.match(excused, /excused/);
-  assert.match(excused, /Browser chrome is not in the page/, 'the excuse is quoted, not summarised');
+  assert.match(
+    excused,
+    /Browser chrome is not in the page/,
+    'the excuse is quoted, not summarised',
+  );
   assert.match(excused, /Nothing to judge/);
   assert.doesNotMatch(excused, /VERDICT/, 'no verdict block for a rule with nothing to judge');
   const retired = run(['demo.main.retired'], bp);
@@ -198,7 +201,10 @@ test('--json is the same assembly, structured', () => {
     ['form', 'done'],
     'screens arrive in step order',
   );
-  assert.equal(doc.screens[1].setup, 'Submit the form first - the address alone lands short of it.');
+  assert.equal(
+    doc.screens[1].setup,
+    'Submit the form first - the address alone lands short of it.',
+  );
   assert.match(doc.evidence.key_prefix, /^runs\/evidence\//);
 });
 
@@ -254,6 +260,9 @@ test('the skeleton it prints is a record the board reads back', () => {
  */
 test('the prompt hands out a port, and takes the one it is given @rule:status.evidence.agent-assumed', () => {
   const bp = fixture('port');
-  assert.match(run(['demo.main.walks'], bp), /Your port is 47\d\d\. Make the scratch copy with --port 47\d\d/);
+  assert.match(
+    run(['demo.main.walks'], bp),
+    /Your port is 47\d\d\. Make the scratch copy with --port 47\d\d/,
+  );
   assert.match(run(['demo.main.walks', '--port', '4799'], bp), /Your port is 4799\./);
 });

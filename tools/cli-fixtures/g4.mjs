@@ -4,7 +4,7 @@
  * has signed. Runs are written as JSON straight into the blueprint's runs/
  * folder, as a reporter or the panel would have left them.
  */
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { writeRunRecord } from '../../lib/run-record.js';
 import { parse } from '../../vendor/yaml.js';
@@ -43,14 +43,21 @@ function checkout(m, rules) {
 /* Each rule's current statement hash, as `hash --write` left it. */
 function hashes(m) {
   const f = parse(readFileSync(join(m.specOf('checkout'), 'features', 'checkout.yml'), 'utf8'));
-  return Object.fromEntries(f.stories[0].rules.map((r) => [r.id.split('.').pop(), r.steps?.statement_hash]));
+  return Object.fromEntries(
+    f.stories[0].rules.map((r) => [r.id.split('.').pop(), r.steps?.statement_hash]),
+  );
 }
 
 /* A run record, as the ledger keeps it, in checkout's runs/. */
 function run(m, id, fields, results) {
   const dir = join(m.specOf('checkout'), 'runs');
   mkdirSync(dir, { recursive: true });
-  const record = { run_id: id, created: id.replace(/T(\d\d)-(\d\d)-(\d\d)Z.*/, 'T$1:$2:$3Z'), ...fields, results };
+  const record = {
+    run_id: id,
+    created: id.replace(/T(\d\d)-(\d\d)-(\d\d)Z.*/, 'T$1:$2:$3Z'),
+    ...fields,
+    results,
+  };
   writeFileSync(join(dir, `${id}.json`), `${JSON.stringify(record, null, 2)}\n`);
 }
 
@@ -64,8 +71,18 @@ function suite(m, ...rules) {
 }
 
 const CHECKS = { actor: 'ci', kind: 'checks', target: 'local', base_url: 'http://localhost:3000' };
-const AGENT = { actor: 'agent', kind: 'walkdown', target: 'local', base_url: 'http://localhost:3000' };
-const WALK = { actor: 'topher', kind: 'walkdown', target: 'local', base_url: 'http://localhost:3000' };
+const AGENT = {
+  actor: 'agent',
+  kind: 'walkdown',
+  target: 'local',
+  base_url: 'http://localhost:3000',
+};
+const WALK = {
+  actor: 'topher',
+  kind: 'walkdown',
+  target: 'local',
+  base_url: 'http://localhost:3000',
+};
 
 export default {
   /*
@@ -79,14 +96,34 @@ export default {
       spec,
       readFileSync(spec, 'utf8')
         .replace('    # staging:\n', '    staging:\n')
-        .replace('    #   base_url: https://staging.example.com\n', '      base_url: https://staging.example.com\n'),
+        .replace(
+          '    #   base_url: https://staging.example.com\n',
+          '      base_url: https://staging.example.com\n',
+        ),
     );
     suite(m, 'pays');
-    const pays = (status, message) => [{ rule: 'checkout.basics.pays', status, statement_hash: h.pays, message }];
+    const pays = (status, message) => [
+      { rule: 'checkout.basics.pays', status, statement_hash: h.pays, message },
+    ];
     // Named so the older run sorts after the newer: file order is not time.
-    run(m, '2026-09-30T09-00-00Z-local-02', CHECKS, pays('pass', 'Monday: the card payment went through'));
-    run(m, '2026-10-01T09-00-00Z-staging-01', { ...CHECKS, target: 'staging', base_url: 'https://staging.example.com' }, pays('pass', 'Tuesday: the card payment went through'));
-    run(m, '2026-10-02T09-00-00Z-local-01', CHECKS, pays('fail', 'Wednesday: the payment form never submitted'));
+    run(
+      m,
+      '2026-09-30T09-00-00Z-local-02',
+      CHECKS,
+      pays('pass', 'Monday: the card payment went through'),
+    );
+    run(
+      m,
+      '2026-10-01T09-00-00Z-staging-01',
+      { ...CHECKS, target: 'staging', base_url: 'https://staging.example.com' },
+      pays('pass', 'Tuesday: the card payment went through'),
+    );
+    run(
+      m,
+      '2026-10-02T09-00-00Z-local-01',
+      CHECKS,
+      pays('fail', 'Wednesday: the payment form never submitted'),
+    );
   },
 
   /*
@@ -108,13 +145,28 @@ export default {
       f,
       readFileSync(f, 'utf8')
         .replace('A card payment goes through.', 'A payment by card goes through.')
-        .replace('The total is the sum of the cart.', 'The total is the sum of the cart, less any discount.'),
+        .replace(
+          'The total is the sum of the cart.',
+          'The total is the sum of the cart, less any discount.',
+        ),
     );
     // Only `pays` is declared words-only; then `totals` is hashed as a new rule.
     const t = readFileSync(f, 'utf8');
-    writeFileSync(f, t.replace('The total is the sum of the cart, less any discount.', 'The total is the sum of the cart.'));
+    writeFileSync(
+      f,
+      t.replace(
+        'The total is the sum of the cart, less any discount.',
+        'The total is the sum of the cart.',
+      ),
+    );
     m.ok(['hash', '--write', '--reword', 'plainer English, same rule', '--blueprint', 'checkout']);
-    writeFileSync(f, readFileSync(f, 'utf8').replace('The total is the sum of the cart.', 'The total is the sum of the cart, less any discount.'));
+    writeFileSync(
+      f,
+      readFileSync(f, 'utf8').replace(
+        'The total is the sum of the cart.',
+        'The total is the sum of the cart, less any discount.',
+      ),
+    );
     m.ok(['hash', '--write', '--blueprint', 'checkout']);
   },
 
@@ -130,13 +182,18 @@ export default {
     const spec = join(m.specOf('checkout'), 'spec.yml');
     writeFileSync(
       spec,
-      readFileSync(spec, 'utf8')
-        .replace(/    local:\n      base_url: http:\/\/localhost:3000\n      env: .*\n/, '    review:\n      base_url: https://pr-2.review.app\n'),
+      readFileSync(spec, 'utf8').replace(
+        /    local:\n      base_url: http:\/\/localhost:3000\n      env: .*\n/,
+        '    review:\n      base_url: https://pr-2.review.app\n',
+      ),
     );
     suite(m, 'pays', 'totals');
-    run(m, '2026-10-01T09-00-00Z-review-01', { ...CHECKS, target: 'review', base_url: 'https://pr-1.review.app' }, [
-      { rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays },
-    ]);
+    run(
+      m,
+      '2026-10-01T09-00-00Z-review-01',
+      { ...CHECKS, target: 'review', base_url: 'https://pr-1.review.app' },
+      [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }],
+    );
     run(m, '2026-10-01T10-00-00Z-review-01', { actor: 'ci', kind: 'checks', target: 'review' }, [
       { rule: 'checkout.basics.totals', status: 'pass', statement_hash: h.totals },
     ]);
@@ -150,8 +207,18 @@ export default {
     ]);
     suite(m, 'totals');
     run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, [
-      { rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays, checks: ['tests/checkout.spec.js:1'] },
-      { rule: 'checkout.basics.totals', status: 'pass', statement_hash: h.totals, checks: ['tests/checkout.spec.js:2'] },
+      {
+        rule: 'checkout.basics.pays',
+        status: 'pass',
+        statement_hash: h.pays,
+        checks: ['tests/checkout.spec.js:1'],
+      },
+      {
+        rule: 'checkout.basics.totals',
+        status: 'pass',
+        statement_hash: h.totals,
+        checks: ['tests/checkout.spec.js:2'],
+      },
     ]);
   },
 
@@ -159,20 +226,34 @@ export default {
   'g4-evidence-only'(m) {
     const h = checkout(m, [['pays', 'A card payment goes through.', 'verify: [checks]']]);
     suite(m, 'pays');
-    run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }]);
+    run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, [
+      { rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays },
+    ]);
     run(m, '2026-10-01T10-00-00Z-local-01', { ...AGENT, roles: ['eng'] }, [
-      { rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays, reasoning: 'Paid with the test card; the receipt showed the order.' },
+      {
+        rule: 'checkout.basics.pays',
+        status: 'pass',
+        statement_hash: h.pays,
+        reasoning: 'Paid with the test card; the receipt showed the order.',
+      },
     ]);
   },
 
   /* `pays` asks eng and product; every tier passes and eng alone has signed. */
   'g4-one-of-two'(m) {
-    const h = checkout(m, [['pays', 'A card payment goes through.', 'verify: [checks]', 'signoff: [eng, product]']]);
+    const h = checkout(m, [
+      ['pays', 'A card payment goes through.', 'verify: [checks]', 'signoff: [eng, product]'],
+    ]);
     suite(m, 'pays');
     const ok = [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }];
     run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, ok);
     run(m, '2026-10-01T10-00-00Z-local-01', AGENT, ok);
-    run(m, '2026-10-01T11-00-00Z-local-01', { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] }, ok);
+    run(
+      m,
+      '2026-10-01T11-00-00Z-local-01',
+      { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] },
+      ok,
+    );
   },
 
   /* `pays` says nothing about how it is verified. */
@@ -197,7 +278,12 @@ export default {
   'g4-weak-excuses'(m) {
     checkout(m, [
       ['pays', 'A card payment goes through.', 'unverifiable:', '  agent: hard'],
-      ['totals', 'The total is the sum of the cart.', 'unverifiable:', '  human: Product reads every total by hand before a release.'],
+      [
+        'totals',
+        'The total is the sum of the cart.',
+        'unverifiable:',
+        '  human: Product reads every total by hand before a release.',
+      ],
       [
         'receipt',
         'A receipt is emailed after payment.',
@@ -223,10 +309,18 @@ export default {
    */
   'g4-roles-on-runs'(m) {
     const h = checkout(m, [['pays', 'A card payment goes through.', 'signoff: [eng, product]']]);
-    writeFileSync(join(m.home, 'profile.yml'), 'identity:\n  username: topher\n  roles: [design]\n');
+    writeFileSync(
+      join(m.home, 'profile.yml'),
+      'identity:\n  username: topher\n  roles: [design]\n',
+    );
     const ok = [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }];
     run(m, '2026-10-01T09-00-00Z-local-01', AGENT, ok);
-    run(m, '2026-09-01T09-00-00Z-local-01', { actor: 'sam', kind: 'walkdown', target: 'local' }, ok);
+    run(
+      m,
+      '2026-09-01T09-00-00Z-local-01',
+      { actor: 'sam', kind: 'walkdown', target: 'local' },
+      ok,
+    );
     run(m, '2026-10-01T11-00-00Z-local-01', { ...WALK, roles: ['product'] }, ok);
   },
 
@@ -240,10 +334,15 @@ export default {
       ['totals', 'The total is the sum of the cart.', 'verify: [checks]'],
     ]);
     suite(m, 'pays', 'totals');
-    run(m, '2026-10-01T09-00-00Z-local-01', { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] }, [
-      { rule: 'checkout.basics.pays', status: 'approved', statement_hash: h.pays },
-      { rule: 'checkout.basics.totals', status: 'approved', statement_hash: h.totals },
-    ]);
+    run(
+      m,
+      '2026-10-01T09-00-00Z-local-01',
+      { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] },
+      [
+        { rule: 'checkout.basics.pays', status: 'approved', statement_hash: h.pays },
+        { rule: 'checkout.basics.totals', status: 'approved', statement_hash: h.totals },
+      ],
+    );
     const built = [{ rule: 'checkout.basics.totals', status: 'pass', statement_hash: h.totals }];
     run(m, '2026-10-01T10-00-00Z-local-01', CHECKS, built);
     run(m, '2026-10-01T11-00-00Z-local-01', AGENT, built);
@@ -256,9 +355,19 @@ export default {
     const ok = [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }];
     run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, ok);
     run(m, '2026-10-01T10-00-00Z-local-01', AGENT, ok);
-    run(m, '2026-10-01T11-00-00Z-local-01', { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] }, [
-      { rule: 'checkout.basics.pays', status: 'refining', statement_hash: h.pays, message: 'The spinner never stops after a declined card.' },
-    ]);
+    run(
+      m,
+      '2026-10-01T11-00-00Z-local-01',
+      { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] },
+      [
+        {
+          rule: 'checkout.basics.pays',
+          status: 'refining',
+          statement_hash: h.pays,
+          message: 'The spinner never stops after a declined card.',
+        },
+      ],
+    );
   },
 
   /*
@@ -275,7 +384,10 @@ export default {
       baseUrl: 'http://localhost:3000',
       actor: 'topher',
       kind: 'walkdown',
-      signatures: [{ role: 'eng', signer: 'topher' }, { role: 'product', signer: 'pat' }],
+      signatures: [
+        { role: 'eng', signer: 'topher' },
+        { role: 'product', signer: 'pat' },
+      ],
       results: [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }],
     });
   },

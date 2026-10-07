@@ -16,14 +16,19 @@ const root = realpathSync(mkdtempSync(join(tmpdir(), 'walkdown-records-yml-')));
 after(() => rmSync(root, { recursive: true, force: true }));
 
 const git = (cwd, ...args) =>
-  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
 
 function machine(name) {
   const home = join(root, name);
   mkdirSync(home, { recursive: true });
   writeFileSync(join(home, 'profile.yml'), `identity:\n  username: ${name}\n`);
   const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home };
-  return (cwd, ...args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  return (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
 }
 
 test('records.yml says where records usually live, and a registry row may say otherwise @rule:locations.default.records-yml-informs', () => {
@@ -34,7 +39,10 @@ test('records.yml says where records usually live, and a registry row may say ot
   git(repo, 'init', '-q');
   assert.equal(first(repo, 'blueprints', 'new', '--commit', 'spec', '--folder', 'shop').status, 0);
   const home = join(repo, '.walkdown', 'blueprints', 'shop');
-  const said = readFileSync(join(home, 'records.yml'), 'utf8').replace(/^evidence: .*$/m, 'evidence: ../evidence');
+  const said = readFileSync(join(home, 'records.yml'), 'utf8').replace(
+    /^evidence: .*$/m,
+    'evidence: ../evidence',
+  );
   writeFileSync(join(home, 'records.yml'), said);
   git(repo, 'add', '-A');
   git(repo, 'commit', '-q', '-m', 'shop');
@@ -67,7 +75,14 @@ test('records.yml says where records usually live, and a registry row may say ot
   assert.doesNotMatch(b.why, /records\.yml/);
 
   // records move never edits records.yml, so the first machine is unchanged.
-  assert.equal(readFileSync(join(clone, '.walkdown', 'blueprints', 'shop', 'records.yml'), 'utf8'), said);
-  assert.equal(git(clone, 'status', '--porcelain', '--', '.walkdown').trim(), '', 'nothing in the repository changed');
+  assert.equal(
+    readFileSync(join(clone, '.walkdown', 'blueprints', 'shop', 'records.yml'), 'utf8'),
+    said,
+  );
+  assert.equal(
+    git(clone, 'status', '--porcelain', '--', '.walkdown').trim(),
+    '',
+    'nothing in the repository changed',
+  );
   assert.equal(where(first, repo).path, a.path);
 });

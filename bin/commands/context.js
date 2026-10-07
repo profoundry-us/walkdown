@@ -5,7 +5,14 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadBlueprint } from '../../lib/blueprint.js';
-import { nameOf, projectIdsAt, resolveLocations, SPEC_FILE, tilde, upgradeDue } from '../../lib/locations.js';
+import {
+  nameOf,
+  projectIdsAt,
+  resolveLocations,
+  SPEC_FILE,
+  tilde,
+  upgradeDue,
+} from '../../lib/locations.js';
 
 /*
  * How a command finishes. process.exit() tears the process down before Node
@@ -68,8 +75,13 @@ export function namedOrExit(value, command) {
   upgradeOrExit();
   const ids = projectIdsAt();
   if (!ids.length) noBlueprintHere(resolveLocations({}), undefined);
-  const which = ids.length === 1 ? `This project's blueprint is ${ids[0]}` : `This project's blueprints are ${ids.join(', ')}`;
-  console.error(`\`walkdown ${command}\` acts on one blueprint, and does not choose it for you. ${which}.`);
+  const which =
+    ids.length === 1
+      ? `This project's blueprint is ${ids[0]}`
+      : `This project's blueprints are ${ids.join(', ')}`;
+  console.error(
+    `\`walkdown ${command}\` acts on one blueprint, and does not choose it for you. ${which}.`,
+  );
   console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${nameOf(ids[0])}\`).`);
   process.exit(2);
 }
@@ -88,7 +100,11 @@ export function eachOrExit(blueprintId) {
   upgradeOrExit();
   const loc = resolveLocations({ blueprint: blueprintId });
   if (!loc.ambiguous) return [{ id: loc.id, blueprint: loadOrExit(blueprintId), several: false }];
-  return loc.config.registry.candidates.map((id) => ({ id, blueprint: loadOrExit(id), several: true }));
+  return loc.config.registry.candidates.map((id) => ({
+    id,
+    blueprint: loadOrExit(id),
+    several: true,
+  }));
 }
 
 /*
@@ -135,10 +151,15 @@ export function noBlueprintHere(loc, blueprintId) {
   // The reason, then what to do, a line each (n-0438): one sentence carrying
   // three clauses was hard to read.
   const why = loc.spec?.why ?? '';
-  if (/has not imported|`walkdown blueprints (import|new)`?|is a repository of its own|name it by its ID/.test(why)) {
+  if (
+    /has not imported|`walkdown blueprints (import|new)`?|is a repository of its own|name it by its ID/.test(
+      why,
+    )
+  ) {
     const [head, ...rest] = why.split(' — ');
     console.error(`No blueprint ${blueprintId ? `for \`${blueprintId}\`` : 'here'}: ${head}.`);
-    for (const part of rest.join(' — ').split('; ')) if (part) console.error(`  ${part[0].toUpperCase()}${part.slice(1)}.`);
+    for (const part of rest.join(' — ').split('; '))
+      if (part) console.error(`  ${part[0].toUpperCase()}${part.slice(1)}.`);
     process.exit(2);
   }
   console.error(

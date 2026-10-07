@@ -166,7 +166,11 @@ test('the fail refusal names both ways to give a why, and dies with the rule it 
    * sitting of 2026-08-31, round three on note-with-any-verdict).
    */
   await page.getByTestId('detail.back').click();
-  await page.getByTestId('panel.rules-list').locator('button').nth(idx === 0 ? 1 : 0).click();
+  await page
+    .getByTestId('panel.rules-list')
+    .locator('button')
+    .nth(idx === 0 ? 1 : 0)
+    .click();
   await expect(page.getByTestId('detail.rule-id')).toBeVisible();
   await expect(page.getByTestId('detail.say')).toHaveCount(0);
 });
@@ -362,8 +366,14 @@ test('the panel will not accept work without a named person, and asks for the re
   await page.reload();
 
   // From the Threads tab, which opens on what waits on a person.
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
-  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
+  await page
+    .locator(`[data-open-thread="${addressed.id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   // Done, from a person's seat, records verified - the button says what
   // pressing it means, the record keeps its name.
   const verify = page.locator('[data-testid="thread.actions"][data-act="verified"]').first();
@@ -389,8 +399,14 @@ test('the panel will not accept work without a named person, and asks for the re
     await route.fulfill({ response: res, json: body });
   });
   await page.reload();
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
-  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
+  await page
+    .locator(`[data-open-thread="${addressed.id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   await verify.click();
   await expect(page.getByTestId('thread.say')).toBeVisible();
   await expect(page.getByTestId('thread.say')).toContainText(/name/i);
@@ -402,7 +418,10 @@ test('the panel will not accept work without a named person, and asks for the re
   // And the refusal belongs to the moment it refused: leave the screen and
   // come back, and it is gone rather than standing over the next reading.
   await page.getByTestId('thread.close').click();
-  await page.locator(`[data-open-thread="${addressed.id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .locator(`[data-open-thread="${addressed.id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   await expect(page.getByTestId('thread.actions').first()).toBeVisible();
   await expect(page.getByTestId('thread.say')).toHaveCount(0);
 });
@@ -530,7 +549,11 @@ test('a screen further down the same page is not left behind a veil', {
     data.storyboard = [
       ...(data.storyboard ?? []),
       { id: 'review-part-way', title: 'Review, part way', app: { path: `${page0}#part-way` } },
-      { id: 'review-further-down', title: 'Review, further down', app: { path: `${page0}#further-down` } },
+      {
+        id: 'review-further-down',
+        title: 'Review, further down',
+        app: { path: `${page0}#further-down` },
+      },
     ];
     await route.fulfill({ response: res, json: data });
   });
@@ -646,7 +669,11 @@ test('waiving a rule\u2019s conversation needs a person and a reason, like waivi
   // nothing to stand on once every such note was settled (2026-09-27).
   const rule = 'panel.threads.claim-never-accept';
   const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'The refusal could say which setting to change.', anchor: { rule } },
+    data: {
+      kind: 'note',
+      body: 'The refusal could say which setting to change.',
+      anchor: { rule },
+    },
   });
   expect(filed.ok(), await filed.text()).toBeTruthy();
   // Read again, so the panel knows the note it did not see arrive - waiting
@@ -654,8 +681,14 @@ test('waiving a rule\u2019s conversation needs a person and a reason, like waivi
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   const live = () =>
-    payload(page).then(({ threads: all }) =>
-      all.filter((t) => t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status)).length,
+    payload(page).then(
+      ({ threads: all }) =>
+        all.filter(
+          (t) =>
+            t.anchor?.rule === rule &&
+            t.kind !== 'question' &&
+            ['open', 'addressed'].includes(t.status),
+        ).length,
     );
   const before = await live();
 
@@ -770,7 +803,11 @@ test('threads have a view of their own, ended ones included', {
     expect(res.ok(), `${path}: ${await res.text()}`).toBeTruthy();
     return res.json();
   };
-  const { id: waiting } = await post('/api/threads', { kind: 'note', body: 'The review screen crops its footer.', anchor: { screen: 'review' } });
+  const { id: waiting } = await post('/api/threads', {
+    kind: 'note',
+    body: 'The review screen crops its footer.',
+    anchor: { screen: 'review' },
+  });
   await post(`/api/threads/${waiting}/replies`, { body: 'Uncropped it.', via: 'agent' });
   await post(`/api/threads/${waiting}/status`, { status: 'addressed', via: 'agent' });
   await review(page);
@@ -806,7 +843,11 @@ test('threads have a view of their own, ended ones included', {
   await expect(filter.locator('button').first()).toHaveText(/Awaiting you/);
   await expect(filter.locator('button').first()).toHaveClass(/btn-primary/);
   expect(
-    new Set(await list.locator('[data-open-thread]').evaluateAll((els) => els.map((e) => e.dataset.openThread))),
+    new Set(
+      await list
+        .locator('[data-open-thread]')
+        .evaluateAll((els) => els.map((e) => e.dataset.openThread)),
+    ),
   ).toEqual(owed);
   await filter.getByText('Active', { exact: false }).click();
 
@@ -909,10 +950,17 @@ test('a message is read as the markdown it was written in, and nothing else reac
   await page.goto(fixtureFor({ bp: 'blueprint' }));
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   // The list opens on what waits on a person; a thread on a rule lives under the rule and is listed here only under All (ADR 0006 §3).
   await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
-  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .getByTestId('panel.threads-list')
+    .locator(`[data-open-thread="${id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   const text = page.getByTestId('thread.body').locator('.wd-text').first();
   await expect(text).toBeVisible();
 
@@ -957,9 +1005,12 @@ test('the screen picker opens over the design, not underneath it', {
   // surface resolves against the served target's base_url, and matching on
   // the path alone was satisfied by a stranger's server on 4700 (n-0112).
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)), {
-      timeout: 10000,
-    })
+    .poll(
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)),
+      {
+        timeout: 10000,
+      },
+    )
     .toBe(true);
   await page.waitForLoadState('networkidle');
 
@@ -993,7 +1044,10 @@ test('the surface buttons are named for what each side shows, and a side with no
   const pick = async (id) => {
     await page.getByTestId('panel.screen-picker').click();
     await page.getByTestId('panel.screens-list').locator(`[data-screen="${id}"]`).click();
-    await expect(page.getByTestId('panel.screen-picker')).toHaveAttribute('title', /picked by hand/i);
+    await expect(page.getByTestId('panel.screen-picker')).toHaveAttribute(
+      'title',
+      /picked by hand/i,
+    );
   };
 
   // walkdown's own review screen: a design, and an as-built drawing for its app.
@@ -1036,7 +1090,11 @@ test('the surface buttons are named for what each side shows, and a side with no
         const walk = (root) => {
           const f = root.querySelector('[data-walkdown-sketch-flag]');
           if (f) return getComputedStyle(f).backgroundColor;
-          for (const e of root.querySelectorAll('*')) if (e.shadowRoot) { const r = walk(e.shadowRoot); if (r) return r; }
+          for (const e of root.querySelectorAll('*'))
+            if (e.shadowRoot) {
+              const r = walk(e.shadowRoot);
+              if (r) return r;
+            }
           return null;
         };
         return walk(document);
@@ -1065,12 +1123,16 @@ test('on a page that is no screen, nothing in the bar compares or takes you anyw
 
   const design = page.getByTestId('panel.surface-design');
   const build = page.getByTestId('panel.surface-build');
-  for (const control of [design, build, page.getByTestId('panel.fade')]) await expect(control).toBeDisabled();
+  for (const control of [design, build, page.getByTestId('panel.fade')])
+    await expect(control).toBeDisabled();
   await expect(design).toHaveAttribute('title', /screen picker/);
   await expect(build).toHaveAttribute('title', /screen picker/);
 
   // Put away, the swap has nothing to offer either.
-  await page.getByTestId('panel.bar').getByTitle(/Put walkdown away/i).click();
+  await page
+    .getByTestId('panel.bar')
+    .getByTitle(/Put walkdown away/i)
+    .click();
   await expect(page.getByTestId('panel.tab-swap')).toBeHidden();
 });
 
@@ -1261,7 +1323,9 @@ test('the steps are read outright and the check source waits behind a disclosure
     then.locator('xpath=preceding-sibling::*[1]').boundingBox(),
     then.boundingBox(),
   ]);
-  expect(listBox.y, 'the then list starts below its label').toBeGreaterThanOrEqual(labelBox.y + labelBox.height - 1);
+  expect(listBox.y, 'the then list starts below its label').toBeGreaterThanOrEqual(
+    labelBox.y + labelBox.height - 1,
+  );
   const stepsBox = await steps.boundingBox();
   expect(listBox.width, 'and takes the width the steps have').toBeGreaterThan(stepsBox.width * 0.8);
 
@@ -1273,14 +1337,21 @@ test('the steps are read outright and the check source waits behind a disclosure
    * `detail.steps` in its own steps, so its own detail is the fixture.
    */
   const anchor = steps.locator('code[data-anchor="detail.steps"]');
-  await expect(anchor, 'a declared anchor is a code span that knows what it points at').toHaveCount(1);
+  await expect(anchor, 'a declared anchor is a code span that knows what it points at').toHaveCount(
+    1,
+  );
   await expect(steps.getByTestId('detail.when')).not.toContainText('`');
   const colour = (loc) => loc.evaluate((el) => getComputedStyle(el).color);
   const stepCode = await colour(anchor);
   const stmt = page.getByTestId('detail.statement');
-  await expect(stmt.locator('p'), 'a one-paragraph statement is not boxed in a paragraph of its own').toHaveCount(0);
+  await expect(
+    stmt.locator('p'),
+    'a one-paragraph statement is not boxed in a paragraph of its own',
+  ).toHaveCount(0);
   const body = await page.evaluate(() => {
-    const root = [...document.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot;
+    const root = [...document.querySelectorAll('[data-walkdown-chrome]')].find(
+      (e) => e.shadowRoot,
+    ).shadowRoot;
     const probe = document.createElement('div');
     probe.className = 'wd-text';
     probe.innerHTML = '<code>x</code>';
@@ -1320,7 +1391,9 @@ test('the steps are read outright and the check source waits behind a disclosure
   await src.click();
   // Generous: opening it is a round trip to the server, which re-derives the
   // whole ledger to answer.
-  await expect(page.getByTestId('detail.source-modal')).toContainText('await ownRule(page,', { timeout: 15000 });
+  await expect(page.getByTestId('detail.source-modal')).toContainText('await ownRule(page,', {
+    timeout: 15000,
+  });
 });
 
 test('hovering an anchor a step names points at it on the surface', {
@@ -1372,7 +1445,10 @@ test('a rule leads with its claim and sets the reason and history beneath it', {
   const history = page.getByTestId('detail.history');
   await expect(history).toBeVisible();
   await expect(history).toContainText(/history/i);
-  const [b2, h2] = await Promise.all([page.getByTestId('detail.because').boundingBox(), history.boundingBox()]);
+  const [b2, h2] = await Promise.all([
+    page.getByTestId('detail.because').boundingBox(),
+    history.boundingBox(),
+  ]);
   expect(h2.y).toBeGreaterThan(b2.y);
   const opacity = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
   expect(await opacity(history)).toBeLessThan(await opacity(page.getByTestId('detail.because')));
@@ -1652,9 +1728,12 @@ test('in Detect mode the picker reports the page, in the bar and in the open lis
     location.href = '/as-built/settings.html';
   });
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/settings.html`)), {
-      timeout: 10000,
-    })
+    .poll(
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/settings.html`)),
+      {
+        timeout: 10000,
+      },
+    )
     .toBe(true);
 
   await expect(picker).toContainText('Settings');
@@ -1703,7 +1782,10 @@ test('the identity is a username to record under and a full name to show, both e
   expect(username).not.toContain(' '); // a handle, not a full name
   expect(username).not.toBe(fullName);
   await expect(nameField).toHaveValue(fullName);
-  await expect(shown, 'the strip says which username it records').toHaveAttribute('title', new RegExp(username));
+  await expect(shown, 'the strip says which username it records').toHaveAttribute(
+    'title',
+    new RegExp(username),
+  );
 
   /*
    * The username is READ. It was a text box once, and its value rode up on
@@ -1798,13 +1880,21 @@ test('a rule draws its threads as one conversation, and never repeats which rule
   // whole conversation is one slide to the right (n-0319): every message of
   // every thread as one stream (ADR 0006 §1), each thread's opening message
   // tagged with its name, and nothing repeating the rule it is under.
-  await expect(page.getByTestId('detail.stream').locator('.wd-tag[data-thread]').first(), 'the last message says which thread it is on').toBeVisible();
+  await expect(
+    page.getByTestId('detail.stream').locator('.wd-tag[data-thread]').first(),
+    'the last message says which thread it is on',
+  ).toBeVisible();
   await page.getByTestId('detail.history-open').click();
   const under = page.getByTestId('history.stream');
-  await expect(under.locator('.wd-tag[data-thread]').first(), 'the rule draws its threads').toBeVisible();
+  await expect(
+    under.locator('.wd-tag[data-thread]').first(),
+    'the rule draws its threads',
+  ).toBeVisible();
   // One opening tag per thread; a reply's "↳" tag names the thread it is on
   // where the stream changes thread, and is not a second listing of it.
-  const opening = await under.locator('.wd-tag[data-thread]').evaluateAll((els) => els.filter((el) => !el.textContent.trim().startsWith('\u21b3')).length);
+  const opening = await under
+    .locator('.wd-tag[data-thread]')
+    .evaluateAll((els) => els.filter((el) => !el.textContent.trim().startsWith('\u21b3')).length);
   expect(opening).toBe(counts[rule]);
   await expect(
     page.getByTestId('history.panel').getByTestId('thread.where'),
@@ -1843,15 +1933,21 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   const rule = rows.find((r) => r.built && !r.retired).rule;
   const file = async (body, options) => {
     const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-      data: { kind: 'question', body, anchor: { rule }, via: 'agent', ...(options ? { options } : {}) },
+      data: {
+        kind: 'question',
+        body,
+        anchor: { rule },
+        via: 'agent',
+        ...(options ? { options } : {}),
+      },
     });
     expect(res.ok()).toBeTruthy();
     return (await res.json()).id;
   };
-  const q1 = await file('Should the sheet keep its shadow when the desk is hidden?\n\nThe ghost draws one today.', [
-    { label: 'Keep it', why: 'the shadow is what says it is a sheet' },
-    { label: 'Drop it' },
-  ]);
+  const q1 = await file(
+    'Should the sheet keep its shadow when the desk is hidden?\n\nThe ghost draws one today.',
+    [{ label: 'Keep it', why: 'the shadow is what says it is a sheet' }, { label: 'Drop it' }],
+  );
   const q2 = await file('Does the ruling need a darker line every fifth row?');
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
@@ -1867,13 +1963,19 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   const options = ask.locator('[data-option]');
   await expect(options).toHaveText([/Keep it/, /Drop it/]);
   await expect(ask.locator('[data-v="later"]')).toBeVisible();
-  await expect(page.getByTestId('detail.verdict').locator('[data-v="pass"], [data-v="fail"], [data-v="answer"]')).toHaveCount(0);
+  await expect(
+    page
+      .getByTestId('detail.verdict')
+      .locator('[data-v="pass"], [data-v="fail"], [data-v="answer"]'),
+  ).toHaveCount(0);
   await expect(page.getByTestId('detail.verdict').locator('[data-v="reply"]')).toBeVisible();
   // The tag is still the door to the thread, which draws the same choices.
   await ask.locator('.wd-tag[data-thread]').click();
   // The ask sits at the end of the scrolling stream, not in the fixed foot,
   // so a long question leaves the stream its room (Topher, 2026-09-21).
-  await expect(page.getByTestId('thread.body').getByTestId('thread.ask')).toContainText(/keep its shadow/);
+  await expect(page.getByTestId('thread.body').getByTestId('thread.ask')).toContainText(
+    /keep its shadow/,
+  );
   await expect(page.getByTestId('thread.ask').locator('[data-option]')).toHaveCount(2);
   await expect(page.getByTestId('thread.turn')).not.toContainText(/keep its shadow/);
   await expect(page.getByTestId('thread.actions').filter({ hasText: 'Answer' })).toBeVisible();
@@ -1896,8 +1998,11 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   await ask.locator('[data-v="answer"]').click();
   await expect(ask).toHaveAttribute('data-question', q2);
   await expect(page.getByTestId('detail.ask-count')).toContainText('2 of 2');
-  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(-33/);
-  const threads = async () => (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads;
+  await expect
+    .poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform))
+    .toMatch(/translateX\(-33/);
+  const threads = async () =>
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads;
   const first = (await threads()).find((t) => t.id === q1);
   expect(first.status).toBe('answered');
   expect(first.chosen).toBe('Keep it');
@@ -1911,8 +2016,12 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   const stream = page.getByTestId('history.stream');
   await expect(stream.locator('.wd-opt.chosen')).toHaveText(/Keep it/);
   // A reply on another thread than the message before it says so too.
-  await expect(stream.locator('.wd-msg', { hasText: 'Does the ruling need a darker line' }).locator('.wd-tag')).toHaveText(`${q2} \u00b7 question \u00b7 open`);
-  const answer = stream.locator('.wd-msg', { hasText: 'the shadow is what says it is a sheet.' }).last();
+  await expect(
+    stream.locator('.wd-msg', { hasText: 'Does the ruling need a darker line' }).locator('.wd-tag'),
+  ).toHaveText(`${q2} \u00b7 question \u00b7 open`);
+  const answer = stream
+    .locator('.wd-msg', { hasText: 'the shadow is what says it is a sheet.' })
+    .last();
   await expect(answer.locator('.wd-tag')).toHaveText(`\u21b3 answer \u00b7 ${q1}`);
   await expect(answer.locator('.wd-text')).toHaveClass(/wd-clamp/);
   await answer.locator('.wd-tag[data-thread]').click();
@@ -1928,14 +2037,22 @@ test('a rule that asks draws one ask at a time with its choices, and Answer move
   const turn = page.getByTestId('detail.turn');
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/folds your answer/i);
-  await expect(page.getByTestId('detail.verdict').locator('[data-v="pass"], [data-v="fail"]')).toHaveCount(0);
-  await expect(page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"] [data-ask]`)).toHaveCount(0);
+  await expect(
+    page.getByTestId('detail.verdict').locator('[data-v="pass"], [data-v="fail"]'),
+  ).toHaveCount(0);
+  await expect(
+    page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"] [data-ask]`),
+  ).toHaveCount(0);
   // Folded in, so the rule is a person's again for the checks that follow
   // (status.attention.blocked-queues).
   for (const id of [q1, q2])
-    expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
-      data: { status: 'incorporated', via: 'agent' },
-    })).ok()).toBeTruthy();
+    expect(
+      (
+        await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+          data: { status: 'incorporated', via: 'agent' },
+        })
+      ).ok(),
+    ).toBeTruthy();
 });
 
 test('no two signature states are drawn the same way', {
@@ -2144,11 +2261,17 @@ test('a thread an agent filed says so in the list, not only once it is opened', 
     expect(res.ok(), await res.text()).toBeTruthy();
     return res.json();
   };
-  const byAgent = { ...(await file({ said: 'The heading wraps at 1024px.', via: 'agent' })), via: 'agent' };
+  const byAgent = {
+    ...(await file({ said: 'The heading wraps at 1024px.', via: 'agent' })),
+    via: 'agent',
+  };
   const plain = await file({ body: 'The heading wraps on my laptop.' });
   await page.reload();
 
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   await page.locator('[data-tfilter="active"]').click();
   const list = page.getByTestId('panel.threads-list');
   // By the card's own id attribute, never by text: a thread whose BODY names
@@ -2196,11 +2319,16 @@ test('mid-fade, the reason pinning is closed is reachable by the pointer', {
 
   // What the pointer actually hits at the button's centre carries the reason.
   const box = await pin.boundingBox();
-  const hit = await page.evaluate(({ x, y }) => {
-    const host = document.querySelector('[data-walkdown-chrome]')?.shadowRoot ?? document;
-    const el = host.elementFromPoint(x, y);
-    return el?.closest('[data-testid="panel.pin-why"]') ? 'the reason' : (el?.tagName ?? 'nothing');
-  }, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
+  const hit = await page.evaluate(
+    ({ x, y }) => {
+      const host = document.querySelector('[data-walkdown-chrome]')?.shadowRoot ?? document;
+      const el = host.elementFromPoint(x, y);
+      return el?.closest('[data-testid="panel.pin-why"]')
+        ? 'the reason'
+        : (el?.tagName ?? 'nothing');
+    },
+    { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+  );
   expect(hit, 'the element under the pointer is the one carrying the reason').toBe('the reason');
 
   const why = page.getByTestId('panel.pin-why');
@@ -2355,7 +2483,9 @@ test('a page no blueprint claims asks which project, and opens nothing over it',
   await expect(modal, 'the panel asks rather than opening').toBeVisible();
   // Named, because a claim misses on a port or a fragment and "no blueprint"
   // without the address leaves you guessing which one was asked about.
-  await expect(page.getByTestId('project.address'), 'it names the address').toContainText(WD_ORIGIN);
+  await expect(page.getByTestId('project.address'), 'it names the address').toContainText(
+    WD_ORIGIN,
+  );
   await expect(page.getByTestId('project.why')).toContainText(/No blueprint claims this page/i);
 
   // How to make it reviewable, and how to bring a project in - both at the
@@ -2490,7 +2620,10 @@ test('one blueprint on the server is not evidence that this page belongs to it',
   // The one it holds is offered, never opened - and choosing its project goes
   // straight in, because one blueprint is not a question worth asking twice.
   await page.getByTestId('project.list').locator('[data-project]').first().click();
-  await expect(page.getByTestId('panel.rules-list'), 'one blueprint opens on choosing').toBeVisible();
+  await expect(
+    page.getByTestId('panel.rules-list'),
+    'one blueprint opens on choosing',
+  ).toBeVisible();
 });
 
 /*
@@ -2513,7 +2646,10 @@ test('a server that lists nothing still does not open itself over the page', {
   });
   await page.goto(fixtureFor({ bp: '' }));
 
-  await expect(page.getByTestId('project.modal'), 'it says something rather than opening').toBeVisible();
+  await expect(
+    page.getByTestId('project.modal'),
+    'it says something rather than opening',
+  ).toBeVisible();
   await expect(page.getByTestId('project.address')).toContainText(WD_ORIGIN);
   await expect(page.getByTestId('panel.rules-list')).toHaveCount(0);
   // Nothing is listed, so nothing is offered: the list is absent rather than
@@ -2654,7 +2790,11 @@ test("walkdown's own root asks which project over the desk alone, and a pick bri
 
   // A blueprint picked from the root has no page under it to keep, so it goes
   // to one it claims (panel.rules.takes-you-there).
-  await page.getByTestId('start.options').getByText(/walkdown-example/i).first().click();
+  await page
+    .getByTestId('start.options')
+    .getByText(/walkdown-example/i)
+    .first()
+    .click();
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
   await expect
     .poll(() => page.frames().some((f) => f.url().includes('index.html')), { timeout: 10000 })
@@ -2694,8 +2834,12 @@ test('crossing to a project that claims nothing here does not keep the old count
   await page.goto(fixtureFor({ bp: '' }));
 
   // Two claimants in one project: the question, with the reason.
-  await expect(page.getByTestId('start.notice')).toContainText(/2 blueprints in this project claim/);
-  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(2);
+  await expect(page.getByTestId('start.notice')).toContainText(
+    /2 blueprints in this project claim/,
+  );
+  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(
+    2,
+  );
 
   // Cross to the other project from the bar.
   await page.getByTestId('panel.project').click();
@@ -2704,7 +2848,9 @@ test('crossing to a project that claims nothing here does not keep the old count
   // Its two blueprints, neither claiming this page - and the notice says
   // that, rather than the count it gathered for the project you left.
   await expect(page.getByTestId('start.options').locator('[data-pick]')).toHaveCount(2);
-  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(0);
+  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(
+    0,
+  );
   await expect(page.getByTestId('start.notice')).toContainText(/holds more than one blueprint/);
   await expect(page.getByTestId('start.notice')).not.toContainText(/claim this page/);
 
@@ -2713,17 +2859,25 @@ test('crossing to a project that claims nothing here does not keep the old count
   // was set the answer was dropped, and the modal named the address it had
   // just been asked about and said nothing claimed it (n-0282).
   await page.getByTestId('panel.project').click();
-  await page.getByTestId('project.list').locator('[data-project]:not([data-project="other"])').click();
+  await page
+    .getByTestId('project.list')
+    .locator('[data-project]:not([data-project="other"])')
+    .click();
   await page.getByTestId('start.options').locator('[data-pick]').first().click();
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
   await page.getByTestId('panel.project').click();
   const list = page.getByTestId('project.list');
   await expect(list.locator('[data-project][data-claims]')).toHaveCount(1);
-  await expect(list.locator('[data-project][data-claims]').first()).not.toHaveAttribute('data-project', 'other');
+  await expect(list.locator('[data-project][data-claims]').first()).not.toHaveAttribute(
+    'data-project',
+    'other',
+  );
   // And counted right in both dimensions: two blueprints, one project. A
   // singly-claimed page once read "1 blueprints claim this page, in more
   // than one project" (n-0283).
-  await expect(page.getByTestId('project.why')).toHaveText('2 blueprints claim this page, in one project.');
+  await expect(page.getByTestId('project.why')).toHaveText(
+    '2 blueprints claim this page, in one project.',
+  );
   await page.keyboard.press('Escape');
 });
 
@@ -2738,13 +2892,19 @@ test('times read in the zone the person declared, and Settings says which @rule:
 }, async ({ page }) => {
   // A thread with a stamp whose Tokyo reading and UTC reading differ in date.
   const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'when was this', anchor: { rule: 'panel.rules.steps-not-an-appendix' } },
+    data: {
+      kind: 'note',
+      body: 'when was this',
+      anchor: { rule: 'panel.rules.steps-not-an-appendix' },
+    },
   });
   expect(filed.ok()).toBeTruthy();
   const { id, thread } = await filed.json();
   // An instant with a Z, whole seconds or not: the door stamps milliseconds,
   // other writers do not, and the rule asks for neither in particular.
-  expect(thread.created, 'the file says UTC').toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
+  expect(thread.created, 'the file says UTC').toMatch(
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/,
+  );
   await review(page);
   await ensureSession(page);
   await page.getByTestId('panel.actor-name').click();
@@ -2755,16 +2915,31 @@ test('times read in the zone the person declared, and Settings says which @rule:
   await page.keyboard.press('Escape');
 
   // The message's hover stamp carries the zone, and the hour is Tokyo's.
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   // The list opens on what waits on a person; a thread on a rule lives under the rule and is listed here only under All (ADR 0006 §3).
   await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
-  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .getByTestId('panel.threads-list')
+    .locator(`[data-open-thread="${id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   const at = page.getByTestId('thread.body').locator('.wd-at[title]').first();
   await expect(at).toBeVisible();
   const title = await at.getAttribute('title');
   expect(title, 'the stamp says which clock read it').toMatch(/GMT\+9/);
-  const [h, m] = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tokyo', hour: 'numeric', minute: '2-digit' }).format(new Date(thread.created)).split(/[: ]/);
-  expect(title, 'and the hour is Tokyo\'s, whatever zone the browser is in').toMatch(new RegExp(`\\b${h}:${m}:`));
+  const [h, m] = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Tokyo',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+    .format(new Date(thread.created))
+    .split(/[: ]/);
+  expect(title, "and the hour is Tokyo's, whatever zone the browser is in").toMatch(
+    new RegExp(`\\b${h}:${m}:`),
+  );
 });
 
 /*
@@ -2785,7 +2960,11 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
   const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
     // A first line longer than the pane is wide: the block cuts it short
     // rather than letting it set the width of everything on the screen.
-    data: { kind: 'note', body: `The label reads wrong here, ${'and this note goes on at length about it '.repeat(6)}.`, anchor: { rule } },
+    data: {
+      kind: 'note',
+      body: `The label reads wrong here, ${'and this note goes on at length about it '.repeat(6)}.`,
+      anchor: { rule },
+    },
   });
   expect(filed.ok()).toBeTruthy();
   const { id, thread } = await filed.json();
@@ -2802,12 +2981,21 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
   // And an answered request: under ADR 0005 a person's to verify from its
   // own screen (n-0296); on a walkable rule it is the rule's conversation now.
   const asked = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'Could the design show this?', anchor: { rule }, reason: 'request' },
+    data: {
+      kind: 'note',
+      body: 'Could the design show this?',
+      anchor: { rule },
+      reason: 'request',
+    },
   });
   const request = (await asked.json()).id;
-  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${request}/status?bp=blueprint`, {
-    data: { status: 'addressed', via: 'agent', reason: 'Drawn.' },
-  })).ok()).toBeTruthy();
+  expect(
+    (
+      await page.request.post(`${WD_ORIGIN}/api/threads/${request}/status?bp=blueprint`, {
+        data: { status: 'addressed', via: 'agent', reason: 'Drawn.' },
+      })
+    ).ok(),
+  ).toBeTruthy();
 
   // Opened after the filing, so the panel is reading the threads as they are.
   await review(page);
@@ -2819,7 +3007,8 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
   await expect(says).toBeVisible();
   await expect(says).toContainText(/Pass ends this conversation \(\d+ notes?\)/);
   const liveNow = (await payload(page)).threads.filter(
-    (t) => t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status),
+    (t) =>
+      t.anchor?.rule === rule && t.kind !== 'question' && ['open', 'addressed'].includes(t.status),
   ).length;
   await expect(says).toContainText(`(${liveNow} note${liveNow === 1 ? '' : 's'})`);
   // Cut short, not run off the edge: the stream, and the statement above it,
@@ -2830,10 +3019,13 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
     // Polled: the detail slides in over 300ms, and a box read mid-slide
     // sits wherever the track was at that instant.
     await expect
-      .poll(async () => {
-        const box = await loc.boundingBox();
-        return [box.x >= panel.x - 1, box.x + box.width <= panel.x + panel.width + 1];
-      }, { message: 'wider than the panel' })
+      .poll(
+        async () => {
+          const box = await loc.boundingBox();
+          return [box.x >= panel.x - 1, box.x + box.width <= panel.x + panel.width + 1];
+        },
+        { message: 'wider than the panel' },
+      )
       .toEqual([true, true]);
   }
 
@@ -2887,7 +3079,9 @@ test('a project with one claimant among several is asked the several question, i
   });
   await page.route(/\/api\/whose(\?|$)/, async (route) => {
     const url = new URL(route.request().url()).searchParams.get('url');
-    await route.fulfill({ json: { url, matches: keys.map((key) => ({ id: key, key, name: key, screen: 'review' })) } });
+    await route.fulfill({
+      json: { url, matches: keys.map((key) => ({ id: key, key, name: key, screen: 'review' })) },
+    });
   });
   await review(page);
   await page.getByTestId('panel.project').click();
@@ -2896,7 +3090,9 @@ test('a project with one claimant among several is asked the several question, i
   // Two to choose from, one marked as claiming - and the reason given is
   // that there are two, never a count of one presented as a refusal to pick.
   expect(await page.getByTestId('start.options').locator('[data-pick]').count()).toBeGreaterThan(1);
-  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(1);
+  await expect(page.getByTestId('start.options').locator('[data-pick][data-claims]')).toHaveCount(
+    1,
+  );
   const notice = page.getByTestId('start.notice');
   await expect(notice).toContainText(/holds more than one blueprint/);
   await expect(notice).not.toContainText(/1 blueprints/);
@@ -2912,7 +3108,9 @@ test('a project with one claimant among several is asked the several question, i
 test("walkdown's own address opens the rule or thread it names, once", {
   tag: '@rule:panel.start.address-opens-what-it-names',
 }, async ({ page }) => {
-  const { rows, threads } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const { rows, threads } = await (
+    await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)
+  ).json();
   const thread = threads.find((t) => t.anchor?.rule && rows.some((r) => r.rule === t.anchor.rule));
   const rule = rows.find((r) => r.rule !== thread.anchor.rule).rule;
 
@@ -2937,7 +3135,9 @@ test("walkdown's own address opens the rule or thread it names, once", {
   // An id the blueprint does not know is said, not silently nothing.
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&rule=no.such.rule`);
   await expect(page.locator('.toast', { hasText: 'No rule no.such.rule here' })).toBeVisible();
-  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
+  await expect
+    .poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform))
+    .toMatch(/translateX\(0%\)/);
 });
 
 /*
@@ -2968,14 +3168,18 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await expect(page.getByTestId('panel.project')).not.toContainText('Pick a project');
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)), {
-      timeout: 10000,
-    })
+    .poll(
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)),
+      {
+        timeout: 10000,
+      },
+    )
     .toBe(true);
   expect(new URL(page.url()).searchParams.get('bp')).toBe(key);
 
   // Open a rule: the address names it, and a reload comes back to it.
-  const rule = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).rows[0].rule;
+  const rule = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+    .rows[0].rule;
   await page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"]`).first().click();
   await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
   await expect.poll(() => new URL(page.url()).searchParams.get('rule')).toBe(rule);
@@ -2988,7 +3192,9 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
   await expect.poll(() => new URL(page.url()).searchParams.get('rule')).toBeNull();
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
-  await expect.poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform)).toMatch(/translateX\(0%\)/);
+  await expect
+    .poll(() => page.locator('.wdp-track').evaluate((el) => el.style.transform))
+    .toMatch(/translateX\(0%\)/);
   expect(new URL(page.url()).searchParams.get('rule')).toBeNull();
 
   // The root with a blueprint named and no page: the board opens on its
@@ -2998,18 +3204,24 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
   await page.goto(`${WD_ORIGIN}/?bp=blueprint`);
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)), {
-      timeout: 10000,
-    })
+    .poll(
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)),
+      {
+        timeout: 10000,
+      },
+    )
     .toBe(true);
-  await expect.poll(() => decodeURIComponent(new URL(page.url()).hash.slice(1))).toMatch(
-    new RegExp(`^${WD_ORIGIN}/as-built/review.html`),
-  );
+  await expect
+    .poll(() => decodeURIComponent(new URL(page.url()).hash.slice(1)))
+    .toMatch(new RegExp(`^${WD_ORIGIN}/as-built/review.html`));
   await page.reload();
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)), {
-      timeout: 10000,
-    })
+    .poll(
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/review.html`)),
+      {
+        timeout: 10000,
+      },
+    )
     .toBe(true);
 
   // A blueprint this server does not have is dropped from the address too,
@@ -3025,27 +3237,42 @@ test("walkdown's own address keeps the blueprint and the page, so a reload comes
  * third paragraph of a note). A reply is never headlined; a note's opening
  * message is drawn as before.
  */
-test("a question leads with its question, in the list and on its own screen", {
+test('a question leads with its question, in the list and on its own screen', {
   tag: '@rule:threads.conversation.question-leads-with-the-question',
 }, async ({ page }) => {
   const rule = 'threads.conversation.one-stream';
   const ask = 'Should the prompt hand out a port to each judge?';
   const filed = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'question', body: `${ask}\n\nContext: two judges collided on the same port.`, anchor: { rule } },
+    data: {
+      kind: 'question',
+      body: `${ask}\n\nContext: two judges collided on the same port.`,
+      anchor: { rule },
+    },
   });
   expect(filed.ok()).toBeTruthy();
   const { id } = await filed.json();
-  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/replies?bp=blueprint`, {
-    data: { body: 'Yes, hand one out.\nBecause collisions.', author: 'topher' },
-  })).ok()).toBeTruthy();
+  expect(
+    (
+      await page.request.post(`${WD_ORIGIN}/api/threads/${id}/replies?bp=blueprint`, {
+        data: { body: 'Yes, hand one out.\nBecause collisions.', author: 'topher' },
+      })
+    ).ok(),
+  ).toBeTruthy();
   const noted = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'The label reads wrong.\n\nOn the second screen.', anchor: { rule } },
+    data: {
+      kind: 'note',
+      body: 'The label reads wrong.\n\nOn the second screen.',
+      anchor: { rule },
+    },
   });
   const note = (await noted.json()).id;
 
   await page.goto(fixtureFor({ bp: 'blueprint' }));
   await expect(page.getByTestId('panel.bar')).toBeVisible();
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   // Under All: a question on a rule is the rule's to answer and is listed
   // here only among everything (ADR 0006 §3).
   await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
@@ -3064,7 +3291,9 @@ test("a question leads with its question, in the list and on its own screen", {
   expect(await weight(cardAsk)).toBeGreaterThan(await weight(cardBody));
   expect(await size(cardAsk)).toBeGreaterThan(await size(cardBody));
   // A note's card has no headline.
-  await expect(list.locator(`[data-open-thread="${note}"]`).first().locator('.wd-ask')).toHaveCount(0);
+  await expect(list.locator(`[data-open-thread="${note}"]`).first().locator('.wd-ask')).toHaveCount(
+    0,
+  );
 
   // Opened: the same headline on the opening message, and none on the reply.
   await card.click({ position: { x: 8, y: 6 } });
@@ -3072,11 +3301,15 @@ test("a question leads with its question, in the list and on its own screen", {
   // Counted in the conversation itself: an open question also re-asks itself
   // in a card at the end of the stream, beside the box that answers it
   // (90ab98f), and that card leads with the same question.
-  const asks = body.locator('.wd-ask').and(page.locator(':not([data-testid="thread.ask"] .wd-ask)'));
+  const asks = body
+    .locator('.wd-ask')
+    .and(page.locator(':not([data-testid="thread.ask"] .wd-ask)'));
   await expect(asks).toHaveCount(1);
   await expect(asks).toHaveText(ask);
   await expect(page.getByTestId('thread.ask').locator('.wd-ask')).toHaveText(ask);
-  const msgs = body.locator('.wd-msg').and(page.locator(':not([data-testid="thread.ask"] .wd-msg)'));
+  const msgs = body
+    .locator('.wd-msg')
+    .and(page.locator(':not([data-testid="thread.ask"] .wd-msg)'));
   await expect(msgs.first().locator('.wd-ask')).toHaveCount(1);
   await expect(msgs.last()).toContainText('Yes, hand one out.');
   await expect(msgs.last().locator('.wd-ask')).toHaveCount(0);
@@ -3091,11 +3324,15 @@ test("a question leads with its question, in the list and on its own screen", {
 test('an id in a message previews what it names, under the cursor and under focus', {
   tag: '@rule:threads.conversation.one-stream',
 }, async ({ page }) => {
-  const { rows, threads } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const { rows, threads } = await (
+    await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)
+  ).json();
   const about = rows.find((r) => r.rule === 'threads.conversation.one-stream');
   // Any thread whose opening line is plain prose, so the card's first line
   // is the body's first words verbatim.
-  const other = threads.find((t) => t.anchor?.rule && /^[A-Z][a-z][^`*_[\n]{40}/.test(t.body ?? ''));
+  const other = threads.find(
+    (t) => t.anchor?.rule && /^[A-Z][a-z][^`*_[\n]{40}/.test(t.body ?? ''),
+  );
   const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
     data: {
       kind: 'note',
@@ -3143,11 +3380,15 @@ test('an id in a message previews what it names, under the cursor and under focu
   await body.evaluate((el) => {
     el.scrollTop = el.scrollHeight;
   });
-  await expect.poll(() => body.locator(`[data-thread-ref="${other.id}"]`).evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    const b = el.closest('[data-testid="thread.body"]').getBoundingClientRect();
-    return r.bottom < b.top || r.top > b.bottom;
-  })).toBe(true);
+  await expect
+    .poll(() =>
+      body.locator(`[data-thread-ref="${other.id}"]`).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const b = el.closest('[data-testid="thread.body"]').getBoundingClientRect();
+        return r.bottom < b.top || r.top > b.bottom;
+      }),
+    )
+    .toBe(true);
   await body.locator(`[data-thread-ref="${other.id}"]`).focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');
@@ -3189,7 +3430,11 @@ test('the composer says whose move it is and offers only that reader’s moves',
   // A person's note, just filed: the agent's move. Nothing here is the
   // person's to press but Reply and Waive - no Done, because there is
   // nothing to accept yet.
-  const { id: note } = await post('/api/threads', { kind: 'note', body: 'The label reads wrong.', anchor });
+  const { id: note } = await post('/api/threads', {
+    kind: 'note',
+    body: 'The label reads wrong.',
+    anchor,
+  });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${note}`);
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/agent.s move/i);
@@ -3228,8 +3473,9 @@ test('the composer says whose move it is and offers only that reader’s moves',
   // carries the person - not the word on the button.
   await page.getByTestId('thread.actions').last().click();
   await expect(turn).toHaveCount(0);
-  const verified = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
-    .threads.find((t) => t.id === note);
+  const verified = (
+    await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()
+  ).threads.find((t) => t.id === note);
   expect(verified.status).toBe('verified');
   expect(verified.verified_by).toBe('checks-person');
   // Opened again: an ended thread is closed, offers a person Reply and
@@ -3243,8 +3489,9 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await box.fill('It came back at 375.');
   await page.locator('[data-testid="thread.actions"][data-act="open"]').click();
   await expect(turn).toHaveAttribute('data-party', 'agent');
-  const reopened = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
-    .threads.find((t) => t.id === note);
+  const reopened = (
+    await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()
+  ).threads.find((t) => t.id === note);
   expect(reopened.status).toBe('open');
   expect(reopened.verified_by).toBe('checks-person');
   expect(reopened.replies.at(-1).body).toBe('It came back at 375.');
@@ -3252,7 +3499,11 @@ test('the composer says whose move it is and offers only that reader’s moves',
   // On a rule the walk can reach, the same addressed note is the rule's
   // conversation: the line says the verdict ends it, and a person is offered
   // Reply and Waive only - the pass is the Done, the fail is the Reopen.
-  const { id: onRule } = await post('/api/threads', { kind: 'note', body: 'The label reads wrong here too.', anchor: { rule } });
+  const { id: onRule } = await post('/api/threads', {
+    kind: 'note',
+    body: 'The label reads wrong here too.',
+    anchor: { rule },
+  });
   await post(`/api/threads/${onRule}/status`, { status: 'addressed', via: 'agent' });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${onRule}`);
   await expect(turn).toHaveAttribute('data-party', 'human');
@@ -3272,8 +3523,9 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await expect(turn).toHaveAttribute('data-party', 'agent');
   await expect(turn).toContainText(/You answered/);
   await expect(actions).toHaveText(['Waive', 'Reply', 'Reopen']);
-  const answered = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
-    .threads.find((t) => t.id === q);
+  const answered = (
+    await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()
+  ).threads.find((t) => t.id === q);
   expect(answered.status).toBe('answered');
   expect(answered.replies.at(-1).body).toBe('4730.');
 
@@ -3283,7 +3535,8 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    if (body.identity) body.identity = { ...body.identity, username: 'agent', name: '', declared: false };
+    if (body.identity)
+      body.identity = { ...body.identity, username: 'agent', name: '', declared: false };
     await route.fulfill({ response: res, json: body });
   });
   const { id: note2 } = await post('/api/threads', { kind: 'note', body: 'Second label.', anchor });
@@ -3295,7 +3548,10 @@ test('the composer says whose move it is and offers only that reader’s moves',
   await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'addressed');
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${q}`);
   await expect(actions).toHaveText(['Reply', 'Done']);
-  await expect(page.getByTestId('thread.actions').last()).toHaveAttribute('data-act', 'incorporated');
+  await expect(page.getByTestId('thread.actions').last()).toHaveAttribute(
+    'data-act',
+    'incorporated',
+  );
   // And where it is the person's move, or the thread has ended, the agent
   // only talks: a person's acceptance is not a machine's to take back.
   await post(`/api/threads/${note}/status`, { status: 'addressed', via: 'agent' });
@@ -3344,7 +3600,9 @@ test('a relayed message keeps the person\u2019s face and shows the agent\u2019s 
   await expect(added).not.toHaveAttribute('open', /.*/);
   await expect(added.locator('.wd-added-peek')).toBeVisible();
   await expect(added.locator('.wd-added-text')).toBeHidden();
-  expect(await added.locator('.wd-added-peek').evaluate((el) => getComputedStyle(el).webkitLineClamp)).toBe('2');
+  expect(
+    await added.locator('.wd-added-peek').evaluate((el) => getComputedStyle(el).webkitLineClamp),
+  ).toBe('2');
   // A caret in the corner points down while closed and up once open.
   const caret = added.locator('.wd-added-caret');
   await expect(caret).toBeVisible();
@@ -3358,7 +3616,10 @@ test('a relayed message keeps the person\u2019s face and shows the agent\u2019s 
   await expect(added.locator('.wd-added-text')).toBeHidden();
   // The list draws the same message the same way.
   await page.getByTestId('thread.close').click();
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   // The list opens on what waits on a person; a thread on a rule lives under the rule and is listed here only under All (ADR 0006 §3).
   await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
   const card = page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first();
@@ -3386,23 +3647,28 @@ test('the surface in front takes the pointer, and mid-fade neither does', {
 
   const under = async () => {
     const box = await page.getByTestId('panel.app-frame').boundingBox();
-    return page.evaluate(({ x, y }) => {
-      // The ghost lives in walkdown's own shadow root; the app frame is in
-      // the page. Ask the root first, then the document.
-      const root = document.querySelector('[data-walkdown-chrome]')?.shadowRoot;
-      const inRoot = root?.elementFromPoint(x, y);
-      if (inRoot?.closest?.('[data-walkdown-ghost]')) return 'ghost';
-      const el = document.elementFromPoint(x, y);
-      if (el?.dataset?.testid === 'panel.app-frame') return 'app';
-      return el?.tagName ?? 'nothing';
-    }, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
+    return page.evaluate(
+      ({ x, y }) => {
+        // The ghost lives in walkdown's own shadow root; the app frame is in
+        // the page. Ask the root first, then the document.
+        const root = document.querySelector('[data-walkdown-chrome]')?.shadowRoot;
+        const inRoot = root?.elementFromPoint(x, y);
+        if (inRoot?.closest?.('[data-walkdown-ghost]')) return 'ghost';
+        const el = document.elementFromPoint(x, y);
+        if (el?.dataset?.testid === 'panel.app-frame') return 'app';
+        return el?.tagName ?? 'nothing';
+      },
+      { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+    );
   };
 
   // The slider reads 0 at the design and 100 at the app.
   await fade.fill('0');
   await expect.poll(under, 'fully faded to the design, the design takes the pointer').toBe('ghost');
   await fade.fill('50');
-  await expect.poll(under, 'half way, neither sheet takes the pointer').not.toMatch(/^(ghost|app)$/);
+  await expect
+    .poll(under, 'half way, neither sheet takes the pointer')
+    .not.toMatch(/^(ghost|app)$/);
   await fade.fill('100');
   await expect.poll(under, 'back on the page, the page takes the pointer').toBe('app');
 });
@@ -3423,7 +3689,12 @@ test('the sign-off dots stand two tall, in as many columns as the roles need', {
   for (const stack of (await stacks.all()).slice(0, 40)) {
     const n = ((await stack.getAttribute('data-signoff')) ?? '').split(' ').filter(Boolean).length;
     expect(Number(await stack.getAttribute('data-columns'))).toBe(Math.ceil(n / 2));
-    const boxes = await stack.locator(':scope > span').evaluateAll((els) => els.map((el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, h: r.height }; }));
+    const boxes = await stack.locator(':scope > span').evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, h: r.height };
+      }),
+    );
     expect(boxes.length, 'one dot per role, no more').toBe(n);
     const rows = new Set(boxes.map((b) => Math.round(b.y)));
     expect(rows.size, 'never taller than two dots').toBeLessThanOrEqual(2);
@@ -3433,7 +3704,9 @@ test('the sign-off dots stand two tall, in as many columns as the roles need', {
       const [top, bottom] = [boxes[0], boxes[1]];
       expect(last.x, 'the lone dot is on the right').toBeGreaterThan(top.x);
       const mid = (top.y + bottom.y + bottom.h) / 2;
-      expect(Math.abs(last.y + last.h / 2 - mid), 'centred between the rows').toBeLessThanOrEqual(1.5);
+      expect(Math.abs(last.y + last.h / 2 - mid), 'centred between the rows').toBeLessThanOrEqual(
+        1.5,
+      );
     }
   }
   test.info().annotations.push({ type: 'odd-role-rules-seen', description: String(odd) });
@@ -3454,7 +3727,9 @@ test('the tiers bubble on a rule stays inside the pane that scrolls it', {
   const strip = pane.getByTestId('panel.rule-tiers').first();
   await strip.hover();
   const tip = strip.getByTestId('panel.rule-tiers-tip');
-  await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.5);
+  await expect
+    .poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBeGreaterThan(0.5);
   const [t, p] = await Promise.all([tip.boundingBox(), pane.boundingBox()]);
   expect(t.y, 'the bubble starts no higher than the pane it is in').toBeGreaterThanOrEqual(p.y - 1);
   expect(t.y + t.height, 'and it ends inside it').toBeLessThanOrEqual(p.y + p.height + 1);
@@ -3472,18 +3747,28 @@ test('the legend keeps every mark clear of the words beside it', {
   const legend = page.getByTestId('panel.legend');
   await legend.hover();
   const tip = page.getByTestId('panel.legend-tip');
-  await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.5);
+  await expect
+    .poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBeGreaterThan(0.5);
   // From the right edge of the footer it opens towards the room, so none of
   // it is off the pane (n-0308).
-  const [t, pane] = await Promise.all([tip.boundingBox(), page.getByTestId('panel.bar').boundingBox()]);
+  const [t, pane] = await Promise.all([
+    tip.boundingBox(),
+    page.getByTestId('panel.bar').boundingBox(),
+  ]);
   expect(t.x, 'inside the pane, from the left').toBeGreaterThanOrEqual(pane.x - 1);
-  expect(t.x + t.width, 'inside the pane, from the right').toBeLessThanOrEqual(pane.x + pane.width + 1);
+  expect(t.x + t.width, 'inside the pane, from the right').toBeLessThanOrEqual(
+    pane.x + pane.width + 1,
+  );
   const badges = tip.locator('.badge');
   expect(await badges.count(), 'the legend explains the asks').toBeGreaterThan(0);
   for (const badge of await badges.all()) {
     const words = badge.locator('xpath=../following-sibling::span[1]');
     const [b, w] = await Promise.all([badge.boundingBox(), words.boundingBox()]);
-    expect(b.x + b.width, `${await badge.textContent()} ends before its sentence starts`).toBeLessThanOrEqual(w.x + 0.5);
+    expect(
+      b.x + b.width,
+      `${await badge.textContent()} ends before its sentence starts`,
+    ).toBeLessThanOrEqual(w.x + 0.5);
   }
 });
 
@@ -3508,7 +3793,9 @@ test('Skip sets a rule aside for this sitting only: recorded as skipped, unchang
   await expect(page.getByTestId('panel.judged')).toHaveText(/^\+1\/\d+$/);
   expect((await draft(page)).draft.verdicts[rule]).toBe('skipped');
   // The row wears the sitting's own mark for it.
-  await expect(page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"]`).first()).toContainText('↷');
+  await expect(
+    page.getByTestId('panel.rules-list').locator(`[data-rule="${rule}"]`).first(),
+  ).toContainText('↷');
 
   await page.getByTestId('panel.walk').click(); // Finish
   await expect(page.getByTestId('panel.actor')).toBeHidden();
@@ -3543,7 +3830,7 @@ test('Continue stays put on an unjudged rule; a skip is the way past', {
   await page.getByTestId('panel.skip').click();
   await expect(page.getByTestId('detail.rule-id'), 'a skip moves on').not.toHaveText(rule);
   // Back on the skipped rule, it is judged this sitting, so Continue moves again.
-  await page.getByTestId("detail.back").first().click();
+  await page.getByTestId('detail.back').first().click();
   await list.locator(`[data-rule="${rule}"]`).first().click();
   await expect(page.getByTestId('detail.rule-id')).toHaveText(rule);
   await expect(cont, 'judged this sitting, so Continue moves').toBeEnabled();
@@ -3566,12 +3853,17 @@ test('with nothing left owing a verdict, Continue and Skip are disabled and poin
   const onward = page.getByTestId('panel.onward');
   const skip = page.getByTestId('panel.skip');
   const cont = page.getByTestId('panel.continue');
-  const judged = async () => Number((await page.getByTestId('panel.judged').textContent()).match(/\+(\d+)\//)?.[1] ?? 0);
+  const judged = async () =>
+    Number((await page.getByTestId('panel.judged').textContent()).match(/\+(\d+)\//)?.[1] ?? 0);
   // Continue lands on the next owed rule and goes quiet there; Skip is the
   // way past it. Round and round until nothing is owed.
   for (let i = 0; i < 120; i++) {
     if ((await onward.getAttribute('data-done')) !== null) break;
-    if ((await page.getByTestId('detail.rule-id').count()) && (await skip.isEnabled()) && (await cont.isDisabled())) {
+    if (
+      (await page.getByTestId('detail.rule-id').count()) &&
+      (await skip.isEnabled()) &&
+      (await cont.isDisabled())
+    ) {
       const before = await judged();
       await skip.click();
       await expect.poll(judged).toBe(before + 1);
@@ -3591,7 +3883,10 @@ test('with nothing left owing a verdict, Continue and Skip are disabled and poin
   // bring the sitting back (n-0331).
   await expect(page.getByTestId('panel.actor')).toBeHidden();
   await page.waitForTimeout(1500);
-  await expect(page.getByTestId('panel.actor'), 'still finished after the late reload').toBeHidden();
+  await expect(
+    page.getByTestId('panel.actor'),
+    'still finished after the late reload',
+  ).toBeHidden();
 });
 
 /*
@@ -3608,19 +3903,30 @@ test('a fail on an addressed conversation files its why once, as the reopen', {
     data: { kind: 'note', body: 'The label reads wrong.', anchor: { rule } },
   });
   const { id } = await filed.json();
-  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
-    data: { status: 'addressed', via: 'agent', reason: 'Reworded it.' },
-  })).ok()).toBeTruthy();
+  expect(
+    (
+      await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+        data: { status: 'addressed', via: 'agent', reason: 'Reworded it.' },
+      })
+    ).ok(),
+  ).toBeTruthy();
   await review(page);
   await endSession(page);
   await ensureSession(page);
   await openRuleForVerdict(page, rule);
   await page.getByTestId('detail.feedback').fill('Still wrong on the second line.');
   await page.locator('[data-v="fail"]').click();
-  await expect.poll(async () => {
-    const t = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((x) => x.id === id);
-    return [t?.status, (t?.replies ?? []).filter((r) => r.body === 'Still wrong on the second line.').length];
-  }).toEqual(['open', 1]);
+  await expect
+    .poll(async () => {
+      const t = (
+        await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()
+      ).threads.find((x) => x.id === id);
+      return [
+        t?.status,
+        (t?.replies ?? []).filter((r) => r.body === 'Still wrong on the second line.').length,
+      ];
+    })
+    .toEqual(['open', 1]);
   await endSession(page);
 });
 
@@ -3642,7 +3948,9 @@ test('the last proxy is offered on the next walk, unticked', {
   const signer = page.locator(`input[data-testid="walkdown.signing.signer"][data-i="${i}"]`);
   await signer.fill('sam');
   await signer.blur();
-  await expect(page.getByTestId('walkdown.signing.summary')).toContainText('Signing for sam (product)');
+  await expect(page.getByTestId('walkdown.signing.summary')).toContainText(
+    'Signing for sam (product)',
+  );
   await page.getByTestId('walkdown.signing.start').click();
   await expect(page.getByTestId('panel.actor')).toBeVisible();
   await expect(page.getByTestId('panel.actor-signing')).toContainText('product for sam');
@@ -3675,11 +3983,16 @@ test('a server answering for another blueprint ends the sitting, out loud', {
     // restoreSession found it there after the drop and the sitting came
     // back - on a CI runner every time, here only when the timing fell that
     // way (2026-09-28).
-    await route.fulfill({ response: res, json: { ...json, key: '/somewhere/else/entirely', draft: null } });
+    await route.fulfill({
+      response: res,
+      json: { ...json, key: '/somewhere/else/entirely', draft: null },
+    });
   });
   // The other board has no draft of ours - it is another board.
   await page.route(/\/api\/draft(\?|$)/, (route) =>
-    route.request().method() === 'GET' ? route.fulfill({ json: { draft: null } }) : route.continue(),
+    route.request().method() === 'GET'
+      ? route.fulfill({ json: { draft: null } })
+      : route.continue(),
   );
   // session() left the first rule open; its verdict pair arrives a tick later.
   await expect(acceptVerdict(page)).toBeVisible();
@@ -3713,19 +4026,34 @@ test('a thread under a renamed anchor shows the name it was filed under, marked 
     data: {
       kind: 'note',
       body: 'The modal clips its last row.',
-      anchor: { rule: 'panel.rules.evidence-visible', screen: 'rule-detail', element: 'detail.screenshots-modal' },
+      anchor: {
+        rule: 'panel.rules.evidence-visible',
+        screen: 'rule-detail',
+        element: 'detail.screenshots-modal',
+      },
     },
   });
   expect(res.ok()).toBeTruthy();
   const { id } = await res.json();
-  const listed = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads;
-  expect(listed.some((t) => t.id === id), 'the server lists what it just filed').toBeTruthy();
+  const listed = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
+    .threads;
+  expect(
+    listed.some((t) => t.id === id),
+    'the server lists what it just filed',
+  ).toBeTruthy();
   await page.goto(fixtureFor({ bp: 'blueprint' }));
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
-  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .getByTestId('panel.threads-list')
+    .locator(`[data-open-thread="${id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   const mark = page.getByTestId('thread.renamed');
   await expect(mark).toBeVisible();
   const where = mark.locator('xpath=..');
@@ -3736,10 +4064,17 @@ test('a thread under a renamed anchor shows the name it was filed under, marked 
   const tip = page.getByTestId('thread.renames');
   await expect(tip).toHaveText('detail.screenshots-modal → detail.evidence-modal');
   await where.hover();
-  await expect.poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeGreaterThan(0.9);
-  const [t, pane] = await Promise.all([tip.boundingBox(), page.getByTestId('thread.panel').boundingBox()]);
+  await expect
+    .poll(() => tip.evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBeGreaterThan(0.9);
+  const [t, pane] = await Promise.all([
+    tip.boundingBox(),
+    page.getByTestId('thread.panel').boundingBox(),
+  ]);
   expect(t.x, 'inside the pane, from the left').toBeGreaterThanOrEqual(pane.x - 1);
-  expect(t.x + t.width, 'inside the pane, from the right').toBeLessThanOrEqual(pane.x + pane.width + 1);
+  expect(t.x + t.width, 'inside the pane, from the right').toBeLessThanOrEqual(
+    pane.x + pane.width + 1,
+  );
 });
 
 /*
@@ -3753,19 +4088,28 @@ test('the rule id copies itself, and the toast sits inside the frame with a cap'
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await review(page);
   const rule = (await firstRule(page)).trim();
-  expect(await page.getByTestId('detail.rule-id').evaluate((el) => getComputedStyle(el).cursor), 'the ordinary pointer hand (n-0320)').toBe('pointer');
+  expect(
+    await page.getByTestId('detail.rule-id').evaluate((el) => getComputedStyle(el).cursor),
+    'the ordinary pointer hand (n-0320)',
+  ).toBe('pointer');
   await page.getByTestId('detail.rule-id').click();
   const toast = page.getByTestId('panel.toast');
   await expect(toast).toContainText('Copied');
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(rule);
 
-  const [t, f] = await Promise.all([toast.boundingBox(), page.getByTestId('panel.app-frame').boundingBox()]);
+  const [t, f] = await Promise.all([
+    toast.boundingBox(),
+    page.getByTestId('panel.app-frame').boundingBox(),
+  ]);
   const right = f.x + f.width - (t.x + t.width);
   const bottom = f.y + f.height - (t.y + t.height);
   expect(right, 'inside the frame, from the right').toBeGreaterThan(0);
   expect(bottom, 'inside the frame, from the bottom').toBeGreaterThan(0);
   expect(Math.abs(right - bottom), 'the same distance both ways').toBeLessThanOrEqual(2);
-  const cap = await toast.evaluate((el) => ({ max: getComputedStyle(el).maxHeight, over: getComputedStyle(el).overflowY }));
+  const cap = await toast.evaluate((el) => ({
+    max: getComputedStyle(el).maxHeight,
+    over: getComputedStyle(el).overflowY,
+  }));
   expect(cap.max).not.toBe('none');
   expect(cap.over).toBe('auto');
 });
@@ -3777,7 +4121,9 @@ test('a headless rule says so once', {
   // The cli blueprint's since ADR 0013 (n-0357). latest-wins was the example
   // until it got a screen of its own; this one has no terminal moment to draw.
   await ownRule(page, 'spec-never-implementation', null, 'cli');
-  await expect(page.getByTestId('detail.rule-id')).toHaveText('ownership.writes.spec-never-implementation');
+  await expect(page.getByTestId('detail.rule-id')).toHaveText(
+    'ownership.writes.spec-never-implementation',
+  );
   const pane = page.locator('.wdp-detail');
   await expect(page.getByTestId('detail.screen')).toContainText(/judged without one/);
   const text = await pane.innerText();
@@ -3798,19 +4144,31 @@ test('Check source opens the checks in a modal, with a GitHub link in a new tab'
   // The desk behind it blurs, and each file name sits on its own dark
   // ground rather than in bare text over the app (n-0318).
   expect(await modal.evaluate((el) => getComputedStyle(el).backdropFilter)).toMatch(/blur/);
-  expect(await modal.locator('figcaption').first().evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+  expect(
+    await modal
+      .locator('figcaption')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor),
+  ).not.toBe('rgba(0, 0, 0, 0)');
   // The head - "Check source" and the rule - stands on its own ground too,
   // and larger than the file names under it; bare text over the blurred
   // desk was the one line you could not read (Topher, 2026-09-21, n-0318).
   const head = modal.getByTestId('detail.modal-head');
   await expect(head).toContainText(/Check source/);
-  expect(await head.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+  expect(await head.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(
+    'rgba(0, 0, 0, 0)',
+  );
   expect(await head.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
   const px = (loc) => loc.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-  expect(await px(head.locator('span').first())).toBeGreaterThan(await px(modal.locator('figcaption').first()));
+  expect(await px(head.locator('span').first())).toBeGreaterThan(
+    await px(modal.locator('figcaption').first()),
+  );
   const link = modal.getByTestId('detail.source-github').first();
   await expect(link).toHaveAttribute('target', '_blank');
-  await expect(link).toHaveAttribute('href', /github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/[^#]+#L\d+-L\d+$/);
+  await expect(link).toHaveAttribute(
+    'href',
+    /github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/[^#]+#L\d+-L\d+$/,
+  );
   await page.getByTestId('detail.source-close').click();
   await expect(modal).toHaveCount(0);
 });
@@ -3837,19 +4195,41 @@ test('a question on a rule is answerable from its own screen, choices and all', 
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.waitForLoadState('networkidle');
-  await page.getByTestId('panel.tabs').getByText(/Threads/).click();
+  await page
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
   await page.getByTestId('panel.thread-filter').getByText('All', { exact: false }).click();
-  await page.getByTestId('panel.threads-list').locator(`[data-open-thread="${id}"]`).first().click({ position: { x: 8, y: 6 } });
+  await page
+    .getByTestId('panel.threads-list')
+    .locator(`[data-open-thread="${id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
   const ask = page.getByTestId('thread.ask');
   await expect(ask).toContainText(/legend open upward/);
   await ask.locator('[data-option]').filter({ hasText: 'Upward' }).click();
   await page.getByTestId('thread.actions').filter({ hasText: 'Answer' }).click();
-  await expect.poll(async () => (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id)?.status).toBe('answered');
-  const t = (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((x) => x.id === id);
+  await expect
+    .poll(
+      async () =>
+        (
+          await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()
+        ).threads.find((t) => t.id === id)?.status,
+    )
+    .toBe('answered');
+  const t = (
+    await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()
+  ).threads.find((x) => x.id === id);
   expect(t.chosen).toBe('Upward');
   expect(t.replies.at(-1).body).toBe('Upward');
   // Folded in, so the rule is a person's again for the checks that follow.
-  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, { data: { status: 'incorporated', via: 'agent' } })).ok()).toBeTruthy();
+  expect(
+    (
+      await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+        data: { status: 'incorporated', via: 'agent' },
+      })
+    ).ok(),
+  ).toBeTruthy();
 });
 
 /*
@@ -3869,9 +4249,14 @@ test('a sent reply leaves the composer, and a second Enter posts nothing', {
     return res.json();
   };
   const replies = async (id) =>
-    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
-      .threads.find((t) => t.id === id).replies ?? [];
-  const { id } = await post('/api/threads', { kind: 'note', body: 'The composer keeps its words.', anchor: { screen: 'review' } });
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find(
+      (t) => t.id === id,
+    ).replies ?? [];
+  const { id } = await post('/api/threads', {
+    kind: 'note',
+    body: 'The composer keeps its words.',
+    anchor: { screen: 'review' },
+  });
   await page.goto(`${WD_ORIGIN}/?bp=blueprint&thread=${id}`);
   const box = page.getByTestId('thread.reply');
   await expect(box).toBeVisible();
@@ -3911,12 +4296,15 @@ test('Enter on the rule\u2019s box says the words on the rule, and Shift-Enter b
 }, async ({ page }) => {
   const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
   const rule = rows.find((r) => r.built).rule;
-  const { id } = await (await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'The label reads wrong.', anchor: { rule } },
-  })).json();
+  const { id } = await (
+    await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+      data: { kind: 'note', body: 'The label reads wrong.', anchor: { rule } },
+    })
+  ).json();
   const replies = async () =>
-    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json())
-      .threads.find((t) => t.id === id).replies ?? [];
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find(
+      (t) => t.id === id,
+    ).replies ?? [];
   await review(page);
   await endSession(page);
   await openRule(page, rule);
@@ -3928,7 +4316,9 @@ test('Enter on the rule\u2019s box says the words on the rule, and Shift-Enter b
   await expect(box).toHaveValue('one line\nand another');
   expect(await replies()).toHaveLength(0);
   await page.keyboard.press('Enter');
-  await expect.poll(async () => (await replies()).map((r) => r.body)).toEqual(['one line\nand another']);
+  await expect
+    .poll(async () => (await replies()).map((r) => r.body))
+    .toEqual(['one line\nand another']);
   await expect(box).toHaveValue('');
   await expect(page.getByTestId('detail.conversation')).toContainText('and another');
   // Enter on the emptied box sends nothing, and no verdict was recorded by any of it.
@@ -3948,22 +4338,37 @@ test('a picture dropped while failing a rule goes with the why', {
   tag: '@rule:embed.threads.picture-on-a-pin',
 }, async ({ page }) => {
   const drop = (el) => {
-    const bytes = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+    const bytes = Uint8Array.from(
+      atob(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+      ),
+      (c) => c.charCodeAt(0),
+    );
     const dt = new DataTransfer();
     dt.items.add(new File([bytes], 'shot.png', { type: 'image/png' }));
-    el.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    el.dispatchEvent(
+      new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }),
+    );
     el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
   };
   const { rows } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
   const rule = rows.find((r) => r.built).rule;
-  const { id } = await (await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
-    data: { kind: 'note', body: 'The corner is clipped.', anchor: { rule } },
-  })).json();
-  expect((await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
-    data: { status: 'addressed', via: 'agent', reason: 'Trimmed it.' },
-  })).ok()).toBeTruthy();
+  const { id } = await (
+    await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
+      data: { kind: 'note', body: 'The corner is clipped.', anchor: { rule } },
+    })
+  ).json();
+  expect(
+    (
+      await page.request.post(`${WD_ORIGIN}/api/threads/${id}/status?bp=blueprint`, {
+        data: { status: 'addressed', via: 'agent', reason: 'Trimmed it.' },
+      })
+    ).ok(),
+  ).toBeTruthy();
   const thread = async () =>
-    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find((t) => t.id === id);
+    (await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json()).threads.find(
+      (t) => t.id === id,
+    );
   await review(page);
   await endSession(page);
   await ensureSession(page);
@@ -3981,10 +4386,13 @@ test('a picture dropped while failing a rule goes with the why', {
   const frameBody = page.frameLocator('[data-testid="panel.app-frame"]').locator('body');
   const air = (el, [what, type]) => {
     const dt = new DataTransfer();
-    if (type === 'Files') dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
+    if (type === 'Files')
+      dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
     else dt.setData('text/plain', 'words');
     // composed: the frame's embed listens on its window, past its shadow root.
-    el.dispatchEvent(new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
+    el.dispatchEvent(
+      new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }),
+    );
   };
   await frameBody.evaluate(air, ['dragenter', 'text']);
   await page.waitForTimeout(150);
@@ -4005,18 +4413,25 @@ test('a picture dropped while failing a rule goes with the why', {
   await expect(cover).toHaveCount(0);
   // Dropped on the pane's words, nowhere near the box: held above it.
   await page.getByTestId('detail.conversation').evaluate(drop);
-  await expect(page.getByTestId('detail.shots').locator('img'), 'held above the box until the verdict').toHaveCount(1);
+  await expect(
+    page.getByTestId('detail.shots').locator('img'),
+    'held above the box until the verdict',
+  ).toHaveCount(1);
   expect(page.context().pages().length, 'no tab opened on the file').toBe(1);
   await page.getByTestId('detail.feedback').fill('Still clipped, see the picture.');
   await page.locator('[data-v="fail"]').click();
-  await expect.poll(async () => {
-    const t = await thread();
-    const why = (t?.replies ?? []).find((r) => r.body === 'Still clipped, see the picture.');
-    return [t?.status, why?.attachments?.map((a) => a.name) ?? null];
-  }).toEqual(['open', ['shot.png']]);
+  await expect
+    .poll(async () => {
+      const t = await thread();
+      const why = (t?.replies ?? []).find((r) => r.body === 'Still clipped, see the picture.');
+      return [t?.status, why?.attachments?.map((a) => a.name) ?? null];
+    })
+    .toEqual(['open', ['shot.png']]);
   await expect(page.getByTestId('detail.shots')).toHaveCount(0);
   // And the picture is drawn under the why in the rule's conversation.
-  await expect(page.getByTestId('detail.conversation').locator('[data-attachment] img')).toHaveCount(1);
+  await expect(
+    page.getByTestId('detail.conversation').locator('[data-attachment] img'),
+  ).toHaveCount(1);
   await endSession(page);
 });
 
@@ -4029,7 +4444,9 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   tag: '@rule:panel.dock.storyboard',
 }, async ({ page }) => {
   await review(page);
-  const { storyboard } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const { storyboard } = await (
+    await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)
+  ).json();
   await page.getByTestId('panel.screen-picker').click();
   const list = page.getByTestId('panel.screens-list');
   await expect(list).toBeVisible();
@@ -4042,7 +4459,9 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   const cards = board.getByTestId('panel.screens-card');
   await expect(cards).toHaveCount(storyboard.length);
   // In storyboard order, each a frame of the page the pick would open.
-  expect(await cards.evaluateAll((els) => els.map((e) => e.dataset.screen))).toEqual(storyboard.map((s) => s.id));
+  expect(await cards.evaluateAll((els) => els.map((e) => e.dataset.screen))).toEqual(
+    storyboard.map((s) => s.id),
+  );
   /*
    * Each card is a PICTURE, photographed by the server and kept: not a live
    * frame, which is what the first cut drew and what wreaked havoc on the
@@ -4053,16 +4472,24 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   for (const sc of storyboard.filter((s) => s.app?.path)) {
     const pic = board.locator(`[data-screen="${sc.id}"] img`);
     await expect(pic).toHaveCount(1);
-    await expect.poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 30000 }).toBe(true);
+    await expect
+      .poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 30000 })
+      .toBe(true);
   }
   const again = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&bp=blueprint`);
   expect(again.ok()).toBeTruthy();
   expect(again.headers()['content-type']).toMatch(/image\/png/);
   expect(again.headers()['x-walkdown-cache']).toBe('hit');
-  expect(again.headers()['x-walkdown-page']).toBe(`${DECLARED_ORIGIN}${storyboard.find((s) => s.id === 'review').app.path}`);
-  const fresh = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&refresh=1&bp=blueprint`);
+  expect(again.headers()['x-walkdown-page']).toBe(
+    `${DECLARED_ORIGIN}${storyboard.find((s) => s.id === 'review').app.path}`,
+  );
+  const fresh = await page.request.get(
+    `${WD_ORIGIN}/api/screenshot?screen=review&refresh=1&bp=blueprint`,
+  );
   expect(fresh.headers()['x-walkdown-cache']).toBe('miss');
-  expect((await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=no-such&bp=blueprint`)).status()).toBe(404);
+  expect(
+    (await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=no-such&bp=blueprint`)).status(),
+  ).toBe(404);
   // The board is wider than the list - three cards a page can be read at -
   // and still on the stage.
   const wide = (await list.boundingBox()).width;
@@ -4074,14 +4501,19 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   await board.locator('[data-screen="rule-detail"]').click();
   await expect(list).toBeHidden();
   await expect
-    .poll(() => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)), { timeout: 10000 })
+    .poll(
+      () => page.frames().some((f) => f.url().startsWith(`${WD_ORIGIN}/as-built/rule-detail.html`)),
+      { timeout: 10000 },
+    )
     .toBe(true);
   // Kept for this browser: the picker reopens on the storyboard after a reload.
   await page.reload();
   await expect(page.getByTestId('panel.bar')).toBeVisible();
   await page.getByTestId('panel.screen-picker').click();
   await expect(page.getByTestId('panel.screens-board')).toBeVisible();
-  await expect(page.getByTestId('panel.screens-view').filter({ hasText: 'Storyboard' })).toHaveAttribute('aria-selected', 'true');
+  await expect(
+    page.getByTestId('panel.screens-view').filter({ hasText: 'Storyboard' }),
+  ).toHaveAttribute('aria-selected', 'true');
   await page.getByTestId('panel.screens-view').filter({ hasText: 'List' }).click();
   await expect(page.getByTestId('panel.screens-board')).toHaveCount(0);
   await expect(list.locator('[data-screen="rule-detail"]')).toBeVisible();

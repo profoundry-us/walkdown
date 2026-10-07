@@ -15,19 +15,20 @@
  * fails here immediately — which is the whole reason the door is one module
  * now, and the reason a third interface can be added without a fourth copy.
  */
-import { declareProject, threadAt } from '../tools/test-home.mjs';
+
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import { parse } from '../vendor/yaml.js';
+import { newFormOf } from '../bin/commands/old-forms.js';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { createWalkdownServer } from '../lib/serve.js';
 import * as writes from '../lib/writes.js';
+import { declareProject, threadAt } from '../tools/test-home.mjs';
+import { parse } from '../vendor/yaml.js';
 
-import { newFormOf } from '../bin/commands/old-forms.js';
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const roots = [];
 after(() => {
@@ -40,8 +41,7 @@ function fixture({ declared = true } = {}) {
   roots.push(root);
   const home = join(root, 'home');
   mkdirSync(home, { recursive: true });
-  if (declared)
-    writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: door-person\n');
+  if (declared) writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: door-person\n');
   /*
    * A home: the spec is `blueprint/` and the ledger sits beside it. Declared
    * here rather than per door, because the library door loads the blueprint
@@ -115,7 +115,10 @@ const doors = {
       return run(['n-0001', '--verify', '--blueprint', declareProject(home, bp)], home);
     },
     async claim({ bp, home }) {
-      return run(['n-0001', '--reply', 'looked at it', '--blueprint', declareProject(home, bp)], home);
+      return run(
+        ['n-0001', '--reply', 'looked at it', '--blueprint', declareProject(home, bp)],
+        home,
+      );
     },
   },
 

@@ -6,7 +6,15 @@
 import '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, before, test } from 'node:test';
@@ -58,21 +66,33 @@ before(() => {
 });
 after(() => rmSync(root, { recursive: true, force: true }));
 
-test('through walkdown run, the formatter files into the home it was handed (#16) @rule:locations.answer.adapters-file-where-walkdown-says', { skip: !hasRspec && 'no rspec here' }, () => {
+test('through walkdown run, the formatter files into the home it was handed (#16) @rule:locations.answer.adapters-file-where-walkdown-says', {
+  skip: !hasRspec && 'no rspec here',
+}, () => {
   const before_ = recorded().length;
   const res = runChecks(
-    { config: { runner: { run_all: command } }, codeRoot: code, dir: spec, at: { runs: { path: runs } } },
+    {
+      config: { runner: { run_all: command } },
+      codeRoot: code,
+      dir: spec,
+      at: { runs: { path: runs } },
+    },
     { stdio: 'pipe' },
   );
   assert.equal(res.code, 0, res.stdout + res.stderr);
   assert.match(res.stdout, /walkdown: recorded 1 rule result/, res.stdout + res.stderr);
   assert.equal(recorded().length, before_ + 1);
   const run = JSON.parse(readFileSync(join(runs, recorded().sort().at(-1)), 'utf8'));
-  assert.deepEqual(run.results.map((r) => [r.rule, r.status]), [[RULE, 'pass']]);
+  assert.deepEqual(
+    run.results.map((r) => [r.rule, r.status]),
+    [[RULE, 'pass']],
+  );
   assert.match(run.results[0].statement_hash, /^sha256:/, 'hashed against the spec it was handed');
 });
 
-test('run as bare rspec in the code, it asks walkdown where and files into the home (#16) @rule:locations.answer.adapters-file-where-walkdown-says', { skip: !hasRspec && 'no rspec here' }, () => {
+test('run as bare rspec in the code, it asks walkdown where and files into the home (#16) @rule:locations.answer.adapters-file-where-walkdown-says', {
+  skip: !hasRspec && 'no rspec here',
+}, () => {
   const before_ = recorded().length;
   const res = spawnSync('sh', ['-c', command], { cwd: code, env: env(), encoding: 'utf8' });
   assert.equal(res.status, 0, res.stdout + res.stderr);
@@ -80,16 +100,62 @@ test('run as bare rspec in the code, it asks walkdown where and files into the h
   assert.equal(recorded().length, before_ + 1, res.stdout + res.stderr);
 });
 
-test('a spec committed in the repository is still found by looking up from the code @rule:locations.answer.adapters-file-where-walkdown-says', { skip: !hasRspec && 'no rspec here' }, () => {
+test('a spec committed in the repository is still found by looking up from the code @rule:locations.answer.adapters-file-where-walkdown-says', {
+  skip: !hasRspec && 'no rspec here',
+}, () => {
   // No registry row answers here, and no clone is asked: the walk is the fallback.
   const repo = join(root, 'inrepo');
   mkdirSync(join(repo, 'spec'), { recursive: true });
   mkdirSync(join(repo, 'features'), { recursive: true });
-  writeFileSync(join(repo, 'spec', 'thing_spec.rb'), readFileSync(join(code, 'spec', 'thing_spec.rb')));
+  writeFileSync(
+    join(repo, 'spec', 'thing_spec.rb'),
+    readFileSync(join(code, 'spec', 'thing_spec.rb')),
+  );
   writeFileSync(join(repo, 'spec.yml'), 'blueprint: inrepo\n');
   const lonely = join(root, 'lonely-home');
   mkdirSync(lonely, { recursive: true });
-  const res = spawnSync('sh', ['-c', command], { cwd: repo, env: env({ WALKDOWN_HOME: lonely }), encoding: 'utf8' });
+  const res = spawnSync('sh', ['-c', command], {
+    cwd: repo,
+    env: env({ WALKDOWN_HOME: lonely }),
+    encoding: 'utf8',
+  });
   assert.equal(res.status, 0, res.stdout + res.stderr);
-  assert.equal(readdirSync(join(repo, 'runs')).filter((f) => f.endsWith('.json')).length, 1, res.stdout + res.stderr);
+  assert.equal(
+    readdirSync(join(repo, 'runs')).filter((f) => f.endsWith('.json')).length,
+    1,
+    res.stdout + res.stderr,
+  );
+});
+
+test('a run is recorded under the username profile.yml says, and config.yml still answers on a machine not yet upgraded (n-0510) @rule:status.attribution.username-is-the-record', {
+  skip: !hasRspec && 'no rspec here',
+}, () => {
+  const actorOf = (files) => {
+    for (const [name, text] of Object.entries(files))
+      writeFileSync(join(process.env.WALKDOWN_HOME, name), text);
+    try {
+      // Not under CI, which records every run as `ci` whatever the profile says.
+      const { CI: _, ...local } = env();
+      const res = spawnSync('sh', ['-c', command], { cwd: code, env: local, encoding: 'utf8' });
+      assert.equal(res.status, 0, res.stdout + res.stderr);
+      return JSON.parse(readFileSync(join(runs, recorded().sort().at(-1)), 'utf8')).actor;
+    } finally {
+      for (const name of Object.keys(files))
+        rmSync(join(process.env.WALKDOWN_HOME, name), { force: true });
+    }
+  };
+  assert.equal(actorOf({ 'profile.yml': 'identity:\n  username: pat\n' }), 'pat');
+  assert.equal(
+    actorOf({ 'config.yml': 'identity:\n  username: lee\n' }),
+    'lee',
+    'the name before ADR 0014',
+  );
+  assert.equal(
+    actorOf({
+      'profile.yml': 'identity:\n  username: pat\n',
+      'config.yml': 'identity:\n  username: lee\n',
+    }),
+    'pat',
+    'profile.yml wins',
+  );
 });

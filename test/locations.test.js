@@ -8,22 +8,30 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   unlinkSync,
-  realpathSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, basename } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import test from 'node:test';
-import { threadAt } from '../tools/test-home.mjs';
-import { parse } from '../vendor/yaml.js';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { formatHash, specFiles, specHash } from '../lib/hash.js';
+import {
+  canon,
+  expand,
+  KINDS,
+  readRegistry,
+  readUserConfig,
+  register as registerRow,
+  resolveLocations,
+} from '../lib/locations.js';
 import { Refused } from '../lib/refusal.js';
-import { canon, expand, KINDS, readRegistry, readUserConfig, register as registerRow, resolveLocations } from '../lib/locations.js';
 import { deriveStatus } from '../lib/status.js';
+import { threadAt } from '../tools/test-home.mjs';
+import { parse } from '../vendor/yaml.js';
 
 /*
  * Every case builds its own tree and points WALKDOWN_HOME at a scratch
@@ -99,7 +107,10 @@ const register = (home, rows) => {
       ...Object.entries(rest).map(([k, v]) => `    ${k}: ${v}`),
     ];
   });
-  writeFileSync(join(home, 'registry.yml'), [`next: ${rows.length + 1}`, 'blueprints:', ...lines, ''].join('\n'));
+  writeFileSync(
+    join(home, 'registry.yml'),
+    [`next: ${rows.length + 1}`, 'blueprints:', ...lines, ''].join('\n'),
+  );
   return ids;
 };
 
@@ -107,7 +118,8 @@ const register = (home, rows) => {
 const nm = (id) => String(id).replace(/^\d{4}-[a-z0-9]{2,3}-/, '');
 
 /* A personal home, where `blueprints new` makes one (ADR 0014 §4). */
-const personal = (s, folder, label = 'repo') => join(s.home, 'projects', label, 'blueprints', folder);
+const personal = (s, folder, label = 'repo') =>
+  join(s.home, 'projects', label, 'blueprints', folder);
 
 /* The one home folder under a directory of homes: the blueprint's own name. */
 const onlyHome = (dir, name) => {
@@ -119,15 +131,15 @@ const onlyHome = (dir, name) => {
 const configure = (home, yaml) => writeFileSync(join(home, 'profile.yml'), yaml);
 
 /*
-  * This test used to be called "with no config, a blueprint in the tree wins".
-  * It does not any more, and that reversal is the whole of n-0133: a
-  * blueprint nobody declared is not a project.
-  *
-  * The second half used to read "and its existing records stay put" - runs
-  * found INSIDE the spec, outranking everything. That was the layout before
-  * homes and nothing reads it now: the entry names a home, and the home is
-  * where every record is.
-  */
+ * This test used to be called "with no config, a blueprint in the tree wins".
+ * It does not any more, and that reversal is the whole of n-0133: a
+ * blueprint nobody declared is not a project.
+ *
+ * The second half used to read "and its existing records stay put" - runs
+ * found INSIDE the spec, outranking everything. That was the layout before
+ * homes and nothing reads it now: the entry names a home, and the home is
+ * where every record is.
+ */
 test('a declared blueprint answers from its home; an undeclared one is nothing at all', () => {
   const s = scratch();
   try {
@@ -348,7 +360,12 @@ test('a more specific entry beats a broader one', () => {
     const inner = blueprint(join(repo, 'sub', 'blueprint'), { name: 'inner' });
     register(s.home, [
       { id: 'outer', roots: repo, spec: join(repo, 'blueprint') },
-      { id: 'pinned-inner', roots: join(repo, 'sub'), spec: inner, evidence: join(s.home, 'inner-ev') },
+      {
+        id: 'pinned-inner',
+        roots: join(repo, 'sub'),
+        spec: inner,
+        evidence: join(s.home, 'inner-ev'),
+      },
     ]);
     const loc = resolveLocations({ cwd: join(repo, 'sub') });
     assert.equal(nm(loc.id), 'pinned-inner');
@@ -456,7 +473,8 @@ test('a spec file that cannot be read is named, not an errno @rule:locations.tra
     chmodSync(dir, 0o000);
     assert.throws(
       () => loadBlueprint(bp),
-      (e) => e instanceof Refused && e.message.includes(dir) && e.message.includes('cannot be listed'),
+      (e) =>
+        e instanceof Refused && e.message.includes(dir) && e.message.includes('cannot be listed'),
       'a spec directory that cannot be listed is named too',
     );
     chmodSync(dir, 0o755);
@@ -568,7 +586,11 @@ test('a fresh project gets nothing in its tree at all @rule:locations.default.no
      */
     assert.deepEqual(tree(repo), before, 'the tree is exactly as it was found');
     // The skills are the machine's business now (`walkdown init`, ADR 0012).
-    assert.equal(existsSync(join(s.skills, 'walkdown')), false, 'a blueprint installs nothing for the person');
+    assert.equal(
+      existsSync(join(s.skills, 'walkdown')),
+      false,
+      'a blueprint installs nothing for the person',
+    );
 
     // Everything walkdown made is in the person's own home, one folder under
     // `projects/<label>/blueprints/` (ADR 0014 §4), laid out as every home is.
@@ -578,7 +600,11 @@ test('a fresh project gets nothing in its tree at all @rule:locations.default.no
     for (const kind of KINDS) assert.equal(loc[kind].path, join(home, kind), kind);
     assert.equal(loc.standard.name, 'none');
     assert.match(said, /git never sees/);
-    assert.match(said, /walkdown blueprints commit spec/, 'and says how to commit it if you want it in the tree');
+    assert.match(
+      said,
+      /walkdown blueprints commit spec/,
+      'and says how to commit it if you want it in the tree',
+    );
 
     // Abandoning it is deleting that one directory.
     rmSync(home, { recursive: true, force: true });
@@ -610,9 +636,14 @@ test('--commit spec and --commit all are one .gitignore apart, and changing your
     // The home's own .gitignore, one per blueprint (ADR 0014 §5).
     const ignore = join(home, '.gitignore');
     const rules = () =>
-      readFileSync(ignore, 'utf8').split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+      readFileSync(ignore, 'utf8')
+        .split('\n')
+        .filter((l) => l.trim() && !l.startsWith('#'));
     assert.deepEqual(rules(), ['runs/', 'evidence/', 'drafts/']);
-    assert.ok(!existsSync(join(repo, '.walkdown', '.gitignore')), 'and no shared one beside the homes');
+    assert.ok(
+      !existsSync(join(repo, '.walkdown', '.gitignore')),
+      'and no shared one beside the homes',
+    );
     assert.equal(loc().standard.name, 'spec');
     assert.match(said, /Committed: the spec and its threads/);
     assert.match(said, /delete it to commit everything/, 'and how to change its mind');
@@ -640,14 +671,22 @@ test('--commit spec and --commit all are one .gitignore apart, and changing your
     // spec -> none: the home leaves the repository whole, and so does the pointer.
     const out = walkdown(s.home, ['blueprints', 'new', '--commit', 'none', '--dir', repo]);
     assert.match(out, /→ moved/);
-    assert.equal(existsSync(join(repo, '.walkdown')), false, 'the repository has nothing of walkdown\'s');
+    assert.equal(
+      existsSync(join(repo, '.walkdown')),
+      false,
+      "the repository has nothing of walkdown's",
+    );
     assert.equal(existsSync(join(repo, 'CLAUDE.md')), false, 'not even the pointer walkdown made');
     // Moved whole, keeping its folder name (ADR 0014 §4).
     const away = join(s.home, 'projects', 'repo', 'blueprints', basename(home));
     assert.equal(loc().spec.path, away);
     assert.ok(existsSync(join(away, 'runs', 'r.json')), 'the record came along, unedited');
     assert.equal(loc().standard.name, 'none');
-    assert.equal(parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints.length, 1, 'one row, rewritten');
+    assert.equal(
+      parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints.length,
+      1,
+      'one row, rewritten',
+    );
 
     // none -> spec: back in, under the same folder name it left with.
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec', '--dir', repo]);
@@ -728,7 +767,10 @@ test('tightening to spec says what git still tracks, and leaving takes the skill
       return;
     }
     const git = (...args) =>
-      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@x', ...args], { cwd: repo, encoding: 'utf8' });
+      execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@x', ...args], {
+        cwd: repo,
+        encoding: 'utf8',
+      });
     walkdown(s.home, ['blueprints', 'new', '--commit', 'all'], repo);
     const home = onlyHome(join(repo, '.walkdown', 'blueprints'), 'repo');
     mkdirSync(join(home, 'runs', 'evidence', 'x'), { recursive: true });
@@ -752,7 +794,10 @@ test('tightening to spec says what git still tracks, and leaving takes the skill
     mkdirSync(join(repo, '.claude', 'skills', 'walkdown-judge'), { recursive: true });
     writeFileSync(join(repo, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'mine now\n');
     walkdown(s.home, ['blueprints', 'new', '--commit', 'none'], repo);
-    assert.equal(readFileSync(join(repo, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'), 'mine now\n');
+    assert.equal(
+      readFileSync(join(repo, '.claude', 'skills', 'walkdown-judge', 'SKILL.md'), 'utf8'),
+      'mine now\n',
+    );
     assert.ok(!existsSync(join(repo, '.walkdown')));
     const registry = readFileSync(join(s.home, 'registry.yml'), 'utf8');
     assert.match(registry, /^blueprints:\n  - /m, registry);
@@ -804,17 +849,30 @@ test('import registers a home the registry does not yet name, and refuses what i
     // spelled out, rather than being taken for a home and half-built.
     const notOne = join(repo, 'notes');
     mkdirSync(notOne, { recursive: true });
-    assert.throws(() => walkdown(s.home, ['blueprints', 'import', notOne], repo), /no spec\.yml there/);
+    assert.throws(
+      () => walkdown(s.home, ['blueprints', 'import', notOne], repo),
+      /no spec\.yml there/,
+    );
 
     // And a home-shaped directory standing outside any `.walkdown/blueprints/`
     // is a copy, whatever it holds.
     const bare = join(repo, 'old');
     blueprint(bare, { name: 'old' });
-    assert.throws(() => walkdown(s.home, ['blueprints', 'import', bare], repo), /not under any repository's \.walkdown\/blueprints\//);
+    assert.throws(
+      () => walkdown(s.home, ['blueprints', 'import', bare], repo),
+      /not under any repository's \.walkdown\/blueprints\//,
+    );
     const elsewhere = join(s.root, 'elsewhere', 'else');
     blueprint(elsewhere, { name: 'else' });
-    assert.throws(() => walkdown(s.home, ['blueprints', 'import', elsewhere], repo), /not under any repository's \.walkdown\/blueprints\//);
-    assert.equal(readdirSync(join(repo, '.walkdown', 'blueprints')).length, 2, 'nothing was copied in');
+    assert.throws(
+      () => walkdown(s.home, ['blueprints', 'import', elsewhere], repo),
+      /not under any repository's \.walkdown\/blueprints\//,
+    );
+    assert.equal(
+      readdirSync(join(repo, '.walkdown', 'blueprints')).length,
+      2,
+      'nothing was copied in',
+    );
 
     // A copy is what --ephemeral lists: in the registry, spelled in full,
     // with no project - it is nobody's home, which is the point of a
@@ -853,7 +911,10 @@ test('a nested directory sharing the name is its own project, never a merge into
     // Bare, it would join `app` under the root blueprint's own name: refused.
     const bare = cli(s.home, ['blueprints', 'new'], pack);
     assert.equal(bare.status, 2, bare.stdout + bare.stderr);
-    assert.match(bare.stderr, /`app` is already the name of .*'s own blueprint, so this one needs a name of its own\. Nothing was made\./);
+    assert.match(
+      bare.stderr,
+      /`app` is already the name of .*'s own blueprint, so this one needs a name of its own\. Nothing was made\./,
+    );
     assert.equal(readRegistry().rows.length, 1, 'nothing merged, nothing registered');
     walkdown(s.home, ['blueprints', 'new', '--project', 'app-pack', '--code', 'ap2'], pack);
     assert.equal(readRegistry().rows.length, 2, 'a row of its own');
@@ -872,7 +933,11 @@ test('a nested directory sharing the name is its own project, never a merge into
       join(top.spec.path, 'features', 'a.yml'),
       'feature: a\nstories:\n  - id: a.s\n    rules:\n      - id: a.s.one\n        statement: One.\n        verify: [checks]\n',
     );
-    walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'at the top', '--blueprint', 'app'], repo);
+    walkdown(
+      s.home,
+      ['threads', 'new', '--rule', 'a.s.one', '--body', 'at the top', '--blueprint', 'app'],
+      repo,
+    );
     assert.ok(existsSync(threadAt(top.threads.path, 'n-0001')));
     assert.ok(!existsSync(threadAt(inner.threads.path, 'n-0001')));
   } finally {
@@ -892,7 +957,10 @@ test('a folder inside the checkout named like its blueprint is refused, and the 
 
     const bare = cli(s.home, ['blueprints', 'new'], pack);
     assert.equal(bare.status, 2, bare.stdout + bare.stderr);
-    assert.match(bare.stderr, /`app` is already the name of .*\/app's own blueprint, so this one needs a name of its own\. Nothing was made\./);
+    assert.match(
+      bare.stderr,
+      /`app` is already the name of .*\/app's own blueprint, so this one needs a name of its own\. Nothing was made\./,
+    );
     assert.doesNotMatch(bare.stdout, /up to date/, "the root's home is not reported as this one's");
     assert.equal(readRegistry().rows.length, 1, 'nothing registered');
     assert.deepEqual(readdirSync(join(repo, '.walkdown', 'blueprints')), before, 'nothing made');
@@ -903,8 +971,15 @@ test('a folder inside the checkout named like its blueprint is refused, and the 
     // The name it suggests works as given, and joins the project `app`.
     walkdown(s.home, ['blueprints', 'new', suggested[1]], pack);
     const rows = readRegistry().rows;
-    assert.deepEqual(rows.map((r) => nm(r.id)), ['app', 'app-packs']);
-    assert.deepEqual(rows.map((r) => r.project), ['app', 'app'], 'in the project `app`');
+    assert.deepEqual(
+      rows.map((r) => nm(r.id)),
+      ['app', 'app-packs'],
+    );
+    assert.deepEqual(
+      rows.map((r) => r.project),
+      ['app', 'app'],
+      'in the project `app`',
+    );
     assert.equal(rows[0].home, rootHome, "and the root's blueprint is as it was");
   } finally {
     s.cleanup();
@@ -931,22 +1006,41 @@ test('a blueprint made one directory too deep says plainly that it is a new proj
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
 
     // A folder inside a checkout joins its project unless --project says otherwise (q-0385).
-    const deep = walkdown(s.home, ['blueprints', 'new', '--commit', 'spec', '--project', 'web'], join(repo, 'app', 'web'));
+    const deep = walkdown(
+      s.home,
+      ['blueprints', 'new', '--commit', 'spec', '--project', 'web'],
+      join(repo, 'app', 'web'),
+    );
     assert.match(deep, /`web`, a new project on this machine/, deep);
-    assert.match(deep, /`0001-rp-repo` already answers for this directory/, 'the outer blueprint is named, by its ID');
-    assert.match(deep, /two blueprints in two projects/, 'and what the person now has is said plainly');
+    assert.match(
+      deep,
+      /`0001-rp-repo` already answers for this directory/,
+      'the outer blueprint is named, by its ID',
+    );
+    assert.match(
+      deep,
+      /two blueprints in two projects/,
+      'and what the person now has is said plainly',
+    );
 
     // And an unrelated repository says none of it.
     const other = join(s.root, 'other');
     mkdirSync(other, { recursive: true });
     execFileSync('git', ['init', '-q', '.'], { cwd: other });
-    assert.doesNotMatch(walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], other), /already answers/);
+    assert.doesNotMatch(
+      walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], other),
+      /already answers/,
+    );
 
     // Still a second project, because that is the deliberate case.
     const where = JSON.parse(walkdown(s.home, ['where', '--json'], join(repo, 'app', 'web')));
     assert.equal(nm(where.id), 'web', 'the inner one answers where it was made');
     assert.match(where.spec.path, /\/app\/web\/\.walkdown\/blueprints\/web$/);
-    assert.equal(nm(JSON.parse(walkdown(s.home, ['where', '--json'], repo)).id), 'repo', 'and the outer one where it was');
+    assert.equal(
+      nm(JSON.parse(walkdown(s.home, ['where', '--json'], repo)).id),
+      'repo',
+      'and the outer one where it was',
+    );
   } finally {
     s.cleanup();
   }
@@ -979,7 +1073,10 @@ test('a number once given is never given again @rule:locations.registry.ids-stay
     assert.match(second.spec.path, /\/projects\/app-b\/blueprints\/app$/);
     const first = JSON.parse(walkdown(s.home, ['where', '--json'], one));
     assert.equal(first.id, firstId);
-    assert.ok(!existsSync(first.spec.path), 'the abandoned checkout answers with its own gone home, not with the new one');
+    assert.ok(
+      !existsSync(first.spec.path),
+      'the abandoned checkout answers with its own gone home, not with the new one',
+    );
     assert.throws(() => walkdown(s.home, ['status'], one));
 
     // And forgetting the row does not hand its number out again.
@@ -1012,7 +1109,9 @@ async function race(s, asks) {
       `} catch (e) { process.stdout.write('REFUSED ' + String(e.stderr).split('\\n')[0]); }\n`,
   );
   const racers = asks.map(({ args, cwd }) =>
-    spawn(process.execPath, [runner, JSON.stringify(args), cwd], { env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' } }),
+    spawn(process.execPath, [runner, JSON.stringify(args), cwd], {
+      env: { ...process.env, WALKDOWN_HOME: s.home, NO_COLOR: '1' },
+    }),
   );
   const settled = racers.map(
     (p) =>
@@ -1054,15 +1153,25 @@ test('blueprints made at the same moment under one name are one blueprint', asyn
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(repo, { recursive: true });
-    const results = await race(s, Array.from({ length: 8 }, () => ({ args: ['app'], cwd: repo })));
+    const results = await race(
+      s,
+      Array.from({ length: 8 }, () => ({ args: ['app'], cwd: repo })),
+    );
     const homes = personalHomes(s);
     const rows = readRegistry().rows;
-    assert.equal(homes.length, 1, `eight asks for one blueprint, ${homes.length} homes: ${homes.join(' ')}`);
+    assert.equal(
+      homes.length,
+      1,
+      `eight asks for one blueprint, ${homes.length} homes: ${homes.join(' ')}`,
+    );
     assert.equal(rows.length, 1, JSON.stringify(rows));
     assert.equal(rows[0].home, homes[0], 'and the row names the home that stands');
     for (const r of results.filter((r) => r.startsWith('REFUSED')))
       assert.match(r, /another walkdown is writing/, r);
-    assert.ok(results.some((r) => r === 'OK'), results.join(' | '));
+    assert.ok(
+      results.some((r) => r === 'OK'),
+      results.join(' | '),
+    );
   } finally {
     s.cleanup();
   }
@@ -1082,11 +1191,18 @@ test('racers with different names never share a number — the loser is refused 
   try {
     const repo = join(s.root, 'repo');
     mkdirSync(repo, { recursive: true });
-    const results = await race(s, Array.from({ length: 8 }, (_, i) => ({ args: [`r${i}`], cwd: repo })));
+    const results = await race(
+      s,
+      Array.from({ length: 8 }, (_, i) => ({ args: [`r${i}`], cwd: repo })),
+    );
 
     const rows = readRegistry().rows;
     const numbers = rows.map((r) => String(r.id).slice(0, 4));
-    assert.equal(new Set(numbers).size, numbers.length, `two blueprints wearing one number: ${numbers.join(' ')}`);
+    assert.equal(
+      new Set(numbers).size,
+      numbers.length,
+      `two blueprints wearing one number: ${numbers.join(' ')}`,
+    );
     // Every refusal says so in words, and names the retry.
     for (const r of results.filter((r) => r.startsWith('REFUSED')))
       assert.match(r, /another walkdown is writing/, r);
@@ -1130,7 +1246,11 @@ test('a blueprint in the personal home answers, whatever sits above that home @r
 
     const where = walkdown(home, ['where'], other);
     assert.doesNotMatch(where, /nothing declares|lies under/, where);
-    assert.match(where, /tmp-home\/projects\/other\/blueprints\/other\b/, 'and its home is the one under the personal home');
+    assert.match(
+      where,
+      /tmp-home\/projects\/other\/blueprints\/other\b/,
+      'and its home is the one under the personal home',
+    );
 
     // And a pack inside the checkout, made a project of its own (a plain
     // folder joins the checkout's by default, q-0385), is its own row:
@@ -1249,9 +1369,15 @@ test('a profile row about a checkout is never read, and a move writes the one re
     assert.equal(rows()[0].evidence, undefined, 'the profile row did not come along');
     const loc = resolveLocations({ cwd: repo });
     assert.equal(loc.evidence.path, join(rows()[0].home, 'evidence'), 'and is not read');
-    assert.ok(loc.config.ignored.some((ig) => ig.key === 'blueprints' && /registers nothing/.test(ig.why)));
+    assert.ok(
+      loc.config.ignored.some((ig) => ig.key === 'blueprints' && /registers nothing/.test(ig.why)),
+    );
 
-    walkdown(s.home, ['records', 'move', 'drafts', '--to', join(s.root, 'drafts'), '--blueprint', 'repo'], repo);
+    walkdown(
+      s.home,
+      ['records', 'move', 'drafts', '--to', join(s.root, 'drafts'), '--blueprint', 'repo'],
+      repo,
+    );
     assert.equal(rows().length, 1, JSON.stringify(rows()));
     assert.ok(rows()[0].drafts.endsWith('/drafts'));
     assert.equal(rows()[0].evidence, undefined, 'and nothing else on the row changed');
@@ -1283,8 +1409,15 @@ test('a pack is reached by standing in it, and its original is never listed as a
     // already the pack's row, and nothing is written.
     assert.match(walkdown(s.home, ['blueprints', 'import', spec], repo), /already listed/);
     assert.equal(readFileSync(join(s.home, 'registry.yml'), 'utf8'), before, 'nothing written');
-    assert.deepEqual(readdirSync(join(repo, '.walkdown', 'blueprints')).filter((f) => f !== 'mono'), [], 'no home minted');
-    assert.match(walkdown(s.home, ['where', '--blueprint', 'reach'], repo), /no registered blueprint `reach`/);
+    assert.deepEqual(
+      readdirSync(join(repo, '.walkdown', 'blueprints')).filter((f) => f !== 'mono'),
+      [],
+      'no home minted',
+    );
+    assert.match(
+      walkdown(s.home, ['where', '--blueprint', 'reach'], repo),
+      /no registered blueprint `reach`/,
+    );
     assert.equal(nm(JSON.parse(walkdown(s.home, ['where', '--json'], repo)).id), 'mono');
     assert.equal(nm(JSON.parse(walkdown(s.home, ['where', '--json'], pack)).id), 'gamma');
     /*
@@ -1293,7 +1426,8 @@ test('a pack is reached by standing in it, and its original is never listed as a
      * "throwaway copy" was the pack's own ledger under a second name.
      */
     assert.throws(
-      () => walkdown(s.home, ['blueprints', 'import', spec, '--ephemeral', '--why', 'a look'], repo),
+      () =>
+        walkdown(s.home, ['blueprints', 'import', spec, '--ephemeral', '--why', 'a look'], repo),
       /own blueprint.*throwaway COPY/s,
     );
     assert.ok(!readFileSync(join(s.home, 'registry.yml'), 'utf8').includes('ephemeral'));
@@ -1440,7 +1574,9 @@ test('two repositories with one basename get IDs of their own @rule:locations.re
     // A home apiece, which is what `blueprints new` lays out; the row names
     // it and every record path derives from it.
     const homeA = blueprint(join(s.home, 'projects', 'app', 'blueprints', 'app'), { name: 'app' });
-    const homeB = blueprint(join(s.home, 'projects', 'app-two', 'blueprints', 'app'), { name: 'app' });
+    const homeB = blueprint(join(s.home, 'projects', 'app-two', 'blueprints', 'app'), {
+      name: 'app',
+    });
 
     // A project is named after its repository, and both are called `app`: the
     // second is told the label is taken, and nothing is written until it has
@@ -1448,10 +1584,24 @@ test('two repositories with one basename get IDs of their own @rule:locations.re
     const first = registerRow({ checkout: a, homeDir: homeA, name: 'app' });
     assert.equal(first.action, 'written');
     assert.equal(registerRow({ checkout: b, homeDir: homeB, name: 'app' }).action, 'label-taken');
-    const second = registerRow({ checkout: b, homeDir: homeB, name: 'app', project: 'app-two', code: 'a2' });
-    assert.equal(second.action, 'written', 'the second was written down, not mistaken for the first');
+    const second = registerRow({
+      checkout: b,
+      homeDir: homeB,
+      name: 'app',
+      project: 'app-two',
+      code: 'a2',
+    });
+    assert.equal(
+      second.action,
+      'written',
+      'the second was written down, not mistaken for the first',
+    );
     assert.match(first.id, /^0001-[a-z0-9]{2,3}-app$/);
-    assert.equal(second.id, '0002-a2-app', 'and its ID has the next number and its own project code');
+    assert.equal(
+      second.id,
+      '0002-a2-app',
+      'and its ID has the next number and its own project code',
+    );
 
     const locA = resolveLocations({ cwd: a });
     const locB = resolveLocations({ cwd: b });
@@ -1471,7 +1621,14 @@ test('two repositories with one basename get IDs of their own @rule:locations.re
 const init = (dir, home, extra = []) =>
   execFileSync(
     process.execPath,
-    [new URL('../bin/walkdown.js', import.meta.url).pathname, 'blueprints', 'new', '--dir', dir, ...extra],
+    [
+      new URL('../bin/walkdown.js', import.meta.url).pathname,
+      'blueprints',
+      'new',
+      '--dir',
+      dir,
+      ...extra,
+    ],
     { cwd: dir, encoding: 'utf8', env: { ...process.env, WALKDOWN_HOME: home, NO_COLOR: '1' } },
   );
 
@@ -1493,12 +1650,20 @@ test('two repositories with one basename never share a home or a ledger @rule:lo
     // The second asks for the label the first has, and is told so with no
     // terminal to ask; given one of its own, it is a project too.
     let refusal = '';
-    assert.throws(() => init(b, s.home), (e) => {
-      refusal = String(e.stderr ?? e.message);
-      return true;
-    });
-    assert.match(refusal, /^✗ This machine already has a project called `app`, at .*\/one\/app\. .*\/two\/app is another checkout, so its project needs a name of its own\. Nothing was made\.$/m);
-    const suggested = refusal.match(/^  Name it with `--project <label>`, e\.g\. `walkdown blueprints new (--project two-app --code ta)`\.$/m);
+    assert.throws(
+      () => init(b, s.home),
+      (e) => {
+        refusal = String(e.stderr ?? e.message);
+        return true;
+      },
+    );
+    assert.match(
+      refusal,
+      /^✗ This machine already has a project called `app`, at .*\/one\/app\. .*\/two\/app is another checkout, so its project needs a name of its own\. Nothing was made\.$/m,
+    );
+    const suggested = refusal.match(
+      /^  Name it with `--project <label>`, e\.g\. `walkdown blueprints new (--project two-app --code ta)`\.$/m,
+    );
     assert.ok(suggested, refusal);
     // The command it suggests works as given.
     const second = init(b, s.home, suggested[1].split(' '));
@@ -1515,7 +1680,11 @@ test('two repositories with one basename never share a home or a ledger @rule:lo
      */
     const locA = resolveLocations({ cwd: a });
     const locB = resolveLocations({ cwd: b });
-    assert.notEqual(locA.spec.path, locB.spec.path, 'the second did not adopt the first’s blueprint');
+    assert.notEqual(
+      locA.spec.path,
+      locB.spec.path,
+      'the second did not adopt the first’s blueprint',
+    );
     for (const l of [locA, locB]) assert.ok(existsSync(join(l.spec.path, 'spec.yml')));
     for (const kind of KINDS) assert.notEqual(locA[kind].path, locB[kind].path);
   } finally {
@@ -1560,9 +1729,7 @@ test('two packs in one repository each get their own home @rule:locations.answer
      * neither sees the other's - which is the property the pack layout needs
      * and the thing a shared home could never give it.
      */
-    const locs = ['one', 'two'].map((pack) =>
-      resolveLocations({ cwd: join(repo, 'packs', pack) }),
-    );
+    const locs = ['one', 'two'].map((pack) => resolveLocations({ cwd: join(repo, 'packs', pack) }));
     assert.deepEqual(locs.map((l) => nm(l.id)).sort(), ['one', 'two']);
     for (const kind of KINDS) assert.notEqual(locs[0][kind].path, locs[1][kind].path);
   } finally {
@@ -1619,7 +1786,11 @@ test('asking where records go writes nothing at all @rule:locations.answer.askin
     const before = readdirSync(s.home).sort();
 
     const loc = resolveLocations({ cwd: repo });
-    assert.equal(loc.evidence.path, join(home, 'evidence'), 'beside the spec, in the home the row names');
+    assert.equal(
+      loc.evidence.path,
+      join(home, 'evidence'),
+      'beside the spec, in the home the row names',
+    );
     // Derived rather than allocated: the answer exists, the directory does not.
     assert.equal(existsSync(join(home, 'evidence')), false);
     assert.deepEqual(readdirSync(s.home).sort(), before, 'the home is exactly as it was');
@@ -1687,7 +1858,11 @@ test('the code row says which repository actually answered @rule:locations.answe
     const fresh = resolveLocations({ cwd: bare });
     assert.equal(fresh.code.path, bare, 'code still answers from the working directory');
     assert.match(fresh.code.why, /working directory/, 'and names that decision');
-    assert.match(fresh.code.why, /outside any repository/, 'instead of a claim the screen contradicts');
+    assert.match(
+      fresh.code.why,
+      /outside any repository/,
+      'instead of a claim the screen contradicts',
+    );
 
     /*
      * A configured spec outside any repository lands on the same directory,
@@ -1784,7 +1959,11 @@ test('blueprints new twice in one repository keeps the home it already made @rul
     assert.deepEqual(after[0].spec, first[0].spec, 'and the same blueprint, not a fresh one');
     assert.equal(after[0].id, first[0].id, 'under the same ID');
     const homes = readdirSync(join(s.home, 'projects', 'app', 'blueprints'));
-    assert.equal(homes.length, 1, `one home on disk — a second would be a blueprint nothing reads: ${homes.join(' ')}`);
+    assert.equal(
+      homes.length,
+      1,
+      `one home on disk — a second would be a blueprint nothing reads: ${homes.join(' ')}`,
+    );
     assert.equal(homes[0], 'app');
 
     // The neighbouring behaviour the change must not cost: a DIFFERENT
@@ -1817,7 +1996,10 @@ test('blueprints new --commit spec twice keeps one row and one home too @rule:lo
     assert.doesNotMatch(second, /\+ (listed|created)/, second);
     assert.equal(readRegistry().rows.length, 1);
     assert.equal(readdirSync(join(root, '.walkdown', 'blueprints')).length, 1);
-    assert.ok(!existsSync(join(root, '.walkdown', 'config.yml')), 'and no manifest is written beside them');
+    assert.ok(
+      !existsSync(join(root, '.walkdown', 'config.yml')),
+      'and no manifest is written beside them',
+    );
   } finally {
     s.cleanup();
   }
@@ -1897,7 +2079,10 @@ const appendToRow = (home, name, lines) => {
   writeFileSync(file, text.join('\n'));
 };
 /* The registry rows whose IDs end with `name`. */
-const rowsOf = (home, name) => parse(readFileSync(join(home, 'registry.yml'), 'utf8')).blueprints.filter((p) => nm(p.id) === name);
+const rowsOf = (home, name) =>
+  parse(readFileSync(join(home, 'registry.yml'), 'utf8')).blueprints.filter(
+    (p) => nm(p.id) === name,
+  );
 const rule = (spec, id = 'a.s.one') =>
   writeFileSync(
     join(spec, 'features', 'a.yml'),
@@ -1918,21 +2103,36 @@ test('leaving the repository with a port override kept writes the home back into
     mkdirSync(repo, { recursive: true });
     walkdown(s.home, ['blueprints', 'new'], repo);
     const id = rowsOf(s.home, 'beta')[0].id;
-    appendToRow(s.home, 'beta', '    targets:\n      local:\n        base_url: http://localhost:4999\n');
+    appendToRow(
+      s.home,
+      'beta',
+      '    targets:\n      local:\n        base_url: http://localhost:4999\n',
+    );
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
     // One registry row, re-pointed at the committed home and still carrying
     // the port and its ID (ADR 0003, ADR 0014 §2).
     const moved = rowsOf(s.home, 'beta');
     assert.equal(moved.length, 1);
     assert.equal(moved[0].id, id);
-    assert.ok(/\/\.walkdown\/blueprints\/beta$/.test(moved[0].home ?? '') && moved[0].targets, JSON.stringify(moved));
+    assert.ok(
+      /\/\.walkdown\/blueprints\/beta$/.test(moved[0].home ?? '') && moved[0].targets,
+      JSON.stringify(moved),
+    );
     const out = walkdown(s.home, ['blueprints', 'new', '--commit', 'none'], repo);
     assert.match(out, /→ moved/, out);
     assert.match(out, /the ID kept/, out);
     assert.doesNotMatch(out, /\+ listed/, 'not listed a second time');
     const rows = parse(readFileSync(join(s.home, 'registry.yml'), 'utf8')).blueprints;
-    assert.deepEqual(rows.map((p) => p.id), [id], JSON.stringify(rows));
-    assert.ok(rows[0].home?.includes('/home/projects/beta/blueprints/') && rows[0].targets?.local?.base_url === 'http://localhost:4999', 'the override survived the round trip');
+    assert.deepEqual(
+      rows.map((p) => p.id),
+      [id],
+      JSON.stringify(rows),
+    );
+    assert.ok(
+      rows[0].home?.includes('/home/projects/beta/blueprints/') &&
+        rows[0].targets?.local?.base_url === 'http://localhost:4999',
+      'the override survived the round trip',
+    );
     const loc = JSON.parse(walkdown(s.home, ['where', '--json'], repo));
     assert.ok(loc.spec.path.includes('/home/projects/beta/blueprints/'), loc.spec.path);
     assert.equal(loc.standard.name, 'none');
@@ -1941,7 +2141,9 @@ test('leaving the repository with a port override kept writes the home back into
     const again = walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
     assert.doesNotMatch(again, /did not land/);
     assert.ok(!existsSync(join(repo, 'spec.yml')), 'nothing scaffolded at the repository root');
-    assert.ok(existsSync(join(repo, '.walkdown', 'blueprints', basename(rows[0].home), 'spec.yml')));
+    assert.ok(
+      existsSync(join(repo, '.walkdown', 'blueprints', basename(rows[0].home), 'spec.yml')),
+    );
   } finally {
     s.cleanup();
   }
@@ -1960,8 +2162,15 @@ test('an unreadable registry stops blueprints new before anything is made or mov
     // The rows live in the registry now (ADR 0003), so that is the file whose
     // breakage would make a listed project look unlisted.
     const good = readFileSync(join(s.home, 'registry.yml'), 'utf8');
-    writeFileSync(join(s.home, 'registry.yml'), good.replace('blueprints:', 'blueprints:\n   - broken: [\n'));
-    const r = spawnSync(process.execPath, [CLI, 'blueprints', 'new', '--commit', 'spec'], { cwd: repo, env: { ...process.env, WALKDOWN_HOME: s.home }, encoding: 'utf8' });
+    writeFileSync(
+      join(s.home, 'registry.yml'),
+      good.replace('blueprints:', 'blueprints:\n   - broken: [\n'),
+    );
+    const r = spawnSync(process.execPath, [CLI, 'blueprints', 'new', '--commit', 'spec'], {
+      cwd: repo,
+      env: { ...process.env, WALKDOWN_HOME: s.home },
+      encoding: 'utf8',
+    });
     assert.equal(r.status, 2, r.stdout + r.stderr);
     assert.match(r.stderr, /does not parse/);
     assert.ok(!existsSync(join(repo, '.walkdown')), 'no second home made in the repository');
@@ -1994,13 +2203,25 @@ test('a nested same-named pack gets an ID of its own, and naming either reaches 
     assert.equal(bare.id, packId);
     assert.ok(bare.spec.path.includes('/home/projects/app-pack/blueprints/'), bare.spec.path);
     const named = JSON.parse(walkdown(s.home, ['where', '--blueprint', 'app', '--json'], pack));
-    assert.equal(named.spec.path, bare.spec.path, 'one flag away from the bare command answers the same project');
+    assert.equal(
+      named.spec.path,
+      bare.spec.path,
+      'one flag away from the bare command answers the same project',
+    );
     const byId = JSON.parse(walkdown(s.home, ['where', '--blueprint', packId, '--json'], pack));
     assert.equal(byId.spec.path, bare.spec.path, 'and so does its ID');
     const root = JSON.parse(walkdown(s.home, ['where', '--blueprint', rootId, '--json'], pack));
-    assert.match(root.spec.path, /\/app\/\.walkdown\/blueprints\/app$/, 'and the other ID is the other row');
+    assert.match(
+      root.spec.path,
+      /\/app\/\.walkdown\/blueprints\/app$/,
+      'and the other ID is the other row',
+    );
     rule(bare.spec.path);
-    walkdown(s.home, ['threads', 'new', '--blueprint', packId, '--rule', 'a.s.one', '--body', 'in the pack'], pack);
+    walkdown(
+      s.home,
+      ['threads', 'new', '--blueprint', packId, '--rule', 'a.s.one', '--body', 'in the pack'],
+      pack,
+    );
     assert.ok(existsSync(threadAt(bare.threads.path, 'n-0001')));
     assert.ok(!existsSync(threadAt(root.threads.path, 'n-0001')));
     const listed = walkdown(s.home, ['blueprints'], pack);
@@ -2082,15 +2303,28 @@ test('a profile row restating a registered blueprint is set aside whole, and tra
     mkdirSync(repo, { recursive: true });
     walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
     const spec = onlyHome(join(repo, '.walkdown', 'blueprints'), 'gamma');
-    configure(s.home, `blueprints:\n  - id: gamma\n    roots: [${repo}]\n    spec: ${spec}\n    home: ${basename(spec)}\n`);
+    configure(
+      s.home,
+      `blueprints:\n  - id: gamma\n    roots: [${repo}]\n    spec: ${spec}\n    home: ${basename(spec)}\n`,
+    );
     const loc = JSON.parse(walkdown(s.home, ['where', '--json'], repo));
     assert.equal(loc.config.matchedIn, 'registry');
-    assert.deepEqual(loc.config.ignored.map((i) => `${i.id}:${i.key}`), ['gamma:blueprints']);
+    assert.deepEqual(
+      loc.config.ignored.map((i) => `${i.id}:${i.key}`),
+      ['gamma:blueprints'],
+    );
     assert.equal(canon(loc.threads.path), canon(join(spec, 'threads')));
     assert.equal(loc.standard.name, 'spec', 'tracked follows where the records are');
-    assert.match(walkdown(s.home, ['where'], repo), /ignores `blueprints: gamma`.*registers nothing/);
+    assert.match(
+      walkdown(s.home, ['where'], repo),
+      /ignores `blueprints: gamma`.*registers nothing/,
+    );
     rule(spec);
-    walkdown(s.home, ['threads', 'new', '--rule', 'a.s.one', '--body', 'one ledger', '--blueprint', 'gamma'], repo);
+    walkdown(
+      s.home,
+      ['threads', 'new', '--rule', 'a.s.one', '--body', 'one ledger', '--blueprint', 'gamma'],
+      repo,
+    );
     assert.ok(existsSync(threadAt(spec, 'threads', 'n-0001')));
     assert.ok(!existsSync(join(s.home, 'projects')), 'no second ledger under ~/.walkdown');
   } finally {
@@ -2114,14 +2348,21 @@ test('a relative personal default is set aside, and a name asks about the name, 
     configure(s.home, 'defaults:\n  drafts: tmp/drafts-{id}\n');
     const inGamma = JSON.parse(walkdown(s.home, ['where', '--json'], gamma));
     const inSpec = JSON.parse(walkdown(s.home, ['where', '--json'], join(gamma, 'blueprint')));
-    assert.deepEqual(inGamma.config.ignored.map((i) => i.key), ['defaults.drafts']);
+    assert.deepEqual(
+      inGamma.config.ignored.map((i) => i.key),
+      ['defaults.drafts'],
+    );
     assert.equal(inGamma.drafts.path, inSpec.drafts.path);
     assert.doesNotMatch(inGamma.drafts.path, /tmp\/drafts/);
     // (d) asked by id, the answer is about the id, not the directory
     configure(s.home, '');
     const text = walkdown(s.home, ['where', '--blueprint', 'ghost'], join(repo, 'alpha'));
     assert.match(text, /no registered blueprint `ghost`/);
-    assert.doesNotMatch(text, /no row for this project/, "the project has rows; the answer is about the name");
+    assert.doesNotMatch(
+      text,
+      /no row for this project/,
+      'the project has rows; the answer is about the name',
+    );
     assert.doesNotMatch(text, /names this project/);
   } finally {
     s.cleanup();
@@ -2149,7 +2390,10 @@ test('a pack’s own blueprint named through another spelling of its path is alr
     const before = readFileSync(join(s.home, 'registry.yml'), 'utf8');
     assert.notEqual(canon(spec), spec, 'the pack is reached through a symlink, which is the point');
     assert.match(walkdown(s.home, ['blueprints', 'import', spec], pack), /already listed/);
-    assert.match(walkdown(s.home, ['blueprints', 'import', `.walkdown/blueprints/${folder}`], pack), /already listed/);
+    assert.match(
+      walkdown(s.home, ['blueprints', 'import', `.walkdown/blueprints/${folder}`], pack),
+      /already listed/,
+    );
     assert.equal(readFileSync(join(s.home, 'registry.yml'), 'utf8'), before);
     assert.deepEqual(readdirSync(join(pack, '.walkdown', 'blueprints')), [folder]);
   } finally {
@@ -2162,10 +2406,17 @@ const gitRepo = (dir) => {
   mkdirSync(dir, { recursive: true });
   execFileSync('git', ['init', '-q'], { cwd: dir });
   return (...args) =>
-    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@x', ...args], { cwd: dir, encoding: 'utf8' });
+    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@x', ...args], {
+      cwd: dir,
+      encoding: 'utf8',
+    });
 };
 const cli = (home, args, cwd) =>
-  spawnSync(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, WALKDOWN_HOME: home }, encoding: 'utf8' });
+  spawnSync(process.execPath, [CLI, ...args], {
+    cwd,
+    env: { ...process.env, WALKDOWN_HOME: home },
+    encoding: 'utf8',
+  });
 
 test('leaving the repository after committing everything says what git now holds as deletions @rule:locations.default.in-repo-on-request', () => {
   /* n-0179: "Nothing was added" was printed over eight files git still tracked. */
@@ -2181,10 +2432,19 @@ test('leaving the repository after committing everything says what git now holds
     git('commit', '-q', '-m', 'everything');
     const tracked = git('ls-files', '.walkdown').split('\n').filter(Boolean).length;
     const out = walkdown(s.home, ['blueprints', 'new', '--commit', 'none'], repo);
-    assert.match(out, new RegExp(`${tracked} file\\(s\\) git tracked under the home that left are now deletions to commit`), out);
+    assert.match(
+      out,
+      new RegExp(
+        `${tracked} file\\(s\\) git tracked under the home that left are now deletions to commit`,
+      ),
+      out,
+    );
     assert.ok(!existsSync(join(repo, '.walkdown')));
     // And git agrees: every one of them is a pending deletion, not a quiet "nothing was added".
-    assert.equal(git('ls-files', '--deleted', '--', '.walkdown').split('\n').filter(Boolean).length, tracked);
+    assert.equal(
+      git('ls-files', '--deleted', '--', '.walkdown').split('\n').filter(Boolean).length,
+      tracked,
+    );
   } finally {
     s.cleanup();
   }
@@ -2204,10 +2464,17 @@ test('a root .gitignore hiding .walkdown/ makes the tracked row say so, and lint
 
     writeFileSync(join(repo, '.gitignore'), '.walkdown/\n');
     const where = walkdown(s.home, ['where'], repo);
-    assert.match(where, /tracked\s+nothing — \.gitignore:1 `\.walkdown\/` hides the spec from git/, where);
+    assert.match(
+      where,
+      /tracked\s+nothing — \.gitignore:1 `\.walkdown\/` hides the spec from git/,
+      where,
+    );
     const lint = cli(s.home, ['lint', '--no-checks'], repo);
     assert.notEqual(lint.status, 0, lint.stdout);
-    assert.ok(lint.stdout.includes(`hides ${rel} from git — a clone will not get the spec`), lint.stdout);
+    assert.ok(
+      lint.stdout.includes(`hides ${rel} from git — a clone will not get the spec`),
+      lint.stdout,
+    );
     assert.match(lint.stdout, /\[tracking\]/);
     // blueprints new reports the same, in colour, rather than "Committed".
     const again = walkdown(s.home, ['blueprints', 'new', '--commit', 'spec'], repo);
@@ -2219,7 +2486,12 @@ test('a root .gitignore hiding .walkdown/ makes the tracked row say so, and lint
     writeFileSync(join(home, '.gitignore'), '# nothing\n');
     const empty = cli(s.home, ['lint', '--no-checks'], repo);
     assert.notEqual(empty.status, 0, empty.stdout);
-    assert.ok(empty.stdout.includes(`${rel}/.gitignore is present and keeps nothing out — git will commit runs, evidence and drafts`), empty.stdout);
+    assert.ok(
+      empty.stdout.includes(
+        `${rel}/.gitignore is present and keeps nothing out — git will commit runs, evidence and drafts`,
+      ),
+      empty.stdout,
+    );
     assert.match(walkdown(s.home, ['where'], repo), /tracked\s+everything/);
   } finally {
     s.cleanup();
@@ -2262,7 +2534,6 @@ test('the ignore file beside a .walkdown does not answer for a blueprint standin
     s.cleanup();
   }
 });
-
 
 test('a config.yml from before the profile makes an upgrade due, and nothing is filed past it @rule:locations.keeping.upgrade-moves-once', () => {
   /*
@@ -2311,7 +2582,10 @@ test('a config.yml from before the profile makes an upgrade due, and nothing is 
 
     // And `where` - a question, not a load - still answers, and says the same.
     const at = resolveLocations({ cwd: repo });
-    assert.ok(at.upgrade.some((d) => /profile\.yml/.test(d)), JSON.stringify(at.upgrade));
+    assert.ok(
+      at.upgrade.some((d) => /profile\.yml/.test(d)),
+      JSON.stringify(at.upgrade),
+    );
     assert.equal(at.threads.path, join(at.homeDir, 'threads'), 'threads stay in the home');
   } finally {
     s.cleanup();

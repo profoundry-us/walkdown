@@ -6,7 +6,11 @@ import { eachOrExit } from './context.js';
 export async function run(args) {
   const { values } = parseArgs({
     args,
-    options: { blueprint: { type: 'string' }, target: { type: 'string' }, rule: { type: 'string' } },
+    options: {
+      blueprint: { type: 'string' },
+      target: { type: 'string' },
+      rule: { type: 'string' },
+    },
   });
   /*
    * Several blueprints in the project and none named: the suite is the
@@ -24,12 +28,17 @@ export async function run(args) {
    * broken reporter to the person who just watched their tests pass.
    */
   const dirs = each.map((b) => b.at.runs.path);
-  const listing = () => dirs.flatMap((d) => (existsSync(d) ? readdirSync(d).map((f) => `${d}/${f}`) : []));
+  const listing = () =>
+    dirs.flatMap((d) => (existsSync(d) ? readdirSync(d).map((f) => `${d}/${f}`) : []));
   const before = new Set(listing());
   let code = 0;
   try {
     for (const blueprint of several ? distinctRunners(each, { rule: values.rule }) : each) {
-      const result = runChecks(blueprint, { target: values.target ?? 'local', rule: values.rule, narrow: !several });
+      const result = runChecks(blueprint, {
+        target: values.target ?? 'local',
+        rule: values.rule,
+        narrow: !several,
+      });
       code = Math.max(code, result.code);
     }
   } catch (err) {

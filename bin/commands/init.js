@@ -3,7 +3,14 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { parseArgs } from 'node:util';
 import { defaultActor } from '../../lib/identity.js';
-import { readRegistry, registryPath, rememberIdentity, skillsHome, walkdownHome, writeRegistry } from '../../lib/locations.js';
+import {
+  readRegistry,
+  registryPath,
+  rememberIdentity,
+  skillsHome,
+  walkdownHome,
+  writeRegistry,
+} from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { end } from './context.js';
 import { install } from './skills.js';
@@ -69,10 +76,14 @@ export async function run(args) {
    */
   const who = defaultActor(process.cwd());
   const me = rememberIdentity({ username: who.username, name: who.name });
-  if (me.action === 'written') console.log(`  ${green('+ you')}      ${me.path}  ${dim(`as \`${me.username}\``)}`);
-  else if (me.action === 'kept') console.log(`  ${dim('· you')}      ${me.path}  ${dim('already says who you are')}`);
+  if (me.action === 'written')
+    console.log(`  ${green('+ you')}      ${me.path}  ${dim(`as \`${me.username}\``)}`);
+  else if (me.action === 'kept')
+    console.log(`  ${dim('· you')}      ${me.path}  ${dim('already says who you are')}`);
   else
-    console.log(`  ${yellow('? you')}      this machine offers no name — add \`identity:\` to ${me.path} before accepting work`);
+    console.log(
+      `  ${yellow('? you')}      this machine offers no name — add \`identity:\` to ${me.path} before accepting work`,
+    );
 
   // ---- the skills, by the one installer -------------------------------------
   // Whether Claude Code is here is asked before the install, which makes the
@@ -88,13 +99,18 @@ export async function run(args) {
   const lines = [];
   if (major < NODE_MAJOR) {
     missing.push('node');
-    lines.push(`  ${red('✗ node')}     ${process.versions.node} — walkdown needs ${NODE_MAJOR} or later: https://nodejs.org`);
+    lines.push(
+      `  ${red('✗ node')}     ${process.versions.node} — walkdown needs ${NODE_MAJOR} or later: https://nodejs.org`,
+    );
   } else lines.push(`  ${dim('· node')}     ${dim(process.versions.node)}`);
   const git = spawnSync('git', ['--version'], { encoding: 'utf8' });
   if (git.error || git.status !== 0) {
     missing.push('git');
-    lines.push(`  ${red('✗ git')}      not found — walkdown reads a project's history through it: https://git-scm.com/downloads`);
-  } else lines.push(`  ${dim('· git')}      ${dim(git.stdout.trim().replace(/^git version /, ''))}`);
+    lines.push(
+      `  ${red('✗ git')}      not found — walkdown reads a project's history through it: https://git-scm.com/downloads`,
+    );
+  } else
+    lines.push(`  ${dim('· git')}      ${dim(git.stdout.trim().replace(/^git version /, ''))}`);
   lines.push(
     claudeHere
       ? `  ${dim('· claude')}   ${dim(`${claude} — Claude Code loads the skills from here`)}`
@@ -103,7 +119,11 @@ export async function run(args) {
   console.log(`\n${lines.join('\n')}`);
 
   if (missing.length) {
-    console.log(red(`\n  walkdown needs ${missing.join(' and ')} and does not install ${missing.length > 1 ? 'them' : 'it'} itself. Everything else above is set up.`));
+    console.log(
+      red(
+        `\n  walkdown needs ${missing.join(' and ')} and does not install ${missing.length > 1 ? 'them' : 'it'} itself. Everything else above is set up.`,
+      ),
+    );
     return end(1);
   }
   console.log(`\nReady. In a project, \`walkdown blueprints new\` starts a spec.`);

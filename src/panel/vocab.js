@@ -92,9 +92,7 @@ export function storyLabels(stories) {
 export const needsYou = (rule) =>
   (S.data?.attention ?? []).some((i) => i.who === 'human' && !i.thread && i.rule === rule);
 export const threadsFor = (rule) =>
-  (S.data?.threads ?? []).filter(
-    (t) => t.anchor?.rule === rule && !TERMINAL.includes(t.status),
-  );
+  (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule && !TERMINAL.includes(t.status));
 /** Every thread ever filed on a rule, ended ones included: the rule's whole conversation. */
 export const conversationOf = (rule) =>
   (S.data?.threads ?? []).filter((t) => t.anchor?.rule === rule);
@@ -118,7 +116,9 @@ export const onWalkableRule = (t) =>
  * itself - `sign` a wording, `walk` a build.
  */
 export function askOf(row) {
-  const mine = (S.data?.attention ?? []).filter((i) => i.who === 'human' && !i.thread && i.rule === row.rule);
+  const mine = (S.data?.attention ?? []).filter(
+    (i) => i.who === 'human' && !i.thread && i.rule === row.rule,
+  );
   if (!mine.length) return '';
   if (mine.some((i) => i.action === 'answer')) return 'asks';
   if (mine.some((i) => i.action === 'verify')) return 'fixed';
@@ -137,7 +137,10 @@ export function askOf(row) {
 export const ASK = Object.freeze({
   sign: ['badge-info', 'a wording to approve or send back'],
   asks: ['badge-info', 'a question on the rule to answer'],
-  fixed: ['badge-warning', 'a claimed fix to judge - pass ends the conversation, fail continues it'],
+  fixed: [
+    'badge-warning',
+    'a claimed fix to judge - pass ends the conversation, fail continues it',
+  ],
   walk: ['badge-success', 'a build to judge'],
 });
 
@@ -179,8 +182,7 @@ export const iAmDeclared = () => Boolean(S.data?.identity?.declared);
  * browser cannot work the path out; the server sends it with the identity,
  * and the literal is the fallback for a payload made before it did.
  */
-export const whereIdentityLives = () =>
-  S.data?.identity?.config_path || '~/.walkdown/config.yml';
+export const whereIdentityLives = () => S.data?.identity?.config_path || '~/.walkdown/config.yml';
 
 /** The screen a rule is about: the end of its flow, or the one it names. */
 export const ruleScreen = (r) => screenById(r?.flow?.at(-1) ?? r?.screens?.[0]);
@@ -261,7 +263,11 @@ export function surfaceSides(screen) {
   const build =
     path && (S.data?.appBase || surface === 'app')
       ? {
-          label: /\/as-built\//.test(path) ? 'As-built' : /\/stand-in\//.test(path) ? 'Stand-in' : 'App',
+          label: /\/as-built\//.test(path)
+            ? 'As-built'
+            : /\/stand-in\//.test(path)
+              ? 'Stand-in'
+              : 'App',
         }
       : null;
   return { design, build };
@@ -356,7 +362,10 @@ const OFFERS = {
     note: {
       // An observation is the agent's to settle; anything else it addresses
       // and hands to a person (ADR 0005 §2). Both are Done from its seat.
-      open: (t) => [REPLY, ['Done', t.reason === 'observation' ? 'settled' : 'addressed', 'primary']],
+      open: (t) => [
+        REPLY,
+        ['Done', t.reason === 'observation' ? 'settled' : 'addressed', 'primary'],
+      ],
     },
     question: {
       answered: [REPLY, ['Done', 'incorporated', 'primary']],
@@ -390,13 +399,12 @@ const ON_RULE = {
 export function threadActions(t, role = myRole(), { onRule = onWalkableRule(t) } = {}) {
   const kind = t.kind === 'question' ? 'question' : 'note';
   const offer =
-    (role === 'human' && onRule ? ON_RULE[kind]?.[t.status] : null) ?? OFFERS[role]?.[kind]?.[t.status];
+    (role === 'human' && onRule ? ON_RULE[kind]?.[t.status] : null) ??
+    OFFERS[role]?.[kind]?.[t.status];
   const list = (typeof offer === 'function' ? offer(t) : offer) ?? [REPLY];
   // Never a button the server would refuse: the offers are written against
   // the lifecycle, and this is the seam that keeps them honest if it moves.
-  return list.filter(
-    ([, act]) => act.startsWith('__') || canTransition(t.kind, t.status, act),
-  );
+  return list.filter(([, act]) => act.startsWith('__') || canTransition(t.kind, t.status, act));
 }
 
 /*
@@ -405,13 +413,27 @@ export function threadActions(t, role = myRole(), { onRule = onWalkableRule(t) }
  * amber, the agent's is blue, an ended thread is green - and `label` says
  * "your move" when the party is the reader.
  */
-export function turnLine(t, role = myRole(), { person = 'the person', endedBy = null, endedAt = null, onRule = onWalkableRule(t) } = {}) {
+export function turnLine(
+  t,
+  role = myRole(),
+  { person = 'the person', endedBy = null, endedAt = null, onRule = onWalkableRule(t) } = {},
+) {
   const party = whoseMove(t);
   const note = t.kind !== 'question';
   if (!party) {
-    const how = t.status === 'waived' ? 'Waived' : t.status === 'recorded' ? 'Recorded' : t.status[0].toUpperCase() + t.status.slice(1);
+    const how =
+      t.status === 'waived'
+        ? 'Waived'
+        : t.status === 'recorded'
+          ? 'Recorded'
+          : t.status[0].toUpperCase() + t.status.slice(1);
     // On a rule, the way back is a fail on the rule, not a Reopen here.
-    const back = role !== 'human' || t.status === 'recorded' ? '' : onRule && note ? '; a fail on the rule reopens it' : '; reopen if it comes back';
+    const back =
+      role !== 'human' || t.status === 'recorded'
+        ? ''
+        : onRule && note
+          ? '; a fail on the rule reopens it'
+          : '; reopen if it comes back';
     return {
       party: 'closed',
       label: 'Closed',
@@ -425,20 +447,36 @@ export function turnLine(t, role = myRole(), { person = 'the person', endedBy = 
   const finding = t.reason === 'finding';
   let text;
   if (role === 'human') {
-    if (q && t.status === 'open') text = 'The agent is asking you. Answer records your answer; Reply just talks.';
-    else if (q) text = 'You answered. It folds the answer into the rule on its next run and closes this.';
-    else if (t.status === 'open' && obs) text = 'It noticed this itself and closes it itself on its next run. It never comes back to you.';
-    else if (t.status === 'open' && finding) text = 'A judge failed the rule on this. The agent fixes it on its next run; a signed pass on the rule closes it.';
-    else if (t.status === 'open') text = 'It does what you asked here on its next run, then hands it back to you.';
+    if (q && t.status === 'open')
+      text = 'The agent is asking you. Answer records your answer; Reply just talks.';
+    else if (q)
+      text = 'You answered. It folds the answer into the rule on its next run and closes this.';
+    else if (t.status === 'open' && obs)
+      text =
+        'It noticed this itself and closes it itself on its next run. It never comes back to you.';
+    else if (t.status === 'open' && finding)
+      text =
+        'A judge failed the rule on this. The agent fixes it on its next run; a signed pass on the rule closes it.';
+    else if (t.status === 'open')
+      text = 'It does what you asked here on its next run, then hands it back to you.';
     // Addressed, on a rule: the verdict is the acceptance (ADR 0006 §3).
-    else if (onRule) text = 'The agent says this is done. Judge the rule: a signed pass ends this conversation, a fail continues it.';
-    else if (finding) text = 'The agent says this is fixed. Judge the rule again - a signed pass closes it; Reopen if it is not.';
+    else if (onRule)
+      text =
+        'The agent says this is done. Judge the rule: a signed pass ends this conversation, a fail continues it.';
+    else if (finding)
+      text =
+        'The agent says this is fixed. Judge the rule again - a signed pass closes it; Reopen if it is not.';
     else text = 'The agent says this is done. Look: Done if it is, Reopen if it is not.';
   } else {
-    if (q && t.status === 'open') text = `${person} has not answered yet. Reply if there is more to ask.`;
-    else if (q) text = 'Fold the answer into the rule, say where it went, then mark it Done. That closes the question.';
-    else if (t.status === 'open' && obs) text = 'You noticed this. Say what changed, then mark it Done - nobody else is asked.';
-    else if (t.status === 'open') text = `Do what this asks, say what you did, then mark it Done. It goes back to ${person} to look.`;
+    if (q && t.status === 'open')
+      text = `${person} has not answered yet. Reply if there is more to ask.`;
+    else if (q)
+      text =
+        'Fold the answer into the rule, say where it went, then mark it Done. That closes the question.';
+    else if (t.status === 'open' && obs)
+      text = 'You noticed this. Say what changed, then mark it Done - nobody else is asked.';
+    else if (t.status === 'open')
+      text = `Do what this asks, say what you did, then mark it Done. It goes back to ${person} to look.`;
     else text = `${person} is looking at what you did. Reply if there is more to say.`;
   }
   return { party, label, text };
@@ -452,5 +490,7 @@ export function composerPlaceholder(t, role = myRole(), opts = {}) {
   // reply box first, and the reason is what the reply becomes if you press
   // Reopen or Waive instead of Enter.
   const reasons = ['Reopen', 'Waive'].filter((v, i) => acts.includes(['open', 'waived'][i]));
-  return !acts.includes('__reply') && reasons.length ? `For ${reasons.join(' or ')}, say why\u2026` : 'Reply\u2026';
+  return !acts.includes('__reply') && reasons.length
+    ? `For ${reasons.join(' or ')}, say why\u2026`
+    : 'Reply\u2026';
 }

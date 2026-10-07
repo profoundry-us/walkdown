@@ -27,7 +27,10 @@ function suite(m, tests, ids) {
   const command = `node --test --test-reporter=${REPORTER} --test-reporter-destination=stdout tests/shop.test.js`;
   for (const id of ids) {
     const file = join(m.specOf(id), 'spec.yml');
-    const text = readFileSync(file, 'utf8').replace(/^ {2}run_all: .*$/m, `  run_all: "${command}"`);
+    const text = readFileSync(file, 'utf8').replace(
+      /^ {2}run_all: .*$/m,
+      `  run_all: "${command}"`,
+    );
     writeFileSync(file, text);
   }
 }
@@ -47,8 +50,14 @@ export default {
     m.ok(['skills', '--into', '../claude/skills']);
     const theirs = join(m.root, 'their-skills');
     mkdirSync(join(theirs, 'incorporate'), { recursive: true });
-    writeFileSync(join(theirs, 'incorporate', 'SKILL.md'), '---\nname: walkdown-incorporate\n---\nTheir own way of folding answers in.\n');
-    writeFileSync(join(theirs, 'judge.md'), '---\nname: walkdown-judge\n---\nTheir own judging notes.\n');
+    writeFileSync(
+      join(theirs, 'incorporate', 'SKILL.md'),
+      '---\nname: walkdown-incorporate\n---\nTheir own way of folding answers in.\n',
+    );
+    writeFileSync(
+      join(theirs, 'judge.md'),
+      '---\nname: walkdown-judge\n---\nTheir own judging notes.\n',
+    );
     symlinkSync(join(theirs, 'incorporate'), join(skillsDir(m), 'walkdown-incorporate'), 'dir');
     mkdirSync(join(skillsDir(m), 'walkdown-judge'), { recursive: true });
     symlinkSync(join(theirs, 'judge.md'), join(skillsDir(m), 'walkdown-judge', 'SKILL.md'));
@@ -59,13 +68,17 @@ export default {
    * since edited it.
    */
   'g1-old-copies'(m) {
-    const show = (path) => execFileSync('git', ['show', `v0.1.0:${path}`], { cwd: REPO, encoding: 'utf8' });
+    const show = (path) =>
+      execFileSync('git', ['show', `v0.1.0:${path}`], { cwd: REPO, encoding: 'utf8' });
     const write = (name, text) => {
       mkdirSync(join(skillsDir(m), name), { recursive: true });
       writeFileSync(join(skillsDir(m), name, 'SKILL.md'), text);
     };
     write('walkdown-judge', show('lib/skills/walkdown-judge.md'));
-    write('walkdown-setup', `${show('lib/skills/walkdown-setup.md')}\nAlways set up with --commit spec here.\n`);
+    write(
+      'walkdown-setup',
+      `${show('lib/skills/walkdown-setup.md')}\nAlways set up with --commit spec here.\n`,
+    );
   },
   /* `checkout` and `search` sharing one node suite, with a test tagged for a rule neither holds. */
   'g1-shared-suite'(m, h) {
@@ -99,9 +112,18 @@ export default {
     m.ok(['blueprints', 'new', 'checkout']);
     const spec = m.specOf('checkout');
     const file = join(spec, 'spec.yml');
-    writeFileSync(file, readFileSync(file, 'utf8').replace('# prototype:\n#   root: prototype/', 'prototype:\n  root: prototype/'));
+    writeFileSync(
+      file,
+      readFileSync(file, 'utf8').replace(
+        '# prototype:\n#   root: prototype/',
+        'prototype:\n  root: prototype/',
+      ),
+    );
     mkdirSync(join(spec, 'prototype', 'screens'), { recursive: true });
-    writeFileSync(join(spec, 'prototype', 'screens', 'pay.html'), '<!doctype html><title>Pay</title>\n');
+    writeFileSync(
+      join(spec, 'prototype', 'screens', 'pay.html'),
+      '<!doctype html><title>Pay</title>\n',
+    );
     // The code has one too, as a repository that keeps its design does.
     mkdirSync(join(m.shop, 'prototype'), { recursive: true });
   },
@@ -116,7 +138,16 @@ export default {
     bare(m, 'checkout');
     bare(m, 'search');
     h.feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'Search should find what was just bought.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.pays',
+      '--body',
+      'Search should find what was just bought.',
+      '--blueprint',
+      'checkout',
+    ]);
     writeFileSync(
       join(m.specOf('search'), 'features', 'search.yml'),
       [
@@ -156,7 +187,16 @@ export default {
   /* `checkout` and `search`; checkout's story has a thread, a recorded run and a picture behind it. */
   'g1-before-move'(m, h) {
     h.fixtures['two-blueprints'](m);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.totals', '--body', 'The total leaves out the shipping.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.totals',
+      '--body',
+      'The total leaves out the shipping.',
+      '--blueprint',
+      'checkout',
+    ]);
     suite(
       m,
       [
@@ -177,7 +217,9 @@ export default {
     const spec = m.specOf('checkout');
     bare(m, 'checkout');
     h.feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    agentPass(m, spec, 'checkout.basics.pays', ['runs/evidence/2026-10-02T00-00-00Z/app-checkout.png']);
+    agentPass(m, spec, 'checkout.basics.pays', [
+      'runs/evidence/2026-10-02T00-00-00Z/app-checkout.png',
+    ]);
     mkdirSync(join(spec, 'evidence', '2026-10-02T00-00-00Z'), { recursive: true });
     writeFileSync(join(spec, 'evidence', '2026-10-02T00-00-00Z', 'app-checkout.png'), '');
     m.ok(['records', 'move', 'evidence', '--to', '../evidence-kept', '--blueprint', 'checkout']);
@@ -191,7 +233,10 @@ export default {
     h.git(m, m.shop, 'add', '-A');
     h.git(m, m.shop, 'commit', '-q', '-m', 'checkout and its suite');
     m.ok(['run', '--blueprint', 'checkout']);
-    for (const [file, text] of [['README.md', '# shop\n\nA shop.\n'], ['CHANGELOG.md', '# Changes\n']]) {
+    for (const [file, text] of [
+      ['README.md', '# shop\n\nA shop.\n'],
+      ['CHANGELOG.md', '# Changes\n'],
+    ]) {
       writeFileSync(join(m.shop, file), text);
       h.git(m, m.shop, 'add', '-A');
       h.git(m, m.shop, 'commit', '-q', '-m', `${file}`);
@@ -222,7 +267,16 @@ function agentPass(m, spec, rule, evidence) {
         kind: 'walkdown',
         target: 'local',
         base_url: 'http://localhost:3000',
-        results: [{ rule, status: 'pass', statement_hash: hash, evidence, reasoning: 'Paid with the test card; the receipt showed.', threads: [] }],
+        results: [
+          {
+            rule,
+            status: 'pass',
+            statement_hash: hash,
+            evidence,
+            reasoning: 'Paid with the test card; the receipt showed.',
+            threads: [],
+          },
+        ],
       },
       null,
       2,

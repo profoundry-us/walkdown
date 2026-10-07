@@ -203,7 +203,11 @@ test('positions are recorded in the surface coordinate space, not the screen', {
 });
 
 test('the same anchors exist on both surfaces, and a pin records which it was placed on', {
-  tag: ['@rule:embed.pin.both-surfaces', '@rule:embed.pin.anchored-target', '@rule:embed.pin.follows-the-visible-surface'],
+  tag: [
+    '@rule:embed.pin.both-surfaces',
+    '@rule:embed.pin.anchored-target',
+    '@rule:embed.pin.follows-the-visible-surface',
+  ],
 }, async ({ page }) => {
   /*
    * Reviewing walkdown with walkdown: the review screen is a DRAWING of this
@@ -340,7 +344,10 @@ test('a tag on the page naming another blueprint does not redirect a write', {
   // by key from the moment the server answers, whatever form it was asked in.
   const open = blueprints.find((b) => b.id === '0001-cs-blueprint').key;
   const other = blueprints.map((b) => b.key).find((k) => k !== open);
-  expect(other, 'the server must hold a second blueprint for this to be about anything').toBeTruthy();
+  expect(
+    other,
+    'the server must hold a second blueprint for this to be about anything',
+  ).toBeTruthy();
 
   const writes = [];
   page.on('request', (r) => {
@@ -355,7 +362,9 @@ test('a tag on the page naming another blueprint does not redirect a write', {
 
   expect(writes.length).toBeGreaterThan(0);
   for (const u of writes) {
-    expect(u.searchParams.get('bp'), `${u.pathname} filed against what the panel has open`).toBe(open);
+    expect(u.searchParams.get('bp'), `${u.pathname} filed against what the panel has open`).toBe(
+      open,
+    );
   }
 });
 
@@ -412,7 +421,9 @@ test('a pin says what it is on contact, and says nothing until then', {
   const marker = pins.last();
   const thread = await marker.getAttribute('data-thread');
   await marker.hover();
-  const tip = app(page).locator(`[data-testid="pin.marker"][data-thread="${thread}"] [data-testid="pin.tip"]`);
+  const tip = app(page).locator(
+    `[data-testid="pin.marker"][data-thread="${thread}"] [data-testid="pin.tip"]`,
+  );
   await expect(tip).toContainText(thread);
   await expect
     .poll(async () => Number(await tip.evaluate((el) => getComputedStyle(el).opacity)))
@@ -429,7 +440,9 @@ test('a pin says what it is on contact, and says nothing until then', {
     const at = await pin.boundingBox();
     if (!at) continue;
     await page.mouse.move(at.x + at.width / 2, at.y + at.height / 2);
-    const card = app(page).locator(`[data-testid="pin.marker"][data-thread="${id}"] [data-testid="pin.tip"]`);
+    const card = app(page).locator(
+      `[data-testid="pin.marker"][data-thread="${id}"] [data-testid="pin.tip"]`,
+    );
     // Two of the project's pins share a spot; the one underneath cannot be
     // touched, so a card that never shows is skipped, not failed.
     let shown = false;
@@ -440,9 +453,13 @@ test('a pin says what it is on contact, and says nothing until then', {
     if (!shown) continue;
     const c = await card.boundingBox();
     expect(c.y, `${id}: card top inside the frame`).toBeGreaterThanOrEqual(frame.y - 1);
-    expect(c.y + c.height, `${id}: card bottom inside the frame`).toBeLessThanOrEqual(frame.y + frame.height + 1);
+    expect(c.y + c.height, `${id}: card bottom inside the frame`).toBeLessThanOrEqual(
+      frame.y + frame.height + 1,
+    );
     expect(c.x, `${id}: card left inside the frame`).toBeGreaterThanOrEqual(frame.x - 1);
-    expect(c.x + c.width, `${id}: card right inside the frame`).toBeLessThanOrEqual(frame.x + frame.width + 1);
+    expect(c.x + c.width, `${id}: card right inside the frame`).toBeLessThanOrEqual(
+      frame.x + frame.width + 1,
+    );
   }
 });
 
@@ -467,11 +484,25 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
   // A 1x1 PNG, dragged from the desk and dropped on the box (n-0328): a
   // real DragEvent with a File on its transfer, which is what a drop is.
   const drop = (el) => {
-    const bytes = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+    const bytes = Uint8Array.from(
+      atob(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+      ),
+      (c) => c.charCodeAt(0),
+    );
     const dt = new DataTransfer();
     dt.items.add(new File([bytes], 'shot.png', { type: 'image/png' }));
-    el.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
-    el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
+    el.dispatchEvent(
+      new DragEvent('dragover', {
+        dataTransfer: dt,
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      }),
+    );
+    el.dispatchEvent(
+      new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }),
+    );
   };
   // The form says it will take the picture: ready while a file is in the
   // air over the page, over while it is over the form, nothing for text
@@ -479,11 +510,14 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
   const form = frame.getByTestId('pin.form');
   const air = (el, [what, type]) => {
     const dt = new DataTransfer();
-    if (type === 'Files') dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
+    if (type === 'Files')
+      dt.items.add(new File([new Uint8Array([1])], 'x.png', { type: 'image/png' }));
     else dt.setData('text/plain', 'words');
     // composed: a native drag event crosses the embed's shadow root on its
     // way to the window; a synthetic one only does when told to.
-    el.dispatchEvent(new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }));
+    el.dispatchEvent(
+      new DragEvent(what, { dataTransfer: dt, bubbles: true, cancelable: true, composed: true }),
+    );
   };
   await frame.locator('body').evaluate(air, ['dragenter', 'text']);
   await expect(form).not.toHaveAttribute('data-drag', /ready|over/);
@@ -495,23 +529,30 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
   await expect(form).toHaveAttribute('data-drag', 'ready');
   await note.evaluate(drop);
   await expect(form).not.toHaveAttribute('data-drag', /ready|over/);
-  await expect(frame.getByTestId('pin.shots').locator('img'), 'shown small before it is filed').toHaveCount(1);
+  await expect(
+    frame.getByTestId('pin.shots').locator('img'),
+    'shown small before it is filed',
+  ).toHaveCount(1);
   await note.fill('The corner is clipped, see the picture.');
   await frame.getByTestId('pin.save').click();
 
   // On disk: the record names the picture, and the file is served by that name.
   let thread;
-  await expect.poll(async () => {
-    const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
-    thread = bp.threads.find((t) => t.body === 'The corner is clipped, see the picture.');
-    return thread?.attachments?.length ?? 0;
-  }).toBe(1);
+  await expect
+    .poll(async () => {
+      const bp = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+      thread = bp.threads.find((t) => t.body === 'The corner is clipped, see the picture.');
+      return thread?.attachments?.length ?? 0;
+    })
+    .toBe(1);
   expect(thread.attachments[0].file).toMatch(/^attachments\/[0-9a-f-]{36}-1\.png$/);
   expect(thread.attachments[0].name).toBe('shot.png');
   const served = await page.request.get(`${WD_ORIGIN}/${thread.attachments[0].file}?bp=blueprint`);
   expect(served.status()).toBe(200);
   expect(served.headers()['content-type']).toMatch(/image\/png/);
-  expect((await page.request.get(`${WD_ORIGIN}/attachments/../${thread.id}.yml?bp=blueprint`)).status()).toBe(404);
+  expect(
+    (await page.request.get(`${WD_ORIGIN}/attachments/../${thread.id}.yml?bp=blueprint`)).status(),
+  ).toBe(404);
 
   // In the stream: a thumbnail under the words, which opens the picture.
   await page.getByTestId('panel.pin-mode').click();
@@ -525,12 +566,18 @@ test('a screenshot dropped on the pin form goes on the pin, and opens from the s
   await page.getByTestId('detail.evidence-close').click();
   // The same drop on the thread's own composer puts the picture on the reply.
   await page.getByTestId('thread.reply').evaluate(drop);
-  await expect(page.getByTestId('thread.shots').locator('img'), 'held above the box until sent').toHaveCount(1);
+  await expect(
+    page.getByTestId('thread.shots').locator('img'),
+    'held above the box until sent',
+  ).toHaveCount(1);
   // And a drop that misses the box - on the messages above it - is taken
   // by the screen the same way, rather than by the browser, which opened
   // the file in a new tab (Topher, 2026-09-21, n-0328).
   await page.getByTestId('thread.body').evaluate(drop);
-  await expect(page.getByTestId('thread.shots').locator('img'), 'the screen is the target, not the box').toHaveCount(2);
+  await expect(
+    page.getByTestId('thread.shots').locator('img'),
+    'the screen is the target, not the box',
+  ).toHaveCount(2);
   expect(page.context().pages().length, 'no tab opened on the file').toBe(1);
 });
 
@@ -548,20 +595,32 @@ test('beside the pin, an id is a link only where the popover can open it', {
 }, async ({ page }) => {
   // Two pins on the as-built page, filed through the door: the second refers to
   // the first, to a rule, and to an evidence key.
-  const file = async (body) => {
+  // Each pin at a spot of its own, by its offset in the element: without one
+  // every pin rides the element's corner, and the dot on top takes the click
+  // meant for the one beneath (n-0512). Varied per run, for pins earlier runs
+  // left on the same page.
+  const spot = Date.now() % 300;
+  const file = async (body, x) => {
     const res = await page.request.post(`${WD_ORIGIN}/api/threads?bp=blueprint`, {
       data: {
         kind: 'note',
         body,
-        anchor: { screen: 'review', element: 'panel.bar', surface: 'app', position: { x: 40, y: 20 } },
+        anchor: {
+          screen: 'review',
+          element: 'panel.bar',
+          surface: 'app',
+          position: { x: 40, y: 20 },
+          offset: { x: 40 + spot + x, y: 20 },
+        },
       },
     });
     expect(res.ok()).toBeTruthy();
     return (await res.json()).id;
   };
-  const first = await file('The first pin, referred to by the second.');
+  const first = await file('The first pin, referred to by the second.', 0);
   const second = await file(
     `Refs: ${first}, n-0001 (not pinned here), rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt`,
+    120,
   );
 
   // The as-built page on its own, top-level: no panel, so the dot opens the
@@ -571,7 +630,9 @@ test('beside the pin, an id is a link only where the popover can open it', {
   await expect(chrome).toBeAttached();
   const dot = page.locator(`[data-testid="pin.marker"][data-thread="${second}"] .wd-dot`);
   await expect(dot).toBeVisible();
-  await dot.click();
+  // To the dot itself: what this checks is the popover it opens, and a pin an
+  // earlier run left nearby must not take the click instead.
+  await dot.dispatchEvent('click');
   const popover = page.getByTestId('thread.panel');
   await expect(popover).toBeVisible();
   await expect(popover).toContainText(second);
@@ -588,7 +649,10 @@ test('beside the pin, an id is a link only where the popover can open it', {
   await expect(ruleRef).toHaveJSProperty('tagName', 'A');
   // Named by KEY, the one spelling the server never has to guess at, since
   // this page never said which blueprint it belongs to.
-  await expect(ruleRef).toHaveAttribute('href', new RegExp(`^${WD_ORIGIN}/\\?bp=.*0001-walkdown.*&rule=threads\\.conversation\\.one-stream$`));
+  await expect(ruleRef).toHaveAttribute(
+    'href',
+    new RegExp(`^${WD_ORIGIN}/\\?bp=.*0001-walkdown.*&rule=threads\\.conversation\\.one-stream$`),
+  );
   await expect(ruleRef).toHaveAttribute('target', '_blank');
   const away = popover.locator('[data-thread-ref="n-0001"]');
   await expect(away).toHaveJSProperty('tagName', 'A');
@@ -601,10 +665,13 @@ test('beside the pin, an id is a link only where the popover can open it', {
   await ruleRef.hover();
   await expect(card).toBeVisible();
   // Over the popover it was summoned from, not under it (n-0299).
-  const above = await card.evaluate((el, pop) => {
-    const z = (n) => Number(getComputedStyle(n).zIndex) || 0;
-    return z(el) > z(pop);
-  }, await popover.elementHandle());
+  const above = await card.evaluate(
+    (el, pop) => {
+      const z = (n) => Number(getComputedStyle(n).zIndex) || 0;
+      return z(el) > z(pop);
+    },
+    await popover.elementHandle(),
+  );
   expect(above).toBe(true);
   await expect(card).toContainText('threads.conversation.one-stream');
   await expect(card).toContainText('one stream');
@@ -666,15 +733,24 @@ test('beside the pin, Verify is offered to a declared person on an answered note
     return (await res.json()).id;
   };
   const answered = await file('Feedback, answered.');
-  const claim = await page.request.post(`${WD_ORIGIN}/api/threads/${answered}/status?bp=blueprint`, {
-    data: { status: 'addressed', via: 'agent', reason: 'Done.' },
-  });
+  const claim = await page.request.post(
+    `${WD_ORIGIN}/api/threads/${answered}/status?bp=blueprint`,
+    {
+      data: { status: 'addressed', via: 'agent', reason: 'Done.' },
+    },
+  );
   expect(claim.ok()).toBeTruthy();
   const open = await file('Feedback, not answered.');
-  const observed = await file('Something the agent noticed.', { via: 'agent', reason: 'observation' });
-  const settled = await page.request.post(`${WD_ORIGIN}/api/threads/${observed}/status?bp=blueprint`, {
-    data: { status: 'settled', via: 'agent', reason: 'Tidied.' },
+  const observed = await file('Something the agent noticed.', {
+    via: 'agent',
+    reason: 'observation',
   });
+  const settled = await page.request.post(
+    `${WD_ORIGIN}/api/threads/${observed}/status?bp=blueprint`,
+    {
+      data: { status: 'settled', via: 'agent', reason: 'Tidied.' },
+    },
+  );
   expect(settled.ok()).toBeTruthy();
 
   await page.goto(`${WD_ORIGIN}/as-built/review.html`);
@@ -692,7 +768,9 @@ test('beside the pin, Verify is offered to a declared person on an answered note
 
   // Not offered where nothing waits on a person: an open note, or an
   // observation the agent already settled (whose pin has left the page).
-  await expect(page.locator(`[data-testid="pin.marker"][data-thread="${observed}"]`)).toHaveCount(0);
+  await expect(page.locator(`[data-testid="pin.marker"][data-thread="${observed}"]`)).toHaveCount(
+    0,
+  );
   await expect((await openPin(open)).getByTestId('thread.verify')).toHaveCount(0);
 
   // Offered on the answered one, under the declared name.
@@ -704,9 +782,13 @@ test('beside the pin, Verify is offered to a declared person on an answered note
 
   // The pin leaves the page, and the ledger has the thread verified under
   // the person - never a machine.
-  await expect(page.locator(`[data-testid="pin.marker"][data-thread="${answered}"]`)).toHaveCount(0);
+  await expect(page.locator(`[data-testid="pin.marker"][data-thread="${answered}"]`)).toHaveCount(
+    0,
+  );
   await expect(page.getByTestId('thread.panel')).toHaveCount(0);
-  const { threads } = await (await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)).json();
+  const { threads } = await (
+    await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)
+  ).json();
   const t = threads.find((x) => x.id === answered);
   expect(t.status).toBe('verified');
   expect(t.verified_by).toBe('checks-person');

@@ -119,7 +119,9 @@ chrome.action.onClicked.addListener(async (tab) => {
     const up = await fetch(`${SERVER}/api/blueprint`, { signal: AbortSignal.timeout(1500) })
       .then((r) => r.ok)
       .catch(() => false);
-    return chrome.tabs.update(tab.id, { url: up ? `${SERVER}/` : chrome.runtime.getURL('no-page.html') });
+    return chrome.tabs.update(tab.id, {
+      url: up ? `${SERVER}/` : chrome.runtime.getURL('no-page.html'),
+    });
   }
   reviews[tab.id] = tab.url;
   await writeReviews(reviews);

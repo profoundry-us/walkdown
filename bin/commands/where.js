@@ -42,7 +42,9 @@ export function run(args) {
   if (values.json) {
     console.log(
       JSON.stringify(
-        each.length > 1 ? { blueprints: each.map(({ id, loc: l }) => ({ ...answer(l), id })) } : answer(loc),
+        each.length > 1
+          ? { blueprints: each.map(({ id, loc: l }) => ({ ...answer(l), id })) }
+          : answer(loc),
         null,
         2,
       ),
@@ -67,7 +69,9 @@ export function run(args) {
           ? (design(l)[only] ?? { path: null, why: l.spec?.why ?? 'no blueprint answers here' })
           : null;
     if (!cellOf(loc)) {
-      console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}, prototype, proposals.`);
+      console.error(
+        `No such location "${only}". Try: spec, code, ${KINDS.join(', ')}, prototype, proposals.`,
+      );
       return end(2);
     }
     /*
@@ -103,7 +107,6 @@ const sub = (text, colour = dim) => colour(`[${text}]`);
 
 /* One blueprint's locations, printed for a person. */
 function report(loc) {
-
   console.log(`walkdown where — ${loc.id}\n`);
   /*
    * Two files, each answering for itself. profile.yml is the person's -
@@ -123,7 +126,7 @@ function report(loc) {
   const ignores = (ig) =>
     console.log(
       `  ${''.padEnd(9)} ${yellow(
-        `ignores \`${ig.key}: ${typeof ig.value === 'string' ? ig.value : ig.id ?? '…'}\`${ig.id && typeof ig.value === 'string' ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
+        `ignores \`${ig.key}: ${typeof ig.value === 'string' ? ig.value : (ig.id ?? '…')}\`${ig.id && typeof ig.value === 'string' ? ` in entry \`${ig.id}\`` : ''} — ${ig.why ?? 'a relative path means nothing in this file; write it in full'}`,
       )}`,
     );
   for (const ig of loc.config.ignored ?? []) if (ig.key !== 'registry') ignores(ig);
@@ -135,9 +138,16 @@ function report(loc) {
         ? reg.error
           ? sub(`unreadable — ${reg.error}`, red)
           : reg.matched
-            ? sub(`the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`, green)
-            : sub(`the registry — what this machine knows about; ${loc.config.registry.why ?? 'no row answers here'}`)
-        : sub('the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it')
+            ? sub(
+                `the registry — names this project, registered by ${reg.registeredBy ?? 'walkdown'}`,
+                green,
+              )
+            : sub(
+                `the registry — what this machine knows about; ${loc.config.registry.why ?? 'no row answers here'}`,
+              )
+        : sub(
+            'the registry — not present; `walkdown blueprints new` or `walkdown blueprints import` starts it',
+          )
     }`,
   );
   // A row in the registry nothing wrote (ADR 0003 §5): set aside, and said
@@ -186,7 +196,9 @@ function report(loc) {
   console.log(`  ${''.padEnd(9)} ${sub(t.why)}`);
   if (loc.standard) console.log(`  ${''.padEnd(9)} ${sub(`the tree says: ${loc.standard.why}`)}`);
   for (const f of t.findings)
-    console.log(`  ${''.padEnd(9)} ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`);
+    console.log(
+      `  ${''.padEnd(9)} ${f.level === 'error' ? red(`✗ ${f.message}`) : yellow(`! ${f.message}`)}`,
+    );
 
   /*
    * Asking writes nothing, and that is a rule
@@ -222,7 +234,10 @@ function designRows(loc) {
     [
       'prototype',
       proto
-        ? { ...cell(proto), why: `\`prototype.root: ${config.prototype.root}\`, ${cell(proto).why}` }
+        ? {
+            ...cell(proto),
+            why: `\`prototype.root: ${config.prototype.root}\`, ${cell(proto).why}`,
+          }
         : { path: null, why: 'spec.yml declares no `prototype.root`' },
     ],
     ['proposals', cell(proposalsDir(bp))],

@@ -5,7 +5,17 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -16,7 +26,11 @@ const root = realpathSync(mkdtempSync(join(tmpdir(), 'walkdown-judged-')));
 after(() => rmSync(root, { recursive: true, force: true }));
 
 const git = (cwd, ...args) =>
-  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
 
 let n = 0;
 function machine() {
@@ -24,7 +38,8 @@ function machine() {
   mkdirSync(home, { recursive: true });
   writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: sam\n');
   const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: home };
-  const cli = (cwd, ...args) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const cli = (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
   const repo = (name) => {
     const dir = join(root, `m${n}`, name);
     mkdirSync(dir, { recursive: true });
@@ -45,7 +60,10 @@ test('lint warns before a commit that a teammate has taken the folder name, and 
   ok(m.cli(shop, 'blueprints', 'new', 'beta', '--folder', '202610-beta'));
   // A teammate's commit of a home in the same folder arrives.
   mkdirSync(join(shop, '.walkdown', 'blueprints', '202610-beta'), { recursive: true });
-  writeFileSync(join(shop, '.walkdown', 'blueprints', '202610-beta', 'spec.yml'), 'blueprint: beta\n');
+  writeFileSync(
+    join(shop, '.walkdown', 'blueprints', '202610-beta', 'spec.yml'),
+    'blueprint: beta\n',
+  );
   const id = m.rows()[0].id;
 
   const linted = m.cli(shop, 'lint', '--blueprint', id);
@@ -59,14 +77,17 @@ test('lint warns before a commit that a teammate has taken the folder name, and 
   ok(m.cli(shop, 'blueprints', 'new', 'gamma'));
 });
 
-test('a home moved back out of the repository drops walkdown\'s .gitignore @rule:commands.blueprints.commit-moves-the-home', () => {
+test("a home moved back out of the repository drops walkdown's .gitignore @rule:commands.blueprints.commit-moves-the-home", () => {
   const m = machine();
   const shop = m.repo('shop');
   ok(m.cli(shop, 'blueprints', 'new', 'alpha', '--commit', 'spec', '--folder', 'alpha'));
   ok(m.cli(shop, 'blueprints', 'commit', 'none', '--blueprint', 'alpha'));
   const home = m.rows()[0].home.replace(/^~/, process.env.HOME);
   assert.ok(existsSync(join(home, 'spec.yml')));
-  assert.ok(!existsSync(join(home, '.gitignore')), 'a commit choice means nothing outside a repository');
+  assert.ok(
+    !existsSync(join(home, '.gitignore')),
+    'a commit choice means nothing outside a repository',
+  );
 });
 
 test('an unimported home standing in a partly imported checkout is named, with the command that imports it @rule:locations.answer.declared-not-discovered', () => {
@@ -74,20 +95,29 @@ test('an unimported home standing in a partly imported checkout is named, with t
   const repo = m.repo('rp');
   for (const f of ['202610-one', '202610-two', '202610-three']) {
     mkdirSync(join(repo, '.walkdown', 'blueprints', f), { recursive: true });
-    writeFileSync(join(repo, '.walkdown', 'blueprints', f, 'spec.yml'), `blueprint: ${f.slice(7)}\n`);
+    writeFileSync(
+      join(repo, '.walkdown', 'blueprints', f, 'spec.yml'),
+      `blueprint: ${f.slice(7)}\n`,
+    );
   }
   ok(m.cli(repo, 'blueprints', 'import', repo, '--only', '202610-one,202610-two'));
   const three = join(repo, '.walkdown', 'blueprints', '202610-three');
 
   const where = m.cli(three, 'where');
-  assert.match(where.stdout, /202610-three is a blueprint this machine has not imported — `walkdown blueprints import .*202610-three` registers it/);
+  assert.match(
+    where.stdout,
+    /202610-three is a blueprint this machine has not imported — `walkdown blueprints import .*202610-three` registers it/,
+  );
   assert.doesNotMatch(where.stdout, /0001-rp-one/, 'and the other two are not answered for it');
   assert.doesNotMatch(where.stdout, /no row for this project/);
   const named = m.cli(repo, 'status', '--blueprint', 'three');
   assert.equal(named.status, 2);
   assert.match(named.stderr, /not imported\.\n  `walkdown blueprints import/);
   // Standing in an imported one answers for that one alone.
-  assert.match(m.cli(join(repo, '.walkdown', 'blueprints', '202610-one'), 'where').stdout, /0001-rp-one/);
+  assert.match(
+    m.cli(join(repo, '.walkdown', 'blueprints', '202610-one'), 'where').stdout,
+    /0001-rp-one/,
+  );
 });
 
 test('a repository of its own inside a registered checkout is not that checkout (n-0435) @rule:locations.answer.declared-not-discovered', () => {
@@ -104,11 +134,21 @@ test('a repository of its own inside a registered checkout is not that checkout 
 
   const status = m.cli(home, 'status');
   assert.equal(status.status, 2, status.stdout);
-  assert.match(status.stderr, /202610-pack is a blueprint this machine has not imported\.\n  `walkdown blueprints import /);
+  assert.match(
+    status.stderr,
+    /202610-pack is a blueprint this machine has not imported\.\n  `walkdown blueprints import /,
+  );
   const filed = m.cli(home, 'threads', 'new', '--rule', 'checkout.basics.works', '--body', 'x');
-  assert.equal(filed.status, 2, 'nothing is filed in the outer blueprint\'s ledger');
-  assert.match(filed.stderr, /202610-pack is a blueprint this machine has not imported/, 'refused as the unimported home it is');
-  assert.ok(!existsSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')) || !readdirSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')).length);
+  assert.equal(filed.status, 2, "nothing is filed in the outer blueprint's ledger");
+  assert.match(
+    filed.stderr,
+    /202610-pack is a blueprint this machine has not imported/,
+    'refused as the unimported home it is',
+  );
+  assert.ok(
+    !existsSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')) ||
+      !readdirSync(join(store, '.walkdown', 'blueprints', 'checkout', 'threads')).length,
+  );
   // The outer checkout still answers for itself.
   assert.match(m.cli(store, 'where').stdout, /0001-st-checkout|checkout/);
 });
@@ -122,16 +162,28 @@ test('an unimported home named outright is named, by folder or spec name, with o
   for (const name of ['202610-search', 'search']) {
     const r = m.cli(shop, 'status', '--blueprint', name);
     assert.equal(r.status, 2);
-    assert.match(r.stderr, /202610-search is a blueprint this machine has not imported\.\n  `walkdown blueprints import /, name);
+    assert.match(
+      r.stderr,
+      /202610-search is a blueprint this machine has not imported\.\n  `walkdown blueprints import /,
+      name,
+    );
   }
   // A spec name that is not the folder's, with a registry present.
   const orders = join(shop, '.walkdown', 'blueprints', 'orphan-orders');
   mkdirSync(orders, { recursive: true });
   writeFileSync(join(orders, 'spec.yml'), 'blueprint: orders\n');
   ok(m.cli(shop, 'blueprints', 'import', shop, '--only', '202610-search'));
-  for (const args of [['status'], ['where'], ['threads', 'new', '--rule', 'a.b.c', '--body', 'x']]) {
+  for (const args of [
+    ['status'],
+    ['where'],
+    ['threads', 'new', '--rule', 'a.b.c', '--body', 'x'],
+  ]) {
     const r = m.cli(shop, ...args, '--blueprint', 'orders');
-    assert.match(r.stdout + r.stderr, /orphan-orders is a blueprint this machine has not imported/, args[0]);
+    assert.match(
+      r.stdout + r.stderr,
+      /orphan-orders is a blueprint this machine has not imported/,
+      args[0],
+    );
   }
 });
 
@@ -142,12 +194,15 @@ test('a draft saved in a home committed whole stays committed @rule:locations.de
   const home = join(repo, '.walkdown', 'blueprints', 'all');
   const { writeDraft } = await import('../lib/draft.js');
   writeDraft(join(home, 'drafts'), { actor: 'sam', started: '2026-10-01T00:00:00Z', verdicts: {} });
-  assert.ok(!existsSync(join(home, 'drafts', '.gitignore')), 'no ignore file of its own overrules the home');
+  assert.ok(
+    !existsSync(join(home, 'drafts', '.gitignore')),
+    'no ignore file of its own overrules the home',
+  );
   const linted = m.cli(repo, 'lint');
   assert.doesNotMatch(linted.stdout + linted.stderr, /git disagrees|keeps .*drafts out/);
 });
 
-test('the pointer is written once, and taking it out keeps the person\'s own lines @rule:locations.pointer.owns-only-its-block', () => {
+test("the pointer is written once, and taking it out keeps the person's own lines @rule:locations.pointer.owns-only-its-block", () => {
   const m = machine();
   const repo = m.repo('pt');
   const claude = join(repo, 'CLAUDE.md');
@@ -162,7 +217,11 @@ test('the pointer is written once, and taking it out keeps the person\'s own lin
   // A person who deletes the block after the first commit meant it.
   writeFileSync(claude, 'Above.\r\n\r\nBelow.\n\n\n');
   ok(m.cli(repo, 'blueprints', 'new', 'b', '--commit', 'spec', '--folder', 'b'));
-  assert.equal(readFileSync(claude, 'utf8'), 'Above.\r\n\r\nBelow.\n\n\n', 'a second commit writes no paragraph');
+  assert.equal(
+    readFileSync(claude, 'utf8'),
+    'Above.\r\n\r\nBelow.\n\n\n',
+    'a second commit writes no paragraph',
+  );
 
   // Taking it out removes the block and nothing else - not the blank lines below.
   writeFileSync(claude, withBelow);
@@ -170,7 +229,10 @@ test('the pointer is written once, and taking it out keeps the person\'s own lin
   ok(m.cli(repo, 'blueprints', 'commit', 'none', '--blueprint', 'b'));
   const left = readFileSync(claude, 'utf8');
   assert.doesNotMatch(left, /walkdown:begin/);
-  assert.equal(left, withBelow.replace(/<!-- walkdown:begin -->[\s\S]*<!-- walkdown:end -->\r?\n/, ''));
+  assert.equal(
+    left,
+    withBelow.replace(/<!-- walkdown:begin -->[\s\S]*<!-- walkdown:end -->\r?\n/, ''),
+  );
   assert.match(left, /Below\.\n\n\n$/);
 });
 
@@ -186,17 +248,24 @@ test('a checkout that moved keeps its IDs when it is imported where it went @rul
   const imported = ok(m.cli(moved, 'blueprints', 'import', moved, '--all'));
   assert.match(imported.stdout, new RegExp(`~ moved .* keeps its ID \`${before[0].id}\``));
   const after_ = m.rows();
-  assert.deepEqual(after_.map((r) => r.id), before.map((r) => r.id), 'every ID kept');
+  assert.deepEqual(
+    after_.map((r) => r.id),
+    before.map((r) => r.id),
+    'every ID kept',
+  );
   for (const r of after_) {
     assert.equal(r.checkout.replace(/^~/, process.env.HOME), moved, `${r.id} names the new place`);
     assert.equal(r.project, before[0].project);
   }
-  assert.equal(after_[0].home.replace(/^~/, process.env.HOME), join(moved, '.walkdown', 'blueprints', 'search'));
+  assert.equal(
+    after_[0].home.replace(/^~/, process.env.HOME),
+    join(moved, '.walkdown', 'blueprints', 'search'),
+  );
   assert.equal(after_[1].home, before[1].home, 'a personal home stays where it is');
   ok(m.cli(moved, 'status', '--blueprint', 'jot'));
 });
 
-test('in a worktree, records.yml\'s answer says the worktree shares the registered home\'s @rule:locations.answer.says-why', () => {
+test("in a worktree, records.yml's answer says the worktree shares the registered home's @rule:locations.answer.says-why", () => {
   const m = machine();
   const shop = m.repo('shop');
   ok(m.cli(shop, 'blueprints', 'new', 'gamma', '--commit', 'spec', '--folder', 'gamma'));
@@ -208,7 +277,11 @@ test('in a worktree, records.yml\'s answer says the worktree shares the register
   assert.match(where.runs.why, /records\.yml .*git ignores runs, so every worktree shares them/);
   assert.equal(where.runs.path, join(shop, '.walkdown', 'blueprints', 'gamma', 'runs'));
   assert.match(where.threads.why, /records\.yml/);
-  assert.doesNotMatch(where.threads.why, /shares them/, 'threads are committed, and follow the branch');
+  assert.doesNotMatch(
+    where.threads.why,
+    /shares them/,
+    'threads are committed, and follow the branch',
+  );
   assert.match(ok(m.cli(shop, 'where')).stdout, /registered by blueprints new/);
 });
 
@@ -220,8 +293,14 @@ test('a record citing a label two threads share is refused, not written with the
   ok(m.cli(shop, 'blueprints', 'new', 'a', '--commit', 'spec', '--folder', 'a'));
   const home = join(shop, '.walkdown', 'blueprints', 'a');
   mkdirSync(join(home, 'threads'), { recursive: true });
-  for (const [uuid, at] of [['11111111-1111-4111-8111-111111111111', '01'], ['22222222-2222-4222-8222-222222222222', '02']])
-    writeFileSync(join(home, 'threads', `${uuid}.yml`), `id: n-0006\nuuid: ${uuid}\nkind: note\nauthor: sam\ncreated: 2026-10-${at}T00:00:00Z\nanchor: {}\nstatus: open\nbody: Seen.\n`);
+  for (const [uuid, at] of [
+    ['11111111-1111-4111-8111-111111111111', '01'],
+    ['22222222-2222-4222-8222-222222222222', '02'],
+  ])
+    writeFileSync(
+      join(home, 'threads', `${uuid}.yml`),
+      `id: n-0006\nuuid: ${uuid}\nkind: note\nauthor: sam\ncreated: 2026-10-${at}T00:00:00Z\nanchor: {}\nstatus: open\nbody: Seen.\n`,
+    );
   const r = spawnSync(
     process.execPath,
     [
@@ -233,8 +312,15 @@ test('a record citing a label two threads share is refused, not written with the
     { cwd: shop, encoding: 'utf8', env: m.env },
   );
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /n-0006 labels 2 threads .* cite the one you mean by its UUID; nothing was recorded/);
-  assert.ok(!existsSync(join(home, 'runs')) || !readdirSync(join(home, 'runs')).some((f) => f.endsWith('.json')), 'and nothing was');
+  assert.match(
+    r.stderr,
+    /n-0006 labels 2 threads .* cite the one you mean by its UUID; nothing was recorded/,
+  );
+  assert.ok(
+    !existsSync(join(home, 'runs')) ||
+      !readdirSync(join(home, 'runs')).some((f) => f.endsWith('.json')),
+    'and nothing was',
+  );
 });
 
 test('a worktree made before its home was committed reads the registered home, and says so @rule:locations.answer.says-why', () => {
@@ -247,7 +333,11 @@ test('a worktree made before its home was committed reads the registered home, a
   git(shop, 'worktree', 'add', '-q', '-b', 'early', wt);
   ok(m.cli(shop, 'blueprints', 'new', 'x2', '--commit', 'spec', '--folder', 'x2'));
   const where = JSON.parse(ok(m.cli(wt, 'where', '--json')).stdout);
-  assert.equal(where.spec.path, join(shop, '.walkdown', 'blueprints', 'x2'), 'the branch has no copy, so the registered one');
+  assert.equal(
+    where.spec.path,
+    join(shop, '.walkdown', 'blueprints', 'x2'),
+    'the branch has no copy, so the registered one',
+  );
   assert.doesNotMatch(where.runs.why, /this branch's copy/);
 });
 
@@ -275,7 +365,10 @@ test('blank lines the person put after the block at the end of the file are thei
   writeFileSync(claude, `${readFileSync(claude, 'utf8')}\n\n`);
   const before = readFileSync(claude, 'utf8');
   ok(m.cli(repo, 'blueprints', 'commit', 'none', '--blueprint', 'a'));
-  assert.equal(readFileSync(claude, 'utf8'), before.replace(/<!-- walkdown:begin -->[\s\S]*<!-- walkdown:end -->\n/, ''));
+  assert.equal(
+    readFileSync(claude, 'utf8'),
+    before.replace(/<!-- walkdown:begin -->[\s\S]*<!-- walkdown:end -->\n/, ''),
+  );
 });
 
 test('a moved checkout whose blueprints are all kept on this machine keeps their IDs on import @rule:locations.registry.ids-stay-here', () => {
@@ -304,7 +397,10 @@ test('a renamed checkout with no remote and only personal homes is re-pointed wh
   renameSync(deli, renamed);
   const asked = m.cli(renamed, 'blueprints', 'import', '.');
   assert.equal(asked.status, 2);
-  assert.match(asked.stderr, /`deli`'s checkout .* is gone — if this is it, `walkdown blueprints import \. --project deli` points it here/);
+  assert.match(
+    asked.stderr,
+    /`deli`'s checkout .* is gone — if this is it, `walkdown blueprints import \. --project deli` points it here/,
+  );
   assert.equal(m.rows()[0].checkout, row.checkout, 'nothing is guessed');
   const r = ok(m.cli(renamed, 'blueprints', 'import', '.', '--project', 'deli'));
   assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
@@ -322,7 +418,10 @@ test('a moved checkout keeps its IDs though something new now stands at its old 
   renameSync(hire, hire2);
   mkdirSync(hire);
   git(hire, 'init', '-q');
-  assert.match(ok(m.cli(hire2, 'blueprints', 'import', '.', '--all')).stdout, new RegExp(`~ moved .*\`${row.id}\``));
+  assert.match(
+    ok(m.cli(hire2, 'blueprints', 'import', '.', '--all')).stdout,
+    new RegExp(`~ moved .*\`${row.id}\``),
+  );
   assert.equal(m.rows()[0].id, row.id);
   assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), hire2);
 
@@ -335,9 +434,22 @@ test('a moved checkout keeps its IDs though something new now stands at its old 
   mkdirSync(deli);
   git(deli, 'init', '-q');
   ok(m.cli(deli2, 'blueprints', 'import', '.', '--project', 'deli'));
-  assert.equal(m.rows().find((r) => r.id === menu.id).checkout.replace(/^~/, process.env.HOME), deli2);
-  assert.match(ok(m.cli(deli2, 'blueprints', 'import', '.', '--project', 'deli')).stdout, /already listed/);
-  assert.notEqual(m.cli(deli, 'status').status, 0, 'and the new repository at the old path is nobody\'s');
+  assert.equal(
+    m
+      .rows()
+      .find((r) => r.id === menu.id)
+      .checkout.replace(/^~/, process.env.HOME),
+    deli2,
+  );
+  assert.match(
+    ok(m.cli(deli2, 'blueprints', 'import', '.', '--project', 'deli')).stdout,
+    /already listed/,
+  );
+  assert.notEqual(
+    m.cli(deli, 'status').status,
+    0,
+    "and the new repository at the old path is nobody's",
+  );
 });
 
 test('a moved checkout keeps its IDs when its origin is cloned back at the old path @rule:locations.registry.ids-stay-here', () => {
@@ -396,7 +508,17 @@ test('check source shows each check in full: past 40 lines, and not into the nex
   const long = Array.from({ length: 48 }, (_, i) => `  await step(${i});`);
   writeFileSync(
     join(dir, 'checks', 'a.spec.js'),
-    ["test('long', async () => {", ...long, '});', '', '// the next check says why', "test('next', async () => {", '  await step();', '});', ''].join('\n'),
+    [
+      "test('long', async () => {",
+      ...long,
+      '});',
+      '',
+      '// the next check says why',
+      "test('next', async () => {",
+      '  await step();',
+      '});',
+      '',
+    ].join('\n'),
   );
   const first = checkSnippet(dir, 'checks/a.spec.js:1').source.split('\n');
   assert.equal(first.length, 50, 'opener, 48 lines and its close');
@@ -409,12 +531,31 @@ test('check source keeps a check whose opener spans lines, and an rspec example 
   const { checkSnippet } = await import('../lib/api.js');
   const dir = join(root, 'snippet2');
   mkdirSync(join(dir, 'spec'), { recursive: true });
-  writeFileSync(join(dir, 'spec', 'a.spec.js'), "test('x', {\n  tag: '@smoke',\n}, () => {\n  expect('}').ok();\n});\n\ntest('y', () => {});\n");
-  assert.equal(checkSnippet(dir, 'spec/a.spec.js:1').source, "test('x', {\n  tag: '@smoke',\n}, () => {\n  expect('}').ok();\n});");
-  writeFileSync(join(dir, 'spec', 'b.spec.js'), "test('z', () => {\n  expect(t).toMatch(/walkdown's \\(own\\)/);\n});\n\ntest('w', () => {});\n");
-  assert.equal(checkSnippet(dir, 'spec/b.spec.js:1').source.split('\n').length, 3, 'a regex holding a quote and an escaped bracket');
-  writeFileSync(join(dir, 'spec', 'a_spec.rb'), "  it 'works' do\n    expect(1).to eq 1\n  end\n\n  it 'next' do\n  end\n");
-  assert.equal(checkSnippet(dir, 'spec/a_spec.rb:1').source, "  it 'works' do\n    expect(1).to eq 1\n  end");
+  writeFileSync(
+    join(dir, 'spec', 'a.spec.js'),
+    "test('x', {\n  tag: '@smoke',\n}, () => {\n  expect('}').ok();\n});\n\ntest('y', () => {});\n",
+  );
+  assert.equal(
+    checkSnippet(dir, 'spec/a.spec.js:1').source,
+    "test('x', {\n  tag: '@smoke',\n}, () => {\n  expect('}').ok();\n});",
+  );
+  writeFileSync(
+    join(dir, 'spec', 'b.spec.js'),
+    "test('z', () => {\n  expect(t).toMatch(/walkdown's \\(own\\)/);\n});\n\ntest('w', () => {});\n",
+  );
+  assert.equal(
+    checkSnippet(dir, 'spec/b.spec.js:1').source.split('\n').length,
+    3,
+    'a regex holding a quote and an escaped bracket',
+  );
+  writeFileSync(
+    join(dir, 'spec', 'a_spec.rb'),
+    "  it 'works' do\n    expect(1).to eq 1\n  end\n\n  it 'next' do\n  end\n",
+  );
+  assert.equal(
+    checkSnippet(dir, 'spec/a_spec.rb:1').source,
+    "  it 'works' do\n    expect(1).to eq 1\n  end",
+  );
 });
 
 test('a pushed home keeps its ID when its checkout moves and the origin is cloned at the old path @rule:locations.registry.ids-stay-here', () => {
@@ -442,7 +583,10 @@ test('a pushed home keeps its ID when its checkout moves and the origin is clone
   const [after_, ...more] = m.rows();
   assert.equal(more.length, 0, 'no second row');
   assert.equal(after_.checkout.replace(/^~/, process.env.HOME), old);
-  assert.equal(after_.home.replace(/^~/, process.env.HOME), join(old, '.walkdown', 'blueprints', 'site'));
+  assert.equal(
+    after_.home.replace(/^~/, process.env.HOME),
+    join(old, '.walkdown', 'blueprints', 'site'),
+  );
   // The fresh clone is the moved checkout's copy now, and reads its runs.
   const w = JSON.parse(ok(m.cli(pub, 'where', '--json')).stdout);
   assert.equal(w.runs.path, runs.replace(pub, old));
@@ -466,7 +610,9 @@ test('a moved checkout whose only records are a draft, or whose runs were moved,
       mkdirSync(join(home, 'drafts'), { recursive: true });
       writeFileSync(join(home, 'drafts', 'local.json'), '{}');
     } else {
-      ok(m.cli(app, 'records', 'move', 'runs', '--to', join(base, 'kept-runs'), '--blueprint', 'ui'));
+      ok(
+        m.cli(app, 'records', 'move', 'runs', '--to', join(base, 'kept-runs'), '--blueprint', 'ui'),
+      );
       mkdirSync(join(home, 'evidence', 'x'), { recursive: true });
       writeFileSync(join(home, 'evidence', 'x', 'a.txt'), 'seen');
     }
@@ -492,8 +638,15 @@ test('a checkout moved with its runs moved into a folder inside it keeps its led
   const r = ok(m.cli(old, 'blueprints', 'import', '.', '--all'));
   assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``));
   const [after_] = m.rows();
-  assert.equal(after_.runs.replace(/^~/, process.env.HOME), join(old, 'wd-runs'), 'the runs folder came along');
-  assert.equal(JSON.parse(ok(m.cli(old, 'where', '--json')).stdout).runs.path, join(old, 'wd-runs'));
+  assert.equal(
+    after_.runs.replace(/^~/, process.env.HOME),
+    join(old, 'wd-runs'),
+    'the runs folder came along',
+  );
+  assert.equal(
+    JSON.parse(ok(m.cli(old, 'where', '--json')).stdout).runs.path,
+    join(old, 'wd-runs'),
+  );
 });
 
 test('runs moved inside the checkout follow a move past a fresh clone, and a path spelled another way still follows @rule:locations.registry.ids-stay-here', () => {
@@ -543,7 +696,10 @@ test('rename --folder refuses a folder name a committed sibling already has @rul
   const before = readFileSync(join(m.home, 'registry.yml'), 'utf8');
   const r = m.cli(shop, 'blueprints', 'rename', 'a', 'a2', '--folder', '202610-search');
   assert.equal(r.status, 2, r.stdout + r.stderr);
-  assert.match(r.stderr, /already holds a blueprint of project `shop` under the folder name `202610-search`/);
+  assert.match(
+    r.stderr,
+    /already holds a blueprint of project `shop` under the folder name `202610-search`/,
+  );
   assert.equal(readFileSync(join(m.home, 'registry.yml'), 'utf8'), before, 'nothing was renamed');
   // And the other way: a committed home onto a folder name kept on this machine.
   const back = m.cli(shop, 'blueprints', 'rename', 'b', 'b2', '--folder', '202610-a');
@@ -576,7 +732,7 @@ test('rename refuses a name shaped like an ID, makes a nested folder, and finds 
   assert.match(onto.stderr, /already holds a blueprint of project `solo`/);
 });
 
-test('rename --folder never puts a home inside a home, its own or a sibling\'s @rule:commands.blueprints.rename', () => {
+test("rename --folder never puts a home inside a home, its own or a sibling's @rule:commands.blueprints.rename", () => {
   const m = machine();
   const shop = m.repo('shop');
   ok(m.cli(shop, 'blueprints', 'new', 'a', '--folder', '202610-a'));

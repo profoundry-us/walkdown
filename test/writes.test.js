@@ -18,8 +18,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { declaredHome } from '../tools/test-home.mjs';
 import { createWalkdownServer } from '../lib/serve.js';
+import { declaredHome } from '../tools/test-home.mjs';
 import { parse, stringify } from '../vendor/yaml.js';
 
 /*
@@ -149,25 +149,45 @@ test('a pin on a fresh project creates the threads directory it needs', async ()
  */
 test('a reopen\u2019s reason carries the pictures dropped with it @rule:embed.threads.picture-on-a-pin', async () => {
   const p = project();
-  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  const png =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
   try {
     await serve(p, async (base) => {
-      const opened = await post(base, '/api/threads', { kind: 'note', body: 'The corner is clipped.', anchor: {} });
+      const opened = await post(base, '/api/threads', {
+        kind: 'note',
+        body: 'The corner is clipped.',
+        anchor: {},
+      });
       assert.ok(opened.ok, JSON.stringify(opened.data));
       const id = opened.data.id;
-      assert.ok((await post(base, `/api/threads/${id}/status`, { status: 'addressed', via: 'agent', reason: 'Trimmed it.' })).ok);
+      assert.ok(
+        (
+          await post(base, `/api/threads/${id}/status`, {
+            status: 'addressed',
+            via: 'agent',
+            reason: 'Trimmed it.',
+          })
+        ).ok,
+      );
       const back = await post(base, `/api/threads/${id}/status`, {
         status: 'open',
         reason: 'Still clipped, see the picture.',
-        attachments: [{ name: 'after.png', type: 'image/png', data: `data:image/png;base64,${png}` }],
+        attachments: [
+          { name: 'after.png', type: 'image/png', data: `data:image/png;base64,${png}` },
+        ],
       });
       assert.ok(back.ok, JSON.stringify(back.data));
       const t = back.data.thread; // the door answers with the thread as written
       assert.equal(t.status, 'open');
       const reason = t.replies.at(-1);
       assert.equal(reason.body, 'Still clipped, see the picture.');
-      assert.deepEqual(reason.attachments, [{ file: `attachments/${id}-1.png`, name: 'after.png' }]);
-      assert.ok(existsSync(join(p.h.threads, 'attachments', `${id}-1.png`)), 'the bytes sit beside the threads');
+      assert.deepEqual(reason.attachments, [
+        { file: `attachments/${id}-1.png`, name: 'after.png' },
+      ]);
+      assert.ok(
+        existsSync(join(p.h.threads, 'attachments', `${id}-1.png`)),
+        'the bytes sit beside the threads',
+      );
       // A move with no reason takes no pictures: nothing to hang them on.
       const bare = await post(base, `/api/threads/${id}/status`, {
         status: 'addressed',
@@ -305,17 +325,26 @@ test('only writes.js may write: the request path imports no writer of its own @r
  * refuses a new thread there and says where the concern lives now; a reply
  * on a thread already there still goes through.
  */
-test('a new thread on a retired rule is refused with the rule\'s note; a reply on one already there is not @rule:threads.lifecycle.not-on-a-retired-rule', async () => {
+test("a new thread on a retired rule is refused with the rule's note; a reply on one already there is not @rule:threads.lifecycle.not-on-a-retired-rule", async () => {
   const p = project();
   try {
     const feat = join(p.bp, 'features', 'demo.yml');
-    writeFileSync(feat, readFileSync(feat, 'utf8') + '\n      - id: demo.main.gone\n        retired: Withdrawn; the concern lives on demo.main.thing now.\n        statement: The old thing.\n');
+    writeFileSync(
+      feat,
+      readFileSync(feat, 'utf8') +
+        '\n      - id: demo.main.gone\n        retired: Withdrawn; the concern lives on demo.main.thing now.\n        statement: The old thing.\n',
+    );
     await serve(p, async (base) => {
       // Filed while it lived: the thread outlasts the rule, and still takes a reply.
       const dir = loadBlueprint(p.bp).at.threads.path;
       mkdirSync(dir, { recursive: true });
-      writeFileSync(join(dir, 'n-0900.yml'), 'id: n-0900\nkind: note\nauthor: writes-person\ncreated: 2026-09-01T00:00:00Z\nstatus: open\nanchor: { rule: demo.main.gone }\nbody: filed while it lived\n');
-      const reply = await post(base, '/api/threads/n-0900/replies', { body: 'moving this to the rule that carries it' });
+      writeFileSync(
+        join(dir, 'n-0900.yml'),
+        'id: n-0900\nkind: note\nauthor: writes-person\ncreated: 2026-09-01T00:00:00Z\nstatus: open\nanchor: { rule: demo.main.gone }\nbody: filed while it lived\n',
+      );
+      const reply = await post(base, '/api/threads/n-0900/replies', {
+        body: 'moving this to the rule that carries it',
+      });
       assert.ok(reply.ok, JSON.stringify(reply.data));
       for (const kind of ['note', 'question']) {
         const r = await post(base, '/api/threads', {
@@ -328,7 +357,10 @@ test('a new thread on a retired rule is refused with the rule\'s note; a reply o
         assert.match(JSON.stringify(r.data), /retired/);
         assert.match(JSON.stringify(r.data), /lives on demo\.main\.thing now/);
       }
-      assert.deepEqual(readdirSync(dir).filter((f) => f.endsWith('.yml')), ['n-0900.yml']);
+      assert.deepEqual(
+        readdirSync(dir).filter((f) => f.endsWith('.yml')),
+        ['n-0900.yml'],
+      );
     });
   } finally {
     p.cleanup();

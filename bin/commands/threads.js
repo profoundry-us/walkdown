@@ -18,7 +18,8 @@ const thread = async (args) => (await import('./thread.js')).run(args);
 export const VERBS = {
   list: {
     usage: 'walkdown threads [list] [--rule <id>] [--all] [--blueprint <id>] [--json]',
-    about: 'The open threads, questions and notes, newest first. --all includes the ended ones;\n--rule keeps those anchored to one rule.',
+    about:
+      'The open threads, questions and notes, newest first. --all includes the ended ones;\n--rule keeps those anchored to one rule.',
     run: async (args) => (await import('./threads-list.js')).run(args),
   },
   new: {
@@ -36,21 +37,26 @@ export const VERBS = {
       const [id, ...rest] = args;
       if (!id || id.startsWith('-')) return usage('show');
       if (sets(rest).length || rest.some((a) => ['--reply', '--said', '--added'].includes(a))) {
-        console.error('threads show reads a thread and changes nothing — `walkdown threads reply` or `walkdown threads set` changes one.');
+        console.error(
+          'threads show reads a thread and changes nothing — `walkdown threads reply` or `walkdown threads set` changes one.',
+        );
         return end(2);
       }
       return thread([id, ...rest]);
     },
   },
   reply: {
-    usage: 'walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]] [--as-is] [--attach <file>]... --blueprint <id> [--json]',
+    usage:
+      'walkdown threads reply <id> <text> [--as-agent [--said <text>] [--added <text>]] [--as-is] [--attach <file>]... --blueprint <id> [--json]',
     about:
       "Say something on a thread and leave its status as it was. With --as-agent and --said,\nthe text is a person's words relayed; it is under their name with the machine marked.",
     run: (args) => {
       const [id, ...rest] = args;
       if (!id || id.startsWith('-')) return usage('reply');
       if (sets(rest).length) {
-        console.error(`threads reply leaves the status as it was — \`walkdown threads set ${id} ... --reply <text>\` changes it and says why together.`);
+        console.error(
+          `threads reply leaves the status as it was — \`walkdown threads set ${id} ... --reply <text>\` changes it and says why together.`,
+        );
         return end(2);
       }
       // The text is the one word no flag owns, wherever it stands.
@@ -63,7 +69,8 @@ export const VERBS = {
           break;
         }
       }
-      if (text === undefined && !rest.includes('--said') && !rest.includes('--added')) return usage('reply');
+      if (text === undefined && !rest.includes('--said') && !rest.includes('--added'))
+        return usage('reply');
       return thread([id, ...(text !== undefined ? ['--reply', text] : []), ...rest]);
     },
   },
@@ -77,7 +84,9 @@ export const VERBS = {
       const [id, ...rest] = args;
       if (!id || id.startsWith('-')) return usage('set');
       if (!sets(rest).length) {
-        console.error(`threads set changes a thread's status — say how (${SETS.join(', ')}). \`walkdown threads reply\` only says something.`);
+        console.error(
+          `threads set changes a thread's status — say how (${SETS.join(', ')}). \`walkdown threads reply\` only says something.`,
+        );
         return end(2);
       }
       return thread([id, ...rest]);

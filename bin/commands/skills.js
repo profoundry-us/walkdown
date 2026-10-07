@@ -1,5 +1,5 @@
-import { createInterface } from 'node:readline/promises';
 import { join, resolve } from 'node:path';
+import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { end } from './context.js';
@@ -33,11 +33,11 @@ const MARK = {
   'up-to-date': dim('· up to date'),
   'kept-differs': yellow('! kept (yours differs — --force to overwrite)'),
   linked: green('+ linked'),
-  removed: green('- removed (an earlier walkdown\'s copy)'),
-  duplicate: yellow('! duplicate (an earlier walkdown\'s copy — --force removes it)'),
+  removed: green("- removed (an earlier walkdown's copy)"),
+  duplicate: yellow("! duplicate (an earlier walkdown's copy — --force removes it)"),
   'duplicate-edited': yellow('! duplicate (edited — kept even with --force; remove it yourself)'),
   'kept-edited': yellow('! kept (an earlier copy, edited — remove it yourself)'),
-  'someone-elses-link': yellow("! left alone (a link walkdown did not make)"),
+  'someone-elses-link': yellow('! left alone (a link walkdown did not make)'),
   'someone-elses': yellow("! left alone (not walkdown's)"),
 };
 
@@ -100,7 +100,10 @@ export async function run(args) {
      * is the same news as the question, minus the answer.
      */
     const places = [
-      [personal, 'yours — Claude Code, as the walkdown plugin: one link to this clone, every project'],
+      [
+        personal,
+        'yours — Claude Code, as the walkdown plugin: one link to this clone, every project',
+      ],
       ...(repo ? [[repo, 'the repository — a clone brings them; commit them with the spec']] : []),
     ];
     const count = places.length === 1 ? 'One place' : `${places.length} places`;
@@ -112,8 +115,12 @@ export async function run(args) {
     });
 
     if (!process.stdin.isTTY) {
-      console.error(red('Nothing written: there is no terminal to ask, and this never picks for you.'));
-      console.error(dim('  `--into <dir>` names a directory; `--project` is the repository root above.'));
+      console.error(
+        red('Nothing written: there is no terminal to ask, and this never picks for you.'),
+      );
+      console.error(
+        dim('  `--into <dir>` names a directory; `--project` is the repository root above.'),
+      );
       return end(2);
     }
 
@@ -147,7 +154,10 @@ export async function run(args) {
 export async function install(into, { force = false, repo = null } = {}) {
   const { installSkills } = await import('../../lib/init.js');
   const rows = installSkills(into, { force });
-  for (const r of rows) console.log(`  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`);
+  for (const r of rows)
+    console.log(
+      `  ${MARK[r.action] ?? r.action}  ${r.path}${r.target ? dim(` → ${r.target}`) : ''}`,
+    );
   console.log(`\n  ${into}`);
   const linked = rows.some((r) => r.target);
   console.log(
@@ -160,6 +170,10 @@ export async function install(into, { force = false, repo = null } = {}) {
     ),
   );
   if (rows.some((r) => r.action.startsWith('duplicate')))
-    console.log(yellow('\n  Claude Code lists those skills twice until the old copies go: `walkdown skills --force` removes the ones walkdown released, and an edited one is yours to remove.'));
+    console.log(
+      yellow(
+        '\n  Claude Code lists those skills twice until the old copies go: `walkdown skills --force` removes the ones walkdown released, and an edited one is yours to remove.',
+      ),
+    );
   return rows;
 }

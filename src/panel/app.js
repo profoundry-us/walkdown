@@ -20,8 +20,6 @@
  */
 
 import { MSG } from '../../lib/message-stream.js';
-import { sitting } from '../../lib/sitting.js';
-import { saysSomething } from '../../lib/vocab.js';
 /*
  * The two blocks that used to sit in the middle of this file as generated
  * copies — the shared screen matcher and the conversation model — are
@@ -35,17 +33,32 @@ import { saysSomething } from '../../lib/vocab.js';
  * tools/sync-shared.mjs still keeps it honest.
  */
 import { locationOfUrl, matchScreen } from '../../lib/screen-match.js';
+import { sitting } from '../../lib/sitting.js';
+import { saysSomething } from '../../lib/vocab.js';
 import { html, live, nothing, render as put } from '../../vendor/lit.js';
 import { blueprintsPane, serverRow } from './blueprints.js';
-import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
-import { loadSeen, markSeen, names, openThreadView, sayOnRule, sayVerdict } from './conversation.js';
+import {
+  loadSeen,
+  markSeen,
+  names,
+  openThreadView,
+  sayOnRule,
+  sayVerdict,
+} from './conversation.js';
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
+import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import { icon } from './icons.js';
-import { checkRefs, detailPane, evidenceRows, historyPane, loadCheckSource } from './rule-detail.js';
+import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
+import {
+  checkRefs,
+  detailPane,
+  evidenceRows,
+  historyPane,
+  loadCheckSource,
+} from './rule-detail.js';
 import { legendControl, listPane, searchBox, tierMarks } from './rules-list.js';
 import { loadScreensView, SCREENS_VIEW_KEY, screensPane } from './screens.js';
 import { provideShell, requestRender } from './shell.js';
-import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import {
   ACTOR_KEY,
   CHOICE,
@@ -68,11 +81,33 @@ import { backFromThread, dragFiles, threadCard, threadPane } from './thread-pane
 
 /** Set once the shell is up: the frame's word that a file is in the air over the application (n-0333). */
 let fileDragFromFrame = null;
+
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
-import { CHIP, currentScreen, declaredAnchors, defaultScreen, duringSession, ghostSource, surfaceSides, hereLocation, isHeadless, needsYou, orderedRows, owedRows, pageSurface, ruleScreen, screenById, screenInHand, screenUrl, TERMINAL, whereIdentityLives, whoAmI } from './vocab.js';
+import {
+  CHIP,
+  currentScreen,
+  declaredAnchors,
+  defaultScreen,
+  duringSession,
+  ghostSource,
+  hereLocation,
+  isHeadless,
+  needsYou,
+  orderedRows,
+  owedRows,
+  pageSurface,
+  ruleScreen,
+  screenById,
+  screenInHand,
+  screenUrl,
+  surfaceSides,
+  TERMINAL,
+  whereIdentityLives,
+  whoAmI,
+} from './vocab.js';
 
 /*
  * Two layouts, one panel.
@@ -1439,7 +1474,12 @@ export function render() {
      * so the old transform is still on it and the browser animates from where
      * it actually is.
      */
-    const AT = { list: '0%', detail: '-33.3333%', thread: onThreads ? '-33.3333%' : '-66.6667%', history: '-66.6667%' };
+    const AT = {
+      list: '0%',
+      detail: '-33.3333%',
+      thread: onThreads ? '-33.3333%' : '-66.6667%',
+      history: '-66.6667%',
+    };
     track.style.transform = `translateX(${AT[S.view] ?? '0%'})`;
   }
   /*
@@ -1596,7 +1636,8 @@ function renderBar() {
   const canGhost = Boolean(ghostSource(inHand)) && Boolean(sides.design && sides.build);
   const designLabel = sides.design?.label ?? 'Design';
   const buildLabel = sides.build?.label ?? 'App';
-  const noScreen = 'This page is no screen in the storyboard — pick one in the screen picker to compare';
+  const noScreen =
+    'This page is no screen in the storyboard — pick one in the screen picker to compare';
   const designTip = !inHand
     ? noScreen
     : !sides.design
@@ -1934,26 +1975,28 @@ export function saveSession() {
    * 400 to each one (n-0248). The server has read the write and declined it;
    * no retry changes that, so the only honest thing left is to say so.
    */
-  draftWrites = draftWrites.then(() => fetch(api('/api/draft'), {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
-  })
-    .then(async (res) => {
-      if (res.ok) {
-        draftRefused = null;
-        return;
-      }
-      const said = await res
-        .json()
-        .then((o) => o?.error)
-        .catch(() => null);
-      const why = said ?? `the server answered ${res.status}`;
-      if (why === draftRefused) return; // said once, not once per rule
-      draftRefused = why;
-      toast(`Nothing is being kept on disk - ${esc(why)}`, { tone: 'error', sticky: true });
+  draftWrites = draftWrites.then(() =>
+    fetch(api('/api/draft'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ target: 'local', ...(draft ?? { discard: true }) }),
     })
-    .catch(() => {}));
+      .then(async (res) => {
+        if (res.ok) {
+          draftRefused = null;
+          return;
+        }
+        const said = await res
+          .json()
+          .then((o) => o?.error)
+          .catch(() => null);
+        const why = said ?? `the server answered ${res.status}`;
+        if (why === draftRefused) return; // said once, not once per rule
+        draftRefused = why;
+        toast(`Nothing is being kept on disk - ${esc(why)}`, { tone: 'error', sticky: true });
+      })
+      .catch(() => {}),
+  );
   return draftWrites;
 }
 
@@ -1980,7 +2023,8 @@ async function openSigning() {
    * config grants it to you, because last time's answer was theirs.
    */
   const offered = (await store.get(PROXY_KEY()).catch(() => null)) ?? [];
-  const lastFor = (role) => offered.find((o) => o?.role === role && o.signer && o.signer !== mine)?.signer ?? null;
+  const lastFor = (role) =>
+    offered.find((o) => o?.role === role && o.signer && o.signer !== mine)?.signer ?? null;
   S.signing = knownRoles().map((role) => {
     const proxy = lastFor(role);
     return proxy
@@ -2074,7 +2118,10 @@ function startWalkdown(signatures) {
   if (!signatures?.length) return openSigning();
   // Remembered only to OFFER next time (q-0314); the sitting itself carries
   // the answer that was given.
-  store.set(PROXY_KEY(), signatures.filter((sig) => sig.signer !== whoAmI()));
+  store.set(
+    PROXY_KEY(),
+    signatures.filter((sig) => sig.signer !== whoAmI()),
+  );
   // `started` marks the session so pins dropped during it can count as a
   // fail's why and ride into the run record; `threads` collects the notes
   // the feedback box files, per rule. `signatures` is who the sitting is
@@ -2356,7 +2403,9 @@ async function giveVerdict(status) {
          * send-back means the agent is owed it again - and a fresh note
          * only when nothing is live. A pass with words is a reply too.
          */
-        const tid = await sayOnRule(rule, text, { reopen: status === 'fail' || status === 'refining' });
+        const tid = await sayOnRule(rule, text, {
+          reopen: status === 'fail' || status === 'refining',
+        });
         if (!tid) return; // the refusal is on screen; verdict stays unrecorded
         if (!(S.session.threads[rule] ??= []).includes(tid)) S.session.threads[rule].push(tid);
         saveSession();
@@ -2422,7 +2471,10 @@ function nextOwed() {
  * only ways past such a rule are a verdict and Skip.
  */
 const unjudgedHere = () =>
-  S.view === 'detail' && S.selected && needsYou(S.selected.rule) && !S.session?.verdicts?.[S.selected.rule]
+  S.view === 'detail' &&
+  S.selected &&
+  needsYou(S.selected.rule) &&
+  !S.session?.verdicts?.[S.selected.rule]
     ? S.selected.rule
     : null;
 
@@ -2507,18 +2559,17 @@ async function finishWalkdown() {
      * missing from the ledger, in the second it happens.
      */
     const filed = out.signatures?.length
-      ? out.signatures
-          .map((sig) => `${esc(sig.role)} (${esc(sig.signer)})`)
-          .join(', ')
+      ? out.signatures.map((sig) => `${esc(sig.role)} (${esc(sig.signer)})`).join(', ')
       : out.roles?.length
         ? out.roles.map((r) => esc(r)).join(', ')
         : 'no role stated — the ledger reads it as engineering';
     // And the threads those passes closed on your behalf (ADR 0005): said
     // here, in the same breath as the verdicts, so nothing was accepted
     // that you did not hear about.
-    const closed = Array.isArray(out.closed) && out.closed.length
-      ? ` — verified ${out.closed.length} thread${out.closed.length === 1 ? '' : 's'} (${out.closed.map((id) => esc(id)).join(', ')})`
-      : '';
+    const closed =
+      Array.isArray(out.closed) && out.closed.length
+        ? ` — verified ${out.closed.length} thread${out.closed.length === 1 ? '' : 's'} (${out.closed.map((id) => esc(id)).join(', ')})`
+        : '';
     toast(
       `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b> — ${filed}${closed}`,
       { tone: 'success' },
@@ -2960,9 +3011,7 @@ export async function start() {
    */
   if (!S.BP) {
     const projectsClaiming = [
-      ...new Set(
-        S.claimants.map((m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key))),
-      ),
+      ...new Set(S.claimants.map((m) => projectIdOf(S.blueprints.find((pr) => pr.key === m.key)))),
     ];
     if (S.claimants.length === 1) {
       // One claimant: open it, activate its project, say nothing.
@@ -3143,9 +3192,10 @@ function renderGate() {
       // One claimant is never the reason: the panel opens that one unasked
       // (n-0293), so the question here is which of the project's several -
       // the same sentence as none claiming (n-0273).
-      notice: claimed > 1
-        ? `${claimed} blueprints in this project claim this page. Nothing is remembered — walkdown asks each time rather than choosing for you.`
-        : 'This project holds more than one blueprint. Pick the one you are reviewing against.',
+      notice:
+        claimed > 1
+          ? `${claimed} blueprints in this project claim this page. Nothing is remembered — walkdown asks each time rather than choosing for you.`
+          : 'This project holds more than one blueprint. Pick the one you are reviewing against.',
     })}</div>`,
     D.side,
   );

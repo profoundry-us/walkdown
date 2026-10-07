@@ -17,7 +17,16 @@
  * and nothing else. Expected lines are matched against the steady text.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import { dirname, join } from 'node:path';
 import { parse } from '../vendor/yaml.js';
@@ -36,7 +45,12 @@ export function scenarios() {
     .sort()
     .map((file) => {
       const s = parse(readFileSync(join(SCENARIOS, file), 'utf8'));
-      return { file, ...s, command: (s.command ?? []).map(String), expect: (s.expect ?? []).map((e) => new RegExp(e, 'm')) };
+      return {
+        file,
+        ...s,
+        command: (s.command ?? []).map(String),
+        expect: (s.expect ?? []).map((e) => new RegExp(e, 'm')),
+      };
     });
 }
 
@@ -55,7 +69,10 @@ export function machine({ path } = {}) {
   mkdirSync(home, { recursive: true });
   mkdirSync(join(root, 'claude'), { recursive: true }); // Claude Code is installed
   writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
-  writeFileSync(join(root, '.gitconfig'), '[user]\n\tname = Sam Shopper\n\temail = sam@example.com\n');
+  writeFileSync(
+    join(root, '.gitconfig'),
+    '[user]\n\tname = Sam Shopper\n\temail = sam@example.com\n',
+  );
   const env = {
     ...process.env,
     WALKDOWN_HOME: home,
@@ -67,16 +84,35 @@ export function machine({ path } = {}) {
     TZ: 'America/Chicago',
     NO_COLOR: '1',
   };
-  for (const k of ['WALKDOWN_SPEC', 'WALKDOWN_RECORD_HOME', 'NODE_TEST_CONTEXT', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_CONFIG_GLOBAL']) delete env[k];
+  for (const k of [
+    'WALKDOWN_SPEC',
+    'WALKDOWN_RECORD_HOME',
+    'NODE_TEST_CONTEXT',
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_CONFIG_GLOBAL',
+  ])
+    delete env[k];
   if (path === 'node-only') env.PATH = dirname(process.execPath);
-  const wd = (args, cwd = shop) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const wd = (args, cwd = shop) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
   const ok = (args) => {
     const r = wd(args);
-    if (r.status !== 0) throw new Error(`fixture: walkdown ${args.join(' ')} exited ${r.status}\n${r.stderr}`);
+    if (r.status !== 0)
+      throw new Error(`fixture: walkdown ${args.join(' ')} exited ${r.status}\n${r.stderr}`);
     return r;
   };
   const specOf = (id) => ok(['where', 'spec', '--blueprint', id]).stdout.trim();
-  return { root, home, shop, env, wd, ok, specOf, done: () => rmSync(root, { recursive: true, force: true }) };
+  return {
+    root,
+    home,
+    shop,
+    env,
+    wd,
+    ok,
+    specOf,
+    done: () => rmSync(root, { recursive: true, force: true }),
+  };
 }
 
 /* A feature with one story of the given rules, written into a blueprint. */
@@ -105,8 +141,13 @@ function feature(m, id, name, rules) {
 
 /* A real repository where the fake `.git` stood: some moments need git's answers. */
 function git(m, cwd, ...args) {
-  const r = spawnSync('git', ['-c', 'init.defaultBranch=main', ...args], { cwd, encoding: 'utf8', env: m.env });
-  if (r.status !== 0) throw new Error(`fixture: git ${args.join(' ')} exited ${r.status}\n${r.stderr}`);
+  const r = spawnSync('git', ['-c', 'init.defaultBranch=main', ...args], {
+    cwd,
+    encoding: 'utf8',
+    env: m.env,
+  });
+  if (r.status !== 0)
+    throw new Error(`fixture: git ${args.join(' ')} exited ${r.status}\n${r.stderr}`);
   return r.stdout;
 }
 function realRepo(m, dir = m.shop) {
@@ -142,9 +183,19 @@ export const FIXTURES = {
   /* `checkout` with one rule and an open note on it, n-0001. */
   'a-note'(m) {
     m.ok(['blueprints', 'new', 'checkout']);
-    for (const f of readdirSync(join(m.specOf('checkout'), 'features'))) rmSync(join(m.specOf('checkout'), 'features', f));
+    for (const f of readdirSync(join(m.specOf('checkout'), 'features')))
+      rmSync(join(m.specOf('checkout'), 'features', f));
     feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.pays',
+      '--body',
+      'The pay button does nothing on a declined card.',
+      '--blueprint',
+      'checkout',
+    ]);
   },
   /* `shop` with one blueprint, `checkout`. */
   'one-blueprint'(m) {
@@ -155,7 +206,8 @@ export const FIXTURES = {
     m.ok(['blueprints', 'new', 'checkout']);
     m.ok(['blueprints', 'new', 'search']);
     for (const id of ['checkout', 'search'])
-      for (const f of readdirSync(join(m.specOf(id), 'features'))) rmSync(join(m.specOf(id), 'features', f));
+      for (const f of readdirSync(join(m.specOf(id), 'features')))
+        rmSync(join(m.specOf(id), 'features', f));
     feature(m, 'checkout', 'checkout', [
       ['pays', 'A card payment goes through.'],
       ['totals', 'The total is the sum of the cart.'],
@@ -169,7 +221,10 @@ export const FIXTURES = {
     const other = join(m.root, 'hireart_main');
     mkdirSync(join(other, '.git'), { recursive: true });
     const r = m.wd(['blueprints', 'new', 'search'], other);
-    if (r.status !== 0) throw new Error(`fixture: blueprints new search in hireart_main exited ${r.status}\n${r.stderr}`);
+    if (r.status !== 0)
+      throw new Error(
+        `fixture: blueprints new search in hireart_main exited ${r.status}\n${r.stderr}`,
+      );
   },
   'second-shop'(m) {
     m.ok(['blueprints', 'new', 'checkout']);
@@ -186,7 +241,16 @@ export const FIXTURES = {
     const home = m.specOf('checkout');
     for (const f of readdirSync(join(home, 'features'))) rmSync(join(home, 'features', f));
     feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.pays',
+      '--body',
+      'The pay button does nothing on a declined card.',
+      '--blueprint',
+      'checkout',
+    ]);
     m.ok(['sweep', '--why', 'every check again', '--blueprint', 'checkout']);
     mkdirSync(join(home, 'evidence', '2026-10-02T00-00-00Z'), { recursive: true });
     writeFileSync(join(home, 'evidence', '2026-10-02T00-00-00Z', 'app-checkout.png'), '');
@@ -228,7 +292,10 @@ export const FIXTURES = {
     writeFileSync(join(m.shop, 'CLAUDE.md'), '# shop\n\nRun the tests before you push.\n');
     m.ok(['blueprints', 'new', 'checkout', '--commit', 'spec', '--folder', 'checkout']);
     // The team writes below walkdown's block, then a second blueprint is committed.
-    writeFileSync(join(m.shop, 'CLAUDE.md'), `${readFileSync(join(m.shop, 'CLAUDE.md'), 'utf8')}\n## Deploys\n\nOnly from main.\n`);
+    writeFileSync(
+      join(m.shop, 'CLAUDE.md'),
+      `${readFileSync(join(m.shop, 'CLAUDE.md'), 'utf8')}\n## Deploys\n\nOnly from main.\n`,
+    );
     m.ok(['blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search']);
   },
   /* `checkout`, committed, with one note filed on it. */
@@ -238,7 +305,16 @@ export const FIXTURES = {
     const home = m.specOf('checkout');
     for (const f of readdirSync(join(home, 'features'))) rmSync(join(home, 'features', f));
     feature(m, 'checkout', 'checkout', [['pays', 'A card payment goes through.']]);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The pay button does nothing on a declined card.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.pays',
+      '--body',
+      'The pay button does nothing on a declined card.',
+      '--blueprint',
+      'checkout',
+    ]);
   },
   /* `shop` a real git repository with an origin, and one commit. */
   'git-repo'(m) {
@@ -246,7 +322,12 @@ export const FIXTURES = {
   },
   /* Three homes a teammate committed to `shop`; this machine has imported one. */
   'committed-homes'(m) {
-    for (const [folder, name] of [['202610-checkout', 'checkout'], ['202610-search', 'search'], ['billing', 'billing']]) committedHome(m, folder, name);
+    for (const [folder, name] of [
+      ['202610-checkout', 'checkout'],
+      ['202610-search', 'search'],
+      ['billing', 'billing'],
+    ])
+      committedHome(m, folder, name);
     m.ok(['blueprints', 'import', '.walkdown/blueprints/202610-checkout']);
   },
   /* Homes under any folder names, and one inside another (ADR 0014 §4). */
@@ -285,7 +366,16 @@ export const FIXTURES = {
   /* `checkout` where a merge left two threads labelled n-0001. */
   'clashing-labels'(m) {
     FIXTURES['a-note'](m);
-    m.ok(['threads', 'new', '--rule', 'checkout.basics.pays', '--body', 'The receipt shows the wrong total.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.pays',
+      '--body',
+      'The receipt shows the wrong total.',
+      '--blueprint',
+      'checkout',
+    ]);
     const dir = join(m.specOf('checkout'), 'threads');
     for (const f of readdirSync(dir)) {
       const p = join(dir, f);
@@ -323,14 +413,17 @@ export const FIXTURES = {
 const MORE = new URL('./cli-fixtures/', import.meta.url).pathname;
 for (const f of (() => {
   try {
-    return readdirSync(MORE).filter((n) => n.endsWith('.mjs')).sort();
+    return readdirSync(MORE)
+      .filter((n) => n.endsWith('.mjs'))
+      .sort();
   } catch {
     return [];
   }
 })()) {
   const extra = (await import(join(MORE, f))).default;
   for (const [name, fn] of Object.entries(extra)) {
-    if (FIXTURES[name]) throw new Error(`tools/cli-fixtures/${f}: fixture "${name}" is already defined`);
+    if (FIXTURES[name])
+      throw new Error(`tools/cli-fixtures/${f}: fixture "${name}" is already defined`);
     FIXTURES[name] = (m) => fn(m, { feature, git, realRepo, committedHome, fixtures: FIXTURES });
   }
 }
@@ -342,34 +435,43 @@ for (const f of (() => {
  * @param {{ root?: string, home: string, shop: string }} m
  */
 export function steady(text, m, uuids = new Map()) {
-  return (m.root ? text.replaceAll(join(m.root, 'claude'), '~/.claude') : text)
-    .replaceAll(REPO, '~/src/walkdown')
-    // HOME is the machine's root, so a path walkdown shortens itself reads
-    // ~/home - the same ~/.walkdown a person would see.
-    .replace(/~\/home\b/g, '~/.walkdown')
-    // and a path printed relative to the code reaches it as ../home.
-    .replace(/(^|[\s(])((?:\.\.\/)+)home\//gm, '$1$2.walkdown/')
-    .replaceAll(`as \`${userInfo().username}\``, 'as `sam`')
-    .replace(/^(\s+· node\s+)\S+/m, '$124.0.0')
-    .replace(/^(\s+· git\s+)\S.*$/m, '$12.50.1')
-    .replace(/\b[A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d\d [AP]M [A-Z]{3,4}\b/g, 'Oct 2, 2026, 9:00 AM CDT')
-    .replaceAll(m.shop, '~/shop')
-    .replaceAll(m.home, '~/.walkdown')
-    // Anything else on the machine is under HOME, which is its root.
-    .replaceAll(m.root ?? '\0', '~')
-    // A thread's UUID is new on every run: numbered in the order they appear.
-    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, (u) => {
-      if (!uuids.has(u)) uuids.set(u, `00000000-0000-4000-8000-${String(uuids.size + 1).padStart(12, '0')}`);
-      return uuids.get(u);
-    })
-    // The day a row was registered.
-    .replace(/\bon \d{4}-\d\d-\d\d\b/g, 'on 2026-10-02')
-    // Written as it was: dashes in a file name or run id, colons in a record.
-    .replace(/\d{4}-\d\d-\d\dT\d\d([-:])\d\d[-:]\d\d(\.\d+)?Z/g, (_, sep) => `2026-10-02T00${sep}00${sep}00Z`)
-    .replace(/("git_sha": ")[0-9a-f]{7,40}(-dirty)?"/g, '$11a2b3c4"')
-    .replace(/sha256:[0-9a-f]{12}/g, 'sha256:000000000000')
-    // A folder `blueprints new` names for this month reads as October 2026.
-    .replace(/\b20\d{2}(0[1-9]|1[0-2])-(?=[a-z])/g, '202610-');
+  return (
+    (m.root ? text.replaceAll(join(m.root, 'claude'), '~/.claude') : text)
+      .replaceAll(REPO, '~/src/walkdown')
+      // HOME is the machine's root, so a path walkdown shortens itself reads
+      // ~/home - the same ~/.walkdown a person would see.
+      .replace(/~\/home\b/g, '~/.walkdown')
+      // and a path printed relative to the code reaches it as ../home.
+      .replace(/(^|[\s(])((?:\.\.\/)+)home\//gm, '$1$2.walkdown/')
+      .replaceAll(`as \`${userInfo().username}\``, 'as `sam`')
+      .replace(/^(\s+· node\s+)\S+/m, '$124.0.0')
+      .replace(/^(\s+· git\s+)\S.*$/m, '$12.50.1')
+      .replace(
+        /\b[A-Z][a-z]{2} \d{1,2}, \d{4}, \d{1,2}:\d\d [AP]M [A-Z]{3,4}\b/g,
+        'Oct 2, 2026, 9:00 AM CDT',
+      )
+      .replaceAll(m.shop, '~/shop')
+      .replaceAll(m.home, '~/.walkdown')
+      // Anything else on the machine is under HOME, which is its root.
+      .replaceAll(m.root ?? '\0', '~')
+      // A thread's UUID is new on every run: numbered in the order they appear.
+      .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, (u) => {
+        if (!uuids.has(u))
+          uuids.set(u, `00000000-0000-4000-8000-${String(uuids.size + 1).padStart(12, '0')}`);
+        return uuids.get(u);
+      })
+      // The day a row was registered.
+      .replace(/\bon \d{4}-\d\d-\d\d\b/g, 'on 2026-10-02')
+      // Written as it was: dashes in a file name or run id, colons in a record.
+      .replace(
+        /\d{4}-\d\d-\d\dT\d\d([-:])\d\d[-:]\d\d(\.\d+)?Z/g,
+        (_, sep) => `2026-10-02T00${sep}00${sep}00Z`,
+      )
+      .replace(/("git_sha": ")[0-9a-f]{7,40}(-dirty)?"/g, '$11a2b3c4"')
+      .replace(/sha256:[0-9a-f]{12}/g, 'sha256:000000000000')
+      // A folder `blueprints new` names for this month reads as October 2026.
+      .replace(/\b20\d{2}(0[1-9]|1[0-2])-(?=[a-z])/g, '202610-')
+  );
 }
 
 /* The one file a path names, where its last part may be a `*` pattern. */
@@ -378,7 +480,8 @@ function one(path) {
   if (!base.includes('*')) return path;
   const re = new RegExp(`^${base.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`);
   const hits = readdirSync(dirname(path)).filter((f) => re.test(f));
-  if (hits.length !== 1) throw new Error(`cat ${path}: ${hits.length} files match, a screen shows one`);
+  if (hits.length !== 1)
+    throw new Error(`cat ${path}: ${hits.length} files match, a screen shows one`);
   return join(dirname(path), hits[0]);
 }
 
@@ -422,7 +525,10 @@ export function run(scenario) {
     }
     // A folder drawn as `tree` draws it, where a screen is about a layout.
     if (scenario.tree) {
-      const text = steady(tree(join(m.root, scenario.tree), scenario.tree.replace(/^shop\//, '')), m);
+      const text = steady(
+        tree(join(m.root, scenario.tree), scenario.tree.replace(/^shop\//, '')),
+        m,
+      );
       return { status: 0, stdout: text, stderr: '', text: text.replace(/\n+$/, '') };
     }
     // Where the command is typed: ~/shop, or a path under the machine's root.

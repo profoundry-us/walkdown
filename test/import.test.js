@@ -10,7 +10,19 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import test from 'node:test';
@@ -102,7 +114,9 @@ function scratch() {
 }
 
 const registry = (home) =>
-  existsSync(join(home, 'registry.yml')) ? (parse(readFileSync(join(home, 'registry.yml'), 'utf8'))?.blueprints ?? []) : [];
+  existsSync(join(home, 'registry.yml'))
+    ? (parse(readFileSync(join(home, 'registry.yml'), 'utf8'))?.blueprints ?? [])
+    : [];
 
 /** Every file under a folder, with its bytes, so "untouched" can be asserted. */
 function snapshot(dir) {
@@ -122,7 +136,12 @@ test('a project nobody imported is invisible, and importing it makes it reachabl
   const s = scratch();
   try {
     const shop = project(join(s.root, 'acme-shop'), [
-      { id: 'checkout', description: 'Cart and payment.', origin: 'https://shop.test', paths: ['/cart'] },
+      {
+        id: 'checkout',
+        description: 'Cart and payment.',
+        origin: 'https://shop.test',
+        paths: ['/cart'],
+      },
     ]);
     // Standing somewhere else entirely: the clone exists on disk and walkdown
     // does not know it.
@@ -174,9 +193,27 @@ test('a home by its path registers that one; a repository is a list it asks abou
   const s = scratch();
   try {
     const shop = project(join(s.root, 'acme-shop'), [
-      { id: 'checkout', folder: '0001-checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/cart'] },
-      { id: 'admin', folder: 'back/202610-admin', description: 'Back office.', origin: 'https://shop.test', paths: ['/admin'] },
-      { id: 'search', folder: '0003-search', description: 'Finding things.', origin: 'https://shop.test', paths: ['/search'] },
+      {
+        id: 'checkout',
+        folder: '0001-checkout',
+        description: 'Cart.',
+        origin: 'https://shop.test',
+        paths: ['/cart'],
+      },
+      {
+        id: 'admin',
+        folder: 'back/202610-admin',
+        description: 'Back office.',
+        origin: 'https://shop.test',
+        paths: ['/admin'],
+      },
+      {
+        id: 'search',
+        folder: '0003-search',
+        description: 'Finding things.',
+        origin: 'https://shop.test',
+        paths: ['/search'],
+      },
     ]);
     const homeOf = (f) => join(shop, '.walkdown', 'blueprints', f);
 
@@ -184,7 +221,10 @@ test('a home by its path registers that one; a repository is a list it asks abou
     const one = walkdown(s.home, ['blueprints', 'import', homeOf('0001-checkout')], s.root);
     assert.match(one.stdout, /\+ listed .*0001-checkout .*as `0001-[a-z0-9]+-checkout`/);
     assert.match(one.stdout, /in project `acme-shop`/);
-    assert.deepEqual(registry(s.home).map((r) => nm(r.id)), ['checkout']);
+    assert.deepEqual(
+      registry(s.home).map((r) => nm(r.id)),
+      ['checkout'],
+    );
     const listedRow = JSON.stringify(registry(s.home)[0]);
 
     // The repository with no terminal: the list, every folder, the listed
@@ -202,11 +242,21 @@ test('a home by its path registers that one; a repository is a list it asks abou
     const picked = atTerminal(s.home, ['blueprints', 'import', shop], s.root, '2');
     assert.equal(picked.status, 0, picked.stdout);
     assert.match(picked.stdout, /Import which\?/);
-    assert.deepEqual(registry(s.home).map((r) => nm(r.id)).sort(), ['checkout', 'search']);
+    assert.deepEqual(
+      registry(s.home)
+        .map((r) => nm(r.id))
+        .sort(),
+      ['checkout', 'search'],
+    );
 
     // And --only names a folder.
     walkdown(s.home, ['blueprints', 'import', shop, '--only', 'back/202610-admin'], s.root);
-    assert.deepEqual(registry(s.home).map((r) => nm(r.id)).sort(), ['admin', 'checkout', 'search']);
+    assert.deepEqual(
+      registry(s.home)
+        .map((r) => nm(r.id))
+        .sort(),
+      ['admin', 'checkout', 'search'],
+    );
 
     // A home already listed is said, and its row is unchanged.
     const again = walkdown(s.home, ['blueprints', 'import', homeOf('0001-checkout')], s.root);
@@ -242,7 +292,12 @@ test('two projects sharing a name are told apart by their labels', () => {
       { id: 'checkout', description: 'Cart.', origin: 'https://shop.test', paths: ['/cart'] },
     ]);
     const other = project(join(s.root, 'two', 'acme'), [
-      { id: 'checkout', description: 'A different checkout entirely.', origin: 'https://acme.test', paths: ['/buy'] },
+      {
+        id: 'checkout',
+        description: 'A different checkout entirely.',
+        origin: 'https://acme.test',
+        paths: ['/buy'],
+      },
     ]);
     walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
     // The second checkout's default label is taken: it is asked for one,
@@ -251,7 +306,11 @@ test('two projects sharing a name are told apart by their labels', () => {
     assert.equal(refused.status, 2);
     assert.match(refused.stderr, /label `acme` is another project's/);
     assert.match(refused.stderr, /--project <label>/);
-    walkdown(s.home, ['blueprints', 'import', other, '--all', '--project', 'acme-2', '--code', 'ac2'], s.root);
+    walkdown(
+      s.home,
+      ['blueprints', 'import', other, '--all', '--project', 'acme-2', '--code', 'ac2'],
+      s.root,
+    );
     const rows = registry(s.home);
     assert.deepEqual(rows.map((r) => r.project).sort(), ['acme', 'acme-2']);
     assert.notEqual(rows[0].code, rows[1].code);
@@ -280,17 +339,28 @@ test('the server routes across imported projects, and answers with all of them @
 
     process.env.WALKDOWN_HOME = s.home;
     const { createWalkdownServer } = await import('../lib/serve.js');
-    const server = createWalkdownServer(join(shop, '.walkdown', 'blueprints', '0001-checkout'), { cwd: s.root });
+    const server = createWalkdownServer(join(shop, '.walkdown', 'blueprints', '0001-checkout'), {
+      cwd: s.root,
+    });
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
     const base = `http://127.0.0.1:${server.address().port}`;
     try {
-      const both = await (await fetch(`${base}/api/whose?url=${encodeURIComponent('https://shop.test/')}`)).json();
+      const both = await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('https://shop.test/')}`)
+      ).json();
       assert.deepEqual(both.matches.map((m) => nm(m.id)).sort(), ['campaigns', 'checkout']);
 
-      const one = await (await fetch(`${base}/api/whose?url=${encodeURIComponent('https://shop.test/cart')}`)).json();
-      assert.deepEqual(one.matches.map((m) => nm(m.id)), ['checkout']);
+      const one = await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('https://shop.test/cart')}`)
+      ).json();
+      assert.deepEqual(
+        one.matches.map((m) => nm(m.id)),
+        ['checkout'],
+      );
 
-      const none = await (await fetch(`${base}/api/whose?url=${encodeURIComponent('https://nobody.test/')}`)).json();
+      const none = await (
+        await fetch(`${base}/api/whose?url=${encodeURIComponent('https://nobody.test/')}`)
+      ).json();
       assert.deepEqual(none.matches, []);
 
       // And every blueprint says which project it is in, so the panel can
@@ -325,7 +395,11 @@ test('a copy of a home imports with --ephemeral, marked a copy', () => {
     assert.equal(bare.status, 2);
     assert.match(bare.stderr, /--ephemeral/);
 
-    const said = walkdown(s.home, ['blueprints', 'import', copy, '--ephemeral', '--why', 'a look'], s.root);
+    const said = walkdown(
+      s.home,
+      ['blueprints', 'import', copy, '--ephemeral', '--why', 'a look'],
+      s.root,
+    );
     assert.match(said.stdout, /listed/);
     const row = registry(s.home).find((p) => p.ephemeral);
     assert.ok(row, JSON.stringify(registry(s.home)));
@@ -336,11 +410,25 @@ test('a copy of a home imports with --ephemeral, marked a copy', () => {
     const where = walkdown(s.home, ['where', '--blueprint', row.id], s.root).stdout;
     assert.match(where, /scratch\/0001-checkout/);
 
-    const again = walkdown(s.home, ['blueprints', 'import', copy, '--ephemeral', '--why', 'a look'], s.root);
+    const again = walkdown(
+      s.home,
+      ['blueprints', 'import', copy, '--ephemeral', '--why', 'a look'],
+      s.root,
+    );
     assert.match(again.stdout, /already listed/);
 
     // And a project's own home is refused the flag: a copy means a copy.
-    const own = walkdown(s.home, ['blueprints', 'import', join(shop, '.walkdown', 'blueprints', '0001-checkout'), '--ephemeral'], s.root, false);
+    const own = walkdown(
+      s.home,
+      [
+        'blueprints',
+        'import',
+        join(shop, '.walkdown', 'blueprints', '0001-checkout'),
+        '--ephemeral',
+      ],
+      s.root,
+      false,
+    );
     assert.equal(own.status, 2);
     assert.match(own.stderr, /own blueprint/);
   } finally {
@@ -358,7 +446,11 @@ test('a project imported twice under two spellings of its path is one row', () =
     walkdown(s.home, ['blueprints', 'import', shop, '--all'], s.root);
     // Through the link: the same directory, canonicalised at add time (ADR
     // 0003 §3), so it is already there rather than registered a second time.
-    const again = walkdown(s.home, ['blueprints', 'import', join(s.root, 'shop-link'), '--all'], s.root);
+    const again = walkdown(
+      s.home,
+      ['blueprints', 'import', join(s.root, 'shop-link'), '--all'],
+      s.root,
+    );
     assert.match(again.stdout, /already listed/);
     const rows = registry(s.home);
     assert.equal(rows.length, 1);
@@ -398,16 +490,28 @@ test('forgetting a blueprint takes it off the list and touches none of its files
     const before = { committed: snapshot(committed), personal: snapshot(personalDir) };
 
     const ids = registry(s.home).map((r) => r.id);
-    const first = walkdown(s.home, ['blueprints', 'forget', ids.find((i) => nm(i) === 'checkout')], s.root);
+    const first = walkdown(
+      s.home,
+      ['blueprints', 'forget', ids.find((i) => nm(i) === 'checkout')],
+      s.root,
+    );
     assert.match(first.stdout, /forgotten/);
     assert.doesNotMatch(first.stdout, /rm -rf/, 'a committed home is still in its repository');
     const second = walkdown(s.home, ['blueprints', 'forget', 'notes'], shop);
     assert.match(second.stdout, /forgotten/);
-    assert.match(second.stdout, /nothing else will mention it; `rm -rf .*notes`/, 'the personal folder is named, with how to delete it');
+    assert.match(
+      second.stdout,
+      /nothing else will mention it; `rm -rf .*notes`/,
+      'the personal folder is named, with how to delete it',
+    );
 
     assert.equal(registry(s.home).length, 0, 'neither is listed');
     assert.doesNotMatch(walkdown(s.home, ['blueprints'], s.root).stdout, /checkout|notes/);
-    assert.deepEqual(snapshot(committed), before.committed, 'every file in the committed home is as it was');
+    assert.deepEqual(
+      snapshot(committed),
+      before.committed,
+      'every file in the committed home is as it was',
+    );
     assert.deepEqual(snapshot(personalDir), before.personal, 'and in the personal one');
   } finally {
     s.cleanup();

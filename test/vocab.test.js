@@ -18,10 +18,10 @@ import {
   ROLES,
   statusesFor,
   TERMINAL,
-  whoseMove,
   THREAD_KINDS,
   TIERS,
   threadPrefix,
+  whoseMove,
 } from '../lib/vocab.js';
 
 test('terminal is derived from the flows, so the two cannot disagree', () => {
@@ -29,10 +29,17 @@ test('terminal is derived from the flows, so the two cannot disagree', () => {
   // orderings. The derivation is the fix: a status is terminal exactly when
   // its flow offers nowhere to go but back to open - an ending can be
   // reopened, and that is the only move it offers.
-  assert.deepEqual([...TERMINAL].sort(), ['incorporated', 'recorded', 'settled', 'verified', 'waived']);
+  assert.deepEqual([...TERMINAL].sort(), [
+    'incorporated',
+    'recorded',
+    'settled',
+    'verified',
+    'waived',
+  ]);
   for (const status of TERMINAL)
     for (const flow of Object.values(FLOWS))
-      for (const next of flow[status] ?? []) assert.equal(next, 'open', `${status} may only reopen`);
+      for (const next of flow[status] ?? [])
+        assert.equal(next, 'open', `${status} may only reopen`);
   // A decision is a record, not a task: it never reopens.
   assert.deepEqual(FLOWS.note.recorded, []);
 });

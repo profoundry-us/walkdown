@@ -164,7 +164,11 @@ test('an approval covers an unbuilt rule and stops the moment there is a build @
     blueprint({
       // An agent has looked too: a built rule it has not is held from every
       // signer (q-0336), which is not what this is about.
-      runs: [signed('2026-01-01', 'topher', 'approved', ['eng']), checksRun('2026-01-02', 'pass'), agentRun('2026-01-03', 'pass')],
+      runs: [
+        signed('2026-01-01', 'topher', 'approved', ['eng']),
+        checksRun('2026-01-02', 'pass'),
+        agentRun('2026-01-03', 'pass'),
+      ],
     }),
   );
   assert.equal(built.rows[0].built, true);
@@ -209,7 +213,9 @@ test('a rule sent back fails, and is not queued to the person who sent it @rule:
 test('a sent-back rule returns to its signer once the fix is claimed and judged @rule:status.acceptance.sent-back-is-a-fail', () => {
   const sentBack = signed('2026-01-03', 'topher', 'refining', ['product']);
   const judge = (bp) =>
-    bp.attention.filter((i) => i.action === 'judge' && i.role === 'product').map((i) => i.after ?? true);
+    bp.attention
+      .filter((i) => i.action === 'judge' && i.role === 'product')
+      .map((i) => i.after ?? true);
 
   // Fix claimed, but the agent tier has not looked since: still nothing for
   // the signer, and the re-judge is the agent's item.
@@ -223,7 +229,10 @@ test('a sent-back rule returns to its signer once the fix is claimed and judged 
   );
   assert.equal(states(claimed.rows[0]).product, 'sent-back');
   assert.deepEqual(judge(claimed), []);
-  assert.equal(claimed.attention.some((i) => i.action === 'rejudge'), true);
+  assert.equal(
+    claimed.attention.some((i) => i.action === 'rejudge'),
+    true,
+  );
 
   // The agent has judged the fix: now the signer is asked, and the item says
   // which fix it follows.
@@ -258,21 +267,57 @@ test('a sent-back rule returns to its signer once the fix is claimed and judged 
 test('a fix the agent settled, by a pass or by hand, still returns a sent-back rule to its signer, and a settled observation claims nothing @rule:status.acceptance.sent-back-is-a-fail', () => {
   const sentBack = signed('2026-01-03', 'topher', 'refining', ['product']);
   const judge = (bp) =>
-    bp.attention.filter((i) => i.action === 'judge' && i.role === 'product').map((i) => i.after ?? true);
-  const runs = [checksRun('2026-01-01', 'pass'), agentRun('2026-01-02', 'pass'), sentBack, agentRun('2026-01-05', 'pass')];
+    bp.attention
+      .filter((i) => i.action === 'judge' && i.role === 'product')
+      .map((i) => i.after ?? true);
+  const runs = [
+    checksRun('2026-01-01', 'pass'),
+    agentRun('2026-01-02', 'pass'),
+    sentBack,
+    agentRun('2026-01-05', 'pass'),
+  ];
   const note = addressedNote('n-0001', '2026-01-04T00:00:00Z');
 
   // The agent's pass settled the note it had addressed (n-0402): the fix is still the one the signer waits on.
-  const settled = { ...note, status: 'settled', author: 'agent', replies: [...note.replies, { author: 'agent', via: 'verdict', created: '2026-01-05T00:00:00Z', body: 'Settled.' }] };
-  assert.deepEqual(judge(deriveStatus(blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs, threads: [settled] }))), ['n-0001']);
+  const settled = {
+    ...note,
+    status: 'settled',
+    author: 'agent',
+    replies: [
+      ...note.replies,
+      { author: 'agent', via: 'verdict', created: '2026-01-05T00:00:00Z', body: 'Settled.' },
+    ],
+  };
+  assert.deepEqual(
+    judge(
+      deriveStatus(
+        blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs, threads: [settled] }),
+      ),
+    ),
+    ['n-0001'],
+  );
 
   // Settled by `threads set`, as the agent queue says to: the same fix.
   const byHand = { ...note, status: 'settled', author: 'agent', reason: 'finding' };
-  assert.deepEqual(judge(deriveStatus(blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs, threads: [byHand] }))), ['n-0001']);
+  assert.deepEqual(
+    judge(
+      deriveStatus(
+        blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs, threads: [byHand] }),
+      ),
+    ),
+    ['n-0001'],
+  );
 
   // An observation settled - a remark put away, or one filed by mistake - is no fix at all.
   const mistake = { ...note, status: 'settled', author: 'agent', reason: 'observation' };
-  assert.deepEqual(judge(deriveStatus(blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs, threads: [mistake] }))), []);
+  assert.deepEqual(
+    judge(
+      deriveStatus(
+        blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs, threads: [mistake] }),
+      ),
+    ),
+    [],
+  );
 });
 
 test('a verdict needs every tier AND every role @rule:status.acceptance.verdict-needs-every-role', () => {
@@ -337,7 +382,11 @@ test('the queue names the role a rule waits on @rule:status.attention.names-the-
   const { attention } = deriveStatus(
     blueprint({
       signoff: ['eng', 'product', 'design'],
-      runs: [checksRun('2026-01-01', 'pass'), agentRun('2026-01-01T12:00:00Z', 'pass'), signed('2026-01-02', 'topher', 'pass', ['eng'])],
+      runs: [
+        checksRun('2026-01-01', 'pass'),
+        agentRun('2026-01-01T12:00:00Z', 'pass'),
+        signed('2026-01-02', 'topher', 'pass', ['eng']),
+      ],
     }),
   );
   // "Somebody should look at this" was never the question. A queue that

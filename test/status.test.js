@@ -19,7 +19,16 @@ const STATEMENT = 'The visitor can do the thing.';
 // a recorded statement hash to walkdown's stale-check scanner
 const BOGUS_HASH = 'sha256:' + '0'.repeat(12);
 
-function blueprint({ runs = [], threads = [], verify = ['checks'], environments, targets, steps, unverifiable, retired } = {}) {
+function blueprint({
+  runs = [],
+  threads = [],
+  verify = ['checks'],
+  environments,
+  targets,
+  steps,
+  unverifiable,
+  retired,
+} = {}) {
   return {
     config: { runner: { targets: targets ?? { local: {}, staging: {} } } },
     features: [
@@ -119,10 +128,19 @@ test('a pass with an outdated statement_hash renders stale, not passing @rule:st
  */
 test('a pass against a hash the rule lists as reworded is current, not stale @rule:status.derived.stale-never-passes', () => {
   const OLD = 'sha256:' + 'a'.repeat(12);
-  const steps = { given: ['x'], when: ['y'], then: ['z'], reworded: [{ hash: OLD, at: '2026-09-13', why: 'plainer' }] };
-  const kept = deriveStatus(blueprint({ steps, runs: [checksRun('2026-01-01', 'local', 'pass', OLD)] }));
+  const steps = {
+    given: ['x'],
+    when: ['y'],
+    then: ['z'],
+    reworded: [{ hash: OLD, at: '2026-09-13', why: 'plainer' }],
+  };
+  const kept = deriveStatus(
+    blueprint({ steps, runs: [checksRun('2026-01-01', 'local', 'pass', OLD)] }),
+  );
   assert.equal(kept.rows[0].cells.local.state, 'pass');
-  const other = deriveStatus(blueprint({ steps, runs: [checksRun('2026-01-01', 'local', 'pass', BOGUS_HASH)] }));
+  const other = deriveStatus(
+    blueprint({ steps, runs: [checksRun('2026-01-01', 'local', 'pass', BOGUS_HASH)] }),
+  );
   assert.equal(other.rows[0].cells.local.state, 'stale');
 });
 
@@ -221,20 +239,64 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
       // ONE verify item, on the rule, naming them all (ADR 0006 §3) - the
       // look that clears them is a verdict on the rule. A settled
       // observation and a decision wait on nothing.
-      { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+      {
+        id: 'n-1',
+        kind: 'note',
+        reason: 'feedback',
+        status: 'addressed',
+        anchor: { rule: 'demo.main.thing' },
+      },
       { id: 'n-4', kind: 'note', status: 'addressed', anchor: { rule: 'demo.main.thing' } }, // no reason: feedback
       // A note the agent wrote is the agent's to settle once its pass is
       // newer than the fix, never a person's to verify (n-0338) - but a
       // design request, whoever filed it, waits on a person.
-      { id: 'n-5', kind: 'note', reason: 'finding', author: 'agent', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
-      { id: 'n-10', kind: 'note', reason: 'request', author: 'agent', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
-      { id: 'n-6', kind: 'note', reason: 'observation', status: 'settled', anchor: { rule: 'demo.main.thing' } },
+      {
+        id: 'n-5',
+        kind: 'note',
+        reason: 'finding',
+        author: 'agent',
+        status: 'addressed',
+        anchor: { rule: 'demo.main.thing' },
+      },
+      {
+        id: 'n-10',
+        kind: 'note',
+        reason: 'request',
+        author: 'agent',
+        status: 'addressed',
+        anchor: { rule: 'demo.main.thing' },
+      },
+      {
+        id: 'n-6',
+        kind: 'note',
+        reason: 'observation',
+        status: 'settled',
+        anchor: { rule: 'demo.main.thing' },
+      },
       // An addressed observation is the agent's to settle, never a person's
       // to verify: it noticed it itself and closes it itself.
-      { id: 'n-9', kind: 'note', reason: 'observation', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
-      { id: 'n-7', kind: 'note', reason: 'decision', status: 'recorded', anchor: { rule: 'demo.main.thing' } },
+      {
+        id: 'n-9',
+        kind: 'note',
+        reason: 'observation',
+        status: 'addressed',
+        anchor: { rule: 'demo.main.thing' },
+      },
+      {
+        id: 'n-7',
+        kind: 'note',
+        reason: 'decision',
+        status: 'recorded',
+        anchor: { rule: 'demo.main.thing' },
+      },
       // Feedback with no rule stands on its own.
-      { id: 'n-8', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { screen: 'main' } },
+      {
+        id: 'n-8',
+        kind: 'note',
+        reason: 'feedback',
+        status: 'addressed',
+        anchor: { screen: 'main' },
+      },
       { id: 'n-2', kind: 'note', status: 'open', anchor: { rule: 'demo.main.thing' } },
       { id: 'q-1', kind: 'question', status: 'open', anchor: {} },
       { id: 'q-2', kind: 'question', status: 'answered', anchor: {} },
@@ -244,7 +306,12 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   const { attention } = deriveStatus(bp);
   const byWho = (who) =>
     attention.filter((i) => i.who === who).map((i) => `${i.action}:${i.thread ?? i.rule}`);
-  assert.deepEqual(byWho('human'), ['judge:demo.main.thing', 'verify:n-8', 'answer:q-1', 'verify:demo.main.thing']);
+  assert.deepEqual(byWho('human'), [
+    'judge:demo.main.thing',
+    'verify:n-8',
+    'answer:q-1',
+    'verify:demo.main.thing',
+  ]);
   assert.deepEqual(byWho('agent'), ['settle:n-5', 'settle:n-9', 'address:n-2', 'incorporate:q-2']);
   const perRule = attention.find((i) => i.action === 'verify' && i.rule === 'demo.main.thing');
   assert.deepEqual(perRule.threads, ['n-1', 'n-4', 'n-10']);
@@ -271,9 +338,13 @@ test('the agent’s addressed note waits on its judgment, then on the agent, nev
   const { attention } = deriveStatus(bp);
   // The fix is newer than the pass: the rule is judged again first, and the
   // note is not settled before then, nor ever a person's to verify.
-  assert.ok(attention.some((i) => i.who === 'agent' && i.action === 'rejudge' && i.thread === 'n-1'));
+  assert.ok(
+    attention.some((i) => i.who === 'agent' && i.action === 'rejudge' && i.thread === 'n-1'),
+  );
   assert.ok(!attention.some((i) => i.action === 'settle'));
-  assert.ok(!attention.some((i) => i.who === 'human' && (i.thread === 'n-1' || i.threads?.includes('n-1'))));
+  assert.ok(
+    !attention.some((i) => i.who === 'human' && (i.thread === 'n-1' || i.threads?.includes('n-1'))),
+  );
 });
 
 /*
@@ -287,9 +358,18 @@ test('a rule holding an answered question waits on the fold-in and on nobody els
       verify: ['checks', 'human'],
       // Judged by the agent too: a rule it has not looked at is queued to
       // no person at all (q-0336), which is not what this is about.
-      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass'), walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')],
+      runs: [
+        checksRun('2026-01-03T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass'),
+      ],
       threads: [
-        { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
+        {
+          id: 'n-1',
+          kind: 'note',
+          reason: 'feedback',
+          status: 'addressed',
+          anchor: { rule: 'demo.main.thing' },
+        },
         { id: 'q-1', kind: 'question', status: 'answered', anchor: { rule: 'demo.main.thing' } },
       ],
     }),
@@ -304,10 +384,24 @@ test('a rule holding an answered question waits on the fold-in and on nobody els
       verify: ['checks', 'human'],
       // Judged by the agent too: a rule it has not looked at is queued to
       // no person at all (q-0336), which is not what this is about.
-      runs: [checksRun('2026-01-03T00:00:00Z', 'local', 'pass'), walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')],
+      runs: [
+        checksRun('2026-01-03T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass'),
+      ],
       threads: [
-        { id: 'n-1', kind: 'note', reason: 'feedback', status: 'addressed', anchor: { rule: 'demo.main.thing' } },
-        { id: 'q-1', kind: 'question', status: 'incorporated', anchor: { rule: 'demo.main.thing' } },
+        {
+          id: 'n-1',
+          kind: 'note',
+          reason: 'feedback',
+          status: 'addressed',
+          anchor: { rule: 'demo.main.thing' },
+        },
+        {
+          id: 'q-1',
+          kind: 'question',
+          status: 'incorporated',
+          anchor: { rule: 'demo.main.thing' },
+        },
       ],
     }),
   );
@@ -394,7 +488,10 @@ test('sign-off is not build evidence: approved stays unbuilt and pending, and di
  * signature is the whole judgment, it is the verdict.
  */
 test('where nothing verifies a rule but a signature, the signature is the verdict', () => {
-  const excused = { checks: 'the button is browser chrome', agent: 'no tool an agent drives reaches it' };
+  const excused = {
+    checks: 'the button is browser chrome',
+    agent: 'no tool an agent drives reaches it',
+  };
   const signed = deriveStatus(
     blueprint({
       verify: [],
@@ -403,14 +500,23 @@ test('where nothing verifies a rule but a signature, the signature is the verdic
     }),
   );
   assert.equal(signed.rows[0].built, true);
-  assert.deepEqual(signed.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'signed']]);
+  assert.deepEqual(
+    signed.rows[0].acceptance.map((a) => [a.role, a.state]),
+    [['eng', 'signed']],
+  );
   assert.equal(signed.rows[0].verdict, 'pass');
   // Unsigned, the signature is owed - the one thing that can be.
   const unsigned = deriveStatus(blueprint({ verify: [], unverifiable: excused }));
   assert.equal(unsigned.rows[0].verdict, 'pending');
-  assert.ok(unsigned.attention.some((a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing'));
+  assert.ok(
+    unsigned.attention.some(
+      (a) => a.who === 'human' && a.action === 'judge' && a.rule === 'demo.main.thing',
+    ),
+  );
   // And a rule that is merely unbuilt is not this: agent is asked by default.
-  const unbuilt = deriveStatus(blueprint({ verify: [], runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')] }));
+  const unbuilt = deriveStatus(
+    blueprint({ verify: [], runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'approved')] }),
+  );
   assert.equal(unbuilt.rows[0].built, false);
   assert.equal(unbuilt.rows[0].verdict, 'pending');
 });
@@ -434,9 +540,15 @@ test('every note on a walkable rule waits under the rule; one on a retired rule 
       ],
     }),
   );
-  const verify = (st) => st.attention.filter((i) => i.who === 'human' && i.action === 'verify').map((i) => i.thread ?? `rule:${i.rule}`);
+  const verify = (st) =>
+    st.attention
+      .filter((i) => i.who === 'human' && i.action === 'verify')
+      .map((i) => i.thread ?? `rule:${i.rule}`);
   assert.deepEqual(verify(live), [`rule:${rule}`]);
-  assert.deepEqual(live.attention.find((i) => i.rule === rule && i.action === 'verify' && !i.thread).threads, ['n-1', 'n-2']);
+  assert.deepEqual(
+    live.attention.find((i) => i.rule === rule && i.action === 'verify' && !i.thread).threads,
+    ['n-1', 'n-2'],
+  );
   // And an open question on it is the rule's to answer, listed once under
   // the rule rather than as a thread of its own.
   const asks = live.attention.filter((i) => i.who === 'human' && i.action === 'answer');
@@ -453,7 +565,10 @@ test('every note on a walkable rule waits under the rule; one on a retired rule 
   );
   assert.equal(retired.rows.length, 0);
   assert.deepEqual(verify(retired), ['n-3']);
-  assert.deepEqual(retired.attention.filter((i) => i.action === 'answer').map((i) => i.thread), ['q-2']);
+  assert.deepEqual(
+    retired.attention.filter((i) => i.action === 'answer').map((i) => i.thread),
+    ['q-2'],
+  );
 });
 
 test('a build verdict flips built; an approval goes stale when the statement moves', () => {
@@ -523,14 +638,22 @@ test('a verdict counts only at the address it was made against @rule:status.deri
 test('a cosmetic edit to the address is the same place @rule:status.derived.verdict-belongs-to-a-place', () => {
   // A trailing slash and an uppercased host: the same system, and exact
   // string equality emptied every cell over it (n-0199).
-  const runs = [at(walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), 'https://pr-1.review.app')];
+  const runs = [
+    at(walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), 'https://pr-1.review.app'),
+  ];
   for (const base_url of ['https://pr-1.review.app/', 'https://PR-1.review.app']) {
-    const row = deriveStatus(blueprint({ runs, verify: ['agent'], targets: { local: { base_url } } })).rows[0];
+    const row = deriveStatus(
+      blueprint({ runs, verify: ['agent'], targets: { local: { base_url } } }),
+    ).rows[0];
     assert.equal(row.agent.state, 'pass', base_url);
   }
   // A different path is a different place still.
   const other = deriveStatus(
-    blueprint({ runs, verify: ['agent'], targets: { local: { base_url: 'https://pr-1.review.app/v2' } } }),
+    blueprint({
+      runs,
+      verify: ['agent'],
+      targets: { local: { base_url: 'https://pr-1.review.app/v2' } },
+    }),
   ).rows[0];
   assert.equal(other.agent.state, 'never');
 });
@@ -554,12 +677,17 @@ test('a run with no recorded address is taken at face value @rule:status.derived
  * verdicts at once (n-0199). The addressless RUN above still counts.
  */
 test('an addressless target counts no run that named an address @rule:status.derived.verdict-belongs-to-a-place', () => {
-  const placed = at(walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), 'https://pr-1.review.app');
-  const row = deriveStatus(blueprint({ runs: [placed], verify: ['agent'], targets: { local: {} } })).rows[0];
+  const placed = at(
+    walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
+    'https://pr-1.review.app',
+  );
+  const row = deriveStatus(blueprint({ runs: [placed], verify: ['agent'], targets: { local: {} } }))
+    .rows[0];
   assert.equal(row.agent.state, 'never');
   const unplaced = walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass');
   assert.equal(
-    deriveStatus(blueprint({ runs: [unplaced], verify: ['agent'], targets: { local: {} } })).rows[0].agent.state,
+    deriveStatus(blueprint({ runs: [unplaced], verify: ['agent'], targets: { local: {} } })).rows[0]
+      .agent.state,
     'pass',
   );
 });
@@ -653,14 +781,25 @@ test('a sweep makes earlier verdicts stale, and the runs survive it @rule:status
  */
 test('a cell stale only by a sweep says so; one also reworded says that too @rule:status.sweep.declares-a-floor', () => {
   const swept = deriveStatus(
-    blueprint({ runs: [walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'), sweep('2026-02-01T00:00:00Z', ['agent'])], verify: ['checks', 'agent'] }),
+    blueprint({
+      runs: [
+        walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass'),
+        sweep('2026-02-01T00:00:00Z', ['agent']),
+      ],
+      verify: ['checks', 'agent'],
+    }),
   );
   assert.equal(swept.rows[0].agent.sweptBy, '2026-02-01T00:00:00Z');
   assert.equal(swept.rows[0].agent.staleBy, undefined);
 
   const reworded = { ...walkdownRun('2026-01-01T00:00:00Z', 'agent', 'pass') };
   reworded.results = [{ ...reworded.results[0], statement_hash: 'sha256:000000000000' }];
-  const both = deriveStatus(blueprint({ runs: [reworded, sweep('2026-02-01T00:00:00Z', ['agent'])], verify: ['checks', 'agent'] }));
+  const both = deriveStatus(
+    blueprint({
+      runs: [reworded, sweep('2026-02-01T00:00:00Z', ['agent'])],
+      verify: ['checks', 'agent'],
+    }),
+  );
   assert.equal(both.rows[0].agent.state, 'stale');
   assert.equal(both.rows[0].agent.sweptBy, '2026-02-01T00:00:00Z');
   assert.equal(both.rows[0].agent.staleBy, 'rewording');
@@ -778,7 +917,12 @@ test('the verdict reply that closed a thread is not a fix the pass missed @rule:
     verified_by: 'topher',
     replies: [
       { author: 'topher', created: '2026-02-02T00:00:00Z', body: 'fixed' },
-      { author: 'topher', via: 'verdict', created: '2026-02-04T00:00:00Z', body: "Verified by topher's pass." },
+      {
+        author: 'topher',
+        via: 'verdict',
+        created: '2026-02-04T00:00:00Z',
+        body: "Verified by topher's pass.",
+      },
     ],
   };
   const { rows, attention } = deriveStatus(
@@ -898,26 +1042,41 @@ test('a human skip signs nothing and revokes nothing; the rule is what it was @r
       ],
     }),
   );
-  assert.deepEqual(skippedAfterSigning.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'signed']]);
+  assert.deepEqual(
+    skippedAfterSigning.rows[0].acceptance.map((a) => [a.role, a.state]),
+    [['eng', 'signed']],
+  );
   assert.equal(skippedAfterSigning.rows[0].human.state, 'pass');
 
   const skippedUnsigned = deriveStatus(
     blueprint({ runs: [walkdownRun('2026-01-02T00:00:00Z', 'topher', 'skipped')] }),
   );
-  assert.deepEqual(skippedUnsigned.rows[0].acceptance.map((a) => [a.role, a.state]), [['eng', 'none']]);
+  assert.deepEqual(
+    skippedUnsigned.rows[0].acceptance.map((a) => [a.role, a.state]),
+    [['eng', 'none']],
+  );
   assert.equal(skippedUnsigned.rows[0].human.state, 'never');
 });
 
 test('a built rule the agent tier has not judged, or judged before it went stale, is in the agent queue @rule:status.attention.agent-tier-queued', () => {
-  const judge = (runs) => deriveStatus(blueprint({ runs, verify: ['checks', 'agent'] })).attention.filter((i) => i.action === 'judge-first');
+  const judge = (runs) =>
+    deriveStatus(blueprint({ runs, verify: ['checks', 'agent'] })).attention.filter(
+      (i) => i.action === 'judge-first',
+    );
   const built = walkdownRun('2026-01-01T00:00:00Z', 'checks', 'pass');
   built.kind = 'checks';
   // Never judged by the agent, but built by a check: queued, and says so.
-  assert.deepEqual(judge([built]).map((i) => [i.who, i.rule, i.state]), [['agent', 'demo.main.thing', 'never']]);
+  assert.deepEqual(
+    judge([built]).map((i) => [i.who, i.rule, i.state]),
+    [['agent', 'demo.main.thing', 'never']],
+  );
   // A pass on the words before they moved: stale, and queued as stale.
   const old = walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass');
   old.results = [{ ...old.results[0], statement_hash: 'sha256:000000000000' }];
-  assert.deepEqual(judge([built, old]).map((i) => i.state), ['stale']);
+  assert.deepEqual(
+    judge([built, old]).map((i) => i.state),
+    ['stale'],
+  );
   // A current pass is owed nothing.
   assert.deepEqual(judge([built, walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass')]), []);
   // Unbuilt: nothing to look at yet.
@@ -928,14 +1087,16 @@ test('a built rule the agent tier has not judged, or judged before it went stale
  * Topher, q-0336: "Hold it back". A built rule the agent tier owes is the
  * agent's alone until it is judged; no role is asked to sign it.
  */
-test('a built rule the agent owes is held out of every signer\'s queue until it is judged @rule:status.attention.agent-tier-queued', () => {
+test("a built rule the agent owes is held out of every signer's queue until it is judged @rule:status.attention.agent-tier-queued", () => {
   const who = (runs) =>
     deriveStatus(blueprint({ verify: ['checks', 'agent'], runs }))
       .attention.filter((i) => i.rule === 'demo.main.thing')
       .map((i) => `${i.who}:${i.action}`);
   const built = checksRun('2026-01-03T00:00:00Z', 'local', 'pass');
   assert.deepEqual(who([built]), ['agent:judge-first']);
-  assert.deepEqual(who([built, walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')]), ['human:judge']);
+  assert.deepEqual(who([built, walkdownRun('2026-01-04T00:00:00Z', 'agent', 'pass')]), [
+    'human:judge',
+  ]);
 });
 
 /*
@@ -946,7 +1107,13 @@ test('an open design request is queued for design, never for the building agent 
   const bp = blueprint({
     threads: [
       { id: 'n-1', kind: 'note', reason: 'request', status: 'open', anchor: { screen: 'undrawn' } },
-      { id: 'n-2', kind: 'note', reason: 'feedback', status: 'open', anchor: { rule: 'demo.main.thing' } },
+      {
+        id: 'n-2',
+        kind: 'note',
+        reason: 'feedback',
+        status: 'open',
+        anchor: { rule: 'demo.main.thing' },
+      },
     ],
   });
   const { attention } = deriveStatus(bp);
@@ -954,12 +1121,24 @@ test('an open design request is queued for design, never for the building agent 
   assert.deepEqual(request, [
     { who: 'design', action: 'draw', thread: 'n-1', rule: null, screen: 'undrawn', by: 'person' },
   ]);
-  assert.ok(!attention.some((i) => i.who === 'agent' && i.thread === 'n-1'), 'never the building agent');
-  assert.ok(attention.some((i) => i.who === 'agent' && i.action === 'address' && i.thread === 'n-2'), 'any other note still is');
+  assert.ok(
+    !attention.some((i) => i.who === 'agent' && i.thread === 'n-1'),
+    'never the building agent',
+  );
+  assert.ok(
+    attention.some((i) => i.who === 'agent' && i.action === 'address' && i.thread === 'n-2'),
+    'any other note still is',
+  );
 });
 
 test('design.by says who the design queue is for, and a person draws when it says nothing @rule:ownership.design.declared-per-blueprint', () => {
-  const thread = { id: 'n-1', kind: 'note', reason: 'request', status: 'open', anchor: { screen: 'undrawn' } };
+  const thread = {
+    id: 'n-1',
+    kind: 'note',
+    reason: 'request',
+    status: 'open',
+    anchor: { screen: 'undrawn' },
+  };
   const by = (design) => {
     const bp = blueprint({ threads: [thread] });
     if (design !== undefined) bp.config.design = design;
@@ -969,5 +1148,9 @@ test('design.by says who the design queue is for, and a person draws when it say
   assert.equal(by({ by: 'person' }).by, 'person');
   const agent = by({ by: 'agent' });
   assert.equal(agent.by, 'agent');
-  assert.equal(agent.who, 'design', 'a design agent is still design, never the agent building the app');
+  assert.equal(
+    agent.who,
+    'design',
+    'a design agent is still design, never the agent building the app',
+  );
 });

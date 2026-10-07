@@ -283,5 +283,4 @@ export const IDENTITY_KEY = 'walkdown:identity'; // { name }
 // browser legitimately owns - how you are SHOWN, and which hats you are
 // signing in this sitting.
 export const identityOverride = { username: null, name: null };
-export const saveIdentity = () =>
-  store.set(IDENTITY_KEY, { name: identityOverride.name });
+export const saveIdentity = () => store.set(IDENTITY_KEY, { name: identityOverride.name });

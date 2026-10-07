@@ -7,7 +7,16 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { after, test } from 'node:test';
@@ -33,7 +42,8 @@ function files(dir) {
 const folders = (dir) => {
   const out = [];
   const walk = (d) => {
-    for (const n of readdirSync(d)) if (statSync(join(d, n)).isDirectory()) out.push(relative(dir, join(d, n))), walk(join(d, n));
+    for (const n of readdirSync(d))
+      if (statSync(join(d, n)).isDirectory()) out.push(relative(dir, join(d, n))), walk(join(d, n));
   };
   walk(dir);
   return out.sort();
@@ -62,13 +72,15 @@ test('any folder holding a spec.yml is a home, whatever it is called @rule:locat
     'feature: x\nstories:\n  - id: x.y\n    rules:\n      - id: x.y.z\n        statement: It bills.\n        because: Money.\n',
   );
   const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
-  const cli = (...args) => spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
+  const cli = (...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
   const before = folders(bps);
 
   // The three homes are found and offered, each under its own folder.
   const offered = cli('blueprints', 'import', repo);
   assert.equal(offered.status, 2, 'with no terminal it lists them and asks for --all');
-  for (const f of ['202610-search', '0002-search', 'billing/api/invoices']) assert.match(offered.stdout, new RegExp(`\\d\\. ${f}\\b`));
+  for (const f of ['202610-search', '0002-search', 'billing/api/invoices'])
+    assert.match(offered.stdout, new RegExp(`\\d\\. ${f}\\b`));
   // The home inside another is refused, and both folders are named.
   assert.match(offered.stderr, /202610-search\/inner is a blueprint inside .*202610-search/);
   assert.doesNotMatch(offered.stdout, /\d\. 202610-search\/inner/);
@@ -76,7 +88,12 @@ test('any folder holding a spec.yml is a home, whatever it is called @rule:locat
   const taken = cli('blueprints', 'import', repo, '--all');
   assert.equal(taken.status, 0, taken.stdout + taken.stderr);
   const rows = () => parse(readFileSync(join(wd, 'registry.yml'), 'utf8')).blueprints;
-  assert.deepEqual(rows().map((r) => relative(bps, r.home.replace(/^~/, process.env.HOME))).sort(), ['0002-search', '202610-search', 'billing/api/invoices']);
+  assert.deepEqual(
+    rows()
+      .map((r) => relative(bps, r.home.replace(/^~/, process.env.HOME)))
+      .sort(),
+    ['0002-search', '202610-search', 'billing/api/invoices'],
+  );
   // No number is read out of a folder name: 0002-search is not ID number 2.
   for (const r of rows()) assert.match(r.id, /^000[1-3]-[a-z0-9]{2,3}-/);
 
@@ -92,7 +109,17 @@ test('any folder holding a spec.yml is a home, whatever it is called @rule:locat
   for (const f of before) assert.ok(folders(bps).includes(f), `${f} is where it was`);
 
   // A thread and a run in a home, by the name alone inside the project.
-  const filed = cli('threads', 'new', '--blueprint', 'invoices', '--rule', 'x.y.z', '--body', 'Seen.', '--as-agent');
+  const filed = cli(
+    'threads',
+    'new',
+    '--blueprint',
+    'invoices',
+    '--rule',
+    'x.y.z',
+    '--body',
+    'Seen.',
+    '--as-agent',
+  );
   assert.equal(filed.status, 0, filed.stdout + filed.stderr);
   // Nothing walkdown wrote in the repository holds an ID this machine gave.
   const ids = rows().map((r) => r.id);
@@ -112,7 +139,8 @@ test('a home inside a home is refused by its path, as the scan refuses it, and t
   writeFileSync(join(outer, 'spec.yml'), 'blueprint: search\n');
   writeFileSync(join(inner, 'spec.yml'), 'blueprint: inner\n');
   const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
-  const cli = (...args) => spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
+  const cli = (...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
   const rows = () => {
     try {
       return parse(readFileSync(join(wd, 'registry.yml'), 'utf8'))?.blueprints ?? [];
@@ -129,6 +157,10 @@ test('a home inside a home is refused by its path, as the scan refuses it, and t
   const o = cli('blueprints', 'import', outer);
   assert.equal(o.status, 0, `${o.stdout}${o.stderr}`);
   assert.equal(rows().length, 1);
-  assert.equal(cli('blueprints', 'import', inner).status, 2, 'still refused once its outer home is registered');
+  assert.equal(
+    cli('blueprints', 'import', inner).status,
+    2,
+    'still refused once its outer home is registered',
+  );
   assert.equal(rows().length, 1);
 });

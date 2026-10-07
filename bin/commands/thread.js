@@ -1,7 +1,9 @@
-import { blueprintFlag } from '../../lib/locations.js';
+import { readFileSync } from 'node:fs';
+import { basename, extname } from 'node:path';
 import { parseArgs } from 'node:util';
 import { collectRules, loadBlueprint } from '../../lib/blueprint.js';
 import { defaultActor } from '../../lib/identity.js';
+import { blueprintFlag } from '../../lib/locations.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim, yellow } from '../../lib/report/tty.js';
 import { getThread, labelOwners } from '../../lib/threads.js';
@@ -9,8 +11,6 @@ import { whenIn } from '../../lib/time.js';
 import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, offer, openThread } from '../../lib/writes.js';
 import { candidatesHere, end, loadOrExit, namedOrExit } from './context.js';
-import { readFileSync } from 'node:fs';
-import { basename, extname } from 'node:path';
 
 export function run(args) {
   const { values, positionals } = parseArgs({
@@ -52,7 +52,9 @@ export function run(args) {
           ? 'reply'
           : null;
   // A change names its blueprint; reading one finds it (locations.several.writes-name-one).
-  let blueprint = loadOrExit(verb ? namedOrExit(values.blueprint, `threads ${verb}`) : (values.blueprint ?? holderOf(id)));
+  let blueprint = loadOrExit(
+    verb ? namedOrExit(values.blueprint, `threads ${verb}`) : (values.blueprint ?? holderOf(id)),
+  );
 
   /*
    * Who this runs as is not an argument. There was a `--actor <name>` here,
@@ -83,15 +85,19 @@ export function run(args) {
    * bodies for one message.
    */
   if ((values.said !== undefined || values.added !== undefined) && !via) {
-    console.error('--said and --added say what a machine relayed and added; they go with --as-agent');
+    console.error(
+      '--said and --added say what a machine relayed and added; they go with --as-agent',
+    );
     process.exit(2);
   }
   if (values.added !== undefined && values.said === undefined) {
-    console.error('--added goes beside a person\'s words - say what they said with --said');
+    console.error("--added goes beside a person's words - say what they said with --said");
     process.exit(2);
   }
   if (values.said !== undefined && values.reply !== undefined) {
-    console.error('--said is the message; what the machine adds to it goes in --added, not --reply');
+    console.error(
+      '--said is the message; what the machine adds to it goes in --added, not --reply',
+    );
     process.exit(2);
   }
   const status = values.verify
@@ -118,7 +124,9 @@ export function run(args) {
    */
   if (id === 'new') {
     if (replying || status) {
-      console.error('threads new opens a thread; `threads reply` and `threads set` act on one that exists.');
+      console.error(
+        'threads new opens a thread; `threads reply` and `threads set` act on one that exists.',
+      );
       process.exit(2);
     }
     const kind = values.kind ?? 'note';
@@ -131,10 +139,14 @@ export function run(args) {
     // A relayed thread's body is what the person said; --body beside --said
     // would be two bodies for one message.
     if (values.said !== undefined && values.body !== undefined) {
-      console.error('--said is the body of a relayed thread; what the machine adds goes in --added, not --body');
+      console.error(
+        '--said is the body of a relayed thread; what the machine adds goes in --added, not --body',
+      );
       process.exit(2);
     }
-    const body = saysSomething(values.body ?? values.said) ? (values.body ?? values.said).trim() : '';
+    const body = saysSomething(values.body ?? values.said)
+      ? (values.body ?? values.said).trim()
+      : '';
     if (!body) {
       console.error('a thread needs a body — say what was seen (--body <text>)');
       process.exit(2);
@@ -207,7 +219,15 @@ export function run(args) {
     const marked = thread.via ?? null;
     if (values.json) {
       console.log(
-        JSON.stringify({ id: opened, uuid: thread.uuid, kind, status: thread.status, by, ...(marked ? { via: marked } : {}), anchor }),
+        JSON.stringify({
+          id: opened,
+          uuid: thread.uuid,
+          kind,
+          status: thread.status,
+          by,
+          ...(marked ? { via: marked } : {}),
+          anchor,
+        }),
       );
       return end(0);
     }
@@ -232,7 +252,8 @@ export function run(args) {
       if (values.json) console.log(JSON.stringify({ id, options: thread.options }));
       else {
         console.log(`✓ ${id} now offers ${thread.options.length} choices`);
-        for (const o of thread.options) console.log(`  ○ ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`);
+        for (const o of thread.options)
+          console.log(`  ○ ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`);
       }
     } catch (err) {
       console.error(err.message);
@@ -274,7 +295,11 @@ export function run(args) {
       console.error(err.message);
       // A refused change is refused whole: say so, so nobody goes looking
       // for the reply (commands.threads.one-verb-per-change).
-      console.error(values.reply !== undefined ? 'Nothing was changed, and the reply did not land.' : 'Nothing was changed.');
+      console.error(
+        values.reply !== undefined
+          ? 'Nothing was changed, and the reply did not land.'
+          : 'Nothing was changed.',
+      );
       process.exit(2);
     }
     blueprint = loadBlueprint(blueprint.dir);
@@ -285,8 +310,16 @@ export function run(args) {
   if (!t && owners.holding.length > 1) {
     // A label two threads share is named, both of them, and never guessed.
     console.error(`${id} labels ${owners.holding.length} threads:`);
-    for (const o of owners.holding) console.error(`  ${o.uuid}  ${String(o.created ?? '')}  ${String(o.body ?? '').trim().split('\n')[0].slice(0, 80)}`);
-    console.error(`Name one by its UUID, or \`walkdown threads relabel ${id}${blueprintFlag(blueprint.dir)}\` gives the newer one a label of its own.`);
+    for (const o of owners.holding)
+      console.error(
+        `  ${o.uuid}  ${String(o.created ?? '')}  ${String(o.body ?? '')
+          .trim()
+          .split('\n')[0]
+          .slice(0, 80)}`,
+      );
+    console.error(
+      `Name one by its UUID, or \`walkdown threads relabel ${id}${blueprintFlag(blueprint.dir)}\` gives the newer one a label of its own.`,
+    );
     process.exit(2);
   }
   if (!t) {
@@ -368,9 +401,15 @@ export function run(args) {
   const others = [...owners.holding, ...owners.formerly].filter((o) => o.uuid !== t.uuid);
   if (others.length) {
     const holder = owners.holding[0];
-    console.log(yellow(`  ! ${id} has labelled ${others.length + 1} threads. It labels ${holder?.uuid ?? 'none'} now${holder?.uuid === t.uuid ? ' (this one)' : ''}.`));
+    console.log(
+      yellow(
+        `  ! ${id} has labelled ${others.length + 1} threads. It labels ${holder?.uuid ?? 'none'} now${holder?.uuid === t.uuid ? ' (this one)' : ''}.`,
+      ),
+    );
     for (const o of owners.formerly)
-      console.log(dim(`    ${o.uuid} was ${id}, and is ${o.id} now${o.uuid === t.uuid ? ' (this one)' : ''}`));
+      console.log(
+        dim(`    ${o.uuid} was ${id}, and is ${o.id} now${o.uuid === t.uuid ? ' (this one)' : ''}`),
+      );
   }
   /*
    * Author, and how the words arrived. Provenance was written to disk and
@@ -391,17 +430,21 @@ export function run(args) {
   // What a machine added beside a person's words, apart from them and
   // marked as its own.
   const addition = (m, pad) =>
-    m?.added ? `\n${pad}${dim('┆ agent added:')}\n${pad}${dim('┆')} ${String(m.added).trim().replace(/\n/g, `\n${pad}${dim('┆')} `)}` : '';
+    m?.added
+      ? `\n${pad}${dim('┆ agent added:')}\n${pad}${dim('┆')} ${String(m.added)
+          .trim()
+          .replace(/\n/g, `\n${pad}${dim('┆')} `)}`
+      : '';
   console.log(addition(t, '  ').replace(/^\n/, ''));
   for (const a of t.attachments ?? []) console.log(dim(`  📎 ${a.name} · ${a.file}`));
   // The choices a question offered, and the one the answer took.
   for (const o of t.options ?? [])
-    console.log(`  ${t.chosen === o.label ? '◉' : '○'} ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`);
+    console.log(
+      `  ${t.chosen === o.label ? '◉' : '○'} ${o.label}${o.why ? dim(` — ${o.why}`) : ''}`,
+    );
   if (t.deferred) console.log(dim(`  put off until later · ${whenIn(t.deferred, who.timezone)}`));
   for (const r of t.replies ?? []) {
-    console.log(
-      dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + at(r),
-    );
+    console.log(dim(`\n  ↳ ${r.author ?? 'unknown'}`) + saidVia(r) + at(r));
     console.log(
       `    ${String(r.body ?? '')
         .trim()
@@ -412,7 +455,6 @@ export function run(args) {
   return end(0);
 }
 
-
 /*
  * `--attach <file>`: a picture from disk goes on the message (n-0096). The
  * same door the browser's paste uses, so the record is one shape whoever
@@ -422,7 +464,13 @@ function attachFiles(paths) {
   if (!paths?.length) return null;
   return paths.map((p) => {
     const ext = extname(p).toLowerCase().replace('.', '');
-    const type = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' }[ext];
+    const type = {
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      webp: 'image/webp',
+    }[ext];
     if (!type) throw new Error(`${p}: a picture goes on a message - png, jpg, gif or webp`);
     return { name: basename(p), type, data: readFileSync(p).toString('base64') };
   });

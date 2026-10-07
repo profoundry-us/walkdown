@@ -2,7 +2,7 @@
  * Fixtures for group g2's cli screens: design ownership, authoring, screen
  * identity and time.
  */
-import { readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /* `checkout` with one rule, `checkout.basics.pays`, and nothing else in features/. */
@@ -21,20 +21,42 @@ function storyboard(m, screens) {
 /* Undrawn screens, cart (unless left out) and receipt, and a design request on receipt alone. */
 function undrawn(m, { cart = true } = {}) {
   storyboard(m, [
-    ...(cart ? ['  - id: cart', '    title: Cart', '    prototype: null', '    app: { path: /cart }'] : []),
+    ...(cart
+      ? ['  - id: cart', '    title: Cart', '    prototype: null', '    app: { path: /cart }']
+      : []),
     '  - id: receipt',
     '    title: Receipt',
     '    prototype: null',
     '    app: { path: /receipt }',
   ]);
-  m.ok(['threads', 'new', '--screen', 'receipt', '--body', 'Draw the receipt a shopper sees after paying.', '--blueprint', 'checkout']);
+  m.ok([
+    'threads',
+    'new',
+    '--screen',
+    'receipt',
+    '--body',
+    'Draw the receipt a shopper sees after paying.',
+    '--blueprint',
+    'checkout',
+  ]);
 }
 
 export default {
   /* `checkout`'s note n-0001, replied to by the agent and set to addressed. */
   'g2-note-addressed'(m, h) {
     h.fixtures['a-note'](m);
-    m.ok(['threads', 'set', 'n-0001', '--status', 'addressed', '--as-agent', '--reply', 'The pay button shows the bank\'s message now.', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'set',
+      'n-0001',
+      '--status',
+      'addressed',
+      '--as-agent',
+      '--reply',
+      "The pay button shows the bank's message now.",
+      '--blueprint',
+      'checkout',
+    ]);
   },
   /* `checkout` whose storyboard has a page, /cart, and a fragment state of it, /cart#coupon. */
   'g2-routes'(m, h) {
@@ -91,7 +113,13 @@ export default {
   'g2-design-by-agent'(m, h) {
     checkout(m, h);
     const spec = join(m.specOf('checkout'), 'spec.yml');
-    writeFileSync(spec, readFileSync(spec, 'utf8').replace(/^blueprint: checkout$/m, 'blueprint: checkout\n\ndesign:\n  by: agent'));
+    writeFileSync(
+      spec,
+      readFileSync(spec, 'utf8').replace(
+        /^blueprint: checkout$/m,
+        'blueprint: checkout\n\ndesign:\n  by: agent',
+      ),
+    );
     undrawn(m, { cart: false });
   },
   /* `checkout` with two undrawn screens, cart and receipt; only receipt has a design request. */

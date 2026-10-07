@@ -2,7 +2,16 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, statSync }
 import { homedir } from 'node:os';
 import { dirname, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
-import { canon, canRemember, KINDS, readRegistry, registryPath, rememberLocation, resolveLocations, tilde } from '../../lib/locations.js';
+import {
+  canon,
+  canRemember,
+  KINDS,
+  readRegistry,
+  registryPath,
+  rememberLocation,
+  resolveLocations,
+  tilde,
+} from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { MoveFailed, moveDir } from '../../lib/standard.js';
 import { end, namedOrExit, severalHere } from './context.js';
@@ -23,7 +32,9 @@ export function run(args) {
   });
   const kind = positionals[0];
   if (!KINDS.includes(kind)) {
-    console.error(`walkdown records move <kind> --to <path> --blueprint <id>\n  kind is one of: ${KINDS.join(', ')}`);
+    console.error(
+      `walkdown records move <kind> --to <path> --blueprint <id>\n  kind is one of: ${KINDS.join(', ')}`,
+    );
     return end(2);
   }
   if (!values.to) {
@@ -60,7 +71,11 @@ export function run(args) {
           : 'Nothing registered contains this directory, so there is no row to remember a move in.',
       ),
     );
-    console.error(dim('`walkdown blueprints new` starts a blueprint here; `walkdown blueprints import <project>` registers one that exists.'));
+    console.error(
+      dim(
+        '`walkdown blueprints new` starts a blueprint here; `walkdown blueprints import <project>` registers one that exists.',
+      ),
+    );
     return end(2);
   }
   const from = loc[kind].path;
@@ -117,7 +132,11 @@ export function run(args) {
    */
   if (existsSync(to) && lstatSync(to).isSymbolicLink()) {
     console.error(red(`${to} is a link, not a directory.`));
-    console.error(dim(`  It points at ${statSync(to).isDirectory() ? realpathSync(to) : 'something else'}. Name the directory itself.`));
+    console.error(
+      dim(
+        `  It points at ${statSync(to).isDirectory() ? realpathSync(to) : 'something else'}. Name the directory itself.`,
+      ),
+    );
     return end(2);
   }
 

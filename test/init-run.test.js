@@ -1,4 +1,3 @@
-import { register } from '../tools/test-home.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {
@@ -15,16 +14,27 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
-import { installSkills, placePointer, POINTER_BEGIN, POINTER_END, POINTER_TEXT, scaffold, skillFiles } from '../lib/init.js';
+import {
+  installSkills,
+  POINTER_BEGIN,
+  POINTER_END,
+  POINTER_TEXT,
+  placePointer,
+  scaffold,
+  skillFiles,
+} from '../lib/init.js';
+import { register } from '../tools/test-home.mjs';
 
 /*
  * A block as walkdown wrote it before ADR 0014, naming a blueprint - the
  * shape the fixed paragraph replaces, and the boundary cases' "before".
  */
-const oldBlock = (where) => `${POINTER_BEGIN}\n## walkdown\n\nThis project's spec is the walkdown blueprint in \`${where}\`.\n${POINTER_END}\n`;
+const oldBlock = (where) =>
+  `${POINTER_BEGIN}\n## walkdown\n\nThis project's spec is the walkdown blueprint in \`${where}\`.\n${POINTER_END}\n`;
+
 import { lint } from '../lib/lint.js';
-import { removePointer } from '../lib/standard.js';
 import { runChecks } from '../lib/run-cmd.js';
+import { removePointer } from '../lib/standard.js';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-initrun-'));
 
@@ -63,8 +73,7 @@ const homeSpec = (proj, name = basename(proj)) =>
   join(proj, '.walkdown', 'blueprints', `0001-${name}`);
 const spec = (proj) => ({ specDir: homeSpec(proj), commit: 'spec' });
 /** The spec's path as `scaffold` reports it: relative to the project root. */
-const rel = (proj, ...parts) =>
-  join('.walkdown', 'blueprints', `0001-${basename(proj)}`, ...parts);
+const rel = (proj, ...parts) => join('.walkdown', 'blueprints', `0001-${basename(proj)}`, ...parts);
 function declare(proj, name = basename(proj)) {
   const home = join(proj, '.walkdown', 'blueprints', `0001-${name}`);
   mkdirSync(home, { recursive: true });
@@ -84,7 +93,10 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   assert.equal(actionOf(results, pluginAt()), 'linked');
   assert.equal(realpathSync(pluginAt()), CLONE);
   for (const short of ['judge', 'incorporate', 'formulate'])
-    assert.match(readFileSync(viaPlugin(short), 'utf8'), new RegExp(`^---\\nname: ${short}\\ndescription: .+`));
+    assert.match(
+      readFileSync(viaPlugin(short), 'utf8'),
+      new RegExp(`^---\\nname: ${short}\\ndescription: .+`),
+    );
   // And not into the repository, even though this spec is committed: skills
   // are the person's, and a committed one is a vendored copy walkdown cannot
   // keep right afterwards (n-0239).
@@ -99,7 +111,9 @@ test('init scaffolds a lint-clean blueprint with agent conventions', () => {
   assert.match(pointer, /AGENTS\.md/);
   assert.equal(actionOf(results, homeSpec(proj)), 'spec-in-repo');
 
-  const { findings, exitCode } = lint(loadBlueprint(declare(proj), { cwd: proj }), { checks: false });
+  const { findings, exitCode } = lint(loadBlueprint(declare(proj), { cwd: proj }), {
+    checks: false,
+  });
   assert.deepEqual(findings, [], JSON.stringify(findings));
   assert.equal(exitCode, 0);
 });
@@ -136,10 +150,7 @@ test('init is idempotent: rerun no-ops, customizations kept, --force updates own
   assert.equal(readFileSync(skillAt('walkdown-judge'), 'utf8'), 'customized');
   assert.equal(actionOf(forced, pluginAt()), 'up-to-date');
   rmSync(join(PERSONAL_SKILLS, 'walkdown-judge'), { recursive: true });
-  assert.equal(
-    readFileSync(join(homeSpec(proj), 'spec.yml'), 'utf8'),
-    'blueprint: customized\n',
-  );
+  assert.equal(readFileSync(join(homeSpec(proj), 'spec.yml'), 'utf8'), 'blueprint: customized\n');
 });
 
 test('init appends a pointer to an existing CLAUDE.md exactly once', () => {
@@ -205,18 +216,26 @@ test('the pointer reads the same from wherever the file sits, and carries no pat
   execFileSync('git', ['init', '-q', '.'], { cwd: repo });
   const home = join(root, 'pointer-subdir-home');
   const cli = (args, cwd) =>
-    execFileSync(process.execPath, [new URL('../bin/walkdown.js', import.meta.url).pathname, ...args], {
-      cwd,
-      env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(root, 'ps-skills') },
-      encoding: 'utf8',
-    });
+    execFileSync(
+      process.execPath,
+      [new URL('../bin/walkdown.js', import.meta.url).pathname, ...args],
+      {
+        cwd,
+        env: { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(root, 'ps-skills') },
+        encoding: 'utf8',
+      },
+    );
   cli(['blueprints', 'new', '--commit', 'spec'], repo);
 
   cli(['pointer', '--into', 'AGENTS.md'], deep);
   const block = readFileSync(join(deep, 'AGENTS.md'), 'utf8');
   assert.equal(block, POINTER_TEXT);
   assert.ok(!block.includes(root), `no machine path in a committed file:\n${block}`);
-  assert.equal(readFileSync(join(repo, 'CLAUDE.md'), 'utf8'), POINTER_TEXT, 'and the same at the root');
+  assert.equal(
+    readFileSync(join(repo, 'CLAUDE.md'), 'utf8'),
+    POINTER_TEXT,
+    'and the same at the root',
+  );
 });
 
 /*
@@ -253,10 +272,10 @@ const BOUNDARY_CASES = {
   crlf: { head: '# Head\r\n\r\n', gap: '\r\n', tail: '## Tail\r\n' },
   // A comment of the person's own, on the line after ours. It used to lose
   // its leading `<` and become broken markup.
-  comment: { head: '# Head\n\n', gap: '\n', tail: '<!-- mine, not walkdown\'s -->\n' },
+  comment: { head: '# Head\n\n', gap: '\n', tail: "<!-- mine, not walkdown's -->\n" },
 };
 
-test('the block ends at its marker\'s line, whatever comes next @rule:locations.pointer.owns-only-its-block', () => {
+test("the block ends at its marker's line, whatever comes next @rule:locations.pointer.owns-only-its-block", () => {
   for (const [name, { head, gap, tail }] of Object.entries(BOUNDARY_CASES)) {
     const proj = join(root, `boundary-${name}`);
     mkdirSync(proj, { recursive: true });
@@ -312,18 +331,18 @@ test('taking the block out leaves the file as it would have been @rule:locations
  * and their words come back on a line of their own. Deleting them outright
  * would be quieter than the old corruption and no more honest.
  */
-test('words left on the marker\'s line are kept, not swallowed @rule:locations.pointer.owns-only-its-block', () => {
+test("words left on the marker's line are kept, not swallowed @rule:locations.pointer.owns-only-its-block", () => {
   const proj = join(root, 'boundary-sameline');
   mkdirSync(proj, { recursive: true });
   const file = join(proj, 'CLAUDE.md');
   const theirs = '<!-- mine, on the same line -->';
-  writeFileSync(file, `# Head\n\n${oldBlock('blueprint/').replace(/\n$/, '')} ${theirs}\n## Tail\n`);
+  writeFileSync(
+    file,
+    `# Head\n\n${oldBlock('blueprint/').replace(/\n$/, '')} ${theirs}\n## Tail\n`,
+  );
 
   assert.equal(placePointer(file, POINTER_TEXT), 'pointer-updated');
-  assert.equal(
-    readFileSync(file, 'utf8'),
-    `# Head\n\n${POINTER_TEXT}${theirs}\n## Tail\n`,
-  );
+  assert.equal(readFileSync(file, 'utf8'), `# Head\n\n${POINTER_TEXT}${theirs}\n## Tail\n`);
 
   assert.equal(removePointer(file), 'removed');
   assert.equal(readFileSync(file, 'utf8'), `# Head\n\n${theirs}\n## Tail\n`);
@@ -341,7 +360,7 @@ test('words left on the marker\'s line are kept, not swallowed @rule:locations.p
  * which decided it). A team that wants them committed asks: `walkdown skills
  * --project`.
  */
-test('skills are the person\'s, whatever the spec did @rule:locations.default.skills-are-yours-by-default', () => {
+test("skills are the person's, whatever the spec did @rule:locations.default.skills-are-yours-by-default", () => {
   const home = join(root, 'skills-home');
   const proj = join(root, 'skills-out');
   mkdirSync(proj, { recursive: true });
@@ -350,7 +369,11 @@ test('skills are the person\'s, whatever the spec did @rule:locations.default.sk
 
   assert.ok(existsSync(viaPlugin('judge', home)), 'the person got them, as the plugin');
   assert.equal(existsSync(join(proj, '.claude')), false, 'and the repository did not');
-  assert.deepEqual(tree(proj), [], 'nothing - not even a pointer, which is a committed spec\'s (n-0161)');
+  assert.deepEqual(
+    tree(proj),
+    [],
+    "nothing - not even a pointer, which is a committed spec's (n-0161)",
+  );
 
   // And a committed spec changes none of that: the repository gets the spec,
   // and the procedures stay where they work in every project.
@@ -535,7 +558,11 @@ test('skills with no flags writes nothing and surveys both destinations @rule:lo
   mkdirSync(join(home, 'skills'), { recursive: true });
   const again = skillsCli(repo, home, []);
   assert.equal(again.status, 2);
-  assert.deepEqual(readdirSync(join(home, 'skills')), [], 'surveying an existing directory wrote nothing');
+  assert.deepEqual(
+    readdirSync(join(home, 'skills')),
+    [],
+    'surveying an existing directory wrote nothing',
+  );
 });
 
 /*

@@ -1,6 +1,7 @@
 import { parseArgs } from 'node:util';
 import { checkedRuleIds } from '../../lib/checks.js';
 import { listDrafts } from '../../lib/draft.js';
+import { defaultActor } from '../../lib/identity.js';
 import {
   ACCEPT_MARK,
   acceptanceCell,
@@ -14,7 +15,6 @@ import { dim, green, red, truncate, yellow } from '../../lib/report/tty.js';
 import { deriveStatus, retiredRules } from '../../lib/status.js';
 import { listThreads } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
-import { defaultActor } from '../../lib/identity.js';
 import { eachOrExit, end, sectionHead } from './context.js';
 
 function renderRuleDetail(blueprint, derived, ruleId, json, emit) {
@@ -311,16 +311,16 @@ function report(blueprint, values, ruleId, emit) {
   }
 
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
-const verifyParts = (i) => {
-  const requests = i.requests?.length ?? 0;
-  const yours = i.threads.length - requests;
-  return [
-    ...(yours ? [`${plural(yours, 'note')} of yours answered`] : []),
-    ...(requests ? [`${plural(requests, 'design request')} drawn`] : []),
-  ].join(', ');
-};
+  const verifyParts = (i) => {
+    const requests = i.requests?.length ?? 0;
+    const yours = i.threads.length - requests;
+    return [
+      ...(yours ? [`${plural(yours, 'note')} of yours answered`] : []),
+      ...(requests ? [`${plural(requests, 'design request')} drawn`] : []),
+    ].join(', ');
+  };
 
-const HOWTO = {
+  const HOWTO = {
     // Named, because "needs a human" was never the question - the question is
     // whether it needs PRODUCT or engineering, and a queue that cannot say
     // which is a queue two people both scroll past.
@@ -360,7 +360,8 @@ const HOWTO = {
     // The machine's own observation, addressed by the machine: it closes it
     // itself. Missing from this table for a day, so the queue crashed the
     // moment one existed (2026-09-21).
-    settle: (i) => `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — a note you wrote, addressed; close it`,
+    settle: (i) =>
+      `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — a note you wrote, addressed; close it`,
     // A design request (ADR 0009): design's to draw, never the building agent's.
     draw: (i) =>
       `draw ${i.screen ?? i.rule ?? 'what it asks for'} — design request ${i.thread}${i.rule && i.screen ? dim(` (${i.rule})`) : ''}`,

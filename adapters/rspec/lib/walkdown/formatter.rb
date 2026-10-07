@@ -29,7 +29,8 @@ require 'yaml'
 # Env: WALKDOWN_TARGET (default "local"), APP_HOST (base_url fallback;
 # Capybara.app_host
 # wins when Capybara is loaded). Who a run is recorded under is "ci" under CI
-# and the `identity:` in ~/.walkdown/config.yml otherwise — never an env var.
+# and the `identity:` in ~/.walkdown/profile.yml otherwise (config.yml on a
+# machine not yet upgraded) — never an env var.
 # Evidence: set `evidence: [paths]` metadata on an example to attach files
 # (screenshots your workflow specs saved).
 #
@@ -322,10 +323,15 @@ module Walkdown
     def actor
       return 'ci' if ENV['CI']
 
+      # profile.yml since ADR 0014; config.yml is what it was called before
+      # `walkdown upgrade`, and a run on a machine not yet upgraded still says
+      # who it is (n-0510).
       home = ENV['WALKDOWN_HOME'] || File.join(Dir.home, '.walkdown')
-      config = File.join(home, 'config.yml')
-      if File.exist?(config)
-        said = (YAML.safe_load_file(config, aliases: true) || {}).dig('identity', 'username')
+      %w[profile.yml config.yml].each do |name|
+        file = File.join(home, name)
+        next unless File.exist?(file)
+
+        said = (YAML.safe_load_file(file, aliases: true) || {}).dig('identity', 'username')
         return said.strip if said.is_a?(String) && !said.strip.empty?
       end
       Etc.getlogin || 'unknown'

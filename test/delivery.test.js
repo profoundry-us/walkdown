@@ -7,7 +7,7 @@
  * who cloned it. So this reads the package manifest and the source rather
  * than trusting that today's suite would have noticed.
  */
-import { register } from '../tools/test-home.mjs';
+
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import {
@@ -22,6 +22,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { register } from '../tools/test-home.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const read = (p) => readFileSync(join(root, p), 'utf8');
@@ -87,15 +88,21 @@ test('the CLI runs from a tree with no node_modules @rule:delivery.install.clone
     // This repository's own blueprints, registered in the suite's home the
     // way `walkdown import .` would put them there (ADR 0003). Both: since
     // ADR 0013 the suite tags rules of each, and lint reads the project.
-    for (const [id, home] of [['walkdown', '0001-walkdown'], ['cli', '0002-cli']])
-      register({ id, project: root.replace(/\/$/, ''), homeDir: join(root, '.walkdown', 'blueprints', home) });
+    for (const [id, home] of [
+      ['walkdown', '0001-walkdown'],
+      ['cli', '0002-cli'],
+    ])
+      register({
+        id,
+        project: root.replace(/\/$/, ''),
+        homeDir: join(root, '.walkdown', 'blueprints', home),
+      });
 
-    const out = execFileSync(process.execPath, [
-      join(away, 'bin', 'walkdown.js'),
-      'lint',
-      '--blueprint',
-      'walkdown',
-    ], { cwd: root }).toString();
+    const out = execFileSync(
+      process.execPath,
+      [join(away, 'bin', 'walkdown.js'), 'lint', '--blueprint', 'walkdown'],
+      { cwd: root },
+    ).toString();
     assert.match(
       out,
       /rules, \d+ screens/,

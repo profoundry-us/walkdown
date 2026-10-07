@@ -1,5 +1,5 @@
-import { blueprintFlag } from '../../lib/locations.js';
 import { parseArgs } from 'node:util';
+import { blueprintFlag } from '../../lib/locations.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim, yellow } from '../../lib/report/tty.js';
 import { labelClashes, listThreads } from '../../lib/threads.js';
@@ -21,7 +21,9 @@ export function run(args) {
   if (values.json) {
     console.log(
       JSON.stringify(
-        each.length > 1 ? { blueprints: each.map(({ id, blueprint }) => ({ id, threads: of(blueprint) })) } : of(each[0].blueprint),
+        each.length > 1
+          ? { blueprints: each.map(({ id, blueprint }) => ({ id, threads: of(blueprint) })) }
+          : of(each[0].blueprint),
         null,
         2,
       ),
@@ -62,7 +64,15 @@ function report(threads, values) {
  */
 function clashes(blueprint) {
   for (const { label, threads } of labelClashes(blueprint.threads)) {
-    console.log(yellow(`\n  ! ${label} labels ${threads.length} threads: ${threads.map((t) => t.uuid).join(', ')}`));
-    console.log(dim(`    \`walkdown threads relabel ${label}${blueprintFlag(blueprint.dir)}\` gives the newer one a label of its own`));
+    console.log(
+      yellow(
+        `\n  ! ${label} labels ${threads.length} threads: ${threads.map((t) => t.uuid).join(', ')}`,
+      ),
+    );
+    console.log(
+      dim(
+        `    \`walkdown threads relabel ${label}${blueprintFlag(blueprint.dir)}\` gives the newer one a label of its own`,
+      ),
+    );
   }
 }

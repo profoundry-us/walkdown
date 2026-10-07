@@ -1,4 +1,3 @@
-import { declareProject } from '../tools/test-home.mjs';
 /*
  * Two threads sharing a label (ADR 0014 §9). Two branches that each filed a
  * thread both took the next number, and the merge holds both: two files,
@@ -13,6 +12,7 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
+import { declareProject } from '../tools/test-home.mjs';
 import { parse } from '../vendor/yaml.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
@@ -53,7 +53,10 @@ function fixture() {
   thread(OLDER, 'n-0006', '2026-10-01T10:00:00Z', 'Filed on main.');
   thread(NEWER, 'n-0006', '2026-10-02T10:00:00Z', 'Filed on the branch.');
   thread(OTHER, 'n-0007', '2026-10-03T10:00:00Z', 'Filed after both.');
-  writeFileSync(join(bp, 'runs', '2026-10-02T11-00-00Z-local-01.json'), '{"id":"2026-10-02T11-00-00Z-local-01","results":[],"note":"cites n-0006"}\n');
+  writeFileSync(
+    join(bp, 'runs', '2026-10-02T11-00-00Z-local-01.json'),
+    '{"id":"2026-10-02T11-00-00Z-local-01","results":[],"note":"cites n-0006"}\n',
+  );
   const id = declareProject(home, bp);
   return { home, bp, id };
 }
@@ -95,16 +98,22 @@ sys.stdout.write(out.decode("utf8", "replace"))
 sys.exit(os.waitstatus_to_exitcode(status))
 `;
 const atTerminal = (f, args, answer, prompt) =>
-  spawnSync('python3', ['-c', PTY, answer, prompt, process.execPath, CLI, ...args, '--blueprint', f.id], {
-    cwd: f.bp,
-    encoding: 'utf8',
-    timeout: 30_000,
-    env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: f.home },
-  });
+  spawnSync(
+    'python3',
+    ['-c', PTY, answer, prompt, process.execPath, CLI, ...args, '--blueprint', f.id],
+    {
+      cwd: f.bp,
+      encoding: 'utf8',
+      timeout: 30_000,
+      env: { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: f.home },
+    },
+  );
 
 const snapshot = (bp) =>
   Object.fromEntries(
-    ['threads', 'runs'].flatMap((k) => readdirSync(join(bp, k)).map((n) => [`${k}/${n}`, readFileSync(join(bp, k, n), 'utf8')])),
+    ['threads', 'runs'].flatMap((k) =>
+      readdirSync(join(bp, k)).map((n) => [`${k}/${n}`, readFileSync(join(bp, k, n), 'utf8')]),
+    ),
   );
 
 test('two threads sharing a label are named, and relabelled only when a person agrees @rule:locations.threads.clashing-labels-ask', () => {
@@ -115,10 +124,16 @@ test('two threads sharing a label are named, and relabelled only when a person a
   const listed = cli(f, ['threads']);
   assert.equal(listed.status, 0, listed.stderr);
   assert.match(listed.stdout, new RegExp(`n-0006 labels 2 threads: ${OLDER}, ${NEWER}`));
-  assert.match(listed.stdout, new RegExp(`\`walkdown threads relabel n-0006 --blueprint ${f.id}\``));
+  assert.match(
+    listed.stdout,
+    new RegExp(`\`walkdown threads relabel n-0006 --blueprint ${f.id}\``),
+  );
   const linted = cli(f, ['lint', '--json']);
-  const clash = JSON.parse(linted.stdout).findings?.find?.((x) => x.category === 'label-clash') ??
-    JSON.parse(linted.stdout).blueprints?.flatMap((b) => b.findings).find((x) => x.category === 'label-clash');
+  const clash =
+    JSON.parse(linted.stdout).findings?.find?.((x) => x.category === 'label-clash') ??
+    JSON.parse(linted.stdout)
+      .blueprints?.flatMap((b) => b.findings)
+      .find((x) => x.category === 'label-clash');
   assert.ok(clash, linted.stdout);
   assert.match(clash.message, new RegExp(`${OLDER}, ${NEWER}`));
 
@@ -136,7 +151,12 @@ test('two threads sharing a label are named, and relabelled only when a person a
   const asked = cli(f, ['threads', 'relabel', 'n-0006']);
   assert.equal(asked.status, 2, asked.stdout);
   assert.match(asked.stdout, new RegExp(NEWER), 'the newer one is the one it would move');
-  assert.match(asked.stderr, new RegExp(`Nothing was changed\\. \`walkdown threads relabel ${NEWER} --yes --blueprint ${f.id}\` does it`));
+  assert.match(
+    asked.stderr,
+    new RegExp(
+      `Nothing was changed\\. \`walkdown threads relabel ${NEWER} --yes --blueprint ${f.id}\` does it`,
+    ),
+  );
   assert.deepEqual(snapshot(f.bp), before, 'and nothing was');
 
   // Declining at a terminal changes nothing either.
@@ -151,19 +171,27 @@ test('two threads sharing a label are named, and relabelled only when a person a
   const newer = parse(readFileSync(join(f.bp, 'threads', `${NEWER}.yml`), 'utf8'));
   assert.equal(newer.id, 'n-0008', 'one past every label in the blueprint, n-0007 included');
   assert.deepEqual(newer.aliases, ['n-0006']);
-  assert.equal(parse(readFileSync(join(f.bp, 'threads', `${OLDER}.yml`), 'utf8')).id, 'n-0006', 'the older keeps the label');
+  assert.equal(
+    parse(readFileSync(join(f.bp, 'threads', `${OLDER}.yml`), 'utf8')).id,
+    'n-0006',
+    'the older keeps the label',
+  );
 
   // `threads show n-0006` names both, and says which holds the label now.
   const shown = cli(f, ['threads', 'show', 'n-0006']);
   assert.equal(shown.status, 0, shown.stderr);
   assert.match(shown.stdout, /Filed on main\./, 'the label reads the thread that holds it');
-  assert.match(shown.stdout, new RegExp(`n-0006 has labelled 2 threads\\. It labels ${OLDER} now \\(this one\\)`));
+  assert.match(
+    shown.stdout,
+    new RegExp(`n-0006 has labelled 2 threads\\. It labels ${OLDER} now \\(this one\\)`),
+  );
   assert.match(shown.stdout, new RegExp(`${NEWER} was n-0006, and is n-0008 now`));
   assert.match(cli(f, ['threads', 'show', 'n-0008']).stdout, /Filed on the branch\./);
 
   // No run record or reply is edited.
   const after_ = snapshot(f.bp);
-  for (const [k, v] of Object.entries(before)) if (k !== `threads/${NEWER}.yml`) assert.equal(after_[k], v, `${k} untouched`);
+  for (const [k, v] of Object.entries(before))
+    if (k !== `threads/${NEWER}.yml`) assert.equal(after_[k], v, `${k} untouched`);
   assert.deepEqual(newer.replies, parse(before[`threads/${NEWER}.yml`]).replies);
 
   // And the clash is gone from the list and from lint.

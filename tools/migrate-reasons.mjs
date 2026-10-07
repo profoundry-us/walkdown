@@ -41,11 +41,13 @@ const bp = loadBlueprint(at.spec.path, { cwd });
 const cited = new Map();
 for (const { data: run } of bp.runs)
   for (const res of run?.results ?? [])
-    for (const id of res?.threads ?? []) (cited.get(id) ?? cited.set(id, []).get(id)).push({ rule: res.rule, run: run.run_id });
+    for (const id of res?.threads ?? [])
+      (cited.get(id) ?? cited.set(id, []).get(id)).push({ rule: res.rule, run: run.run_id });
 // Every thread a rule names as where it came from.
 const origins = new Set();
 for (const { rule } of collectRules(bp.features))
-  if (typeof rule?.origin === 'string' && rule.origin.startsWith('thread:')) origins.add(rule.origin.slice('thread:'.length));
+  if (typeof rule?.origin === 'string' && rule.origin.startsWith('thread:'))
+    origins.add(rule.origin.slice('thread:'.length));
 
 const machine = (t) => isMachineName(t.author) || Boolean(t.via);
 /*
@@ -58,10 +60,14 @@ const machine = (t) => isMachineName(t.author) || Boolean(t.via);
  * is dictation, which is what `via` was for, and it is their feedback, not
  * the machine's observation.
  */
-const opensAsDecision = (t) => /^\s*(decision\b|direction,)/i.test(t.body ?? '') || /^[\s\S]{0,160}\bDecision \(/.test(t.body ?? '');
+const opensAsDecision = (t) =>
+  /^\s*(decision\b|direction,)/i.test(t.body ?? '') ||
+  /^[\s\S]{0,160}\bDecision \(/.test(t.body ?? '');
 const opensAsRequest = (t) => /^\s*design request\b/i.test(t.body ?? '');
 const dictated = (t) =>
-  Boolean(t.via) && !isMachineName(t.author) && new RegExp(`^[\\s\\S]{0,20}\\b${String(t.author).split(/\s/)[0]}\\b`, 'i').test(t.body ?? '');
+  Boolean(t.via) &&
+  !isMachineName(t.author) &&
+  new RegExp(`^[\\s\\S]{0,20}\\b${String(t.author).split(/\s/)[0]}\\b`, 'i').test(t.body ?? '');
 // "Carries no fix": nothing in the thread claims work - it was never at
 // addressed, and no reply says anything was done.
 const carriesNoFix = (t) => t.status === 'open' && !(t.replies ?? []).length;
@@ -76,7 +82,14 @@ function classify(t) {
 }
 
 const classified = [];
-const buckets = { finding: [], observation: [], decision: [], request: [], feedback: [], skipped: [] };
+const buckets = {
+  finding: [],
+  observation: [],
+  decision: [],
+  request: [],
+  feedback: [],
+  skipped: [],
+};
 for (const { file, data: t } of bp.threads) {
   if (t?.kind !== 'note') continue;
   if (t.reason) {
@@ -97,13 +110,18 @@ for (const { data: run } of bp.runs) {
     : (run.roles ?? []).filter(Boolean).map(() => String(run.actor));
   if (!signed.length) continue;
   for (const res of run.results ?? [])
-    if (res?.status === 'pass' && res.rule) passes.push({ rule: res.rule, signer: signed[0], runId: run.run_id, created: run.created });
+    if (res?.status === 'pass' && res.rule)
+      passes.push({ rule: res.rule, signer: signed[0], runId: run.run_id, created: run.created });
 }
 passes.sort((a, b) => a.created.localeCompare(b.created));
 
-console.log(`${bp.threads.length} threads; ${classified.length} notes to classify, ${buckets.skipped.length} already say why.`);
+console.log(
+  `${bp.threads.length} threads; ${classified.length} notes to classify, ${buckets.skipped.length} already say why.`,
+);
 for (const k of ['finding', 'feedback', 'observation', 'request', 'decision'])
-  console.log(`  ${k.padEnd(12)} ${String(buckets[k].length).padStart(4)}  ${buckets[k].join(' ')}`);
+  console.log(
+    `  ${k.padEnd(12)} ${String(buckets[k].length).padStart(4)}  ${buckets[k].join(' ')}`,
+  );
 
 if (!write) {
   // Say what §2 would close, without touching the files: the same walk the
@@ -113,12 +131,19 @@ if (!write) {
     // The same test the writer applies: a finding, or a person's own
     // feedback, that was answered before a signed pass on its rule (§2, §3).
     if (t.status !== 'addressed' || !closesOnVerdict({ ...t, reason })) continue;
-    const claimed = (t.replies ?? []).map((r) => r?.created).filter(Boolean).sort().at(-1) ?? t.created;
+    const claimed =
+      (t.replies ?? [])
+        .map((r) => r?.created)
+        .filter(Boolean)
+        .sort()
+        .at(-1) ?? t.created;
     const secs = (iso) => Math.floor(Date.parse(iso) / 1000);
     const pass = passes.find((p) => p.rule === t.anchor?.rule && secs(claimed) <= secs(p.created));
     if (pass) would.push(`${t.id} (${pass.signer}, ${pass.runId})`);
   }
-  console.log(`\nWould close ${would.length} addressed finding(s)/feedback on a later signed pass:\n  ${would.join('\n  ')}`);
+  console.log(
+    `\nWould close ${would.length} addressed finding(s)/feedback on a later signed pass:\n  ${would.join('\n  ')}`,
+  );
   console.log('\nDry run. Pass --write to apply and record the run.');
   process.exit(0);
 }
@@ -143,7 +168,12 @@ for (const { file, t, reason } of classified) {
 // have had this been running then.
 const closed = [];
 for (const p of passes) {
-  const ids = closeByVerdict(bp, { rule: p.rule, signer: p.signer, runId: p.runId, created: p.created });
+  const ids = closeByVerdict(bp, {
+    rule: p.rule,
+    signer: p.signer,
+    runId: p.runId,
+    created: p.created,
+  });
   for (const id of ids) closed.push({ id, rule: p.rule, run: p.runId, signer: p.signer });
 }
 
@@ -161,13 +191,18 @@ const { record } = writeRunRecord({
 // beside it under keys nothing else reads.
 const file = `${at.runs.path}/${record.run_id}.json`;
 const full = JSON.parse(readFileSync(file, 'utf8'));
-full.why = 'ADR 0005 migration: every note says why it exists; findings a signed pass already looked at close under that pass.';
-full.classified = Object.fromEntries(['finding', 'feedback', 'observation', 'request', 'decision'].map((k) => [k, buckets[k]]));
+full.why =
+  'ADR 0005 migration: every note says why it exists; findings a signed pass already looked at close under that pass.';
+full.classified = Object.fromEntries(
+  ['finding', 'feedback', 'observation', 'request', 'decision'].map((k) => [k, buckets[k]]),
+);
 full.recorded = recorded;
 full.closed = closed;
 writeFileSync(file, JSON.stringify(full, null, 2) + '\n');
 
-console.log(`\nWrote reasons on ${classified.length} notes; ${recorded.length} decision(s) filed as recorded.`);
+console.log(
+  `\nWrote reasons on ${classified.length} notes; ${recorded.length} decision(s) filed as recorded.`,
+);
 console.log(`Closed ${closed.length} finding(s)/feedback on signed passes:`);
 for (const c of closed) console.log(`  ${c.id} — ${c.rule}, ${c.signer}, ${c.run}`);
 console.log(`Recorded as ${record.run_id}.`);

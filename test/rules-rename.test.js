@@ -8,7 +8,15 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -30,9 +38,15 @@ function fixture() {
   spawnSync('git', ['init', '-q'], { cwd: shop });
   writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
   writeFileSync(join(home, 'profile.yml'), 'identity:\n  username: topher\n');
-  const env = { ...process.env, WALKDOWN_HOME: home, WALKDOWN_SKILLS_DIR: join(home, 'skills'), NO_COLOR: '1' };
+  const env = {
+    ...process.env,
+    WALKDOWN_HOME: home,
+    WALKDOWN_SKILLS_DIR: join(home, 'skills'),
+    NO_COLOR: '1',
+  };
   delete env.WALKDOWN_SPEC;
-  const wd = (args) => spawnSync(process.execPath, [CLI, ...args], { cwd: shop, encoding: 'utf8', env });
+  const wd = (args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd: shop, encoding: 'utf8', env });
   assert.equal(wd(['blueprints', 'new', 'shop']).status, 0);
   const at = JSON.parse(wd(['where', '--json']).stdout);
   const features = join(at.spec.path, 'features');
@@ -60,20 +74,41 @@ function fixture() {
     ].join('\n'),
   );
   assert.equal(wd(['hash', '--write', '--blueprint', 'shop']).status, 0);
-  const hash = readFileSync(join(features, 'shop.yml'), 'utf8').match(/statement_hash: (sha256:[0-9a-f]+)/)[1];
+  const hash = readFileSync(join(features, 'shop.yml'), 'utf8').match(
+    /statement_hash: (sha256:[0-9a-f]+)/,
+  )[1];
   mkdirSync(at.runs.path, { recursive: true });
   const put = (name, record) =>
-    writeFileSync(join(at.runs.path, `${name}.json`), `${JSON.stringify({ run_id: name, ...record }, null, 2)}\n`);
+    writeFileSync(
+      join(at.runs.path, `${name}.json`),
+      `${JSON.stringify({ run_id: name, ...record }, null, 2)}\n`,
+    );
   put('2026-10-01T10-00-00Z-local-01', {
-    created: '2026-10-01T10:00:00Z', actor: 'topher', kind: 'checks', target: 'local',
+    created: '2026-10-01T10:00:00Z',
+    actor: 'topher',
+    kind: 'checks',
+    target: 'local',
     results: [{ rule: 'shop.cart.init-adds', status: 'pass', statement_hash: hash }],
   });
   put('2026-10-01T11-00-00Z-local-01', {
-    created: '2026-10-01T11:00:00Z', actor: 'agent', kind: 'walkdown', target: 'local',
-    results: [{ rule: 'shop.cart.init-adds', status: 'pass', statement_hash: hash, reasoning: 'It was in the cart after adding it.' }],
+    created: '2026-10-01T11:00:00Z',
+    actor: 'agent',
+    kind: 'walkdown',
+    target: 'local',
+    results: [
+      {
+        rule: 'shop.cart.init-adds',
+        status: 'pass',
+        statement_hash: hash,
+        reasoning: 'It was in the cart after adding it.',
+      },
+    ],
   });
   put('2026-10-01T12-00-00Z-local-01', {
-    created: '2026-10-01T12:00:00Z', actor: 'topher', kind: 'walkdown', target: 'local',
+    created: '2026-10-01T12:00:00Z',
+    actor: 'topher',
+    kind: 'walkdown',
+    target: 'local',
     signatures: [{ role: 'eng', signer: 'topher' }],
     results: [{ rule: 'shop.cart.init-adds', status: 'pass', statement_hash: hash }],
   });
@@ -85,7 +120,10 @@ function fixture() {
   // A test, in the code, still tagged with the old id.
   // Spelled in two halves, so this file is not itself a test tagged with it.
   mkdirSync(join(shop, 'tests'), { recursive: true });
-  writeFileSync(join(shop, 'tests', 'cart.test.js'), `test('adds @${'rule'}:shop.cart.init-adds', () => {});\n`);
+  writeFileSync(
+    join(shop, 'tests', 'cart.test.js'),
+    `test('adds @${'rule'}:shop.cart.init-adds', () => {});\n`,
+  );
   const runsBefore = Object.fromEntries(
     readdirSync(at.runs.path).map((f) => [f, readFileSync(join(at.runs.path, f), 'utf8')]),
   );
@@ -120,10 +158,14 @@ test('a renamed rule keeps its verdicts, its threads follow it, and its old tag 
   assert.equal(after_.verdict, before.verdict);
 
   // No run record was edited.
-  for (const [f, body] of Object.entries(runsBefore)) assert.equal(readFileSync(join(at.runs.path, f), 'utf8'), body, f);
+  for (const [f, body] of Object.entries(runsBefore))
+    assert.equal(readFileSync(join(at.runs.path, f), 'utf8'), body, f);
 
   // The thread is anchored to the new id.
-  assert.match(readFileSync(threadAt(at.threads.path, 'n-0001'), 'utf8'), /rule: shop\.cart\.add\n/);
+  assert.match(
+    readFileSync(threadAt(at.threads.path, 'n-0001'), 'utf8'),
+    /rule: shop\.cart\.add\n/,
+  );
 
   // The old tag counts, and lint names it with the id to use.
   const lint = wd(['lint']);
@@ -134,7 +176,10 @@ test('a renamed rule keeps its verdicts, its threads follow it, and its old tag 
 
 test('a taken id, a former id of another rule, or a non-id is refused and nothing changes @rule:commands.rules.rename', () => {
   const { wd, features } = fixture();
-  assert.equal(wd(['rules', 'rename', 'shop.cart.init-adds', 'shop.cart.add', '--blueprint', 'shop']).status, 0);
+  assert.equal(
+    wd(['rules', 'rename', 'shop.cart.init-adds', 'shop.cart.add', '--blueprint', 'shop']).status,
+    0,
+  );
   const text = readFileSync(join(features, 'shop.yml'), 'utf8');
 
   for (const [to, says] of [

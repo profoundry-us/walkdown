@@ -29,9 +29,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { specHash } from '../lib/hash.js';
+import { resolveLocations, SPEC_FILE } from '../lib/locations.js';
 import { siblingsOf } from '../lib/project.js';
 import { byUuid } from '../lib/run-record.js';
-import { resolveLocations, SPEC_FILE } from '../lib/locations.js';
 import { settleByAgentPass } from '../lib/threads.js';
 import { parse } from '../vendor/yaml.js';
 
@@ -57,11 +57,15 @@ const stamp = () =>
 const status = () => {
   try {
     return JSON.parse(
-      execFileSync('node', [join(ROOT, 'bin/walkdown.js'), 'status', '--json', ...(ONLY ? ['--blueprint', ONLY] : [])], {
-        cwd: ROOT,
-        encoding: 'utf8',
-        maxBuffer: 64 * 1024 * 1024,
-      }),
+      execFileSync(
+        'node',
+        [join(ROOT, 'bin/walkdown.js'), 'status', '--json', ...(ONLY ? ['--blueprint', ONLY] : [])],
+        {
+          cwd: ROOT,
+          encoding: 'utf8',
+          maxBuffer: 64 * 1024 * 1024,
+        },
+      ),
     );
   } catch (e) {
     if (e.stdout) return JSON.parse(e.stdout);
@@ -92,7 +96,10 @@ function owed() {
     owing += n.owing;
     of += n.of;
   }
-  if (all.length > 1) console.log(`\n${owing} of ${of} agent-tier rules owed across ${all.map((b) => b.id).join(' and ')}`);
+  if (all.length > 1)
+    console.log(
+      `\n${owing} of ${of} agent-tier rules owed across ${all.map((b) => b.id).join(' and ')}`,
+    );
   console.log(`\nscreens to capture: ${[...screens].join(', ') || '(none — all headless)'}`);
 }
 
@@ -101,7 +108,9 @@ function owedIn(s, several, screens) {
   const sweep = (s.sweeps ?? []).find((x) => x.tier === 'agent');
   const rows = s.rows.filter((r) => (r.verify ?? []).includes('agent'));
   // A pass older than a fix a thread claims is a pass of the code before it.
-  const need = rows.filter((r) => ['never', 'stale', 'fail', 'blocked'].includes(r.agent?.state) || r.unjudgedFix);
+  const need = rows.filter(
+    (r) => ['never', 'stale', 'fail', 'blocked'].includes(r.agent?.state) || r.unjudgedFix,
+  );
   if (sweep)
     console.log(`sweep ${sweep.runId} — ${sweep.why}\n  ${sweep.done}/${sweep.of} judged since\n`);
   console.log(`${need.length} of ${rows.length} agent-tier rules owed${need.length ? ':' : ''}\n`);
@@ -1397,15 +1406,15 @@ const STATES = [
   {
     name: 'dock-surface-swap-keeps-the-ghost',
     steps: [
-      ['sr', "r => r.querySelector('[data-surface=\"prototype\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-surface="prototype"]\').click()'],
       ['wait', 2000],
       [
         'probe',
         "(d, fr, fd, fsr, gh, gd) => { gd.defaultView.__noReload = 'set on the first look'; return { at: 'prototype', ghostSrc: gh.src, ghostOpacity: getComputedStyle(gh.parentElement).opacity }; }",
       ],
-      ['sr', "r => r.querySelector('[data-surface=\"app\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-surface="app"]\').click()'],
       ['wait', 800],
-      ['sr', "r => r.querySelector('[data-surface=\"prototype\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-surface="prototype"]\').click()'],
       ['wait', 800],
       [
         'probe',
@@ -1452,7 +1461,7 @@ const STATES = [
     steps: [
       // Fully onto the design: the pinned fixture question lives on the
       // prototype surface, and pins draw on the surface they belong to.
-      ['sr', "r => r.querySelector('[data-surface=\"prototype\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-surface="prototype"]\').click()'],
       ['wait', 2500],
       [
         'probe',
@@ -1482,7 +1491,10 @@ const STATES = [
     steps: [
       ['tab', 'threads'],
       ['wait', 600],
-      ['sr', "r => [...r.querySelectorAll('button')].find((b) => /All/.test(b.textContent))?.click()"],
+      [
+        'sr',
+        "r => [...r.querySelectorAll('button')].find((b) => /All/.test(b.textContent))?.click()",
+      ],
       ['wait', 400],
       [
         'sr',
@@ -1528,7 +1540,7 @@ const STATES = [
         "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const v = r.querySelector('[data-testid=\"detail.verdict\"]'); const stmt = r.querySelector('[data-testid=\"detail.statement\"]'); const fb = r.querySelector('[data-testid=\"detail.feedback\"]'); const judged = r.querySelector('[data-testid=\"detail.judged\"]'); const pane = v.closest('[data-testid=\"detail.pane\"]') ?? r.querySelector('[data-walkdown-chrome]') ?? d.body; return { at: 'rule open in session', buttons: [...v.querySelectorAll('button')].map((b) => b.textContent.trim()), verdictTop: Math.round(v.getBoundingClientRect().top), statementBottom: Math.round(stmt.getBoundingClientRect().bottom), viewportH: d.defaultView.innerHeight, feedbackAboveVerdict: fb.getBoundingClientRect().bottom <= v.getBoundingClientRect().top, judged: judged.textContent.trim() }; }",
       ],
       // Fail with the box empty: refused, with the why named.
-      ['sr', "r => r.querySelector('[data-v=\"fail\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="fail"]\').click()'],
       ['wait', 800],
       [
         'probe',
@@ -1539,16 +1551,16 @@ const STATES = [
         'sr',
         "r => { const t = r.querySelector('#wdp-vnote'); t.value = 'sitting probe — the why a fail owes, filed as a note'; t.dispatchEvent(new Event('input', { bubbles: true })); }",
       ],
-      ['sr', "r => r.querySelector('[data-v=\"fail\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="fail"]\').click()'],
       ['wait', 1500],
       [
         'probe',
         "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'fail recorded', rule: r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(), failCls: r.querySelector('[data-v=\"fail\"]').className, judged: r.querySelector('[data-testid=\"detail.judged\"]').textContent.trim() }; }",
       ],
       // Pass on the next rule: the session moves on by itself.
-      ['sr', "r => [...r.querySelectorAll('[data-testid=\"detail.stepper\"]')].at(-1).click()"],
+      ['sr', 'r => [...r.querySelectorAll(\'[data-testid="detail.stepper"]\')].at(-1).click()'],
       ['wait', 900],
-      ['sr', "r => r.querySelector('[data-v=\"pass\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="pass"]\').click()'],
       ['wait', 1200],
       [
         'probe',
@@ -1589,7 +1601,7 @@ const STATES = [
         "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'embed.pin.tooltip-says-what-it-is').click()",
       ],
       ['wait', 900],
-      ['sr', "r => r.querySelector('[data-v=\"pass\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="pass"]\').click()'],
       ['wait', 1200],
       [
         'probe',
@@ -1631,7 +1643,7 @@ const STATES = [
         'probe',
         "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; const v = r.querySelector('[data-testid=\"detail.verdict\"]'); return { at: 'unbuilt pair', buttons: [...v.querySelectorAll('button')].map((b) => b.textContent.trim()), underline: v.nextElementSibling?.textContent.trim() ?? null, placeholder: r.querySelector('[data-testid=\"detail.feedback\"]').placeholder }; }",
       ],
-      ['sr', "r => r.querySelector('[data-v=\"refining\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="refining"]\').click()'],
       ['wait', 800],
       [
         'probe',
@@ -1641,13 +1653,13 @@ const STATES = [
         'sr',
         "r => { const t = r.querySelector('#wdp-vnote'); t.value = 'sitting probe — what should change about the wording'; t.dispatchEvent(new Event('input', { bubbles: true })); }",
       ],
-      ['sr', "r => r.querySelector('[data-v=\"refining\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="refining"]\').click()'],
       ['wait', 1500],
       [
         'probe',
         "(d) => { const r = [...d.querySelectorAll('[data-walkdown-chrome]')].find((e) => e.shadowRoot).shadowRoot; return { at: 'refined, stays put', rule: r.querySelector('[data-testid=\"detail.rule-id\"]').textContent.trim(), judged: r.querySelector('[data-testid=\"detail.judged\"]').textContent.trim() }; }",
       ],
-      ['sr', "r => r.querySelector('[data-testid=\"detail.back\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-testid="detail.back"]\').click()'],
       ['wait', 600],
       [
         'sr',
@@ -1664,7 +1676,7 @@ const STATES = [
         'sr',
         "r => { const t = r.querySelector('#wdp-vnote'); t.value = ''; t.dispatchEvent(new Event('input', { bubbles: true })); }",
       ],
-      ['sr', "r => r.querySelector('[data-v=\"approved\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="approved"]\').click()'],
       ['wait', 1200],
       [
         'probe',
@@ -1706,7 +1718,7 @@ const STATES = [
         "r => [...r.querySelectorAll('[data-rule]')].find((e) => e.dataset.rule === 'embed.pin.own-skin').click()",
       ],
       ['wait', 900],
-      ['sr', "r => r.querySelector('[data-v=\"pass\"]').click()"],
+      ['sr', 'r => r.querySelector(\'[data-v="pass"]\').click()'],
       ['wait', 1000],
       ['sr', "r => r.querySelector('#wdp-walk').click()"],
       ['wait', 1000],
@@ -1906,61 +1918,61 @@ async function capture(only = []) {
      * the picture, and the loop goes on.
      */
     try {
-    for (const [op, arg] of state.steps) {
-      if (op === 'sr') await inSr(arg);
-      else if (op === 'tab')
-        await inSr(`r => r.querySelector('[role=tab][data-tab=${arg}]').click()`);
-      else if (op === 'key') await page.keyboard.press(arg);
-      else if (op === 'wait') await page.waitForTimeout(arg);
-      else if (op === 'top') await inTop(arg);
-      else if (op === 'probe') probes.push(await inTop(arg));
-      else if (op === 'aim') spot = await inTop(arg);
-      else if (op === 'hover') await page.mouse.move(spot.x, spot.y);
-      else if (op === 'click') await page.mouse.click(spot.x, spot.y);
-      /*
-       * A press held across several `aim`/`hover` pairs is a drag. Kept as
-       * three ops rather than one `drag` because what a drag has to prove is
-       * what happens PART WAY through it, and a state can only photograph
-       * that if it can stop in the middle.
-       */ else if (op === 'down') await page.mouse.down();
-      else if (op === 'up') await page.mouse.up();
-      // Typing where focus already is - the panel's dial editors and the
-      // composer both care that a real keystroke arrived, not that a value
-      // was assigned.
-      else if (op === 'type') await page.keyboard.type(arg);
-      else if (op === 'size') await page.setViewportSize({ width: arg[0], height: arg[1] });
-      /*
-       * Hold every thread this state would file, and remember what it asked
-       * for. These rules are about what a pin RECORDS, and a sitting that
-       * answered that by filing a dozen throwaway threads would be writing
-       * junk into the ledger it exists to keep honest.
-       *
-       * `['no-writes', 500]` answers refused instead of held, which is the
-       * only way to photograph what the panel does with a reply the server
-       * would not take. Matched on a substring rather than a route glob on
-       * purpose: every call the panel makes carries `?bp=`, and a glob ending
-       * in `/api/threads` matches none of them - a miss that filed real junk
-       * threads twice in one night before it was noticed.
-       */ else if (op === 'no-writes')
-        await page.evaluate((status) => {
-          window.__held = [];
-          const real = window.fetch;
-          window.fetch = (u, o) => {
-            if (o?.method !== 'POST' || !String(u).includes('/api/threads')) return real(u, o);
-            window.__held.push({ url: String(u), body: JSON.parse(o.body) });
-            const body = status
-              ? { error: 'held by the sitting harness' }
-              : { id: 'n-HELD', thread: {} };
-            return Promise.resolve(
-              new Response(JSON.stringify(body), {
-                status: status ?? 200,
-                headers: { 'content-type': 'application/json' },
-              }),
-            );
-          };
-        }, arg ?? null);
-      if (op === 'tab') await page.waitForTimeout(500);
-    }
+      for (const [op, arg] of state.steps) {
+        if (op === 'sr') await inSr(arg);
+        else if (op === 'tab')
+          await inSr(`r => r.querySelector('[role=tab][data-tab=${arg}]').click()`);
+        else if (op === 'key') await page.keyboard.press(arg);
+        else if (op === 'wait') await page.waitForTimeout(arg);
+        else if (op === 'top') await inTop(arg);
+        else if (op === 'probe') probes.push(await inTop(arg));
+        else if (op === 'aim') spot = await inTop(arg);
+        else if (op === 'hover') await page.mouse.move(spot.x, spot.y);
+        else if (op === 'click') await page.mouse.click(spot.x, spot.y);
+        /*
+         * A press held across several `aim`/`hover` pairs is a drag. Kept as
+         * three ops rather than one `drag` because what a drag has to prove is
+         * what happens PART WAY through it, and a state can only photograph
+         * that if it can stop in the middle.
+         */ else if (op === 'down') await page.mouse.down();
+        else if (op === 'up') await page.mouse.up();
+        // Typing where focus already is - the panel's dial editors and the
+        // composer both care that a real keystroke arrived, not that a value
+        // was assigned.
+        else if (op === 'type') await page.keyboard.type(arg);
+        else if (op === 'size') await page.setViewportSize({ width: arg[0], height: arg[1] });
+        /*
+         * Hold every thread this state would file, and remember what it asked
+         * for. These rules are about what a pin RECORDS, and a sitting that
+         * answered that by filing a dozen throwaway threads would be writing
+         * junk into the ledger it exists to keep honest.
+         *
+         * `['no-writes', 500]` answers refused instead of held, which is the
+         * only way to photograph what the panel does with a reply the server
+         * would not take. Matched on a substring rather than a route glob on
+         * purpose: every call the panel makes carries `?bp=`, and a glob ending
+         * in `/api/threads` matches none of them - a miss that filed real junk
+         * threads twice in one night before it was noticed.
+         */ else if (op === 'no-writes')
+          await page.evaluate((status) => {
+            window.__held = [];
+            const real = window.fetch;
+            window.fetch = (u, o) => {
+              if (o?.method !== 'POST' || !String(u).includes('/api/threads')) return real(u, o);
+              window.__held.push({ url: String(u), body: JSON.parse(o.body) });
+              const body = status
+                ? { error: 'held by the sitting harness' }
+                : { id: 'n-HELD', thread: {} };
+              return Promise.resolve(
+                new Response(JSON.stringify(body), {
+                  status: status ?? 200,
+                  headers: { 'content-type': 'application/json' },
+                }),
+              );
+            };
+          }, arg ?? null);
+        if (op === 'tab') await page.waitForTimeout(500);
+      }
     } catch (e) {
       const line = `STATE ${state.name}: ${String(e.message ?? e).split('\n')[0]}`;
       errors.push(line);
@@ -2064,12 +2076,20 @@ function record(file) {
     // A thread named by its label is written as its UUID (ADR 0014 §9).
     let named;
     try {
-      named = byUuid(results, () => [resolveLocations({ spec }).threads.path, ...siblingsOf(spec).map((x) => x.threads)]);
+      named = byUuid(results, () => [
+        resolveLocations({ spec }).threads.path,
+        ...siblingsOf(spec).map((x) => x.threads),
+      ]);
     } catch (e) {
       console.error(`refusing to record: ${e.message}`);
       process.exit(1);
     }
-    return { id, spec, run: { ...base, spec_hash: specHash(spec), results: named }, out: join(resolveLocations({ spec }).runs.path, `${base.run_id}.json`) };
+    return {
+      id,
+      spec,
+      run: { ...base, spec_hash: specHash(spec), results: named },
+      out: join(resolveLocations({ spec }).runs.path, `${base.run_id}.json`),
+    };
   });
   /*
    * And into the runs directory the ledger actually keeps, which stopped
@@ -2086,17 +2106,24 @@ function record(file) {
   const settled = [];
   for (const { id, spec, run, out } of outs) {
     writeFileSync(out, JSON.stringify(run, null, 2) + '\n');
-    console.log(`recorded ${run.run_id} — ${run.results.length} verdict(s)${outs.length > 1 ? ` for ${id}` : ''}`);
+    console.log(
+      `recorded ${run.run_id} — ${run.results.length} verdict(s)${outs.length > 1 ? ` for ${id}` : ''}`,
+    );
     console.log(`  ${out}`);
     // The agent's pass ends the notes it wrote on the rule and has now judged
     // (threads.lifecycle.closes-where-it-was-asked); a person's stay for them.
     for (const r of run.results)
       if (r.status === 'pass')
         settled.push(
-          ...settleByAgentPass(loadBlueprint(spec), { rule: r.rule, runId: run.run_id, created: run.created }),
+          ...settleByAgentPass(loadBlueprint(spec), {
+            rule: r.rule,
+            runId: run.run_id,
+            created: run.created,
+          }),
         );
   }
-  if (settled.length) console.log(`settled ${settled.join(', ')} — notes the agent wrote, judged by this pass`);
+  if (settled.length)
+    console.log(`settled ${settled.join(', ')} — notes the agent wrote, judged by this pass`);
 }
 
 /* ----------------------------------------------------------------------- */
