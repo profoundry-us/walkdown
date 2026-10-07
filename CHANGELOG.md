@@ -14,7 +14,8 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 - `walkdown upgrade` moves an install laid out before
   [ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md) to the new
   layout, once. `--dry-run` says what it would move. Until it has run, every command that
-  loads a blueprint exits 2, says an upgrade is due and changes nothing.
+  loads a blueprint exits 2, says an upgrade is due and changes nothing. `--code <pc>`
+  gives the project it is run in that code, instead of the one derived from its label.
 - `walkdown blueprints rename <id> <new-name> [--folder <folder>]` changes the name in a
   blueprint's ID, keeping its number and code. `--folder` renames the home folder too.
   Rules, threads and runs are untouched.
@@ -25,7 +26,7 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   ([ADR 0011](docs/adr/foundational/202610_several_blueprints_per_project.md),
   [#20](https://github.com/profoundry-us/walkdown/issues/20)).
   `walkdown blueprints new <name>` gives a project that has a blueprint another one, in its
-  own numbered home, and says which blueprints the project already holds.
+  own home, and says which blueprints the project already holds.
 - In a project with several blueprints, a recorded test run files each result in the
   blueprint that holds its rule: one record per blueprint, sharing a run id. A tag no
   blueprint holds is named and recorded nowhere. This holds for the node:test and
@@ -51,8 +52,10 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
     `.walkdown/config.yml` and `.walkdown/.gitignore` are gone.
   - Registry IDs are `NNNN-<code>-<name>`, numbered on this machine (`0001-wd-walkdown`).
     Each row names its project by a short label and code, and its checkout by path.
-    Inside a project, a blueprint's bare name works wherever its ID does. A personal home
-    lives at `~/.walkdown/projects/<label>/blueprints/`.
+    Inside a project, a blueprint's bare name works wherever its ID does; outside it, a
+    bare name is refused with the ID that reaches it. An ID from before the upgrade, kept on
+    its row as `formerly:`, still works (`hireart_main` became `0001-hm-hireart-main`). A
+    personal home lives at `~/.walkdown/projects/<label>/blueprints/`.
   - A thread is stored as `threads/<uuid>.yml`. Its `n-NNNN` is a label, which two
     branches can give out twice, and its uuid is what identifies it. Attachments are named
     after the uuid.
@@ -85,31 +88,54 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   `walkdown skills` does, and names anything walkdown needs that is missing (Node 20 or
   later, git), exiting 1 if so. It writes nothing in a project and is safe to run again.
 
-- A new blueprint's `walkdown.yml` names no `runner.list`. Lint reads coverage from the
+- A new blueprint's `spec.yml` names no `runner.list`. Lint reads coverage from the
   rule tags in the files under `authoring.location`, which works for any framework and
   costs nothing. It used to run `npx playwright test --list`, over a second on every lint
   in a project without Playwright. A `list:` you named is still used.
 - In a project with several blueprints, `status`, `lint`, `threads` and `where` with no
   `--blueprint` report on every one, a section each, and `--json` answers
   `{ "blueprints": [ … ] }`. A project with one blueprint prints what it did before.
-- In a project with several blueprints, `hash`, `thread new`, `judge`, `sweep` and
-  `move` refuse until `--blueprint` names one, and list the ids. A thread id only one of
-  them holds needs no `--blueprint`. `walkdown run` with no `--blueprint` runs the
-  project's suite once and files by rule; with one, it records only that blueprint's
-  results.
+- **Breaking:** every command that writes into a blueprint needs `--blueprint <id>`,
+  with one blueprint or several and wherever it is run: `threads new`, `set`, `reply` and
+  `relabel`, `records move`, `rules move` and `rename`, `sweep`, `judge`, `hash --write`
+  and `blueprints commit`. Without it the command exits 2, lists the project's IDs and
+  changes nothing. A write never takes its blueprint from the folder it is run in, from a
+  project's only blueprint, or from a thread label only one blueprint holds. Reads
+  (`status`, `lint`, `threads`, `threads show`, `where`) need none. `walkdown run` with no
+  `--blueprint` runs the project's suite once and files by rule; with one, it records only
+  that blueprint's results.
+- `walkdown blueprints new` names a new home's folder after the blueprint (`search`). A
+  date or number prefix is yours to choose with `--folder 202610-search`.
+- `walkdown blueprints new` run in a folder inside a registered checkout adds the
+  blueprint to that checkout's project: at a terminal it asks first, and without one it
+  says so. `--project <label>` makes a project of its own instead. A subfolder named like
+  the project's own blueprint is refused and offered a name of its own.
+- `walkdown where` puts every reason in brackets, under the path it explains. Asked for
+  one kind with no answer, it prints nothing on stdout and the reason on stderr.
+  `walkdown where prototype` and `where proposals` answer like the other kinds.
+- A refusal for a folder walkdown has no blueprint for gives the reason first, then what
+  to do, a line each. In a repository of its own inside a registered checkout, it says
+  so.
+- A rule a signer sent back returns to their queue once a fix is claimed and judged,
+  however the agent closed the note that carried it.
 - Lint accepts what names another blueprint's rule, thread or screen in the same
   project: a check tagged with its rule, a rule whose origin is its thread, a run
   result for its rule, and a thread on its screen.
 - A new thread's id is unique across every blueprint in its project.
-- The pointer paragraph lists every blueprint in the project, and says that commands
-  which write need `--blueprint`. A blueprint kept outside the repository is named by id,
-  never by a path on one machine. Moving one of several blueprints out of the repository
-  rewrites the pointer instead of removing it.
-- With several blueprints in a project, bare `walkdown init` reuses the one named for the
-  project directory, and refuses if there is none; `--commit` needs `--id`.
 
 ### Fixed
 
+- The RSpec formatter reads who you are from `~/.walkdown/profile.yml`, and from
+  `config.yml` on a machine not yet upgraded. It read only `config.yml`, so after
+  `walkdown upgrade` every RSpec run was recorded under the OS login.
+- `walkdown blueprints commit` finds its blueprint wherever it is run; it worked only at
+  the checkout's root. Standing inside a home kept in `~/.walkdown` answers as that
+  home's project.
+- `walkdown blueprints import <path>` refuses a home inside another home, as the scan of a
+  repository already did.
+- When `walkdown blueprints new` refuses a taken project label or code, it says what
+  happened in plain words, and the command it suggests works as printed, keeping the
+  `--project` you gave. A code that is no code is refused before anything is made.
 - Commands no longer say "No blueprint here" where several blueprints are registered;
   they say which ones are.
 - `walkdown init --commit all` no longer deletes a `.walkdown/.gitignore` that other

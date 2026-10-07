@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-07T13-45-23Z-local-01",
+  "created": "2026-10-07T13:45:23Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "693d955-dirty",
+  "tree_hash": "sha256:eecc6ee02982",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "panel.identity.default-actor",
+      "status": "pass",
+      "statement_hash": "sha256:3645bdcb734b",
+      "duration_ms": 100,
+      "checks": [
+        "test/identity.test.js:70"
+      ]
+    }
+  ]
+}

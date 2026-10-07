@@ -6,8 +6,20 @@ author: agent
 created: 2026-10-07T11:58:30.615Z
 anchor:
   rule: threads.conversation.one-stream
-status: open
+status: settled
 body: The check "beside the pin, an id is a link only where the popover can open
   it" (checks/embed.spec.js:546) times out on `dot.click()` about one run in
   two, after the dot reads visible. Moving the two pins apart did not help, so
   something else takes or moves the dot.
+replies:
+  - author: agent
+    created: 2026-10-07T13:16:16Z
+    body: Fixed in the check. With no offset every pin rides its element's corner,
+      so pins piled on one spot and the dot on top took the click. The check now
+      gives its pins offsets of their own and dispatches the click to the dot.
+      It passed 8 of 8 repeated and three full suites in a row.
+  - author: agent
+    via: verdict
+    created: 2026-10-07T13:33:57Z
+    body: Settled by the agent's pass on threads.conversation.one-stream
+      (2026-10-07T13-33-57Z-local-01).

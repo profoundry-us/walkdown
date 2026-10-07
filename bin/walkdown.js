@@ -16,7 +16,7 @@ A command is a noun and then a verb; the noun alone lists, and
 Getting ready
   walkdown init [--force]
   walkdown skills [--into <dir>] [--project] [--force]
-  walkdown upgrade [--dry-run]
+  walkdown upgrade [--dry-run] [--code <pc>]
 
 Blueprints
   walkdown blueprints [list] [--stale]
@@ -62,7 +62,7 @@ without it; anything that writes into one needs it, wherever it is run from.
 /* What each command that is not a noun does, for `walkdown <command> --help`. */
 const ABOUT = {
   upgrade:
-    "Move walkdown's files from the layout before ADR 0014 to the current one, once:\nthe profile, each home flattened around its spec.yml, registry rows given IDs\nand projects, threads given UUIDs. Folder names and verdicts are kept. With\n--dry-run it says what it would do and changes nothing.",
+    "Move walkdown's files from the layout before ADR 0014 to the current one, once:\nthe profile, each home flattened around its spec.yml, registry rows given IDs\nand projects, threads given UUIDs. Folder names and verdicts are kept. With\n--dry-run it says what it would do and changes nothing. --code <pc> gives the\nproject you run it in that code, instead of the one derived from its label.",
   run: "Run the project's checks via the runner contract (run_all, or run_for_rule\nwith --rule), injecting the target's env and WALKDOWN_TARGET. The\nreporter/formatter records the run.",
   status:
     'Derived per-rule verification from the runs ledger: latest checks per target,\nthe latest agent walkdown, which roles have accepted the rule, and open\nthreads. With a rule id: that rule in full (statement, evidence, the excuses\nfor any tier it does not ask for, who has signed and who has not, threads).',

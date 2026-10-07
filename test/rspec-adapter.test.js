@@ -159,3 +159,51 @@ test('a run is recorded under the username profile.yml says, and config.yml stil
     'profile.yml wins',
   );
 });
+
+test('rspec and the CLI name the same person, whatever this machine has said or not (n-0513) @rule:status.attribution.username-is-the-record', {
+  skip: !hasRspec && 'no rspec here',
+}, () => {
+  // git's global config through HOME, which both read: the CLI asks git with
+  // every GIT_CONFIG_* variable removed, and so does the formatter.
+  const home = join(root, 'person');
+  mkdirSync(home, { recursive: true });
+  writeFileSync(join(home, '.gitconfig'), '[github]\n\tuser = ghpat\n');
+  const { CI: _, ...local } = env({ HOME: home });
+  const both = (files) => {
+    for (const [name, text] of Object.entries(files))
+      writeFileSync(join(process.env.WALKDOWN_HOME, name), text);
+    try {
+      const res = spawnSync('sh', ['-c', command], { cwd: code, env: local, encoding: 'utf8' });
+      assert.equal(res.status, 0, res.stdout + res.stderr);
+      const rspec = JSON.parse(readFileSync(join(runs, recorded().sort().at(-1)), 'utf8')).actor;
+      const cli = spawnSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          `import { defaultActor } from ${JSON.stringify(join(REPO, 'lib', 'identity.js'))}; console.log(defaultActor(process.cwd()).username)`,
+        ],
+        { cwd: code, env: local, encoding: 'utf8' },
+      ).stdout.trim();
+      return { rspec, cli };
+    } finally {
+      for (const name of Object.keys(files))
+        rmSync(join(process.env.WALKDOWN_HOME, name), { force: true });
+    }
+  };
+  assert.deepEqual(
+    both({ 'config.yml': 'identity:\n  username: lee\n' }),
+    { rspec: 'lee', cli: 'lee' },
+    'not yet upgraded',
+  );
+  assert.deepEqual(
+    both({}),
+    { rspec: 'ghpat', cli: 'ghpat' },
+    'nothing said: git answers for both',
+  );
+  assert.deepEqual(
+    both({ 'profile.yml': 'name: Pat\n' }),
+    { rspec: 'ghpat', cli: 'ghpat' },
+    'a profile with no username',
+  );
+});

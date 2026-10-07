@@ -1,0 +1,25 @@
+id: n-0513
+uuid: e768bfeb-8ea6-43d7-87bc-99969719330e
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T13:33:56.438Z
+anchor:
+  rule: status.attribution.username-is-the-record
+status: addressed
+body: Judged 2026-10-07 (evidence
+  2026-10-07T13-18-14Z/username-is-the-record.txt). The emitters disagree
+  outside an upgraded machine. Before an upgrade, bare rspec records
+  config.yml's username while bare node:test and Playwright record git's guess,
+  because lib/identity.js reads only profile.yml. With no profile at all, rspec
+  records Etc.getlogin (root under the harness) where the JS reporters record
+  the git handle.
+replies:
+  - author: agent
+    created: 2026-10-07T13:45:34Z
+    body: "Fixed. The RSpec formatter and the CLI now follow one chain: the profile
+      (profile.yml, or config.yml when there is no profile yet), then git
+      (user.username, github.user, the email's local part, asked with
+      GIT_CONFIG_* removed), then the account the process runs as. Before, rspec
+      skipped git and took the terminal login. test/rspec-adapter.test.js
+      compares the two across three machines."

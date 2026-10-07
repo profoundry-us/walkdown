@@ -1,0 +1,20 @@
+id: n-0515
+uuid: 070c0cd4-3259-4ca2-b19f-271dfd6fda16
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T13:33:56.911Z
+anchor:
+  rule: threads.conversation.one-stream
+status: addressed
+body: "Found while judging (evidence 2026-10-07T13-26-32Z). An evidence key that
+  ends a sentence takes the full stop into the key:
+  \"…runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt.\" links to
+  the file with a trailing dot, which answers 404, in the panel's evidence modal
+  and in the popover."
+replies:
+  - author: agent
+    created: 2026-10-07T13:45:35Z
+    body: Fixed. An evidence key ends on a letter or digit, so a full stop after it
+      stays the sentence's. checks/embed.spec.js now files the key at the end of
+      a sentence and checks the link.

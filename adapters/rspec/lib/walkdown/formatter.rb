@@ -316,27 +316,52 @@ module Walkdown
       [file, record]
     end
 
-    # Who the run is recorded under. The personal config first, because it is
-    # where a person has actually said who they are; a login name is what the
-    # box is called. There used to be a WALKDOWN_ACTOR here, and an env var
-    # that lets any caller type a name is not attribution (n-0139).
+    # Who the run is recorded under, by the same chain as the CLI's
+    # defaultActor (lib/identity.js), so every reporter names the same person
+    # (n-0513): what the profile says - profile.yml, or config.yml on a
+    # machine not yet upgraded (n-0510) - then git's user.username,
+    # github.user and the local part of user.email, then the OS account. There
+    # used to be a WALKDOWN_ACTOR here, and an env var that lets any caller
+    # type a name is not attribution (n-0139).
     def actor
       return 'ci' if ENV['CI']
 
-      # profile.yml since ADR 0014; config.yml is what it was called before
-      # `walkdown upgrade`, and a run on a machine not yet upgraded still says
-      # who it is (n-0510).
-      home = ENV['WALKDOWN_HOME'] || File.join(Dir.home, '.walkdown')
-      %w[profile.yml config.yml].each do |name|
-        file = File.join(home, name)
-        next unless File.exist?(file)
-
-        said = (YAML.safe_load_file(file, aliases: true) || {}).dig('identity', 'username')
-        return said.strip if said.is_a?(String) && !said.strip.empty?
-      end
-      Etc.getlogin || 'unknown'
+      declared_username || git_username || os_username
     rescue StandardError
-      Etc.getlogin || 'unknown'
+      os_username
+    end
+
+    def declared_username
+      home = ENV['WALKDOWN_HOME'] || File.join(Dir.home, '.walkdown')
+      profile = File.join(home, 'profile.yml')
+      file = File.exist?(profile) ? profile : File.join(home, 'config.yml')
+      return nil unless File.exist?(file)
+
+      said = (YAML.safe_load_file(file, aliases: true) || {}).dig('identity', 'username')
+      said.strip if said.is_a?(String) && !said.strip.empty?
+    end
+
+    def git_username
+      # Without GIT_CONFIG_*, as the CLI asks git, so both read the same config.
+      clean = ENV.keys.grep(/\AGIT_CONFIG/).to_h { |k| [k, nil] }
+      read = ->(key) { IO.popen(clean, ['git', 'config', '--get', key], err: File::NULL, &:read).to_s.strip }
+      explicit = read.call('user.username')
+      explicit = read.call('github.user') if explicit.empty?
+      return explicit unless explicit.empty?
+
+      email = read.call('user.email')
+      local = email.include?('@') ? email.split('@').first.strip : ''
+      local.empty? ? nil : local
+    rescue StandardError
+      nil
+    end
+
+    # What node's os.userInfo().username reads: the account the process runs
+    # as, not the terminal's login, which differs under sudo or a harness.
+    def os_username
+      Etc.getpwuid(Process.uid)&.name || Etc.getlogin || 'unknown'
+    rescue StandardError
+      'unknown'
     end
 
     def base_url

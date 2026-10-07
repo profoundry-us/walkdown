@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-07T13-33-57Z-local-01",
+  "created": "2026-10-07T13:33:57Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "693d955-dirty",
+  "note": "Agent tier, one walkdown rule, judged after n-0512 (a change to its Playwright check only) against its statement and the thread-panel and rule-detail screens. Driven in the built-in browser against the scratch copy judge-onestream, served from inside the copy with its own home on :4731; GET /api/blueprint named the copy. Copy cleaned afterwards. Hash checked ok with `hash --blueprint walkdown`. Not recorded; no threads filed.",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "threads.conversation.one-stream",
+      "status": "pass",
+      "statement_hash": "sha256:d3d0b129a2e7",
+      "evidence": [
+        "runs/evidence/2026-10-07T13-26-32Z/one-stream-probe.json",
+        "runs/evidence/2026-10-07T13-26-32Z/app-thread-panel-n-0514.png",
+        "runs/evidence/2026-10-07T13-26-32Z/app-thread-panel-cont-hover.png",
+        "runs/evidence/2026-10-07T13-26-32Z/app-rule-detail-conversation.png",
+        "runs/evidence/2026-10-07T13-26-32Z/app-rule-detail-history.png",
+        "runs/evidence/2026-10-07T13-26-32Z/app-embed-popover-n-0514.png",
+        "runs/evidence/2026-10-07T13-26-32Z/app-embed-popover-rule-card.png"
+      ],
+      "reasoning": "n-0512 changed only the check, so I judged the rule itself on the copy at :4731 in the built-in browser. I filed two pins on the review screen at offsets of their own. n-0514's opening note held line breaks, a blank line, a pinned and an unpinned thread id, a rule id and an evidence key, and it got replies from the person (two within seconds), the agent and the person again. Collapsed in the Threads tab, n-0514 is its first message: tile, name, time and words with the breaks kept. Under it are the faces of both people, '4 replies' and 'Last reply today at 8:28 AM'. Rows are split by a 1px top hairline, with no card, fill, radius, shadow or rail. Opened, the opening note has the same .wd-msg shape as every reply. The two quick replies are continuations, with no name and a hidden tile, and each one's time shows only while it is hovered. A Today divider sits above, and the agent's message brings the name back. The rule detail shows the last message, tagged ↳ n-0512, and 'History · 16'. History shows the 16 messages oldest first, with day dividers from Sep 13 to Today and each thread's opening tagged with id, reason and status. On as-built/review.html, a real click on the dot opened the standalone popover with the same message classes and grouping. There, n-0513 is a button that opened that pin in the same popover. n-0001 and the rule are anchors to the panel's own address with target _blank, and their hover cards give the statement and verdict, or the status, author, age and first line, plus 'Opens in walkdown, in a new tab'. Rule and thread ids that end a sentence leave the full stop out. One defect is beside the rule's steps rather than in them. An evidence key that ends a sentence takes the full stop into the key ('...source-check.txt.'), so the panel's evidence modal and the popover's link both point at a URL that answers 404, while the same URL without the dot answers 200. Two small asides: the pin's hover tooltip stayed over the popover's edge after the click, and the popover's Today divider sits half under its sticky header."
+    }
+  ]
+}

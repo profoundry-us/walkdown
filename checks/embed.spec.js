@@ -619,7 +619,7 @@ test('beside the pin, an id is a link only where the popover can open it', {
   };
   const first = await file('The first pin, referred to by the second.', 0);
   const second = await file(
-    `Refs: ${first}, n-0001 (not pinned here), rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt`,
+    `Refs: ${first}, n-0001 (not pinned here), rule threads.conversation.one-stream, and runs/evidence/2026-09-14T19-09-05Z/one-stream-source-check.txt.`,
     120,
   );
 
@@ -640,6 +640,8 @@ test('beside the pin, an id is a link only where the popover can open it', {
   // The evidence key is a real link to the file the server resolves it to.
   const ev = popover.locator('[data-evidence-ref]');
   await expect(ev).toHaveAttribute('href', /\/evidence\/runs\/evidence\/2026-09-14T19-09-05Z\//);
+  // The key ends its sentence, and the full stop is the sentence's (n-0515).
+  await expect(ev).toHaveAttribute('href', /one-stream-source-check\.txt$/);
   await expect(ev).toHaveAttribute('target', '_blank');
   // A rule id, and a thread not pinned on this page: nothing in this popover
   // can open them, so they link OUT to the panel at its own address, in a

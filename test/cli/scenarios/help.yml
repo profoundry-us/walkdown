@@ -12,7 +12,7 @@ expect:
   - '^Rules and verdicts$'
   - '^The panel$'
   - '^  walkdown blueprints rename <id> <new-name> \[--folder <folder>\]$'
-  - '^  walkdown upgrade \[--dry-run\]$'
+  - '^  walkdown upgrade \[--dry-run\] \[--code <pc>\]$'
 anchors:
   - { id: cli.help.intro, match: '^(walkdown —|A command is|`walkdown <noun>)' }
   - { id: cli.help.ready, match: '^(Getting ready|  walkdown (init|skills|upgrade))' }

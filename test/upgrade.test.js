@@ -208,3 +208,114 @@ test('an ID from before the upgrade still reaches its blueprint, from inside its
     assert.equal(cli(cwd, 'status', '--blueprint', 'shop_main').status, 0, cwd);
   }
 });
+
+test('upgrade --code gives the project it is run in the code chosen, and refuses one that is no code @rule:locations.keeping.upgrade-moves-once', () => {
+  const wd = join(root, 'home-code');
+  const repo = join(root, 'hireart_main');
+  mkdirSync(repo, { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: repo });
+  write(join(wd, 'config.yml'), 'identity:\n  username: sam\n');
+  oldHome(join(wd, 'blueprints', '0002-hireart-main'), 'hireart_main', 'ha.s.works');
+  write(
+    join(wd, 'registry.yml'),
+    `blueprints:\n  - id: hireart_main\n    project: ${repo}\n    home: ${join(wd, 'blueprints', '0002-hireart-main')}\n    registered: { by: init, at: '2026-09-01T00:00:00Z' }\n`,
+  );
+  const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
+  const cli = (...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd: repo, encoding: 'utf8', env });
+  const before = tree(wd);
+  const bad = cli('upgrade', '--code', 'hire');
+  assert.equal(bad.status, 2, bad.stdout + bad.stderr);
+  assert.match(bad.stderr, /`hire` is not a project code .* Nothing was changed\./);
+  assert.deepEqual(tree(wd), before, 'nothing moved');
+  const up = cli('upgrade', '--code', 'ha');
+  assert.equal(up.status, 0, up.stdout + up.stderr);
+  const [row] = parse(readFileSync(join(wd, 'registry.yml'), 'utf8')).blueprints;
+  assert.equal(row.code, 'ha');
+  assert.match(row.id, /^\d{4}-ha-hireart-main$/);
+});
+
+test('a code another project would have derived is taken by the one that chose it, and a name here beats a former ID (n-0514) @rule:locations.keeping.upgrade-moves-once', () => {
+  const wd = join(root, 'home-reserve');
+  const shop = join(root, 'reserve', 'shop');
+  const hire = join(root, 'reserve', 'hireart');
+  for (const r of [shop, hire]) {
+    mkdirSync(r, { recursive: true });
+    execFileSync('git', ['init', '-q'], { cwd: r });
+  }
+  write(join(wd, 'config.yml'), 'identity:\n  username: sam\n');
+  oldHome(join(wd, 'blueprints', '0001-hireart'), 'hireart', 'hr.s.works');
+  oldHome(join(wd, 'blueprints', '0002-shop'), 'shop', 'shop.s.works');
+  write(
+    join(wd, 'registry.yml'),
+    [
+      'blueprints:',
+      '  - id: hireart',
+      `    project: ${hire}`,
+      `    home: ${join(wd, 'blueprints', '0001-hireart')}`,
+      "    registered: { by: init, at: '2026-09-01T00:00:00Z' }",
+      '  - id: shop',
+      `    project: ${shop}`,
+      `    home: ${join(wd, 'blueprints', '0002-shop')}`,
+      "    registered: { by: init, at: '2026-09-01T00:00:00Z' }",
+      '',
+    ].join('\n'),
+  );
+  const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
+  const cli = (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const derived = 'hr'; // what `hireart` derives
+  const up = cli(shop, 'upgrade', '--code', derived);
+  assert.equal(up.status, 0, up.stdout + up.stderr);
+  const rows = parse(readFileSync(join(wd, 'registry.yml'), 'utf8')).blueprints;
+  const byFormer = Object.fromEntries(rows.map((r) => [r.formerly, r]));
+  assert.equal(byFormer.shop.code, derived, 'the project that chose it has it');
+  assert.notEqual(byFormer.hireart.code, derived, 'the other steered around it');
+  assert.equal(cli(shop, 'upgrade').status, 0, 'and a second run finds nothing to do');
+
+  // A blueprint called `shop` in another project: standing there, the name is its.
+  const other = join(root, 'reserve', 'other');
+  mkdirSync(other, { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: other });
+  assert.equal(
+    cli(other, 'blueprints', 'new', 'shop', '--project', 'other', '--code', 'ot').status,
+    0,
+  );
+  const mineHere = cli(other, 'where', 'spec', '--blueprint', 'shop').stdout.trim();
+  assert.ok(
+    mineHere.includes(join('projects', 'other')),
+    `the name here is other's shop: ${mineHere}`,
+  );
+  assert.ok(
+    cli(root, 'where', 'spec', '--blueprint', 'shop').stdout.includes('0002-shop'),
+    'outside, the former ID still answers',
+  );
+});
+
+test('upgrade --code is refused before anything moves when an upgraded project holds the code, or outside any repository @rule:locations.keeping.upgrade-moves-once', () => {
+  const wd = join(root, 'home-held');
+  const done = join(root, 'held', 'done');
+  const todo = join(root, 'held', 'todo');
+  for (const r of [done, todo]) {
+    mkdirSync(r, { recursive: true });
+    execFileSync('git', ['init', '-q'], { cwd: r });
+  }
+  write(join(wd, 'config.yml'), 'identity:\n  username: sam\n');
+  oldHome(join(wd, 'blueprints', '0002-todo'), 'todo', 'todo.s.works');
+  write(
+    join(wd, 'registry.yml'),
+    `next: 2\nblueprints:\n  - id: 0001-dn-done\n    project: done\n    code: dn\n    checkout: ${done}\n    home: ${join(wd, 'projects', 'done', 'blueprints', 'done')}\n    registered: { by: init, at: '2026-09-01T00:00:00Z' }\n  - id: todo\n    project: ${todo}\n    home: ${join(wd, 'blueprints', '0002-todo')}\n    registered: { by: init, at: '2026-09-01T00:00:00Z' }\n`,
+  );
+  const env = { ...process.env, NO_COLOR: '1', WALKDOWN_HOME: wd };
+  const cli = (cwd, ...args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const before = tree(wd);
+  const held = cli(todo, 'upgrade', '--code', 'dn');
+  assert.equal(held.status, 2, held.stdout + held.stderr);
+  assert.match(held.stderr, /`dn` is already the project `done`'s\. Nothing was changed\./);
+  const nowhere = cli(root, 'upgrade', '--code', 'zz');
+  assert.equal(nowhere.status, 2);
+  assert.match(nowhere.stderr, /this is no repository\. Nothing was changed\./);
+  assert.equal(cli(todo, 'upgrade', '--code', ' ').status, 2, 'a blank code is no code');
+  assert.deepEqual(tree(wd), before, 'nothing moved');
+});

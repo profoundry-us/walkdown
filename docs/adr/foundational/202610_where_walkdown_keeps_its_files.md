@@ -83,9 +83,11 @@ a project that already has blueprints, walkdown says so ("added to `hireart_main
 
 A blueprint's home is a folder holding a `spec.yml`. In a repository, homes live anywhere
 under `.walkdown/blueprints/`, at any depth: `202610-search/`, `0002-search/`, or
-`billing/api/0002-invoices/` for a pack. walkdown suggests `YYYYMM-name`, because a date
-says how old a blueprint is and never has to be reallocated. It also accepts whatever the
-team chose, and it never parses a number or date out of the name. The filesystem keeps
+`billing/api/0002-invoices/` for a pack. walkdown names a new home's folder after the
+blueprint (`search/`); a date or number prefix is the team's to add with `--folder`. It
+accepts whatever the team chose, and it never parses a number or date out of the name.
+(Amended 2026-10-06, n-0355: this first said walkdown suggests `YYYYMM-name`, and Topher
+found a prefix he had not chosen was one more thing to read past.) The filesystem keeps
 homes unique: two blueprints cannot be one folder. A home inside another home is refused.
 
 A personal home lives at `~/.walkdown/projects/<project>/blueprints/<folder>/`, laid out
@@ -201,8 +203,8 @@ In a recognised worktree:
 ## Consequences
 
 - **The doors are rewritten.**
-  - `blueprints new` stops allocating numbers. It proposes `YYYYMM-name` and accepts any
-    folder name.
+  - `blueprints new` stops allocating numbers. It names the folder after the blueprint
+    and accepts any folder name.
   - `import` scans at any depth and asks.
   - `rename` changes the description in the ID and, when asked, the folder name. It never
     keeps or makes a number.

@@ -6,8 +6,10 @@ Each section takes an install from one version to the next. What changed is in
 ## From 0.3.0 to the next release
 
 The command line became nouns and verbs
-([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)). No data moves;
-what changes is what you, your scripts and your agents type.
+([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)), every write names
+its blueprint, and walkdown's files moved
+([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)). What you,
+your scripts and your agents type changes, and `walkdown upgrade` moves the files once.
 
 ### 1. Update the clone
 
@@ -42,6 +44,15 @@ the new one with your arguments in it, ready to copy.
 `walkdown init` now sets up the machine only. Run it once on each machine; it is safe
 to run again.
 
+**Every write names its blueprint.** `threads new`, `set`, `reply` and `relabel`,
+`records move`, `rules move` and `rename`, `sweep`, `judge`, `hash --write` and
+`blueprints commit` need `--blueprint <id>`, even in a project with one blueprint and
+even for a thread label only one blueprint holds. Without it they exit 2, list the
+project's IDs and change nothing. Inside the project the blueprint's name is enough
+(`--blueprint checkout`); elsewhere, its full ID. Reads (`status`, `lint`, `threads`,
+`threads show`, `where`) and `walkdown run` need none. Add the flag to any script, alias,
+`CLAUDE.md` line or agent memory that writes.
+
 ### 3. Move to the new layout
 
 Files moved too ([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)).
@@ -53,6 +64,10 @@ walkdown upgrade --dry-run
 walkdown upgrade
 ```
 
+Each project gets a two- or three-letter code, which every ID carries. It is derived
+from the project's label (`hm` for `hireart_main`). To choose it instead, pass it to
+the upgrade run inside that project: `walkdown upgrade --code ha`.
+
 Run it from inside each project whose blueprints you keep in the repository. It flattens
 each home, renames `config.yml` to `profile.yml`, renumbers the registry, gives every
 thread a uuid, and replaces the pointer block in `CLAUDE.md` / `AGENTS.md`. It is safe to
@@ -63,7 +78,8 @@ Then, in place of the IDs you used to type:
 
 | Was | Now |
 |---|---|
-| `--blueprint walkdown` | still works inside the project; elsewhere, its full ID (`walkdown blueprints` lists them) |
+| `--blueprint <old-id>` | still works, anywhere: the upgrade keeps the old ID on the row as `formerly:` (`hireart_main` reaches `0001-hm-hireart-main`) |
+| `--blueprint <name>` | works inside the project; elsewhere, use the full ID (`walkdown blueprints` lists them) |
 | `walkdown blueprints add <path>` | `walkdown blueprints import <path>` |
 | `walkdown blueprints rename <id> <new-id>` | `walkdown blueprints rename <id> <new-name> [--folder <folder>]` |
 

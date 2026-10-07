@@ -1,0 +1,25 @@
+id: n-0514
+uuid: 1345704c-6bbe-4d4c-ac8b-25f9ec4c6666
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T13:33:56.633Z
+anchor:
+  rule: locations.keeping.upgrade-moves-once
+status: addressed
+body: "Judged 2026-10-07 (evidence 2026-10-07T13-18-14Z/upgrade-moves-once.txt).
+  Two defects. `walkdown upgrade --code hr`, where hr is another project's
+  derived code, is refused only inside the registry step, after the profile, the
+  homes and a move under projects/ have landed. Every later upgrade then fails
+  with \"already exists — was not moved\". And a formerly ID beats a name in the
+  project standing here: in ~/other, `--blueprint shop` reached ~/shop's former
+  `shop`, and a sweep landed there."
+replies:
+  - author: agent
+    created: 2026-10-07T13:45:34Z
+    body: Fixed. The chosen code is reserved before any project is derived, so
+      another project steers around it. A code an upgraded project already holds
+      is refused before anything moves, and so are a blank code and --code
+      outside any repository. A home a stopped run had already moved is
+      recognised rather than refused. A name in the project standing here now
+      beats a former ID. Tested in test/upgrade.test.js.

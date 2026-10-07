@@ -4,6 +4,7 @@
  * it, step by step, and with `--dry-run` says it without moving anything.
  */
 import { parseArgs } from 'node:util';
+import { canon, expand, gitRoot, readRegistry } from '../../lib/locations.js';
 import { dim, green, red } from '../../lib/report/tty.js';
 import { planUpgrade, runUpgrade } from '../../lib/upgrade.js';
 import { end } from './context.js';
@@ -11,8 +12,47 @@ import { end } from './context.js';
 export async function run(args) {
   const { values } = parseArgs({
     args,
-    options: { 'dry-run': { type: 'boolean', default: false } },
+    options: { 'dry-run': { type: 'boolean', default: false }, code: { type: 'string' } },
   });
+  /*
+   * The code of the project standing here, chosen rather than derived from
+   * its label (`--code ha` for hireart_main, which would derive `hm`). Asked
+   * for here because the upgrade is what gives an existing project its code.
+   */
+  const code = values.code === undefined ? null : values.code.trim().toLowerCase();
+  if (code !== null && !/^[a-z0-9]{2,3}$/.test(code)) {
+    console.error(
+      red(
+        `✗ \`${values.code}\` is not a project code — two or three lowercase letters or digits. Nothing was changed.`,
+      ),
+    );
+    return end(2);
+  }
+  // Asked before anything moves: a refusal halfway would leave the machine
+  // half upgraded (n-0514).
+  if (code !== null) {
+    const top = gitRoot(process.cwd());
+    if (!top) {
+      console.error(
+        red(
+          '✗ `--code` names the code of the project you run this in, and this is no repository. Nothing was changed.',
+        ),
+      );
+      return end(2);
+    }
+    const holder = readRegistry().rows.find(
+      (r) => r?.code === code && r.checkout && canon(expand(String(r.checkout))) !== canon(top),
+    );
+    if (holder) {
+      console.error(
+        red(
+          `✗ The project code \`${code}\` is already the project \`${holder.project}\`'s. Nothing was changed.`,
+        ),
+      );
+      console.error(dim('  Choose another with `--code <two or three letters>`.'));
+      return end(2);
+    }
+  }
   const { steps } = planUpgrade();
   if (!steps.length) {
     console.log(
@@ -29,7 +69,7 @@ export async function run(args) {
     return end(0);
   }
   try {
-    runUpgrade({ say: (what) => console.log(`  ${green('✓')} ${what}`) });
+    runUpgrade({ code, say: (what) => console.log(`  ${green('✓')} ${what}`) });
   } catch (e) {
     console.error(red(`✗ ${e.message}`));
     console.error(

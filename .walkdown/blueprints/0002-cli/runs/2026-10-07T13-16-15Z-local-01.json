@@ -1,0 +1,43 @@
+{
+  "run_id": "2026-10-07T13-16-15Z-local-01",
+  "created": "2026-10-07T13:16:15Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "693d955-dirty",
+  "tree_hash": "sha256:5b65d3e4e616",
+  "spec_hash": "sha256:e8d78fe918f6",
+  "results": [
+    {
+      "rule": "locations.answer.adapters-file-where-walkdown-says",
+      "status": "pass",
+      "statement_hash": "sha256:7e1aecb8560b",
+      "duration_ms": 844,
+      "checks": [
+        "test/rspec-adapter.test.js:69",
+        "test/rspec-adapter.test.js:93",
+        "test/rspec-adapter.test.js:103"
+      ]
+    },
+    {
+      "rule": "status.attribution.username-is-the-record",
+      "status": "pass",
+      "statement_hash": "sha256:be08ebbb3f59",
+      "duration_ms": 820,
+      "checks": [
+        "test/rspec-adapter.test.js:130"
+      ]
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-once",
+      "status": "pass",
+      "statement_hash": "sha256:49cd12caf11c",
+      "duration_ms": 1168,
+      "checks": [
+        "test/upgrade.test.js:77",
+        "test/upgrade.test.js:182",
+        "test/upgrade.test.js:212"
+      ]
+    }
+  ]
+}

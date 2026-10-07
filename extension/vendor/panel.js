@@ -3054,7 +3054,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       const texts = [];
       for (let n = walker.nextNode(); n; n = walker.nextNode()) if (!skip(n)) texts.push(n);
       const RE =
-        /\b([nq]-\d{4})\b|\b(runs\/evidence\/[\w.-]+\/[\w./-]+)|\b([a-z][\w-]*(?:\.[a-z][\w-]*){2,})\b/gi;
+        /\b([nq]-\d{4})\b|\b(runs\/evidence\/[\w.-]+\/[\w./-]*\w)|\b([a-z][\w-]*(?:\.[a-z][\w-]*){2,})\b/gi;
       for (const node of texts) {
         const value = node.nodeValue;
         let last = 0;

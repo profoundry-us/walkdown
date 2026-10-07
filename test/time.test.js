@@ -99,10 +99,10 @@ test("every stamp in this blueprint's own records is a UTC instant and none name
   }
   for (const f of files(join(HOME, 'blueprint', 'features'), '.yml')) {
     const y = parse(readFileSync(f, 'utf8'));
+    // The entries before n-0290 were stamped as bare dates; those are
+    // history and stay. Anything written since is an instant.
     for (const s of y.stories ?? [])
       for (const r of s.rules ?? [])
-        // The entries before n-0290 were stamped as bare dates; those are
-        // history and stay. Anything written since is an instant.
         for (const w of r.steps?.reworded ?? [])
           if (typeof w.at === 'string' && w.at.includes('T')) stamped.push([f, w.at]);
   }
