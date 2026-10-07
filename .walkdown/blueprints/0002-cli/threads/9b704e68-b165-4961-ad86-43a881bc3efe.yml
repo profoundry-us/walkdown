@@ -1,0 +1,15 @@
+id: n-0510
+uuid: 9b704e68-b165-4961-ad86-43a881bc3efe
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T11:58:30.227Z
+anchor:
+  rule: status.attribution.username-is-the-record
+status: open
+body: Found auditing the HireArt setup. The RSpec formatter still reads identity
+  from ~/.walkdown/config.yml (adapters/rspec/lib/walkdown/formatter.rb:326, and
+  its header comment at line 32). ADR 0014 renamed that file profile.yml, so
+  after `walkdown upgrade` every RSpec run is recorded under the OS login (actor
+  "root" in the audit), not the profile's username. It should read profile.yml,
+  falling back to config.yml, and a test should cover it.

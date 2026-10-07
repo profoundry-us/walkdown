@@ -1,0 +1,16 @@
+id: n-0511
+uuid: 88e48c31-fd56-49b8-b221-af4cc8a4efd2
+kind: note
+reason: finding
+author: agent
+created: 2026-10-07T11:58:30.416Z
+anchor:
+  rule: locations.keeping.upgrade-moves-once
+status: open
+body: "Found auditing the HireArt setup. After `walkdown upgrade`, a blueprint
+  whose old id had an underscore (hireart_main) becomes 0001-hm-hireart-main,
+  and `--blueprint hireart_main` answers \"No blueprint for `hireart_main`\"
+  with no hint of the new ID. upgrade writes `formerly: hireart_main` on the row
+  (lib/upgrade.js:320) but nothing reads it. UPGRADING.md says the old name
+  still works inside the project, which is false here. The resolver should
+  accept a row's formerly id, or at least name the new ID when it refuses."

@@ -3774,9 +3774,10 @@ test('the rule id copies itself, and the toast sits inside the frame with a cap'
 test('a headless rule says so once', {
   tag: '@rule:panel.rules.headless-says-so',
 }, async ({ page }) => {
-  // The cli blueprint's since ADR 0013 (n-0357).
-  await ownRule(page, 'latest-wins', null, 'cli');
-  await expect(page.getByTestId('detail.rule-id')).toHaveText('status.derived.latest-wins');
+  // The cli blueprint's since ADR 0013 (n-0357). latest-wins was the example
+  // until it got a screen of its own; this one has no terminal moment to draw.
+  await ownRule(page, 'spec-never-implementation', null, 'cli');
+  await expect(page.getByTestId('detail.rule-id')).toHaveText('ownership.writes.spec-never-implementation');
   const pane = page.locator('.wdp-detail');
   await expect(page.getByTestId('detail.screen')).toContainText(/judged without one/);
   const text = await pane.innerText();
