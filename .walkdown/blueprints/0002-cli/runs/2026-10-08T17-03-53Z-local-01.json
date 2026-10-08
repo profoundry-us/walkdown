@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-10-08T17-03-53Z-local-01",
+  "created": "2026-10-08T17:03:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "236944b-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/swap-unrelated.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/swap-unrelated-at-dd7e05c.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/swap.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/base.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/tty.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/earlier-1.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/earlier-2.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/earlier-3.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/earlier-4.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/unit-import-repositories.txt",
+        "runs/evidence/2026-10-08T17-03-01Z-judge16/unit-import-other.txt"
+      ],
+      "reasoning": "Driven with node bin/walkdown.js on scratch machines (mktemp HOME and WALKDOWN_HOME under /tmp/judge16-*), no server. The base steps hold: a home path registers that one and names its ID and project; a repository path lists every home by folder and marks the listed one; with no terminal it lists and registers nothing until --all or --only; at a real pty it takes numbers or folder names in any case, refuses an unknown word and takes nothing on an empty answer; a listed home is reported as already listed with its row unchanged; a path with no home says so. The earlier cases still hold: moves by one home path re-point every row, worktrees of registered and unregistered checkouts, a fork with upstream and an ssh-with-port remote moved, a shallow clone moved, letter case, /tmp, symlinks, template siblings at new paths and cloned at the old path (refused, every ID named to forget), a repository with no commits, set-url and remote removal in place, a re-clone at the same path, a cp -R copy, and a gone label pointed at --project. But n-0549's birth-time shortcut undoes n-0541: a different repository whose .git predates the registration, renamed into a moved project's old path, is taken as the same checkout though its first commit and origin both differ. With app registered at ~/app, then mv ~/app ~/app-old and mv ~/app-v2 ~/app (an unrelated older repo with the same home folder), import at ~/app-old is refused as label-taken with no hint, --project app is refused the same way, and ~/app (acme/app-v2) answers as 0001-ap-cart. So the rule's IDs are filed under another repository with no way out but forget. At the parent commit dd7e05c the same steps move the IDs to ~/app-old and give ~/app-v2 its own project. A template sibling renamed in the same way does the same.",
+      "threads": [
+        "f909e0ed-b86e-4d71-8729-35d8d1fcd495"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+id: n-0550
+uuid: f909e0ed-b86e-4d71-8729-35d8d1fcd495
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T17:03:52.478Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 236944b. An unrelated repository whose .git is
+  older than the registration, renamed into a moved project's old path, passes
+  as the same checkout. Its first commit and origin both disagree. The moved
+  project is then refused under its own label, even with --project. Its IDs stay
+  filed under the other repository.
+replies:
+  - author: agent
+    created: 2026-10-08T17:09:19Z
+    body: "Rows now keep the identity of the .git they were registered from (device
+      and inode), and learn it on a move or the next registry write. At a row's
+      own path only that very .git counts as the same checkout. A move keeps the
+      inode. A clone, a copy, or another repository renamed in does not, and
+      each of those is put to the first-commit and remote tests. Birth time is
+      no longer consulted. A move's message now says when another repository
+      stands at the old path, instead of claiming that path no longer exists.
+      Test: test/import-repositories.test.js (swap)."

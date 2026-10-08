@@ -252,7 +252,7 @@ export async function run(args) {
     if (moved) {
       for (const id of moved.ids)
         console.log(
-          `  ${green('~ moved')}    ${dim(`\`${id}\` keeps its ID: it was at ${tilde(moved.from)}, which no longer exists, and this machine now finds it at ${tilde(top)}`)}`,
+          `  ${green('~ moved')}    ${dim(`\`${id}\` keeps its ID: it was at ${tilde(moved.from)}, ${gone(moved.from)}, and this machine now finds it at ${tilde(top)}`)}`,
         );
       return end(0);
     }
@@ -558,7 +558,7 @@ function finish(chosen, checkout, values, known = []) {
     if (w.from) {
       // The checkout moved: the same blueprint, by the same ID.
       console.log(
-        `  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`keeps its ID \`${w.id}\`: it was at ${tilde(w.from)}, which no longer exists`)}`,
+        `  ${green('~ moved')}    ${tilde(w.dir)}  ${dim(`keeps its ID \`${w.id}\`: it was at ${tilde(w.from)}, ${gone(w.from)}`)}`,
       );
       continue;
     }
@@ -624,4 +624,9 @@ function claimedByGone(dirs) {
   ))
     console.error(dim(`    walkdown blueprints forget ${r.id}`));
   return true;
+}
+
+/** What became of a moved checkout's old path, said truly (n-0550). */
+function gone(from) {
+  return existsSync(from) ? 'where another repository stands now' : 'which no longer exists';
 }

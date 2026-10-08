@@ -447,3 +447,32 @@ test('a checkout that never moved stays listed after an amend and a gc, and afte
   assert.match(recloned.stdout, new RegExp(`already listed|\`${row.id}\``), 'n-0549: re-clone');
   assert.equal(m.rows().length, 1);
 });
+
+test('another repository renamed into a moved project’s path, older than its registration, does not keep its rows @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('swap');
+  const make = (dir, origin) => {
+    const at = m.repo(dir);
+    execFileSync('git', ['remote', 'add', 'origin', origin], { cwd: at });
+    mkdirSync(join(at, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+    writeFileSync(join(at, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+    execFileSync('git', ['add', '-A'], { cwd: at });
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', dir], {
+      cwd: at,
+    });
+    return at;
+  };
+  const app = make('app', 'git@github.com:acme/app.git');
+  const v2 = make('app-v2', 'git@github.com:acme/app-v2.git');
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  const old = join(m.home, 'app-old');
+  execFileSync('mv', [app, old]);
+  execFileSync('mv', [v2, app]);
+  const r = m.cli(old, 'blueprints', 'import', '.', '--all');
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(
+    r.stdout,
+    new RegExp(`~ moved .*\`${row.id}\`.*another repository stands now`),
+    'n-0550',
+  );
+});
