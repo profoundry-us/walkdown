@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-08T15-58-52Z-local-01",
+  "created": "2026-10-08T15:58:52Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8f32045-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-54-50Z-judge10/import-01-base-steps.txt",
+        "runs/evidence/2026-10-08T15-54-50Z-judge10/import-02-worktrees.txt",
+        "runs/evidence/2026-10-08T15-54-50Z-judge10/import-03-moves-forks-origins.txt",
+        "runs/evidence/2026-10-08T15-54-50Z-judge10/import-04-earlier-fixes-and-spellings.txt",
+        "runs/evidence/2026-10-08T15-54-50Z-judge10/import-05-shared-first-commit-sibling-takes-rows.txt"
+      ],
+      "reasoning": "Driven headless at 8f32045 on scratch machines under /tmp/judge10-*, no server. The base steps hold: one home registers alone with its ID and project, a repository lists each home by folder and marks the listed one, no terminal registers nothing without --all or --only, re-import leaves the row unchanged, and paths with no home say so. The n-0543 claims hold too. A worktree imported before its checkout registers at the checkout in the checkout's project, by one home, by --all, and from a .claude/worktrees folder. A home only the worktree holds is refused once and exits 2, as are --only PROMO and --only promo,Promo. --only matches in any case, and a fork moved elsewhere keeps its IDs. n-0522 through n-0542 still hold, and so do letter case, /tmp vs /private/tmp and symlinks. It fails because a gone row now goes to any repository holding its first commit, whatever its origin. alpha (origin acme/alpha) and beta (origin acme/beta) were both cloned from one starter kit and each gained its own committed web home. alpha was registered, then moved to ~/code/alpha. Importing beta reported '~ moved ... keeps its ID 0001-ap-web', so beta's home is filed as alpha's blueprint under alpha's label and origin. alpha at its new place is then refused, 'the project label alpha is another project's', even with --project alpha, and walkdown status there finds nothing. If alpha is deleted instead, beta inherits its label silently. A person's own project cannot be imported under its own name, and the advice printed leads nowhere.",
+      "threads": [
+        "90739e20-c336-4288-9fe1-550572da3d50"
+      ]
+    }
+  ]
+}

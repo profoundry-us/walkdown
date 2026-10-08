@@ -385,3 +385,35 @@ test('a checkout retargeted to a fork and then moved keeps its IDs @rule:command
   assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), r.stdout);
   assert.equal(m.rows().length, 1, 'no new IDs (n-0543)');
 });
+
+test('two projects from one template are two repositories, though they share a first commit @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('one-template');
+  const starter = m.repo('starter');
+  const project = (name) => {
+    const at = join(m.home, name);
+    execFileSync('git', ['clone', '-q', starter, at]);
+    execFileSync('git', ['remote', 'set-url', 'origin', `https://example.com/acme/${name}.git`], {
+      cwd: at,
+    });
+    mkdirSync(join(at, '.walkdown', 'blueprints', 'web'), { recursive: true });
+    writeFileSync(join(at, '.walkdown', 'blueprints', 'web', 'spec.yml'), 'blueprint: web\n');
+    execFileSync('git', ['add', '-A'], { cwd: at });
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', name], {
+      cwd: at,
+    });
+    return at;
+  };
+  const alpha = project('alpha');
+  assert.equal(m.cli(alpha, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  mkdirSync(join(m.home, 'code'));
+  const moved = join(m.home, 'code', 'alpha');
+  execFileSync('mv', [alpha, moved]);
+  const beta = project('beta');
+  const b = m.cli(beta, 'blueprints', 'import', '.', '--all');
+  assert.doesNotMatch(b.stdout, /moved/, b.stdout);
+  assert.equal(String(m.rows().find((r) => r.id === row.id).checkout), '~/alpha', 'n-0544');
+  const a = m.cli(moved, 'blueprints', 'import', '.', '--all');
+  assert.equal(a.status, 0, a.stderr);
+  assert.match(a.stdout, new RegExp(`~ moved .*\`${row.id}\``), a.stdout);
+});

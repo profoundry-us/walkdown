@@ -22,6 +22,7 @@ import { parseArgs } from 'node:util';
 import {
   canon,
   checkoutFor,
+  checkoutGone,
   couldHaveMoved,
   describeFolder,
   expand,
@@ -462,8 +463,22 @@ function finish(chosen, checkout, values, known = []) {
           `✗ the project ${row.action === 'label-taken' ? 'label' : 'code'} \`${row.taken}\` is another project's on this machine. Nothing more was imported.`,
         ),
       );
+      // A label whose checkout is gone may be this one, moved: the way to
+      // keep its IDs is said, not only the way to make new ones (n-0544).
+      const gone =
+        row.action === 'label-taken' &&
+        values.project !== row.taken &&
+        readRegistry().rows.some((r) => r?.project === row.taken && checkoutGone(r));
+      if (gone)
+        console.error(
+          dim(
+            `  If this is \`${row.taken}\`'s checkout, moved, \`--project ${row.taken}\` keeps its IDs.`,
+          ),
+        );
       console.error(
-        dim('  Choose another with `--project <label>` and `--code <two or three letters>`.'),
+        dim(
+          `  ${gone ? 'Otherwise choose' : 'Choose'} another with \`--project <label>\` and \`--code <two or three letters>\`.`,
+        ),
       );
       return end(2);
     }

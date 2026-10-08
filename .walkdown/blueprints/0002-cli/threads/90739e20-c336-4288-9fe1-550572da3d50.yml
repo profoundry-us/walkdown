@@ -1,0 +1,22 @@
+id: n-0544
+uuid: 90739e20-c336-4288-9fe1-550572da3d50
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T15:58:51.851Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 8f32045. Two projects cloned from one starter kit
+  share a first commit. When one moves or is deleted, the other takes its rows
+  as moved, even though their origins differ. The project that moved is then
+  refused under its own label, and --project with that label is refused too.
+replies:
+  - author: agent
+    created: 2026-10-08T16:02:41Z
+    body: "A shared first commit now proves the same repository only beside the
+      remote. If the candidate's origin differs from the row's, the row's origin
+      must be among the candidate's remotes, as a fork keeps it as upstream. A
+      sibling from one template never has it. When a label is refused and its
+      checkout is gone, the refusal now says that --project with that label
+      keeps its IDs. Test: test/import-moves.test.js (one template)."
