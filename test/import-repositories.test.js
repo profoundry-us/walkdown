@@ -307,3 +307,45 @@ test('a template sibling at a moved checkout’s old path does not hold its rows
     assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), `${n}: ${r.stdout}`);
   }
 });
+
+test('a sibling standing where a deleted project stood is refused, not claimed under its IDs @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('sibling-claimed');
+  const tpl = m.repo('tpl');
+  mkdirSync(join(tpl, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(tpl, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: tpl });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: tpl,
+  });
+  const app = join(m.home, 'app');
+  const clone = (origin) => {
+    execFileSync('git', ['clone', '-q', tpl, app]);
+    execFileSync('git', ['remote', 'set-url', 'origin', origin], { cwd: app });
+  };
+  clone('git@github.com:acme/app.git');
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  rmSync(app, { recursive: true, force: true });
+  clone('git@github.com:acme/shop.git');
+  const r = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.equal(r.status, 2, r.stdout);
+  assert.match(r.stderr, /another repository/);
+  assert.match(r.stderr, /blueprints forget/);
+  assert.doesNotMatch(r.stdout, /already listed/, 'n-0547');
+});
+
+test('a repository with no commits never takes a project that had one @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('no-commits');
+  const notes = m.repo('notes');
+  mkdirSync(join(notes, '.walkdown', 'blueprints', 'billing'), { recursive: true });
+  writeFileSync(join(notes, '.walkdown', 'blueprints', 'billing', 'spec.yml'), 'blueprint: b\n');
+  assert.equal(m.cli(notes, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  rmSync(notes, { recursive: true, force: true });
+  const fresh = join(m.home, 'fresh');
+  mkdirSync(join(fresh, '.walkdown', 'blueprints', 'billing'), { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: fresh });
+  writeFileSync(join(fresh, '.walkdown', 'blueprints', 'billing', 'spec.yml'), 'blueprint: b\n');
+  const r = m.cli(fresh, 'blueprints', 'import', '.', '--all');
+  assert.doesNotMatch(r.stdout, /moved/, r.stdout);
+  assert.equal(m.rows().find((x) => x.id === row.id).checkout, '~/notes', 'n-0547');
+});

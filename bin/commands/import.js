@@ -217,6 +217,7 @@ export async function run(args) {
       return end(2);
     }
     const already = listedHomes().get(canon(homeDir));
+    if (already && claimedByGone([homeDir])) return end(2);
     if (already) {
       if (values.json)
         console.log(
@@ -319,6 +320,7 @@ export async function run(args) {
     return isHome(there) ? { ...h, dir: there } : { ...h, checkout: top };
   };
   const listed = listedHomes();
+  if (claimedByGone(homes.map((h) => at_(h).dir))) return end(2);
   const isListed = (h) => listed.has(canon(at_(h).dir));
   const fresh = homes.filter((h) => !isListed(h));
   let known = homes.filter(isListed);
@@ -587,4 +589,33 @@ function finish(chosen, checkout, values, known = []) {
 /** Why a home only a worktree holds is not registered (ADR 0014 §10). */
 function onlyInWorktree(dir, wt) {
   return `${tilde(dir)} is only in ${tilde(wt.worktree)}, a git worktree of ${tilde(wt.checkout)}, and a worktree is never registered. Once its branch is in ${tilde(wt.checkout)}, import it there.`;
+}
+
+/*
+ * A home listed under a row whose checkout is gone - another repository now
+ * stands where it stood - is neither this checkout's nor already listed.
+ * Taking the old IDs claimed one project's records for another; making new
+ * ones beside them would list one folder twice. So it is said, with the way
+ * out (n-0547).
+ */
+function claimedByGone(dirs) {
+  const rows = readRegistry().rows;
+  const gone = dirs
+    .map((d) =>
+      rows.find((r) => r?.registered && r.home && canon(expand(String(r.home))) === canon(d)),
+    )
+    .filter((r) => r && checkoutGone(r));
+  if (!gone.length) return false;
+  const ids = gone.map((r) => `\`${r.id}\``).join(', ');
+  console.error(
+    red(
+      `✗ ${tilde(expand(String(gone[0].checkout)))} is listed as \`${gone[0].project}\` (${ids}), but what stands there now is another repository. Nothing was imported.`,
+    ),
+  );
+  console.error(
+    dim(
+      `  If \`${gone[0].project}\` moved, import it where it is now and its IDs go with it. If it is gone for good, \`walkdown blueprints forget ${gone[0].id}\` (the files stay), then import this one.`,
+    ),
+  );
+  return true;
 }

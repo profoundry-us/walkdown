@@ -1,0 +1,25 @@
+id: n-0547
+uuid: fa1274d3-a0f1-4edf-b4ff-c1eb160f4c56
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T16:32:58.381Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: "Found while judging at c22c9f8. A sibling cloned at a deleted project's
+  path is claimed as that project: its homes read as already listed under the
+  old IDs, even with --project, though anotherRepository already calls it
+  another repository. And a repository with no commits takes a local-only
+  project's rows, because the first-commit test is skipped when the candidate
+  has none."
+replies:
+  - author: agent
+    created: 2026-10-08T16:37:54Z
+    body: "A home listed under a row whose checkout is gone, where another
+      repository now stands, is no longer read as already listed. Import refuses
+      it, naming the row's IDs and both ways out: import the moved original, or
+      walkdown blueprints forget (the files stay). A row with a recorded first
+      commit now treats a repository with no commits as another one. A moved row
+      also learns the remote it moved under, so the next move is not asked for
+      --project again. Tests: test/import-repositories.test.js."

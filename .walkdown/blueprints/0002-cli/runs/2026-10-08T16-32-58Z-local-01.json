@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-08T16-32-58Z-local-01",
+  "created": "2026-10-08T16:32:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c22c9f8-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/fail-sibling-at-old-path-claimed.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/fail-no-commit-repo-takes-local-only-rows.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/base-steps.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/moves-forks-ports-siblings.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/sibling-at-old-path-then-real-move.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/worktrees.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/remote-replaced.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/remote-replaced-then-plain-move.txt",
+        "runs/evidence/2026-10-08T16-21-57Z-judge13/json.txt"
+      ],
+      "reasoning": "Driven at c22c9f8 through `node bin/walkdown.js` on scratch HOME and WALKDOWN_HOME under /tmp/judge13-*, with a real pty for the picker; no server was needed. The base steps hold: a home path registers that blueprint alone and says its ID and project, the repository path lists each home by folder and marks the listed one, the terminal picker takes numbers, folder names in any case and `all`, and refuses an unknown word or out-of-range number with nothing written; with no terminal it prints the list and registers nothing until --all or --only, a listed home's row is unchanged, and a path with no home says so. The claimed n-0546 fix holds: a template sibling with another origin or with no remote at the old path leaves the row gone, so the real checkout then moves with its IDs. Moves, forks with upstream, ssh ports, respelled hosts, shallow-then-deepened clones, letter case, symlinks, worktrees (registered or not, branch-only homes refused), and template siblings at new paths all still behave. Two things fail. First, the sibling itself imported at the old path is told its homes are `already listed` as the deleted project's IDs, though checkoutGone already reads those rows as gone by the same anotherRepository test; `--project shop --code sh` is ignored the same way, so the person has no flag that registers it and the sibling's spec is listed under the other project's label and IDs. Second, a local-only row that knows its first commit is taken by a `git init` repository with no commits at all, whose homes merely share the layout: anotherRepository skips the first-commit test when the candidate has no commits, though a moved checkout always carries that commit.",
+      "threads": [
+        "fa1274d3-a0f1-4edf-b4ff-c1eb160f4c56"
+      ]
+    }
+  ]
+}
