@@ -23,6 +23,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { threadAt } from '../tools/test-home.mjs';
+import { builtOnce } from './support/fixture-copy.mjs';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const REPO = new URL('..', import.meta.url).pathname;
@@ -36,18 +37,7 @@ after(() => {
 // not read a fixture's tag as a check of a rule it lacks.
 const tag = (id) => '@rule' + `:${id}`;
 
-/*
- * A project `shop` with blueprints a and b, each holding one rule, and a
- * node:test suite tagged for both and for `nobody.holds.this`.
- */
-function project({ commit = 'none' } = {}) {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'wd-sev-')));
-  roots.push(root);
-  const home = join(root, 'home');
-  const shop = join(root, 'shop');
-  mkdirSync(join(shop, 'test'), { recursive: true });
-  mkdirSync(home, { recursive: true });
-  spawnSync('git', ['init', '-q'], { cwd: shop });
+function envFor(home) {
   const env = {
     ...process.env,
     WALKDOWN_HOME: home,
@@ -60,21 +50,36 @@ function project({ commit = 'none' } = {}) {
   // A child `node --test` that inherits this runner's context reports into
   // it instead of running as a suite of its own.
   delete env.NODE_TEST_CONTEXT;
-  const wd = (args, cwd = shop) =>
-    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  return env;
+}
+
+/*
+ * Built once per variant and copied for each test (test/support/
+ * fixture-copy.mjs): the build is eight CLI runs, and every test here wants
+ * the same two blueprints.
+ */
+const build = (commit) => (root) => {
+  const home = join(root, 'home');
+  const shop = join(root, 'shop');
+  mkdirSync(join(shop, 'test'), { recursive: true });
+  mkdirSync(home, { recursive: true });
+  spawnSync('git', ['init', '-q'], { cwd: shop });
+  const env = envFor(home);
+  const wd = (args) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd: shop, encoding: 'utf8', env });
   for (const id of ['a', 'b']) {
     const made = wd(['blueprints', 'new', id, ...(commit === 'none' ? [] : ['--commit', commit])]);
     assert.equal(made.status, 0, made.stderr);
   }
-  const specOf = (id) => JSON.parse(wd(['where', '--blueprint', id, '--json']).stdout).spec.path;
-  // A home is one folder now (ADR 0014 §5): the spec is the home.
-  const homeOf = (id) => specOf(id);
+  const specs = {};
+  for (const id of ['a', 'b'])
+    specs[id] = JSON.parse(wd(['where', '--blueprint', id, '--json']).stdout).spec.path;
   for (const id of ['a', 'b']) {
     writeFileSync(
-      join(specOf(id), 'features', `${id}.yml`),
+      join(specs[id], 'features', `${id}.yml`),
       `feature: ${id}\nstories:\n  - id: ${id}.s\n    title: ${id}\n    statement: As a shopper I use ${id}.\n    rules:\n      - id: ${id}.s.works\n        statement: The ${id} page works.\n        verify: [checks]\n        steps:\n          then: [It works]\n`,
     );
-    const cfg = join(specOf(id), 'spec.yml');
+    const cfg = join(specs[id], 'spec.yml');
     writeFileSync(
       cfg,
       readFileSync(cfg, 'utf8')
@@ -95,6 +100,27 @@ function project({ commit = 'none' } = {}) {
       ),
     ].join('\n'),
   );
+  return { specs };
+};
+const variants = {
+  none: builtOnce('wd-sev-', build('none'), roots),
+  spec: builtOnce('wd-sev-', build('spec'), roots),
+};
+
+/**
+ * A project `shop` with blueprints a and b, each holding one rule, and a
+ * node:test suite tagged for both and for `nobody.holds.this`.
+ */
+function project({ commit = 'none' } = {}) {
+  const { root, made } = variants[commit]();
+  const home = join(root, 'home');
+  const shop = join(root, 'shop');
+  const env = envFor(home);
+  const wd = (args, cwd = shop) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  const specOf = (id) => made.specs[id];
+  // A home is one folder now (ADR 0014 §5): the spec is the home.
+  const homeOf = (id) => specOf(id);
   const runsOf = (id) => {
     const d = join(homeOf(id), 'runs');
     return existsSync(d)
