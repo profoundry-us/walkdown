@@ -162,6 +162,8 @@ checks:
     name: Unit tests
     run: npm test
     # ~63s on 2026-10-06 once ADR 0014 brought its real-git suites (upgrade,
-    # worktree, judged-edges); 45 killed a passing run every turn.
-    timeout: 90
+    # worktree, judged-edges); 45 killed a passing run every turn. 90 then
+    # killed every passing run on a loaded machine (load ~35 on 10 cores,
+    # 2026-10-08), so Topher raised it to 180.
+    timeout: 180
 
