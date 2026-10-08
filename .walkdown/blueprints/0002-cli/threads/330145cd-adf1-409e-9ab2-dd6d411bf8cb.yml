@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T21:10:21.768Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: settled
 body: "Found while judging at cec7571. A home kept on this machine still fills
   in --project with its project's label when imported by its path, and that
   default still reaches the move test. With a project named, the move test asks

@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-08T21-32-34Z-local-01",
+  "created": "2026-10-08T21:32:34Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5887722-dirty",
+  "spec_hash": "sha256:1c278d03bb2c",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T21-32-34Z/base.txt",
+        "runs/evidence/2026-10-08T21-32-34Z/kept-home-n0555.txt",
+        "runs/evidence/2026-10-08T21-32-34Z/everyday.txt",
+        "runs/evidence/2026-10-08T21-32-34Z/edges.txt"
+      ],
+      "reasoning": "Driven in a terminal with the working tree's bin/walkdown.js on throwaway HOME and WALKDOWN_HOME machines; nothing was served, so no port was used. The five steps hold, through a pty and without one, and cart's row is unchanged throughout. n-0555 is fixed: the kept billing home imported from inside an unrelated ~/website is refused and shop's cart row is unchanged. Typed by the person, --project shop still moves cart there, as it should. The everyday cases hold: mv keeps every ID, delete and re-clone in place stays listed, re-clone elsewhere keeps the IDs, and a remote renamed in place stays listed. An unrelated repository at shop's deleted path is refused with guidance, and one at another path becomes its own project. A worktree and a second clone both answer already listed, never a new project. Switching ssh to https, or the fork workflow's upstream rename, then mv also keeps the IDs. Weighed edges, none filed: a GitHub rename with set-url, then mv or a re-clone elsewhere, gives a new project silently (about 3%: a rename is rare and two steps must follow). A shallow re-clone in place is refused with --project guidance (about 3%). A committed home only a second clone holds is refused as another project's label with no clone-aware hint (about 10%: two clones of one repository and a blueprint pulled into one of them).",
+      "threads": []
+    }
+  ]
+}
