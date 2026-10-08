@@ -217,15 +217,16 @@ test('a checkout retargeted to a fork and then moved keeps its IDs @rule:command
   assert.equal(m.rows().length, 1, 'no new IDs (n-0543)');
 });
 
-test('two projects from one template are two repositories, though they share a first commit @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+test('a repository that only looks like a gone project is never told it moved: a template sibling, with a remote or none; the project itself is @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
   const m = machine('one-template');
   const starter = m.repo('starter');
-  const project = (name) => {
+  // The table in repository.test.js holds every case; this is one real
+  // sibling, sharing the first commit, to keep what import prints honest.
+  const project = (name, origin = `https://example.com/acme/${name}.git`) => {
     const at = join(m.home, name);
     execFileSync('git', ['clone', '-q', starter, at]);
-    execFileSync('git', ['remote', 'set-url', 'origin', `https://example.com/acme/${name}.git`], {
-      cwd: at,
-    });
+    if (origin) execFileSync('git', ['remote', 'set-url', 'origin', origin], { cwd: at });
+    else execFileSync('git', ['remote', 'remove', 'origin'], { cwd: at });
     mkdirSync(join(at, '.walkdown', 'blueprints', 'web'), { recursive: true });
     writeFileSync(join(at, '.walkdown', 'blueprints', 'web', 'spec.yml'), 'blueprint: web\n');
     execFileSync('git', ['add', '-A'], { cwd: at });
@@ -244,42 +245,22 @@ test('two projects from one template are two repositories, though they share a f
   const b = m.cli(beta, 'blueprints', 'import', '.', '--all');
   assert.doesNotMatch(b.stdout, /moved/, b.stdout);
   assert.equal(String(m.rows().find((r) => r.id === row.id).checkout), '~/alpha', 'n-0544');
+  assert.ok(
+    m.rows().some((r) => r.project === 'beta'),
+    'beta is a project of its own',
+  );
+  const gamma = project('gamma', null);
+  const g = m.cli(gamma, 'blueprints', 'import', '.', '--all');
+  assert.doesNotMatch(g.stdout, /moved/, g.stdout);
+  assert.equal(String(m.rows().find((r) => r.id === row.id).checkout), '~/alpha', 'n-0545');
   const a = m.cli(moved, 'blueprints', 'import', '.', '--all');
   assert.equal(a.status, 0, a.stderr);
   assert.match(a.stdout, new RegExp(`~ moved .*\`${row.id}\``), a.stdout);
 });
 
-test('a template sibling with no remote never takes a project whose origin it does not name @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
-  const m = machine('bare-sibling');
-  const starter = m.repo('starter');
-  const project = (name, origin) => {
-    const at = join(m.home, name);
-    execFileSync('git', ['clone', '-q', starter, at]);
-    if (origin) execFileSync('git', ['remote', 'set-url', 'origin', origin], { cwd: at });
-    else execFileSync('git', ['remote', 'remove', 'origin'], { cwd: at });
-    mkdirSync(join(at, '.walkdown', 'blueprints', 'web'), { recursive: true });
-    writeFileSync(join(at, '.walkdown', 'blueprints', 'web', 'spec.yml'), 'blueprint: web\n');
-    execFileSync('git', ['add', '-A'], { cwd: at });
-    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', name], {
-      cwd: at,
-    });
-    return at;
-  };
-  const alpha = project('alpha', 'https://example.com/acme/alpha.git');
-  assert.equal(m.cli(alpha, 'blueprints', 'import', '.', '--all').status, 0);
-  rmSync(alpha, { recursive: true, force: true });
-  const gamma = project('gamma', null);
-  const r = m.cli(gamma, 'blueprints', 'import', '.', '--all');
-  assert.doesNotMatch(r.stdout, /moved/, r.stdout);
-  assert.equal(m.rows().find((row) => row.project === 'alpha')?.checkout, '~/alpha', 'n-0545');
-});
-
 test('a template sibling at a moved checkout’s old path does not hold its rows there @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
-  // Another origin at the old path, or no remote at all (n-0546).
-  for (const [n, other] of [
-    [1, 'git@github.com:zed/site.git'],
-    [2, null],
-  ]) {
+  // Another origin at the old path; no remote at all is in the table.
+  for (const [n, other] of [[1, 'git@github.com:zed/site.git']]) {
     const m = machine(`sibling-at-old-path-${n}`);
     const starter = m.repo('starter');
     const clone = (at, origin) => {
@@ -370,37 +351,6 @@ test('a checkout that stays put and only changes its remote is still the one lis
     assert.equal(r.status, 0, `${step.join(' ')}: ${r.stderr}`);
     assert.match(r.stdout, /already listed/, 'n-0548');
   }
-});
-
-test('a clone where a gone project stood is never filed under that project @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
-  const m = machine('clone-into-gone');
-  const app = m.repo('app');
-  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/app.git'], { cwd: app });
-  mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
-  writeFileSync(join(app, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
-  execFileSync('git', ['add', '-A'], { cwd: app });
-  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
-    cwd: app,
-  });
-  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
-  rmSync(app, { recursive: true, force: true });
-  const other = m.repo('other');
-  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/other.git'], {
-    cwd: other,
-  });
-  mkdirSync(join(other, '.walkdown', 'blueprints', 'docs'), { recursive: true });
-  writeFileSync(join(other, '.walkdown', 'blueprints', 'docs', 'spec.yml'), 'blueprint: docs\n');
-  execFileSync('git', ['add', '-A'], { cwd: other });
-  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'o'], {
-    cwd: other,
-  });
-  execFileSync('git', ['clone', '-q', other, app]);
-  execFileSync('git', ['remote', 'set-url', 'origin', 'git@github.com:acme/other.git'], {
-    cwd: app,
-  });
-  const r = m.cli(app, 'blueprints', 'import', '.', '--all');
-  assert.equal(r.status, 0, r.stderr);
-  assert.equal(m.rows().find((x) => String(x.id).endsWith('-docs'))?.project, 'other', 'n-0548');
 });
 
 test('a checkout that never moved stays listed after an amend and a gc, and after a re-clone missing a local commit @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
