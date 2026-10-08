@@ -140,6 +140,11 @@ export async function run(args) {
         if (isHome(there)) {
           homeDir = canon(there);
           checkout = wt.checkout;
+        } else if (!wt.clone) {
+          // Only this worktree's branch holds it: registered here, the
+          // worktree became a project of its own (n-0542).
+          console.error(red(onlyInWorktree(homeDir, wt)));
+          return end(2);
         }
       }
     }
@@ -231,7 +236,7 @@ export async function run(args) {
     (gitRoot(dir) && canon(gitRoot(dir)) === dir) || existsSync(join(dir, '.walkdown'))
       ? dir
       : null;
-  const { homes, nested } = top ? findHomes(top) : { homes: [], nested: [] };
+  let { homes, nested } = top ? findHomes(top) : { homes: [], nested: [] };
   for (const n of nested)
     console.error(
       red(
@@ -297,6 +302,13 @@ export async function run(args) {
    * its old path matches that clone by origin, and is still not its
    * worktree (locations.registry.ids-stay-here).
    */
+  // A home only this worktree's branch holds is not offered (n-0542).
+  if (wt?.worktree && !wt.clone) {
+    const mine = (h) => isHome(join(wt.checkout, relative(wt.worktree, h.dir)));
+    for (const h of homes.filter((h) => !mine(h))) console.error(dim(onlyInWorktree(h.dir, wt)));
+    homes = homes.filter(mine);
+    if (!homes.length) return end(2);
+  }
   const at_ = (h) => {
     if (!wt?.worktree) return h;
     const there = canon(join(wt.checkout, relative(wt.worktree, h.dir)));
@@ -529,4 +541,9 @@ function finish(chosen, checkout, values, known = []) {
       ),
     );
   return end(0);
+}
+
+/** Why a home only a worktree holds is not registered (ADR 0014 §10). */
+function onlyInWorktree(dir, wt) {
+  return `${tilde(dir)} is only in ${tilde(wt.worktree)}, a git worktree of ${tilde(wt.checkout)}, and a worktree is never registered. Once its branch is in ${tilde(wt.checkout)}, import it there.`;
 }

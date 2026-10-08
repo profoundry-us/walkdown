@@ -1,0 +1,24 @@
+id: n-0542
+uuid: b0b3ef4d-dc94-42a9-8ffd-d84049bf63eb
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T15:35:44.267Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at e453e79. A checkout still standing loses its rows
+  when its origin URL changes, as when it becomes a fork or gains a trailing
+  slash. A clone of the old origin then takes all of them as moved. Also, a home
+  only a worktree holds registers the worktree as its own project. After that,
+  the checkout's homes read as unlisted there and --all registers them twice.
+replies:
+  - author: agent
+    created: 2026-10-08T15:41:29Z
+    body: "When the old path can be asked for the row's first commit, that commit
+      now decides, and the origin is only consulted where it cannot be. A
+      checkout that became a fork or had its remote respelled is still its own
+      repository. Origins drop a trailing slash. A home only a worktree's branch
+      holds is refused by name, or left out of a repository import with a note:
+      a worktree is never registered, so it never becomes a project. The move
+      tests moved to test/import-moves.test.js."
