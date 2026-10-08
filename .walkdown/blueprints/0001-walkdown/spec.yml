@@ -50,6 +50,16 @@ authoring:
 # serves. `walkdown judge` carries these lines into every prompt.
 governance:
   - >-
+    Weigh an edge before filing it (Topher, 2026-10-08). A step of the rule
+    that does not hold always fails it. Beyond the steps, estimate how likely a
+    person using walkdown as intended is to meet the edge, and give the
+    estimate and its basis in the reasoning. At 80% or more it fails the rule
+    and gets a finding. Below 10% it never fails the rule and is never filed:
+    name it in the reasoning and stop there. Between the two it does not fail
+    the rule; open a question (--kind question) on the rule with the estimate,
+    and Topher decides whether it is fixed. Twenty-three judgings of one import
+    rule, each finding a rarer edge than the last, are why.
+  - >-
     The application under review is walkdown's own panel, and it writes to the
     very blueprint it serves — this working tree's blueprint is the real
     ledger, not a disposable environment. Before judging anything that files,

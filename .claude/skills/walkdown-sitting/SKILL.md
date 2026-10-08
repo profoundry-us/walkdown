@@ -91,6 +91,13 @@ start.
 
 ## Judgment
 
+**Weigh an edge before filing it.** A step of the rule that does not hold
+fails it. Beyond the steps, estimate how likely someone using walkdown as
+intended is to meet the edge: 80% or more fails the rule with a finding,
+under 10% is named in the reasoning and never filed, and anything between is
+a question for Topher that fails nothing. Each blueprint's governance lines
+say the same, and every judge prompt carries them.
+
 **Partial is fine; pretending is not.** If the sitting runs out of road, record
 the rules you actually drove and leave the rest owed. A sweep makes that
 honest — the unjudged ones stay visibly unjudged. Writing verdicts you did not
