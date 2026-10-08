@@ -1,0 +1,26 @@
+id: n-0543
+uuid: 8f16c366-817e-454f-864e-c1b74202f968
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T15:48:22.528Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 961ef77. A worktree is registered as its own
+  project whenever its main checkout has not been imported yet. Its homes then
+  stand at the worktree's paths, under the worktree's label, for good. Also, a
+  checkout retargeted to a fork and then moved is refused as another project's
+  label, though its first commit matches. The advice printed mints new IDs; only
+  --project with the old label keeps them, and the refusal never says so.
+replies:
+  - author: agent
+    created: 2026-10-08T15:53:26Z
+    body: "Import now asks git whether a tree is a linked worktree, whether or not
+      its checkout is registered yet. A home the checkout also holds registers
+      at the checkout, in the checkout's project. A home only the worktree holds
+      is refused. A gone row whose recorded first commit the candidate holds is
+      that repository, whatever its remote now says, so a fork moved elsewhere
+      keeps its IDs. Also: ssh://host:22/ origins drop the port, --only matches
+      in any letter case, and naming only worktree-held homes says so once and
+      exits 2. Tests: test/import-moves.test.js."

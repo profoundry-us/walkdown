@@ -30,6 +30,7 @@ import {
   goneCheckouts,
   isHome,
   isOldHome,
+  linkedWorktree,
   projectOf,
   projectsDir,
   readRegistry,
@@ -134,7 +135,7 @@ export async function run(args) {
      * (ADR 0014 §10): a worktree is never registered.
      */
     if (checkout) {
-      const wt = checkoutFor(checkout, readRegistry().rows);
+      const wt = checkoutFor(checkout, readRegistry().rows) ?? linkedWorktree(checkout);
       if (wt?.worktree) {
         const there = join(wt.checkout, relative(wt.worktree, homeDir));
         if (isHome(there)) {
@@ -284,7 +285,7 @@ export async function run(args) {
    * A worktree's homes are imported as the checkout's (ADR 0014 §10): the
    * project is the checkout, and the worktree is never registered.
    */
-  let wt = checkoutFor(top, readRegistry().rows);
+  let wt = top ? (checkoutFor(top, readRegistry().rows) ?? linkedWorktree(top)) : null;
   if (wt?.clone) {
     const moved = reclaimFromClone(top, wt.checkout);
     if (moved) {
@@ -303,9 +304,11 @@ export async function run(args) {
    * worktree (locations.registry.ids-stay-here).
    */
   // A home only this worktree's branch holds is not offered (n-0542).
+  let branchOnly = [];
   if (wt?.worktree && !wt.clone) {
     const mine = (h) => isHome(join(wt.checkout, relative(wt.worktree, h.dir)));
-    for (const h of homes.filter((h) => !mine(h))) console.error(dim(onlyInWorktree(h.dir, wt)));
+    branchOnly = homes.filter((h) => !mine(h));
+    for (const h of branchOnly) console.error(dim(onlyInWorktree(h.dir, wt)));
     homes = homes.filter(mine);
     if (!homes.length) return end(2);
   }
@@ -325,8 +328,11 @@ export async function run(args) {
       : '';
     return `  ${i === null ? '' : `${i + 1}. `}${h.folder}${d ? dim(` — ${d}`) : ''}${mark}`;
   };
+  // By any letter case, as the path itself is (n-0543).
   const named = (h, w) =>
-    w === h.folder || w === basename(h.folder) || w === describeFolder(h.folder);
+    [h.folder, basename(h.folder), describeFolder(h.folder)].some(
+      (n) => String(n).toLowerCase() === w.toLowerCase(),
+    );
   let chosen = fresh;
   if (values.only) {
     const want = [
@@ -338,7 +344,10 @@ export async function run(args) {
       ),
     ];
     // Refused alike whether or not anything here is still unlisted (n-0541).
-    const missing = want.filter((w) => !homes.some((h) => named(h, w)));
+    // One only this worktree holds was said so above, not called missing.
+    const missing = want.filter(
+      (w) => !homes.some((h) => named(h, w)) && !branchOnly.some((h) => named(h, w)),
+    );
     if (missing.length) {
       console.error(red(`${tilde(top)} holds no blueprint folder called ${missing.join(', ')}.`));
       console.error(dim(`  it holds: ${homes.map((h) => h.folder).join(', ')}`));
@@ -348,6 +357,8 @@ export async function run(args) {
     // A folder already listed is said so, not refused: `--only cart,billing`
     // with cart listed still imports billing (n-0538).
     known = homes.filter((h) => isListed(h) && want.some((w) => named(h, w)));
+    // Every name was a home only this worktree holds, already said.
+    if (!chosen.length && !known.length) return end(2);
   } else if (!fresh.length) {
     if (values.json) {
       const listed = known.map((h) => ({

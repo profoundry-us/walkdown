@@ -37,7 +37,9 @@ function machine(name) {
     execFileSync('git', ['init', '-q'], { cwd: at });
     execFileSync(
       'git',
-      ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '--allow-empty', '-m', 'i'],
+      // Named for its folder: two empty first commits made in one second are
+      // one commit, and two repositories would share a first commit.
+      ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '--allow-empty', '-m', at],
       { cwd: at },
     );
     return at;
@@ -330,4 +332,56 @@ test('a home only a worktree holds is refused, and the worktree never becomes a 
   const all = m.cli(wt, 'blueprints', 'import', '.', '--all');
   assert.doesNotMatch(all.stdout, /\+ listed/, all.stdout);
   assert.equal(m.rows().length, 1, 'only the checkout’s cart (n-0542)');
+});
+
+test('a worktree of a checkout not yet imported registers the checkout, never itself @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('worktree-first');
+  const shop = m.repo('shop');
+  for (const n of ['cart', 'billing']) {
+    mkdirSync(join(shop, '.walkdown', 'blueprints', n), { recursive: true });
+    writeFileSync(join(shop, '.walkdown', 'blueprints', n, 'spec.yml'), `blueprint: ${n}\n`);
+  }
+  execFileSync('git', ['add', '-A'], { cwd: shop });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: shop,
+  });
+  const wt = join(shop, '.claude', 'worktrees', 'x');
+  execFileSync('git', ['worktree', 'add', '-q', wt, '-b', 'x'], { cwd: shop });
+  const r = m.cli(wt, 'blueprints', 'import', join('.walkdown', 'blueprints', 'cart'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(m.rows()[0].checkout, '~/shop', 'the checkout, not the worktree (n-0543)');
+  assert.equal(m.rows()[0].project, 'shop');
+  const all = m.cli(wt, 'blueprints', 'import', '.', '--all');
+  assert.equal(all.status, 0, all.stderr);
+  assert.ok(
+    m.rows().every((row) => row.checkout === '~/shop'),
+    JSON.stringify(m.rows()),
+  );
+});
+
+test('a checkout retargeted to a fork and then moved keeps its IDs @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('fork-moved');
+  const shop = m.repo('shop');
+  execFileSync('git', ['remote', 'add', 'origin', 'https://example.com/acme/shop.git'], {
+    cwd: shop,
+  });
+  mkdirSync(join(shop, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(shop, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: shop });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: shop,
+  });
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  execFileSync('git', ['remote', 'rename', 'origin', 'upstream'], { cwd: shop });
+  execFileSync('git', ['remote', 'add', 'origin', 'https://example.com/me/shop.git'], {
+    cwd: shop,
+  });
+  mkdirSync(join(m.home, 'code'));
+  const moved = join(m.home, 'code', 'shop');
+  execFileSync('mv', [shop, moved]);
+  const r = m.cli(moved, 'blueprints', 'import', '.', '--all');
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), r.stdout);
+  assert.equal(m.rows().length, 1, 'no new IDs (n-0543)');
 });

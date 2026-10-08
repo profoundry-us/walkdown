@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-08T15-48-23Z-local-01",
+  "created": "2026-10-08T15:48:23Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "961ef77-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-41-49Z-judge9/import-01-base-steps.txt",
+        "runs/evidence/2026-10-08T15-41-49Z-judge9/import-02-fork-and-respelled-origin-old-path-standing.txt",
+        "runs/evidence/2026-10-08T15-41-49Z-judge9/import-03-worktree-only-home-checkout-registered.txt",
+        "runs/evidence/2026-10-08T15-41-49Z-judge9/import-04-worktree-registered-when-checkout-not-yet.txt",
+        "runs/evidence/2026-10-08T15-41-49Z-judge9/import-05-fork-then-move-refused.txt",
+        "runs/evidence/2026-10-08T15-41-49Z-judge9/import-06-earlier-fixes-and-spellings.txt"
+      ],
+      "reasoning": "Driven headless at 961ef77 on scratch machines (HOME and WALKDOWN_HOME under /tmp/judge9-*), with no server, and with a real pty for the terminal cases. The base steps hold. One home's path registers that blueprint alone and names its ID and project. A repository's path lists each folder, marks the one already listed, and registers the numbers picked; an empty answer or Ctrl-D imports nothing. With no terminal it lists, registers nothing and exits 2, and --json keeps stdout empty. Re-import says already listed and leaves the registry byte-identical under /tmp, /private/tmp, a symlink and another letter case. Paths holding no home say so. The n-0542 claims hold where the checkout is already registered. A checkout that became a fork, or whose origin gained a trailing slash, keeps its rows when a second clone of the original is imported. A home only a worktree's branch holds is refused when named, by any spelling, and left out of a repository import with a note, including a worktree under .claude/worktrees/. The earlier fixes n-0522 through n-0541 still hold. The rule fails because a worktree is still registered as a project whenever the main checkout has not been imported yet. In a Claude Code worktree at shop/.claude/worktrees/x, `walkdown blueprints import .walkdown/blueprints/cart` lists 0001-xx-cart in a new project `x` whose checkout is the worktree. Then `walkdown blueprints import . --all` run in shop itself registers billing and search at the worktree's paths as 0002-xx-billing and 0003-xx-search. shop is never registered, and its own homes are answered by the worktree's copies. A worktree beside the checkout behaves the same way, with project `shop-wt`. Removing the worktree later moves the rows back to shop, but they keep the worktree's label and code for good. e453e79 does the same, so this was not introduced by this fix, but the fix claims a worktree is never registered. A second problem concerns moves. A checkout whose origin is retargeted to a fork (as `gh repo fork` does) or respelled, and which is then moved, is refused on import with 'the project label `shop` is another project's' and told to choose another label. Following that advice mints new IDs beside the old rows, which stay marked gone. Only `--project shop` keeps the IDs, and the refusal never mentions it.",
+      "threads": [
+        "8f16c366-817e-454f-864e-c1b74202f968"
+      ]
+    }
+  ]
+}
