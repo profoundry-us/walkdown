@@ -1,0 +1,62 @@
+{
+  "run_id": "2026-10-08T18-49-31Z-local-01",
+  "created": "2026-10-08T18:49:31Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "54d94cd-dirty",
+  "tree_hash": "sha256:7eaeec7157e0",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "locations.several.results-filed-by-rule",
+      "status": "pass",
+      "statement_hash": "sha256:e6bc38c97ca2",
+      "duration_ms": 2642,
+      "checks": [
+        "test/several-project.test.js:145",
+        "test/several-project.test.js:166",
+        "test/several-project.test.js:184",
+        "test/several-project.test.js:211",
+        "test/several-project.test.js:486"
+      ]
+    },
+    {
+      "rule": "locations.several.lint-reads-the-project",
+      "status": "pass",
+      "statement_hash": "sha256:a2090d8e2e07",
+      "duration_ms": 959,
+      "checks": [
+        "test/several-project.test.js:253"
+      ]
+    },
+    {
+      "rule": "locations.threads.uuid-is-the-identity",
+      "status": "pass",
+      "statement_hash": "sha256:945e5cd8fc01",
+      "duration_ms": 1818,
+      "checks": [
+        "test/several-project.test.js:355"
+      ]
+    },
+    {
+      "rule": "locations.pointer.names-no-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:ea412d8747cd",
+      "duration_ms": 1974,
+      "checks": [
+        "test/several-project.test.js:448",
+        "test/several-project.test.js:486"
+      ]
+    },
+    {
+      "rule": "locations.several.serve-shows-each-screen",
+      "status": "pass",
+      "statement_hash": "sha256:623f1388325d",
+      "duration_ms": 99,
+      "checks": [
+        "test/several-project.test.js:533"
+      ]
+    }
+  ]
+}
