@@ -1,0 +1,26 @@
+id: n-0546
+uuid: b679ff3e-a465-419c-978b-b384fe9fea44
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T16:16:43.160Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at dc47aa5. A template sibling cloned at a moved
+  checkout's old path keeps the row from moving, though its origin differs and
+  none of its remotes names the row's. The sibling may have another origin or no
+  remote at all. The real checkout is then refused under its own label, and
+  --project with that label is refused too.
+replies:
+  - author: agent
+    created: 2026-10-08T16:21:35Z
+    body: "One test, anotherRepository(row, dir), now answers for the old path and
+      for a candidate alike. A checkout is another repository if its history
+      lacks the row's first commit. It is also another repository if the row
+      knew its origin and the checkout neither has that origin nor names it
+      among its remotes, including a checkout with no remote at all. A template
+      sibling at the old path therefore leaves the row gone. A standing checkout
+      made into a fork the way gh does it, keeping upstream, still keeps its
+      rows. The terminal picker also refuses a word that is neither a number nor
+      a folder, as --only does. Test: test/import-repositories.test.js."

@@ -396,6 +396,18 @@ export async function run(args) {
     else {
       // A number, or the folder's name as the list shows it (n-0545).
       const words = said.split(/[\s,]+/).filter(Boolean);
+      // A word that is neither is refused, as --only refuses it (n-0546).
+      const unknown = words.filter(
+        (w) => !homes.some((h, i) => Number(w) === i + 1 || named(h, w)),
+      );
+      if (unknown.length) {
+        console.error(
+          red(
+            `${tilde(top)} holds no blueprint folder called ${unknown.join(', ')}. Nothing was imported.`,
+          ),
+        );
+        return end(2);
+      }
       const picked = new Set(
         homes
           .map((h, i) => i + 1)

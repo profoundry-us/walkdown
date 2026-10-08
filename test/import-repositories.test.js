@@ -130,7 +130,11 @@ test('a checkout still standing keeps its rows when its origin is respelled or b
   assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
   const [row] = m.rows();
   for (const url of [`file://${src}/`, 'https://example.com/me/shop.git']) {
-    execFileSync('git', ['remote', 'set-url', 'origin', url], { cwd: shop });
+    // A fork as `gh repo fork` leaves it: the old origin kept as upstream.
+    if (url.startsWith('https')) {
+      execFileSync('git', ['remote', 'rename', 'origin', 'upstream'], { cwd: shop });
+      execFileSync('git', ['remote', 'add', 'origin', url], { cwd: shop });
+    } else execFileSync('git', ['remote', 'set-url', 'origin', url], { cwd: shop });
     const review = join(m.home, `review-${url.length}`);
     execFileSync('git', ['clone', '-q', `file://${src}`, review]);
     const r = m.cli(review, 'blueprints', 'import', join('.walkdown', 'blueprints', 'cart'));
@@ -268,4 +272,38 @@ test('a template sibling with no remote never takes a project whose origin it do
   const r = m.cli(gamma, 'blueprints', 'import', '.', '--all');
   assert.doesNotMatch(r.stdout, /moved/, r.stdout);
   assert.equal(m.rows().find((row) => row.project === 'alpha')?.checkout, '~/alpha', 'n-0545');
+});
+
+test('a template sibling at a moved checkout’s old path does not hold its rows there @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  // Another origin at the old path, or no remote at all (n-0546).
+  for (const [n, other] of [
+    [1, 'git@github.com:zed/site.git'],
+    [2, null],
+  ]) {
+    const m = machine(`sibling-at-old-path-${n}`);
+    const starter = m.repo('starter');
+    const clone = (at, origin) => {
+      mkdirSync(join(at, '..'), { recursive: true });
+      execFileSync('git', ['clone', '-q', starter, at]);
+      if (origin) execFileSync('git', ['remote', 'set-url', 'origin', origin], { cwd: at });
+      else execFileSync('git', ['remote', 'remove', 'origin'], { cwd: at });
+      mkdirSync(join(at, '.walkdown', 'blueprints', 'web'), { recursive: true });
+      writeFileSync(join(at, '.walkdown', 'blueprints', 'web', 'spec.yml'), 'blueprint: web\n');
+      execFileSync('git', ['add', '-A'], { cwd: at });
+      execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', at], {
+        cwd: at,
+      });
+      return at;
+    };
+    const site = clone(join(m.home, 'clients', 'site'), 'git@github.com:acme/site.git');
+    assert.equal(m.cli(site, 'blueprints', 'import', '.', '--all').status, 0);
+    const [row] = m.rows();
+    const archived = join(m.home, 'archive', 'site');
+    mkdirSync(join(archived, '..'), { recursive: true });
+    execFileSync('mv', [site, archived]);
+    clone(site, other);
+    const r = m.cli(archived, 'blueprints', 'import', '.', '--all');
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), `${n}: ${r.stdout}`);
+  }
 });
