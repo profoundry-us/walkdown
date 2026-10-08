@@ -25,6 +25,9 @@ const SLOW = new Set([
   // them - 3s to 11s apiece after their fixtures were trimmed, and before it
   // the edit hook was killed at its budget on every change near init.
   "several", "several-project", "rules-move", "cli",
+  // The same suites dealt across files to keep each in budget (2026-10-08):
+  // the CLI's scenarios in four, and import's moves in two.
+  "cli-2", "cli-3", "cli-4", "import-moves", "import-repositories",
   // ADR 0012: every command spawned on throwaway machines, ~10s.
   "commands",
   // ADR 0014: real git repos, clones and moves on throwaway machines -

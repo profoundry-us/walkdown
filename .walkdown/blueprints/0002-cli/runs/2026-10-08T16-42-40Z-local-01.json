@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-08T16-42-40Z-local-01",
+  "created": "2026-10-08T16:42:40Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "d150841-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/set-url-in-place-refused.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/sibling-registered-into-gone-project.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/forget-hint-files-sibling-under-gone-project.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/project-move-keeps-stale-root.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/base-steps.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/sibling-at-gone-path-refused.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/no-commit-repository-is-another.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/moved-row-learns-remote.txt",
+        "runs/evidence/2026-10-08T16-38-16Z-judge14/earlier-fixes-spotcheck.txt"
+      ],
+      "reasoning": "Driven headless with scratch HOME and WALKDOWN_HOME under /tmp/judge14-*, no server. The base steps hold: one home's path registers it alone with its ID and project, a repository with no terminal lists every folder, marks the listed one and registers nothing, the terminal prompt takes '1 search' and registers those two, a second import reports every home already listed, and an empty folder or an empty repository says it holds no blueprint. The n-0547 claims hold as described: an unrelated clone at a moved project's old path is refused with the row's IDs and both ways out, and the moved original then keeps its IDs; a repository with no commits does not take a local-only project's rows; and a --project move learns the new remote so the next move needs no flag. The 29 import unit tests pass. The rule still fails on two paths a person meets. First, the fix broke a step it did not touch. A checkout that never moved, whose remote was changed in place by an org rename (git remote set-url origin git@github.com:neworg/app.git) or removed, is now refused as 'another repository' at its own registered path. --project app is ignored, and the only way out offered is forget, which loses the IDs. The same import at c22c9f8 said 'already listed' with the row unchanged, as the step requires. The first commit is still held, so the disk does tell this case apart. Second, the claim n-0547 set out to stop still gets through by another door. Delete a project, clone an unrelated repository (another origin, another first commit) at its old path, and import it. If the clone shares no home folder with the old project, it is registered with no refusal as 0003-ap-docs 'in project app, beside billing, cart', under the dead project's label and code. If it does share folders, following the refusal's own hint (forget the one ID it names) files the clone's new IDs in project app beside the gone search row. Less central: a person who follows the label-taken hint '--project app keeps its IDs' after a history rewrite gets the move, but the row keeps its old first commit, so the next import of that same checkout is refused as another repository.",
+      "threads": [
+        "46c4d5e1-7551-475d-a1e9-d11046cf5fab"
+      ]
+    }
+  ]
+}

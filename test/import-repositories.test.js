@@ -349,3 +349,56 @@ test('a repository with no commits never takes a project that had one @rule:comm
   assert.doesNotMatch(r.stdout, /moved/, r.stdout);
   assert.equal(m.rows().find((x) => x.id === row.id).checkout, '~/notes', 'n-0547');
 });
+
+test('a checkout that stays put and only changes its remote is still the one listed @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('remote-in-place');
+  const app = m.repo('app');
+  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/app.git'], { cwd: app });
+  mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(app, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: app });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: app,
+  });
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  for (const step of [
+    ['remote', 'set-url', 'origin', 'git@github.com:neworg/app.git'],
+    ['remote', 'remove', 'origin'],
+  ]) {
+    execFileSync('git', step, { cwd: app });
+    const r = m.cli(app, 'blueprints', 'import', '.', '--all');
+    assert.equal(r.status, 0, `${step.join(' ')}: ${r.stderr}`);
+    assert.match(r.stdout, /already listed/, 'n-0548');
+  }
+});
+
+test('a clone where a gone project stood is never filed under that project @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('clone-into-gone');
+  const app = m.repo('app');
+  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/app.git'], { cwd: app });
+  mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(app, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: app });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: app,
+  });
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  rmSync(app, { recursive: true, force: true });
+  const other = m.repo('other');
+  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/other.git'], {
+    cwd: other,
+  });
+  mkdirSync(join(other, '.walkdown', 'blueprints', 'docs'), { recursive: true });
+  writeFileSync(join(other, '.walkdown', 'blueprints', 'docs', 'spec.yml'), 'blueprint: docs\n');
+  execFileSync('git', ['add', '-A'], { cwd: other });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'o'], {
+    cwd: other,
+  });
+  execFileSync('git', ['clone', '-q', other, app]);
+  execFileSync('git', ['remote', 'set-url', 'origin', 'git@github.com:acme/other.git'], {
+    cwd: app,
+  });
+  const r = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(m.rows().find((x) => String(x.id).endsWith('-docs'))?.project, 'other', 'n-0548');
+});

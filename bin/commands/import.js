@@ -614,8 +614,14 @@ function claimedByGone(dirs) {
   );
   console.error(
     dim(
-      `  If \`${gone[0].project}\` moved, import it where it is now and its IDs go with it. If it is gone for good, \`walkdown blueprints forget ${gone[0].id}\` (the files stay), then import this one.`,
+      `  If \`${gone[0].project}\` moved, import it where it is now and its IDs go with it. If it is gone for good, forget each of its IDs here (the files stay), then import this one:`,
     ),
   );
+  // Every row of that checkout, not only those this import met (n-0548).
+  const at = canon(expand(String(gone[0].checkout)));
+  for (const r of rows.filter(
+    (r) => r?.registered && r.checkout && canon(expand(String(r.checkout))) === at,
+  ))
+    console.error(dim(`    walkdown blueprints forget ${r.id}`));
   return true;
 }

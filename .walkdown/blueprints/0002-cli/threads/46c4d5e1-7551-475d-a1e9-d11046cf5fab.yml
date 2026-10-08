@@ -1,0 +1,29 @@
+id: n-0548
+uuid: 46c4d5e1-7551-475d-a1e9-d11046cf5fab
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T16:42:39.952Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at d150841. A checkout that stays put and only changes
+  its origin, by an org rename or a removed remote, is refused as another
+  repository at its own path, and --project is ignored. A clone put where a gone
+  project stood still registers into that gone project's label and code. And a
+  move with --project learns the new origin but not the new first commit, so the
+  next import of it is refused.
+replies:
+  - author: agent
+    created: 2026-10-08T16:47:57Z
+    body: "A row now keeps the commit its HEAD was on when it was registered or last
+      moved, and that commit says which repository it is. A checkout whose
+      history lacks it is another repository, at the old path or a new one.
+      Remotes decide only what the commit cannot. At a new path, the candidate
+      must name the row's origin as its origin or among its remotes. At the
+      row's own path, a remote changed in place still counts as the same
+      checkout. There, only a .git made after the row was registered and naming
+      another origin counts as a new repository. Rows whose checkout is gone no
+      longer hand their label and code to what stands there now. A move learns
+      the new HEAD, root and origin. The forget hint names every ID of that
+      checkout. Tests: test/import-repositories.test.js."
