@@ -1,0 +1,30 @@
+id: n-0541
+uuid: 0e3905ed-42cf-4dd3-997b-27409e0f6edb
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T15:19:15.904Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 24f32ba. On a case-insensitive disk, importing
+  ~/shop after ~/Shop registers the same homes twice, because canon keeps the
+  case as typed. An unrelated repository put at a moved checkout's old path,
+  holding the same home in its history, keeps the row from moving, though its
+  first commit and origin differ. A shallow clone registered, deepened, then
+  moved cannot be imported, because its recorded root was the shallow cut. Also,
+  --only with a described name reports nothing listed under --json, --only with
+  an unknown name exits 0 when all is listed, and a bare --json with no terminal
+  prints text.
+replies:
+  - author: agent
+    created: 2026-10-08T15:29:24Z
+    body: "Paths are compared by the name the disk keeps (realpathSync.native), so
+      ~/shop and ~/Shop are one folder. A row's recorded first commit and origin
+      now come first. A repository at the old path without that commit, or with
+      another origin, leaves the row gone, so its home there does not hold the
+      row. The first commit is matched as any commit in the history, so a
+      deepened shallow clone still matches. --only refuses an unknown name the
+      same way whether or not anything is unlisted. It matches described names
+      under --json, and a bare --json with no terminal keeps the list off
+      stdout. Tests: test/project-codes.test.js."

@@ -291,3 +291,77 @@ test('a checkout still standing on another branch, or registered by an older wal
   for (const row of m.rows().filter((row) => row.project === 'shop'))
     assert.match(String(row.home), /\/shop\//, `${row.id} still at shop`);
 });
+
+test('a checkout spelled in another case is the one already listed, on a disk that ignores case @rule:commands.blueprints.import-takes-what-it-is-pointed-at', (t) => {
+  const m = machine('case-spelling');
+  const repo = m.repo('Shop');
+  mkdirSync(join(repo, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(repo, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  if (!existsSync(join(m.home, 'shop'))) return t.skip('this disk keeps case apart');
+  assert.equal(m.cli(repo, 'blueprints', 'import', '.', '--all').status, 0);
+  const r = m.cli(m.home, 'blueprints', 'import', join(m.home, 'shop'), '--all');
+  assert.doesNotMatch(r.stdout, /\+ listed/, r.stdout);
+  assert.equal(m.rows().length, 1, 'one row, not two (n-0541)');
+});
+
+test('another repository at a moved checkout’s old path, holding the same home, does not keep its rows @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('other-at-old-path');
+  const make = (dir, origin, msg) => {
+    const at = m.repo(dir);
+    execFileSync('git', ['remote', 'add', 'origin', origin], { cwd: at });
+    mkdirSync(join(at, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+    writeFileSync(join(at, '.walkdown', 'blueprints', 'cart', 'spec.yml'), `blueprint: ${msg}\n`);
+    execFileSync('git', ['add', '-A'], { cwd: at });
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', msg], {
+      cwd: at,
+    });
+    return at;
+  };
+  const shop = make('shop', 'https://example.com/acme/shop.git', 'acme');
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  mkdirSync(join(m.home, 'work'));
+  const moved = join(m.home, 'work', 'shop');
+  execFileSync('mv', [shop, moved]);
+  make('shop', 'https://example.com/zed/shop.git', 'zed');
+  const r = m.cli(moved, 'blueprints', 'import', join('.walkdown', 'blueprints', 'cart'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), r.stdout);
+});
+
+test('a shallow clone registered, deepened and moved keeps its IDs @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('shallow');
+  const src = m.repo('src');
+  mkdirSync(join(src, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(src, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: src });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: src,
+  });
+  const shop = join(m.home, 'shop');
+  execFileSync('git', ['clone', '-q', '--depth', '1', `file://${src}`, shop]);
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  execFileSync('git', ['fetch', '-q', '--unshallow'], { cwd: shop });
+  const moved = join(m.home, 'shop-moved');
+  execFileSync('mv', [shop, moved]);
+  const r = m.cli(moved, 'blueprints', 'import', join('.walkdown', 'blueprints', 'cart'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), r.stdout);
+});
+
+test('--only and --json say the same whether or not anything is unlisted @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('only-alike');
+  const repo = m.repo('shop');
+  mkdirSync(join(repo, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(repo, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  assert.equal(m.cli(repo, 'blueprints', 'import', '.', '--all').status, 0);
+  assert.equal(m.cli(repo, 'blueprints', 'import', '.', '--only', 'nope').status, 2);
+  const listed = m.cli(repo, 'blueprints', 'import', '.', '--only', 'cart', '--json');
+  assert.equal(JSON.parse(listed.stdout).listed.length, 1, listed.stdout);
+  mkdirSync(join(repo, '.walkdown', 'blueprints', 'search'), { recursive: true });
+  writeFileSync(join(repo, '.walkdown', 'blueprints', 'search', 'spec.yml'), 'blueprint: s\n');
+  const bare = m.cli(repo, 'blueprints', 'import', '.', '--json');
+  assert.equal(bare.status, 2);
+  assert.equal(bare.stdout.trim(), '', 'stdout stays JSON or empty (n-0541)');
+});

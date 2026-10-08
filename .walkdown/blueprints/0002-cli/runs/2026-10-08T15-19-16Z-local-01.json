@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-08T15-19-16Z-local-01",
+  "created": "2026-10-08T15:19:16Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8e93194-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-09-FAIL-case-spelling-registers-twice.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-08-path-spellings.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-05-FAIL-shallow-clone-deepened-then-moved.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-07-FAIL-unrelated-repo-at-old-path.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-02-json-and-only.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-01-steps.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-03-older-rows.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-04-declared-case-deleted-old-rows.txt",
+        "runs/evidence/2026-10-08T15-13-57Z-judge7/import-06-earlier-fixes-and-moves.txt"
+      ],
+      "reasoning": "Driven headless with node bin/walkdown.js (24f32ba code; HEAD 8e93194 differs only in tools/sitting.mjs) on scratch machines under /tmp/judge7-*, with rows from b98db06 written by that commit's own CLI where older rows were needed. The steps hold on the plain path: one home registers alone and says its ID and project, the repository lists each home by folder and marks the listed one, a terminal pick registers the chosen and reports the listed one with its row byte-identical, no terminal registers nothing until --all or --only, and folders, .walkdown, a home's subfolder and spec.yml itself are each refused with nothing written. The n-0540 claims hold where tested: b98db06 rows learn root on the next write, a checkout standing at its first commit or on a home-less orphan branch is not taken by an unrelated repository or a clone, a genuine move of old rows keeps IDs, and n-0522, n-0533, n-0536, n-0538 and the worktree path still hold. It fails step 4 and the statement on three paths. First and plainest: on macOS's case-insensitive disk, a home already registered is registered again under a new ID when its path is typed in another case - `import ~/Shop --all`, then `import ~/shop --all`, gives 0001/0002 and 0003/0004 for the same two folders, and `walkdown blueprints` lists both (canon uses realpathSync, which keeps the typed case). Second: the history test added for n-0540 runs before the row's kept root and origin, so an unrelated repository at the old path whose history holds the same home folder counts as the old checkout still standing - its home reports as 'already listed as 0001-sp-cart' (acme/shop's row, though it is zed/shop with another first commit), and the real acme/shop at its new path is refused even with --project shop. Third: a checkout registered as a shallow clone keeps the shallow boundary as its root, so after git fetch --unshallow and a move, importing its own home registers nothing and --project shop is refused as another project's label (the same move without deepening works). Smaller: with every home listed, `--only search --json` (search being 202610-search's name, which --only accepts when the folder is fresh) reports nothing listed, and `--only nope` exits 0 rather than naming the missing folder. The judge's declared gap - a b98db06 row whose checkout was deleted before any write is matched by label, so zed/shop takes acme/shop's dead ID - I find acceptable for this rule: the old checkout and the records in it are gone, nothing live is displaced, the information to tell the two apart was never written, and refusing it would also refuse the genuine moves of old rows that do work; it is a one-time upgrade window that belongs to the ID rule, not to what import registers.",
+      "threads": [
+        "0e3905ed-42cf-4dd3-997b-27409e0f6edb"
+      ]
+    }
+  ]
+}

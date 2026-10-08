@@ -313,27 +313,9 @@ export async function run(args) {
       : '';
     return `  ${i === null ? '' : `${i + 1}. `}${h.folder}${d ? dim(` — ${d}`) : ''}${mark}`;
   };
-  if (!fresh.length && values.json) {
-    const want = values.only ? values.only.split(',').map((w) => w.trim()) : null;
-    const asked = want
-      ? known.filter((h) => want.some((w) => w === h.folder || w === basename(h.folder)))
-      : known;
-    const listed = asked.map((h) => ({
-      id: listedHomes().get(canon(at_(h).dir)) ?? null,
-      home: tilde(at_(h).dir),
-    }));
-    console.log(JSON.stringify({ imported: [], listed }, null, 2));
-    return end(0);
-  }
-  if (!fresh.length) {
-    console.log(`${dim('· already listed')} every blueprint in ${tilde(top)}:`);
-    for (const h of homes) console.log(show(h, null));
-    return end(0);
-  }
-
-  let chosen = fresh;
   const named = (h, w) =>
     w === h.folder || w === basename(h.folder) || w === describeFolder(h.folder);
+  let chosen = fresh;
   if (values.only) {
     const want = [
       ...new Set(
@@ -343,19 +325,35 @@ export async function run(args) {
           .filter(Boolean),
       ),
     ];
-    chosen = fresh.filter((h) => want.some((w) => named(h, w)));
-    // A folder already listed is said so, not refused: `--only cart,billing`
-    // with cart listed still imports billing (n-0538).
-    known = homes.filter((h) => isListed(h) && want.some((w) => named(h, w)));
+    // Refused alike whether or not anything here is still unlisted (n-0541).
     const missing = want.filter((w) => !homes.some((h) => named(h, w)));
     if (missing.length) {
       console.error(red(`${tilde(top)} holds no blueprint folder called ${missing.join(', ')}.`));
       console.error(dim(`  it holds: ${homes.map((h) => h.folder).join(', ')}`));
       return end(2);
     }
+    chosen = fresh.filter((h) => want.some((w) => named(h, w)));
+    // A folder already listed is said so, not refused: `--only cart,billing`
+    // with cart listed still imports billing (n-0538).
+    known = homes.filter((h) => isListed(h) && want.some((w) => named(h, w)));
+  } else if (!fresh.length) {
+    if (values.json) {
+      const listed = known.map((h) => ({
+        id: listedHomes().get(canon(at_(h).dir)) ?? null,
+        home: tilde(at_(h).dir),
+      }));
+      console.log(JSON.stringify({ imported: [], listed }, null, 2));
+      return end(0);
+    }
+    console.log(`${dim('· already listed')} every blueprint in ${tilde(top)}:`);
+    for (const h of homes) console.log(show(h, null));
+    return end(0);
   } else if (!values.all) {
-    console.log(`${tilde(top)} holds ${homes.length} blueprint${homes.length === 1 ? '' : 's'}:`);
-    homes.forEach((h, i) => console.log(show(h, i)));
+    // --json keeps stdout JSON: the list a person would choose from is the
+    // refusal's, on stderr (n-0541).
+    const say = values.json ? console.error : console.log;
+    say(`${tilde(top)} holds ${homes.length} blueprint${homes.length === 1 ? '' : 's'}:`);
+    homes.forEach((h, i) => say(show(h, i)));
     if (!process.stdin.isTTY) {
       console.error(yellow('\nSay which: --all, or --only <folders>. Nothing was imported.'));
       return end(2);
@@ -408,7 +406,6 @@ function finish(chosen, checkout, values, known = []) {
     for (const r of readRegistry().rows) {
       if (!r?.registered || !r.checkout || !r.home || r.ephemeral) continue;
       const old = expand(String(r.checkout));
-      if (existsSync(old) && existsSync(join(expand(String(r.home)), SPEC_FILE))) continue;
       if (!couldHaveMoved(r, here, values.project ?? null)) continue;
       const there = join(here, relative(old, expand(String(r.home))));
       if (!isHome(there) || riders.some((x) => x.dir === canon(there))) continue;
