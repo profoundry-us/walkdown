@@ -470,6 +470,54 @@ test('a built rule the agent failed is the agent’s alone until it passes @rule
   );
 });
 
+test('a failed rule with nothing open on it is judged again, never held from everyone @rule:status.attention.blocked-queues', () => {
+  const runs = [
+    checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+    walkdownRun('2026-02-01T00:00:00Z', 'agent', 'fail'),
+  ];
+  const waived = {
+    id: 'n-2',
+    kind: 'note',
+    reason: 'finding',
+    author: 'agent',
+    status: 'waived',
+    anchor: { rule: 'demo.main.thing' },
+  };
+  // A finding a person waived, or no finding at all (n-0539).
+  for (const threads of [[waived], []]) {
+    const { attention } = deriveStatus(blueprint({ runs, targets: { local: {} }, threads }), {
+      checkRefs: new Set(['demo.main.thing']),
+    });
+    assert.deepEqual(
+      attention.map((i) => `${i.who}:${i.action}:${i.state ?? ''}`),
+      ['agent:judge-first:fail'],
+    );
+  }
+});
+
+test('an unbuilt rule no check claims asks a person only for its wording @rule:status.attention.blocked-queues', () => {
+  const { attention } = deriveStatus(
+    blueprint({
+      targets: { local: {} },
+      threads: [
+        {
+          id: 'n-3',
+          kind: 'note',
+          reason: 'feedback',
+          author: 'sam',
+          status: 'addressed',
+          anchor: { rule: 'demo.main.thing' },
+          replies: [{ author: 'agent', created: '2026-02-01T00:00:00Z', body: 'done' }],
+        },
+      ],
+    }),
+    { checkRefs: new Set(['demo.other.rule']) },
+  );
+  // Cover, and the wording beside it - not a walk-down of the note (n-0539).
+  assert.ok(attention.some((i) => i.who === 'agent' && i.action === 'cover'));
+  assert.ok(!attention.some((i) => i.action === 'verify'), JSON.stringify(attention));
+});
+
 test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],

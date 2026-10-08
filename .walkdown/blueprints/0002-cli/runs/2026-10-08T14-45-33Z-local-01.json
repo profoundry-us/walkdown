@@ -1,0 +1,40 @@
+{
+  "run_id": "2026-10-08T14-45-33Z-local-01",
+  "created": "2026-10-08T14:45:33Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b98db06-dirty",
+  "note": "Fifth adversarial re-judging of two cli rules, import and attention, on scratch machines driven through the working tree's CLI and lib/status.js.",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-38-47Z-judge5/import-01-steps.txt",
+        "runs/evidence/2026-10-08T14-38-47Z-judge5/import-02-moved-checkout.txt",
+        "runs/evidence/2026-10-08T14-38-47Z-judge5/import-03-unrelated-repository.txt"
+      ],
+      "reasoning": "I cloned a repository holding three homes made by blueprints new --commit spec onto fresh scratch machines and registered cart. Importing billing by its path registered it alone and said its ID 0002-sp-billing and project shop. In a terminal (a pty via script) the repository's path listed billing, cart and search by folder, marked cart as already listed, and registered the number typed. With stdin from /dev/null it printed the list, exited 2 and left the registry byte-identical, then --only search and --all registered the rest. Importing cart's path again said already listed and left the registry unchanged. An empty folder, a plain git repository, a folder with no spec.yml and .walkdown inside a repository each said nothing there is a blueprint and registered nothing. The moved checkout matrix (all, two and one homes registered, imported by each home, --all, --only billing and with no terminal) kept every ID and said every changed row as moved, so n-0522, n-0530 and n-0533 hold. An unrelated repository with an origin no longer takes over a deleted checkout's rows (U1), so n-0536 holds for that shape. Two things fail. First, the move test still captures a checkout that is not gone: shop, with no remote, had cart and billing registered and was checked out at a commit before its homes (git checkout HEAD~1). Importing billing from an unrelated repository outlet with the same layout re-pointed both of shop's rows at outlet, printed that ~/shop no longer exists while it does, and once shop was back on main its own homes were unregistered (U3). The same happens with an origin when the unrelated repository's name matches, github.com/zed/shop taking acme/shop's row (U4). So the home's path did not register that blueprint alone with its own project. Second, --only naming a home already registered is refused as holding no unlisted blueprint folder called cart, with exit 2, rather than reported as already listed, and --only cart,billing therefore registered nothing at all, billing included.",
+      "threads": [
+        "eb2a8e2d-205c-43e6-83cc-84e4c6a0d5b9"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "fail",
+      "statement_hash": "sha256:7d5377c322ba",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-38-47Z-judge5/status-01-derivation-probe.txt",
+        "runs/evidence/2026-10-08T14-38-47Z-judge5/status-02-cli-board.txt"
+      ],
+      "reasoning": "I ran deriveStatus over in-memory boards with a check inventory, and walkdown status over a scratch blueprint built with blueprints new, threads new and threads set, with one checks run and one agent run in runs/. On the GIVEN board each THEN line held: two judge items for the rule eng and product had not signed, a cover item alone for the built uncovered rule, cover beside an approve-the-wording item for the unbuilt one, a design draw item queued to the design agent under design.by agent, incorporate alone for the answered question, one answer item per rule, one verify item per rule for the person's addressed note, settle for the agent's addressed note once its pass was newer, rejudge for a pass older than its fix and for a fixed fail (the CLI says the failing verdict), judge-first for a built rule never judged, a person's verify for feedback on a retired rule and none for the agent's finding there. The n-0537 fix holds as filed: a failed rule with its finding open is the agent's address item alone. It fails on a new shape. When a person waives the agent's finding on a failed rule (threads set --waive --reason), the rule is held from every signer and asked of nobody: c.basics.failed-waived shows fail on the board and appears in no queue, so the step that a rule the agent tier owes is judged by an agent before a person signs has no item that asks it. The same holds with no thread or a finding settled without a reply (N1, N2, N20). Also, an unbuilt rule no check claims with a person's addressed note is asked of the agent to cover and of the person to walk down at once (N8), and the steps let only the wording ask stand beside a cover item.",
+      "threads": [
+        "4c9c5ab8-1763-432a-94b3-24421b721934"
+      ]
+    }
+  ]
+}

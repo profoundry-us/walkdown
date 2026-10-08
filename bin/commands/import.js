@@ -323,14 +323,20 @@ export async function run(args) {
       ),
     ];
     chosen = fresh.filter((h) => want.some((w) => named(h, w)));
-    const missing = want.filter((w) => !fresh.some((h) => named(h, w)));
+    // A folder already listed is said so, not refused: `--only cart,billing`
+    // with cart listed still imports billing (n-0538).
+    const already = homes.filter(
+      (h) => isListed(h) && want.some((w) => named(h, w)) && !chosen.includes(h),
+    );
+    for (const h of already)
+      console.log(`${dim('· already listed')}${show(h, null).replace(/^ {2}/, ' ')}`);
+    const missing = want.filter((w) => !homes.some((h) => named(h, w)));
     if (missing.length) {
-      console.error(
-        red(`${tilde(top)} holds no unlisted blueprint folder called ${missing.join(', ')}.`),
-      );
+      console.error(red(`${tilde(top)} holds no blueprint folder called ${missing.join(', ')}.`));
       console.error(dim(`  it holds: ${homes.map((h) => h.folder).join(', ')}`));
       return end(2);
     }
+    if (!chosen.length) return end(0);
   } else if (!values.all) {
     console.log(`${tilde(top)} holds ${homes.length} blueprint${homes.length === 1 ? '' : 's'}:`);
     homes.forEach((h, i) => console.log(show(h, i)));
@@ -355,6 +361,8 @@ export async function run(args) {
           .filter((n) => n >= 1 && n <= homes.length),
       );
       chosen = homes.filter((h, i) => picked.has(i + 1) && !isListed(h));
+      for (const h of homes.filter((h, i) => picked.has(i + 1) && isListed(h)))
+        console.log(`${dim('· already listed')}${show(h, null).replace(/^ {2}/, ' ')}`);
     }
     if (!chosen.length) {
       console.log(dim('nothing imported'));

@@ -198,3 +198,60 @@ test('a gone checkout is never taken over by an unrelated repository that shares
   assert.match(String(rows.find((row) => String(row.id).endsWith('-cart'))?.home), /shop/);
   assert.equal(rows.find((row) => String(row.id).endsWith('-billing'))?.project, 'outlet');
 });
+
+test('a checkout still standing, at a commit from before its homes, is never taken over @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('still-standing');
+  const make = (dir) => {
+    const at = m.repo(dir);
+    for (const n of ['cart', 'billing']) {
+      mkdirSync(join(at, '.walkdown', 'blueprints', n), { recursive: true });
+      writeFileSync(join(at, '.walkdown', 'blueprints', n, 'spec.yml'), `blueprint: ${n}\n`);
+    }
+    execFileSync('git', ['add', '-A'], { cwd: at });
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+      cwd: at,
+    });
+    return at;
+  };
+  const shop = make('shop');
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--only', 'cart,billing').status, 0);
+  execFileSync('git', ['checkout', '-q', 'HEAD~1'], { cwd: shop });
+  const outlet = make('outlet');
+  const r = m.cli(outlet, 'blueprints', 'import', join('.walkdown', 'blueprints', 'billing'));
+  assert.doesNotMatch(r.stdout, /moved|no longer exists/, r.stdout);
+  for (const row of m.rows().filter((row) => row.project === 'shop'))
+    assert.match(String(row.home), /\/shop\//, `${row.id} still at shop (n-0538)`);
+});
+
+test('a gone checkout is not taken over by another owner’s repository of the same name @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('same-name');
+  const make = (dir, origin) => {
+    const at = m.repo(dir);
+    execFileSync('git', ['remote', 'add', 'origin', origin], { cwd: at });
+    mkdirSync(join(at, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+    writeFileSync(join(at, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+    return at;
+  };
+  const acme = make('acme-shop', 'https://example.com/acme/shop.git');
+  assert.equal(m.cli(acme, 'blueprints', 'import', '.', '--all').status, 0);
+  const home = String(m.rows()[0].home);
+  rmSync(acme, { recursive: true, force: true });
+  const zed = make('zed-shop', 'https://example.com/zed/shop.git');
+  const r = m.cli(zed, 'blueprints', 'import', '.', '--all');
+  assert.doesNotMatch(r.stdout, /moved/, r.stdout);
+  assert.equal(String(m.rows()[0].home), home, 'acme/shop’s row is not re-pointed (n-0538)');
+});
+
+test('--only naming a folder already listed says so and imports the rest @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('only-listed');
+  const repo = m.repo('shop');
+  for (const n of ['cart', 'billing']) {
+    mkdirSync(join(repo, '.walkdown', 'blueprints', n), { recursive: true });
+    writeFileSync(join(repo, '.walkdown', 'blueprints', n, 'spec.yml'), `blueprint: ${n}\n`);
+  }
+  assert.equal(m.cli(repo, 'blueprints', 'import', '.', '--only', 'cart').status, 0);
+  const r = m.cli(repo, 'blueprints', 'import', '.', '--only', 'cart,billing');
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /already listed\s+cart/);
+  assert.equal(m.rows().length, 2, 'billing registered (n-0538)');
+});

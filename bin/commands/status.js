@@ -356,7 +356,13 @@ function report(blueprint, values, ruleId, emit) {
       `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
     cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
     'judge-first': (i) =>
-      `judge ${i.rule} — ${i.state === 'stale' ? 'the agent verdict on it is stale, and no signer is asked until it is judged again' : 'the agent tier has never judged it, and no signer is asked until it has'}`,
+      `judge ${i.rule} — ${
+        i.state === 'stale'
+          ? 'the agent verdict on it is stale, and no signer is asked until it is judged again'
+          : i.state === 'fail'
+            ? 'the agent failed it and no open note says why, so no signer is asked until it is judged again'
+            : 'the agent tier has never judged it, and no signer is asked until it has'
+      }`,
     rejudge: (i) =>
       `judge ${i.rule} again — ${i.thread} claims a fix newer than the ${i.after === 'fail' ? 'failing' : 'passing'} verdict`,
     // The machine's own observation, addressed by the machine: it closes it

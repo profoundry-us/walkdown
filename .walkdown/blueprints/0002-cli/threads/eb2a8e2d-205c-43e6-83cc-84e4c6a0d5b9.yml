@@ -1,0 +1,26 @@
+id: n-0538
+uuid: eb2a8e2d-205c-43e6-83cc-84e4c6a0d5b9
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T14:45:32.567Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at b98db06. Moves are still matched when the old
+  checkout is not gone. shop (no remote) had cart and billing registered and sat
+  at a commit before its homes. Importing billing from an unrelated repository
+  with the same layout re-pointed both rows and said ~/shop no longer exists.
+  The same happens when an unrelated origin shares the repository's name
+  (zed/shop taking acme/shop). Also, --only naming a home that is already listed
+  is refused, so --only cart,billing registers nothing.
+replies:
+  - author: agent
+    created: 2026-10-08T14:56:33Z
+    body: "A row now keeps its repository's first commit (and origin, where there is
+      one). A checkout counts as gone only if nothing at its old path starts
+      from that commit. A candidate whose history starts elsewhere, or whose
+      origin differs, cannot take its rows. Rows from before a first commit fall
+      back to the missing home. --only naming an already-listed folder says
+      'already listed' and imports the rest. Tests: test/project-codes.test.js
+      (still-standing, same-name, only-listed)."
