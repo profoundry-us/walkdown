@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-08T20-20-10Z-local-01",
+  "created": "2026-10-08T20:20:10Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7997eae-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T20-20-10Z/base.txt",
+        "runs/evidence/2026-10-08T20-20-10Z/reclone-then-remote-renamed.txt",
+        "runs/evidence/2026-10-08T20-20-10Z/amend-gc-then-move.txt",
+        "runs/evidence/2026-10-08T20-20-10Z/reclone-move-then-org-rename.txt",
+        "runs/evidence/2026-10-08T20-20-10Z/exfat-inode-reused-elsewhere.txt",
+        "runs/evidence/2026-10-08T20-20-10Z/exfat-inode-reused-here.txt"
+      ],
+      "reasoning": "Driven with node bin/walkdown.js on throwaway machines (mktemp HOME and WALKDOWN_HOME); nothing was served, so port 4771 went unused. The steps hold: a home path registers one blueprint, the repository path lists and marks, no terminal registers nothing without --all or --only, and a path with no home refuses. Both halves of n-0551 are fixed: a re-cloned checkout relearns its .git and survives a later remote change in place, and an amended, gc'd, moved checkout keeps its IDs. A re-clone that is then moved, and later moved again under a renamed remote, keeps its IDs, the last with --project. It fails on inode reuse, which the fix's own comment names. On an exFAT drive ejected and plugged back in, a new .git took the deleted project's inode number. An unrelated repository started elsewhere on that drive then took the deleted project's IDs as moved, despite another first commit; the commit before the fix gave it new IDs. At the deleted project's own path, a repository with another origin and first commit read as already listed, even with --project.",
+      "threads": ["8cc29d0e-d131-46ce-b7f8-4ba056d7b037"]
+    }
+  ]
+}

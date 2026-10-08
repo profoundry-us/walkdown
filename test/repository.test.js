@@ -42,11 +42,11 @@ const row = {
   home: '/w/app/blueprints/0001-app',
   root: 'r1',
   origin: 'github.com/acme/app',
-  git: '1:100',
+  git: '1:100:5',
 };
 const HOME = row.home;
 const app = (more = {}) => ({
-  git: '1:100',
+  git: '1:100:5',
   commits: ['r1', 'c2'],
   origin: 'github.com/acme/app',
   held: [HOME],
@@ -114,6 +114,18 @@ const gone = [
     world({ '/w/app': { git: '1:050', commits: ['o1'], held: [HOME] } }, [HOME]),
     true,
   ],
+  [
+    'its .git inode handed out again where it stood, to another repository (n-0552)',
+    {},
+    world({ '/w/app': { git: '1:100:9', commits: ['z1'], origin: 'github.com/zed/site' } }, [HOME]),
+    true,
+  ],
+  [
+    'registered before the birth time was kept, its .git unchanged',
+    { git: '1:100' },
+    world({ '/w/app': app({ commits: ['r9'], origin: 'github.com/acme-inc/app' }) }, [HOME]),
+    false,
+  ],
   ['a folder that is no repository, its home gone', {}, world({ '/w/app': {} }), true],
   ['a folder that is no repository, its home on disk', {}, world({ '/w/app': {} }, [HOME]), false],
 ];
@@ -127,7 +139,7 @@ for (const [name, change, facts, expected] of gone) {
 // The candidate is /w/new; the row's own path is empty unless a case puts
 // something there.
 const moved = [
-  ['the same clone moved', {}, { '/w/new': app({ git: '1:100' }) }, null, true],
+  ['the same clone moved', {}, { '/w/new': app() }, null, true],
   [
     'not gone: the checkout is still standing',
     {},
@@ -208,9 +220,9 @@ const moved = [
     true,
   ],
   [
-    'its .git inode reused by another repository elsewhere',
-    {},
-    { '/w/new': { git: '1:100', commits: ['z1'], origin: 'github.com/zed/notes' } },
+    'its .git inode handed out again elsewhere, as exFAT does, neither with a remote (n-0552)',
+    { origin: undefined },
+    { '/w/new': { git: '1:100:9', commits: ['z1'] } },
     null,
     false,
   ],

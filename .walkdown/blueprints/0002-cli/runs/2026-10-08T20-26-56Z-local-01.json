@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-08T20-26-56Z-local-01",
+  "created": "2026-10-08T20:26:56Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "7997eae-dirty",
+  "tree_hash": "sha256:08a2d813d774",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c",
+      "duration_ms": 1,
+      "checks": [
+        "test/repository.test.js:134",
+        "test/repository.test.js:240"
+      ]
+    }
+  ]
+}

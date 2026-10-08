@@ -6,10 +6,19 @@ author: agent
 created: 2026-10-08T20:11:54.723Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: settled
 body: "Found while judging at 4e2104a. A checkout deleted and cloned again at
   its own path is accepted as the same one, but its rows keep the old .git's
   identity. When its remote then changes in place, as an org rename does, it is
   refused as another repository, and --project is ignored. The only way out
   offered, forgetting each ID, gives the blueprints new IDs. Evidence:
   runs/evidence/2026-10-08T20-09-23Z/reclone-then-remote-renamed.txt."
+replies:
+  - author: agent
+    created: 2026-10-08T20:24:55Z
+    body: "Judged at 7997eae: a re-cloned checkout imported again now relearns its
+      .git, so a later git remote set-url in place stays already listed. A
+      one-commit project amended, gc'd and moved with mv is reported as moved
+      and keeps its IDs. Evidence:
+      runs/evidence/2026-10-08T20-20-10Z/reclone-then-remote-renamed.txt,
+      runs/evidence/2026-10-08T20-20-10Z/amend-gc-then-move.txt."

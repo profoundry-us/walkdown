@@ -1,0 +1,17 @@
+id: n-0552
+uuid: 8cc29d0e-d131-46ce-b7f8-4ba056d7b037
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T20:24:37.294Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: open
+body: "Found while judging at 7997eae. On an exFAT drive, a .git inode number is
+  reused after the drive is ejected and plugged back in. An unrelated repository
+  started there then takes a deleted project's IDs as moved, though its first
+  commit differs; before 7997eae it got new IDs. At the deleted project's own
+  path, one with another origin and first commit is read as already listed, even
+  with --project. Evidence:
+  runs/evidence/2026-10-08T20-20-10Z/exfat-inode-reused-elsewhere.txt,
+  runs/evidence/2026-10-08T20-20-10Z/exfat-inode-reused-here.txt."
