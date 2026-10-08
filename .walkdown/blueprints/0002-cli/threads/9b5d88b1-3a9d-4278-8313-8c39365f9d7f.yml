@@ -1,0 +1,15 @@
+id: n-0551
+uuid: 9b5d88b1-3a9d-4278-8313-8c39365f9d7f
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T20:11:54.723Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: open
+body: "Found while judging at 4e2104a. A checkout deleted and cloned again at
+  its own path is accepted as the same one, but its rows keep the old .git's
+  identity. When its remote then changes in place, as an org rename does, it is
+  refused as another repository, and --project is ignored. The only way out
+  offered, forgetting each ID, gives the blueprints new IDs. Evidence:
+  runs/evidence/2026-10-08T20-09-23Z/reclone-then-remote-renamed.txt."

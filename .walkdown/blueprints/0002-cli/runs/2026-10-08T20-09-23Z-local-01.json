@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-08T20-09-23Z-local-01",
+  "created": "2026-10-08T20:09:23Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4e2104a-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T20-09-23Z/base.txt",
+        "runs/evidence/2026-10-08T20-09-23Z/reclone-then-remote-renamed.txt",
+        "runs/evidence/2026-10-08T20-09-23Z/amend-gc-then-move.txt"
+      ],
+      "reasoning": "Driven with node bin/walkdown.js on throwaway machines (mktemp HOME and WALKDOWN_HOME), nothing served. Every step holds on a three-home repository: a home's path registers it alone with its ID and project, and the repository's path lists homes by folder and marks the listed one. With no terminal it lists and registers nothing until --all or --only; a terminal answer registers the one chosen. Already-listed rows stay unchanged, and an empty folder is refused. One new edge fails: a checkout re-cloned at its own path is accepted, but its rows keep the old .git identity. When its remote is then changed in place, the same repository is refused as another one, --project is ignored, and the only way out is forgetting every ID (n-0551). A moved checkout whose single first commit was amended and collected is also refused without --project, though its .git is the very one; the message offers --project, which keeps the IDs, so it is not filed.",
+      "threads": ["9b5d88b1-3a9d-4278-8313-8c39365f9d7f"]
+    }
+  ]
+}
