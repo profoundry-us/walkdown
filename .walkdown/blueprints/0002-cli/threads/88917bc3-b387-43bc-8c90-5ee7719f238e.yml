@@ -1,0 +1,26 @@
+id: q-0517
+uuid: 88917bc3-b387-43bc-8c90-5ee7719f238e
+kind: question
+author: agent
+created: 2026-10-08T02:38:42.437Z
+anchor:
+  rule: status.derived.stale-never-passes
+status: open
+body: A signature lapses only when a rule's wording changes. So a fix to a rule
+  a signer already passed never comes back to them, unless they had sent the
+  rule back first. By a fix I mean a thread addressed and judged by the agent
+  after the signature. This week five signed rules changed in behaviour or
+  screens (says-why, declared-not-discovered, one-verb-per-change,
+  upgrade-moves-once, username-is-the-record), and the panel asked Topher about
+  none of them. Should a judged fix put a signed rule back in front of its
+  signers?
+options:
+  - label: Ask the signer again
+    why: a fix judged after the signature queues the rule to each signer as "walk
+      down again", and their signature still counts until they look
+  - label: Ask only when the thread was theirs
+    why: re-offer only where the signer filed or replied on the thread the fix
+      closed
+  - label: Leave it as it is
+    why: a signature stands until the wording changes; a person who wants to look
+      again opens the rule

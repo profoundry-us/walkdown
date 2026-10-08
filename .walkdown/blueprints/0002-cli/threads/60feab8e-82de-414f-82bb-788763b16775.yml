@@ -8,8 +8,8 @@ anchor:
   screen: blueprints-two-searches
 status: open
 body: "Draw what `walkdown blueprints` prints on a machine with two projects,
-  shop and hireart_main, each with a blueprint called search: each project as a
-  heading, and under it the blueprint's ID, 0001-sp-search and 0002-hm-search,
+  shop and acme_main, each with a blueprint called search: each project as a
+  heading, and under it the blueprint's ID, 0001-sp-search and 0002-am-search,
   beside where its home is (locations.registry.ids-stay-here). The point of the
   screen is that one name gets two IDs, each this machine's own. Anchors:
   cli.prompt, cli.ids.list, cli.exit. as-built/cli/blueprints-two-searches.html

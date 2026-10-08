@@ -54,7 +54,7 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
     Each row names its project by a short label and code, and its checkout by path.
     Inside a project, a blueprint's bare name works wherever its ID does; outside it, a
     bare name is refused with the ID that reaches it. An ID from before the upgrade, kept on
-    its row as `formerly:`, still works (`hireart_main` became `0001-hm-hireart-main`). A
+    its row as `formerly:`, still works (`acme_main` became `0001-am-acme-main`). A
     personal home lives at `~/.walkdown/projects/<label>/blueprints/`.
   - A thread is stored as `threads/<uuid>.yml`. Its `n-NNNN` is a label, which two
     branches can give out twice, and its uuid is what identifies it. Attachments are named

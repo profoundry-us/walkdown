@@ -65,8 +65,8 @@ walkdown upgrade
 ```
 
 Each project gets a two- or three-letter code, which every ID carries. It is derived
-from the project's label (`hm` for `hireart_main`). To choose it instead, pass it to
-the upgrade run inside that project: `walkdown upgrade --code ha`.
+from the project's label (`am` for `acme_main`). To choose it instead, pass it to
+the upgrade run inside that project: `walkdown upgrade --code ac`.
 
 Run it from inside each project whose blueprints you keep in the repository. It flattens
 each home, renames `config.yml` to `profile.yml`, renumbers the registry, gives every
@@ -78,7 +78,7 @@ Then, in place of the IDs you used to type:
 
 | Was | Now |
 |---|---|
-| `--blueprint <old-id>` | still works, anywhere: the upgrade keeps the old ID on the row as `formerly:` (`hireart_main` reaches `0001-hm-hireart-main`) |
+| `--blueprint <old-id>` | still works, anywhere: the upgrade keeps the old ID on the row as `formerly:` (`acme_main` reaches `0001-am-acme-main`) |
 | `--blueprint <name>` | works inside the project; elsewhere, use the full ID (`walkdown blueprints` lists them) |
 | `walkdown blueprints add <path>` | `walkdown blueprints import <path>` |
 | `walkdown blueprints rename <id> <new-id>` | `walkdown blueprints rename <id> <new-name> [--folder <folder>]` |

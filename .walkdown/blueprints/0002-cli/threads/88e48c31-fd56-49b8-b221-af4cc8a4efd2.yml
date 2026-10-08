@@ -7,10 +7,10 @@ created: 2026-10-07T11:58:30.416Z
 anchor:
   rule: locations.keeping.upgrade-moves-once
 status: settled
-body: "Found auditing the HireArt setup. After `walkdown upgrade`, a blueprint
-  whose old id had an underscore (hireart_main) becomes 0001-hm-hireart-main,
-  and `--blueprint hireart_main` answers \"No blueprint for `hireart_main`\"
-  with no hint of the new ID. upgrade writes `formerly: hireart_main` on the row
+body: "Found auditing a work project's setup. After `walkdown upgrade`, a blueprint
+  whose old id had an underscore (acme_main) becomes 0001-am-acme-main,
+  and `--blueprint acme_main` answers \"No blueprint for `acme_main`\"
+  with no hint of the new ID. upgrade writes `formerly: acme_main` on the row
   (lib/upgrade.js:320) but nothing reads it. UPGRADING.md says the old name
   still works inside the project, which is false here. The resolver should
   accept a row's formerly id, or at least name the new ID when it refuses."
@@ -20,7 +20,7 @@ replies:
     body: Fixed. A registry row's `formerly:` ID resolves anywhere, as an ID always
       did, and the reason says what it is called now. UPGRADING.md says so.
       `walkdown upgrade --code <pc>` also lets the project it is run in choose
-      its code (`--code ha` for hireart_main). Both are tested in
+      its code (`--code ac` for acme_main). Both are tested in
       test/upgrade.test.js.
   - author: agent
     via: verdict

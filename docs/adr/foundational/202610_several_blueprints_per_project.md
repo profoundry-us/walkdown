@@ -17,7 +17,7 @@ committed. The registry and its readers already allow several rows for one proje
 `walkdown claims` already handle a page claimed by more than one.
 
 Nothing can create the second row. On 2026-10-02, a project on Topher's work machine
-(`hireart_main`) had a blueprint for one feature set, and an unrelated feature wanted
+(`acme_main`) had a blueprint for one feature set, and an unrelated feature wanted
 its own, kept out of the repository like the first. Every route was closed:
 
 - `walkdown init --dir <root>` finds the row rooted there and reuses its home. That is

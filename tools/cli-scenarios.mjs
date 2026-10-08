@@ -218,12 +218,12 @@ export const FIXTURES = {
   /* Two projects on one machine, each with a blueprint called `search`. */
   'two-searches'(m) {
     m.ok(['blueprints', 'new', 'search']);
-    const other = join(m.root, 'hireart_main');
+    const other = join(m.root, 'acme_main');
     mkdirSync(join(other, '.git'), { recursive: true });
     const r = m.wd(['blueprints', 'new', 'search'], other);
     if (r.status !== 0)
       throw new Error(
-        `fixture: blueprints new search in hireart_main exited ${r.status}\n${r.stderr}`,
+        `fixture: blueprints new search in acme_main exited ${r.status}\n${r.stderr}`,
       );
   },
   'second-shop'(m) {

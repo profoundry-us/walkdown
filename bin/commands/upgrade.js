@@ -16,7 +16,7 @@ export async function run(args) {
   });
   /*
    * The code of the project standing here, chosen rather than derived from
-   * its label (`--code ha` for hireart_main, which would derive `hm`). Asked
+   * its label (`--code ac` for acme_main, which would derive `am`). Asked
    * for here because the upgrade is what gives an existing project its code.
    */
   const code = values.code === undefined ? null : values.code.trim().toLowerCase();

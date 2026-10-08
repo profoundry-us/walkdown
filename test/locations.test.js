@@ -2551,7 +2551,7 @@ test('a config.yml from before the profile makes an upgrade due, and nothing is 
    */
   const s = scratch();
   try {
-    const repo = join(s.root, 'hireart_main');
+    const repo = join(s.root, 'acme_main');
     mkdirSync(repo, { recursive: true });
     walkdown(s.home, ['blueprints', 'new'], repo);
     const old = join(s.home, 'blueprints');
@@ -2560,9 +2560,9 @@ test('a config.yml from before the profile makes an upgrade due, and nothing is 
       `  runs: ${old}/{id}/blueprint/runs`,
       `  threads: ${old}/{id}/blueprint/threads`,
       'projects:',
-      '  - id: hireart',
+      '  - id: harbor',
       `    roots: [${repo}]`,
-      `    spec: ${old}/0001-hireart/blueprint`,
+      `    spec: ${old}/0001-harbor/blueprint`,
       '    targets:',
       '      local: { base_url: http://localhost:3000 }',
       '',

@@ -238,12 +238,12 @@ test("the pointer is written once, and taking it out keeps the person's own line
 
 test('a checkout that moved keeps its IDs when it is imported where it went @rule:locations.registry.ids-stay-here', () => {
   const m = machine();
-  const repo = m.repo('hireart_main');
+  const repo = m.repo('acme_main');
   ok(m.cli(repo, 'blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search'));
   ok(m.cli(repo, 'blueprints', 'new', 'jot', '--folder', 'jot'));
   const before = m.rows();
 
-  const moved = join(root, `m${n}`, 'hireart_moved');
+  const moved = join(root, `m${n}`, 'acme_moved');
   renameSync(repo, moved);
   const imported = ok(m.cli(moved, 'blueprints', 'import', moved, '--all'));
   assert.match(imported.stdout, new RegExp(`~ moved .* keeps its ID \`${before[0].id}\``));
@@ -411,19 +411,19 @@ test('a renamed checkout with no remote and only personal homes is re-pointed wh
 test('a moved checkout keeps its IDs though something new now stands at its old path @rule:locations.registry.ids-stay-here', () => {
   const m = machine();
   // Committed: matched by the home that is gone from its place.
-  const hire = m.repo('hire');
-  ok(m.cli(hire, 'blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search'));
+  const acme = m.repo('acme');
+  ok(m.cli(acme, 'blueprints', 'new', 'search', '--commit', 'spec', '--folder', 'search'));
   const [row] = m.rows();
-  const hire2 = join(root, `m${n}`, 'hire2');
-  renameSync(hire, hire2);
-  mkdirSync(hire);
-  git(hire, 'init', '-q');
+  const acme2 = join(root, `m${n}`, 'acme2');
+  renameSync(acme, acme2);
+  mkdirSync(acme);
+  git(acme, 'init', '-q');
   assert.match(
-    ok(m.cli(hire2, 'blueprints', 'import', '.', '--all')).stdout,
+    ok(m.cli(acme2, 'blueprints', 'import', '.', '--all')).stdout,
     new RegExp(`~ moved .*\`${row.id}\``),
   );
   assert.equal(m.rows()[0].id, row.id);
-  assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), hire2);
+  assert.equal(m.rows()[0].checkout.replace(/^~/, process.env.HOME), acme2);
 
   // Personal, no remote: the person names it, and it moves.
   const deli = m.repo('deli');

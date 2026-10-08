@@ -372,16 +372,20 @@ stories:
         history: Registry ids had to be unique on the whole machine, so a second project's `search` was refused or renamed, and a repository's own instructions named a blueprint this machine called something else (ADR 0014 (2026-10-05)). The statement said `registry.yml` alone until Topher chose to count the machine's own cache, which never travels, as inside (q-0384).
         steps:
           given:
-            - A machine with two projects, `hireart_main` and `shop`, each with a blueprint whose folder is named `search`
+            - A machine with two projects, `acme_main` and `shop`, each with a blueprint whose folder is named `search`
           when:
             - Each is registered, a thread is filed and a run recorded in each, and the first is committed
           then:
-            - Each gets an ID made of four digits, its project's code and a description, such as `0003-ha-search` and `0004-sh-search`
+            - Each gets an ID made of four digits, its project's code and a description, such as `0003-am-search` and `0004-sh-search`
             - "`--blueprint` and `?bp=` accept the ID, and inside a project they also accept the description alone"
             - The thread, the run record, the pointer and the committed home hold no ID; files under `~/.walkdown/`, such as its cache, may
             - Committing, un-committing or moving the checkout changes the path on the row and keeps the ID
             - A number once given is never given again, even after its blueprint is forgotten
-          statement_hash: sha256:ba36d9b498af
+          statement_hash: sha256:753e695e15c0
+          reworded:
+            - hash: sha256:ba36d9b498af
+              at: 2026-10-08T02:43:19Z
+              why: a generic example project instead of an internal one; same meaning
       - origin: walkdown
         created_at: 2026-10-05
         verify:

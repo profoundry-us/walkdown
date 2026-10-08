@@ -310,7 +310,7 @@ copy it to (`<that>/.walkdown/tmp/<label>/`, say); a path no project owns is wha
 flag is for (q-0176).
 
 **Every row has a registry ID, and it stays on this machine** (ADR 0014 §2). It reads
-`NNNN-<code>-<name>` — `0001-wd-walkdown`, `0002-wd-cli`, `0003-ha-search`:
+`NNNN-<code>-<name>` — `0001-wd-walkdown`, `0002-wd-cli`, `0003-am-search`:
 
 - **`NNNN`** is the registry's own counter, never reused, even after its blueprint is
   forgotten.

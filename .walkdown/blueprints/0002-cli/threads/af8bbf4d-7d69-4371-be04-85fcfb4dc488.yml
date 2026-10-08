@@ -8,7 +8,7 @@ anchor:
   rule: locations.registry.ids-stay-here
 status: settled
 body: Agent judging found that moving a checkout loses its ID. After mv
-  hireart_main hireart_moved, the row reads (gone). Import in the new place is
+  acme_main acme_moved, the row reads (gone). Import in the new place is
   refused, because the project's own label and code are 'another project's'.
   Only forget plus import gets back, with a new ID and label. The statement also
   says no file outside registry.yml holds an ID, and

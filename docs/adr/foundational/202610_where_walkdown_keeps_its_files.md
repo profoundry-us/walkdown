@@ -53,11 +53,11 @@ not been told about is never served or written to, as ADR 0003 has it.
 ### 2. Every blueprint has a registry ID, and it stays on this machine
 
 Each row has an ID of the form `NNNN-pc-description`, for example `0001-wd-walkdown`,
-`0002-wd-cli` or `0003-ha-search`.
+`0002-wd-cli` or `0003-am-search`.
 
 - **`NNNN`** is the registry's own counter, from `0000` to `9999`. It is never reused.
 - **`pc`** is a two- or three-letter code for the project, unique on this machine (`wd`
-  for walkdown, `ha` for hireart_main). When two projects would get the same code, the
+  for walkdown, `am` for acme_main). When two projects would get the same code, the
   second is asked to choose another.
 - **`description`** defaults to the home's folder name with any number or date prefix
   removed.
@@ -76,7 +76,7 @@ and never its ID. Links and habits survive.
 A project is a label on a registry row, used for grouping and filtering ("only show me
 this repo's blueprints"). It defaults to the git remote's repository name, falling back to
 the directory name. Labels are unique on the machine by default. When a new blueprint joins
-a project that already has blueprints, walkdown says so ("added to `hireart_main`, beside
+a project that already has blueprints, walkdown says so ("added to `acme_main`, beside
 `search` and `checkout`"), so a wrong project is noticed at once.
 
 ### 4. The team chooses the folder names; walkdown reads any of them
@@ -277,12 +277,12 @@ After the build, this appendix shrinks to a list of the ids, because the rules t
 > Every registered blueprint has an ID that this machine gave it, such as `0002-wd-cli`. No file
 > walkdown writes outside `~/.walkdown/registry.yml` contains it.
 
-- *Given:* a machine with two projects, `hireart_main` and `shop`, each with a blueprint whose folder
+- *Given:* a machine with two projects, `acme_main` and `shop`, each with a blueprint whose folder
   is named `search`
 - *When:* each is registered, a thread is filed and a run recorded in each, and the first is committed
 - *Then:*
   - Each gets an ID made of four digits, its project's code and a description, such as
-    `0003-ha-search` and `0004-sh-search`
+    `0003-am-search` and `0004-sh-search`
   - `--blueprint` and `?bp=` accept the ID, and inside a project they also accept the description
     alone
   - The thread, the run record, the pointer and the committed home hold no ID

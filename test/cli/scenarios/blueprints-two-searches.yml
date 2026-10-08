@@ -7,6 +7,6 @@ command: [blueprints]
 exit: 0
 expect:
   - '0001-sp-search'
-  - '0002-hm-search'
+  - '0002-am-search'
 anchors:
   - { id: cli.ids.list, match: '^  ' }
