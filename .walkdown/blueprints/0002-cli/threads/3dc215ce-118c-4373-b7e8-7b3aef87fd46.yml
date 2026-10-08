@@ -1,0 +1,24 @@
+id: n-0549
+uuid: 3dc215ce-118c-4373-b7e8-7b3aef87fd46
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T16:55:37.381Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at dd7e05c. A checkout that never moved is refused as
+  another repository once the commit it was registered on leaves its history. An
+  amend followed by git's own garbage collection does that, and so does a
+  re-clone at the same path that lacks an unpushed commit. Following the
+  refusal's advice gives the blueprint a new ID.
+replies:
+  - author: agent
+    created: 2026-10-08T16:58:51Z
+    body: "Rows no longer keep the commit they were registered on. An amend and a gc
+      remove that commit from a checkout that never moved, so it is no test. At
+      the row's own path, a .git made before the row was registered is now the
+      same checkout, whatever has happened to its commits or remote. Only a .git
+      made there since, a re-clone or a sibling, is put to the first-commit and
+      remote tests. A re-clone of the same origin passes those tests. Test:
+      test/import-repositories.test.js (amend and gc, re-clone)."

@@ -402,3 +402,48 @@ test('a clone where a gone project stood is never filed under that project @rule
   assert.equal(r.status, 0, r.stderr);
   assert.equal(m.rows().find((x) => String(x.id).endsWith('-docs'))?.project, 'other', 'n-0548');
 });
+
+test('a checkout that never moved stays listed after an amend and a gc, and after a re-clone missing a local commit @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('amend-gc');
+  const bare = join(m.home, 'origin.git');
+  execFileSync('git', ['init', '-q', '--bare', bare]);
+  const app = join(m.home, 'app');
+  execFileSync('git', ['clone', '-q', bare, app]);
+  const commit = (msg, ...extra) =>
+    execFileSync(
+      'git',
+      [
+        '-c',
+        'user.name=s',
+        '-c',
+        'user.email=s@x',
+        'commit',
+        '-q',
+        '--allow-empty',
+        ...extra,
+        '-m',
+        msg,
+      ],
+      { cwd: app },
+    );
+  mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(app, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: app });
+  commit('h');
+  execFileSync('git', ['push', '-q', 'origin', 'HEAD'], { cwd: app });
+  commit('local only');
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  commit('reworded', '--amend');
+  execFileSync('git', ['reflog', 'expire', '--expire-unreachable=now', '--all'], { cwd: app });
+  execFileSync('git', ['gc', '-q', '--prune=now'], { cwd: app });
+  const amended = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.equal(amended.status, 0, amended.stderr);
+  assert.match(amended.stdout, /already listed/, 'n-0549: amend and gc');
+  rmSync(app, { recursive: true, force: true });
+  execFileSync('git', ['clone', '-q', bare, app]);
+  const recloned = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.equal(recloned.status, 0, recloned.stderr);
+  assert.match(recloned.stdout, new RegExp(`already listed|\`${row.id}\``), 'n-0549: re-clone');
+  assert.equal(m.rows().length, 1);
+});

@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-08T16-55-37Z-local-01",
+  "created": "2026-10-08T16:55:37Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd7e05c-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/amend-then-gc.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/amend-then-gc-2.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/reclone.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/base-steps.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/newfix-a.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/earlier-1.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/shallow-reclone.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/paths.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/template.txt",
+        "runs/evidence/2026-10-08T16-51-55Z-judge15/no-commits.txt"
+      ],
+      "reasoning": "The base steps hold on scratch machines. A home's path registers that blueprint alone and names its ID and project. The repository's path in a pty lists billing, cart and search by folder, marks cart as already listed, and registers the ones answered. With no terminal it prints the list, exits 2 and registers nothing until --all or --only billing is given. A folder holding no home says so. The new fix's own cases hold too: a move after more commits keeps the ID and learns the new HEAD, a remote renamed or removed in place stays the same checkout, and a sibling with another origin cloned where a gone project stood is refused with every ID to forget named. The earlier fixes I re-checked also hold: worktrees (unregistered and imported explicitly), a fork with upstream, an ssh port spelled differently, a shallow clone deepened and moved, letter case, /tmp and symlink spellings, template siblings at new and old paths, and repositories with no commits. The failure is that a row is now keyed to the commit HEAD was on at registration, and that breaks the step saying an already-registered home is reported as already listed with its row unchanged. To reproduce: register a home, amend the commit HEAD was on (as people do before pushing), push, and let git's own housekeeping prune the old commit. I simulated that with reflog expire and gc --prune=now; git's defaults do it after about 30 days. Importing that same untouched checkout, at the same path, with the same origin, an unchanged .git and the home still committed, is then refused as 'another repository' and told to forget its ID. Following that advice re-registers it under a new ID: 0001-og-cart becomes 0002-og-cart. A related case needs no gc: delete the checkout and re-clone it at the same path from its own origin, after it was registered on a commit that was never pushed. That is refused the same way. Neither case is in the accepted list. In the first, the path, origin and .git birth time all say it is the same checkout. In the second, the origin and the committed home do. I drove the CLI only. No server was started, and port 4771 was not used.",
+      "threads": [
+        "3dc215ce-118c-4373-b7e8-7b3aef87fd46"
+      ]
+    }
+  ]
+}
