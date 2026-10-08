@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T14:27:20.803Z
 anchor:
   rule: status.attention.blocked-queues
-status: addressed
+status: settled
 body: Found while judging at 329c511. A built rule whose agent verdict is a
   fail, with the agent's finding still open, asks eng to walk it down while the
   agent is asked to address the finding. So it sits in two queues until a fix is
@@ -18,3 +18,8 @@ replies:
       signer and every verify until the agent passes it; its open finding is the
       agent's address item. The re-judge line for a fixed fail now says 'the
       failing verdict'. Test in status.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T15:05:19Z
+    body: Settled by the agent's pass on status.attention.blocked-queues
+      (2026-10-08T15-05-19Z-local-01).

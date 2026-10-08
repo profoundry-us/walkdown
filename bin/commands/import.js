@@ -211,7 +211,16 @@ export async function run(args) {
     }
     const already = listedHomes().get(canon(homeDir));
     if (already) {
-      console.log(`  ${dim('· already listed')} ${tilde(homeDir)}  ${dim(`as \`${already}\``)}`);
+      if (values.json)
+        console.log(
+          JSON.stringify(
+            { imported: [], listed: [{ id: already, home: tilde(homeDir) }] },
+            null,
+            2,
+          ),
+        );
+      else
+        console.log(`  ${dim('· already listed')} ${tilde(homeDir)}  ${dim(`as \`${already}\``)}`);
       return end(0);
     }
     return finish([{ dir: homeDir, folder: basename(homeDir) }], checkout, values);
@@ -296,7 +305,7 @@ export async function run(args) {
   const listed = listedHomes();
   const isListed = (h) => listed.has(canon(at_(h).dir));
   const fresh = homes.filter((h) => !isListed(h));
-  const known = homes.filter(isListed);
+  let known = homes.filter(isListed);
   const show = (h, i) => {
     const d = describe(h.dir).description;
     const mark = isListed(h)
@@ -304,6 +313,18 @@ export async function run(args) {
       : '';
     return `  ${i === null ? '' : `${i + 1}. `}${h.folder}${d ? dim(` — ${d}`) : ''}${mark}`;
   };
+  if (!fresh.length && values.json) {
+    const want = values.only ? values.only.split(',').map((w) => w.trim()) : null;
+    const asked = want
+      ? known.filter((h) => want.some((w) => w === h.folder || w === basename(h.folder)))
+      : known;
+    const listed = asked.map((h) => ({
+      id: listedHomes().get(canon(at_(h).dir)) ?? null,
+      home: tilde(at_(h).dir),
+    }));
+    console.log(JSON.stringify({ imported: [], listed }, null, 2));
+    return end(0);
+  }
   if (!fresh.length) {
     console.log(`${dim('· already listed')} every blueprint in ${tilde(top)}:`);
     for (const h of homes) console.log(show(h, null));
@@ -325,18 +346,13 @@ export async function run(args) {
     chosen = fresh.filter((h) => want.some((w) => named(h, w)));
     // A folder already listed is said so, not refused: `--only cart,billing`
     // with cart listed still imports billing (n-0538).
-    const already = homes.filter(
-      (h) => isListed(h) && want.some((w) => named(h, w)) && !chosen.includes(h),
-    );
-    for (const h of already)
-      console.log(`${dim('· already listed')}${show(h, null).replace(/^ {2}/, ' ')}`);
+    known = homes.filter((h) => isListed(h) && want.some((w) => named(h, w)));
     const missing = want.filter((w) => !homes.some((h) => named(h, w)));
     if (missing.length) {
       console.error(red(`${tilde(top)} holds no blueprint folder called ${missing.join(', ')}.`));
       console.error(dim(`  it holds: ${homes.map((h) => h.folder).join(', ')}`));
       return end(2);
     }
-    if (!chosen.length) return end(0);
   } else if (!values.all) {
     console.log(`${tilde(top)} holds ${homes.length} blueprint${homes.length === 1 ? '' : 's'}:`);
     homes.forEach((h, i) => console.log(show(h, i)));
@@ -361,15 +377,14 @@ export async function run(args) {
           .filter((n) => n >= 1 && n <= homes.length),
       );
       chosen = homes.filter((h, i) => picked.has(i + 1) && !isListed(h));
-      for (const h of homes.filter((h, i) => picked.has(i + 1) && isListed(h)))
-        console.log(`${dim('· already listed')}${show(h, null).replace(/^ {2}/, ' ')}`);
+      known = homes.filter((h, i) => picked.has(i + 1) && isListed(h));
     }
-    if (!chosen.length) {
+    if (!chosen.length && !known.length) {
       console.log(dim('nothing imported'));
       return end(0);
     }
   }
-  return finish(chosen.map(at_), checkout, values, known);
+  return finish(chosen.map(at_), checkout, values, known.map(at_));
 }
 
 function finish(chosen, checkout, values, known = []) {
@@ -461,6 +476,10 @@ function finish(chosen, checkout, values, known = []) {
         {
           checkout: checkout ? tilde(checkout) : null,
           imported: written.map((w) => ({ id: w.id, project: w.project, home: tilde(w.dir) })),
+          listed: known.map((k) => ({
+            id: listedHomes().get(canon(k.dir)) ?? null,
+            home: tilde(k.dir),
+          })),
           indexed,
         },
         null,

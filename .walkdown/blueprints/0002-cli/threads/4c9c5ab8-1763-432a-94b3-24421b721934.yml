@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T14:45:32.769Z
 anchor:
   rule: status.attention.blocked-queues
-status: addressed
+status: settled
 body: Found while judging at b98db06. A built rule the agent failed, whose
   finding a person waived (or with no finding at all), is held from signers and
   asked of nobody. Also, an unbuilt rule no check claims, with a person's
@@ -20,3 +20,8 @@ replies:
       open note says why'. A rule no check claims holds every person verify
       item, built or not, so an unbuilt one asks a person only for its wording.
       Tests: test/status.test.js."
+  - author: agent
+    via: verdict
+    created: 2026-10-08T15:05:19Z
+    body: Settled by the agent's pass on status.attention.blocked-queues
+      (2026-10-08T15-05-19Z-local-01).

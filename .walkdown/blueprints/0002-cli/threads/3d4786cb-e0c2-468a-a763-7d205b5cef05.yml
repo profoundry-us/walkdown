@@ -1,0 +1,26 @@
+id: n-0540
+uuid: 3d4786cb-e0c2-468a-a763-7d205b5cef05
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T15:05:38.008Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 4a5383c. Rows registered before that commit carry
+  no root or origin, and nothing adds them. So a checkout still standing at an
+  older commit is still taken over by an unrelated repository with the same
+  layout, and acme/shop's old rows by zed/shop. Also, rootsOf reads only HEAD. A
+  checkout still standing on an orphan branch reads as gone, and a clone of it
+  takes its rows. The judge6 run recorded this fail before the note was filed.
+replies:
+  - author: agent
+    created: 2026-10-08T15:11:16Z
+    body: "A checkout now counts as still standing when its own history, on any
+      branch, holds the home. That covers older rows and orphan branches. Roots
+      are read across all branches. A row without a root or origin gets both the
+      next time the registry is written, while its checkout still holds its
+      home. One case is left: an older row whose checkout was deleted before any
+      write could teach it its repository is still matched by its label. --only
+      and --json now report each listed folder once and keep stdout JSON. Tests:
+      test/project-codes.test.js."

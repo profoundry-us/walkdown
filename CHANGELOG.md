@@ -164,6 +164,28 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   count of what it had imported.
 - `walkdown skills` says the plugin is not installed where the name `walkdown` in Claude
   Code's skills folder is a link somebody else made, instead of describing copies.
+- After a checkout moves, `walkdown blueprints import` reports every blueprint that
+  moved with it, keeps all of their IDs (including ones never registered), and
+  registers the move before any new folder. A checkout that is still in place is not
+  treated as moved, even at a commit from before its blueprints. Neither is one taken
+  over by a different repository with the same layout or an origin of the same name:
+  each blueprint registered from now on records its repository's first commit and its
+  origin.
+- `walkdown blueprints import --only` with a folder that is already listed says so and
+  imports the rest. It used to refuse and import nothing.
+- `walkdown serve` and its API name the blueprints to choose from. They no longer say the
+  server was started outside a project.
+- `walkdown status` queues each rule to one party at a time:
+  - A rule awaiting the agent's judgment is held from people, whether it has never been
+    judged, is stale, has a fix to re-judge, or has failed.
+  - A failed rule with nothing open on it is queued for the agent to judge again.
+  - A fixed fail is re-judged.
+  - A rule that no check claims asks a person only to approve its wording.
+- A finding or observation is refused when it carries a person's words (`said`,
+  `added`). Those are feedback.
+- `walkdown claims --url` checks a screen's query keys whether or not they repeat. An
+  address that matches a screen only after its query is dropped says it has no screen
+  of its own.
 
 ## [0.3.0] - 2026-10-02
 

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:37:08.683Z
 anchor:
   rule: status.attention.blocked-queues
-status: addressed
+status: settled
 body: Found while judging at 793988a. (a) An agent observation addressed after
   the agent's last pass is asked to be settled while the rule is still owed a
   re-judge; settle should wait for the newer pass. (b) A person is asked to
@@ -20,3 +20,8 @@ replies:
       newer than its fix. A person verifies nothing on a built rule the agent
       has not judged yet. A built rule no check claims gets its cover item even
       while the agent owes its first look. Tests in status.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T15:05:19Z
+    body: Settled by the agent's pass on status.attention.blocked-queues
+      (2026-10-08T15-05-19Z-local-01).

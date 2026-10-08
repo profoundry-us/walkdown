@@ -1,0 +1,43 @@
+{
+  "run_id": "2026-10-08T15-05-19Z-local-01",
+  "created": "2026-10-08T15:05:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4a5383c-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-01-steps-no-terminal-home-only-all-empty.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-02-terminal-pick.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-03-n0538-standing-checkout-new-rows.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-04-FAIL-pre-fix-rows-taken-by-unrelated-repo.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-05-FAIL-pre-fix-rows-taken-by-same-name-origin.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-06-orphan-branch-checkout-read-as-gone.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-07-earlier-fixes-moves.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/import-08-only-listed-and-json.txt"
+      ],
+      "reasoning": "Judged at 4a5383c from the CLI on throwaway HOME and WALKDOWN_HOME under /tmp/judge6-*, no server. The steps hold for rows this commit writes: a home's path registers it alone with its ID and project; a repository's path lists each home by folder, marks the listed one and, with no terminal, registers nothing and asks for --all or --only; in a pty the picked numbers are registered and a picked listed one is reported as already listed; a repeat import leaves the row unchanged; an empty path says so with exit 2. The n-0538 fix holds for new rows (they now carry root and origin): a standing checkout at a commit before its homes keeps its rows when an unrelated repository with the same layout imports billing, and zed/shop cannot take acme/shop's rows. --only cart,search with cart listed says so and imports search. Earlier fixes still hold: every moved row is said (n-0522, n-0530), a move with only one home registered imports the rest (n-0533), and an unrelated origin with --project does not take a deleted checkout's row (n-0536). It fails because only rows written by this commit carry a root or an origin, and nothing adds them to rows already on a machine (upgrade says nothing to do; re-import keeps the row as it is). For every row registered before 4a5383c the n-0538 defect is unchanged. Repro: register cart and billing in ~/shop (no remote) with walkdown b98db06, then on 4a5383c check ~/shop out at its commit before the homes. Importing ~/other/.walkdown/blueprints/billing from an unrelated repository with the same layout prints '~ moved ... it was at ~/shop, which no longer exists' for both IDs. It re-points both rows to ~/other and registers nothing of ~/other's own. The same happens with origins: rows from b98db06 in acme/shop are taken by zed/shop. A second gap affects new rows too. A standing checkout whose HEAD is on an orphan branch, such as gh-pages, reads as gone. A second clone of the same repository then takes its rows, and the output says ~/shop no longer exists.",
+      "threads": [
+        null
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:7d5377c322ba",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/status-01-derivation-probe.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/status-01-derivation-probe.mjs.txt",
+        "runs/evidence/2026-10-08T15-04-06Z-judge6/status-02-cli-failed-rule-waived-finding.txt"
+      ],
+      "reasoning": "Judged at 4a5383c. I ran lib/status.js deriveStatus on sixteen synthetic boards (the probe source is saved beside its output) and checked every item for who, plus any rule queued to two parties for verdict-type work. I also ran the CLI end to end on a scratch blueprint. The n-0539 fix holds. A built rule the agent failed is queued to the agent as 'judge ... the agent failed it and no open note says why' and to no signer, whether its finding was waived by a person, settled before the fail, or never filed. In the CLI, waiving the finding with threads set --waive moves the rule from 'address n-0001' to that judge item. A finding settled after the fail is a rejudge. An unbuilt rule no check claims, holding a person's addressed note and an addressed design request, gets cover plus the eng wording ask and no verify. A rule built only by an agent pass that no check claims gets cover alone. Earlier fixes still hold. A fix claimed after a pass is the agent's rejudge alone (n-0526, n-0531). An open finding on a failed rule is the agent's address item and nothing of a person's (n-0537). An answered question on a failed, uncovered rule gives cover plus incorporate and nothing to a person (n-0534). The steps' other cases hold too. A covered, judged rule asks each unsigned role to judge, one verify item naming n-1 and n-2 and one answer item naming q-1 and q-2. On a retired rule, a person's feedback and a design request are their own verify items, and an agent finding, an observation or a person's unanchored finding waits on nobody. Open design requests go to design with by agent or by person from design.by, never to the building agent. Every item carried who as agent, human or design. The node --test cases tagged with this rule pass (20 of 20 in the filtered run).",
+      "threads": []
+    }
+  ]
+}

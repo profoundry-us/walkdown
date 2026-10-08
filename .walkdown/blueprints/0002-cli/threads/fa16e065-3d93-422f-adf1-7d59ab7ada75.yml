@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T14:08:00.198Z
 anchor:
   rule: status.attention.blocked-queues
-status: addressed
+status: settled
 body: Found while judging at 22fea5e. A built rule no check claims is in the
   agent's queue to cover and in a person's queue to verify their addressed note
   at once. And a rule no check claims that holds an answered question gets the
@@ -18,3 +18,8 @@ replies:
       an answer being folded in. And a built rule no check claims holds people's
       items, verify included, the way judge-first and re-judge do. Test in
       status.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T15:05:19Z
+    body: Settled by the agent's pass on status.attention.blocked-queues
+      (2026-10-08T15-05-19Z-local-01).

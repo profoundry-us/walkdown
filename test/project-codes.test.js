@@ -252,6 +252,42 @@ test('--only naming a folder already listed says so and imports the rest @rule:c
   assert.equal(m.cli(repo, 'blueprints', 'import', '.', '--only', 'cart').status, 0);
   const r = m.cli(repo, 'blueprints', 'import', '.', '--only', 'cart,billing');
   assert.equal(r.status, 0, r.stderr);
+  assert.equal((r.stdout.match(/already listed/g) ?? []).length, 1, r.stdout);
   assert.match(r.stdout, /already listed\s+cart/);
   assert.equal(m.rows().length, 2, 'billing registered (n-0538)');
+  const json = m.cli(repo, 'blueprints', 'import', '.', '--only', 'cart', '--json');
+  assert.equal(JSON.parse(json.stdout).listed.length, 1, json.stdout);
+});
+
+test('a checkout still standing on another branch, or registered by an older walkdown, is never taken over @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('other-branch');
+  const make = (dir) => {
+    const at = m.repo(dir);
+    for (const n of ['cart', 'billing']) {
+      mkdirSync(join(at, '.walkdown', 'blueprints', n), { recursive: true });
+      writeFileSync(join(at, '.walkdown', 'blueprints', n, 'spec.yml'), `blueprint: ${n}\n`);
+    }
+    execFileSync('git', ['add', '-A'], { cwd: at });
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+      cwd: at,
+    });
+    return at;
+  };
+  const shop = make('shop');
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
+  // As an older walkdown wrote it: no root, no origin (n-0540).
+  const reg = join(m.wd, 'registry.yml');
+  writeFileSync(reg, readFileSync(reg, 'utf8').replace(/^\s+root: .*\n/gm, ''));
+  execFileSync('git', ['checkout', '-q', '--orphan', 'pages'], { cwd: shop });
+  execFileSync('git', ['rm', '-rqf', '.'], { cwd: shop });
+  execFileSync(
+    'git',
+    ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '--allow-empty', '-m', 'p'],
+    { cwd: shop },
+  );
+  const outlet = make('outlet');
+  const r = m.cli(outlet, 'blueprints', 'import', join('.walkdown', 'blueprints', 'billing'));
+  assert.doesNotMatch(r.stdout, /moved|no longer exists/, r.stdout);
+  for (const row of m.rows().filter((row) => row.project === 'shop'))
+    assert.match(String(row.home), /\/shop\//, `${row.id} still at shop`);
 });

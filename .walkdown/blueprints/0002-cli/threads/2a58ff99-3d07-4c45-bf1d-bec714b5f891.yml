@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:09.739Z
 anchor:
   rule: status.attention.blocked-queues
-status: addressed
+status: settled
 body: "Found while drawing cli screens. A rule that demands checks, has no check
   claiming it and has no run sits in two queues: \"cover checkout.basics.pays\"
   in AGENT QUEUE and \"walk down checkout.basics.pays — eng has not accepted it
@@ -23,3 +23,8 @@ replies:
       person, but now as `approve the wording of <rule> — not built yet`, which
       judges no build. The rule gained a step saying so. Tests in
       status.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T15:05:19Z
+    body: Settled by the agent's pass on status.attention.blocked-queues
+      (2026-10-08T15-05-19Z-local-01).
