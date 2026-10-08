@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:10.305Z
 anchor:
   rule: ownership.design.request-on-a-screen
-status: addressed
+status: settled
 body: Found while drawing cli screens. `walkdown threads new --screen cart
   --reason request` prints "✓ n-0002 opened · note" and never says it was filed
   as a design request, which is the one thing a person filing it wants
@@ -16,3 +16,8 @@ replies:
     created: 2026-10-08T13:27:18Z
     body: "Fixed. `threads new` prints the reason in its confirmation: `✓ n-0002
       opened · note · design request · by sam`. Scenario: threads-new-request."
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:37:35Z
+    body: Settled by the agent's pass on ownership.design.request-on-a-screen
+      (2026-10-08T13-37-35Z-local-01).

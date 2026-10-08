@@ -1,0 +1,12 @@
+id: n-0529
+uuid: 9d4dbd84-524e-4bc7-b064-6284316ddcd2
+kind: note
+reason: request
+author: topher
+created: 2026-10-08T13:46:01.172Z
+anchor:
+  screen: claims-url-query
+status: open
+body: "A new screen: `walkdown claims --url` on an address whose query a screen
+  declares. The declared query names the screen, as it does in the panel
+  (n-0491). Anchors: cli.prompt, cli.claims.url, cli.claims.screen, cli.exit."

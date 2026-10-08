@@ -114,7 +114,31 @@ test('serve started in a project with several blueprints names them, and never c
         resolve(text);
       }
     });
-  }).finally(() => child.kill());
-  assert.doesNotMatch(out, /outside a registered project/);
-  assert.match(out, new RegExp(`a project with several blueprints \\(${ids.join(', ')}\\)`));
+  });
+  try {
+    assert.doesNotMatch(out, /outside a registered project/);
+    assert.match(out, new RegExp(`a project with several blueprints \\(${ids.join(', ')}\\)`));
+    // And an API call naming no blueprint is refused truthfully too (n-0523).
+    const port = out.match(/localhost:(\d+)\//)[1];
+    const res = await fetch(`http://localhost:${port}/api/threads`);
+    assert.equal(res.status, 404);
+    const { error } = await res.json();
+    assert.doesNotMatch(error, /outside any registered project/);
+    assert.match(error, /name one with \?bp=<id>/);
+  } finally {
+    child.kill();
+  }
+});
+
+test('a moved checkout reports every row the move re-pointed as moved, not as already listed @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('moved-three');
+  const repo = m.repo('repo');
+  for (const n of ['alpha', 'beta', 'gamma'])
+    assert.equal(m.cli(repo, 'blueprints', 'new', n, '--commit', 'spec').status, 0);
+  const moved = join(m.home, 'repo2');
+  execFileSync('mv', [repo, moved]);
+  const r = m.cli(moved, 'blueprints', 'import', '.', '--all');
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal((r.stdout.match(/~ moved/g) ?? []).length, 3, r.stdout);
+  assert.doesNotMatch(r.stdout, /already listed/);
 });

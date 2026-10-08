@@ -127,3 +127,32 @@ test('an app path written as a whole URL is claimed on its own origin, not glued
   assert.equal(claim.origin, 'http://localhost:4700');
   assert.equal(claim.path, '/stand-in/party-id-types');
 });
+
+test('a declared query picks the screen inside a blueprint, and never decides which blueprints claim the page @rule:screens.identity.query-is-not-identity', async () => {
+  const shop = bp('shop', 'http://localhost:3000', [
+    { id: 'orders', app: { path: '/orders' } },
+    { id: 'orders-returns', app: { path: '/orders?tab=returns' } },
+  ]);
+  const returns = bp('returns', 'http://localhost:3000', [
+    { id: 'returns-tab', app: { path: '/orders?tab=returns' } },
+  ]);
+  const at = (url) => blueprintsForUrl([shop, returns], url).map((c) => `${c.id}:${c.screen}`);
+  assert.deepEqual(at('http://localhost:3000/orders?tab=returns&page=2'), [
+    'shop:orders-returns',
+    'returns:returns-tab',
+  ]);
+  // Without the query, both still claim the page (n-0525).
+  assert.deepEqual(at('http://localhost:3000/orders?page=2'), [
+    'shop:orders',
+    'returns:returns-tab',
+  ]);
+  // The server's index answers the same: it keeps the declared query.
+  const { claimantsFor } = await import('../lib/registry.js');
+  const index = {
+    blueprints: [shop, returns].map((b) => ({ id: b.id, claims: claimsOf(b.blueprint) })),
+  };
+  assert.deepEqual(
+    claimantsFor(index, 'http://localhost:3000/orders?tab=returns').map((c) => c.screen),
+    ['orders-returns', 'returns-tab'],
+  );
+});

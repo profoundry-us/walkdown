@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:23.721Z
 anchor:
   rule: commands.blueprints.forget-keeps-the-files
-status: addressed
+status: settled
 body: "Found while judging the locations rules. A forgotten home kept in
   ~/.walkdown cannot be registered again: `blueprints new` refuses the existing
   folder, and `blueprints import` refuses it as a folder outside any repository.
@@ -21,3 +21,8 @@ replies:
       `blueprints new` with its name now points at that import instead of
       calling the folder no blueprint. The rule gained a step for it. Scenario:
       blueprints-import-forgotten."
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:37:35Z
+    body: Settled by the agent's pass on commands.blueprints.forget-keeps-the-files
+      (2026-10-08T13-37-35Z-local-01).

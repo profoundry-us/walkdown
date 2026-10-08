@@ -1,0 +1,158 @@
+{
+  "run_id": "2026-10-08T13-37-35Z-local-01",
+  "created": "2026-10-08T13:37:35Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "793988a-dirty",
+  "note": "Agent re-judging of the eleven cli rules whose findings were fixed in 793988a; four pass, seven fail on cases the fixes did not reach.",
+  "spec_hash": "sha256:afa5f308f11c",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-01-setup.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-02-home-path-and-no-terminal.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-03-terminal.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-04-already-only-all.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-05-no-home.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-06-terminal-answers.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-07-moved-checkout-count.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/import-08-moved-rows-reported-already-listed.txt"
+      ],
+      "reasoning": "On a scratch machine I made a git repository with three committed homes (alpha, beta, gamma) and forgot beta and gamma so only alpha stayed registered. Importing beta by its home path registered that one blueprint and named its ID 0004-rp-beta and its project repo. Importing the repository with no terminal listed alpha, beta and gamma by folder, marked alpha and beta as already listed, registered nothing and exited 2 asking for --all or --only. In a pseudo terminal it listed the same, asked which, and answering 3 registered gamma alone. --only gamma and --all registered only the unlisted folders, and --only with an unknown folder was refused. Importing alpha again by its path said already listed with its ID and left the registry byte-identical, as did --all when everything was listed. An empty directory, a git repository with no .walkdown, a subfolder, the blueprints folder itself and a missing path each said there was nothing to import and changed nothing. The n-0502 count line now reads as the machine's total and is labelled so, which is true. The rule breaks when the repository's checkout has moved: after moving a checkout holding three registered homes, import . --all printed moved for alpha but printed already listed for beta and gamma, while the registry diff shows both of their rows rewritten to the new checkout and home paths. A home reported as already listed had its row changed, which contradicts the step that its row is unchanged, and the person is not told that two rows moved.",
+      "threads": [
+        "ba0fb166-ea91-49ec-8d9d-46af24f2f049"
+      ]
+    },
+    {
+      "rule": "commands.blueprints.forget-keeps-the-files",
+      "status": "pass",
+      "statement_hash": "sha256:4d5b1cc69a64",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/forget-01-forget-and-files.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/forget-02-not-served.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/forget-03-new-and-import-from-elsewhere.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/forget-04-new-on-forgotten-committed.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/forget-05-import-back-from-inside.txt"
+      ],
+      "reasoning": "In a scratch project shop I made a committed blueprint checkout and a personal one search kept in ~/.walkdown, each with a rule, a thread and a run file from a sweep, then forgot both. Neither appeared in walkdown blueprints, status by its old ID was refused, and a serve on port 4744 listed neither and answered 404 to bp by old ID or by name. A sha256 and mtime listing of every file and folder in both homes was identical before and after, and git status in shop was clean. Forgetting the personal one named its folder under ~/.walkdown with an rm -rf line that deletes it, and the committed one did not. With search forgotten, blueprints new search refused and pointed at blueprints import of that folder rather than calling it no blueprint. Importing the kept home from a directory in no project, or from another project, refused and named the project shop it is kept for. From a subfolder inside shop it came back as 0014-sp-search, and import . --all in shop brought checkout back as 0015-sp-checkout, both under new numbers, with their threads readable and every file hash unchanged. blueprints new checkout on the forgotten committed home also re-registered it under a new number without rewriting its files. One small inaccuracy that does not break a step is that the forget message says nothing else will mention the kept folder, while walkdown blueprints does list it as an unregistered folder."
+    },
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "fail",
+      "statement_hash": "sha256:8fc3f6d54231",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/serve-01-in-project-with-several.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/serve-02-by-id-and-own-project.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/serve-03-late-registration-and-storyboard.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/serve-04-root-chooser.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/serve-04-root-chooser.jpg",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-a/serve-05-blueprint-flag-and-subdir.txt"
+      ],
+      "reasoning": "I served on port 4744 from a scratch directory in no project. The banner said it serves every blueprint registered on this machine and that it started outside a registered project, and the root opened in the built-in browser showed a Which project chooser listing the four projects and no rules. The server's /api/blueprint with bp=0009-oh-solo was identical to a server started inside that project apart from the boot timestamp. A blueprint registered after start was matched by /api/whose from its own app address, and a screen added to another blueprint's storyboard was matched too, with no restart. Started with --blueprint from outside, or with --blueprint inside a project, or inside a project with one blueprint, the page naming none opened that blueprint. The n-0500 banner fix holds, since started in a project with three blueprints, or in a subfolder of one with two, the banner says started in a project with several blueprints and names them. The same false statement survives in the refusal: on those servers GET /api/threads, GET /api/walkdowns and POST /api/threads with no bp answer 404 with no blueprint named - this server was started outside any registered project, so name one with ?bp=<id>. The refusal does say how to name one, but it tells the person something untrue about where the server started, which is the defect n-0500 reported, so the finding is only half fixed.",
+      "threads": [
+        "47b6a50e-0c5a-4f99-b072-68b6453128c9"
+      ]
+    },
+    {
+      "rule": "commands.threads.one-verb-per-change",
+      "status": "pass",
+      "statement_hash": "sha256:687a1c86cfdf",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/one-verb-per-change.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/one-verb-per-change-n0504.txt"
+      ],
+      "reasoning": "On a scratch machine I made a one-blueprint project with an open note n-0001 and a question q-0002 answered with a reply. `threads show n-0001` printed the thread with and without --blueprint and with --json, and the shasum of every record file was identical before and after, so show changed nothing. `threads reply n-0001 \"done\" --blueprint menu` added the reply and printed \"still open\", and a later show confirmed the status was still open. `threads set n-0001 --status addressed --reply \"fixed in 1a2b3c\"` printed \"open → addressed · +1 reply\" and show listed both the reply and the new status. `threads set q-0002 --status open`, with and without --reply, was refused with \"reopening requires a reason\" and \"Nothing was changed, and the reply did not land\". Other refusals behaved the same way, including `--status reopen`, `--status bogus` and an illegal move out of verified, and show confirmed no reply had landed after any of them. `threads set` with only --reply was refused and pointed to `threads reply`. `thread new ...` was refused and the old form was rewritten as the matching `threads new` command. `threads new` accepted --rule, --body, --element, --kind, --option, --reason and --json. For the n-0504 fix, in a project with two blueprints, `threads show n-0099` with no --blueprint now says \"No thread \"n-0099\" in any of this project's blueprints (0001-sp-checkout, 0002-sp-search)\" and exits 2. q-0099 and zzz say the same. A label that only the second blueprint holds is found without a flag, and a UUID is found too. Two things I noticed are outside this rule. First, `walkdown thread show n-0001` suggests `walkdown threads show show n-0001`, which repeats \"show\"; that belongs to commands.shape.old-forms-say-the-new. Second, an answered question cannot take `--status reopen`, but `--status open --reason` does move it from answered to open."
+    },
+    {
+      "rule": "threads.lifecycle.says-why-it-exists",
+      "status": "fail",
+      "statement_hash": "sha256:5bb935c7abc6",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/says-why-it-exists-cli.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/says-why-it-exists-cli-2.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/says-why-it-exists-added.txt",
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/says-why-it-exists-browser.txt"
+      ],
+      "reasoning": "The machine's profile named sam. From the CLI, each reason I passed was stored and printed. \"banana\" and \"Finding\" were refused, and the refusal listed the five words. An empty --reason was treated as no reason. With no reason, a person's note was stored as feedback and an --as-agent note as observation. finding and observation were authored by agent even without --as-agent, and the record had no via field. A decision was filed with status recorded, and reopen, addressed, waive and settled were each refused as illegal transitions out of recorded. A question given --reason was refused with \"a question carries no reason\". From the browser's door (POST /api/threads on a scratch serve on port 4745) the results matched: no reason gave feedback, decision gave recorded, finding gave author agent, banana was refused, and a question with a reason was refused. Since the n-0498 fix, `threads show` puts the reason in its heading and `threads` ends each row with it. The rule still fails on the finding and observation step. `threads new --rule search.pay.total --reason finding --as-agent --said \"sam said it broke\" --added \"I reproduced it\" --blueprint search` exits 0 and prints \"✓ n-0014 opened · note · finding · by agent\". The stored record has only the body \"sam said it broke\", so the --added text is gone without any warning. The same --added on a relayed feedback note is kept and shown as \"agent added\". The cause is in lib/writes.js: when the reason is finding or observation, openThread sets added to null instead of refusing or keeping it. The voice gate also never sees that text. A smaller inconsistency is that the confirmation line leaves out a reason that was filled in by default, as in \"✓ n-0006 opened · note · by sam\", while show and threads both print feedback.",
+      "threads": [
+        "d72ee4b1-acc0-49b7-823c-ce1bb60b6499"
+      ]
+    },
+    {
+      "rule": "ownership.design.request-on-a-screen",
+      "status": "pass",
+      "statement_hash": "sha256:d92cdf580877",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-40-00Z-judge-b/request-on-a-screen.txt"
+      ],
+      "reasoning": "In a scratch blueprint, the screen checkout-receipt had prototype null and no rule naming it. Lint first warned that it had no design and no open design request. `threads new --screen checkout-receipt --body \"The receipt needs a drawing.\" --blueprint checkout` printed \"✓ n-0001 opened · note · design request · by sam\" and \"screen checkout-receipt\". Its JSON shows anchor {screen: checkout-receipt} with no rule and reason request, which is the n-0499 confirmation working. After that, lint's drift warning for checkout-receipt was gone, so the request satisfies ownership.drift.design-requests-required for that screen. The warning for checkout-home stayed after a feedback note and an observation were filed there. That is correct because neither of those is a request. Given --reason feedback or --reason observation on a screen alone, each thread carried that reason, and an unknown reason was refused. With neither --rule nor --screen, the command was refused with \"a thread needs an anchor — name the rule it is about (--rule <id>), or the screen (--screen <id>)\", and that held with --reason request too. An unknown screen was refused as well. An --as-agent thread on a screen alone with no reason also became a design request, which this rule allows even though says-why-it-exists would make a machine's unreasoned note an observation."
+    },
+    {
+      "rule": "status.attention.agent-tier-queued",
+      "status": "fail",
+      "statement_hash": "sha256:b813158e0a11",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-35-28Z-judge-c/queue-breaks-repro.txt",
+        "runs/evidence/2026-10-08T13-35-28Z-judge-c/full-board-status.txt"
+      ],
+      "reasoning": "I built scratch boards with walkdown's own writers (blueprints new, hash --write, threads, and lib/run-record.js for checks and agent runs) and read walkdown status and status --json. A built rule with no agent verdict and one whose agent pass went stale through a real rewording each got one agent item naming the rule. The stale line now reads 'the agent verdict on it is stale, and no signer is asked until it is judged again', so the n-0495 wording fix holds. Neither rule was asked of eng or product while unsigned. The passing rule was not queued to the agent. It was queued to product, which had not signed, and not to eng, which had. A pass older than a claimed fix produced only the re-judge item and never a judge-first one. An unbuilt rule got no judge item. The second THEN line breaks, though. Take a built rule the agent has never judged, carrying a person's note that the agent has addressed. AGENT QUEUE lists it as 'judge checkout.basics.noted, the agent tier has never judged it, and no signer is asked until it has'. At the same time NEEDS A HUMAN asks the person to 'walk down checkout.basics.noted, 1 note of yours answered (n-0001)'. That item has no warning that nothing has judged the fix, even though the re-judge case carries one. So a person is asked to walk down the rule before any agent has looked at it, and the report contradicts itself. The same happens when the agent cell is stale rather than never.",
+      "threads": [
+        "bcf27cca-4db9-4227-ba55-878e08540800"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "fail",
+      "statement_hash": "sha256:7d5377c322ba",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-35-28Z-judge-c/lived-in-home-status.txt",
+        "runs/evidence/2026-10-08T13-35-28Z-judge-c/full-board-status.txt",
+        "runs/evidence/2026-10-08T13-35-28Z-judge-c/queue-breaks-repro.txt"
+      ],
+      "reasoning": "I rebuilt the n-0496 repro (the lived-in-home fixture) by hand. It now shows 'approve the wording of checkout.basics.pays, not built yet' beside the agent's cover item, which matches the new step. A built rule that no check claims and that has a current agent pass (lostcheck2) is the agent's cover item alone, with no person asked. I also built a board with every kind of queue, and most lines hold there. An open feedback note goes to the agent to address. An answered question goes to the agent to incorporate and keeps its rule out of every person's queue. An open question on a walkable rule is one answer item naming q-0003. A drawn design request and a person's addressed notes are grouped into one verify item per rule naming the threads. A person's addressed feedback on a retired rule stands alone as a verify item, while an agent finding on the same retired rule waits on nobody. An open design request on a screen goes to DESIGN QUEUE for the designer, and to the design agent when design.by is agent. Three lines break. First, the agent wrote an observation on a rule and addressed it after its last pass. The board shows 'settle n-0002' and 'judge checkout.basics.observed again' at the same time, but the rule says the agent settles only once its pass is newer than the fix. Second, a built rule the agent has never judged, with a person's addressed note, is asked of a person as 'walk down checkout.basics.noted, 1 note of yours answered'. So the agent does not hold that rule alone before a person is asked. Third, checkout.basics.untagged demands checks, but its check claim is gone, its checks cell is stale by uncovered and its agent cell is never. It gets only the judge-first item and no cover item, so no agent is asked to cover it until after it has been judged.",
+      "threads": [
+        "326010c2-d5bf-44f8-8b3e-4c5cfc68091d"
+      ]
+    },
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "fail",
+      "statement_hash": "sha256:bd83ebeb2a0e",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-35-28Z-judge-c/sweep-probes.txt"
+      ],
+      "reasoning": "The n-0497 fix holds. On a scratch project I ran 'walkdown sweep --blueprint checkout' three ways: with no --why, with --why '', and with --why of only spaces. Each exits 2 and says 'a sweep needs a reason' and 'Nothing was changed.'. An unknown tier also exits 2 with 'Nothing was changed.', and no sweep record appeared after any of these. The output matches the as-built sweep-needs-a-reason screen. None of these wrote a sweep: hash --write after a real statement change, a recorded agent walkdown, threads new, lint, status and walkdown run. A sweep declared with --why wrote a marker whose why field holds the reason, and status shows that reason under SWEEP. The first THEN line breaks on a blueprint edit made by walkdown's own tool. I declared a sweep on checkout, committed it, and ran 'walkdown rules move checkout.basics.one --blueprint checkout --to search'. That wrote a sweep record into search. search.basics.one was never moved or swept and held a current agent pass, yet it then read stale. The search board showed 'SWEEP agent on local, 0/2 judged, 2 to go' and asked the agent to judge search.basics.one again. Nobody asked for a sweep on search, so the marker there is a side effect of the move. locations.several.rules-move requires the marker to be copied to the destination, so a person needs to decide whether a copied marker should apply only to the rules that moved.",
+      "threads": [
+        "3ed718c4-c7a1-4d02-afbc-b9c9cfde0a17"
+      ]
+    },
+    {
+      "rule": "delivery.plugin.never-through-a-link",
+      "status": "pass",
+      "statement_hash": "sha256:a8b1fc5a9e59",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-32-53Z-judge-d/skills-links.txt"
+      ],
+      "reasoning": "On a scratch HOME I ran skills --into ~/.claude/skills once so walkdown made its own link, then added walkdown-incorporate as a link to another folder, walkdown-setup as a link to a file, and a real walkdown-judge folder whose SKILL.md is a link. Both with and without --force, the walkdown link was reported as up to date and each of the three was reported as left alone, a link walkdown did not make. Listings after the runs show every link unchanged. In a folder that is not Claude Code's, the copies installer did the same for a linked folder, a linked SKILL.md, a dangling link, and a link into walkdown's own skills/setup. It created only the one free copy and left all four links alone with --force. When the name walkdown was somebody else's link (live or dangling), skills --force and init both left it and said the plugin is not installed here and to move the link aside, which is the n-0493 fix. They no longer said Copies. The checksums of every file the links point at, and of the clone's skills tree, were the same before and after. One edge I did not count against the rule: an --into path that is itself a link is written through, because the person named that destination."
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "fail",
+      "statement_hash": "sha256:56d83a30a6b1",
+      "evidence": [
+        "runs/evidence/2026-10-08T13-32-53Z-judge-d/matchers-compared.txt",
+        "runs/evidence/2026-10-08T13-32-53Z-judge-d/index-drops-query.txt",
+        "runs/evidence/2026-10-08T13-32-53Z-judge-d/membership.txt"
+      ],
+      "reasoning": "I gave a scratch blueprint screens at /, /orders, /orders?tab=returns, /orders?tab=returns&state=open, /orders#detail and /admin/orders. Then I resolved 23 URLs three ways: matchScreen called in node, claims --url, and GET /api/whose on a serve at port 4747. claims --url now agrees with matchScreen on all 23. An undeclared query such as page=2 changes nothing, a declared query wins, the two-value query beats the one-value query, and a declared fragment beats a declared query. The root app path behaves the same in both. The server does not agree. /api/whose answered orders for /orders?tab=returns, for the same URL with page=2, and for the two-value query, and it disagreed on 9 of the 23 URLs. The cause is that buildIndex in lib/registry.js maps each claim to origin, path, screen and target, so it drops the ref that claimsOf now computes. Every index serve writes, fresh ones included, is therefore the old shape, and bestClaim falls back to the path alone. The same index with claimsOf's refs kept answers orders-returns. So the second THEN holds for the CLI but not for the server's resolution. The first THEN holds everywhere. On the third THEN, the walkdown claims inventory still keys on path and fragment, and it lists a second blueprint whose only screen is /orders?tab=returns as sharing /orders. But claims --url /orders, and /orders?page=2, now omit that blueprint while /api/whose includes it. So which blueprints a page belongs to is now read with the query by the CLI and without it by the server and the inventory.",
+      "threads": [
+        "805e7960-102b-402f-85ae-87da1c93988d"
+      ]
+    }
+  ]
+}

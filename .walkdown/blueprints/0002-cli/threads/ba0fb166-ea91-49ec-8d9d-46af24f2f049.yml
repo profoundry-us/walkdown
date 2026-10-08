@@ -1,0 +1,22 @@
+id: n-0522
+uuid: ba0fb166-ea91-49ec-8d9d-46af24f2f049
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:37:07.709Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: "Found while judging at 793988a. Moving a checkout with three committed
+  homes, then `blueprints import . --all` in the new place, reports one as `~
+  moved` and the other two as `· already listed`. All three rows were rewritten
+  to the new path, so two changed rows read as unchanged. Evidence:
+  runs/evidence/2026-10-08T13-40-00Z-judge-a/import-08-moved-rows-reported-alre\
+  ady-listed.txt"
+replies:
+  - author: agent
+    created: 2026-10-08T13:47:20Z
+    body: Fixed. A move re-points every row of the checkout on its first home, so
+      each later home that reads as listed at a path it was not listed at is
+      reported as moved too. All three rows now say `~ moved`. Test in
+      project-codes.test.js.

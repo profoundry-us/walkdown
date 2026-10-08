@@ -300,7 +300,7 @@ test('thread new opens an anchored thread and reports under whom @rule:threads.l
     ['new', '--kind', 'note', '--rule', 'f.s.rule', '--said', 'Seen: a thing.', '--as-agent'],
     bp,
   );
-  assert.match(out, /n-0001 opened · note · by A Person/);
+  assert.match(out, /n-0001 opened · note · feedback · by A Person/);
   assert.match(out, /via agent/, 'a note an agent typed for a person says so');
   assert.doesNotMatch(out, /Seen: a thing/, 'a report, not the thread read back');
   const disk = readFileSync(threadAt(threadsOf(bp), 'n-0001'), 'utf8');

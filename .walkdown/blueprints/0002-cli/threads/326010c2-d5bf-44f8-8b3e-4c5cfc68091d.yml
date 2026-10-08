@@ -1,0 +1,22 @@
+id: n-0526
+uuid: 326010c2-d5bf-44f8-8b3e-4c5cfc68091d
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:37:08.683Z
+anchor:
+  rule: status.attention.blocked-queues
+status: addressed
+body: Found while judging at 793988a. (a) An agent observation addressed after
+  the agent's last pass is asked to be settled while the rule is still owed a
+  re-judge; settle should wait for the newer pass. (b) A person is asked to
+  verify on a built rule the agent still owes (as on agent-tier-queued). (c) A
+  built rule no check claims, whose agent cell is never, gets only judge-first
+  and no cover item, because judge-first continues before cover is pushed.
+replies:
+  - author: agent
+    created: 2026-10-08T13:47:21Z
+    body: Fixed, all three. An agent observation is settled only once a pass is
+      newer than its fix. A person verifies nothing on a built rule the agent
+      has not judged yet. A built rule no check claims gets its cover item even
+      while the agent owes its first look. Tests in status.test.js.

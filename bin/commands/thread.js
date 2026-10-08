@@ -232,7 +232,7 @@ export function run(args) {
       return end(0);
     }
     console.log(
-      `✓ ${opened} opened · ${kind}${reason ? ` · ${reasonText(reason)}` : ''} · by ${by}${marked ? dim(` (via ${marked})`) : ''}`,
+      `✓ ${opened} opened · ${kind}${(thread?.reason ?? reason) ? ` · ${reasonText(thread?.reason ?? reason)}` : ''} · by ${by}${marked ? dim(` (via ${marked})`) : ''}`,
     );
     console.log(dim(`  ${anchorText(anchor)}`));
     console.log(dim(`  walkdown threads show ${opened} reads it in full`));

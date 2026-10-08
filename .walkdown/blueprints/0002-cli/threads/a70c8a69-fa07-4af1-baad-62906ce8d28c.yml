@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T02:55:32.285Z
 anchor:
   rule: commands.threads.one-verb-per-change
-status: addressed
+status: settled
 body: Found while judging. `walkdown threads show n-0099`, for a label no
   blueprint holds, in a project with two blueprints, says "Several blueprints
   are registered for ~/shop … Choose one with `--blueprint <id>`". With
@@ -19,3 +19,8 @@ replies:
       `No thread \"n-0099\" in any of this project's blueprints (…)` and exits
       2. A label two blueprints hold names both. Scenario:
       threads-show-in-no-blueprint."
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:37:35Z
+    body: Settled by the agent's pass on commands.threads.one-verb-per-change
+      (2026-10-08T13-37-35Z-local-01).

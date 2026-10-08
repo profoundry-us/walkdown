@@ -150,6 +150,22 @@ test('a note says why it exists, and the machine signs its own @rule:threads.lif
         }),
       /question carries no reason/,
     );
+    // A person's words relayed are never filed as the machine's own, and
+    // nothing said beside them is dropped without a word (n-0524).
+    for (const reason of ['finding', 'observation'])
+      assert.throws(
+        () =>
+          openThread(p.load(), {
+            kind: 'note',
+            body: 'sam said it broke',
+            anchor: { rule: RULE },
+            reason,
+            via: 'agent',
+            said: 'sam said it broke',
+            added: 'I reproduced it',
+          }),
+        /machine's own words/,
+      );
     const q = openThread(p.load(), { kind: 'question', body: 'x?', anchor: { rule: RULE } });
     assert.equal(q.thread.reason, undefined);
     // An empty reason is no reason: the default answers, and a machine's

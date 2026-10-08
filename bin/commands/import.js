@@ -365,6 +365,13 @@ export async function run(args) {
 
 function finish(chosen, checkout, values, known = []) {
   const written = [];
+  /*
+   * A moved checkout re-points every row it holds at once, on the first of
+   * its homes. The rest then read as listed - at a path they were not listed
+   * at when this began - and are moves too (n-0522).
+   */
+  const before = listedHomes();
+  let movedFrom = null;
   for (const h of chosen) {
     let row;
     try {
@@ -400,8 +407,11 @@ function finish(chosen, checkout, values, known = []) {
       path: row.path,
       beside: row.beside ?? [],
       kept: row.action === 'kept',
-      from: row.from ?? null,
+      from:
+        row.from ??
+        (row.action === 'kept' && movedFrom && !before.has(canon(h.dir)) ? movedFrom : null),
     });
+    movedFrom = row.from ?? movedFrom;
   }
   /*
    * Claims are indexed at import, so routing never has to load a spec (ADR

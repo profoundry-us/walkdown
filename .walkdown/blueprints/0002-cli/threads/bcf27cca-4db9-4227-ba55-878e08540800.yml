@@ -1,0 +1,21 @@
+id: n-0527
+uuid: bcf27cca-4db9-4227-ba55-878e08540800
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:37:21.894Z
+anchor:
+  rule: status.attention.agent-tier-queued
+status: addressed
+body: "Found while judging at 793988a. Take a built rule that the agent has
+  never judged, or whose agent verdict is stale. A person's note on it is then
+  addressed by the agent. Status puts it in two queues: the agent is asked to
+  judge it first, and a person is asked to walk it down because their note was
+  answered. Nothing tells the person that no agent has looked at the fix. The
+  verify item in lib/status.js does not check the judge-first hold."
+replies:
+  - author: agent
+    created: 2026-10-08T13:47:22Z
+    body: Fixed. While a built rule waits on the agent's first look, a person's
+      addressed note on it is held out of NEEDS A HUMAN, so the agent holds the
+      rule alone. Test in status.test.js.

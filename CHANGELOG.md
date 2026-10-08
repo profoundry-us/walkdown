@@ -143,6 +143,27 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 - `walkdown init --commit all` no longer deletes a `.walkdown/.gitignore` that other
   blueprints in the same `.walkdown/` rely on, or one somebody edited; `--force` still
   does. Giving walkdown its second blueprint deleted walkdown's own.
+- A forgotten blueprint kept in `~/.walkdown` can be taken back:
+  `walkdown blueprints import <its folder>`, run inside its project, lists it again under a
+  new number. `walkdown blueprints new` with its name says so, instead of calling the
+  folder no blueprint.
+- `walkdown claims --url` uses the panel's own matcher, so a screen declared by its query
+  (`/orders?tab=returns`) is the answer there too. The two had disagreed.
+- A built rule that no check claims is queued only to the agent, to write the check. It
+  is no longer also queued to a person to walk down. An unbuilt rule's item for a person
+  says it is about approving the wording.
+- `walkdown threads new`, `threads show` and `threads` say why each thread exists. A
+  request reads as a design request.
+- `walkdown threads show <id>` in a project with several blueprints says the thread is in
+  none of them, when none holds it, instead of asking you to choose a blueprint.
+- `walkdown serve` started in a project with several blueprints names them, instead of
+  saying it started outside a registered project.
+- `walkdown sweep` refused without `--why` exits 2, as other refusals do, and says
+  nothing was changed.
+- `walkdown blueprints import` counts the blueprints on this machine. It used to read as a
+  count of what it had imported.
+- `walkdown skills` says the plugin is not installed where the name `walkdown` in Claude
+  Code's skills folder is a link somebody else made, instead of describing copies.
 
 ## [0.3.0] - 2026-10-02
 

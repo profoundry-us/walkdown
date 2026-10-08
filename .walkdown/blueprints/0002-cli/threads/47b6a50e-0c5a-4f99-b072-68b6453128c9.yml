@@ -1,0 +1,21 @@
+id: n-0523
+uuid: 47b6a50e-0c5a-4f99-b072-68b6453128c9
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:37:07.906Z
+anchor:
+  rule: locations.answer.serve-starts-anywhere
+status: addressed
+body: Found while judging at 793988a. A serve started in a project with several
+  blueprints refuses an API call that names none (GET /api/threads) with `no
+  blueprint named - this server was started outside any registered project`. The
+  banner was fixed by n-0500, but this refusal, hard-coded in lib/serve.js,
+  still says the false part.
+replies:
+  - author: agent
+    created: 2026-10-08T13:47:21Z
+    body: "Fixed. The API refusal now reads: no blueprint named, and this server has
+      no default one (it was not started with --blueprint or in a project with
+      only one), so name one with ?bp=<id>. That is true wherever the server
+      started. The serve test checks it."

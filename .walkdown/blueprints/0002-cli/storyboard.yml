@@ -607,6 +607,15 @@ screens:
       - cli.skills.link
       - cli.skills.left
       - cli.exit
+  - id: claims-url-query
+    title: A declared query tells two screens on one path apart
+    prototype: null
+    app: { path: /as-built/cli/claims-url-query.html }
+    anchors:
+      - cli.prompt
+      - cli.claims.url
+      - cli.claims.screen
+      - cli.exit
   - id: blueprints-import-forgotten
     title: A forgotten blueprint is taken back from inside its project
     prototype: null

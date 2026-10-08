@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:09.169Z
 anchor:
   rule: delivery.plugin.never-through-a-link
-status: addressed
+status: settled
 body: Found while drawing cli screens. When the name `walkdown` in
   ~/.claude/skills is a link somebody else made, `walkdown skills --into
   ~/.claude/skills --force` leaves it alone, which is right, but then closes
@@ -22,3 +22,8 @@ replies:
       installed here: the name walkdown is a link walkdown did not make. Move
       that link aside and run this again.` Scenario:
       skills-walkdown-name-taken."
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:37:35Z
+    body: Settled by the agent's pass on delivery.plugin.never-through-a-link
+      (2026-10-08T13-37-35Z-local-01).

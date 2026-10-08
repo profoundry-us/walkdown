@@ -345,6 +345,72 @@ test('a built rule no check claims is the cover item alone; an unbuilt one also 
   assert.equal(ask?.unbuilt, true, 'the person is asked to approve wording, not to judge a build');
 });
 
+test('an agent observation is settled only once a pass is newer than its fix @rule:status.attention.blocked-queues', () => {
+  const note = (reason) => ({
+    id: 'n-1',
+    kind: 'note',
+    reason,
+    author: 'agent',
+    status: 'addressed',
+    anchor: { rule: 'demo.main.thing' },
+    replies: [{ author: 'agent', created: '2026-02-01T00:00:00Z', body: 'fixed' }],
+  });
+  const before = deriveStatus(
+    blueprint({
+      verify: ['agent', 'human'],
+      runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
+      threads: [note('observation')],
+    }),
+  ).attention;
+  assert.ok(before.some((i) => i.action === 'rejudge'));
+  assert.ok(!before.some((i) => i.action === 'settle'), 'not settled before the re-judge (n-0526)');
+  const after = deriveStatus(
+    blueprint({
+      verify: ['agent', 'human'],
+      runs: [walkdownRun('2026-03-01', 'agent', 'pass')],
+      threads: [note('observation')],
+    }),
+  ).attention;
+  assert.ok(after.some((i) => i.action === 'settle' && i.thread === 'n-1'));
+});
+
+test('a person verifies no fix on a built rule the agent has not judged yet @rule:status.attention.agent-tier-queued @rule:status.attention.blocked-queues', () => {
+  const { attention } = deriveStatus(
+    blueprint({
+      runs: [checksRun('2026-01-01T00:00:00Z', 'local', 'pass')],
+      targets: { local: {} },
+      threads: [
+        {
+          id: 'n-1',
+          kind: 'note',
+          reason: 'feedback',
+          author: 'sam',
+          status: 'addressed',
+          anchor: { rule: 'demo.main.thing' },
+          replies: [{ author: 'agent', created: '2026-02-01T00:00:00Z', body: 'fixed' }],
+        },
+      ],
+    }),
+    { checkRefs: new Set(['demo.main.thing']) },
+  );
+  assert.ok(attention.some((i) => i.action === 'judge-first' && i.rule === 'demo.main.thing'));
+  // The agent holds it alone until it has looked (n-0527).
+  assert.ok(!attention.some((i) => i.who === 'human'), JSON.stringify(attention));
+});
+
+test('a built rule no check claims is asked to be covered even while the agent owes its first look @rule:status.attention.blocked-queues', () => {
+  const { attention } = deriveStatus(
+    blueprint({
+      runs: [checksRun('2026-01-01T00:00:00Z', 'local', 'pass')],
+      targets: { local: {} },
+    }),
+    { checkRefs: new Set(['demo.other.rule']) },
+  );
+  const mine = attention.filter((i) => i.rule === 'demo.main.thing').map((i) => i.action);
+  assert.ok(mine.includes('cover'), mine.join());
+  assert.ok(mine.includes('judge-first'), mine.join());
+});
+
 test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],

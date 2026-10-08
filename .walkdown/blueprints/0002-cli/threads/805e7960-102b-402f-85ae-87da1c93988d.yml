@@ -1,0 +1,24 @@
+id: n-0525
+uuid: 805e7960-102b-402f-85ae-87da1c93988d
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:37:08.304Z
+anchor:
+  rule: screens.identity.query-is-not-identity
+status: addressed
+body: "Found while judging at 793988a. (a) `walkdown serve`'s /api/whose ignores
+  a declared query: /orders?tab=returns&page=2 answers `orders`, where claims
+  --url and the panel answer `orders-returns`. buildIndex in lib/registry.js
+  drops the ref claimsOf now keeps. (b) Which blueprints a page belongs to is
+  read on path and fragment alone, but claims --url /orders now leaves out a
+  blueprint whose only screen there is /orders?tab=returns. /api/whose lists
+  it."
+replies:
+  - author: agent
+    created: 2026-10-08T13:47:21Z
+    body: "Fixed. The server's index keeps each claim's declared query, so
+      /api/whose agrees with claims --url and the panel. Whether a blueprint
+      claims a page is read on path and fragment alone: a screen declared by a
+      query the address lacks still counts its blueprint, ranked below any
+      screen that fits whole. Test in claims.test.js."

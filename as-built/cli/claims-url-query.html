@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: status-untagged-check
+  AS-BUILT: claims-url-query
 
-  What `walkdown status` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/status-untagged-check.yml - the same run test/cli.test.js
-  checks against status.derived.unbacked-pass-goes-stale. Paths, times and hashes are made steady so
+  What `walkdown claims --url "http://localhost:3000/orders?tab=returns&page=2"` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/claims-url-query.yml - the same run test/cli.test.js
+  checks against screens.identity.query-is-not-identity. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/status-untagged-check".
+  redlines live in as-built/redlines.json under "cli/claims-url-query".
 
-  The design is prototype-cli/screens/status-untagged-check.html. Nothing here is
+  The design is prototype-cli/screens/claims-url-query.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; A checks pass no check claims any more is stale</title>
+  <title>As-built &mdash; A declared query tells two screens on one path apart</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -50,23 +50,13 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown status</div>
-      <div class="ln">walkdown status — ~/.walkdown/projects/shop/blueprints/checkout</div>
-      <div class="ln"></div>
-      <div class="ln">     RULE                    LOCAL    AGENT  ACCEPTED  THREADS</div>
-      <div data-testid="cli.status.unbacked">
-      <div class="ln">  ○  checkout.basics.pays    ~ stale  never  ○ eng     —      </div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown claims --url "http://localhost:3000/orders?tab=returns&amp;page=2"</div>
+      <div data-testid="cli.claims.url">
+      <div class="ln">http://localhost:3000/orders?tab=returns&amp;page=2</div>
       </div>
-      <div data-testid="cli.status.backed">
-      <div class="ln">  ○  checkout.basics.totals  ✓ pass   never  ○ eng     —      </div>
+      <div data-testid="cli.claims.screen">
+      <div class="ln">  0001-sp-checkout — screen orders-returns (target local)</div>
       </div>
-      <div class="ln"></div>
-      <div class="ln">0 verified, 2 pending, 0 failing</div>
-      <div class="ln"></div>
-      <div class="ln">  AGENT QUEUE</div>
-      <div class="ln">  ◆ cover checkout.basics.pays — demands checks, and no check claims it</div>
-      <div class="ln">  ◆ judge checkout.basics.pays — the agent tier has never judged it, and no signer is asked until it has</div>
-      <div class="ln">  ◆ judge checkout.basics.totals — the agent tier has never judged it, and no signer is asked until it has</div>
     <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>
