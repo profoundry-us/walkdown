@@ -141,4 +141,10 @@ test('a moved checkout reports every row the move re-pointed as moved, not as al
   assert.equal(r.status, 0, r.stderr);
   assert.equal((r.stdout.match(/~ moved/g) ?? []).length, 3, r.stdout);
   assert.doesNotMatch(r.stdout, /already listed/);
+  // Pointed at one home after a move, the rows that moved with it are said too.
+  const again = join(m.home, 'repo3');
+  execFileSync('mv', [moved, again]);
+  const one = m.cli(again, 'blueprints', 'import', join('.walkdown', 'blueprints', 'beta'));
+  assert.equal(one.status, 0, one.stderr);
+  assert.equal((one.stdout.match(/~ moved/g) ?? []).length, 3, one.stdout);
 });

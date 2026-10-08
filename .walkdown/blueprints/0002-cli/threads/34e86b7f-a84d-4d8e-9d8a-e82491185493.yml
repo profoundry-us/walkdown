@@ -1,0 +1,19 @@
+id: n-0531
+uuid: 34e86b7f-a84d-4d8e-9d8a-e82491185493
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:56:18.947Z
+anchor:
+  rule: status.attention.blocked-queues
+status: addressed
+body: Found while judging at 35323df. A rule whose fix was claimed after its
+  agent pass is in the agent's queue to re-judge and in each signer's queue at
+  once. And a rule whose agent verdict is a fail, with the fix claimed after it,
+  asks nobody to re-judge it. Only its signers are asked.
+replies:
+  - author: agent
+    created: 2026-10-08T13:58:38Z
+    body: "Fixed, both. A rule owed a re-judge is the agent's alone: no signer's
+      item and no verify item while it waits. A fail the agent gave, with a fix
+      claimed after it, now gets the re-judge item. Tests in status.test.js."

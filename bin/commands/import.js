@@ -437,6 +437,20 @@ function finish(chosen, checkout, values, known = []) {
     );
     return end(0);
   }
+  /*
+   * A move re-points every row of the checkout at once, so rows this import
+   * was never pointed at can change too - after `import <one home>` or
+   * `--only`. Each is said, never changed in silence (n-0522).
+   */
+  const after = listedHomes();
+  const now = new Map([...after].map(([home, id]) => [id, home]));
+  const was = new Map([...before].map(([home, id]) => [id, home]));
+  const named = new Set(written.map((w) => w.id));
+  for (const [id, home] of now)
+    if (!named.has(id) && was.has(id) && was.get(id) !== home)
+      console.log(
+        `  ${green('~ moved')}    ${tilde(home)}  ${dim(`keeps its ID \`${id}\`: it was at ${tilde(was.get(id))}, and moved with its checkout`)}`,
+      );
   for (const w of written) {
     if (w.from) {
       // The checkout moved: the same blueprint, by the same ID.

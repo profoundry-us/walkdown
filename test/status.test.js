@@ -996,9 +996,25 @@ test('a pass older than the fix claimed on its rule is marked, and owed to the a
     attention.some((i) => i.who === 'agent' && i.action === 'rejudge' && i.thread === 'n-1'),
     'the agent owes a fresh judgment',
   );
-  // And the human item says the machine side is not finished, rather than
-  // presenting acceptance as the only step left.
-  assert.equal(attention.find((i) => i.action === 'verify')?.unjudged, true);
+  // And no person is asked to accept the fix until the agent has judged it:
+  // the rule is the agent's alone meanwhile (status.attention.blocked-queues,
+  // n-0526). It used to sit in both queues, the person's item marked unjudged.
+  assert.ok(!attention.some((i) => i.who === 'human'), JSON.stringify(attention));
+});
+
+test('a fail the agent gave, with a fix claimed after it, is the agent’s to judge again and nobody else’s @rule:status.attention.blocked-queues', () => {
+  const { attention } = deriveStatus(
+    blueprint({
+      verify: ['agent'],
+      runs: [walkdownRun('2026-02-01T00:00:00Z', 'agent', 'fail')],
+      threads: [note('n-1', 'addressed', '2026-02-02T00:00:00Z')],
+    }),
+  );
+  assert.ok(
+    attention.some((i) => i.who === 'agent' && i.action === 'rejudge' && i.thread === 'n-1'),
+    JSON.stringify(attention),
+  );
+  assert.ok(!attention.some((i) => i.who === 'human'), JSON.stringify(attention));
 });
 
 test('the verdict reply that closed a thread is not a fix the pass missed @rule:threads.lifecycle.closes-where-it-was-asked', () => {

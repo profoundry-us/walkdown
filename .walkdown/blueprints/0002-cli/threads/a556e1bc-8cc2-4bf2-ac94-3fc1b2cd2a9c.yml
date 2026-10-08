@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:09.549Z
 anchor:
   rule: status.attention.agent-tier-queued
-status: addressed
+status: settled
 body: Found while drawing cli screens. For a rule whose agent verdict is stale,
   `walkdown status` prints "judge checkout.basics.receipt — the agent tier is
   stale on it, and no signer is asked until it has" (bin/commands/status.js
@@ -18,3 +18,8 @@ replies:
     body: Fixed. The stale case now reads `judge <rule> — the agent verdict on it is
       stale, and no signer is asked until it is judged again`. The never-judged
       wording is unchanged.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:56:33Z
+    body: Settled by the agent's pass on status.attention.agent-tier-queued
+      (2026-10-08T13-56-33Z-local-01).

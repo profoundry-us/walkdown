@@ -146,6 +146,16 @@ test('a declared query picks the screen inside a blueprint, and never decides wh
     'shop:orders',
     'returns:returns-tab',
   ]);
+  // A screen that fits whole wins over one whose declared query is missing,
+  // however much longer that one's path is.
+  const v2 = bp('v2', 'http://localhost:3000', [
+    { id: 'orders', app: { path: '/orders' } },
+    { id: 'v2-returns', app: { path: '/v2/orders?tab=returns' } },
+  ]);
+  assert.equal(
+    blueprintsForUrl([v2], 'http://localhost:3000/v2/orders?page=2')[0].screen,
+    'orders',
+  );
   // The server's index answers the same: it keeps the declared query.
   const { claimantsFor } = await import('../lib/registry.js');
   const index = {

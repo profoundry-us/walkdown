@@ -1,0 +1,20 @@
+id: n-0532
+uuid: f7b4e449-030a-4408-83af-fcefc2de8466
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:56:19.146Z
+anchor:
+  rule: screens.identity.query-is-not-identity
+status: addressed
+body: Found while judging at 35323df. At /v2/orders, claims and the server name
+  a screen declared /v2/orders?tab=returns, whose query the address lacks, over
+  /orders, which fits whole. The panel names /orders. The fallback score only
+  took half a point off a longer path.
+replies:
+  - author: agent
+    created: 2026-10-08T13:58:39Z
+    body: Fixed. A screen matched only by dropping its declared query now scores
+      below 0.2, and any screen that fits whole scores at least 1. So /v2/orders
+      names orders in claims, the server and the panel alike. Test in
+      claims.test.js.

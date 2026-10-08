@@ -1,0 +1,96 @@
+{
+  "run_id": "2026-10-08T13-56-33Z-local-01",
+  "created": "2026-10-08T13:56:33Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "35323df-dirty",
+  "note": "Second agent re-judging at 35323df of the six cli rules fixed after the first round; four pass, three fail on edges the fixes did not reach.",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/import-01-home-then-repo-no-tty.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/import-02-repo-in-terminal.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/import-03-only-all-listed-nohome.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/import-04-moved-checkout-all.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/import-05-moved-single-home.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/import-06-single-home-after-move-rewrites-others-silently.txt"
+      ],
+      "reasoning": "I made a repository with three committed homes (alpha, beta, gamma), cloned it onto a second scratch machine and drove import there. Importing the beta home's path registered beta alone and printed its ID and its project. Importing the repository with no terminal listed all three by folder, marked beta as already listed, exited 2 and registered nothing; with --only alpha and with --all it registered what was named. In a pseudo-terminal it listed the same three, prompted, and registered only gamma when I answered 3. Re-importing beta by path said already listed and the registry was byte-identical, and a directory with no home and a .walkdown folder with no home were both refused with nothing registered. The n-0522 fix holds for its own case: after moving the checkout, import . --all reported all three rows as moved. But the same defect remains one step over. After a move, importing one home's path (or the repository with --only gamma) re-points every row of the checkout, yet the output names only the one home as moved. In import-06 the registry diff shows alpha and gamma rewritten from /m3/a to /m3/b while the only line printed is beta's. So the home's path does not touch that blueprint alone, and two rows change with no report at all, which is the exact gap n-0522 named (changed rows reading as unchanged) on the single-home and --only paths.",
+      "threads": [
+        "f637e294-872c-43c3-bbc8-c775caf2e894"
+      ]
+    },
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:8fc3f6d54231",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-01-outside-any-project.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-02-in-single-project.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-03-in-multi-project.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-04-with-blueprint-flag.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-05-late-registration-and-storyboard.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-06-refusals-on-real-routes.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/serve-07-root-no-blueprint.txt"
+      ],
+      "reasoning": "With four blueprints registered in two projects, I started serve on port 4744 from a directory belonging to none. It started and its banner said it serves every blueprint registered on this machine (4). The root answered 200 with the panel shell, and /api/blueprint with no bp returned key null, the list of every registered blueprint and no rows, which is the chooser with no rules. Named by id, /api/blueprint?bp=0004-sl-solo matched a server started inside that project field for field apart from its boot time and the listing's current flag. Real routes that need a blueprint (GET /api/checks, GET /api/draft, POST /api/threads) were refused with 404 and the message that no blueprint was named, the server has no default, and to name one with ?bp=<id>. A server started in the three-blueprint project gave the same refusal word for word, which is the n-0523 fix: it no longer claims the server started outside any project, and its banner names the three blueprints. A server started in the one-blueprint project, and one started elsewhere with --blueprint 0002-rp-beta, both served that blueprint to a page naming none. On the 4744 server, a blueprint registered after start was listed and recognised by /api/whose from its storyboard app path, and a storyboard screen added to an already registered blueprint was recognised the same way, with no restart. The browser pane would not open here, so the chooser was judged from the API and the served page rather than a screenshot.",
+      "threads": []
+    },
+    {
+      "rule": "threads.lifecycle.says-why-it-exists",
+      "status": "pass",
+      "statement_hash": "sha256:5bb935c7abc6",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/threads-01-new-with-reasons.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/threads-02-relayed-words.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/threads-03-show.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/threads-04-raw-records.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/threads-05-decision-transitions.txt",
+        "runs/evidence/2026-10-08T14-30-00Z-judge2-a/threads-06-browser-door.txt"
+      ],
+      "reasoning": "On a scratch machine whose profile names sam, I filed notes from the CLI with each of the five reasons and with none, and the same through the browser door (POST /api/threads on a serve of that project). Each note carried the reason it was given, and complaint and FINDING were refused by both doors with the list of known words. Left unsaid, a person's note was feedback and an --as-agent note was an observation, and the confirmation line now prints that defaulted reason, as n-0524 said. A finding or an observation was authored agent in the record, with no via or typed-for mark, even when sam filed it without --as-agent. A decision was filed with status recorded, and every set I tried (open, settled, addressed, reopen, verify, waive, settled as agent) was refused as an illegal transition with nothing changed. A question was filed with no reason, and a question given one was refused on both doors. The n-0524 fix holds: --said or --added on a finding or an observation is refused with a reason instead of dropping --added, on the CLI and on the browser door, while relayed feedback, decision and request keep the person's words. Two small things that do not break the rule: the refusal reads a observation, and --reason given as an empty string files as if unsaid.",
+      "threads": []
+    },
+    {
+      "rule": "status.attention.agent-tier-queued",
+      "status": "pass",
+      "statement_hash": "sha256:b813158e0a11",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-00-00Z-judge2-b/queues-fixture.txt"
+      ],
+      "reasoning": "I built a scratch board with blueprints new, hash --write, threads new and threads set, and wrote run records with writeRunRecord. It held a built rule the agent never judged, one whose agent pass went stale because its statement hash moved, a passing rule, an unbuilt rule, a pass older than a person's addressed note, and a never-judged rule carrying a person's addressed note (the n-0527 shape), plus a never-judged rule eng had signed with its own addressed note. The first THEN holds: status printed one agent item each, reading 'the agent tier has never judged it' and 'the agent verdict on it is stale'. The second THEN holds: neither rule had any person item, and the person's addressed notes n-0001 and n-0007 on never-judged rules made no verify item, so the n-0527 fix works. The third THEN holds: the passing rule had no agent item and one judge item each for eng and product. The fourth THEN holds: the rule with a pass older than the fix got 'judge shop.q.fixed again' and no judge-first item. The fifth THEN holds: the unbuilt rule got only 'approve the wording', with no judge-first item. After I recorded a newer agent pass on the never-judged rule, both signers' judge items and the held verify item for n-0001 appeared, so the hold releases once the agent has judged."
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "fail",
+      "statement_hash": "sha256:7d5377c322ba",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-00-00Z-judge2-b/queues-fixture.txt",
+        "runs/evidence/2026-10-08T14-00-00Z-judge2-b/queues-retired-and-request.txt",
+        "runs/evidence/2026-10-08T14-00-00Z-judge2-b/real-board-items.txt"
+      ],
+      "reasoning": "On the same scratch board the three n-0526 fixes hold. An agent observation addressed after the agent's pass got only a re-judge item and no settle item until I recorded a newer pass, and then it got 'settle'. No verify item appeared on a never-judged rule. A built rule no check claims, with the agent cell at never, got both 'cover' and 'judge-first' and no person item. Other THEN lines hold too: an answered question made one incorporate item and no person item, an unbuilt rule's ask said it was about the wording, a design request on a rule went to design with by person, and on a retired rule a person's addressed feedback made a verify item while an agent finding waited on nobody. Two shapes still break the rule. First, a rule whose fix was claimed after its last agent pass is in two queues at once: shop.q.fixed got 'judge shop.q.fixed again' for the agent and, at the same time, 'walk down' for eng and for product plus a verify item labelled 'a fix nothing has judged yet'. The project's own owed gate counts a pass older than a claimed fix as owed, so this breaks the line that a built rule the agent tier still owes is judged by an agent before any person is asked to sign it, and the line that nothing sits in two queues at once. Second, a rule whose agent verdict is a fail, with the agent's finding addressed after it, gets no agent item at all: shop.q.failed showed only the two signers' judge items, so nothing asks for the addressed agent note to be judged again, and a person is asked to sign a rule whose only agent verdict is a fail. The real cli board shows this second shape on this very rule right now, with eng asked to judge it and nothing in the agent queue, though its agent cell is a fail and n-0526 is addressed.",
+      "threads": [
+        "34e86b7f-a84d-4d8e-9d8a-e82491185493"
+      ]
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "fail",
+      "statement_hash": "sha256:56d83a30a6b1",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-00-00Z-judge2-b/query-matchers.txt"
+      ],
+      "reasoning": "I built a scratch project with two blueprints. shop declares /orders, /orders?tab=returns and /v2/orders?tab=returns, and other declares only /orders?tab=returns. I served it on port 4747, confirmed through /api/blueprint that the server named only the scratch project, and for six addresses compared claims --url, /api/whose and the panel's own matchScreen from lib/screen-match.js. The n-0525 parts hold. claims --url and /api/whose now agree on every address, and /orders?tab=returns&page=2 is orders-returns in all three. other is listed at /orders and /orders?page=2, so which blueprints claim a page is read on path and fragment alone. The rule still breaks on its first two THEN lines. At /v2/orders and at /v2/orders?page=2, claims and /api/whose name v2-returns with score 9.5, a screen whose declared tab=returns is not in the address. The panel's matchScreen names orders, the screen that fits whole, at score 7. The fallback in bestClaim only subtracts 0.5 from the path score, so a longer path whose declared query is missing outranks a shorter path that fits whole. A declared query is then not honoured, and the server and claims disagree with the panel about which screen this is.",
+      "threads": [
+        "f7b4e449-030a-4408-83af-fcefc2de8466"
+      ]
+    }
+  ]
+}

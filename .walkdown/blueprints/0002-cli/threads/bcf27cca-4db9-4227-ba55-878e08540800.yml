@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:37:21.894Z
 anchor:
   rule: status.attention.agent-tier-queued
-status: addressed
+status: settled
 body: "Found while judging at 793988a. Take a built rule that the agent has
   never judged, or whose agent verdict is stale. A person's note on it is then
   addressed by the agent. Status puts it in two queues: the agent is asked to
@@ -19,3 +19,8 @@ replies:
     body: Fixed. While a built rule waits on the agent's first look, a person's
       addressed note on it is held out of NEEDS A HUMAN, so the agent holds the
       rule alone. Test in status.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:56:33Z
+    body: Settled by the agent's pass on status.attention.agent-tier-queued
+      (2026-10-08T13-56-33Z-local-01).

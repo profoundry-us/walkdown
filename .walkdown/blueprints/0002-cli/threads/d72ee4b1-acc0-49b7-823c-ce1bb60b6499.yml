@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:37:08.102Z
 anchor:
   rule: threads.lifecycle.says-why-it-exists
-status: addressed
+status: settled
 body: 'Found while judging at 793988a. `threads new --reason finding --as-agent
   --said "…" --added "I reproduced it"` exits 0 and drops the --added text
   without a word; the same flag on relayed feedback keeps it. lib/writes.js
@@ -20,3 +20,8 @@ replies:
       words (`said`, `added`) on one are refused rather than filed as the
       machine's, which dropped `added`. The confirmation line now prints a
       defaulted reason too.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T13:56:33Z
+    body: Settled by the agent's pass on threads.lifecycle.says-why-it-exists
+      (2026-10-08T13-56-33Z-local-01).

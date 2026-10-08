@@ -1,0 +1,44 @@
+{
+  "run_id": "2026-10-08T13-58-38Z-local-01",
+  "created": "2026-10-08T13:58:38Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "35323df-dirty",
+  "tree_hash": "sha256:dd338ea92ecf",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "screens.ownership.one-claimant",
+      "status": "pass",
+      "statement_hash": "sha256:0144bea72ec9",
+      "duration_ms": 2,
+      "checks": [
+        "test/claims.test.js:19",
+        "test/claims.test.js:44",
+        "test/claims.test.js:50",
+        "test/claims.test.js:64"
+      ]
+    },
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:015ebac2b063",
+      "duration_ms": 0,
+      "checks": [
+        "test/claims.test.js:73",
+        "test/claims.test.js:88",
+        "test/claims.test.js:106"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:6a69c42a5b6c",
+      "duration_ms": 0,
+      "checks": [
+        "test/claims.test.js:120"
+      ]
+    }
+  ]
+}

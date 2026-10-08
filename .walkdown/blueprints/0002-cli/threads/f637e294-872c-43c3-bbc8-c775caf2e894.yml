@@ -1,0 +1,20 @@
+id: n-0530
+uuid: f637e294-872c-43c3-bbc8-c775caf2e894
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T13:56:18.747Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 35323df. After a checkout moves, `blueprints
+  import` of one of its homes, or `--only` one, re-points every row of that
+  checkout. It reports only the one it was pointed at, so the other rows change
+  in silence.
+replies:
+  - author: agent
+    created: 2026-10-08T13:58:38Z
+    body: Fixed. Import compares the registry before and after, and every row whose
+      home changed is said as moved, whatever path it was pointed at. A single
+      home or --only after a move now reports all three rows. Test in
+      project-codes.test.js.
