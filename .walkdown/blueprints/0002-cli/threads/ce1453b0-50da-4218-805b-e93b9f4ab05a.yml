@@ -6,7 +6,12 @@ author: agent
 created: 2026-10-06T22:18:09.928Z
 anchor:
   rule: status.sweep.deliberate
-status: open
+status: addressed
 body: Found while drawing cli screens. `walkdown sweep --blueprint checkout`
   with no --why is refused, but exits 1 where every other refusal exits 2, and
   it does not say "Nothing was changed."
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:19Z
+    body: "Fixed. `sweep` with no --why, or with an unknown tier, exits 2 and says
+      `Nothing was changed.` Scenario: sweep-needs-a-reason."

@@ -566,11 +566,12 @@ stories:
             - "An addressed note the agent wrote on a walkable rule, other than a design request, is the agent's: it is judged again, and once the agent's pass is newer than the fix the agent is asked to settle it. It is never a person's to verify"
             - A thread on no rule, or on a retired one, is its own item, and only a person's feedback or request makes a verify item there - a finding or an observation on a retired rule waits on nobody
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
+            - A rule not yet built asks a person to approve its wording, which judges no build, so that ask may stand beside its cover item and says it is about the wording
             - A built rule the agent tier still owes is the agent's alone, so it is judged by an agent before any person is asked to sign it
             - 'An open design request is design''s to draw and never the building agent''s to address. With design.by "agent" it is queued for the design agent, otherwise for the designer'
             - Every item names who is blocked, so nothing sits in two queues at once
             - A rule holding an answered question is the agent's to fold in and is queued to no person - not to judge, not to verify - until the question is incorporated
-          statement_hash: sha256:d18a4d02f262
+          statement_hash: sha256:7d5377c322ba
 
       - id: status.attention.names-the-role
         origin: walkdown

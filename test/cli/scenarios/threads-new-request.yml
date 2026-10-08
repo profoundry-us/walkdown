@@ -1,0 +1,11 @@
+# `walkdown threads new --screen receipt`: the confirmation says it was filed as a design request.
+screen: threads-new-request
+title: Filing on a screen alone says it is a design request
+rule: ownership.design.request-on-a-screen
+fixture: g2-undrawn-screens
+command: [threads, new, --screen, receipt, --body, The receipt needs a drawing., --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ n-0002 opened · note · design request · by topher$'
+anchors:
+  - { id: cli.thread.reason, match: 'design request' }

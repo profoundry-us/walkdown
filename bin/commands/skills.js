@@ -160,13 +160,20 @@ export async function install(into, { force = false, repo = null } = {}) {
     );
   console.log(`\n  ${into}`);
   const linked = rows.some((r) => r.target);
+  // Claude Code's folder, with the plugin's name already taken by a link
+  // somebody else made: not copies, and not installed either (n-0493).
+  const blocked = rows.some(
+    (r) => r.path.endsWith('/walkdown') && r.action === 'someone-elses-link',
+  );
   console.log(
     dim(
       into === repo
         ? '  In the repository, so a clone brings them. Commit them with the spec.'
-        : linked
-          ? '  Claude Code loads the walkdown plugin from here: /walkdown:judge, /walkdown:lint and the rest.\n  Updating the clone updates them; there is nothing to copy again.'
-          : '  Copies, for an agent that is not Claude Code. Run this again after updating walkdown.',
+        : blocked
+          ? '  The walkdown plugin is not installed here: the name `walkdown` is a link walkdown did not make.\n  Move that link aside and run this again.'
+          : linked
+            ? '  Claude Code loads the walkdown plugin from here: /walkdown:judge, /walkdown:lint and the rest.\n  Updating the clone updates them; there is nothing to copy again.'
+            : '  Copies, for an agent that is not Claude Code. Run this again after updating walkdown.',
     ),
   );
   if (rows.some((r) => r.action.startsWith('duplicate')))

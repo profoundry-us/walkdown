@@ -1,0 +1,12 @@
+id: n-0519
+uuid: e515b89f-872f-4b93-b135-1d6c2739e540
+kind: note
+reason: request
+author: topher
+created: 2026-10-08T12:31:40.598Z
+anchor:
+  screen: threads-new-request
+status: open
+body: "A new screen: `walkdown threads new --screen receipt` confirms the thread
+  was filed as a design request, not only as a note (n-0499). Anchors:
+  cli.prompt, cli.thread.reason, cli.exit."

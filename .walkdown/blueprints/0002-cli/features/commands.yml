@@ -246,7 +246,8 @@ stories:
             - Neither is served or listed afterwards
             - Every file in both homes is as it was
             - The personal home's folder is named, with how to delete it, because nothing else will
-          statement_hash: sha256:ba872b7a43cd
+            - Either is imported again from inside its project and comes back under a new number, and `blueprints new` with its name says so rather than calling the folder no blueprint
+          statement_hash: sha256:4d5b1cc69a64
   - id: commands.rules
     title: Rules can be put right
     statement: As someone keeping a spec, I can rename a rule whose id no longer fits it, without judging it all again.

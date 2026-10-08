@@ -27,14 +27,16 @@ export function run(args) {
     .filter(Boolean);
   const bad = tiers.filter((t) => ![...TIERS, 'human'].includes(t));
   if (bad.length) {
-    console.error(`${red('unknown tier')}: ${bad.join(', ')} — expected checks, agent or human`);
-    return end(1);
+    console.error(
+      `${red('unknown tier')}: ${bad.join(', ')} — expected checks, agent or human. Nothing was changed.`,
+    );
+    return end(2);
   }
   if (!values.why?.trim()) {
     console.error(`${red('a sweep needs a reason')} — pass --why "…"`);
     console.error(dim('  It puts every rule back on the queue; the marker is what tells a'));
-    console.error(dim('  later reader whether that was warranted.'));
-    return end(1);
+    console.error(dim('  later reader whether that was warranted. Nothing was changed.'));
+    return end(2);
   }
   const targets = Object.keys(blueprint.config?.runner?.targets ?? {});
   const target = values.target ?? targets[0] ?? 'local';

@@ -428,11 +428,20 @@ export async function make({
           ? join(personalHomes(label.label), named)
           : join(checkout, '.walkdown', 'blueprints', named);
       if (existsSync(homeDir) && readdirSync(homeDir).length) {
+        // A forgotten blueprint is still a blueprint: say how to take it back (n-0501).
         console.error(
           red(
-            `${tilde(homeDir)} already exists and is not a blueprint walkdown can take — choose another folder with --folder.`,
+            isHome(homeDir)
+              ? `${tilde(homeDir)} already holds a blueprint this machine does not list. Nothing was made.`
+              : `${tilde(homeDir)} already exists and is not a blueprint walkdown can take — choose another folder with --folder.`,
           ),
         );
+        if (isHome(homeDir))
+          console.error(
+            dim(
+              `  \`walkdown blueprints import ${tilde(homeDir)}\` takes it back; --folder makes a new one beside it.`,
+            ),
+          );
         return process.exit(2);
       }
       const outer = findHomes(checkout).homes.find((h) => homeDir.startsWith(`${h.dir}/`));

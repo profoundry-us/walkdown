@@ -3,6 +3,7 @@ import { blueprintFlag } from '../../lib/locations.js';
 import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim, yellow } from '../../lib/report/tty.js';
 import { labelClashes, listThreads } from '../../lib/threads.js';
+import { reasonText } from '../../lib/vocab.js';
 import { eachOrExit, end, sectionHead } from './context.js';
 
 export function run(args) {
@@ -50,7 +51,7 @@ function report(threads, values) {
       .trim()
       .split('\n')[0];
     console.log(
-      `  ${t.id}  ${t.kind.padEnd(8)} ${paintStatus(String(t.status).padEnd(12))} ${dim(anchorText(t.anchor))}`,
+      `  ${t.id}  ${t.kind.padEnd(8)} ${paintStatus(String(t.status).padEnd(12))} ${dim(anchorText(t.anchor))}${t.reason ? dim(` · ${reasonText(t.reason)}`) : ''}`,
     );
     console.log(`      ${firstLine.length > 100 ? firstLine.slice(0, 97) + '…' : firstLine}\n`);
   }

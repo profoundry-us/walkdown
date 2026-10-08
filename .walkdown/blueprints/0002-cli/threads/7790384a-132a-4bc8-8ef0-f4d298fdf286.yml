@@ -6,8 +6,14 @@ author: agent
 created: 2026-10-06T22:18:10.116Z
 anchor:
   rule: threads.lifecycle.says-why-it-exists
-status: open
+status: addressed
 body: "Found while drawing cli screens. No CLI read prints a thread's reason:
   `threads show` and `threads` both say only \"note\", for a finding, a request
   or a plain note alike. So the reason can only be seen with `cat` of the
   record."
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:18Z
+    body: "Fixed. `threads show` heads a thread `n-0001 · note · feedback · open`,
+      and `threads` ends each row with its reason. A request reads as `design
+      request`. Scenarios: threads-show, threads-closed-by-a-pass."

@@ -6,9 +6,15 @@ author: agent
 created: 2026-10-06T22:18:09.549Z
 anchor:
   rule: status.attention.agent-tier-queued
-status: open
+status: addressed
 body: Found while drawing cli screens. For a rule whose agent verdict is stale,
   `walkdown status` prints "judge checkout.basics.receipt — the agent tier is
   stale on it, and no signer is asked until it has" (bin/commands/status.js
   around line 357). "until it has" only follows "has never judged it", so the
   stale version reads as a broken sentence. The queueing itself is right.
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:19Z
+    body: Fixed. The stale case now reads `judge <rule> — the agent verdict on it is
+      stale, and no signer is asked until it is judged again`. The never-judged
+      wording is unchanged.

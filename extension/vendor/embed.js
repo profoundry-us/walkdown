@@ -3775,7 +3775,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       if (have.get(k) !== v) return -1;
       bonus += 1;
     }
-    return (ref.fragment ? 100 : 0) + bonus;
+    // A declared fragment, then each declared query value, then the longer path:
+    // in that order, so no path is long enough to outrank a declared part.
+    return (ref.fragment ? 1e6 : 0) + bonus * 1e3 + Math.min(ref.path.length, 999);
   }
 
   /** Resolve a location to the most specific storyboard screen that claims it. */
@@ -3897,6 +3899,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    *   decision     a record; filed closed
    */
   const THREAD_REASONS = Object.freeze(['feedback', 'finding', 'observation', 'request', 'decision']);
+
+  /** What a reason is called where a person reads it: a request is to design. */
+  /** @param {string|null|undefined} reason */
+  const reasonText = (reason) =>
+    reason === 'request' ? 'design request' : reason ? String(reason) : null;
 
   /** The reason a note gets when nobody said: a machine's own words are an observation, a person's are feedback. */
   /** @param {{ kind?: string, via?: string|null, author?: string|null }} [t] */

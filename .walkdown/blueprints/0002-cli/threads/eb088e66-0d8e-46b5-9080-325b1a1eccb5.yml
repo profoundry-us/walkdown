@@ -6,7 +6,13 @@ author: agent
 created: 2026-10-06T22:18:10.496Z
 anchor:
   rule: locations.answer.serve-starts-anywhere
-status: open
+status: addressed
 body: Found while judging locations.several.writes-name-one. `walkdown serve`
   started in a project holding several blueprints says in its banner that it
   "started outside a registered project".
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:18Z
+    body: "Fixed. `serve` started in a project with several blueprints says `started
+      in a project with several blueprints (a, b)`. Test:
+      project-codes.test.js."

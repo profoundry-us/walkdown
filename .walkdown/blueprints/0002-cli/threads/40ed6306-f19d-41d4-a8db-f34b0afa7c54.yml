@@ -1,0 +1,12 @@
+id: n-0521
+uuid: 40ed6306-f19d-41d4-a8db-f34b0afa7c54
+kind: note
+reason: request
+author: topher
+created: 2026-10-08T13:16:45.209Z
+anchor:
+  screen: blueprints-import-forgotten
+status: open
+body: "A new screen: `walkdown blueprints import` of a forgotten home kept in
+  ~/.walkdown, run from inside its project, lists it again under a new number
+  (n-0501). Anchors: cli.prompt, cli.import.row, cli.exit."

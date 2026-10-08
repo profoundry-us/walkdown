@@ -327,7 +327,9 @@ function report(blueprint, values, ruleId, emit) {
     judge: (i) =>
       i.after
         ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} sent it back, and the fix ${i.after} claims is judged`
-        : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
+        : i.unbuilt
+          ? `approve the wording of ${i.rule} — not built yet, and ${i.role ?? 'nobody'} has not approved it`
+          : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
     // Per rule when the notes have one (ADR 0005 §6): the look that clears
     // them is a verdict on the rule, so the item says which rule to walk and
     // what waits there - your own notes answered, and any design request
@@ -354,7 +356,7 @@ function report(blueprint, values, ruleId, emit) {
       `incorporate ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — answered, fold it into the rule`,
     cover: (i) => `cover ${i.rule} — demands checks, and no check claims it`,
     'judge-first': (i) =>
-      `judge ${i.rule} — the agent tier ${i.state === 'stale' ? 'is stale on it' : 'has never judged it'}, and no signer is asked until it has`,
+      `judge ${i.rule} — ${i.state === 'stale' ? 'the agent verdict on it is stale, and no signer is asked until it is judged again' : 'the agent tier has never judged it, and no signer is asked until it has'}`,
     rejudge: (i) =>
       `judge ${i.rule} again — ${i.thread} claims a fix newer than the passing verdict`,
     // The machine's own observation, addressed by the machine: it closes it

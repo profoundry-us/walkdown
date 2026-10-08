@@ -63,6 +63,16 @@ export default {
     symlinkSync(join(theirs, 'judge.md'), join(skillsDir(m), 'walkdown-judge', 'SKILL.md'));
   },
   /*
+   * Claude Code's skills folder where the name `walkdown` is already a link
+   * somebody else made, to a plugin of their own (n-0493).
+   */
+  'g1-walkdown-name-taken'(m) {
+    const theirs = join(m.root, 'their-plugin');
+    mkdirSync(theirs, { recursive: true });
+    mkdirSync(skillsDir(m), { recursive: true });
+    symlinkSync(theirs, join(skillsDir(m), 'walkdown'), 'dir');
+  },
+  /*
    * Claude Code's skills folder as walkdown 0.1.0 left it: walkdown-judge
    * exactly as that release shipped it, and walkdown-setup as its person
    * since edited it.

@@ -8,7 +8,7 @@ import { anchorText, paintStatus } from '../../lib/report/threads.js';
 import { dim, yellow } from '../../lib/report/tty.js';
 import { getThread, labelOwners } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
-import { saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
+import { reasonText, saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
 import { mutateThread, offer, openThread } from '../../lib/writes.js';
 import { candidatesHere, end, loadOrExit, namedOrExit } from './context.js';
 
@@ -231,7 +231,9 @@ export function run(args) {
       );
       return end(0);
     }
-    console.log(`✓ ${opened} opened · ${kind} · by ${by}${marked ? dim(` (via ${marked})`) : ''}`);
+    console.log(
+      `✓ ${opened} opened · ${kind}${reason ? ` · ${reasonText(reason)}` : ''} · by ${by}${marked ? dim(` (via ${marked})`) : ''}`,
+    );
     console.log(dim(`  ${anchorText(anchor)}`));
     console.log(dim(`  walkdown threads show ${opened} reads it in full`));
     return end(0);
@@ -384,7 +386,7 @@ export function run(args) {
     return end(0);
   }
   console.log(
-    `${t.id} · ${t.kind} · ${paintStatus(t.status)}${
+    `${t.id} · ${t.kind}${t.reason ? ` · ${reasonText(t.reason)}` : ''} · ${paintStatus(t.status)}${
       t.status === 'waived' && t.waived_by
         ? dim(` by ${t.waived_by}`)
         : t.status === 'verified' && t.verified_by
@@ -479,14 +481,22 @@ function attachFiles(paths) {
 /*
  * Which blueprint holds a thread, among several registered for the project,
  * for `threads show` alone: reading a thread chooses nothing. A change to one
- * names its blueprint (locations.several.writes-name-one). An id two hold or
- * none does leaves the choice where it was, and loadOrExit refuses with the
- * ids.
+ * names its blueprint (locations.several.writes-name-one). An id none holds
+ * is said to be in none of them, and one two hold names those two.
  */
 function holderOf(id) {
-  if (id === 'new') return undefined;
+  if (!id || id === 'new') return undefined;
   const ids = candidatesHere();
   if (!ids.length) return undefined;
   const holding = ids.filter((bp) => getThread(loadOrExit(bp), id));
-  return holding.length === 1 ? holding[0] : undefined;
+  if (holding.length === 1) return holding[0];
+  // Not "choose a blueprint": no choice would find it (n-0504).
+  if (!holding.length) {
+    console.error(`No thread "${id}" in any of this project's blueprints (${ids.join(', ')}).`);
+    console.error('`walkdown threads --all` lists every thread.');
+    process.exit(2);
+  }
+  console.error(`"${id}" names a thread in ${holding.join(' and in ')}.`);
+  console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${holding[0]}\`).`);
+  process.exit(2);
 }

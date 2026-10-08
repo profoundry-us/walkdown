@@ -28,7 +28,7 @@ function machine(name) {
   const home = join(root, name);
   const wd = join(home, '.walkdown');
   mkdirSync(wd, { recursive: true });
-  writeFileSync(join(wd, 'profile.yml'), 'username: sam\nname: Sam\n');
+  writeFileSync(join(wd, 'profile.yml'), 'identity:\n  username: sam\n  name: Sam\n');
   const env = { ...process.env, HOME: home, WALKDOWN_HOME: wd, NO_COLOR: '1' };
   const repo = (dir) => {
     const at = join(home, dir);
@@ -91,4 +91,30 @@ test('outside its project a bare name is refused with the ID that reaches it, ne
     0,
     'and the ID works there',
   );
+});
+
+test('serve started in a project with several blueprints names them, and never calls it unregistered @rule:locations.answer.serve-starts-anywhere', async () => {
+  const m = machine('serve-several');
+  const p = m.repo('shop');
+  m.cli(p, 'blueprints', 'new', 'a');
+  m.cli(p, 'blueprints', 'new', 'b');
+  const ids = m.rows().map((r) => String(r.id));
+  const { spawn } = await import('node:child_process');
+  const child = spawn(process.execPath, [CLI, 'serve', '--port', '0'], {
+    cwd: p,
+    env: { ...process.env, HOME: m.home, WALKDOWN_HOME: m.wd, NO_COLOR: '1' },
+  });
+  const out = await new Promise((resolve, reject) => {
+    let text = '';
+    const timer = setTimeout(() => reject(new Error(`no banner: ${text}`)), 10000);
+    child.stdout.on('data', (d) => {
+      text += d;
+      if (text.includes('Ctrl-C')) {
+        clearTimeout(timer);
+        resolve(text);
+      }
+    });
+  }).finally(() => child.kill());
+  assert.doesNotMatch(out, /outside a registered project/);
+  assert.match(out, new RegExp(`a project with several blueprints \\(${ids.join(', ')}\\)`));
 });

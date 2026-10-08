@@ -6,8 +6,18 @@ author: agent
 created: 2026-10-06T22:18:23.721Z
 anchor:
   rule: commands.blueprints.forget-keeps-the-files
-status: open
+status: addressed
 body: "Found while judging the locations rules. A forgotten home kept in
   ~/.walkdown cannot be registered again: `blueprints new` refuses the existing
   folder, and `blueprints import` refuses it as a folder outside any repository.
   The files are kept, but nothing can take them back."
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:18Z
+    body: "Fixed. `blueprints import <folder>` takes a home kept under
+      ~/.walkdown/projects/<project>/blueprints/ back into that project when it
+      is run from inside the project's checkout, under a new number. From
+      outside, or from another project, it says which project it is kept for.
+      `blueprints new` with its name now points at that import instead of
+      calling the folder no blueprint. The rule gained a step for it. Scenario:
+      blueprints-import-forgotten."

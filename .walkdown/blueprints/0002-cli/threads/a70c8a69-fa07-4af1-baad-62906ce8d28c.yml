@@ -6,9 +6,16 @@ author: agent
 created: 2026-10-07T02:55:32.285Z
 anchor:
   rule: commands.threads.one-verb-per-change
-status: open
+status: addressed
 body: Found while judging. `walkdown threads show n-0099`, for a label no
   blueprint holds, in a project with two blueprints, says "Several blueprints
   are registered for ~/shop … Choose one with `--blueprint <id>`". With
   `--blueprint checkout` it says `No thread "n-0099"`. show is a read and needs
   no flag, so it should say the label is in no blueprint.
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:17Z
+    body: "Fixed. `threads show` for a label no blueprint in the project holds says
+      `No thread \"n-0099\" in any of this project's blueprints (…)` and exits
+      2. A label two blueprints hold names both. Scenario:
+      threads-show-in-no-blueprint."

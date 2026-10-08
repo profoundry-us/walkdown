@@ -16,7 +16,7 @@
  * by its ID and never by standing somewhere.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative, sep } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 import {
@@ -29,6 +29,8 @@ import {
   goneCheckouts,
   isHome,
   isOldHome,
+  projectOf,
+  projectsDir,
   readRegistry,
   reclaimFromClone,
   register,
@@ -72,6 +74,12 @@ function checkoutOf(homeDir) {
     if (basename(d) === 'blueprints' && basename(dirname(d)) === '.walkdown')
       return dirname(dirname(d));
   return null;
+}
+
+/** The project a home kept under ~/.walkdown/projects/ is kept for, or null. */
+function keptFor(homeDir) {
+  const rel = relative(canon(projectsDir()), homeDir).split(sep);
+  return rel.length === 3 && rel[0] !== '..' && rel[1] === 'blueprints' ? rel[0] : null;
 }
 
 const listedHomes = () =>
@@ -146,6 +154,34 @@ export async function run(args) {
         ),
       );
       return end(2);
+    }
+    /*
+     * A home kept on this machine for a project, under
+     * ~/.walkdown/projects/<label>/blueprints/, belongs to that project's
+     * checkout: imported from inside it, it is that project's again. Without
+     * this a forgotten one could never come back (n-0501).
+     */
+    const kept = !checkout && !values.ephemeral ? keptFor(homeDir) : null;
+    if (kept) {
+      const here = gitRoot(process.cwd());
+      const known = here ? projectOf(canon(here), readRegistry().rows) : null;
+      if (!here || (known && known.label !== kept)) {
+        console.error(
+          red(
+            `${tilde(homeDir)} is kept on this machine for the project \`${kept}\`. Nothing was registered.`,
+          ),
+        );
+        console.error(
+          dim(
+            here
+              ? `  This is ${tilde(here)}, project \`${known?.label}\`. Run it again from inside ${kept}'s checkout.`
+              : `  Run it again from inside ${kept}'s checkout, which it belongs to.`,
+          ),
+        );
+        return end(2);
+      }
+      checkout = canon(here);
+      values.project ??= kept;
     }
     if (!checkout && !values.ephemeral) {
       console.error(
@@ -412,7 +448,13 @@ function finish(chosen, checkout, values, known = []) {
       );
   }
   for (const k of known) console.log(`  ${dim(`· already listed  ${k.folder}`)}`);
+  // The index is the machine's, so the count is too - not what this import
+  // touched, which read as a miscount after a move (n-0502).
   if (indexed !== null)
-    console.log(dim(`\n  ${indexed} blueprint(s) indexed · \`walkdown blueprints\` lists them`));
+    console.log(
+      dim(
+        `\n  ${indexed} blueprint${indexed === 1 ? '' : 's'} on this machine now · \`walkdown blueprints\` lists them`,
+      ),
+    );
   return end(0);
 }

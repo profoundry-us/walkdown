@@ -607,6 +607,38 @@ screens:
       - cli.skills.link
       - cli.skills.left
       - cli.exit
+  - id: blueprints-import-forgotten
+    title: A forgotten blueprint is taken back from inside its project
+    prototype: null
+    app: { path: /as-built/cli/blueprints-import-forgotten.html }
+    anchors:
+      - cli.prompt
+      - cli.import.row
+      - cli.exit
+  - id: threads-show-in-no-blueprint
+    title: A thread no blueprint holds is said to be in none of them
+    prototype: null
+    app: { path: /as-built/cli/threads-show-in-no-blueprint.html }
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit
+  - id: threads-new-request
+    title: Filing on a screen alone says it is a design request
+    prototype: null
+    app: { path: /as-built/cli/threads-new-request.html }
+    anchors:
+      - cli.prompt
+      - cli.thread.reason
+      - cli.exit
+  - id: skills-walkdown-name-taken
+    title: The plugin's name already taken by somebody's link
+    prototype: null
+    app: { path: /as-built/cli/skills-walkdown-name-taken.html }
+    anchors:
+      - cli.prompt
+      - cli.skills.left
+      - cli.exit
 
   - id: status-after-a-sweep
     title: "After a sweep, older verdicts read stale and the rest is counted"

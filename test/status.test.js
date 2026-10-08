@@ -319,6 +319,32 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   assert.deepEqual(perRule.requests, ['n-10']);
 });
 
+test('a built rule no check claims is the cover item alone; an unbuilt one also asks for its wording to be approved @rule:status.attention.blocked-queues', () => {
+  const elsewhere = new Set(['demo.other.rule']);
+  const built = deriveStatus(
+    blueprint({
+      runs: [
+        checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-01-02T00:00:00Z', 'agent', 'pass'),
+      ],
+      targets: { local: {} },
+    }),
+    { checkRefs: elsewhere },
+  ).attention.filter((i) => i.rule === 'demo.main.thing');
+  // One queue, never two (n-0496).
+  assert.deepEqual(
+    built.map((i) => `${i.who}:${i.action}`),
+    ['agent:cover'],
+  );
+  const unbuilt = deriveStatus(blueprint({ targets: { local: {} } }), {
+    checkRefs: elsewhere,
+  }).attention.filter((i) => i.rule === 'demo.main.thing');
+  assert.ok(unbuilt.some((i) => i.who === 'agent' && i.action === 'cover'));
+  const ask = unbuilt.find((i) => i.who === 'human');
+  assert.equal(ask?.action, 'judge');
+  assert.equal(ask?.unbuilt, true, 'the person is asked to approve wording, not to judge a build');
+});
+
 test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],

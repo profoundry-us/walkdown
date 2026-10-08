@@ -1,0 +1,13 @@
+id: n-0520
+uuid: e80b354e-ca88-4f45-8d06-0f72d23f4dc1
+kind: note
+reason: request
+author: topher
+created: 2026-10-08T13:11:35.291Z
+anchor:
+  screen: threads-show-in-no-blueprint
+status: open
+body: "A new screen: `walkdown threads show n-0099` in a project with two
+  blueprints, where neither holds it. It says the thread is in none of them, not
+  that a blueprint must be chosen (n-0504). Anchors: cli.prompt, cli.refusal,
+  cli.exit."

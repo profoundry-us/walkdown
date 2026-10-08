@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:08.796Z
 anchor:
   rule: screens.identity.query-is-not-identity
-status: open
+status: addressed
 body: "Found while drawing cli screens. `walkdown claims --url` drops the query,
   so a storyboard with `orders` at /orders and `orders-returns` at
   /orders?tab=returns answers `screen orders` for /orders?tab=returns. The
@@ -14,3 +14,9 @@ body: "Found while drawing cli screens. `walkdown claims --url` drops the query,
   lib/claims.js, which claims and the registry index use, ignores queries, while
   `matchScreen` in lib/screen-match.js, which the panel and embed use, honours
   them. That also breaks screens.identity.one-matcher."
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:20Z
+    body: "Fixed. Claims keep their declared query, so `claims --url
+      /orders?tab=returns&page=2` answers `orders-returns`, as the panel does.
+      The shared-page key still drops the query. Scenario: claims-url-query."

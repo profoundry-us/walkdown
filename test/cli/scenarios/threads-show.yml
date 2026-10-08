@@ -6,7 +6,7 @@ fixture: a-note
 command: [threads, show, n-0001]
 exit: 0
 expect:
-  - '^n-0001 · note · open$'
+  - '^n-0001 · note · feedback · open$'
   - '^  rule checkout\.basics\.pays$'
   - 'The pay button does nothing on a declined card\.'
 anchors:

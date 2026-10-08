@@ -6,6 +6,12 @@ author: agent
 created: 2026-10-06T22:18:23.921Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: addressed
 body: Found while judging the locations rules. `blueprints import . --all` after
   the checkout moved printed "2 blueprint(s) indexed" when it indexed one.
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:17Z
+    body: "Fixed. The count was the machine's whole index, not what the import
+      touched. It now reads `1 blueprint on this machine now`. Scenario:
+      import-moved-checkout."

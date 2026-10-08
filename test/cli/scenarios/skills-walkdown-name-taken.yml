@@ -1,0 +1,13 @@
+# `walkdown skills --force` where the name `walkdown` is a link somebody else made: left alone, and said to be not installed.
+screen: skills-walkdown-name-taken
+title: The plugin's name already taken by somebody's link
+rule: delivery.plugin.never-through-a-link
+fixture: g1-walkdown-name-taken
+command: [skills, --into, ../claude/skills, --force]
+exit: 0
+expect:
+  - '^  ! left alone \(a link walkdown did not make\)  ~/\.claude/skills/walkdown$'
+  - '^  The walkdown plugin is not installed here: the name `walkdown` is a link walkdown did not make\.$'
+  - '^  Move that link aside and run this again\.$'
+anchors:
+  - { id: cli.skills.left, match: '^  ! left alone' }

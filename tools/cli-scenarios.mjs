@@ -201,6 +201,11 @@ export const FIXTURES = {
   'one-blueprint'(m) {
     m.ok(['blueprints', 'new', 'checkout']);
   },
+  /* `shop` whose one blueprint, `checkout`, was forgotten: its files stay (n-0501). */
+  'forgotten-blueprint'(m) {
+    m.ok(['blueprints', 'new', 'checkout']);
+    m.ok(['blueprints', 'forget', 'checkout']);
+  },
   /* `shop` with `checkout` and `search`, a rule or two each. */
   'two-blueprints'(m) {
     m.ok(['blueprints', 'new', 'checkout']);

@@ -6,11 +6,11 @@ fixture: g3-signed-pass
 command: [threads, --all]
 exit: 0
 expect:
-  - '^  n-0005  note     open         rule checkout\.basics\.totals$'
-  - '^  n-0004  note     recorded     rule checkout\.basics\.pays$'
-  - '^  n-0003  note     verified     rule checkout\.basics\.pays$'
-  - '^  n-0002  note     verified     rule checkout\.basics\.pays$'
-  - '^  n-0001  note     verified     rule checkout\.basics\.pays$'
+  - '^  n-0005  note     open         rule checkout\.basics\.totals · feedback$'
+  - '^  n-0004  note     recorded     rule checkout\.basics\.pays · decision$'
+  - '^  n-0003  note     verified     rule checkout\.basics\.pays · feedback$'
+  - '^  n-0002  note     verified     rule checkout\.basics\.pays · finding$'
+  - '^  n-0001  note     verified     rule checkout\.basics\.pays · feedback$'
 anchors:
   - { id: cli.threads.other-rule, match: '^  n-0005|^      The total ignores' }
   - { id: cli.threads.decision, match: '^  n-0004|^      A declined card keeps' }

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:18:09.169Z
 anchor:
   rule: delivery.plugin.never-through-a-link
-status: open
+status: addressed
 body: Found while drawing cli screens. When the name `walkdown` in
   ~/.claude/skills is a link somebody else made, `walkdown skills --into
   ~/.claude/skills --force` leaves it alone, which is right, but then closes
@@ -14,3 +14,11 @@ body: Found while drawing cli screens. When the name `walkdown` in
   Code's; the plugin is just not installed there. In bin/commands/skills.js
   install(), `linked = rows.some(r => r.target)` is false when walkdown's own
   row is someone-elses-link, so it falls through to the copies wording.
+replies:
+  - author: agent
+    created: 2026-10-08T13:27:19Z
+    body: "Fixed. When `walkdown` in a Claude Code skills folder is somebody else's
+      link, `skills --force` leaves it and says `The walkdown plugin is not
+      installed here: the name walkdown is a link walkdown did not make. Move
+      that link aside and run this again.` Scenario:
+      skills-walkdown-name-taken."

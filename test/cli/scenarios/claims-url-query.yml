@@ -1,0 +1,13 @@
+# `walkdown claims --url` where the storyboard declares a screen by its query: the declared query wins, as in the panel.
+screen: claims-url-query
+title: A declared query tells two screens on one path apart
+rule: screens.identity.query-is-not-identity
+fixture: g2-query-screens
+command: [claims, --url, 'http://localhost:3000/orders?tab=returns&page=2']
+exit: 0
+expect:
+  - '^http://localhost:3000/orders\?tab=returns&page=2$'
+  - '^  0001-sp-checkout — screen orders-returns \(target local\)$'
+anchors:
+  - { id: cli.claims.url, match: '^http' }
+  - { id: cli.claims.screen, match: '— screen ' }

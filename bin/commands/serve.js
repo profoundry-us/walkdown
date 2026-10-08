@@ -33,7 +33,10 @@ export async function run(args) {
     dim(
       blueprint
         ? `  a page naming none opens ${blueprint.dir}`
-        : "  started outside a registered project: the panel finds each page's blueprint, or asks",
+        : here.ambiguous
+          ? // Inside a project, just not one with a single blueprint (n-0500).
+            `  started in a project with several blueprints (${here.config.registry.candidates.join(', ')}): the panel finds each page's blueprint, or asks`
+          : "  started outside a registered project: the panel finds each page's blueprint, or asks",
     ),
   );
   console.log(`  review:  http://localhost:${port}/`);

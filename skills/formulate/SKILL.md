@@ -12,6 +12,13 @@ derives from it.
 
 ## Procedure
 
+0. **Which blueprint.** A feature belongs in the blueprint whose screens and
+   rules it extends. An unrelated one in the same project gets a blueprint of
+   its own: `walkdown blueprints new <name>`, run inside the project. Every
+   command below that writes (`hash --write`, `threads new`, `sweep`, `rules
+   move`) takes `--blueprint <id>`, even in a project with one blueprint;
+   `walkdown blueprints` lists the IDs.
+
 1. **Inventory the source.** Walk every screen/state the artifact shows. List
    the elements that matter per screen. Note anchors already present
    (`data-testid` in a prototype export); propose dot-namespaced names
@@ -48,7 +55,8 @@ derives from it.
 
 6. **Questions, not guesses.** Everything the source doesn't answer (empty
    states, error copy, edge flows) becomes a question thread anchored to the
-   rule/screen — do not invent product decisions. Proceeding on an assumption
+   rule/screen (`walkdown threads new --kind question --blueprint <id>`) — do
+   not invent product decisions. Proceeding on an assumption
    is allowed only if the thread records the assumption.
 
 7. **Lint early.** `walkdown lint --no-checks` until the structure is clean.

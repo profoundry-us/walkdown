@@ -41,7 +41,15 @@ function fixture(name) {
   const runs = join(root, name, 'runs');
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
-  writeFileSync(join(bp, 'spec.yml'), 'blueprint: cli-fixture\n');
+  // A check claims the rule, so its green checks are backed and it is
+  // nobody's to cover (status.attention.blocked-queues).
+  writeFileSync(join(bp, 'spec.yml'), 'blueprint: cli-fixture\nauthoring:\n  location: checks\n');
+  mkdirSync(join(bp, 'checks'), { recursive: true });
+  writeFileSync(
+    join(bp, 'checks', 'demo.test.js'),
+    // Spelled in two parts, or this repository's own scan reads it as a tag.
+    `test('waits ${'@'}rule:demo.main.waiting', () => {});\n`,
+  );
   writeFileSync(
     join(bp, 'features', 'demo.yml'),
     [

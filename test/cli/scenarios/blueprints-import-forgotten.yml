@@ -1,0 +1,12 @@
+# `walkdown blueprints import` of a forgotten home kept in ~/.walkdown, from inside its project.
+screen: blueprints-import-forgotten
+title: A forgotten blueprint is taken back from inside its project
+rule: commands.blueprints.forget-keeps-the-files
+fixture: forgotten-blueprint
+command: [blueprints, import, ../home/projects/shop/blueprints/checkout]
+exit: 0
+expect:
+  - '^  \+ listed   ~/\.walkdown/projects/shop/blueprints/checkout  as `0002-sp-checkout`$'
+  - '^ +in project `shop`$'
+anchors:
+  - { id: cli.import.row, match: '^  \+ listed' }

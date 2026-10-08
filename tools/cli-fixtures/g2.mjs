@@ -72,6 +72,20 @@ export default {
       '    app: { path: "/cart#coupon" }',
     ]);
   },
+  /* `checkout` with orders, and its returns tab declared by its query (n-0491). */
+  'g2-query-screens'(m, h) {
+    checkout(m, h);
+    storyboard(m, [
+      '  - id: orders',
+      '    title: Orders',
+      '    prototype: null',
+      '    app: { path: /orders }',
+      '  - id: orders-returns',
+      '    title: Orders, on the returns tab',
+      '    prototype: null',
+      '    app: { path: "/orders?tab=returns" }',
+    ]);
+  },
   /*
    * `checkout` with three rules: one as it should be, one with a statement
    * and no steps, and one whose statement has grown into a paragraph.

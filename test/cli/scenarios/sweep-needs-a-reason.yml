@@ -4,11 +4,11 @@ title: A sweep is refused until somebody says why
 rule: status.sweep.deliberate
 fixture: one-blueprint
 command: [sweep, --blueprint, checkout]
-exit: 1
+exit: 2
 expect:
   - '^a sweep needs a reason — pass --why "…"$'
   - '^  It puts every rule back on the queue; the marker is what tells a$'
-  - '^  later reader whether that was warranted\.$'
+  - '^  later reader whether that was warranted\. Nothing was changed\.$'
 anchors:
   - { id: cli.refusal, match: '^a sweep needs a reason' }
   - { id: cli.sweep.why, match: '^  (It puts|later reader)' }

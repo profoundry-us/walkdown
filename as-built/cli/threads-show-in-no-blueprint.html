@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: import-moved-checkout
+  AS-BUILT: threads-show-in-no-blueprint
 
-  What `walkdown blueprints import . --all` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/import-moved-checkout.yml - the same run test/cli.test.js
-  checks against locations.registry.ids-stay-here. Paths, times and hashes are made steady so
+  What `walkdown threads show n-0099` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/threads-show-in-no-blueprint.yml - the same run test/cli.test.js
+  checks against commands.threads.one-verb-per-change. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/import-moved-checkout".
+  redlines live in as-built/redlines.json under "cli/threads-show-in-no-blueprint".
 
-  The design is prototype-cli/screens/import-moved-checkout.html. Nothing here is
+  The design is prototype-cli/screens/threads-show-in-no-blueprint.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; A moved checkout keeps its blueprint's ID</title>
+  <title>As-built &mdash; A thread no blueprint holds is said to be in none of them</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -49,16 +49,13 @@
 </head>
 <body>
   <div class="term">
-    <div class="term-bar"><i></i><i></i><i></i><span>~/shop-moved</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop-moved $</b> walkdown blueprints import . --all</div>
-      <div data-testid="cli.moved.row">
-      <div class="ln">  ~ moved    ~/shop-moved/.walkdown/blueprints/checkout  keeps its ID `0001-sp-checkout`: it was at ~/shop, which no longer exists</div>
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads show n-0099</div>
+      <div data-testid="cli.refusal">
+      <div class="ln">No thread "n-0099" in any of this project's blueprints (0001-sp-checkout, 0002-sp-search).</div>
       </div>
-      <div class="ln"></div>
-      <div data-testid="cli.moved.done">
-      <div class="ln">  1 blueprint on this machine now · `walkdown blueprints` lists them</div>
-      </div>
-    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+      <div class="ln">`walkdown threads --all` lists every thread.</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
   </div>
   <div class="as-built-ring"></div>
   <div class="as-built-label">As-built</div>

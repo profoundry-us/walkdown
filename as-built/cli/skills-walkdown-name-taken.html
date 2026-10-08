@@ -1,21 +1,21 @@
 <!doctype html>
 <!--
-  AS-BUILT: import-moved-checkout
+  AS-BUILT: skills-walkdown-name-taken
 
-  What `walkdown blueprints import . --all` printed, run by tools/cli-captures.mjs
-  from test/cli/scenarios/import-moved-checkout.yml - the same run test/cli.test.js
-  checks against locations.registry.ids-stay-here. Paths, times and hashes are made steady so
+  What `walkdown skills --into ../claude/skills --force` printed, run by tools/cli-captures.mjs
+  from test/cli/scenarios/skills-walkdown-name-taken.yml - the same run test/cli.test.js
+  checks against delivery.plugin.never-through-a-link. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
-  redlines live in as-built/redlines.json under "cli/import-moved-checkout".
+  redlines live in as-built/redlines.json under "cli/skills-walkdown-name-taken".
 
-  The design is prototype-cli/screens/import-moved-checkout.html. Nothing here is
+  The design is prototype-cli/screens/skills-walkdown-name-taken.html. Nothing here is
   evidence; a verdict given against this page is a verdict about a drawing of
   the build.
 -->
 <html lang="en" data-theme="redline">
 <head>
   <meta charset="utf-8">
-  <title>As-built &mdash; A moved checkout keeps its blueprint's ID</title>
+  <title>As-built &mdash; The plugin's name already taken by somebody's link</title>
   <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #14161a; }
@@ -49,15 +49,15 @@
 </head>
 <body>
   <div class="term">
-    <div class="term-bar"><i></i><i></i><i></i><span>~/shop-moved</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop-moved $</b> walkdown blueprints import . --all</div>
-      <div data-testid="cli.moved.row">
-      <div class="ln">  ~ moved    ~/shop-moved/.walkdown/blueprints/checkout  keeps its ID `0001-sp-checkout`: it was at ~/shop, which no longer exists</div>
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown skills --into ../claude/skills --force</div>
+      <div data-testid="cli.skills.left">
+      <div class="ln">  ! left alone (a link walkdown did not make)  ~/.claude/skills/walkdown</div>
       </div>
       <div class="ln"></div>
-      <div data-testid="cli.moved.done">
-      <div class="ln">  1 blueprint on this machine now · `walkdown blueprints` lists them</div>
-      </div>
+      <div class="ln">  ~/.claude/skills</div>
+      <div class="ln">  The walkdown plugin is not installed here: the name `walkdown` is a link walkdown did not make.</div>
+      <div class="ln">  Move that link aside and run this again.</div>
     <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
   </div>
   <div class="as-built-ring"></div>

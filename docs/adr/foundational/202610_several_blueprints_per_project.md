@@ -8,6 +8,13 @@
     person chooses), ADR 0003 (the registry is the only door), n-0145 (running `init`
     twice never makes a second home).
 - **Threads:** [issue #20](https://github.com/profoundry-us/walkdown/issues/20).
+- **Amended by:** ADR 0012, where `init` makes no blueprint: `walkdown blueprints new
+    <name>` replaces `init --id` (§1), and `walkdown blueprints commit <standard>
+    --blueprint <id>` replaces `init --commit`. ADR 0013 §2, where `walkdown run` runs
+    every blueprint's runner instead of refusing. ADR 0014, where homes are kept under
+    `~/.walkdown/projects/<project>/blueprints/` and every write names its blueprint,
+    even in a project with one. The decisions below stand; the commands they name are
+    the old ones.
 
 ## Context
 

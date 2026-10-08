@@ -1,0 +1,13 @@
+id: n-0518
+uuid: 861e9648-177b-49c8-a4e7-ccf32bb2df63
+kind: note
+reason: request
+author: topher
+created: 2026-10-08T12:22:30.254Z
+anchor:
+  screen: skills-walkdown-name-taken
+status: open
+body: "A new screen: `walkdown skills --force` where the name `walkdown` in
+  Claude Code's skills folder is a link somebody else made. It leaves the link
+  alone and says the plugin is not installed there, never that the folder holds
+  copies (n-0493). Anchors: cli.prompt, cli.skills.left, cli.exit."

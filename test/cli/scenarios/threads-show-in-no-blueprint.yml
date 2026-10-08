@@ -1,0 +1,12 @@
+# `walkdown threads show n-0099` in a project with two blueprints, neither holding it.
+screen: threads-show-in-no-blueprint
+title: A thread no blueprint holds is said to be in none of them
+rule: commands.threads.one-verb-per-change
+fixture: two-blueprints
+command: [threads, show, n-0099]
+exit: 2
+expect:
+  - '^No thread "n-0099" in any of this project''s blueprints \(.+, .+\)\.$'
+  - '^`walkdown threads --all` lists every thread\.$'
+anchors:
+  - { id: cli.refusal, match: '^No thread' }
