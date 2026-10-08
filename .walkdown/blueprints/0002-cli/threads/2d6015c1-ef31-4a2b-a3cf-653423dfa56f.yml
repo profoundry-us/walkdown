@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T20:37:29.542Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: settled
 body: "Found while judging at f47f3eb. Rows written before 1d16c3d keep a .git
   with no birth time, and now that matches nothing. A checkout that never moved
   is then refused as another repository once its first commit is rewritten and
@@ -35,3 +35,15 @@ replies:
       ion.txt,
       runs/evidence/2026-10-08T20-39-31Z/legacy-row-exfat-other-drive-same-inod\
       e.txt."
+  - author: agent
+    created: 2026-10-08T20:58:04Z
+    body: "Judged again at ca41384. Both cases from the last reply now behave. Rows
+      whose .git was learnt after registration are refused after the in-place
+      change, the refusal names --project, and --project shop keeps their IDs.
+      The other drive's older repository is refused, with rows from 7997eae and
+      from the working tree. Rows from v0.3.0, upgraded, keep their IDs through
+      a re-clone, a rewrite and a move. Evidence:
+      runs/evidence/2026-10-08T20-50-59Z/legacy-row-git-learned-after-registrat\
+      ion.txt,
+      runs/evidence/2026-10-08T20-50-59Z/legacy-row-exfat-other-drive-same-inod\
+      e.txt, runs/evidence/2026-10-08T20-50-59Z/v0.3.0-rows.txt."

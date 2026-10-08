@@ -498,3 +498,32 @@ test('a row kept before the birth time was learns it on import, and --project vo
   assert.equal(String(m.rows()[0].git), born);
   assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0, 'asked once');
 });
+
+test('a home kept on this machine, imported by its path from another repository at its checkout, is refused: only the person vouches @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('kept-unasked');
+  const shop = m.repo('shop');
+  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/shop.git'], { cwd: shop });
+  mkdirSync(join(shop, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(shop, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: shop });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'c'], {
+    cwd: shop,
+  });
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
+  const made = m.cli(shop, 'blueprints', 'new', 'billing');
+  assert.equal(made.status, 0, made.stderr);
+  const before = readFileSync(join(m.wd, 'registry.yml'), 'utf8').replace(/^built: .*\n/m, '');
+  const kept = String(m.rows().find((r) => String(r.id).endsWith('-billing'))?.home);
+  assert.match(kept, /projects/, 'billing is kept on this machine');
+  rmSync(shop, { recursive: true, force: true });
+  const site = m.repo('website');
+  execFileSync('git', ['clone', '-q', site, shop]);
+  execFileSync('git', ['remote', 'set-url', 'origin', 'git@github.com:other/website.git'], {
+    cwd: shop,
+  });
+  const r = m.cli(shop, 'blueprints', 'import', kept.replace(/^~/, m.home));
+  assert.equal(r.status, 2, r.stdout);
+  assert.match(r.stderr, /another repository/);
+  const after = readFileSync(join(m.wd, 'registry.yml'), 'utf8').replace(/^built: .*\n/m, '');
+  assert.equal(after, before, 'no row learnt the other repository (n-0554)');
+});

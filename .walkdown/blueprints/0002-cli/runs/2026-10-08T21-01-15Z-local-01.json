@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-10-08T21-01-15Z-local-01",
+  "created": "2026-10-08T21:01:15Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "ca41384-dirty",
+  "tree_hash": "sha256:117b7e188722",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "pass",
+      "statement_hash": "sha256:84224634448c",
+      "duration_ms": 8633,
+      "checks": [
+        "test/import-repositories.test.js:54",
+        "test/import-repositories.test.js:82",
+        "test/import-repositories.test.js:103",
+        "test/import-repositories.test.js:119",
+        "test/import-repositories.test.js:146",
+        "test/import-repositories.test.js:168",
+        "test/import-repositories.test.js:193",
+        "test/import-repositories.test.js:220",
+        "test/import-repositories.test.js:261",
+        "test/import-repositories.test.js:292",
+        "test/import-repositories.test.js:317",
+        "test/import-repositories.test.js:334",
+        "test/import-repositories.test.js:356",
+        "test/import-repositories.test.js:409",
+        "test/import-repositories.test.js:437",
+        "test/import-repositories.test.js:466",
+        "test/import-repositories.test.js:502"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+id: n-0554
+uuid: c2e07b6f-e4bd-4256-84b5-77e6f871e815
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T20:58:19.567Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: open
+body: "Found while judging at ca41384. A home kept on this machine fills in
+  --project with its own project's label when imported by its path. Since
+  ca41384 that label vouches for whatever stands at the checkout. So an
+  unrelated repository cloned where a gone project stood takes its IDs, though
+  the person never gave --project. Imported from inside it, the kept home reads
+  as already listed, and every row of that checkout learns the other
+  repository's origin, first commit and .git. The repository's own cart folder
+  then reads as already listed under the gone project's ID. At 9310e22 the same
+  import was refused. Evidence:
+  runs/evidence/2026-10-08T20-50-59Z/kept-home-vouches-unasked.txt."

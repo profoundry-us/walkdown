@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-08T20-50-59Z-local-01",
+  "created": "2026-10-08T20:50:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ca41384-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T20-50-59Z/base.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/legacy-row-git-learned-after-registration.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/legacy-row-exfat-other-drive-same-inode.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/exfat-legacy-and-fresh.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/reclone-amend-seturl.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/v0.3.0-rows.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/vouch-shared-label-worktree.txt",
+        "runs/evidence/2026-10-08T20-50-59Z/kept-home-vouches-unasked.txt"
+      ],
+      "reasoning": "Driven in a terminal with the working tree's bin/walkdown.js on throwaway machines; nothing was served, so port 4771 went unused. Old rows came from git archive extracts of 7997eae (unreleased, two-part .git) and v0.3.0 (upgraded with walkdown upgrade), plus 9310e22 as a control. The five steps pass: one home's path, a terminal choice, no terminal, --only, --all, an unchanged row and an empty path. Both arrangements from n-0553 now behave. Rows whose .git was learnt after registration are refused with the --project hint, and --project shop keeps their IDs. The other exFAT drive's older repository is refused with rows from either build. Exfat inode reuse, re-clone then set-url, amend and gc then mv, and v0.3.0 rows through re-clone, rewrite and move all keep or refuse as before. A row label not its own is refused, and a worktree vouches only its checkout's rows. It fails on a new hole the vouching opened. A kept home imported by its path fills --project with its own label, which now vouches unasked. From inside an unrelated repository cloned at a gone project's path, it reads as already listed. Every row of that checkout then learns the other repository, and its cart folder takes the gone project's ID. At 9310e22 the same import was refused.",
+      "threads": [
+        "c2e07b6f-e4bd-4256-84b5-77e6f871e815"
+      ]
+    }
+  ]
+}

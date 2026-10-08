@@ -108,6 +108,9 @@ export async function run(args) {
       why: { type: 'string' },
     },
   });
+  // The person's own --project, before any default fills it in: only their
+  // word vouches for a repository no fact can tell apart (n-0554).
+  const vouched = values.project ?? null;
   const at = positionals[0];
   if (!at) {
     console.error('walkdown blueprints import needs a path to a blueprint folder or a repository.');
@@ -220,7 +223,7 @@ export async function run(args) {
     }
     if (checkout) relearnCheckout(checkout);
     const already = listedHomes().get(canon(homeDir));
-    if (already && checkout && claimedByGone([homeDir], checkout, values.project)) return end(2);
+    if (already && checkout && claimedByGone([homeDir], checkout, vouched)) return end(2);
     if (already) {
       if (values.json)
         console.log(
@@ -328,7 +331,7 @@ export async function run(args) {
     claimedByGone(
       homes.map((h) => at_(h).dir),
       checkout,
-      values.project,
+      vouched,
     )
   )
     return end(2);
