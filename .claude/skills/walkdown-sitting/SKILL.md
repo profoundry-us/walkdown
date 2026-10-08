@@ -94,8 +94,11 @@ start.
 **Weigh an edge before filing it.** A step of the rule that does not hold
 fails it. Beyond the steps, estimate how likely someone using walkdown as
 intended is to meet the edge: 80% or more fails the rule with a finding,
-under 10% is named in the reasoning and never filed, and anything between is
-a question for Topher that fails nothing. Each blueprint's governance lines
+under 10% is named in the reasoning and never filed, and anything between
+fails nothing and is triaged before it reaches Topher: you decide, from its
+likelihood and what it costs, whether it is worth a question to him, and file
+it (`--kind question`) only if so. Where judges run as subagents, they report
+these edges to you instead of filing them. Each blueprint's governance lines
 say the same, and every judge prompt carries them.
 
 **Partial is fine; pretending is not.** If the sitting runs out of road, record

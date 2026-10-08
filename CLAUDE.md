@@ -150,6 +150,15 @@ Topher, 2026-09-23). Judge it with `/walkdown:judge` on a scratch copy, record
 the verdict, and `node tools/sitting.mjs owed` reads 0. A sweep is exempt: a
 cell stale only because of one waits on the sitting, not on this turn.
 
+Judges weigh what they find (the `governance:` line "Weigh an edge", Topher,
+2026-10-08). A step that does not hold fails the rule. An edge 80% likely or
+more fails it with a finding, to be fixed. One under 10% is named in the
+reasoning and never fixed. Between the two, the judge files nothing and reports
+the edge to you, and you triage it: from its likelihood and what it costs,
+decide whether it is worth a question to Topher, file it (`--kind question`)
+only if so, and tell him in a line what you passed over. Tell a judge you
+dispatch to report those edges rather than file them.
+
 ## Judging the whole board
 
 `/walkdown:judge` is for a rule or the handful a change touched. For everything
