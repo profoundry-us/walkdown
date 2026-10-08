@@ -1,0 +1,18 @@
+id: n-0555
+uuid: 330145cd-adf1-409e-9ab2-dd6d411bf8cb
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T21:10:21.768Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: open
+body: "Found while judging at cec7571. A home kept on this machine still fills
+  in --project with its project's label when imported by its path, and that
+  default still reaches the move test. With a project named, the move test asks
+  only that the label match, so no fact is checked. So after billing is
+  forgotten and ~/shop deleted, importing billing's kept path from inside an
+  unrelated repository with its own cart folder moves shop's cart ID there. The
+  same repository imported by its own path gets a new project, website. walkdown
+  at 9310e22 does the same, so this predates n-0554's fix. Evidence:
+  runs/evidence/2026-10-08T21-01-16Z/kept-home-moves-unasked.txt."

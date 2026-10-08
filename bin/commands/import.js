@@ -109,7 +109,8 @@ export async function run(args) {
     },
   });
   // The person's own --project, before any default fills it in: only their
-  // word vouches for a repository no fact can tell apart (n-0554).
+  // word vouches for a repository no fact can tell apart (n-0554), or for a
+  // gone project's rows moving here (n-0555).
   const vouched = values.project ?? null;
   const at = positionals[0];
   if (!at) {
@@ -237,7 +238,7 @@ export async function run(args) {
         console.log(`  ${dim('· already listed')} ${tilde(homeDir)}  ${dim(`as \`${already}\``)}`);
       return end(0);
     }
-    return finish([{ dir: homeDir, folder: basename(homeDir) }], checkout, values);
+    return finish([{ dir: homeDir, folder: basename(homeDir) }], checkout, values, [], vouched);
   }
 
   // ---- a repository ----------------------------------------------------------
@@ -254,7 +255,7 @@ export async function run(args) {
     );
   if (!homes.length) {
     // A checkout that moved, whose blueprints are all kept on this machine.
-    const moved = top ? repointMovedCheckout(top, values.project ?? null) : null;
+    const moved = top ? repointMovedCheckout(top, vouched) : null;
     if (moved) {
       for (const id of moved.ids)
         console.log(
@@ -437,10 +438,10 @@ export async function run(args) {
       return end(0);
     }
   }
-  return finish(chosen.map(at_), checkout, values, known.map(at_));
+  return finish(chosen.map(at_), checkout, values, known.map(at_), vouched);
 }
 
-function finish(chosen, checkout, values, known = []) {
+function finish(chosen, checkout, values, known = [], vouched = null) {
   const written = [];
   /*
    * A moved checkout re-points every row it holds at once, on the first of
@@ -461,7 +462,7 @@ function finish(chosen, checkout, values, known = []) {
     for (const r of readRegistry().rows) {
       if (!r?.registered || !r.checkout || !r.home || r.ephemeral) continue;
       const old = expand(String(r.checkout));
-      if (!couldHaveMoved(r, here, values.project ?? null)) continue;
+      if (!couldHaveMoved(r, here, vouched)) continue;
       const there = join(here, relative(old, expand(String(r.home))));
       if (!isHome(there) || riders.some((x) => x.dir === canon(there))) continue;
       riders.push({ dir: canon(there), folder: basename(there) });
@@ -479,6 +480,7 @@ function finish(chosen, checkout, values, known = []) {
         homeDir: h.dir,
         by: 'import',
         project: values.project ?? null,
+        vouched,
         code: values.code ?? null,
         ephemeral: values.ephemeral ? { why: values.why ?? '' } : null,
       });

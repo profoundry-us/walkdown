@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T20:58:19.567Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: settled
 body: "Found while judging at ca41384. A home kept on this machine fills in
   --project with its own project's label when imported by its path. Since
   ca41384 that label vouches for whatever stands at the checkout. So an

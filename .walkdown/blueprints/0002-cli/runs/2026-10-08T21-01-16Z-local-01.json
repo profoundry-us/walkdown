@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-08T21-01-16Z-local-01",
+  "created": "2026-10-08T21:01:16Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "cec7571-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T21-01-16Z/kept-home-moves-unasked.txt",
+        "runs/evidence/2026-10-08T21-01-16Z/kept-home-vouches-unasked.txt",
+        "runs/evidence/2026-10-08T21-01-16Z/base.txt",
+        "runs/evidence/2026-10-08T21-01-16Z/reclone-amend-seturl-v0.3.0.txt",
+        "runs/evidence/2026-10-08T21-01-16Z/legacy-rows-7997eae.txt",
+        "runs/evidence/2026-10-08T21-01-16Z/exfat-inode-reuse.txt"
+      ],
+      "reasoning": "Driven in a terminal with the working tree's bin/walkdown.js on throwaway HOME and WALKDOWN_HOME machines; nothing was served, so no port was used. The five steps hold, in a terminal through expect and without one. n-0554 is fixed: the kept home's path from inside an unrelated clone at ~/shop is refused with the registry unchanged, and typing --project shop still vouches. Round 22's other arrangements hold: re-clone then set-url, amend and gc then mv, 7997eae rows rewritten in place or moved then renamed, v0.3.0 rows upgraded then re-cloned and renamed, and exFAT inode reuse. The kept home's default label still reaches the move test, which skips every fact once a project is named. After billing is forgotten and ~/shop deleted, importing billing's kept path from inside an unrelated repository moves shop's cart ID there. Imported by its own path, the same repository gets a new project. walkdown at 9310e22 does the same, so this is older than the fix; filed as n-0555.",
+      "threads": ["330145cd-adf1-409e-9ab2-dd6d411bf8cb"]
+    }
+  ]
+}

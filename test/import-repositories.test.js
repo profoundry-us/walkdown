@@ -527,3 +527,33 @@ test('a home kept on this machine, imported by its path from another repository 
   const after = readFileSync(join(m.wd, 'registry.yml'), 'utf8').replace(/^built: .*\n/m, '');
   assert.equal(after, before, 'no row learnt the other repository (n-0554)');
 });
+
+test('a kept home imported by its path never moves a gone project into an unrelated repository on the label it fills in @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('kept-moves-unasked');
+  const git = (cwd, ...args) =>
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', ...args], { cwd });
+  const make = (dir, origin) => {
+    const at = m.repo(dir);
+    git(at, 'remote', 'add', 'origin', origin);
+    mkdirSync(join(at, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+    writeFileSync(join(at, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+    git(at, 'add', '-A');
+    git(at, 'commit', '-q', '-m', dir);
+    return at;
+  };
+  const shop = make('shop', 'git@github.com:acme/shop.git');
+  assert.equal(m.cli(shop, 'blueprints', 'import', '.', '--all').status, 0);
+  assert.equal(m.cli(shop, 'blueprints', 'new', 'billing').status, 0);
+  const billing = m.rows().find((r) => String(r.id).endsWith('-billing'));
+  const cart = m.rows().find((r) => String(r.id).endsWith('-cart'));
+  assert.equal(m.cli(shop, 'blueprints', 'forget', String(billing.id)).status, 0);
+  rmSync(shop, { recursive: true, force: true });
+  const website = make('website', 'git@github.com:other/website.git');
+  const r = m.cli(website, 'blueprints', 'import', String(billing.home).replace(/^~/, m.home));
+  assert.equal(r.status, 2, r.stdout);
+  assert.match(r.stderr, /label `shop` is another project's/);
+  assert.doesNotMatch(r.stdout, /moved/, r.stdout);
+  const after = m.rows().find((x) => x.id === cart.id);
+  assert.equal(after.checkout, cart.checkout, 'n-0555');
+  assert.equal(after.origin, cart.origin);
+});
