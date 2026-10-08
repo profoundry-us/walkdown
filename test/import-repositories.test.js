@@ -462,3 +462,19 @@ test('another repository renamed into a moved project’s path, older than its r
     'n-0550',
   );
 });
+
+test('a row kept before the birth time was learns it on its next import, once its repository is confirmed @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('legacy-git');
+  const app = m.repo('app');
+  mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  writeFileSync(join(app, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  const born = String(m.rows()[0].git);
+  if (born.split(':').length < 3) return; // a disk that keeps no birth time
+  // As 1d16c3d^ wrote it: device and inode only (n-0552).
+  const reg = join(m.wd, 'registry.yml');
+  writeFileSync(reg, readFileSync(reg, 'utf8').replace(/(git: \d+:\d+):\d+/, '$1'));
+  const r = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.match(r.stdout, /already listed/, r.stdout);
+  assert.equal(String(m.rows()[0].git), born);
+});

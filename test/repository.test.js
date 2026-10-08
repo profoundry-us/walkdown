@@ -121,10 +121,16 @@ const gone = [
     true,
   ],
   [
-    'registered before the birth time was kept, its .git unchanged',
+    'registered before the birth time was kept, its first commit and origin unchanged',
     { git: '1:100' },
-    world({ '/w/app': app({ commits: ['r9'], origin: 'github.com/acme-inc/app' }) }, [HOME]),
+    world({ '/w/app': app() }, [HOME]),
     false,
+  ],
+  [
+    'registered before the birth time was kept, its inode handed to another repository (n-0552)',
+    { git: '1:100' },
+    world({ '/w/app': { git: '1:100:9', commits: ['z1'], origin: 'github.com/zed/site' } }, [HOME]),
+    true,
   ],
   ['a folder that is no repository, its home gone', {}, world({ '/w/app': {} }), true],
   ['a folder that is no repository, its home on disk', {}, world({ '/w/app': {} }, [HOME]), false],

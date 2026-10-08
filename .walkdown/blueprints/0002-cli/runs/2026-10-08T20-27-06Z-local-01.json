@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-08T20-27-06Z-local-01",
+  "created": "2026-10-08T20:27:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "1d16c3d-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T20-27-06Z/base.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/exfat-inode-reused-elsewhere.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/exfat-inode-reused-here.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/reclone-then-remote-renamed.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/amend-gc-then-move.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/reclone-move-then-org-rename.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/exfat-identity-kept.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/apfs-identity-kept.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/legacy-row-amend-gc-then-move.txt",
+        "runs/evidence/2026-10-08T20-27-06Z/legacy-row-exfat-inode-reused-here.txt"
+      ],
+      "reasoning": "Driven in a terminal with node bin/walkdown.js on throwaway machines (mktemp HOME and WALKDOWN_HOME), serving nothing; exFAT cases used an hdiutil disk image, detached and deleted after. The steps hold: a home path registers that blueprint and names its ID and project, and a repository path lists each home and marks the one already listed. With no terminal nothing registers without --all or --only, and a path holding no home says so. Both exFAT reuse cases from n-0552 are fixed for rows written at 1d16c3d: elsewhere the unrelated repository gets new IDs, and at the deleted project's path it is refused. Rounds 17 and 18 still hold: a re-clone then set-url stays listed, and an amend plus gc then mv keeps its IDs. Birth time survived mv across folders, a drive replug, gc, repack, git init and an amend, on both APFS and exFAT. It fails for rows written before 1d16c3d, which keep device and inode only. On exFAT, an unrelated repository with another origin and first commit at such a row's path is read as already listed. That import then writes its birth time into the rows, so the old IDs stay taken for good. A legacy row amended, collected and moved is refused but recovers with --project, which is safe.",
+      "threads": [
+        "8cc29d0e-d131-46ce-b7f8-4ba056d7b037"
+      ]
+    }
+  ]
+}

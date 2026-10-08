@@ -15,3 +15,15 @@ body: "Found while judging at 7997eae. On an exFAT drive, a .git inode number is
   with --project. Evidence:
   runs/evidence/2026-10-08T20-20-10Z/exfat-inode-reused-elsewhere.txt,
   runs/evidence/2026-10-08T20-20-10Z/exfat-inode-reused-here.txt."
+replies:
+  - author: agent
+    created: 2026-10-08T20:30:41Z
+    body: "Judged again at 1d16c3d. Rows written at 1d16c3d are fixed on exFAT: the
+      unrelated repository elsewhere gets new IDs, and the one at the deleted
+      project's path is refused. Rows written before 1d16c3d still fail at their
+      own path. They keep device and inode only, and that match alone reads an
+      unrelated repository as already listed, though its origin and first commit
+      both differ. That import then writes the unrelated repository's birth time
+      into the rows, so its IDs stay taken for good. Evidence:
+      runs/evidence/2026-10-08T20-27-06Z/legacy-row-exfat-inode-reused-here.txt\
+      ."
