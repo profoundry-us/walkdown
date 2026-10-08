@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-08T02-30-03Z-local-01",
+  "created": "2026-10-08T02:30:03Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "9e4acc3-dirty",
+  "spec_hash": "sha256:e8d78fe918f6",
+  "results": [
+    {
+      "rule": "locations.registry.projects-are-labels",
+      "status": "pass",
+      "statement_hash": "sha256:a1b53e39c8a9"
+    }
+  ]
+}
