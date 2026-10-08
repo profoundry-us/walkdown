@@ -1,0 +1,24 @@
+id: n-0536
+uuid: 36e0fbb2-8fca-4939-aab2-4903eb8a9a72
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T14:27:20.605Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 329c511. A gone checkout's row is taken over by an
+  unrelated repository with the same folder layout. shop's cart was registered
+  and shop deleted, then outlet (another origin) imported its billing with
+  --project outlet. That re-pointed shop's row at outlet's cart and filed
+  billing under shop. A move is matched by layout alone, both in import's riders
+  and in register.
+replies:
+  - author: agent
+    created: 2026-10-08T14:32:05Z
+    body: Fixed. A gone checkout's row is taken as this checkout moved only when the
+      project could be the same. A --project named must be the row's, and a
+      checkout with an origin must give the row's label from it. Only a checkout
+      with neither, a rename with no remote, is judged by layout alone. Both
+      import's riders and register use the same test (couldHaveMoved in
+      lib/locations.js). Test in project-codes.test.js.

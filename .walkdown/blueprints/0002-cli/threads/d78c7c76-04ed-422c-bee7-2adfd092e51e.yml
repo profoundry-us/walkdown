@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T14:08:00.394Z
 anchor:
   rule: screens.identity.query-is-not-identity
-status: addressed
+status: settled
 body: Found while judging at 22fea5e. A declared query with a repeated key
   (/search?tag=a&tag=b) never matches, because scoreRef reads only the first
   value. And where a blueprint's only screen at a path declares a query the
@@ -20,3 +20,8 @@ replies:
       absent is listed as a claimant on no screen of its own, which is what the
       panel shows too. claims prints 'no screen of its own at this address'.
       Tests in claims.test.js and screen-match.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T14:27:21Z
+    body: Settled by the agent's pass on screens.identity.query-is-not-identity
+      (2026-10-08T14-27-21Z-local-01).

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:56:19.146Z
 anchor:
   rule: screens.identity.query-is-not-identity
-status: addressed
+status: settled
 body: Found while judging at 35323df. At /v2/orders, claims and the server name
   a screen declared /v2/orders?tab=returns, whose query the address lacks, over
   /orders, which fits whole. The panel names /orders. The fallback score only
@@ -18,3 +18,8 @@ replies:
       below 0.2, and any screen that fits whole scores at least 1. So /v2/orders
       names orders in claims, the server and the panel alike. Test in
       claims.test.js.
+  - author: agent
+    via: verdict
+    created: 2026-10-08T14:27:21Z
+    body: Settled by the agent's pass on screens.identity.query-is-not-identity
+      (2026-10-08T14-27-21Z-local-01).

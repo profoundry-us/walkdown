@@ -171,3 +171,30 @@ test('after a move, a checkout with only some homes registered takes the rest, a
   assert.match(r.stdout, new RegExp(`~ moved .*keeps its ID \`${id}\``));
   assert.equal(new Set(m.rows().map((row) => row.project)).size, 1, 'one project, not two');
 });
+
+test('a gone checkout is never taken over by an unrelated repository that shares its folder layout @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('unrelated-layout');
+  const make = (dir, origin) => {
+    const at = m.repo(dir);
+    execFileSync('git', ['remote', 'add', 'origin', origin], { cwd: at });
+    for (const n of ['cart', 'billing']) {
+      mkdirSync(join(at, '.walkdown', 'blueprints', n), { recursive: true });
+      writeFileSync(join(at, '.walkdown', 'blueprints', n, 'spec.yml'), `blueprint: ${n}\n`);
+    }
+    return at;
+  };
+  const shop = make('shop', 'https://example.com/acme/shop.git');
+  assert.equal(
+    m.cli(shop, 'blueprints', 'import', join('.walkdown', 'blueprints', 'cart')).status,
+    0,
+  );
+  rmSync(shop, { recursive: true, force: true });
+  const outlet = make('outlet', 'https://example.com/acme/outlet.git');
+  const r = m.cli(outlet, 'blueprints', 'import', join('.walkdown', 'blueprints', 'billing'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.doesNotMatch(r.stdout, /moved/, r.stdout);
+  const rows = m.rows();
+  assert.equal(rows.find((row) => String(row.id).endsWith('-cart'))?.project, 'shop');
+  assert.match(String(rows.find((row) => String(row.id).endsWith('-cart'))?.home), /shop/);
+  assert.equal(rows.find((row) => String(row.id).endsWith('-billing'))?.project, 'outlet');
+});

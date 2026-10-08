@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:37:08.304Z
 anchor:
   rule: screens.identity.query-is-not-identity
-status: addressed
+status: settled
 body: "Found while judging at 793988a. (a) `walkdown serve`'s /api/whose ignores
   a declared query: /orders?tab=returns&page=2 answers `orders`, where claims
   --url and the panel answer `orders-returns`. buildIndex in lib/registry.js
@@ -22,3 +22,8 @@ replies:
       claims a page is read on path and fragment alone: a screen declared by a
       query the address lacks still counts its blueprint, ranked below any
       screen that fits whole. Test in claims.test.js."
+  - author: agent
+    via: verdict
+    created: 2026-10-08T14:27:21Z
+    body: Settled by the agent's pass on screens.identity.query-is-not-identity
+      (2026-10-08T14-27-21Z-local-01).

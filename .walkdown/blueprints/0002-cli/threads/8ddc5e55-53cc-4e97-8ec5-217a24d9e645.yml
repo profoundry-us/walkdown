@@ -1,0 +1,20 @@
+id: n-0537
+uuid: 8ddc5e55-53cc-4e97-8ec5-217a24d9e645
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T14:27:20.803Z
+anchor:
+  rule: status.attention.blocked-queues
+status: addressed
+body: Found while judging at 329c511. A built rule whose agent verdict is a
+  fail, with the agent's finding still open, asks eng to walk it down while the
+  agent is asked to address the finding. So it sits in two queues until a fix is
+  claimed. The re-judge line for a fixed fail also calls the verdict a pass.
+replies:
+  - author: agent
+    created: 2026-10-08T14:32:05Z
+    body: Fixed. A built rule whose agent verdict is a fail is held from every
+      signer and every verify until the agent passes it; its open finding is the
+      agent's address item. The re-judge line for a fixed fail now says 'the
+      failing verdict'. Test in status.test.js.

@@ -442,6 +442,34 @@ test('a built rule no check claims is the cover item’s alone, even with a pers
   assert.ok(folding.includes('cover') && folding.includes('incorporate'), folding.join());
 });
 
+test('a built rule the agent failed is the agent’s alone until it passes @rule:status.attention.blocked-queues', () => {
+  const { attention } = deriveStatus(
+    blueprint({
+      runs: [
+        checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+        walkdownRun('2026-02-01T00:00:00Z', 'agent', 'fail'),
+      ],
+      targets: { local: {} },
+      threads: [
+        {
+          id: 'n-2',
+          kind: 'note',
+          reason: 'finding',
+          author: 'agent',
+          status: 'open',
+          anchor: { rule: 'demo.main.thing' },
+        },
+      ],
+    }),
+    { checkRefs: new Set(['demo.main.thing']) },
+  );
+  // Its open finding is the agent's; no signer is asked meanwhile (n-0537).
+  assert.deepEqual(
+    attention.map((i) => `${i.who}:${i.action}`),
+    ['agent:address'],
+  );
+});
+
 test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],

@@ -358,7 +358,7 @@ function report(blueprint, values, ruleId, emit) {
     'judge-first': (i) =>
       `judge ${i.rule} — ${i.state === 'stale' ? 'the agent verdict on it is stale, and no signer is asked until it is judged again' : 'the agent tier has never judged it, and no signer is asked until it has'}`,
     rejudge: (i) =>
-      `judge ${i.rule} again — ${i.thread} claims a fix newer than the passing verdict`,
+      `judge ${i.rule} again — ${i.thread} claims a fix newer than the ${i.after === 'fail' ? 'failing' : 'passing'} verdict`,
     // The machine's own observation, addressed by the machine: it closes it
     // itself. Missing from this table for a day, so the queue crashed the
     // moment one existed (2026-09-21).

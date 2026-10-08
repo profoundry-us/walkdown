@@ -1,0 +1,50 @@
+{
+  "run_id": "2026-10-08T14-27-21Z-local-01",
+  "created": "2026-10-08T14:27:21Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "329c511-dirty",
+  "note": "Fourth adversarial judging of three cli rules that failed earlier rounds (import, attention queues, query identity), driven on scratch machines under /tmp/judge4-*.",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-30-00Z-judge4/import-01-steps.txt",
+        "runs/evidence/2026-10-08T15-30-00Z-judge4/import-02-moved-checkout.txt",
+        "runs/evidence/2026-10-08T15-30-00Z-judge4/import-03-unrelated-repo-captured.txt"
+      ],
+      "reasoning": "I made a repository shop with three committed homes (cart, billing, search) on one scratch machine and cloned it onto fresh scratch machines, each with cart registered first. Importing .walkdown/blueprints/billing registered billing alone and printed its ID 0002-sp-billing and its project shop. The repository's path under a pty listed billing, cart and search by folder, marked cart as already listed as 0001-sp-cart, and registered only search when I typed 3. With stdin from /dev/null it printed the same list, said to give --all or --only, exited 2 and left the registry byte-identical; --only search and then --all registered the rest. Importing cart's own path again said already listed as 0001-sp-cart and left the registry byte-identical, and the cart row was unchanged across the whole run. A plain folder, an empty repository, the blueprints folder itself and a folder inside a home each said nothing there is a blueprint, exited 2 and wrote nothing. I re-ran n-0533 and n-0530 with the checkout moved and either cart or search registered, importing by one home, --only, --all and the terminal, and every way kept the old ID, said the move and joined the new home to project shop. The rule still fails on a new shape the n-0533 riders opened. With shop cloned at ~/shop and its cart registered, I deleted that clone and cloned an unrelated repository outlet (a different origin) holding homes cart and billing. Importing outlet's billing with --project outlet, or importing outlet with --only billing, printed that 0001-sp-cart had moved to outlet's cart, re-pointed shop's row there, and listed billing as 0002-sp-billing in project shop. The path named one home of outlet. It should have registered that home alone, in the project outlet, and left shop's row alone. Instead it re-pointed another project's row and filed the new home under that project. Matching a move by folder layout alone, with no origin check, is what lets this happen.",
+      "threads": [
+        "36e0fbb2-8fca-4939-aab2-4903eb8a9a72"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "fail",
+      "statement_hash": "sha256:7d5377c322ba",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-30-00Z-judge4/status-01-failed-rule-in-two-queues.txt",
+        "runs/evidence/2026-10-08T15-30-00Z-judge4/status-02-derivation-probe.txt"
+      ],
+      "reasoning": "I drove deriveStatus over 25 one-rule boards and built a CLI board on a scratch machine. On it, checks passes were recorded by node --test through lib/node-test-reporter.js, and an agent verdict file was shaped as walkdown judge --json templates it. Most THEN lines held. An open note went to the agent to address, and an answered question to incorporate. A rule no check claims got a cover item, and a fix claimed after a pass or after a fail got the re-judge item and no person's item. Each unsigned role got one judge item, and a person's addressed notes became one verify item per rule naming the threads, with the design request among them. Open questions became one answer item per walkable rule. An agent's addressed finding was re-judged and then settled, never verified by a person. On a retired rule or no rule, only a person's feedback or request made a verify item, and a finding or observation made nothing. An unbuilt rule asked for its wording beside its cover item. A built rule the agent had never judged, or whose verdict was stale, was the agent's alone. An open design request went to design, by agent or by person per design.by. A folding rule asked no person to judge or verify. The re-judges of n-0534 held: a built uncovered rule with a person's addressed note gives only agent:cover, and an uncovered rule with an answered question gives cover and incorporate. It fails on the agent's own fail. board2.main.failed has a checks pass, an agent fail and the agent's open finding n-0002. On it, walkdown status lists 'walk down board2.main.failed - eng has not accepted it yet' under NEEDS A HUMAN, and 'address n-0002' under AGENT QUEUE, both at once. Once the fix is claimed, the person's item goes away and only the re-judge remains. So a person is asked to sign a built rule while the agent tier still owes it a pass. The repo's own measure of what the agent tier owes (tools/sitting.mjs owed) counts a fail. And the rule sits in two queues before the claim but in one after it.",
+      "threads": [
+        "8ddc5e55-53cc-4e97-8ec5-217a24d9e645"
+      ]
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "pass",
+      "statement_hash": "sha256:56d83a30a6b1",
+      "evidence": [
+        "runs/evidence/2026-10-08T15-30-00Z-judge4/query-01-three-readers.txt"
+      ],
+      "reasoning": "On a scratch machine I gave two blueprints in one project storyboards that declare several screens at /orders: orders at /orders, orders-returns at /orders?tab=returns, orders-returns-open at /orders?tab=returns&state=open, detail at /orders#detail and detail-returns at /orders?tab=returns#detail. One also has tagged at /search?tag=a&tag=b. The other has returns-tab at /orders?tab=archive and v2 at /v2/search?tag=x. I read 16 URLs three ways: walkdown claims --url, /api/whose on a scratch serve on port 0, and matchScreen from lib/screen-match.js, which the panel and embed bundle (the committed builds carry the n-0535 change). The three agreed on every URL. For undeclared queries, /orders?page=2 stayed orders, /orders?page=9#detail stayed detail, and /orders?tab=Returns and ?tab=returns%20 stayed orders. For declared queries, ?tab=returns&page=2 gave orders-returns. ?state=open&tab=returns gave orders-returns-open over orders-returns, so the more specific screen won in either key order, and ?tab=returns#detail gave detail-returns. The repeated key from n-0535 now matches: ?tag=b&tag=a names tagged, while ?tag=a and ?tag=a&tag=a do not. Where a blueprint's only screens at a path declare a query the address lacks, claims prints 'no screen of its own at this address', /api/whose gives screen null and the panel names none, so n-0535's second half holds. walkdown claims with no --url keyed the shared page as http://localhost:3000/orders across both blueprints, though their screens there differ only by query, so sharing is still read on path and fragment alone. The unit tests in claims.test.js and screen-match.test.js pass (22 of 22, unrecorded).",
+      "threads": []
+    }
+  ]
+}

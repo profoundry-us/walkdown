@@ -22,6 +22,7 @@ import { parseArgs } from 'node:util';
 import {
   canon,
   checkoutFor,
+  couldHaveMoved,
   describeFolder,
   expand,
   findHomes,
@@ -385,6 +386,7 @@ function finish(chosen, checkout, values, known = []) {
       if (!r?.registered || !r.checkout || !r.home || r.ephemeral) continue;
       const old = expand(String(r.checkout));
       if (existsSync(old) && existsSync(join(expand(String(r.home)), SPEC_FILE))) continue;
+      if (!couldHaveMoved(r, here, values.project ?? null)) continue;
       const there = join(here, relative(old, expand(String(r.home))));
       if (!isHome(there) || riders.some((x) => x.dir === canon(there))) continue;
       riders.push({ dir: canon(there), folder: basename(there) });
