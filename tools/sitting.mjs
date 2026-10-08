@@ -2024,6 +2024,10 @@ function record(file) {
     if (!['pass', 'fail', 'blocked', 'skipped'].includes(r.status))
       bad.push(`${r.rule}: bad status`);
     if (!(r.evidence ?? []).length) bad.push(`${r.rule}: no evidence`);
+    // A fail spawns its finding, and names it: one recorded without (judge6,
+    // 2026-10-08) said what was wrong to nobody who could fix it.
+    if (r.status === 'fail' && !(r.threads ?? []).length)
+      bad.push(`${r.rule}: a fail names its finding in threads`);
     if (!holder(r.rule)) bad.push(`${r.rule}: no such rule`);
   }
   if (bad.length) {
