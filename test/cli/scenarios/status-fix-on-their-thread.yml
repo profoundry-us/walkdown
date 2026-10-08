@@ -1,0 +1,13 @@
+# `walkdown status` after a fix to the agent's finding on a rule topher had
+# signed: he replied on that thread, so the rule comes back to him, signed
+# still. A fix on a thread he never touched does not (q-0517).
+screen: status-fix-on-their-thread
+title: A fix on a thread you took part in brings a signed rule back to you
+rule: status.acceptance.fix-on-their-thread-comes-back
+fixture: g4-fix-on-their-thread
+command: [status, --blueprint, checkout]
+exit: 0
+expect:
+  - 'walk down checkout\.basics\.pays again — eng signed it, and the fix n-0001 claims on your thread is judged; the signature stands meanwhile'
+anchors:
+  - { id: cli.status.walk-again, match: 'walk down checkout\.basics\.pays again' }

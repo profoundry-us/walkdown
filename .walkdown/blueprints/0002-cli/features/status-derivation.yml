@@ -350,6 +350,27 @@ stories:
             - Once a thread on the rule is addressed after the send-back and the agent tier has passed the fix, the signer is asked to look again, and the item names the thread that claimed the fix
             - Their fresh verdict is what clears it
           statement_hash: sha256:1aef4eaeadde
+      - id: status.acceptance.fix-on-their-thread-comes-back
+        origin: thread:q-0517
+        created_at: 2026-10-08
+        statement: A signed rule comes back to a signer to walk again when the agent's fix to a finding they replied on has been judged since they signed. Their signature still counts while it waits.
+        history: Five signed rules changed in behaviour that week, and none came back to Topher, who had taken part in some of their threads (q-0517).
+        because: A fix to something the signer raised is theirs to see, and a fix to something they never touched is not.
+        verify: [checks]
+        screens: [status-fix-on-their-thread]
+        steps:
+          given:
+            - Two rules a signer has signed, each with a finding of the agent's that was then fixed and judged, and the signer replied on one of the two
+          when:
+            - Status is derived
+          then:
+            - The rule whose finding they replied on is queued back to them to walk again, naming the thread that claimed the fix
+            - The rule stays signed and keeps its verdict while it waits
+            - The other rule is not queued back to them
+            - A note the signer filed is not queued back this way, since it already waits on them to verify the fix
+            - A fix they already verified is not queued back, since they have looked at it
+            - Their fresh verdict is what clears it
+          statement_hash: sha256:82b342b29e0d
 
       - id: status.acceptance.verdict-needs-every-role
         origin: walkdown

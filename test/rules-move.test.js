@@ -335,7 +335,7 @@ test('one rule moves into a story of the same id, created for it @rule:locations
   );
 });
 
-test('several selections move as one, and a later move copies each run once more without doubling a sweep @rule:locations.several.rules-move', () => {
+test('several selections move as one, and a later move copies each run once more, naming in its sweep only the rules it carried @rule:locations.several.rules-move', () => {
   const f = fixture();
   const one = f.wd(['rules', 'move', 'shop.cart.add', 'shop.pay', '--blueprint', 'a', '--to', 'b']);
   assert.equal(one.status, 0, one.stderr);
@@ -343,7 +343,15 @@ test('several selections move as one, and a later move copies each run once more
   const later = f.wd(['rules', 'move', 'shop.cart.remove', '--blueprint', 'a', '--to', 'b']);
   assert.equal(later.status, 0, later.stderr);
   const copies = f.runsOf(f.B).map((n) => JSON.parse(readFileSync(join(f.B.runs.path, n), 'utf8')));
-  assert.equal(copies.filter((c) => c.kind === 'sweep').length, 1, 'one sweep, however many moves');
+  // Each move's copy names the rules that move carried, none twice (q-0528).
+  assert.deepEqual(
+    copies
+      .filter((c) => c.kind === 'sweep')
+      .map((c) => c.rules)
+      .sort(),
+    [['shop.cart.add', 'shop.pay.card'], ['shop.cart.remove']],
+  );
+  assert.equal(f.row('b', 'shop.cart.add').checks, 'stale', 'still under the sweep');
   const checks = copies.filter((c) => c.run_id === '2026-10-01T10-00-00Z-local-01');
   assert.deepEqual(checks.map((c) => c.results.map((r) => r.rule)).sort(), [
     ['shop.cart.add', 'shop.pay.card'],
@@ -409,4 +417,59 @@ test('a move is refused, and nothing moves, when the rule is already there, the 
   assert.match(dirty.stderr, /`a` has uncommitted changes to its features/);
   assert.equal(unchanged(), `${was}# an edit nobody committed\n`);
   assert.equal(existsSync(join(f.B.spec.path, 'features', 'shop.yml')), false);
+});
+
+test("a sweep a move copies sweeps only the rules it came with, and the destination's own rules keep their verdicts @rule:locations.several.rules-move", () => {
+  const f = fixture();
+  // b's own rule, passed before a's sweep was declared, never swept in b.
+  writeFileSync(
+    join(f.B.spec.path, 'features', 'ship.yml'),
+    [
+      'feature: ship',
+      'stories:',
+      '  - id: ship.track',
+      '    title: Tracking',
+      '    statement: As a shopper I follow my parcel.',
+      '    rules:',
+      '      - id: ship.track.link',
+      '        statement: The receipt links to the parcel.',
+      '        verify: [checks]',
+      '        steps:',
+      '          then: [It links]',
+      '',
+    ].join('\n'),
+  );
+  assert.equal(f.wd(['hash', '--write', '--blueprint', 'b']).status, 0);
+  const hash = JSON.parse(
+    f.wd(['status', 'ship.track.link', '--blueprint', 'b', '--json']).stdout,
+  ).statement_hash;
+  mkdirSync(f.B.runs.path, { recursive: true });
+  writeFileSync(
+    join(f.B.runs.path, '2026-10-01T12-30-00Z-local-01.json'),
+    `${JSON.stringify({
+      run_id: '2026-10-01T12-30-00Z-local-01',
+      created: '2026-10-01T12:30:00Z',
+      actor: 'topher',
+      kind: 'checks',
+      target: 'local',
+      results: [
+        { rule: 'ship.track.link', status: 'pass', statement_hash: hash, checks: ['t.js:2'] },
+      ],
+    })}\n`,
+  );
+  assert.equal(f.row('b', 'ship.track.link').checks, 'pass');
+  const r = f.wd(['rules', 'move', 'shop.cart.add', '--blueprint', 'a', '--to', 'b']);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(f.row('b', 'shop.cart.add').checks, 'stale', 'the moved rule is still swept');
+  assert.equal(
+    f.row('b', 'ship.track.link').checks,
+    'pass',
+    "b's own rule was never swept (q-0528)",
+  );
+  const sweeps = JSON.parse(f.wd(['status', '--blueprint', 'b', '--json']).stdout).sweeps;
+  const checks = sweeps.filter((x) => x.tier === 'checks');
+  assert.deepEqual(
+    checks.map((x) => [x.of, x.owed]),
+    [[1, ['shop.cart.add']]],
+  );
 });

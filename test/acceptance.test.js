@@ -438,3 +438,51 @@ test('an excused tier is derived out of the sum entirely @rule:status.evidence.a
   assert.deepEqual(Object.keys(rows[0].excuses).sort(), ['agent', 'checks']);
   assert.equal(rows[0].verdict, 'pass');
 });
+
+test('a signed rule comes back to its signer when the fix to a finding they replied on is judged, and only then @rule:status.acceptance.fix-on-their-thread-comes-back', () => {
+  const signature = signed('2026-01-03', 'topher', 'pass', ['product']);
+  const runs = [
+    checksRun('2026-01-01', 'pass'),
+    agentRun('2026-01-02', 'pass'),
+    signature,
+    agentRun('2026-01-05', 'pass'),
+  ];
+  const finding = (replies, more = {}) => ({
+    id: 'n-0001',
+    kind: 'note',
+    reason: 'finding',
+    status: 'settled',
+    author: 'agent',
+    created: '2026-01-03T12:00:00Z',
+    anchor: { rule: 'demo.main.thing' },
+    body: 'the spinner never stops',
+    replies,
+    ...more,
+  });
+  const derive = (threads, rs = runs) =>
+    deriveStatus(
+      blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs: rs, threads }),
+    );
+  const asked = (bp) =>
+    bp.attention.filter((i) => i.action === 'judge' && i.role === 'product').map((i) => i.after);
+  const theirs = [
+    { author: 'topher', created: '2026-01-03T13:00:00Z', body: 'I see it too' },
+    { author: 'agent', created: '2026-01-04T00:00:00Z', body: 'fixed' },
+  ];
+
+  // Replied on, fixed, judged: back to them, signed still.
+  const back = derive([finding(theirs)]);
+  assert.deepEqual(asked(back), ['n-0001']);
+  assert.equal(states(back.rows[0]).product, 'signed');
+  // Not until the fix is judged.
+  assert.deepEqual(asked(derive([finding(theirs)], runs.slice(0, 3))), []);
+  // A finding they never replied on does not come back to them.
+  assert.deepEqual(asked(derive([finding([theirs[1]])])), []);
+  // A note they filed waits on them as the fix to verify, not as this.
+  assert.deepEqual(asked(derive([finding(theirs, { author: 'topher', reason: undefined })])), []);
+  // A fix they verified is one they have seen.
+  assert.deepEqual(asked(derive([finding(theirs, { status: 'verified' })])), []);
+  // Their fresh signature clears it.
+  const again = signed('2026-01-06', 'topher', 'pass', ['product']);
+  assert.deepEqual(asked(derive([finding(theirs)], [...runs, again])), []);
+});

@@ -804,6 +804,15 @@ screens:
       - cli.status.sent-back
       - cli.exit
 
+  - id: status-fix-on-their-thread
+    title: "A fix on a thread you took part in brings a signed rule back to you"
+    prototype: null
+    app: { path: /as-built/cli/status-fix-on-their-thread.html }
+    anchors:
+      - cli.prompt
+      - cli.status.walk-again
+      - cli.exit
+
   - id: status-signed-for-another
     title: "A signature names who accepted, not who typed it"
     prototype: null

@@ -371,6 +371,76 @@ export default {
   },
 
   /*
+   * Both rules signed by topher, and then each had a finding of the agent's
+   * fixed and judged. topher replied on the one on `pays`, and never on the
+   * one on `refunds` (q-0517).
+   */
+  'g4-fix-on-their-thread'(m) {
+    const h = checkout(m, [
+      ['pays', 'A card payment goes through.', 'verify: [checks]'],
+      ['refunds', 'A refund reaches the card it was paid on.', 'verify: [checks]'],
+    ]);
+    suite(m, 'pays', 'refunds');
+    const ok = ['pays', 'refunds'].map((r) => ({
+      rule: `checkout.basics.${r}`,
+      status: 'pass',
+      statement_hash: h[r],
+    }));
+    run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, ok);
+    run(m, '2026-10-01T10-00-00Z-local-01', AGENT, ok);
+    run(
+      m,
+      '2026-10-01T11-00-00Z-local-01',
+      { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] },
+      ok,
+    );
+    // The agent's findings, as `threads new` and `threads set` leave them.
+    const threads = join(m.specOf('checkout'), 'threads');
+    mkdirSync(threads, { recursive: true });
+    const finding = (n, uuid, rule, body, replies) =>
+      writeFileSync(
+        join(threads, `${uuid}.yml`),
+        [
+          `id: n-000${n}`,
+          `uuid: ${uuid}`,
+          'kind: note',
+          'reason: finding',
+          'author: agent',
+          'created: 2026-10-01T11:30:00Z',
+          'anchor:',
+          `  rule: checkout.basics.${rule}`,
+          'status: settled',
+          `body: ${body}`,
+          'replies:',
+          ...replies.flatMap(([author, at, text]) => [
+            `  - author: ${author}`,
+            `    created: ${at}`,
+            `    body: ${text}`,
+          ]),
+          '',
+        ].join('\n'),
+      );
+    finding(
+      1,
+      '00000000-0000-4000-8000-000000000001',
+      'pays',
+      'A declined card leaves the spinner turning.',
+      [
+        ['topher', '2026-10-01T11:40:00Z', 'I see it too, on every declined card.'],
+        ['agent', '2026-10-01T12:00:00Z', 'Fixed - a decline now stops the spinner and says why.'],
+      ],
+    );
+    finding(
+      2,
+      '00000000-0000-4000-8000-000000000002',
+      'refunds',
+      'A refund toast stays up after it is dismissed.',
+      [['agent', '2026-10-01T12:00:00Z', 'Fixed - the toast closes when dismissed.']],
+    );
+    run(m, '2026-10-01T13-00-00Z-local-01', AGENT, ok);
+  },
+
+  /*
    * A walkdown topher drove, signing eng himself and product for Pat beside
    * him, written by the same writer the panel's door uses.
    */

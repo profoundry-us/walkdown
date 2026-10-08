@@ -325,11 +325,13 @@ function report(blueprint, values, ruleId, emit) {
     // whether it needs PRODUCT or engineering, and a queue that cannot say
     // which is a queue two people both scroll past.
     judge: (i) =>
-      i.after
-        ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} sent it back, and the fix ${i.after} claims is judged`
-        : i.unbuilt
-          ? `approve the wording of ${i.rule} — not built yet, and ${i.role ?? 'nobody'} has not approved it`
-          : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
+      i.after && i.signed
+        ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} signed it, and the fix ${i.after} claims on your thread is judged; the signature stands meanwhile`
+        : i.after
+          ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} sent it back, and the fix ${i.after} claims is judged`
+          : i.unbuilt
+            ? `approve the wording of ${i.rule} — not built yet, and ${i.role ?? 'nobody'} has not approved it`
+            : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
     // Per rule when the notes have one (ADR 0005 §6): the look that clears
     // them is a verdict on the rule, so the item says which rule to walk and
     // what waits there - your own notes answered, and any design request
