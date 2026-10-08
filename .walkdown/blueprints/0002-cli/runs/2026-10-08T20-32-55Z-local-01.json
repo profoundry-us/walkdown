@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-08T20-32-55Z-local-01",
+  "created": "2026-10-08T20:32:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f47f3eb-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T20-32-55Z/base.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/legacy-row-exfat-inode-reused-here.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/legacy-row-amend-gc-then-move.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/legacy-row-learns-birth-time.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/legacy-row-rewritten-in-place.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/legacy-row-remote-renamed-in-place.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/exfat-fresh-rows.txt",
+        "runs/evidence/2026-10-08T20-32-55Z/reclone-amend-seturl.txt"
+      ],
+      "reasoning": "Driven in a terminal with node bin/walkdown.js on throwaway machines (mktemp HOME and WALKDOWN_HOME), nothing served; old rows came from walkdown 7997eae extracted to scratch, and exFAT drives were hdiutil images. The base steps pass: a home path registers alone, a repository path lists and marks, no terminal registers nothing without --all or --only, and a path with no home says so. n-0552 is fixed: rows from before 1d16c3d no longer match an unrelated repository at their own path on exFAT, and fresh rows on exFAT pass elsewhere, here, and through replug, gc, rewrite and move. Rounds 17 and 18 still pass with fresh rows. The fix breaks a new case: a row from before 1d16c3d has no birth time, so its own unmoved checkout is refused as another repository after its first commit is rewritten and collected, or its origin is set to a new URL. The import offers only forget, --project does not help, and 7997eae read the same rows as already listed. Filed as n-0553; n-0552 is settled.",
+      "threads": [
+        "2d6015c1-ef31-4a2b-a3cf-653423dfa56f"
+      ]
+    }
+  ]
+}

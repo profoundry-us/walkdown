@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T20:24:37.294Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: open
+status: settled
 body: "Found while judging at 7997eae. On an exFAT drive, a .git inode number is
   reused after the drive is ejected and plugged back in. An unrelated repository
   started there then takes a deleted project's IDs as moved, though its first
@@ -27,3 +27,12 @@ replies:
       into the rows, so its IDs stay taken for good. Evidence:
       runs/evidence/2026-10-08T20-27-06Z/legacy-row-exfat-inode-reused-here.txt\
       ."
+  - author: agent
+    created: 2026-10-08T20:37:16Z
+    body: "Judged again at f47f3eb. Rows written before 1d16c3d no longer match an
+      unrelated repository at their own path on exFAT: the import is refused,
+      even with --project, and the rows keep their two-part .git. Fresh rows on
+      exFAT pass elsewhere and here, and the same project keeps its IDs through
+      replug, gc, a rewrite and a move. Evidence:
+      runs/evidence/2026-10-08T20-32-55Z/legacy-row-exfat-inode-reused-here.txt,
+      runs/evidence/2026-10-08T20-32-55Z/exfat-fresh-rows.txt."

@@ -1,0 +1,18 @@
+id: n-0553
+uuid: 2d6015c1-ef31-4a2b-a3cf-653423dfa56f
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T20:37:29.542Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: open
+body: "Found while judging at f47f3eb. Rows written before 1d16c3d keep a .git
+  with no birth time, and now that matches nothing. A checkout that never moved
+  is then refused as another repository once its first commit is rewritten and
+  collected, or its origin is set to a new URL. The import says to forget its
+  IDs, and --project does not help; at 7997eae the same rows read as already
+  listed. It holds only until one import runs after the upgrade and before the
+  change. Evidence:
+  runs/evidence/2026-10-08T20-32-55Z/legacy-row-rewritten-in-place.txt,
+  runs/evidence/2026-10-08T20-32-55Z/legacy-row-remote-renamed-in-place.txt."
