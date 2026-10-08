@@ -1,0 +1,22 @@
+id: n-0545
+uuid: b5c22ba6-c71d-4f1b-9180-f3bfb333b530
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T16:07:21.997Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 2e631c6. A sibling from the same template with no
+  remote takes a deleted project's rows and label, though the row knew its
+  origin and the sibling has no remote naming it. The real project is then
+  refused under its own label, and --project with that label is refused too.
+replies:
+  - author: agent
+    created: 2026-10-08T16:10:56Z
+    body: "A row that knew its origin now wants that origin among the candidate's
+      remotes whenever the candidate's origin is not the same. That holds
+      whether the candidate has another origin or none at all, so a template
+      sibling with no remote no longer takes it. The terminal picker also takes
+      folder names as well as numbers. Test: test/import-repositories.test.js
+      (bare sibling)."

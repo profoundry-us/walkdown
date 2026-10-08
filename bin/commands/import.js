@@ -384,7 +384,9 @@ export async function run(args) {
     }
     const rl = createInterface({ input: process.stdin, output: process.stdout });
     // Ctrl-D at the question is "none of them", not a stack trace.
-    const said = (await rl.question('\nImport which? (numbers, or "all") ').catch(() => '')).trim();
+    const said = (
+      await rl.question('\nImport which? (numbers or folders, or "all") ').catch(() => '')
+    ).trim();
     rl.close();
     if (!said) {
       console.log(dim('nothing imported'));
@@ -392,11 +394,12 @@ export async function run(args) {
     }
     if (said.toLowerCase() === 'all') chosen = fresh;
     else {
+      // A number, or the folder's name as the list shows it (n-0545).
+      const words = said.split(/[\s,]+/).filter(Boolean);
       const picked = new Set(
-        said
-          .split(/[\s,]+/)
-          .map((n) => Number.parseInt(n, 10))
-          .filter((n) => n >= 1 && n <= homes.length),
+        homes
+          .map((h, i) => i + 1)
+          .filter((n) => words.some((w) => Number(w) === n || named(homes[n - 1], w))),
       );
       chosen = homes.filter((h, i) => picked.has(i + 1) && !isListed(h));
       known = homes.filter((h, i) => picked.has(i + 1) && isListed(h));

@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-08T16-07-22Z-local-01",
+  "created": "2026-10-08T16:07:22Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e631c6-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "evidence": [
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/tpl2.txt",
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/c1b.txt",
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/tpl.txt",
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/base.txt",
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/tty.txt",
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/reg.txt",
+        "runs/evidence/2026-10-08T16-03-01Z-judge11/unit-tests.txt"
+      ],
+      "reasoning": "Driven at 2e631c6 with node bin/walkdown.js on scratch machines (mktemp HOME and WALKDOWN_HOME under /tmp/judge11-*). No server was needed. The base steps hold. A home's path registers that blueprint alone and names its ID and project. Re-importing it says 'already listed' and leaves the registry byte-identical. With no terminal, the repository's path lists billing, checkout and search, marks checkout as already listed, exits 2 and writes nothing. --only and --all register what they name. Under a pty, the prompt accepts '3' and '1, 3' and registers those homes. An empty folder says nothing there is a blueprint and registers nothing. The n-0544 fix holds where both siblings have an origin. A beta cloned from alpha's starter with a different origin gets its own row, and alpha keeps its ID when it moves. With alpha's checkout gone, its label refusal now says `--project alpha` keeps its IDs, and that flag works. Forks with the old origin as upstream, respelled ssh-port remotes, moved shallow clones, letter case, symlinks, worktrees and /tmp all still behave, and the rule's 29 tagged unit tests pass. The fix has a hole when the candidate has no origin. couldHaveMoved only compares remotes when both sides have an origin, so a sibling with no remote passes on the shared first commit alone. Repro (tpl2.txt C1, c1b.txt): register alpha, cloned from a starter with origin set to acme/alpha, then delete ~/alpha. Clone the same starter to ~/gamma, `git remote remove origin`, commit a home at the same folder, and run `blueprints import . --all`. It prints '~ moved ~/gamma/... keeps its ID 0001-ap-web: it was at ~/alpha', and gamma is now listed under project alpha. When the real alpha is restored somewhere else, importing it is refused because label `alpha` is taken. `--project alpha` gets the same refusal, and this time without the keeps-its-IDs hint. That is n-0544's own harm (the real project refused under its own label, --project refused too), reached by a sibling with no remote. The row knew its origin, and gamma has no remote naming it, so by the fix's own test it is not the same repository. Related cases that are harder to call: a row with no origin is taken by a template sibling with or without one (tpl2.txt C2, C3), and two clones that both still point at the starter look identical (C4).",
+      "threads": [
+        "b5c22ba6-c71d-4f1b-9180-f3bfb333b530"
+      ]
+    }
+  ]
+}
