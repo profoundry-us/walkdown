@@ -1,0 +1,72 @@
+{
+  "run_id": "2026-10-08T14-14-06Z-local-01",
+  "created": "2026-10-08T14:14:06Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "22fea5e-dirty",
+  "tree_hash": "sha256:7ed92d4424eb",
+  "spec_hash": "sha256:7181cb2e3f96",
+  "results": [
+    {
+      "rule": "screens.ownership.one-claimant",
+      "status": "pass",
+      "statement_hash": "sha256:0144bea72ec9",
+      "duration_ms": 1,
+      "checks": [
+        "test/claims.test.js:19",
+        "test/claims.test.js:44",
+        "test/claims.test.js:50",
+        "test/claims.test.js:64"
+      ]
+    },
+    {
+      "rule": "screens.ownership.routes-by-page",
+      "status": "pass",
+      "statement_hash": "sha256:015ebac2b063",
+      "duration_ms": 0,
+      "checks": [
+        "test/claims.test.js:73",
+        "test/claims.test.js:88",
+        "test/claims.test.js:106"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.stand-in-app",
+      "status": "pass",
+      "statement_hash": "sha256:6a69c42a5b6c",
+      "duration_ms": 0,
+      "checks": [
+        "test/claims.test.js:120",
+        "test/screen-match.test.js:80"
+      ]
+    },
+    {
+      "rule": "panel.delivery.one-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:4c1dad63ccc7",
+      "duration_ms": 4,
+      "checks": [
+        "test/screen-match.test.js:126"
+      ]
+    },
+    {
+      "rule": "panel.start.address-opens-what-it-names",
+      "status": "pass",
+      "statement_hash": "sha256:682e1f446062",
+      "duration_ms": 1,
+      "checks": [
+        "test/screen-match.test.js:147"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.app-address-is-resolved",
+      "status": "pass",
+      "statement_hash": "sha256:f5007e73e677",
+      "duration_ms": 0,
+      "checks": [
+        "test/screen-match.test.js:157"
+      ]
+    }
+  ]
+}

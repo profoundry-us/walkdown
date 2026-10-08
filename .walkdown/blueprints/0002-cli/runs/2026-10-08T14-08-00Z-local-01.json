@@ -1,0 +1,53 @@
+{
+  "run_id": "2026-10-08T14-08-00Z-local-01",
+  "created": "2026-10-08T14:08:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "22fea5e-dirty",
+  "note": "Third adversarial re-judge of three cli rules at 22fea5e, each driven on scratch machines (HOME and WALKDOWN_HOME a mktemp dir, serve on port 4748) and never against the real registry.",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/import-01-given-home-repo-none.txt",
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/import-02-terminal.txt",
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/import-03-moved-all-registered.txt",
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/import-04-moved-one-registered-refused.txt"
+      ],
+      "reasoning": "I built a git repository with three committed homes (202610-checkout, 202610-search, billing) and registered one. Importing one home's path registered it alone and said its ID and its project. Re-importing it said already listed and left registry.yml byte for byte unchanged. The repository's path with no terminal listed the three by folder, marked the listed one, said to give --all or --only and exited 2 with nothing written. In a terminal driven by expect, answering 1 3 registered billing and reported 202610-checkout as already listed. --only billing registered billing alone. An empty repository, a features folder and a missing path each said so and registered nothing. The claimed fixes for n-0522 and n-0530 hold: with all three rows registered and the checkout moved, import . --all, import of one home, --only one folder, a second move and --json each re-point all three rows and every changed row is said as moved. The rule still fails on the GIVEN's own shape after a move. With only billing registered and the checkout moved from ~/shop to ~/shop-moved, import . --all exits 2 with 'the project label shop is another project's on this machine' and registers nothing, and adding --project shop gives the same refusal. With only 202610-checkout registered, import of 202610-search by its path, and --only billing, are refused the same way, while --all and --only billing,202610-checkout succeed only because the registered home happens to sort first. The refusal calls the same project another project and tells the person to choose another label, which would split it in two, so the home's path does not register its blueprint and the chosen homes are not registered.",
+      "threads": [
+        "2c699af4-0de9-412b-88c1-cc79238e1f52"
+      ]
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "fail",
+      "statement_hash": "sha256:7d5377c322ba",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/attention-01-cover-and-walk-same-rule.txt",
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/attention-02-derivation-probes.txt"
+      ],
+      "reasoning": "I drove deriveStatus with sixteen board shapes and reproduced the decisive one through the CLI on a scratch blueprint. Most THEN lines hold. An open plain note is the agent's to address, an answered question the agent's to incorporate, and a fix claimed after an agent pass or after an agent fail is a rejudge item with no person item beside it, which confirms the n-0531 fixes. Signers are asked one item per unsigned role, addressed person notes and design requests on a walkable rule are one verify item naming the threads and the requests, and open questions are one answer item per rule. Agent findings and observations are settled only once a pass is newer than the fix, which confirms n-0526(a). On a retired rule or none, only a person's feedback or request is a verify item. An unbuilt uncovered rule gets cover and a wording ask marked unbuilt, and a built uncovered rule owed its first look gets cover beside judge-first. Open design requests go to design, by agent or by person per design.by. The rule fails on the cover line and on nothing sitting in two queues. A built rule demanding checks that no check claims, judged by the agent after a person's addressed feedback, is in the agent queue as 'cover pay.card.goes-through' and at once in NEEDS A HUMAN as 'walk down pay.card.goes-through, 1 note of yours answered (n-0001)'. The same happens with a person's addressed design request. The n-0527 hold covers judge-first and rejudge but not cover, so a rule that is the cover item's and nobody's to sign is a person's to walk. Separately, a built or unbuilt rule no check claims that holds an answered question gets only the incorporate item and no cover item, the same gap n-0526(c) closed for judge-first.",
+      "threads": [
+        "fa16e065-3d93-422f-adf1-7d59ab7ada75"
+      ]
+    },
+    {
+      "rule": "screens.identity.query-is-not-identity",
+      "status": "fail",
+      "statement_hash": "sha256:56d83a30a6b1",
+      "evidence": [
+        "runs/evidence/2026-10-08T14-06-25Z-judge3/identity-01-three-matchers.txt"
+      ],
+      "reasoning": "I registered three blueprints on one scratch machine with screens at /orders, /orders?tab=returns (in two blueprints), /v2/orders?tab=returns, /search?tag=a&tag=b and /app#/list. I asked claims --url, the /api/whose of a serve on port 4748, and matchScreen from lib/screen-match.js about ten addresses. The panel bundle carries the same scoreRef. The n-0532 fix holds: at /v2/orders all three name orders and vtwo-orders, the whole fits. An undeclared query changes nothing: /orders?page=2 and /orders?TAB=returns name orders. A declared query wins where present: /orders?tab=returns&page=2 names orders-returns. Membership is read on path, since claims lists the returns blueprint as sharing /orders. The rule still fails in two places. First, a declared query with a repeated key is never honoured. At /search?tag=a&tag=b, the exact address of the tagged screen, matchScreen names no screen in any blueprint, and claims and /api/whose find tagged only through the missing-query fallback at score 7e-7. scoreRef compares each declared pair with URLSearchParams.get, which returns only the first value. Second, the three matchers still disagree about which screen an address is when a blueprint's only screen there declares a query the address lacks. At /orders and /orders?page=2, claims --url and /api/whose say the returns blueprint is on screen returns-tab, whose declared tab=returns is absent, and matchScreen names no screen for that blueprint. So the declared query is not honoured in what claims and the server name. Also, for an address on a hash route, /app#/list?page=2 is claimed by no blueprint and is no screen, while /app#/list names hashed. Page two of a hash-routed screen is not the same screen, though the code treats this as deliberate.",
+      "threads": [
+        "d78c7c76-04ed-422c-bee7-2adfd092e51e"
+      ]
+    }
+  ]
+}

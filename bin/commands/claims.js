@@ -52,7 +52,9 @@ export function run(args) {
     // and means nothing (ADR 0001).
     console.log(values.url);
     for (const hit of hits)
-      console.log(`  ${hit.id} — screen ${hit.screen} (target ${hit.target})`);
+      console.log(
+        `  ${hit.id} — ${hit.screen ? `screen ${hit.screen}` : 'no screen of its own at this address'} (target ${hit.target})`,
+      );
     if (hits.length > 1)
       console.log(`\n${hits.length} blueprints claim it. Opening one is a person's choice.`);
     return end(0);

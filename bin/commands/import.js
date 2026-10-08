@@ -372,6 +372,28 @@ function finish(chosen, checkout, values, known = []) {
    */
   const before = listedHomes();
   let movedFrom = null;
+  /*
+   * A row whose checkout is gone, and whose home stands at the same place in
+   * this one, is this checkout moved. It is registered first, whatever was
+   * chosen, so the move is seen before a home new to the machine asks for
+   * the project's label and is refused it as another project's (n-0533).
+   */
+  if (checkout && !values.ephemeral) {
+    const here = canon(checkout);
+    const riders = [];
+    for (const r of readRegistry().rows) {
+      if (!r?.registered || !r.checkout || !r.home || r.ephemeral) continue;
+      const old = expand(String(r.checkout));
+      if (existsSync(old) && existsSync(join(expand(String(r.home)), SPEC_FILE))) continue;
+      const there = join(here, relative(old, expand(String(r.home))));
+      if (!isHome(there) || riders.some((x) => x.dir === canon(there))) continue;
+      riders.push({ dir: canon(there), folder: basename(there) });
+    }
+    if (riders.length) {
+      const picked = new Set(riders.map((x) => x.dir));
+      chosen = [...riders, ...chosen.filter((h) => !picked.has(canon(h.dir)))];
+    }
+  }
   for (const h of chosen) {
     let row;
     try {

@@ -141,11 +141,10 @@ test('a declared query picks the screen inside a blueprint, and never decides wh
     'shop:orders-returns',
     'returns:returns-tab',
   ]);
-  // Without the query, both still claim the page (n-0525).
-  assert.deepEqual(at('http://localhost:3000/orders?page=2'), [
-    'shop:orders',
-    'returns:returns-tab',
-  ]);
+  // Without the query, both still claim the page (n-0525), but `returns` is
+  // on no screen of its own there: its one screen declares a query the
+  // address lacks, and the panel names none either (n-0535).
+  assert.deepEqual(at('http://localhost:3000/orders?page=2'), ['shop:orders', 'returns:null']);
   // A screen that fits whole wins over one whose declared query is missing,
   // however much longer that one's path is.
   const v2 = bp('v2', 'http://localhost:3000', [

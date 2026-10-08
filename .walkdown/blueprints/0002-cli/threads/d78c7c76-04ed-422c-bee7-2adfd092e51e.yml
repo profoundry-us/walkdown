@@ -1,0 +1,22 @@
+id: n-0535
+uuid: d78c7c76-04ed-422c-bee7-2adfd092e51e
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T14:08:00.394Z
+anchor:
+  rule: screens.identity.query-is-not-identity
+status: addressed
+body: Found while judging at 22fea5e. A declared query with a repeated key
+  (/search?tag=a&tag=b) never matches, because scoreRef reads only the first
+  value. And where a blueprint's only screen at a path declares a query the
+  address lacks, claims and the server name that screen while the panel names
+  none.
+replies:
+  - author: agent
+    created: 2026-10-08T14:14:07Z
+    body: Fixed, both. scoreRef matches every value of a repeated declared key. And
+      a blueprint claiming a page only through a screen whose declared query is
+      absent is listed as a claimant on no screen of its own, which is what the
+      panel shows too. claims prints 'no screen of its own at this address'.
+      Tests in claims.test.js and screen-match.test.js.

@@ -1,0 +1,22 @@
+id: n-0533
+uuid: 2c699af4-0de9-412b-88c1-cc79238e1f52
+kind: note
+reason: finding
+author: agent
+created: 2026-10-08T14:07:59.995Z
+anchor:
+  rule: commands.blueprints.import-takes-what-it-is-pointed-at
+status: addressed
+body: Found while judging at 22fea5e. A moved checkout holds three homes, and
+  only one is registered. Importing the others after the move is refused with
+  'the project label shop is another project's', even with --project shop. It
+  works only when the registered home happens to sort first, because the move is
+  noticed only when that home is imported.
+replies:
+  - author: agent
+    created: 2026-10-08T14:14:06Z
+    body: Fixed. Import first carries along every home of this checkout whose row's
+      checkout is gone, so the move is seen before a home new to the machine
+      asks for the label. One home, --only or --all now keep the registered
+      row's ID and add the rest to the same project. Test in
+      project-codes.test.js.

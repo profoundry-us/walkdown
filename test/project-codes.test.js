@@ -148,3 +148,26 @@ test('a moved checkout reports every row the move re-pointed as moved, not as al
   assert.equal(one.status, 0, one.stderr);
   assert.equal((one.stdout.match(/~ moved/g) ?? []).length, 3, one.stdout);
 });
+
+test('after a move, a checkout with only some homes registered takes the rest, and keeps the one it had @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('moved-partly');
+  const repo = m.repo('shop');
+  for (const n of ['checkout', 'search', 'billing']) {
+    mkdirSync(join(repo, '.walkdown', 'blueprints', n), { recursive: true });
+    writeFileSync(join(repo, '.walkdown', 'blueprints', n, 'spec.yml'), `blueprint: ${n}\n`);
+  }
+  execFileSync('git', ['add', '-A'], { cwd: repo });
+  execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', '-m', 'h'], {
+    cwd: repo,
+  });
+  const first = m.cli(repo, 'blueprints', 'import', join('.walkdown', 'blueprints', 'billing'));
+  assert.equal(first.status, 0, first.stderr);
+  const id = String(m.rows()[0].id);
+  const moved = join(m.home, 'shop-moved');
+  execFileSync('mv', [repo, moved]);
+  // The one home it was pointed at, which happens to sort before the registered one (n-0533).
+  const r = m.cli(moved, 'blueprints', 'import', join('.walkdown', 'blueprints', 'checkout'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, new RegExp(`~ moved .*keeps its ID \`${id}\``));
+  assert.equal(new Set(m.rows().map((row) => row.project)).size, 1, 'one project, not two');
+});

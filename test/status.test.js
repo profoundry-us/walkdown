@@ -411,6 +411,37 @@ test('a built rule no check claims is asked to be covered even while the agent o
   assert.ok(mine.includes('judge-first'), mine.join());
 });
 
+test('a built rule no check claims is the cover item’s alone, even with a person’s note answered, and is covered while a question is folded in @rule:status.attention.blocked-queues', () => {
+  const thread = (status, kind = 'note') => ({
+    id: kind === 'question' ? 'q-1' : 'n-1',
+    kind,
+    reason: kind === 'question' ? undefined : 'feedback',
+    author: 'sam',
+    status,
+    anchor: { rule: 'demo.main.thing' },
+    replies: [{ author: 'agent', created: '2026-02-01T00:00:00Z', body: 'done' }],
+  });
+  const runs = [
+    checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
+    walkdownRun('2026-03-01T00:00:00Z', 'agent', 'pass'),
+  ];
+  const elsewhere = { checkRefs: new Set(['demo.other.rule']) };
+  const answered = deriveStatus(
+    blueprint({ runs, targets: { local: {} }, threads: [thread('addressed')] }),
+    elsewhere,
+  ).attention;
+  assert.deepEqual(
+    answered.map((i) => `${i.who}:${i.action}`),
+    ['agent:cover'],
+    'one queue (n-0534)',
+  );
+  const folding = deriveStatus(
+    blueprint({ runs, targets: { local: {} }, threads: [thread('answered', 'question')] }),
+    elsewhere,
+  ).attention.map((i) => i.action);
+  assert.ok(folding.includes('cover') && folding.includes('incorporate'), folding.join());
+});
+
 test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],

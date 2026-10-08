@@ -171,3 +171,14 @@ test('an app path resolves against base_url the way a link does, so a whole URL 
       src,
     );
 });
+
+test('a declared query with a repeated key is honoured, every value of it @rule:screens.identity.query-is-not-identity', () => {
+  const screens = [
+    { id: 'search', app: { path: '/search' } },
+    { id: 'tagged', app: { path: '/search?tag=a&tag=b' } },
+  ];
+  const at = (search) => matchScreen(screens, { pathname: '/search', search, hash: '' })?.screen.id;
+  assert.equal(at('?tag=a&tag=b'), 'tagged');
+  assert.equal(at('?tag=b&page=2&tag=a'), 'tagged');
+  assert.equal(at('?tag=a'), 'search', 'one of the two values is not the screen (n-0535)');
+});
