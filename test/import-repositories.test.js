@@ -396,6 +396,42 @@ test('a checkout that never moved stays listed after an amend and a gc, and afte
   assert.equal(recloned.status, 0, recloned.stderr);
   assert.match(recloned.stdout, new RegExp(`already listed|\`${row.id}\``), 'n-0549: re-clone');
   assert.equal(m.rows().length, 1);
+  // The re-clone's rows learnt its .git, so a remote changed in place later
+  // is the same checkout still (n-0551).
+  execFileSync('git', ['remote', 'set-url', 'origin', 'git@github.com:acme-inc/app.git'], {
+    cwd: app,
+  });
+  const renamed = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.equal(renamed.status, 0, renamed.stderr);
+  assert.match(renamed.stdout, /already listed/, 'n-0551');
+});
+
+test('a checkout whose only commit was amended and collected, then moved, keeps its IDs without --project @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+  const m = machine('amend-then-move');
+  const app = join(m.home, 'shop');
+  mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
+  execFileSync('git', ['init', '-q'], { cwd: app });
+  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme/shop.git'], { cwd: app });
+  writeFileSync(join(app, '.walkdown', 'blueprints', 'cart', 'spec.yml'), 'blueprint: cart\n');
+  execFileSync('git', ['add', '-A'], { cwd: app });
+  const commit = (...extra) =>
+    execFileSync(
+      'git',
+      ['-c', 'user.name=s', '-c', 'user.email=s@x', 'commit', '-q', ...extra, '-m', 'h'],
+      { cwd: app },
+    );
+  commit();
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0);
+  const [row] = m.rows();
+  commit('--amend', '--date', '2001-01-01T00:00:00');
+  execFileSync('git', ['reflog', 'expire', '--expire-unreachable=now', '--all'], { cwd: app });
+  execFileSync('git', ['gc', '-q', '--prune=now'], { cwd: app });
+  mkdirSync(join(m.home, 'code'));
+  const moved = join(m.home, 'code', 'shop');
+  execFileSync('mv', [app, moved]);
+  const r = m.cli(moved, 'blueprints', 'import', '.', '--all');
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, new RegExp(`~ moved .*\`${row.id}\``), r.stdout);
 });
 
 test('another repository renamed into a moved project’s path, older than its registration, does not keep its rows @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {

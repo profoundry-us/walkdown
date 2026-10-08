@@ -37,6 +37,7 @@ import {
   readRegistry,
   reclaimFromClone,
   register,
+  relearnCheckout,
   repointMovedCheckout,
   SPEC_FILE,
   tilde,
@@ -319,6 +320,7 @@ export async function run(args) {
     const there = canon(join(wt.checkout, relative(wt.worktree, h.dir)));
     return isHome(there) ? { ...h, dir: there } : { ...h, checkout: top };
   };
+  relearnCheckout(checkout);
   const listed = listedHomes();
   if (claimedByGone(homes.map((h) => at_(h).dir))) return end(2);
   const isListed = (h) => listed.has(canon(at_(h).dir));

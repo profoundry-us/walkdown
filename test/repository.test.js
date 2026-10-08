@@ -201,6 +201,20 @@ const moved = [
     true,
   ],
   [
+    'its very .git moved, its only commit amended and collected',
+    {},
+    { '/w/new': app({ commits: ['r9'] }) },
+    null,
+    true,
+  ],
+  [
+    'its .git inode reused by another repository elsewhere',
+    {},
+    { '/w/new': { git: '1:100', commits: ['z1'], origin: 'github.com/zed/notes' } },
+    null,
+    false,
+  ],
+  [
     'its project named outright, whatever stands there',
     {},
     { '/w/new': { git: '1:300' } },
