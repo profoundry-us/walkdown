@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-08T02:38:42.437Z
 anchor:
   rule: status.derived.stale-never-passes
-status: open
+status: answered
 body: A signature lapses only when a rule's wording changes. So a fix to a rule
   a signer already passed never comes back to them, unless they had sent the
   rule back first. By a fix I mean a thread addressed and judged by the agent
@@ -24,3 +24,9 @@ options:
   - label: Leave it as it is
     why: a signature stands until the wording changes; a person who wants to look
       again opens the rule
+replies:
+  - author: topher
+    created: 2026-10-08T21:44:06Z
+    body: Ask only when the thread was theirs
+    answer: true
+chosen: Ask only when the thread was theirs

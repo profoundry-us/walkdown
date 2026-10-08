@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-08T13:37:22.095Z
 anchor:
   rule: status.sweep.deliberate
-status: open
+status: answered
 body: Should a sweep marker that `rules move` copies into another blueprint
   apply only to the rules that moved? Found while judging at 793988a. A sweep
   was declared on checkout, then one rule was moved to search. The move copied
@@ -19,3 +19,9 @@ options:
   - label: The whole destination
     why: a copied marker sweeps every rule in search, and the rule says a move can
       do that
+replies:
+  - author: topher
+    created: 2026-10-08T21:45:02Z
+    body: Only the moved rules
+    answer: true
+chosen: Only the moved rules

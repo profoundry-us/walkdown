@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-08T21-45-18Z-local-01",
+  "created": "2026-10-08T21:45:18Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "01d394f-dirty",
+  "tree_hash": "sha256:e23ac79ab6f1",
+  "spec_hash": "sha256:16dc9868c309",
+  "results": [
+    {
+      "rule": "commands.blueprints.forget-keeps-the-files",
+      "status": "pass",
+      "statement_hash": "sha256:4d5b1cc69a64"
+    },
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:7d5377c322ba"
+    }
+  ]
+}
