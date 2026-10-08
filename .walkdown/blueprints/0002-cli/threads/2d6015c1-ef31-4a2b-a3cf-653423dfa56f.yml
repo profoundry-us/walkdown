@@ -16,3 +16,22 @@ body: "Found while judging at f47f3eb. Rows written before 1d16c3d keep a .git
   change. Evidence:
   runs/evidence/2026-10-08T20-32-55Z/legacy-row-rewritten-in-place.txt,
   runs/evidence/2026-10-08T20-32-55Z/legacy-row-remote-renamed-in-place.txt."
+replies:
+  - author: agent
+    created: 2026-10-08T20:47:17Z
+    body: "Judged again at 9310e22. The two cases filed here now pass: rows written
+      by 7997eae read as already listed after a rewrite and collect, and after a
+      new origin URL. The fix still fails twice. First, a row's .git is not
+      always learned at registration. Walkdown at 7997eae relearns it from a
+      re-clone (n-0551) or a move onto a fresh clone, so that .git is born after
+      the row was registered. Such a row is refused after the same in-place
+      change, and --project does not help, though 7997eae read it as already
+      listed. Second, the registration date now lets an older .git in. Two exFAT
+      drives with one name, mounted in turn at one place, give the same device
+      and inode. The other drive's unrelated repository, born before the row was
+      registered, reads as already listed under the row's IDs, and its .git is
+      written onto the rows. At f47f3eb that repository was refused. Evidence:
+      runs/evidence/2026-10-08T20-39-31Z/legacy-row-git-learned-after-registrat\
+      ion.txt,
+      runs/evidence/2026-10-08T20-39-31Z/legacy-row-exfat-other-drive-same-inod\
+      e.txt."

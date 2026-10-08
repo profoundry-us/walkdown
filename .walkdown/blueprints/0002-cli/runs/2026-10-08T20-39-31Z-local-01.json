@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-08T20-39-31Z-local-01",
+  "created": "2026-10-08T20:39:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "9310e22-dirty",
+  "spec_hash": "sha256:9b32d43f30d4",
+  "results": [
+    {
+      "rule": "commands.blueprints.import-takes-what-it-is-pointed-at",
+      "status": "fail",
+      "statement_hash": "sha256:84224634448c",
+      "evidence": [
+        "runs/evidence/2026-10-08T20-39-31Z/base.txt",
+        "runs/evidence/2026-10-08T20-39-31Z/legacy-row-in-place.txt",
+        "runs/evidence/2026-10-08T20-39-31Z/legacy-row-git-learned-after-registration.txt",
+        "runs/evidence/2026-10-08T20-39-31Z/legacy-row-exfat-other-drive-same-inode.txt",
+        "runs/evidence/2026-10-08T20-39-31Z/exfat-legacy-and-fresh.txt",
+        "runs/evidence/2026-10-08T20-39-31Z/reclone-amend-seturl.txt"
+      ],
+      "reasoning": "Driven in a terminal with node bin/walkdown.js on throwaway machines, with older rows written by an extract of 7997eae; nothing was served. Every step holds: the home's path, the list with and without a terminal, the unchanged row, and the empty path. The two n-0553 cases now pass, and so do the exFAT reuse refusals and the re-clone, amend and new-URL cases. The fix still fails in two arrangements. A row whose .git walkdown 7997eae learned after registration, from a re-clone or a move onto a fresh clone, is refused after an in-place rewrite or new origin URL. Two exFAT drives with one name give an unrelated, older repository the row's device and inode, and it reads as already listed under the row's IDs. 7997eae read the first as already listed, and f47f3eb refused the second. Both are replies on n-0553, which stays open.",
+      "threads": [
+        "2d6015c1-ef31-4a2b-a3cf-653423dfa56f"
+      ]
+    }
+  ]
+}

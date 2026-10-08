@@ -45,10 +45,6 @@ const row = {
   git: '1:100:5',
 };
 const HOME = row.home;
-// A row kept before birth times were knows only when it was registered.
-const REGISTERED = '2026-09-01T00:00:00.000Z';
-const EARLIER = Date.parse('2026-08-01T00:00:00.000Z');
-const LATER = Date.parse('2026-10-01T00:00:00.000Z');
 const app = (more = {}) => ({
   git: '1:100:5',
   commits: ['r1', 'c2'],
@@ -132,26 +128,16 @@ const gone = [
   ],
   [
     'registered before the birth time was kept, its inode handed to another repository (n-0552)',
-    { git: '1:100', registered: { at: REGISTERED } },
-    world({ '/w/app': { git: `1:100:${LATER}`, commits: ['z1'], origin: 'github.com/zed/site' } }, [
-      HOME,
-    ]),
+    { git: '1:100' },
+    world({ '/w/app': { git: '1:100:9', commits: ['z1'], origin: 'github.com/zed/site' } }, [HOME]),
     true,
   ],
   [
-    'registered before the birth time was kept, its history rewritten and its org renamed (n-0553)',
-    { git: '1:100', registered: { at: REGISTERED } },
-    world(
-      {
-        '/w/app': app({
-          git: `1:100:${EARLIER}`,
-          commits: ['r9'],
-          origin: 'github.com/acme-inc/app',
-        }),
-      },
-      [HOME],
-    ),
-    false,
+    // No fact tells this from the case above; --project lets the person say (n-0553).
+    'registered before the birth time was kept, its history rewritten and its org renamed',
+    { git: '1:100' },
+    world({ '/w/app': app({ commits: ['r9'], origin: 'github.com/acme-inc/app' }) }, [HOME]),
+    true,
   ],
   ['a folder that is no repository, its home gone', {}, world({ '/w/app': {} }), true],
   ['a folder that is no repository, its home on disk', {}, world({ '/w/app': {} }, [HOME]), false],

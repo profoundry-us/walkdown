@@ -41,6 +41,7 @@ import {
   repointMovedCheckout,
   SPEC_FILE,
   tilde,
+  vouchForCheckout,
 } from '../../lib/locations.js';
 import { refreshIndex } from '../../lib/registry.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
@@ -217,8 +218,9 @@ export async function run(args) {
       );
       return end(2);
     }
+    if (checkout) relearnCheckout(checkout);
     const already = listedHomes().get(canon(homeDir));
-    if (already && claimedByGone([homeDir])) return end(2);
+    if (already && checkout && claimedByGone([homeDir], checkout, values.project)) return end(2);
     if (already) {
       if (values.json)
         console.log(
@@ -322,7 +324,14 @@ export async function run(args) {
   };
   relearnCheckout(checkout);
   const listed = listedHomes();
-  if (claimedByGone(homes.map((h) => at_(h).dir))) return end(2);
+  if (
+    claimedByGone(
+      homes.map((h) => at_(h).dir),
+      checkout,
+      values.project,
+    )
+  )
+    return end(2);
   const isListed = (h) => listed.has(canon(at_(h).dir));
   const fresh = homes.filter((h) => !isListed(h));
   let known = homes.filter(isListed);
@@ -600,7 +609,7 @@ function onlyInWorktree(dir, wt) {
  * ones beside them would list one folder twice. So it is said, with the way
  * out (n-0547).
  */
-function claimedByGone(dirs) {
+function claimedByGone(dirs, checkout, project) {
   const rows = readRegistry().rows;
   const gone = dirs
     .map((d) =>
@@ -608,6 +617,13 @@ function claimedByGone(dirs) {
     )
     .filter((r) => r && checkoutGone(r));
   if (!gone.length) return false;
+  // At its own path, the person can say it is the same repository still,
+  // where its history and its remote have both changed (n-0553).
+  const own = canon(expand(String(gone[0].checkout))) === canon(checkout);
+  if (own && project && project === String(gone[0].project)) {
+    const ids = vouchForCheckout(checkout, project);
+    if (ids.length) return false;
+  }
   const ids = gone.map((r) => `\`${r.id}\``).join(', ');
   console.error(
     red(
@@ -616,7 +632,7 @@ function claimedByGone(dirs) {
   );
   console.error(
     dim(
-      `  If \`${gone[0].project}\` moved, import it where it is now and its IDs go with it. If it is gone for good, forget each of its IDs here (the files stay), then import this one:`,
+      `  If this is \`${gone[0].project}\` still, its history or its remote changed, \`--project ${gone[0].project}\` says so and keeps its IDs. If \`${gone[0].project}\` moved, import it where it is now and its IDs go with it. If it is gone for good, forget each of its IDs here (the files stay), then import this one:`,
     ),
   );
   // Every row of that checkout, not only those this import met (n-0548).

@@ -463,7 +463,7 @@ test('another repository renamed into a moved project’s path, older than its r
   );
 });
 
-test('a row kept before the birth time was is still its checkout after a rewrite and a new remote, and learns it on import @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
+test('a row kept before the birth time was learns it on import, and --project vouches for it once no fact can @rule:commands.blueprints.import-takes-what-it-is-pointed-at', () => {
   const m = machine('legacy-git');
   const app = m.repo('app');
   mkdirSync(join(app, '.walkdown', 'blueprints', 'cart'), { recursive: true });
@@ -473,29 +473,28 @@ test('a row kept before the birth time was is still its checkout after a rewrite
   if (born.split(':').length < 3) return; // a disk that keeps no birth time
   // As 1d16c3d^ wrote it: device and inode only (n-0552).
   const reg = join(m.wd, 'registry.yml');
-  writeFileSync(reg, readFileSync(reg, 'utf8').replace(/(git: \d+:\d+):\d+/, '$1'));
-  // Its only commit rewritten and collected, its remote set anew: the .git
-  // was born before the row was registered, so it is still the row's (n-0553).
-  execFileSync(
-    'git',
-    [
-      '-c',
-      'user.name=s',
-      '-c',
-      'user.email=s@x',
-      'commit',
-      '-q',
-      '--amend',
-      '--allow-empty',
-      '-m',
-      'r',
-    ],
-    { cwd: app },
-  );
-  execFileSync('git', ['reflog', 'expire', '--expire-unreachable=now', '--all'], { cwd: app });
-  execFileSync('git', ['gc', '-q', '--prune=now'], { cwd: app });
-  execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:acme-inc/app.git'], { cwd: app });
-  const r = m.cli(app, 'blueprints', 'import', '.', '--all');
-  assert.match(r.stdout, /already listed/, r.stdout);
+  const legacy = () =>
+    writeFileSync(reg, readFileSync(reg, 'utf8').replace(/(git: \d+:\d+):\d+/, '$1'));
+  legacy();
+  const learnt = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.match(learnt.stdout, /already listed/, learnt.stdout);
+  assert.equal(String(m.rows()[0].git), born, 'its first commit vouched, it learns its birth time');
+  // Rewritten and collected before any import: nothing tells it from another
+  // repository on a reused inode, so the person says (n-0553).
+  legacy();
+  const git = (...args) =>
+    execFileSync('git', ['-c', 'user.name=s', '-c', 'user.email=s@x', ...args], { cwd: app });
+  git('commit', '-q', '--amend', '--allow-empty', '-m', 'r');
+  git('reflog', 'expire', '--expire-unreachable=now', '--all');
+  git('gc', '-q', '--prune=now');
+  const refused = m.cli(app, 'blueprints', 'import', '.', '--all');
+  assert.equal(refused.status, 2, refused.stdout);
+  assert.match(refused.stderr, /`--project app` says so and keeps its IDs/);
+  const [row] = m.rows();
+  const vouched = m.cli(app, 'blueprints', 'import', '.', '--all', '--project', 'app');
+  assert.equal(vouched.status, 0, vouched.stderr);
+  assert.match(vouched.stdout, /already listed/, vouched.stdout);
+  assert.equal(m.rows()[0].id, row.id);
   assert.equal(String(m.rows()[0].git), born);
+  assert.equal(m.cli(app, 'blueprints', 'import', '.', '--all').status, 0, 'asked once');
 });
