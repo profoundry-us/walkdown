@@ -38,6 +38,13 @@ notes), and the runs ledger. The blueprint is the single source of truth for
 
 ## Ownership boundaries
 
+- **Design comes first.** No rule on a screen is built until the screen has a
+  design a person has accepted. A designer draws it where there is one. Where
+  there is none, or the request is waiting on nobody, a design agent draws a
+  draft instead: a separate agent, never the one building the app. Either way
+  the build waits for the person's acceptance. A screen built first leaves its
+  design to be inferred from the build, and nobody signed off on what it should
+  have been.
 - **Never edit `prototype/`** — design owns it. If the spec needs a screen that
   design hasn't drawn: set `prototype: null` on the storyboard screen, put a
   sketch under `proposals/` if a picture helps, and file a design request

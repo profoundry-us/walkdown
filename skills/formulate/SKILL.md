@@ -31,8 +31,10 @@ derives from it.
    thread (see ownership rules). States (modal open, error showing) are
    screens too if rules need to point at them. **Design comes first:** a rule
    on a screen with no design is not built until the screen's design has been
-   drawn and a person has accepted it. Say so in the report, and stop there
-   for that screen rather than building ahead of its design.
+   drawn and a person has accepted it. A designer draws it where there is
+   one; where there is none, a design agent drafts it (a separate agent,
+   never the one building). Say so in the report, and stop there for that
+   screen rather than building ahead of its design.
 
 3. **Stories, then rules.** One feature file per feature. Stories are user
    goals; rules are single verifiable statements — if a statement needs "and",

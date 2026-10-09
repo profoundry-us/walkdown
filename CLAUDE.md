@@ -45,28 +45,28 @@ reach `prototype-cli/screens/` only when a person accepts one.
 
 ## Design comes first
 
-A rule with a screen is built only after its screen has a design Topher has
-accepted (Topher, 2026-10-09). The design is given or agent-drawn, never
-inferred from the build. Building first and drawing after left 105 CLI screens
-with no design, and the only way out was to copy the build into
-`prototype-cli/screens/` and ask him to accept it after the fact.
+Every screen starts with a design (Topher, 2026-10-09). A rule with a screen
+is built only after that screen has a design Topher has accepted, in either
+blueprint. A designer's design comes first. Where none is given, the
+`designer` agent (`.claude/agents/designer.md`) draws a draft. The design is
+never inferred from the build: building first left 105 CLI screens with no
+design, and the only way out was to copy the build into `prototype-cli/screens/`
+and ask him to accept it after the fact.
 
-For a `cli` screen, in this order:
+In this order, for any screen:
 
-1. Write the scenario's screen into the storyboard with `prototype: null`, and
-   file the request: `walkdown threads new --blueprint cli --screen <id>
-   --reason request --as-agent --body "<what the screen must say>"`.
-2. Dispatch the `cli-designer` agent (`.claude/agents/cli-designer.md`) with
-   the request id. It draws `prototype-cli/drafts/<id>.html` and marks the
-   request addressed. It never touches code, scenarios or `screens/`.
-3. Stop and tell Topher the drafts are waiting. He walks them and accepts or
-   sends one back; nothing is built meanwhile.
-4. Once he accepts a draft, copy it to `prototype-cli/screens/<id>.html`, point
-   the storyboard at it, and only then write the scenario's expected lines and
-   the code that prints them.
-
-A panel screen follows the same order with `prototype/`, whose design is
-given. With none, ask for one before building.
+1. Put the screen in the storyboard with `prototype: null`, and file the
+   request: `walkdown threads new --blueprint <bp> --screen <id> --reason
+   request --as-agent --body "<what the screen must show>"`.
+2. If Topher has given a design, use it. Otherwise dispatch the `designer`
+   agent with the request ids. It draws into the blueprint's drafts folder,
+   `prototype/drafts/` for `walkdown` and `prototype-cli/drafts/` for `cli`,
+   and marks each request addressed. It never touches code, tests or the
+   accepted `screens/`.
+3. Stop and tell Topher the drafts are waiting. He walks them and accepts each
+   or sends it back. Nothing on those screens is built meanwhile.
+4. Once he accepts a draft, copy it to the `screens/` folder beside it, point
+   the storyboard at it, and only then write the checks and the code.
 
 ## Running walkdown's own CLI
 
