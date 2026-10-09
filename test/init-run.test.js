@@ -15,6 +15,7 @@ import { basename, join } from 'node:path';
 import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import {
+  detectRunner,
   installSkills,
   POINTER_BEGIN,
   POINTER_END,
@@ -657,4 +658,28 @@ test('walkdown run never has npx fetch a test runner: a missing one is refused b
   const ran = runChecks(blueprint(), { stdio: 'pipe' });
   assert.equal(ran.code, 0, ran.stderr);
   assert.equal(readFileSync(join(proj, 'yes.txt'), 'utf8'), 'false');
+});
+
+test('the runner init makes live is the one the project declares, and none when it declares none @rule:commands.blueprints.runner-is-what-the-project-declares', () => {
+  const cases = [
+    [
+      'playwright',
+      { 'package.json': JSON.stringify({ devDependencies: { '@playwright/test': '1' } }) },
+    ],
+    ['rspec', { Gemfile: "source 'https://rubygems.org'\ngem 'rspec-rails'\n" }],
+    ['node', { 'package.json': JSON.stringify({ scripts: { test: 'node --test test/' } }) }],
+    [null, { 'package.json': JSON.stringify({ scripts: { test: 'jest' } }) }],
+    [null, {}],
+  ];
+  for (const [expected, files] of cases) {
+    const root = mkdtempSync(join(tmpdir(), 'wd-runner-'));
+    for (const [name, body] of Object.entries(files)) writeFileSync(join(root, name), body);
+    assert.equal(detectRunner(root), expected, JSON.stringify(files));
+    scaffold(root, { specDir: join(root, 'spec') });
+    const spec = readFileSync(join(root, 'spec', 'spec.yml'), 'utf8');
+    const live = spec?.match(/^ {2}run_all: .*$/gm) ?? [];
+    assert.equal(live.length, expected ? 1 : 0, spec);
+    assert.doesNotMatch(spec, /^ {2}list: /m);
+    rmSync(root, { recursive: true, force: true });
+  }
 });

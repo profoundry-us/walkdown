@@ -1,0 +1,13 @@
+# `walkdown run` where spec.yml names no runner: it runs nothing, and says
+# what to set.
+screen: run-no-runner
+title: walkdown run with no runner set says what to set
+rule: commands.blueprints.runner-is-what-the-project-declares
+fixture: one-blueprint
+command: [run]
+exit: 2
+expect:
+  - '^spec\.yml has no runner\.run_all, so there is nothing to run\. Nothing ran\.$'
+  - '^Uncomment the block for your framework in ~/\.walkdown/projects/shop/blueprints/checkout/spec\.yml, or write the command that runs your tests\.$'
+anchors:
+  - { id: cli.run.no-runner, match: '^(spec\.yml has no runner|Uncomment the block)' }

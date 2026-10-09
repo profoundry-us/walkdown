@@ -1,0 +1,12 @@
+# `walkdown blueprints new` in a project whose package.json declares
+# Playwright: the spec.yml it writes runs Playwright, and it says so.
+screen: blueprints-new-runner-found
+title: blueprints new names the test runner the project declares
+rule: commands.blueprints.runner-is-what-the-project-declares
+fixture: g1-declares-playwright
+command: [blueprints, new]
+exit: 0
+expect:
+  - '^  runner: Playwright  what this project declares, so spec\.yml runs it$'
+anchors:
+  - { id: cli.new.runner, match: '^  runner:' }

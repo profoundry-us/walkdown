@@ -149,6 +149,26 @@ stories:
             - With `--project api` it is a project of its own, and nothing is asked
             - "`--commit spec|all` and `--dir` act as they did on `init`"
           statement_hash: sha256:90fc601d7dd0
+      - id: commands.blueprints.runner-is-what-the-project-declares
+        statement: The spec.yml `walkdown blueprints new` writes runs the test framework the project declares, and runs nothing when it declares none.
+        history: It wrote `npx playwright test` into every spec.yml, and in a project without Playwright that command downloaded it from the npm registry (2026-10-08).
+        because: A runner chosen for a project that does not use it is a guess, and the guess ended in the registry.
+        origin: walkdown
+        created_at: 2026-10-08
+        verify: [checks]
+        signoff: [eng, product]
+        screens: [blueprints-new-runner-found, blueprints-new-no-runner, run-no-runner]
+        steps:
+          given:
+            - A project declaring Playwright in its package.json, and a project declaring no test framework at all
+          when:
+            - "`walkdown blueprints new` is run in each, then `walkdown run` in the second"
+          then:
+            - In the first, spec.yml's Playwright block is live and the others are commented, and it says the runner is Playwright
+            - RSpec in a Gemfile, or `node --test` as package.json's test script, makes that block the live one the same way
+            - In the second, every block is commented and no run_all is set, and it says none was found and what to do
+            - "`walkdown run` there runs nothing, exits 2, and names the spec.yml to fill in"
+          statement_hash: sha256:fcd35510a48e
       - id: commands.blueprints.commit-moves-the-home
         statement: "`walkdown blueprints commit <none|spec|all>` moves a blueprint's home between `~/.walkdown/projects/<project>/blueprints/` and the repository's `.walkdown/blueprints/`, keeping its folder name and its ID."
         because: "Whether a spec is committed is decided per blueprint, sometimes long after it was made."

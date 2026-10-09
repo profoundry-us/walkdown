@@ -19,10 +19,10 @@ stories:
           then:
             - Every command works - init, where, lint, status, serve - and the panel and embed are served
             - Nothing walkdown ships at runtime resolves outside itself or Node's own library
-            - The config init writes names the clone's Playwright reporter by its file path, so a project with no walkdown package installed can record its checks
+            - The config init writes names the clone's own reporters and formatter by their file paths, so a project with no walkdown package installed can record its checks
             - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
             - "`walkdown run` never has npx fetch a test runner: one the project has not installed is refused by name, saying how to install it, and nothing runs"
-          statement_hash: sha256:8ebfb3b4fd1b
+          statement_hash: sha256:e4a3f1cc31d5
 
   - id: delivery.plugin
     title: walkdown is one plugin in Claude Code

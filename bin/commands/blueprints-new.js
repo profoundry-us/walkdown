@@ -75,7 +75,7 @@ export async function make({
     console.error('  all   the same, and the runs and evidence are committed too');
     return process.exit(2);
   }
-  const { scaffold } = await import('../../lib/init.js');
+  const { detectRunner, scaffold } = await import('../../lib/init.js');
   const root = canon(resolve(dir ?? process.cwd()));
 
   /*
@@ -629,6 +629,15 @@ export async function make({
             ` their history, and walkdown never touches the index.\n    ${leaving.slice(0, 3).join('\n    ')}${leaving.length > 3 ? `\n    … ${leaving.length - 3} more` : ''}`,
         ),
       );
+    // Which runner the new spec.yml names, if any: init no longer guesses one.
+    if (results.some((r) => r.action === 'created' && r.path.endsWith('spec.yml'))) {
+      const runner = detectRunner(checkout);
+      console.log(
+        runner
+          ? `  runner: ${{ playwright: 'Playwright', rspec: 'RSpec', node: 'node:test' }[runner]}  ${dim(`what this project declares, so spec.yml runs it`)}`
+          : `  runner: ${yellow('none found')}  ${dim('`walkdown run` has nothing to run until you uncomment the block for your framework in spec.yml')}`,
+      );
+    }
     if (results.some((r) => r.action === 'created')) {
       console.log(
         `\nNext: fill in ${dim(join(tilde(homeDir), 'spec.yml'))} (runner commands, targets), sketch your`,

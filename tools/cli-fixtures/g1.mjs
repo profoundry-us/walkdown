@@ -28,7 +28,7 @@ function suite(m, tests, ids) {
   for (const id of ids) {
     const file = join(m.specOf(id), 'spec.yml');
     const text = readFileSync(file, 'utf8').replace(
-      /^ {2}run_all: .*$/m,
+      /^ {2}(?:# )?run_all: .*$/m,
       `  run_all: "${command}"`,
     );
     writeFileSync(file, text);
@@ -36,6 +36,13 @@ function suite(m, tests, ids) {
 }
 
 export default {
+  /* `shop` declares Playwright in its package.json, as a project using it does. */
+  'g1-declares-playwright'(m) {
+    writeFileSync(
+      join(m.shop, 'package.json'),
+      `${JSON.stringify({ name: 'shop', devDependencies: { '@playwright/test': '^1.48.0' } }, null, 2)}\n`,
+    );
+  },
   /* walkdown's link already in Claude Code's skills folder. */
   'g1-plugin-linked'(m) {
     m.ok(['skills', '--into', '../claude/skills']);

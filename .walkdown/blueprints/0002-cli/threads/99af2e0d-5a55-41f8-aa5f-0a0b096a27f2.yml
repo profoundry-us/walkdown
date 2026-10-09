@@ -1,0 +1,12 @@
+id: n-0559
+uuid: 99af2e0d-5a55-41f8-aa5f-0a0b096a27f2
+kind: note
+reason: request
+author: agent
+created: 2026-10-09T03:26:26.092Z
+anchor:
+  screen: blueprints-new-runner-found
+status: open
+body: "New screen for commands.blueprints.runner-is-what-the-project-declares:
+  as-built/cli/blueprints-new-runner-found.html is the build; it wants a
+  design."

@@ -1,0 +1,11 @@
+# `walkdown blueprints new` in a project that declares no test framework:
+# spec.yml names no runner, and it says how to choose one.
+screen: blueprints-new-no-runner
+title: blueprints new says when it found no test runner to name
+rule: commands.blueprints.runner-is-what-the-project-declares
+command: [blueprints, new]
+exit: 0
+expect:
+  - '^  runner: none found  `walkdown run` has nothing to run until you uncomment the block for your framework in spec\.yml$'
+anchors:
+  - { id: cli.new.runner, match: '^  runner:' }

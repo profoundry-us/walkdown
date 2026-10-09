@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-09T03-27-28Z-local-01",
+  "created": "2026-10-09T03:27:28Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "f602004-dirty",
+  "tree_hash": "sha256:844d0dffc2e0",
+  "spec_hash": "sha256:85961afd7308",
+  "results": [
+    {
+      "rule": "commands.blueprints.runner-is-what-the-project-declares",
+      "status": "fail",
+      "statement_hash": "sha256:fcd35510a48e",
+      "duration_ms": 1,
+      "checks": [
+        "test/init-run.test.js:663"
+      ]
+    }
+  ]
+}

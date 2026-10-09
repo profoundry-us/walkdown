@@ -794,6 +794,33 @@ screens:
       - cli.status.acceptance
       - cli.exit
 
+  - id: blueprints-new-runner-found
+    title: "blueprints new names the test runner the project declares"
+    prototype: null
+    app: { path: /as-built/cli/blueprints-new-runner-found.html }
+    anchors:
+      - cli.prompt
+      - cli.new.runner
+      - cli.exit
+
+  - id: blueprints-new-no-runner
+    title: "blueprints new says when it found no test runner to name"
+    prototype: null
+    app: { path: /as-built/cli/blueprints-new-no-runner.html }
+    anchors:
+      - cli.prompt
+      - cli.new.runner
+      - cli.exit
+
+  - id: run-no-runner
+    title: "walkdown run with no runner set says what to set"
+    prototype: null
+    app: { path: /as-built/cli/run-no-runner.html }
+    anchors:
+      - cli.prompt
+      - cli.run.no-runner
+      - cli.exit
+
   - id: status-sent-back
     title: "A rule sent back reads as failing"
     prototype: null

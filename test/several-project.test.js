@@ -84,7 +84,7 @@ const build = (commit) => (root) => {
       cfg,
       readFileSync(cfg, 'utf8')
         .replace(
-          / {2}run_all: .*/,
+          / {2}(?:# )?run_all: .*/,
           `  run_all: "node --test --test-reporter=${REPORTER} --test-reporter-destination=stdout"`,
         )
         .replace(/^ {2}location: .*$/m, '  location: test/'),
