@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-03T00:52:00.236Z
 anchor:
   screen: status-two-blueprints
-status: open
+status: addressed
 body: "Same as our other new solution: use a separate agent to design."
 added: "Draw what `walkdown status` prints in a project with two blueprints,
   checkout and search (locations.several.reads-cover-all): one section per
@@ -15,3 +15,12 @@ added: "Draw what `walkdown status` prints in a project with two blueprints,
   cli.prompt, cli.status.section, cli.status.header, cli.status.summary,
   cli.exit. The frame is the terminal frame tools/cli-captures.mjs --frame
   prints, so the design and the as-built line up under the fade."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:43Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-two-blueprints.html is
+      as-built/cli/status-two-blueprints.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

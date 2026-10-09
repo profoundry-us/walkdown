@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  DESIGN: home-one-folder
+
+  Copied from as-built/cli/home-one-folder.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A blueprint's home is one folder</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> tree -a .walkdown/blueprints/checkout</div>
+      <div class="ln">.walkdown/blueprints/checkout</div>
+      <div data-testid="cli.home.tree">
+      <div class="ln">├── drafts</div>
+      <div class="ln">│   └── local.json</div>
+      <div class="ln">├── evidence</div>
+      <div class="ln">│   └── 2026-10-02T00-00-00Z</div>
+      <div class="ln">│       └── app-checkout.png</div>
+      <div class="ln">├── features</div>
+      <div class="ln">│   └── checkout.yml</div>
+      <div class="ln">├── runs</div>
+      <div class="ln">│   └── 2026-10-02T00-00-00Z-local-01.json</div>
+      <div class="ln">├── threads</div>
+      <div class="ln">│   └── 00000000-0000-4000-8000-000000000001.yml</div>
+      <div class="ln">├── .gitignore</div>
+      <div class="ln">├── AGENTS.md</div>
+      <div class="ln">├── records.yml</div>
+      <div class="ln">├── spec.yml</div>
+      <div class="ln">└── storyboard.yml</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.home.count">
+      <div class="ln">6 directories, 10 files</div>
+      </div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

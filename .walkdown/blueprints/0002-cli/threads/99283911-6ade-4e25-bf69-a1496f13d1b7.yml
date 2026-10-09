@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.699Z
 anchor:
   screen: skills-asks-where
-status: open
+status: addressed
 body: "Draw what `walkdown skills` prints with no `--into` and no terminal, in a
   repository whose spec is committed. It lists both places the skills could go,
   the person's own first, and what each already holds. Then it refuses: nothing
@@ -16,3 +16,11 @@ body: "Draw what `walkdown skills` prints with no `--into` and no terminal, in a
   as-built/cli/skills-asks-where.html is the build, from
   test/cli/scenarios/skills-asks-where.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:18Z
+    body: "Drawn by copying the build: prototype-cli/screens/skills-asks-where.html
+      is as-built/cli/skills-asks-where.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:11:59.359Z
 anchor:
   screen: claims-url-fragment
-status: open
+status: addressed
 body: "Draw what `walkdown claims --url http://localhost:3000/cart#coupon`
   prints where the storyboard declares both /cart and /cart#coupon: the address,
   and the blueprint claiming it on the screen cart-coupon rather than the cart
@@ -15,3 +15,12 @@ body: "Draw what `walkdown claims --url http://localhost:3000/cart#coupon`
   as-built/cli/claims-url-fragment.html is the build, from
   test/cli/scenarios/claims-url-fragment.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:29Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/claims-url-fragment.html is
+      as-built/cli/claims-url-fragment.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

@@ -6,10 +6,18 @@ author: agent
 created: 2026-10-06T02:05:12.189Z
 anchor:
   screen: help
-status: open
+status: addressed
 body: ADR 0014 changed this screen's shape. as-built/cli/help.html is the build.
   A new 'walkdown upgrade [--dry-run]' line under Getting ready. 'blueprints
   new' takes [<name>] [--folder <folder>] [--project <label>] [--code <pc>] (no
   --dir), 'import' takes --all|--only <folders> (no --id), and 'blueprints
   rename' takes <new-name> [--folder <folder>]. 'rules rename' is listed beside
   'rules move'.
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:39Z
+    body: "Drawn by copying the build: prototype-cli/screens/help.html is
+      as-built/cli/help.html without its as-built marks. The screen was built
+      before it was designed, so on Topher's direction (2026-10-09) the build is
+      its first design of record. Accept it, or send it back with what to
+      change."

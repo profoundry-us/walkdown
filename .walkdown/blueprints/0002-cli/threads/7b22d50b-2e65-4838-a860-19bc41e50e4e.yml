@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:33.381Z
 anchor:
   screen: status-evidence-not-acceptance
-status: open
+status: addressed
 body: "Draw what `walkdown status checkout.basics.pays` prints where the checks
   and the agent walkdown both pass and nobody has signed: the rule still
   pending, both evidence lines green, and eng reading not yet
@@ -15,3 +15,12 @@ body: "Draw what `walkdown status checkout.basics.pays` prints where the checks
   as-built/cli/status-evidence-not-acceptance.html is the build, from
   test/cli/scenarios/status-evidence-not-acceptance.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:25Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-evidence-not-acceptance.html is
+      as-built/cli/status-evidence-not-acceptance.html without its as-built
+      marks. The screen was built before it was designed, so on Topher's
+      direction (2026-10-09) the build is its first design of record. Accept it,
+      or send it back with what to change."

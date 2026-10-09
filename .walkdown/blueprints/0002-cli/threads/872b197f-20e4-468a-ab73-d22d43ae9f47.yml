@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:37.156Z
 anchor:
   screen: threads-transition-refused
-status: open
+status: addressed
 body: "Draw what `walkdown threads set q-0002 --status incorporated --blueprint
   checkout` prints for an open question: the illegal move named with both ends
   and the kind of thread, and that nothing was changed
@@ -14,3 +14,12 @@ body: "Draw what `walkdown threads set q-0002 --status incorporated --blueprint
   cli.unchanged, cli.exit. as-built/cli/threads-transition-refused.html is the
   build, from test/cli/scenarios/threads-transition-refused.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:21Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/threads-transition-refused.html is
+      as-built/cli/threads-transition-refused.html without its as-built marks.
+      The screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

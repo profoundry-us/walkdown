@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:21.212Z
 anchor:
   screen: blueprints-commit
-status: open
+status: addressed
 body: "Draw what `walkdown blueprints commit spec --blueprint search` prints:
   the whole home moved into the repository, the ID kept, and the home's own
   .gitignore written (commands.blueprints.commit-moves-the-home). Anchors:
@@ -14,3 +14,11 @@ body: "Draw what `walkdown blueprints commit spec --blueprint search` prints:
   as-built/cli/blueprints-commit.html is the build, from
   test/cli/scenarios/blueprints-commit.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:33Z
+    body: "Drawn by copying the build: prototype-cli/screens/blueprints-commit.html
+      is as-built/cli/blueprints-commit.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:34.512Z
 anchor:
   screen: status-reworded
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints after both of checkout's rules passed
   and then had their wording changed: `pays`, reworded with --reword as words
   only, still passing, and `totals`, given a new meaning, reading stale and
@@ -15,3 +15,11 @@ body: "Draw what `walkdown status` prints after both of checkout's rules passed
   cli.exit. as-built/cli/status-reworded.html is the build, from
   test/cli/scenarios/status-reworded.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:24Z
+    body: "Drawn by copying the build: prototype-cli/screens/status-reworded.html is
+      as-built/cli/status-reworded.html without its as-built marks. The screen
+      was built before it was designed, so on Topher's direction (2026-10-09)
+      the build is its first design of record. Accept it, or send it back with
+      what to change."

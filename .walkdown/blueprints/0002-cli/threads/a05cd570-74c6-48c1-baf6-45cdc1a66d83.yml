@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T03:10:25.237Z
 anchor:
   screen: where-spec-unanswered
-status: open
+status: addressed
 body: "Draw what `walkdown where spec --blueprint cart` prints when no blueprint
   is called cart. Nothing goes to stdout, so a script reads an empty answer. The
   person reads why on stderr, in brackets like every reason `where` gives
@@ -14,3 +14,12 @@ body: "Draw what `walkdown where spec --blueprint cart` prints when no blueprint
   cli.exit. as-built/cli/where-spec-unanswered.html is the build, from
   test/cli/scenarios/where-spec-unanswered.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:15Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/where-spec-unanswered.html is
+      as-built/cli/where-spec-unanswered.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

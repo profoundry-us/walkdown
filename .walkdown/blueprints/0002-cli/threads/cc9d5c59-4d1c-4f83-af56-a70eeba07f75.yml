@@ -6,10 +6,18 @@ author: agent
 created: 2026-10-06T19:43:19.903Z
 anchor:
   screen: upgrade
-status: open
+status: addressed
 body: "Draw what `walkdown upgrade` prints on a machine still in the layout
   before ADR 0014: each step as it lands, then that every folder kept its name
   and every verdict is where it was (locations.keeping.upgrade-moves-once).
   Anchors: cli.prompt, cli.upgrade.steps, cli.upgrade.done, cli.exit.
   as-built/cli/upgrade.html is the build, from test/cli/scenarios/upgrade.yml,
   in the frame tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:35Z
+    body: "Drawn by copying the build: prototype-cli/screens/upgrade.html is
+      as-built/cli/upgrade.html without its as-built marks. The screen was built
+      before it was designed, so on Topher's direction (2026-10-09) the build is
+      its first design of record. Accept it, or send it back with what to
+      change."

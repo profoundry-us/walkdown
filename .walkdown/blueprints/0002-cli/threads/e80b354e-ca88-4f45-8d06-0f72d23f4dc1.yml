@@ -6,8 +6,17 @@ author: topher
 created: 2026-10-08T13:11:35.291Z
 anchor:
   screen: threads-show-in-no-blueprint
-status: open
+status: addressed
 body: "A new screen: `walkdown threads show n-0099` in a project with two
   blueprints, where neither holds it. It says the thread is in none of them, not
   that a blueprint must be chosen (n-0504). Anchors: cli.prompt, cli.refusal,
   cli.exit."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:15Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/threads-show-in-no-blueprint.html is
+      as-built/cli/threads-show-in-no-blueprint.html without its as-built marks.
+      The screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

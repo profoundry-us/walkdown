@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:30.606Z
 anchor:
   screen: rules-move
-status: open
+status: addressed
 body: "Draw what `walkdown rules move checkout.basics --blueprint checkout --to
   search` prints: how many rules moved and which, the thread that went with them
   keeping its id, the run record copied with only their results, and that
@@ -15,3 +15,11 @@ body: "Draw what `walkdown rules move checkout.basics --blueprint checkout --to
   as-built/cli/rules-move.html is the build, from
   test/cli/scenarios/rules-move.yml, in the frame tools/cli-captures.mjs --frame
   prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:28Z
+    body: "Drawn by copying the build: prototype-cli/screens/rules-move.html is
+      as-built/cli/rules-move.html without its as-built marks. The screen was
+      built before it was designed, so on Topher's direction (2026-10-09) the
+      build is its first design of record. Accept it, or send it back with what
+      to change."

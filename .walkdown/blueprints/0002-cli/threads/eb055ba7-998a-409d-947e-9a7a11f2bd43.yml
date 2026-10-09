@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:18.268Z
 anchor:
   screen: status-after-commits
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints after two commits that touch neither
   the rules nor their code. The recorded checks pass still reads as a pass. The
   commit a run saw is kept for looking up, and never ages a verdict
@@ -15,3 +15,12 @@ body: "Draw what `walkdown status` prints after two commits that touch neither
   as-built/cli/status-after-commits.html is the build, from
   test/cli/scenarios/status-after-commits.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:18Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-after-commits.html is
+      as-built/cli/status-after-commits.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

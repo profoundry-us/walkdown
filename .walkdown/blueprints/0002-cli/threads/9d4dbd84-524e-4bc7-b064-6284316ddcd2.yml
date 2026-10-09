@@ -6,7 +6,15 @@ author: topher
 created: 2026-10-08T13:46:01.172Z
 anchor:
   screen: claims-url-query
-status: open
+status: addressed
 body: "A new screen: `walkdown claims --url` on an address whose query a screen
   declares. The declared query names the screen, as it does in the panel
   (n-0491). Anchors: cli.prompt, cli.claims.url, cli.claims.screen, cli.exit."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:14Z
+    body: "Drawn by copying the build: prototype-cli/screens/claims-url-query.html
+      is as-built/cli/claims-url-query.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

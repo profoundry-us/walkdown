@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:26.708Z
 anchor:
   screen: help-one-noun
-status: open
+status: addressed
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown threads help` prints (commands.shape.help-by-noun):
   the noun's verbs - list, new, show, reply, set - each with its usage line and
@@ -16,3 +16,11 @@ added: "Draw what `walkdown threads help` prints (commands.shape.help-by-noun):
   terminal frame tools/cli-captures.mjs --frame prints, so the design and the
   as-built line up under the fade; /as-built/cli/help-one-noun.html shows what
   the build prints today."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:42Z
+    body: "Drawn by copying the build: prototype-cli/screens/help-one-noun.html is
+      as-built/cli/help-one-noun.html without its as-built marks. The screen was
+      built before it was designed, so on Topher's direction (2026-10-09) the
+      build is its first design of record. Accept it, or send it back with what
+      to change."

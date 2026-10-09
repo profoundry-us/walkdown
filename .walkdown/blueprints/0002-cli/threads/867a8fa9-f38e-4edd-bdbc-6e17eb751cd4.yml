@@ -6,6 +6,15 @@ author: agent
 created: 2026-10-09T03:26:26.291Z
 anchor:
   screen: blueprints-new-no-runner
-status: open
+status: addressed
 body: "New screen for commands.blueprints.runner-is-what-the-project-declares:
   as-built/cli/blueprints-new-no-runner.html is the build; it wants a design."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:13Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/blueprints-new-no-runner.html is
+      as-built/cli/blueprints-new-no-runner.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

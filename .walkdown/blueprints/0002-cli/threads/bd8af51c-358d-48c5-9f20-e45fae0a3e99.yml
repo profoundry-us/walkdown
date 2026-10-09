@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.634Z
 anchor:
   screen: blueprints-rename
-status: open
+status: addressed
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown blueprints rename search find` prints
   (commands.blueprints.rename): each place the id changed - folder, registry,
@@ -17,3 +17,11 @@ added: "Draw what `walkdown blueprints rename search find` prints
   tools/cli-captures.mjs --frame prints, so the design and the as-built line up
   under the fade; /as-built/cli/blueprints-rename.html shows what the build
   prints today."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:40Z
+    body: "Drawn by copying the build: prototype-cli/screens/blueprints-rename.html
+      is as-built/cli/blueprints-rename.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

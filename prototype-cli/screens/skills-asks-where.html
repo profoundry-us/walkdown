@@ -1,0 +1,56 @@
+<!doctype html>
+<!--
+  DESIGN: skills-asks-where
+
+  Copied from as-built/cli/skills-asks-where.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>skills asks where they go and writes nothing on its own</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown skills</div>
+      <div class="ln"></div>
+      <div class="ln">  Where should the skills go? 2 places to put them.</div>
+      <div class="ln"></div>
+      <div data-testid="cli.skills.places">
+      <div class="ln">  1  ~/.claude/skills</div>
+      <div class="ln">     yours — Claude Code, as the walkdown plugin: one link to this clone, every project</div>
+      <div class="ln">     the walkdown plugin would be linked here</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">  2  ~/shop/.claude/skills</div>
+      <div class="ln">     the repository — a clone brings them; commit them with the spec</div>
+      <div class="ln">     nothing here yet</div>
+      <div class="ln"></div>
+      <div data-testid="cli.skills.refusal">
+      <div class="ln">Nothing written: there is no terminal to ask, and this never picks for you.</div>
+      <div class="ln">  `--into &lt;dir&gt;` names a directory; `--project` is the repository root above.</div>
+      </div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+  </div>
+</body>
+</html>

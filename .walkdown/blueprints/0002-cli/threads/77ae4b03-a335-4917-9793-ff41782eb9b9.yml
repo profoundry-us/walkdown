@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:52.150Z
 anchor:
   screen: where-says-why
-status: open
+status: addressed
 body: "Draw what `walkdown where` prints for a blueprint kept on this machine:
   each path with the reason that chose it, the registry for the spec and the
   code, the blueprint's own records.yml for each kind of record
@@ -14,3 +14,11 @@ body: "Draw what `walkdown where` prints for a blueprint kept on this machine:
   cli.why.records, cli.exit. as-built/cli/where-says-why.html is the build, from
   test/cli/scenarios/where-says-why.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:32Z
+    body: "Drawn by copying the build: prototype-cli/screens/where-says-why.html is
+      as-built/cli/where-says-why.html without its as-built marks. The screen
+      was built before it was designed, so on Topher's direction (2026-10-09)
+      the build is its first design of record. Accept it, or send it back with
+      what to change."

@@ -37,10 +37,36 @@ touched.
     node tools/cli-captures.mjs init-another  # one
 
 The design side is `prototype-cli/`, drawn by a separate design agent from
-the requests filed on each screen (ADR 0009). Never edit it: a screen that
+the requests filed on each screen (ADR 0009), before the screen is built
+("Design comes first" below). Never edit it: a screen that
 needs a new design gets a request (`walkdown threads new --blueprint cli
 --screen <id> --reason request`), and its drafts in `prototype-cli/drafts/`
 reach `prototype-cli/screens/` only when a person accepts one.
+
+## Design comes first
+
+A rule with a screen is built only after its screen has a design Topher has
+accepted (Topher, 2026-10-09). The design is given or agent-drawn, never
+inferred from the build. Building first and drawing after left 105 CLI screens
+with no design, and the only way out was to copy the build into
+`prototype-cli/screens/` and ask him to accept it after the fact.
+
+For a `cli` screen, in this order:
+
+1. Write the scenario's screen into the storyboard with `prototype: null`, and
+   file the request: `walkdown threads new --blueprint cli --screen <id>
+   --reason request --as-agent --body "<what the screen must say>"`.
+2. Dispatch the `cli-designer` agent (`.claude/agents/cli-designer.md`) with
+   the request id. It draws `prototype-cli/drafts/<id>.html` and marks the
+   request addressed. It never touches code, scenarios or `screens/`.
+3. Stop and tell Topher the drafts are waiting. He walks them and accepts or
+   sends one back; nothing is built meanwhile.
+4. Once he accepts a draft, copy it to `prototype-cli/screens/<id>.html`, point
+   the storyboard at it, and only then write the scenario's expected lines and
+   the code that prints them.
+
+A panel screen follows the same order with `prototype/`, whose design is
+given. With none, ask for one before building.
 
 ## Running walkdown's own CLI
 

@@ -14,7 +14,7 @@
 screens:
   - id: init-another
     title: init gives the project another blueprint
-    prototype: null   # requested of design in n-0341; /screens/init-another.html once accepted
+    prototype: /screens/init-another.html
     app: { path: /as-built/cli/init-another.html }
     anchors:
       - cli.prompt
@@ -25,7 +25,7 @@ screens:
 
   - id: status-two-blueprints
     title: Status in a project with two blueprints
-    prototype: null   # requested of design in n-0339; /screens/status-two-blueprints.html once accepted
+    prototype: /screens/status-two-blueprints.html
     app: { path: /as-built/cli/status-two-blueprints.html }
     anchors:
       - cli.prompt
@@ -36,7 +36,7 @@ screens:
 
   - id: where-one-kind
     title: where names one kind of path for every blueprint
-    prototype: null   # requested of design in n-0342; /screens/where-one-kind.html once accepted
+    prototype: /screens/where-one-kind.html
     app: { path: /as-built/cli/where-one-kind.html }
     anchors:
       - cli.prompt
@@ -45,7 +45,7 @@ screens:
 
   - id: writes-refused-among-several
     title: A write refused until --blueprint names one
-    prototype: null   # requested of design in n-0340; /screens/writes-refused-among-several.html once accepted
+    prototype: /screens/writes-refused-among-several.html
     app: { path: /as-built/cli/writes-refused-among-several.html }
     anchors:
       - cli.prompt
@@ -54,7 +54,7 @@ screens:
 
   - id: help
     title: walkdown help, grouped by noun
-    prototype: null
+    prototype: /screens/help.html
     app: { path: /as-built/cli/help.html }
     anchors:
       - cli.prompt
@@ -69,7 +69,7 @@ screens:
 
   - id: help-one-noun
     title: One noun's verbs
-    prototype: null
+    prototype: /screens/help-one-noun.html
     app: { path: /as-built/cli/help-one-noun.html }
     anchors:
       - cli.prompt
@@ -80,7 +80,7 @@ screens:
 
   - id: old-form-refused
     title: An old form, refused with the new one
-    prototype: null
+    prototype: /screens/old-form-refused.html
     app: { path: /as-built/cli/old-form-refused.html }
     anchors:
       - cli.prompt
@@ -91,7 +91,7 @@ screens:
 
   - id: init-fresh-machine
     title: init on a fresh machine
-    prototype: null
+    prototype: /screens/init-fresh-machine.html
     app: { path: /as-built/cli/init-fresh-machine.html }
     anchors:
       - cli.prompt
@@ -104,7 +104,7 @@ screens:
 
   - id: init-again
     title: init run again
-    prototype: null
+    prototype: /screens/init-again.html
     app: { path: /as-built/cli/init-again.html }
     anchors:
       - cli.prompt
@@ -117,7 +117,7 @@ screens:
 
   - id: init-missing-git
     title: init where git is missing
-    prototype: null
+    prototype: /screens/init-missing-git.html
     app: { path: /as-built/cli/init-missing-git.html }
     anchors:
       - cli.prompt
@@ -128,7 +128,7 @@ screens:
 
   - id: blueprints-new
     title: blueprints new in a project
-    prototype: null
+    prototype: /screens/blueprints-new.html
     app: { path: /as-built/cli/blueprints-new.html }
     anchors:
       - cli.prompt
@@ -140,7 +140,7 @@ screens:
 
   - id: blueprints-rename
     title: blueprints rename
-    prototype: null
+    prototype: /screens/blueprints-rename.html
     app: { path: /as-built/cli/blueprints-rename.html }
     anchors:
       - cli.prompt
@@ -150,7 +150,7 @@ screens:
 
   - id: threads-show
     title: threads show
-    prototype: null
+    prototype: /screens/threads-show.html
     app: { path: /as-built/cli/threads-show.html }
     anchors:
       - cli.prompt
@@ -161,7 +161,7 @@ screens:
 
   - id: threads-set-refused
     title: threads set refused by the lifecycle
-    prototype: null
+    prototype: /screens/threads-set-refused.html
     app: { path: /as-built/cli/threads-set-refused.html }
     anchors:
       - cli.prompt
@@ -171,7 +171,7 @@ screens:
 
   - id: blueprints-import
     title: blueprints import lists a repository's homes and asks which
-    prototype: null
+    prototype: /screens/blueprints-import.html
     app: { path: /as-built/cli/blueprints-import.html }
     anchors:
       - cli.prompt
@@ -182,7 +182,7 @@ screens:
 
   - id: blueprints-forget
     title: blueprints forget takes a blueprint off the list and keeps its files
-    prototype: null
+    prototype: /screens/blueprints-forget.html
     app: { path: /as-built/cli/blueprints-forget.html }
     anchors:
       - cli.prompt
@@ -192,7 +192,7 @@ screens:
 
   - id: rules-rename
     title: rules rename gives a rule a new id and keeps its verdicts
-    prototype: null
+    prototype: /screens/rules-rename.html
     app: { path: /as-built/cli/rules-rename.html }
     anchors:
       - cli.prompt
@@ -202,7 +202,7 @@ screens:
 
   - id: upgrade
     title: walkdown upgrade moves the old layout once
-    prototype: null
+    prototype: /screens/upgrade.html
     app: { path: /as-built/cli/upgrade.html }
     anchors:
       - cli.prompt
@@ -212,7 +212,7 @@ screens:
 
   - id: threads-relabel
     title: threads relabel says what it would do and asks first
-    prototype: null
+    prototype: /screens/threads-relabel.html
     app: { path: /as-built/cli/threads-relabel.html }
     anchors:
       - cli.prompt
@@ -222,7 +222,7 @@ screens:
 
   - id: import-any-folder
     title: Any folder holding a spec.yml is a home, whatever it is called
-    prototype: null
+    prototype: /screens/import-any-folder.html
     app: { path: /as-built/cli/import-any-folder.html }
     anchors:
       - cli.prompt
@@ -232,7 +232,7 @@ screens:
 
   - id: where-records-yml
     title: where reads each kind from records.yml, and says so
-    prototype: null
+    prototype: /screens/where-records-yml.html
     app: { path: /as-built/cli/where-records-yml.html }
     anchors:
       - cli.prompt
@@ -242,7 +242,7 @@ screens:
 
   - id: blueprints-two-searches
     title: Each blueprint has an ID this machine gave it
-    prototype: null
+    prototype: /screens/blueprints-two-searches.html
     app: { path: /as-built/cli/blueprints-two-searches.html }
     anchors:
       - cli.prompt
@@ -251,7 +251,7 @@ screens:
 
   - id: import-moved-checkout
     title: A moved checkout keeps its blueprint's ID
-    prototype: null
+    prototype: /screens/import-moved-checkout.html
     app: { path: /as-built/cli/import-moved-checkout.html }
     anchors:
       - cli.prompt
@@ -261,7 +261,7 @@ screens:
 
   - id: blueprints-new-label-taken
     title: A project label already taken is refused, saying how to choose another
-    prototype: null
+    prototype: /screens/blueprints-new-label-taken.html
     app: { path: /as-built/cli/blueprints-new-label-taken.html }
     anchors:
       - cli.prompt
@@ -271,7 +271,7 @@ screens:
 
   - id: where-worktree
     title: A worktree answers as its checkout's project
-    prototype: null
+    prototype: /screens/where-worktree.html
     app: { path: /as-built/cli/where-worktree.html }
     anchors:
       - cli.prompt
@@ -281,7 +281,7 @@ screens:
 
   - id: blueprints-commit
     title: blueprints commit moves the whole home in, keeping its ID
-    prototype: null
+    prototype: /screens/blueprints-commit.html
     app: { path: /as-built/cli/blueprints-commit.html }
     anchors:
       - cli.prompt
@@ -291,7 +291,7 @@ screens:
 
   - id: records-move
     title: records move moves one kind and the registry says where
-    prototype: null
+    prototype: /screens/records-move.html
     app: { path: /as-built/cli/records-move.html }
     anchors:
       - cli.prompt
@@ -301,7 +301,7 @@ screens:
 
   - id: skills-install
     title: skills installs the plugin the way init does
-    prototype: null
+    prototype: /screens/skills-install.html
     app: { path: /as-built/cli/skills-install.html }
     anchors:
       - cli.prompt
@@ -310,7 +310,7 @@ screens:
 
   - id: home-one-folder
     title: A blueprint's home is one folder
-    prototype: null
+    prototype: /screens/home-one-folder.html
     app: { path: /as-built/cli/home-one-folder.html }
     anchors:
       - cli.prompt
@@ -320,7 +320,7 @@ screens:
 
   - id: gitignore-commit-spec
     title: A committed spec's own .gitignore says what stays out
-    prototype: null
+    prototype: /screens/gitignore-commit-spec.html
     app: { path: /as-built/cli/gitignore-commit-spec.html }
     anchors:
       - cli.prompt
@@ -330,7 +330,7 @@ screens:
 
   - id: where-says-why
     title: where says why each path was chosen
-    prototype: null
+    prototype: /screens/where-says-why.html
     app: { path: /as-built/cli/where-says-why.html }
     anchors:
       - cli.prompt
@@ -340,7 +340,7 @@ screens:
 
   - id: status-unimported
     title: An unimported home is no blueprint, and the refusal names it
-    prototype: null
+    prototype: /screens/status-unimported.html
     app: { path: /as-built/cli/status-unimported.html }
     anchors:
       - cli.prompt
@@ -349,7 +349,7 @@ screens:
 
   - id: where-hand-written-row
     title: A row written by hand is set aside, and where says so
-    prototype: null
+    prototype: /screens/where-hand-written-row.html
     app: { path: /as-built/cli/where-hand-written-row.html }
     anchors:
       - cli.prompt
@@ -359,7 +359,7 @@ screens:
 
   - id: blueprints-new-outside-the-tree
     title: A new blueprint adds nothing to the repository
-    prototype: null
+    prototype: /screens/blueprints-new-outside-the-tree.html
     app: { path: /as-built/cli/blueprints-new-outside-the-tree.html }
     anchors:
       - cli.prompt
@@ -369,7 +369,7 @@ screens:
 
   - id: run-spec-hash
     title: A run records the hash of the spec it was judged against
-    prototype: null
+    prototype: /screens/run-spec-hash.html
     app: { path: /as-built/cli/run-spec-hash.html }
     anchors:
       - cli.prompt
@@ -378,7 +378,7 @@ screens:
 
   - id: pointer-several-agent-files
     title: With several agent files, the pointer waits to be told which
-    prototype: null
+    prototype: /screens/pointer-several-agent-files.html
     app: { path: /as-built/cli/pointer-several-agent-files.html }
     anchors:
       - cli.prompt
@@ -387,7 +387,7 @@ screens:
 
   - id: pointer-paragraph
     title: The pointer says where the specs are and names no blueprint
-    prototype: null
+    prototype: /screens/pointer-paragraph.html
     app: { path: /as-built/cli/pointer-paragraph.html }
     anchors:
       - cli.prompt
@@ -396,7 +396,7 @@ screens:
 
   - id: pointer-own-words
     title: walkdown owns its block in the agent file and nothing else
-    prototype: null
+    prototype: /screens/pointer-own-words.html
     app: { path: /as-built/cli/pointer-own-words.html }
     anchors:
       - cli.prompt
@@ -406,7 +406,7 @@ screens:
 
   - id: thread-file
     title: A thread's file is named by its UUID, and its label is inside
-    prototype: null
+    prototype: /screens/thread-file.html
     app: { path: /as-built/cli/thread-file.html }
     anchors:
       - cli.prompt
@@ -415,7 +415,7 @@ screens:
 
   - id: claims-url-fragment
     title: "The URL's fragment names a screen of its own"
-    prototype: null
+    prototype: /screens/claims-url-fragment.html
     app: { path: /as-built/cli/claims-url-fragment.html }
     anchors:
       - cli.prompt
@@ -425,7 +425,7 @@ screens:
 
   - id: clone-config-by-path
     title: "The config names the clone's reporter by its path, with nothing to install"
-    prototype: null
+    prototype: /screens/clone-config-by-path.html
     app: { path: /as-built/cli/clone-config-by-path.html }
     anchors:
       - cli.prompt
@@ -435,7 +435,7 @@ screens:
 
   - id: lint-across-blueprints
     title: "Lint accepts what names another blueprint's rule or thread"
-    prototype: null
+    prototype: /screens/lint-across-blueprints.html
     app: { path: /as-built/cli/lint-across-blueprints.html }
     anchors:
       - cli.prompt
@@ -446,7 +446,7 @@ screens:
 
   - id: lint-no-design-request
     title: "Lint names an undrawn screen nobody has asked design for"
-    prototype: null
+    prototype: /screens/lint-no-design-request.html
     app: { path: /as-built/cli/lint-no-design-request.html }
     anchors:
       - cli.prompt
@@ -456,7 +456,7 @@ screens:
 
   - id: lint-signoff-omits-eng
     title: "Lint flags a signoff list that leaves out engineering"
-    prototype: null
+    prototype: /screens/lint-signoff-omits-eng.html
     app: { path: /as-built/cli/lint-signoff-omits-eng.html }
     anchors:
       - cli.prompt
@@ -466,7 +466,7 @@ screens:
 
   - id: lint-steps-and-length
     title: "A rule with no steps is an error; a statement grown into a paragraph is a warning"
-    prototype: null
+    prototype: /screens/lint-steps-and-length.html
     app: { path: /as-built/cli/lint-steps-and-length.html }
     anchors:
       - cli.prompt
@@ -477,7 +477,7 @@ screens:
 
   - id: lint-weak-excuses
     title: "Lint names an excuse that does not argue its case"
-    prototype: null
+    prototype: /screens/lint-weak-excuses.html
     app: { path: /as-built/cli/lint-weak-excuses.html }
     anchors:
       - cli.prompt
@@ -488,7 +488,7 @@ screens:
 
   - id: plugin-skills
     title: "The walkdown plugin holds walkdown's five skills and nothing else"
-    prototype: null
+    prototype: /screens/plugin-skills.html
     app: { path: /as-built/cli/plugin-skills.html }
     anchors:
       - cli.prompt
@@ -498,7 +498,7 @@ screens:
 
   - id: records-move-refused
     title: "Moving records into a folder that holds some is refused"
-    prototype: null
+    prototype: /screens/records-move-refused.html
     app: { path: /as-built/cli/records-move-refused.html }
     anchors:
       - cli.prompt
@@ -507,7 +507,7 @@ screens:
 
   - id: reply-refused-voice
     title: "The machine's reply is refused when it misses the voice"
-    prototype: null
+    prototype: /screens/reply-refused-voice.html
     app: { path: /as-built/cli/reply-refused-voice.html }
     anchors:
       - cli.prompt
@@ -518,7 +518,7 @@ screens:
 
   - id: rules-move
     title: "rules move takes a story to another blueprint with its verdicts"
-    prototype: null
+    prototype: /screens/rules-move.html
     app: { path: /as-built/cli/rules-move.html }
     anchors:
       - cli.prompt
@@ -528,7 +528,7 @@ screens:
 
   - id: run-filed-by-rule
     title: "One run of the suite files each result in the blueprint holding its rule"
-    prototype: null
+    prototype: /screens/run-filed-by-rule.html
     app: { path: /as-built/cli/run-filed-by-rule.html }
     anchors:
       - cli.prompt
@@ -539,7 +539,7 @@ screens:
 
   - id: run-files-in-home
     title: "A test adapter files its run in the home outside the repository"
-    prototype: null
+    prototype: /screens/run-files-in-home.html
     app: { path: /as-built/cli/run-files-in-home.html }
     anchors:
       - cli.prompt
@@ -550,7 +550,7 @@ screens:
 
   - id: run-record-signatures
     title: "A walkdown run carries the roles it was signed in"
-    prototype: null
+    prototype: /screens/run-record-signatures.html
     app: { path: /as-built/cli/run-record-signatures.html }
     anchors:
       - cli.prompt
@@ -560,7 +560,7 @@ screens:
 
   - id: run-under-username
     title: "A verdict is written under the username, never the full name"
-    prototype: null
+    prototype: /screens/run-under-username.html
     app: { path: /as-built/cli/run-under-username.html }
     anchors:
       - cli.prompt
@@ -570,7 +570,7 @@ screens:
 
   - id: skills-again
     title: "Run again, the skills link is up to date"
-    prototype: null
+    prototype: /screens/skills-again.html
     app: { path: /as-built/cli/skills-again.html }
     anchors:
       - cli.prompt
@@ -580,7 +580,7 @@ screens:
 
   - id: skills-asks-where
     title: "skills asks where they go and writes nothing on its own"
-    prototype: null
+    prototype: /screens/skills-asks-where.html
     app: { path: /as-built/cli/skills-asks-where.html }
     anchors:
       - cli.prompt
@@ -590,7 +590,7 @@ screens:
 
   - id: skills-old-copies
     title: "--force removes an earlier walkdown's copies and keeps an edited one"
-    prototype: null
+    prototype: /screens/skills-old-copies.html
     app: { path: /as-built/cli/skills-old-copies.html }
     anchors:
       - cli.prompt
@@ -600,7 +600,7 @@ screens:
 
   - id: skills-others-links
     title: "Links walkdown did not make are left alone, even with --force"
-    prototype: null
+    prototype: /screens/skills-others-links.html
     app: { path: /as-built/cli/skills-others-links.html }
     anchors:
       - cli.prompt
@@ -609,7 +609,7 @@ screens:
       - cli.exit
   - id: claims-url-query
     title: A declared query tells two screens on one path apart
-    prototype: null
+    prototype: /screens/claims-url-query.html
     app: { path: /as-built/cli/claims-url-query.html }
     anchors:
       - cli.prompt
@@ -618,7 +618,7 @@ screens:
       - cli.exit
   - id: blueprints-import-forgotten
     title: A forgotten blueprint is taken back from inside its project
-    prototype: null
+    prototype: /screens/blueprints-import-forgotten.html
     app: { path: /as-built/cli/blueprints-import-forgotten.html }
     anchors:
       - cli.prompt
@@ -626,7 +626,7 @@ screens:
       - cli.exit
   - id: threads-show-in-no-blueprint
     title: A thread no blueprint holds is said to be in none of them
-    prototype: null
+    prototype: /screens/threads-show-in-no-blueprint.html
     app: { path: /as-built/cli/threads-show-in-no-blueprint.html }
     anchors:
       - cli.prompt
@@ -634,7 +634,7 @@ screens:
       - cli.exit
   - id: threads-new-request
     title: Filing on a screen alone says it is a design request
-    prototype: null
+    prototype: /screens/threads-new-request.html
     app: { path: /as-built/cli/threads-new-request.html }
     anchors:
       - cli.prompt
@@ -642,7 +642,7 @@ screens:
       - cli.exit
   - id: skills-walkdown-name-taken
     title: The plugin's name already taken by somebody's link
-    prototype: null
+    prototype: /screens/skills-walkdown-name-taken.html
     app: { path: /as-built/cli/skills-walkdown-name-taken.html }
     anchors:
       - cli.prompt
@@ -651,7 +651,7 @@ screens:
 
   - id: status-after-a-sweep
     title: "After a sweep, older verdicts read stale and the rest is counted"
-    prototype: null
+    prototype: /screens/status-after-a-sweep.html
     app: { path: /as-built/cli/status-after-a-sweep.html }
     anchors:
       - cli.prompt
@@ -662,7 +662,7 @@ screens:
 
   - id: status-after-commits
     title: "An unrelated commit leaves a pass a pass"
-    prototype: null
+    prototype: /screens/status-after-commits.html
     app: { path: /as-built/cli/status-after-commits.html }
     anchors:
       - cli.prompt
@@ -672,7 +672,7 @@ screens:
 
   - id: status-agent-assumed
     title: "A rule that declares nothing is judged by the agent"
-    prototype: null
+    prototype: /screens/status-agent-assumed.html
     app: { path: /as-built/cli/status-agent-assumed.html }
     anchors:
       - cli.prompt
@@ -682,7 +682,7 @@ screens:
 
   - id: status-approved-wording
     title: "Approving the wording covers a rule only until it is built"
-    prototype: null
+    prototype: /screens/status-approved-wording.html
     app: { path: /as-built/cli/status-approved-wording.html }
     anchors:
       - cli.prompt
@@ -692,7 +692,7 @@ screens:
 
   - id: status-design-agent
     title: "A design request waits for the design agent, apart from the building agent's queue"
-    prototype: null
+    prototype: /screens/status-design-agent.html
     app: { path: /as-built/cli/status-design-agent.html }
     anchors:
       - cli.prompt
@@ -702,7 +702,7 @@ screens:
 
   - id: status-evidence-key
     title: "A verdict cites its evidence by key, wherever the evidence went"
-    prototype: null
+    prototype: /screens/status-evidence-key.html
     app: { path: /as-built/cli/status-evidence-key.html }
     anchors:
       - cli.prompt
@@ -712,7 +712,7 @@ screens:
 
   - id: status-evidence-not-acceptance
     title: "Passing evidence is not a signature"
-    prototype: null
+    prototype: /screens/status-evidence-not-acceptance.html
     app: { path: /as-built/cli/status-evidence-not-acceptance.html }
     anchors:
       - cli.prompt
@@ -723,7 +723,7 @@ screens:
 
   - id: status-excused-tier
     title: "An excused tier shows its reason where its verdict would be"
-    prototype: null
+    prototype: /screens/status-excused-tier.html
     app: { path: /as-built/cli/status-excused-tier.html }
     anchors:
       - cli.prompt
@@ -733,7 +733,7 @@ screens:
 
   - id: status-latest-wins
     title: "The latest run at each target is the rule's status there"
-    prototype: null
+    prototype: /screens/status-latest-wins.html
     app: { path: /as-built/cli/status-latest-wins.html }
     anchors:
       - cli.prompt
@@ -744,7 +744,7 @@ screens:
 
   - id: status-moved-target
     title: "A verdict counts only at the address it was made against"
-    prototype: null
+    prototype: /screens/status-moved-target.html
     app: { path: /as-built/cli/status-moved-target.html }
     anchors:
       - cli.prompt
@@ -755,7 +755,7 @@ screens:
 
   - id: status-names-the-role
     title: "Each signature owed names its role"
-    prototype: null
+    prototype: /screens/status-names-the-role.html
     app: { path: /as-built/cli/status-names-the-role.html }
     anchors:
       - cli.prompt
@@ -765,7 +765,7 @@ screens:
 
   - id: status-every-queue
     title: "Every item waits in one queue, and says whose"
-    prototype: null
+    prototype: /screens/status-every-queue.html
     app: { path: /as-built/cli/status-every-queue.html }
     anchors:
       - cli.prompt
@@ -776,7 +776,7 @@ screens:
 
   - id: status-agent-queue
     title: "The agent is asked for what only it can do"
-    prototype: null
+    prototype: /screens/status-agent-queue.html
     app: { path: /as-built/cli/status-agent-queue.html }
     anchors:
       - cli.prompt
@@ -785,7 +785,7 @@ screens:
 
   - id: status-person-queue
     title: "A person is asked only for what is theirs"
-    prototype: null
+    prototype: /screens/status-person-queue.html
     app: { path: /as-built/cli/status-person-queue.html }
     anchors:
       - cli.prompt
@@ -794,7 +794,7 @@ screens:
 
   - id: status-agent-settles
     title: "The agent closes its own note once its fix is judged"
-    prototype: null
+    prototype: /screens/status-agent-settles.html
     app: { path: /as-built/cli/status-agent-settles.html }
     anchors:
       - cli.prompt
@@ -803,7 +803,7 @@ screens:
 
   - id: status-agent-first
     title: "A built rule is judged by the agent before anyone signs it"
-    prototype: null
+    prototype: /screens/status-agent-first.html
     app: { path: /as-built/cli/status-agent-first.html }
     anchors:
       - cli.prompt
@@ -812,7 +812,7 @@ screens:
 
   - id: status-one-role-signed
     title: "A rule passes only once every role it names has signed"
-    prototype: null
+    prototype: /screens/status-one-role-signed.html
     app: { path: /as-built/cli/status-one-role-signed.html }
     anchors:
       - cli.prompt
@@ -823,7 +823,7 @@ screens:
 
   - id: status-reworded
     title: "A pass on older wording is stale unless the rewording was words only"
-    prototype: null
+    prototype: /screens/status-reworded.html
     app: { path: /as-built/cli/status-reworded.html }
     anchors:
       - cli.prompt
@@ -834,7 +834,7 @@ screens:
 
   - id: status-role-from-the-run
     title: "A signature counts for the role its run was recorded under"
-    prototype: null
+    prototype: /screens/status-role-from-the-run.html
     app: { path: /as-built/cli/status-role-from-the-run.html }
     anchors:
       - cli.prompt
@@ -843,7 +843,7 @@ screens:
 
   - id: blueprints-new-runner-found
     title: "blueprints new names the test runner the project declares"
-    prototype: null
+    prototype: /screens/blueprints-new-runner-found.html
     app: { path: /as-built/cli/blueprints-new-runner-found.html }
     anchors:
       - cli.prompt
@@ -852,7 +852,7 @@ screens:
 
   - id: blueprints-new-no-runner
     title: "blueprints new says when it found no test runner to name"
-    prototype: null
+    prototype: /screens/blueprints-new-no-runner.html
     app: { path: /as-built/cli/blueprints-new-no-runner.html }
     anchors:
       - cli.prompt
@@ -861,7 +861,7 @@ screens:
 
   - id: run-no-runner
     title: "walkdown run with no runner set says what to set"
-    prototype: null
+    prototype: /screens/run-no-runner.html
     app: { path: /as-built/cli/run-no-runner.html }
     anchors:
       - cli.prompt
@@ -870,7 +870,7 @@ screens:
 
   - id: status-sent-back
     title: "A rule sent back reads as failing"
-    prototype: null
+    prototype: /screens/status-sent-back.html
     app: { path: /as-built/cli/status-sent-back.html }
     anchors:
       - cli.prompt
@@ -880,7 +880,7 @@ screens:
 
   - id: status-fix-on-their-thread
     title: "A fix on a thread you took part in brings a signed rule back to you"
-    prototype: null
+    prototype: /screens/status-fix-on-their-thread.html
     app: { path: /as-built/cli/status-fix-on-their-thread.html }
     anchors:
       - cli.prompt
@@ -889,7 +889,7 @@ screens:
 
   - id: status-signed-for-another
     title: "A signature names who accepted, not who typed it"
-    prototype: null
+    prototype: /screens/status-signed-for-another.html
     app: { path: /as-built/cli/status-signed-for-another.html }
     anchors:
       - cli.prompt
@@ -899,7 +899,7 @@ screens:
 
   - id: status-untagged-check
     title: "A checks pass no check claims any more is stale"
-    prototype: null
+    prototype: /screens/status-untagged-check.html
     app: { path: /as-built/cli/status-untagged-check.html }
     anchors:
       - cli.prompt
@@ -909,7 +909,7 @@ screens:
 
   - id: sweep-needs-a-reason
     title: "A sweep is refused until somebody says why"
-    prototype: null
+    prototype: /screens/sweep-needs-a-reason.html
     app: { path: /as-built/cli/sweep-needs-a-reason.html }
     anchors:
       - cli.prompt
@@ -919,7 +919,7 @@ screens:
 
   - id: thread-finding
     title: "A finding says why it exists and is signed by the agent"
-    prototype: null
+    prototype: /screens/thread-finding.html
     app: { path: /as-built/cli/thread-finding.html }
     anchors:
       - cli.prompt
@@ -929,7 +929,7 @@ screens:
 
   - id: thread-screen-request
     title: "A thread filed on a screen alone is a design request"
-    prototype: null
+    prototype: /screens/thread-screen-request.html
     app: { path: /as-built/cli/thread-screen-request.html }
     anchors:
       - cli.prompt
@@ -939,7 +939,7 @@ screens:
 
   - id: thread-stamps-utc
     title: "Every time a record keeps is an instant in UTC"
-    prototype: null
+    prototype: /screens/thread-stamps-utc.html
     app: { path: /as-built/cli/thread-stamps-utc.html }
     anchors:
       - cli.prompt
@@ -949,7 +949,7 @@ screens:
 
   - id: thread-waived
     title: "A waived note keeps who waived it and why"
-    prototype: null
+    prototype: /screens/thread-waived.html
     app: { path: /as-built/cli/thread-waived.html }
     anchors:
       - cli.prompt
@@ -960,7 +960,7 @@ screens:
 
   - id: threads-closed-by-a-pass
     title: "A signed pass closes every note on the rule"
-    prototype: null
+    prototype: /screens/threads-closed-by-a-pass.html
     app: { path: /as-built/cli/threads-closed-by-a-pass.html }
     anchors:
       - cli.prompt
@@ -971,7 +971,7 @@ screens:
 
   - id: threads-new-on-retired
     title: "A new thread on a retired rule is refused with its note"
-    prototype: null
+    prototype: /screens/threads-new-on-retired.html
     app: { path: /as-built/cli/threads-new-on-retired.html }
     anchors:
       - cli.prompt
@@ -980,7 +980,7 @@ screens:
 
   - id: threads-set-says-what-changed
     title: "A thread change reports what moved"
-    prototype: null
+    prototype: /screens/threads-set-says-what-changed.html
     app: { path: /as-built/cli/threads-set-says-what-changed.html }
     anchors:
       - cli.prompt
@@ -990,7 +990,7 @@ screens:
 
   - id: threads-show-relayed
     title: "A relayed reply keeps the person's words apart from the agent's"
-    prototype: null
+    prototype: /screens/threads-show-relayed.html
     app: { path: /as-built/cli/threads-show-relayed.html }
     anchors:
       - cli.prompt
@@ -1001,7 +1001,7 @@ screens:
 
   - id: threads-transition-refused
     title: "A question cannot be incorporated before it is answered"
-    prototype: null
+    prototype: /screens/threads-transition-refused.html
     app: { path: /as-built/cli/threads-transition-refused.html }
     anchors:
       - cli.prompt
@@ -1011,7 +1011,7 @@ screens:
 
   - id: threads-verify-nobody-named
     title: "Verifying waits for a person who has said who they are"
-    prototype: null
+    prototype: /screens/threads-verify-nobody-named.html
     app: { path: /as-built/cli/threads-verify-nobody-named.html }
     anchors:
       - cli.prompt
@@ -1021,7 +1021,7 @@ screens:
 
   - id: where-fresh-machine
     title: "Asking where things live writes nothing"
-    prototype: null
+    prototype: /screens/where-fresh-machine.html
     app: { path: /as-built/cli/where-fresh-machine.html }
     anchors:
       - cli.prompt
@@ -1031,7 +1031,7 @@ screens:
 
   - id: where-prototype-beside
     title: "The prototype is found beside the spec before the code"
-    prototype: null
+    prototype: /screens/where-prototype-beside.html
     app: { path: /as-built/cli/where-prototype-beside.html }
     anchors:
       - cli.prompt
@@ -1041,7 +1041,7 @@ screens:
 
   - id: threads-reply-names-its-blueprint
     title: "A reply is refused until --blueprint names the blueprint, even with only one"
-    prototype: null
+    prototype: /screens/threads-reply-names-its-blueprint.html
     app: { path: /as-built/cli/threads-reply-names-its-blueprint.html }
     anchors:
       - cli.prompt
@@ -1050,7 +1050,7 @@ screens:
 
   - id: status-nested-repository
     title: "A repository inside a checkout is said to be a repository of its own"
-    prototype: null
+    prototype: /screens/status-nested-repository.html
     app: { path: /as-built/cli/status-nested-repository.html }
     anchors:
       - cli.prompt
@@ -1060,7 +1060,7 @@ screens:
 
   - id: where-spec-unanswered
     title: "An empty answer from where still says why"
-    prototype: null
+    prototype: /screens/where-spec-unanswered.html
     app: { path: /as-built/cli/where-spec-unanswered.html }
     anchors:
       - cli.prompt

@@ -6,7 +6,16 @@ author: topher
 created: 2026-10-08T13:16:45.209Z
 anchor:
   screen: blueprints-import-forgotten
-status: open
+status: addressed
 body: "A new screen: `walkdown blueprints import` of a forgotten home kept in
   ~/.walkdown, run from inside its project, lists it again under a new number
   (n-0501). Anchors: cli.prompt, cli.import.row, cli.exit."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:14Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/blueprints-import-forgotten.html is
+      as-built/cli/blueprints-import-forgotten.html without its as-built marks.
+      The screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

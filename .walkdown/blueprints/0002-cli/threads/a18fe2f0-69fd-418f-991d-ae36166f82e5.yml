@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:30.973Z
 anchor:
   screen: run-files-in-home
-status: open
+status: addressed
 body: "Draw what `walkdown run --blueprint checkout` prints for a blueprint
   whose home is outside the repository: the tagged test passing, the reporter
   filing its run into the home's runs where `walkdown where` says they go, and
@@ -16,3 +16,11 @@ body: "Draw what `walkdown run --blueprint checkout` prints for a blueprint
   as-built/cli/run-files-in-home.html is the build, from
   test/cli/scenarios/run-files-in-home.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:28Z
+    body: "Drawn by copying the build: prototype-cli/screens/run-files-in-home.html
+      is as-built/cli/run-files-in-home.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

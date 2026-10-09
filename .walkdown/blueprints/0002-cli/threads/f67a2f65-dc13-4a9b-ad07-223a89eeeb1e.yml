@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.888Z
 anchor:
   screen: skills-others-links
-status: open
+status: addressed
 body: "Draw what `walkdown skills --force` prints in a skills folder holding
   walkdown's own link. Beside it sit two links somebody else made, at names
   walkdown would use. Walkdown's link reads up to date. Each of theirs is left
@@ -16,3 +16,12 @@ body: "Draw what `walkdown skills --force` prints in a skills folder holding
   as-built/cli/skills-others-links.html is the build, from
   test/cli/scenarios/skills-others-links.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:18Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/skills-others-links.html is
+      as-built/cli/skills-others-links.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

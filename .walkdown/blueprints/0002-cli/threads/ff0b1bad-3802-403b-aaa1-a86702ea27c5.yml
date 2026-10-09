@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:35.275Z
 anchor:
   screen: status-untagged-check
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints after the check suite stopped tagging
   `pays`: its recorded checks pass reading stale because nothing claims the rule
   now, beside `totals`, still tagged and still passing
@@ -15,3 +15,12 @@ body: "Draw what `walkdown status` prints after the check suite stopped tagging
   as-built/cli/status-untagged-check.html is the build, from
   test/cli/scenarios/status-untagged-check.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:23Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-untagged-check.html is
+      as-built/cli/status-untagged-check.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

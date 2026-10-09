@@ -1,0 +1,76 @@
+<!doctype html>
+<!--
+  DESIGN: status-agent-first
+
+  Copied from as-built/cli/status-agent-first.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A built rule is judged by the agent before anyone signs it</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown status --blueprint checkout</div>
+      <div class="ln">walkdown status — ~/.walkdown/projects/shop/blueprints/checkout</div>
+      <div class="ln"></div>
+      <div class="ln">     RULE                      LOCAL   AGENT   ACCEPTED  THREADS                 </div>
+      <div class="ln">  ○  checkout.basics.pays      ✓ pass  ✓ pass  ○ eng     n-0001 open, n-0005 open</div>
+      <div class="ln">  ○  checkout.basics.refunds   ✓ pass  never   ○ eng     —                       </div>
+      <div class="ln">  ○  checkout.basics.coupons   never   never   ○ eng     —                       </div>
+      <div class="ln">  ○  checkout.basics.receipts  ✓ pass  ✓ pass  ○ eng     n-0002 addressed        </div>
+      <div class="ln">  ○  checkout.basics.gifts     ✓ pass  never   ○ eng     q-0003 answered         </div>
+      <div class="ln">  ○  checkout.basics.wraps     ✓ pass  never   ○ eng     q-0004 open             </div>
+      <div class="ln"></div>
+      <div class="ln">0 verified, 6 pending, 0 failing</div>
+      <div class="ln"></div>
+      <div class="ln">  NEEDS A HUMAN</div>
+      <div class="ln">  ◆ walk down checkout.basics.pays — eng has not accepted it yet</div>
+      <div class="ln">  ◆ approve the wording of checkout.basics.coupons — not built yet, and eng has not approved it</div>
+      <div class="ln">  ◆ walk down checkout.basics.receipts — eng has not accepted it yet</div>
+      <div class="ln">  ◆ answer checkout.basics.wraps — 1 question (q-0004)</div>
+      <div class="ln"></div>
+      <div class="ln">  DESIGN QUEUE — for the designer</div>
+      <div class="ln">  ◆ draw checkout.basics.pays — design request n-0005</div>
+      <div class="ln"></div>
+      <div class="ln">  AGENT QUEUE</div>
+      <div data-testid="cli.status.judge-first">
+      <div class="ln">  ◆ judge checkout.basics.refunds — the agent tier has never judged it, and no signer is asked until it has</div>
+      </div>
+      <div class="ln">  ◆ cover checkout.basics.coupons — demands checks, and no check claims it</div>
+      <div class="ln">  ◆ judge checkout.basics.wraps — the agent tier has never judged it, and no signer is asked until it has</div>
+      <div class="ln">  ◆ address n-0001 (checkout.basics.pays) — open note</div>
+      <div class="ln">  ◆ settle n-0002 (checkout.basics.receipts) — the agent's own note, its fix since judged; the agent closes it as settled</div>
+      <div class="ln">  ◆ incorporate q-0003 (checkout.basics.gifts) — answered, fold it into the rule</div>
+      <div class="ln"></div>
+      <div class="ln">  ACTIVE THREADS</div>
+      <div class="ln">  n-0001 open (checkout.basics.pays) — The pay button does nothing on a declined card.</div>
+      <div class="ln">  n-0002 addressed (checkout.basics.receipts) — A receipt leaves out the shipping line.</div>
+      <div class="ln">  q-0003 answered (checkout.basics.gifts) — Does a gift card cover shipping too?</div>
+      <div class="ln">  q-0004 open (checkout.basics.wraps) — Is gift wrap free over fifty dollars?</div>
+      <div class="ln">  n-0005 open (checkout.basics.pays) — Draw the declined-card state.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

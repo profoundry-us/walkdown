@@ -6,6 +6,15 @@ author: agent
 created: 2026-10-09T14:30:23.150Z
 anchor:
   screen: status-person-queue
-status: open
+status: addressed
 body: "New screen: as-built/cli/status-person-queue.html is the build; it wants
   a design."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:12Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-person-queue.html is
+      as-built/cli/status-person-queue.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

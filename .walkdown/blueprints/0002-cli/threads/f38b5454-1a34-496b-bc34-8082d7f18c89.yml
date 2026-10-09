@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:35.656Z
 anchor:
   screen: thread-finding
-status: open
+status: addressed
 body: "Draw the record of a note topher filed with `--reason finding`, as `cat`
   prints it: the reason it exists, and the agent as its author, since a finding
   is the machine's account (threads.lifecycle.says-why-it-exists). Anchors:
@@ -14,3 +14,11 @@ body: "Draw the record of a note topher filed with `--reason finding`, as `cat`
   as-built/cli/thread-finding.html is the build, from
   test/cli/scenarios/thread-finding.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:22Z
+    body: "Drawn by copying the build: prototype-cli/screens/thread-finding.html is
+      as-built/cli/thread-finding.html without its as-built marks. The screen
+      was built before it was designed, so on Topher's direction (2026-10-09)
+      the build is its first design of record. Accept it, or send it back with
+      what to change."

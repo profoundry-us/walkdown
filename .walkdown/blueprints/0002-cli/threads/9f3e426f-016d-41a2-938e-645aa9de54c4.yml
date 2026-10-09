@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:18.077Z
 anchor:
   screen: status-after-a-sweep
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints after a sweep over the checks tier,
   with one of three rules checked again since. The two older checks verdicts
   read stale, and the agent column is untouched. The sweep section names the
@@ -16,3 +16,12 @@ body: "Draw what `walkdown status` prints after a sweep over the checks tier,
   cli.exit. as-built/cli/status-after-a-sweep.html is the build, from
   test/cli/scenarios/status-after-a-sweep.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:18Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-after-a-sweep.html is
+      as-built/cli/status-after-a-sweep.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

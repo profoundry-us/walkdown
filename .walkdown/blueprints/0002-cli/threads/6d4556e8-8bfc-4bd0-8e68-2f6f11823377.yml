@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:34.701Z
 anchor:
   screen: status-role-from-the-run
-status: open
+status: addressed
 body: "Draw what `walkdown status checkout.basics.pays` prints where a walkdown
   recorded before roles existed and one recorded under product both passed it:
   eng signed by sam from the first, product signed by topher from the second,
@@ -15,3 +15,12 @@ body: "Draw what `walkdown status checkout.basics.pays` prints where a walkdown
   cli.status.acceptance, cli.exit. as-built/cli/status-role-from-the-run.html is
   the build, from test/cli/scenarios/status-role-from-the-run.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:24Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-role-from-the-run.html is
+      as-built/cli/status-role-from-the-run.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

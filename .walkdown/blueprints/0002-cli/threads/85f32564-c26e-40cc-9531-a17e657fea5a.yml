@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:34.324Z
 anchor:
   screen: status-one-role-signed
-status: open
+status: addressed
 body: "Draw what `walkdown status checkout.basics.pays` prints for a rule naming
   eng and product, every tier passing and eng alone signed: still pending, eng
   signed by topher and product not yet
@@ -15,3 +15,12 @@ body: "Draw what `walkdown status checkout.basics.pays` prints for a rule naming
   as-built/cli/status-one-role-signed.html is the build, from
   test/cli/scenarios/status-one-role-signed.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:24Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-one-role-signed.html is
+      as-built/cli/status-one-role-signed.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

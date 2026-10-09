@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:37.523Z
 anchor:
   screen: where-fresh-machine
-status: open
+status: addressed
 body: "Draw what `walkdown where` prints on a machine with no ~/.walkdown at
   all: every row answered, the profile and registry named though neither exists,
   and the closing line that nothing was written
@@ -15,3 +15,12 @@ body: "Draw what `walkdown where` prints on a machine with no ~/.walkdown at
   as-built/cli/where-fresh-machine.html is the build, from
   test/cli/scenarios/where-fresh-machine.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:20Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/where-fresh-machine.html is
+      as-built/cli/where-fresh-machine.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

@@ -6,10 +6,19 @@ author: agent
 created: 2026-10-08T21:57:55.072Z
 anchor:
   screen: status-fix-on-their-thread
-status: open
+status: addressed
 body: "status.acceptance.fix-on-their-thread-comes-back needs this moment drawn:
   walkdown status after the agent's fix to a finding the signer replied on has
   been judged. The rule is still signed and verified in the table, and NEEDS A
   HUMAN asks the signer to walk it again, naming the thread and saying the
   signature stands. The as-built capture is at
   as-built/cli/status-fix-on-their-thread.html."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:14Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-fix-on-their-thread.html is
+      as-built/cli/status-fix-on-their-thread.html without its as-built marks.
+      The screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

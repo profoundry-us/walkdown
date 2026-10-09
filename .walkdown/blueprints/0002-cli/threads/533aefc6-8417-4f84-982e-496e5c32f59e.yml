@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:53.479Z
 anchor:
   screen: pointer-own-words
-status: open
+status: addressed
 body: "Draw a CLAUDE.md the team writes in, as cat prints it, after a second
   blueprint is committed: their words above and below, and walkdown's fenced
   block between them (locations.pointer.owns-only-its-block). Anchors:
@@ -14,3 +14,11 @@ body: "Draw a CLAUDE.md the team writes in, as cat prints it, after a second
   as-built/cli/pointer-own-words.html is the build, from
   test/cli/scenarios/pointer-own-words.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:30Z
+    body: "Drawn by copying the build: prototype-cli/screens/pointer-own-words.html
+      is as-built/cli/pointer-own-words.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

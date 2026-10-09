@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:34.893Z
 anchor:
   screen: status-sent-back
-status: open
+status: addressed
 body: "Draw what `walkdown status checkout.basics.pays` prints where every tier
   passes and eng looked and sent it back: the rule failing rather than pending,
   and eng's row saying sent back by topher with what he said
@@ -15,3 +15,11 @@ body: "Draw what `walkdown status checkout.basics.pays` prints where every tier
   as-built/cli/status-sent-back.html is the build, from
   test/cli/scenarios/status-sent-back.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:23Z
+    body: "Drawn by copying the build: prototype-cli/screens/status-sent-back.html
+      is as-built/cli/status-sent-back.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

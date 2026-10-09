@@ -1,0 +1,50 @@
+<!doctype html>
+<!--
+  DESIGN: skills-old-copies
+
+  Copied from as-built/cli/skills-old-copies.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>--force removes an earlier walkdown's copies and keeps an edited one</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown skills --into ../claude/skills --force</div>
+      <div data-testid="cli.skills.link">
+      <div class="ln">  + linked  ~/.claude/skills/walkdown → ~/src/walkdown</div>
+      </div>
+      <div data-testid="cli.skills.copies">
+      <div class="ln">  ! kept (an earlier copy, edited — remove it yourself)  ~/.claude/skills/walkdown-setup</div>
+      <div class="ln">  - removed (an earlier walkdown's copy)  ~/.claude/skills/walkdown-judge</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">  ~/.claude/skills</div>
+      <div class="ln">  Claude Code loads the walkdown plugin from here: /walkdown:judge, /walkdown:lint and the rest.</div>
+      <div class="ln">  Updating the clone updates them; there is nothing to copy again.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

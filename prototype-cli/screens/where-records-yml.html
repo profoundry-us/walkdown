@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  DESIGN: where-records-yml
+
+  Copied from as-built/cli/where-records-yml.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>where reads each kind from records.yml, and says so</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown where</div>
+      <div class="ln">walkdown where — 0001-sp-checkout</div>
+      <div class="ln"></div>
+      <div class="ln">  config    ~/.walkdown/profile.yml</div>
+      <div class="ln">            [yours — identity and defaults; registers nothing]</div>
+      <div class="ln">            ~/.walkdown/registry.yml</div>
+      <div class="ln">            [the registry — names this project, registered by blueprints new on 2026-10-02]</div>
+      <div class="ln">  answers   ~/shop/.walkdown</div>
+      <div class="ln">            [the `.walkdown` the registered home sits in]</div>
+      <div class="ln"></div>
+      <div class="ln">  spec      ~/shop/.walkdown/blueprints/checkout</div>
+      <div class="ln">            [this machine's registry (0001-sp-checkout)]</div>
+      <div data-testid="cli.where.kinds">
+      <div class="ln">  runs      ~/shop/.walkdown/blueprints/checkout/runs</div>
+      </div>
+      <div class="ln">            [the blueprint's own records.yml (0001-sp-checkout)]</div>
+      <div class="ln">  threads   ~/shop/.walkdown/blueprints/checkout/threads</div>
+      <div class="ln">            [the blueprint's own records.yml (0001-sp-checkout)]</div>
+      <div data-testid="cli.where.evidence">
+      <div class="ln">  evidence  ~/shop/.walkdown/blueprints/evidence</div>
+      </div>
+      <div class="ln">            [the blueprint's own records.yml (0001-sp-checkout)]</div>
+      <div class="ln">  drafts    ~/shop/.walkdown/blueprints/checkout/drafts</div>
+      <div class="ln">            [the blueprint's own records.yml (0001-sp-checkout)]</div>
+      <div class="ln">  code      ~/shop</div>
+      <div class="ln">            [this machine's registry, which says which checkout the blueprint belongs to]</div>
+      <div class="ln">  prototype —</div>
+      <div class="ln">            [spec.yml declares no `prototype.root`]</div>
+      <div class="ln">  proposals ~/shop/proposals  (does not exist yet)</div>
+      <div class="ln">            [in the code — nothing of that name beside the spec]</div>
+      <div class="ln">  tracked   spec, threads, evidence</div>
+      <div class="ln">            [asked git: runs is kept out by .walkdown/blueprints/checkout/.gitignore:8 `runs/`; drafts is kept out by .walkdown/blueprints/checkout/.gitignore:10 `drafts/`]</div>
+      <div class="ln">            [the tree says: ~/shop/.walkdown/blueprints/checkout/.gitignore keeps out runs/, evidence/, drafts/ — delete it to commit everything]</div>
+      <div class="ln">            ✗ .walkdown/blueprints/checkout/.gitignore says `evidence/`, but git does not keep .walkdown/blueprints/evidence out — the rule does not reach this home. Move the records under it (`walkdown records move &lt;kind&gt; --to &lt;path&gt; --blueprint 0001-sp-checkout`), or write a rule that names them.</div>
+      <div class="ln"></div>
+      <div class="ln">Nothing was written. See docs/08-locations.md for the resolution order.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

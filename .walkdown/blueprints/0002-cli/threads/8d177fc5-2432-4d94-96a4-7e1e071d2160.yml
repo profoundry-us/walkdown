@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:31.919Z
 anchor:
   screen: skills-old-copies
-status: open
+status: addressed
 body: "Draw what `walkdown skills --force` prints over the copies an earlier
   walkdown left: the link made, walkdown-judge removed because it is exactly as
   a release shipped it, and walkdown-setup kept and named as edited, for its
@@ -15,3 +15,11 @@ body: "Draw what `walkdown skills --force` prints over the copies an earlier
   as-built/cli/skills-old-copies.html is the build, from
   test/cli/scenarios/skills-old-copies.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:27Z
+    body: "Drawn by copying the build: prototype-cli/screens/skills-old-copies.html
+      is as-built/cli/skills-old-copies.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

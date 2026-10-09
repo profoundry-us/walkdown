@@ -1,0 +1,46 @@
+<!doctype html>
+<!--
+  DESIGN: import-moved-checkout
+
+  Copied from as-built/cli/import-moved-checkout.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A moved checkout keeps its blueprint's ID</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop-moved</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop-moved $</b> walkdown blueprints import . --all</div>
+      <div data-testid="cli.moved.row">
+      <div class="ln">  ~ moved    ~/shop-moved/.walkdown/blueprints/checkout  keeps its ID `0001-sp-checkout`: it was at ~/shop, which no longer exists</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.moved.done">
+      <div class="ln">  1 blueprint on this machine now · `walkdown blueprints` lists them</div>
+      </div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

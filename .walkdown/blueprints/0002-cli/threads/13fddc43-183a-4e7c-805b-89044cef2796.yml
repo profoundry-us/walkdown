@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:33.947Z
 anchor:
   screen: status-moved-target
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints once the review target points at
   https://pr-2.review.app: `pays`, which passed only at pr-1, reading never, and
   `totals`, whose passing run recorded no address, still passing
@@ -16,3 +16,12 @@ body: "Draw what `walkdown status` prints once the review target points at
   as-built/cli/status-moved-target.html is the build, from
   test/cli/scenarios/status-moved-target.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:25Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-moved-target.html is
+      as-built/cli/status-moved-target.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

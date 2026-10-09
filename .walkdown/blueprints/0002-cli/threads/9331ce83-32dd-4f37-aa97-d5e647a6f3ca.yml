@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:16.557Z
 anchor:
   screen: clone-config-by-path
-status: open
+status: addressed
 body: "Draw what `cat spec.yml` shows for a blueprint `walkdown blueprints new`
   just made. The runner block names this clone's Playwright reporter by its file
   path. A line says the clone is the install, and that nothing puts a walkdown
@@ -16,3 +16,12 @@ body: "Draw what `cat spec.yml` shows for a blueprint `walkdown blueprints new`
   as-built/cli/clone-config-by-path.html is the build, from
   test/cli/scenarios/clone-config-by-path.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:20Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/clone-config-by-path.html is
+      as-built/cli/clone-config-by-path.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

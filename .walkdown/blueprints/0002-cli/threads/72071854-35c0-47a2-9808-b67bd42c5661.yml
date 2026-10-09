@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.510Z
 anchor:
   screen: run-filed-by-rule
-status: open
+status: addressed
 body: "Draw what `walkdown run` prints with no `--blueprint`, where checkout and
   search share one test suite. The suite runs once. Each result is recorded in
   the blueprint that holds its rule, under one run id. The tag neither blueprint
@@ -15,3 +15,11 @@ body: "Draw what `walkdown run` prints with no `--blueprint`, where checkout and
   as-built/cli/run-filed-by-rule.html is the build, from
   test/cli/scenarios/run-filed-by-rule.yml, in the frame tools/cli-captures.mjs
   --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:19Z
+    body: "Drawn by copying the build: prototype-cli/screens/run-filed-by-rule.html
+      is as-built/cli/run-filed-by-rule.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

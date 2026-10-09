@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.941Z
 anchor:
   screen: threads-set-refused
-status: open
+status: addressed
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown threads set n-0001 --status verified --as-agent
   --reply ...` prints when the lifecycle refuses it
@@ -17,3 +17,12 @@ added: "Draw what `walkdown threads set n-0001 --status verified --as-agent
   tools/cli-captures.mjs --frame prints, so the design and the as-built line up
   under the fade; /as-built/cli/threads-set-refused.html shows what the build
   prints today."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:39Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/threads-set-refused.html is
+      as-built/cli/threads-set-refused.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

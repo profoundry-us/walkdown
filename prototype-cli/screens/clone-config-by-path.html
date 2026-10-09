@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  DESIGN: clone-config-by-path
+
+  Copied from as-built/cli/clone-config-by-path.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The config names the clone's reporter by its path, with nothing to install</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> cat home/projects/shop/blueprints/checkout/spec.yml</div>
+      <div class="ln">blueprint: checkout</div>
+      <div class="ln"></div>
+      <div class="ln"># How to run this project's checks (tests tagged with rule ids).</div>
+      <div class="ln"># Keep the block for your framework; delete the other.</div>
+      <div class="ln">runner:</div>
+      <div data-testid="cli.config.reporter">
+      <div class="ln">  # Playwright — add ['~/src/walkdown/lib/playwright-reporter.js'] to the reporter array in playwright.config.</div>
+      <div class="ln">  # That is this clone's reporter by path, because the clone is the install and</div>
+      <div class="ln">  # nothing puts a `walkdown` package in your node_modules. With walkdown</div>
+      <div class="ln">  # installed as a package, ['walkdown/reporter'] names the same file.</div>
+      </div>
+      <div class="ln">  run_all: "npx playwright test"</div>
+      <div class="ln">  run_for_rule: "npx playwright test --grep '@rule:{id}'"</div>
+      <div data-testid="cli.config.formatter">
+      <div class="ln">  # RSpec — the formatter is in this clone, loaded by its path; no gem to add:</div>
+      </div>
+      <div class="ln">  # run_all: "bundle exec rspec spec/workflows -I ~/src/walkdown/adapters/rspec/lib -r walkdown/formatter --format progress --format Walkdown::Formatter"</div>
+      <div class="ln">  # run_for_rule: "bundle exec rspec spec/workflows -I ~/src/walkdown/adapters/rspec/lib -r walkdown/formatter --format progress --format Walkdown::Formatter --tag 'rule:{id}'"</div>
+      <div class="ln">  # list: "bundle exec rspec spec/workflows -I ~/src/walkdown/adapters/rspec/lib -r walkdown/formatter --dry-run --format Walkdown::ListFormatter"</div>
+      <div class="ln">  #</div>
+      <div class="ln">  # No `list:` is needed: lint reads the rule tags written in the files</div>
+      <div class="ln">  # under authoring.location. Name one only when your framework builds tags</div>
+      <div class="ln">  # at run time and the files cannot show them - it runs on every lint, so</div>
+      <div class="ln">  # a framework's own lister costs a second or more each time.</div>
+      <div class="ln">  results: native</div>
+      <div class="ln">  targets:</div>
+      <div class="ln">    local:</div>
+      <div class="ln">      base_url: http://localhost:3000</div>
+      <div class="ln">      env: { APP_HOST: "http://localhost:3000" }</div>
+      <div class="ln">    # staging:</div>
+      <div class="ln">    #   base_url: https://staging.example.com</div>
+      <div class="ln">    #   env: { APP_HOST: "https://staging.example.com" }</div>
+      <div class="ln"></div>
+      <div class="ln"># Where the design prototype lives; `walkdown serve` mounts it at /prototype/.</div>
+      <div class="ln"># Design owns this directory — see AGENTS.md beside this file.</div>
+      <div class="ln"># prototype:</div>
+      <div class="ln">#   root: prototype/</div>
+      <div class="ln"></div>
+      <div class="ln">embed:</div>
+      <div class="ln">  anchor_attribute: data-testid   # shared element ids across prototype, app, and checks</div>
+      <div class="ln">  port: 4700</div>
+      <div class="ln"></div>
+      <div class="ln">authoring:</div>
+      <div class="ln">  location: tests/                # where checks live</div>
+      <div class="ln">  style: &gt;</div>
+      <div class="ln">    Tag each test with its rule id. Select elements by anchor, never CSS paths.</div>
+      <div class="ln">    One rule per test. See AGENTS.md beside this file.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

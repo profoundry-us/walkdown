@@ -1,0 +1,49 @@
+<!doctype html>
+<!--
+  DESIGN: reply-refused-voice
+
+  Copied from as-built/cli/reply-refused-voice.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The machine's reply is refused when it misses the voice</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads reply n-0001 "Fixed the declined card - the pay button now waits for the bank and shows its message - and a retry is offered under it." --as-agent --blueprint checkout</div>
+      <div data-testid="cli.voice.fault">
+      <div class="ln">the machine's words do not pass the voice (docs/13-voice.md):</div>
+      <div class="ln">  - dash-clause: two thoughts bolted on with dashes ("Fixed the declined card - the pay button now waits for th…") — give the second its own sentence, or cut it</div>
+      </div>
+      <div data-testid="cli.voice.way-past">
+      <div class="ln">Reword them, or file them as they are with --as-is.</div>
+      </div>
+      <div data-testid="cli.unchanged">
+      <div class="ln">Nothing was changed, and the reply did not land.</div>
+      </div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+  </div>
+</body>
+</html>

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:20.838Z
 anchor:
   screen: blueprints-new-label-taken
-status: open
+status: addressed
 body: "Draw what `walkdown blueprints new search` prints in a second checkout
   also called shop: the label refused as another checkout's, and how to choose a
   label and code (locations.registry.projects-are-labels). Anchors: cli.prompt,
@@ -24,3 +24,11 @@ replies:
       work-shop --code ws` (Topher on n-0402: the old lines meant nothing to
       him). as-built/cli/blueprints-new-label-taken.html is recaptured; the
       anchors are the same two.'
+  - author: agent
+    created: 2026-10-09T18:22:34Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/blueprints-new-label-taken.html is
+      as-built/cli/blueprints-new-label-taken.html without its as-built marks.
+      The screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

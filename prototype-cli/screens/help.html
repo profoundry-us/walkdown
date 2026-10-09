@@ -1,0 +1,102 @@
+<!doctype html>
+<!--
+  DESIGN: help
+
+  Copied from as-built/cli/help.html on 2026-10-09, at Topher's direction:
+  this screen was built before it was designed, so the build is the first
+  design of record. From here on the design comes first and the build
+  follows it.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The help groups the commands under what they act on</title>
+  <style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown help</div>
+      <div data-testid="cli.help.intro">
+      <div class="ln">walkdown — verify that what you built is what you designed</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">A command is a noun and then a verb; the noun alone lists, and</div>
+      <div class="ln">`walkdown &lt;noun&gt; help` lists its verbs. `walkdown &lt;command&gt; --help` says more.</div>
+      <div class="ln"></div>
+      <div data-testid="cli.help.ready">
+      <div class="ln">Getting ready</div>
+      <div class="ln">  walkdown init [--force]</div>
+      <div class="ln">  walkdown skills [--into &lt;dir&gt;] [--project] [--force]</div>
+      <div class="ln">  walkdown upgrade [--dry-run] [--code &lt;pc&gt;]</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.help.blueprints">
+      <div class="ln">Blueprints</div>
+      <div class="ln">  walkdown blueprints [list] [--stale]</div>
+      <div class="ln">  walkdown blueprints new [&lt;name&gt;] [--folder &lt;folder&gt;] [--commit none|spec|all] [--project &lt;label&gt;] [--code &lt;pc&gt;]</div>
+      <div class="ln">  walkdown blueprints import &lt;path&gt; [--all|--only &lt;folders&gt;] [--ephemeral] [--why &lt;reason&gt;]</div>
+      <div class="ln">  walkdown blueprints rename &lt;id&gt; &lt;new-name&gt; [--folder &lt;folder&gt;]</div>
+      <div class="ln">  walkdown blueprints commit &lt;none|spec|all&gt; --blueprint &lt;id&gt;</div>
+      <div class="ln">  walkdown blueprints forget &lt;id&gt;</div>
+      <div class="ln">  walkdown pointer [--dir &lt;root&gt;] [--into &lt;file&gt;]</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.help.records">
+      <div class="ln">Records</div>
+      <div class="ln">  walkdown records [list] [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">  walkdown records move &lt;kind&gt; --to &lt;path&gt; --blueprint &lt;id&gt;</div>
+      <div class="ln">  walkdown where [&lt;kind&gt;] [--blueprint &lt;id&gt;] [--json]</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.help.threads">
+      <div class="ln">Threads</div>
+      <div class="ln">  walkdown threads [list] [--rule &lt;id&gt;] [--all] [--blueprint &lt;id&gt;] [--json]</div>
+      <div class="ln">  walkdown threads new --rule &lt;id&gt; | --screen &lt;id&gt; --body &lt;text&gt; --blueprint &lt;id&gt; [--kind note|question] ...</div>
+      <div class="ln">  walkdown threads show &lt;id&gt;</div>
+      <div class="ln">  walkdown threads reply &lt;id&gt; &lt;text&gt; --blueprint &lt;id&gt; [--as-agent [--said &lt;text&gt;] [--added &lt;text&gt;]]</div>
+      <div class="ln">  walkdown threads set &lt;id&gt; --status &lt;s&gt; | --verify | --reopen | --waive --blueprint &lt;id&gt; [--reason &lt;text&gt;] [--reply &lt;text&gt;]</div>
+      <div class="ln">  walkdown threads relabel &lt;label|uuid&gt; --blueprint &lt;id&gt; [--yes]</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.help.verdicts">
+      <div class="ln">Rules and verdicts</div>
+      <div class="ln">  walkdown status [&lt;rule-id&gt;] [--blueprint &lt;id&gt;] [--target &lt;name&gt;] [--json]</div>
+      <div class="ln">  walkdown lint [--blueprint &lt;id&gt;] [--no-checks] [--json]</div>
+      <div class="ln">  walkdown hash [--blueprint &lt;id&gt;] [--write [--reword &lt;why&gt;]]    (--write needs --blueprint)</div>
+      <div class="ln">  walkdown run [--target &lt;name&gt;] [--rule &lt;id&gt;] [--blueprint &lt;id&gt;]</div>
+      <div class="ln">  walkdown judge &lt;rule-id&gt; --blueprint &lt;id&gt; [--target &lt;name&gt;] [--serve &lt;origin&gt;] [--json]</div>
+      <div class="ln">  walkdown sweep --why &lt;reason&gt; --blueprint &lt;id&gt; [--tiers checks,agent] [--target &lt;name&gt;]</div>
+      <div class="ln">  walkdown rules move &lt;rule|story|feature&gt;... --blueprint &lt;from&gt; --to &lt;blueprint&gt; [--dry-run]</div>
+      <div class="ln">  walkdown rules rename &lt;rule&gt; &lt;new-id&gt; --blueprint &lt;id&gt; [--dry-run]</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.help.panel">
+      <div class="ln">The panel</div>
+      <div class="ln">  walkdown serve [--blueprint &lt;id&gt;] [--port &lt;n&gt;]</div>
+      <div class="ln">  walkdown claims [--blueprint &lt;id&gt;] [--url &lt;address&gt;] [--json]</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">--blueprint &lt;id&gt; names a blueprint. Reads cover every blueprint in the project</div>
+      <div class="ln">without it; anything that writes into one needs it, wherever it is run from.</div>
+      <div class="ln">`walkdown blueprints` lists the IDs.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

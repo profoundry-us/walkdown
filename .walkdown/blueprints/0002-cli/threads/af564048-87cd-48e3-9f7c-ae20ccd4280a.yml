@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.127Z
 anchor:
   screen: lint-signoff-omits-eng
-status: open
+status: addressed
 body: "Draw what `walkdown lint` prints over two rules: one whose signoff names
   only product, and one whose signoff is empty. The first is flagged because
   engineering always signs. The second is flagged because leaving the field out
@@ -16,3 +16,12 @@ body: "Draw what `walkdown lint` prints over two rules: one whose signoff names
   as-built/cli/lint-signoff-omits-eng.html is the build, from
   test/cli/scenarios/lint-signoff-omits-eng.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:19Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/lint-signoff-omits-eng.html is
+      as-built/cli/lint-signoff-omits-eng.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:18.457Z
 anchor:
   screen: status-design-agent
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints for a blueprint whose spec.yml says
   `design.by: agent`. A design request is open on the undrawn receipt screen.
   The request sits in a DESIGN QUEUE, titled for the design agent and never the
@@ -16,3 +16,12 @@ body: "Draw what `walkdown status` prints for a blueprint whose spec.yml says
   as-built/cli/status-design-agent.html is the build, from
   test/cli/scenarios/status-design-agent.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:17Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-design-agent.html is
+      as-built/cli/status-design-agent.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

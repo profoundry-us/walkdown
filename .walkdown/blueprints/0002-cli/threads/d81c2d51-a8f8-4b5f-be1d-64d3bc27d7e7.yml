@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:32.638Z
 anchor:
   screen: status-agent-assumed
-status: open
+status: addressed
 body: "Draw what `walkdown status checkout.basics.pays` prints for a rule that
   says nothing about how it is verified: verify reading agent alone, and the
   agent tier the only evidence it owes (status.evidence.agent-assumed). Anchors:
@@ -14,3 +14,12 @@ body: "Draw what `walkdown status checkout.basics.pays` prints for a rule that
   as-built/cli/status-agent-assumed.html is the build, from
   test/cli/scenarios/status-agent-assumed.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:26Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-agent-assumed.html is
+      as-built/cli/status-agent-assumed.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

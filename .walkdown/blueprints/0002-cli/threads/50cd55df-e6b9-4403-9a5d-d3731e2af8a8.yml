@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T03:10:25.039Z
 anchor:
   screen: status-nested-repository
-status: open
+status: addressed
 body: "Draw what `walkdown status` prints when run in ~/shop/vendor/lib, a
   repository of its own cloned inside the registered checkout ~/shop. It is
   refused, and the refusal says what the folder is: a repository of its own
@@ -16,3 +16,12 @@ body: "Draw what `walkdown status` prints when run in ~/shop/vendor/lib, a
   as-built/cli/status-nested-repository.html is the build, from
   test/cli/scenarios/status-nested-repository.yml, in the frame
   tools/cli-captures.mjs --frame prints."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:16Z
+    body: "Drawn by copying the build:
+      prototype-cli/screens/status-nested-repository.html is
+      as-built/cli/status-nested-repository.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."

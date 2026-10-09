@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.174Z
 anchor:
   screen: init-again
-status: open
+status: addressed
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown init` prints the second time
   (commands.init.this-machine-only): everything already in place, nothing
@@ -16,3 +16,11 @@ added: "Draw what `walkdown init` prints the second time
   tools/cli-captures.mjs --frame prints, so the design and the as-built line up
   under the fade; /as-built/cli/init-again.html shows what the build prints
   today."
+replies:
+  - author: agent
+    created: 2026-10-09T18:22:41Z
+    body: "Drawn by copying the build: prototype-cli/screens/init-again.html is
+      as-built/cli/init-again.html without its as-built marks. The screen was
+      built before it was designed, so on Topher's direction (2026-10-09) the
+      build is its first design of record. Accept it, or send it back with what
+      to change."
