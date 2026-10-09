@@ -763,6 +763,53 @@ screens:
       - cli.attention.human
       - cli.exit
 
+  - id: status-every-queue
+    title: "Every item waits in one queue, and says whose"
+    prototype: null
+    app: { path: /as-built/cli/status-every-queue.html }
+    anchors:
+      - cli.prompt
+      - cli.attention.human
+      - cli.status.design-queue
+      - cli.status.agent-queue
+      - cli.exit
+
+  - id: status-agent-queue
+    title: "The agent is asked for what only it can do"
+    prototype: null
+    app: { path: /as-built/cli/status-agent-queue.html }
+    anchors:
+      - cli.prompt
+      - cli.status.agent-queue
+      - cli.exit
+
+  - id: status-person-queue
+    title: "A person is asked only for what is theirs"
+    prototype: null
+    app: { path: /as-built/cli/status-person-queue.html }
+    anchors:
+      - cli.prompt
+      - cli.attention.human
+      - cli.exit
+
+  - id: status-agent-settles
+    title: "The agent closes its own note once its fix is judged"
+    prototype: null
+    app: { path: /as-built/cli/status-agent-settles.html }
+    anchors:
+      - cli.prompt
+      - cli.status.settle
+      - cli.exit
+
+  - id: status-agent-first
+    title: "A built rule is judged by the agent before anyone signs it"
+    prototype: null
+    app: { path: /as-built/cli/status-agent-first.html }
+    anchors:
+      - cli.prompt
+      - cli.status.judge-first
+      - cli.exit
+
   - id: status-one-role-signed
     title: "A rule passes only once every role it names has signed"
     prototype: null

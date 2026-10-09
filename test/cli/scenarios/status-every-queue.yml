@@ -1,0 +1,16 @@
+# `walkdown status` with an item waiting in every queue: each item stands
+# under one heading, and the drawing topher asked for is design's alone.
+screen: status-every-queue
+title: Every item waits in one queue, and says whose
+rule: status.attention.blocked-queues
+fixture: g4-every-queue
+command: [status, --blueprint, checkout]
+exit: 0
+expect:
+  - '^  NEEDS A HUMAN$'
+  - '^  DESIGN QUEUE — for the designer\n  ◆ draw checkout\.basics\.pays — design request n-0005$'
+  - '^  AGENT QUEUE$'
+anchors:
+  - { id: cli.attention.human, match: '^  NEEDS A HUMAN|^  ◆ (walk down|approve|answer) ' }
+  - { id: cli.status.design-queue, match: '^  DESIGN QUEUE|^  ◆ draw ' }
+  - { id: cli.status.agent-queue, match: '^  AGENT QUEUE|^  ◆ (judge|cover|address|settle|incorporate) ' }

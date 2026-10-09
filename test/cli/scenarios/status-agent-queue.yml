@@ -1,0 +1,16 @@
+# `walkdown status`: the agent's queue holds the work only it can do, and
+# the rules it holds back - refunds unjudged, gifts with an answer to fold
+# in - ask topher nothing meanwhile.
+screen: status-agent-queue
+title: The agent is asked for what only it can do
+rule: status.attention.agent-queue
+fixture: g4-every-queue
+command: [status, --blueprint, checkout]
+exit: 0
+expect:
+  - '^  ◆ address n-0001 \(checkout\.basics\.pays\) — open note$'
+  - '^  ◆ incorporate q-0003 \(checkout\.basics\.gifts\) — answered, fold it into the rule$'
+  - '^  ◆ cover checkout\.basics\.coupons — demands checks, and no check claims it$'
+  - '^  NEEDS A HUMAN(?:\n  ◆ (?!.*(refunds|gifts)).*)+\n\n'
+anchors:
+  - { id: cli.status.agent-queue, match: '^  AGENT QUEUE|^  ◆ (judge|cover|address|settle|incorporate) ' }

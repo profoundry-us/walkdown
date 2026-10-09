@@ -1,0 +1,11 @@
+id: n-0562
+uuid: 7586dff7-9f3f-4110-9954-1279773ca422
+kind: note
+reason: request
+author: agent
+created: 2026-10-09T14:30:22.713Z
+anchor:
+  screen: status-every-queue
+status: open
+body: "New screen: as-built/cli/status-every-queue.html is the build; it wants a
+  design."

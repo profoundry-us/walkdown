@@ -1,0 +1,13 @@
+# `walkdown status`: refunds is built and its checks pass, but the agent
+# has never judged it, so no signer is asked for it yet.
+screen: status-agent-first
+title: A built rule is judged by the agent before anyone signs it
+rule: status.attention.agent-tier-queued
+fixture: g4-every-queue
+command: [status, --blueprint, checkout]
+exit: 0
+expect:
+  - '^  ◆ judge checkout\.basics\.refunds — the agent tier has never judged it, and no signer is asked until it has$'
+  - '^  NEEDS A HUMAN(?:\n  ◆ (?!.*refunds).*)+\n\n'
+anchors:
+  - { id: cli.status.judge-first, match: '^  ◆ judge checkout\.basics\.refunds' }

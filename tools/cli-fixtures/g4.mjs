@@ -461,4 +461,84 @@ export default {
       results: [{ rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays }],
     });
   },
+
+  /*
+   * One item in every queue, for the attention screens. pays is built and
+   * judged, with topher's open note on it; refunds is built and never
+   * judged; coupons demands checks nobody wrote; receipts carries the
+   * agent's finding, fixed and judged since; gifts holds topher's answered
+   * question; wraps an open one; and topher asked for a drawing on pays.
+   */
+  'g4-every-queue'(m) {
+    const h = checkout(m, [
+      ['pays', 'A card payment goes through.', 'verify: [checks, agent]'],
+      ['refunds', 'A refund reaches the card it was paid on.', 'verify: [checks, agent]'],
+      ['coupons', 'A coupon takes its discount off the total.', 'verify: [checks]'],
+      ['receipts', 'A receipt lists what was paid for.', 'verify: [checks, agent]'],
+      ['gifts', 'A gift card pays like a card.', 'verify: [checks]'],
+      ['wraps', 'Gift wrap is added at checkout.', 'verify: [checks]'],
+    ]);
+    const built = ['pays', 'refunds', 'receipts', 'gifts', 'wraps'];
+    suite(m, ...built);
+    const pass = (rules) =>
+      rules.map((r) => ({ rule: `checkout.basics.${r}`, status: 'pass', statement_hash: h[r] }));
+    run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, pass(built));
+    run(m, '2026-10-01T10-00-00Z-local-01', AGENT, pass(['pays', 'receipts']));
+    run(m, '2026-10-01T13-00-00Z-local-01', AGENT, pass(['receipts']));
+    // Threads as `threads new` and `threads set` leave them, at fixed times.
+    const threads = join(m.specOf('checkout'), 'threads');
+    mkdirSync(threads, { recursive: true });
+    let n = 0;
+    const thread = (id, rule, fields, body, replies = []) => {
+      const uuid = `00000000-0000-4000-8000-00000000000${++n}`;
+      writeFileSync(
+        join(threads, `${uuid}.yml`),
+        [
+          `id: ${id}`,
+          `uuid: ${uuid}`,
+          ...fields,
+          'created: 2026-10-01T11:00:00Z',
+          'anchor:',
+          `  rule: checkout.basics.${rule}`,
+          `body: ${body}`,
+          ...(replies.length ? ['replies:'] : []),
+          ...replies.flatMap(([author, at, text, extra = []]) => [
+            `  - author: ${author}`,
+            `    created: ${at}`,
+            `    body: ${text}`,
+            ...extra.map((l) => `    ${l}`),
+          ]),
+          '',
+        ].join('\n'),
+      );
+    };
+    const open = (reason, author = 'topher') => [
+      'kind: note',
+      `reason: ${reason}`,
+      `author: ${author}`,
+      'status: open',
+    ];
+    thread('n-0001', 'pays', open('feedback'), 'The pay button does nothing on a declined card.');
+    thread(
+      'n-0002',
+      'receipts',
+      ['kind: note', 'reason: finding', 'author: agent', 'status: addressed'],
+      'A receipt leaves out the shipping line.',
+      [['agent', '2026-10-01T12:00:00Z', 'Fixed - shipping is its own line now.']],
+    );
+    thread(
+      'q-0003',
+      'gifts',
+      ['kind: question', 'author: agent', 'status: answered'],
+      'Does a gift card cover shipping too?',
+      [['topher', '2026-10-01T12:00:00Z', 'Yes, all of it.', ['answer: true']]],
+    );
+    thread(
+      'q-0004',
+      'wraps',
+      ['kind: question', 'author: agent', 'status: open'],
+      'Is gift wrap free over fifty dollars?',
+    );
+    thread('n-0005', 'pays', open('request'), 'Draw the declined-card state.');
+  },
 };

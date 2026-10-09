@@ -557,6 +557,7 @@ stories:
         history: Five rules reached Topher's walkdown with the agent tier owed on 2026-09-23, and nothing in the status report had said so. The agent item first sat beside the signers' until Topher chose to hold the rule back from them (q-0336), accepting that a new project's queue opens empty.
         verify: [checks]
         signoff: [eng, product]
+        screens: [status-agent-first]
         steps:
           given:
             - A built rule whose agent cell is never, another whose agent pass went stale, and a third passing
@@ -576,6 +577,7 @@ stories:
         because: Writing a missing check is an agent's job; there is nothing yet for a person to judge. A design request is for design to draw, never for the agent building the app.
         history: A design request was queued for the building agent, which is not allowed to act on it, so it either sat or was marked addressed without being addressed (GitHub issue #2, ADR 0009). On 2026-10-09 its twelve steps were split by queue into this rule and three more, so each can be judged in one sitting.
         verify: [checks]
+        screens: [status-every-queue]
         steps:
           given:
             - A board holding rules owed signatures, open threads including a design request, and a rule demanding checks that no check claims
@@ -593,6 +595,7 @@ stories:
         because: A person asked to look before the agent has judged, or while the words are about to move, looks twice. An open note holds nobody back, since a signed pass ends it.
         history: Split out of status.attention.blocked-queues on 2026-10-09, whose twelve steps were too many to judge in one sitting.
         verify: [checks]
+        screens: [status-agent-queue]
         steps:
           given:
             - A board holding an open note, an answered question, a rule no check claims, and a rule whose fix was claimed after its last pass
@@ -613,6 +616,7 @@ stories:
         because: A person's queue is read by a person, and an item they cannot act on teaches them to skip the list.
         history: Split out of status.attention.blocked-queues on 2026-10-09, whose twelve steps were too many to judge in one sitting.
         verify: [checks]
+        screens: [status-person-queue]
         steps:
           given:
             - A board holding built rules owed signatures, an unbuilt rule, a person's addressed notes, an open question, and threads on no rule and on a retired one
@@ -633,6 +637,7 @@ stories:
         because: A person never wrote the agent's note, so verifying it asks them to vouch for a conversation they were not in.
         history: Split out of status.attention.blocked-queues on 2026-10-09. The same day its settle line read "a note you wrote", and Topher took it for his; and a remark written while settling read as a new fix, queueing two passing rules to be judged again.
         verify: [checks]
+        screens: [status-agent-settles]
         steps:
           given:
             - The agent's addressed finding on a walkable rule, and a pass newer than its fix

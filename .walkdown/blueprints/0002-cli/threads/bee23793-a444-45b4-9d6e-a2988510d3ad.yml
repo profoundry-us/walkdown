@@ -1,0 +1,11 @@
+id: n-0566
+uuid: bee23793-a444-45b4-9d6e-a2988510d3ad
+kind: note
+reason: request
+author: agent
+created: 2026-10-09T14:30:23.576Z
+anchor:
+  screen: status-agent-first
+status: open
+body: "New screen: as-built/cli/status-agent-first.html is the build; it wants a
+  design."

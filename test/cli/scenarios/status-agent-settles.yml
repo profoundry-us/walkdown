@@ -1,0 +1,13 @@
+# `walkdown status`: the agent's finding on receipts was fixed and a pass
+# has judged it since, so the agent closes it - never topher.
+screen: status-agent-settles
+title: The agent closes its own note once its fix is judged
+rule: status.attention.agent-settles-its-own
+fixture: g4-every-queue
+command: [status, --blueprint, checkout]
+exit: 0
+expect:
+  - '^  ◆ settle n-0002 \(checkout\.basics\.receipts\) — the agent''s own note, its fix since judged; the agent closes it as settled$'
+  - '^  NEEDS A HUMAN(?:\n  ◆ (?!.*n-0002).*)+\n\n'
+anchors:
+  - { id: cli.status.settle, match: '^  ◆ settle ' }

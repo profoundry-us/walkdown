@@ -1,0 +1,14 @@
+# `walkdown status`: what topher is asked for - a walk-down per role owed,
+# the wording of a rule not built yet, and an open question.
+screen: status-person-queue
+title: A person is asked only for what is theirs
+rule: status.attention.person-queue
+fixture: g4-every-queue
+command: [status, --blueprint, checkout]
+exit: 0
+expect:
+  - '^  ◆ walk down checkout\.basics\.pays — eng has not accepted it yet$'
+  - '^  ◆ approve the wording of checkout\.basics\.coupons — not built yet, and eng has not approved it$'
+  - '^  ◆ answer checkout\.basics\.wraps — 1 question \(q-0004\)$'
+anchors:
+  - { id: cli.attention.human, match: '^  NEEDS A HUMAN|^  ◆ (walk down|approve|answer) ' }

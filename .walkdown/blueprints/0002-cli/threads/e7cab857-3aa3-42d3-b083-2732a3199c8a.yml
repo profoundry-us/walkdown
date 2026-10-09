@@ -1,0 +1,11 @@
+id: n-0564
+uuid: e7cab857-3aa3-42d3-b083-2732a3199c8a
+kind: note
+reason: request
+author: agent
+created: 2026-10-09T14:30:23.150Z
+anchor:
+  screen: status-person-queue
+status: open
+body: "New screen: as-built/cli/status-person-queue.html is the build; it wants
+  a design."

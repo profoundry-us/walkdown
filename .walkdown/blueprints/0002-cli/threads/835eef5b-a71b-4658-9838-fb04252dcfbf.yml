@@ -1,0 +1,11 @@
+id: n-0565
+uuid: 835eef5b-a71b-4658-9838-fb04252dcfbf
+kind: note
+reason: request
+author: agent
+created: 2026-10-09T14:30:23.365Z
+anchor:
+  screen: status-agent-settles
+status: open
+body: "New screen: as-built/cli/status-agent-settles.html is the build; it wants
+  a design."
