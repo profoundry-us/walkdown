@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-09T13-45-11Z-local-01",
+  "created": "2026-10-09T13:45:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "bd341c6-dirty",
+  "spec_hash": "sha256:4ed335b594d4",
+  "results": [
+    {
+      "rule": "status.attention.agent-queue",
+      "status": "pass",
+      "statement_hash": "sha256:696f855323f2",
+      "evidence": [
+        "runs/evidence/2026-10-09T13-45-11Z/attention-probe.txt"
+      ],
+      "reasoning": "Drove the real CLI (node bin/walkdown.js, no server, no port used) on a throwaway project with fresh HOME and WALKDOWN_HOME, building the board through init, blueprints new, run (node:test, recorded), judge --json records, threads new and threads set, and reading `walkdown status` and `--json` at three points. Step 1: a person's open note n-0001 gave 'address n-0001' to the agent; an answered question q-0002 gave 'incorporate q-0002'. Step 2: a rule demanding checks with none claiming it gave 'cover'; a rule the agent failed whose finding was then set addressed --as-agent gave 'judge ... again \u2014 n-0004 claims a fix newer than the failing verdict' (rejudge). Step 3: a built uncovered rule (agent passed, no check) had the cover item and no person item at all; an unbuilt uncovered one had cover plus 'approve the wording', which judges no build. Step 4: a rule passing checks but never judged by the agent tier was 'judge-first' for the agent with no person item, and only after an agent pass was recorded did 'walk down ... eng' appear. Step 5: while q-0002 was answered, its rule (checks and agent both passing, plus a person's addressed note n-0005) had no judge and no verify item for any person; once incorporated, the rule went to the agent as a rejudge for n-0005's fix claim, still not to a person. Edge, not counted against the steps: a built rule with a person's open note is in the agent's queue (address) and the person's (walk down) at once. ADR 'whose turn a rule is' makes this deliberate (a signed pass ends an open note), and the unit test expects it, but the statement's 'a rule waiting on the agent asks no person anything' reads against it; reported to the dispatcher rather than filed.",
+      "threads": []
+    }
+  ]
+}

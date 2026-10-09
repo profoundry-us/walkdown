@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-09T13-45-14Z-local-01",
+  "created": "2026-10-09T13:45:14Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "bd341c6-dirty",
+  "spec_hash": "sha256:4ed335b594d4",
+  "results": [
+    {
+      "rule": "status.attention.agent-settles-its-own",
+      "status": "pass",
+      "statement_hash": "sha256:f840d377de4b",
+      "evidence": [
+        "runs/evidence/2026-10-09T13-45-14Z/status-settle-item.txt",
+        "runs/evidence/2026-10-09T13-45-14Z/status-after-settle-remark.txt",
+        "runs/evidence/2026-10-09T13-45-14Z/n-0016-settled-with-remark.yml",
+        "runs/evidence/2026-10-09T13-45-14Z/status-final.txt"
+      ],
+      "reasoning": "Drove the working-tree CLI (no server; HOME and WALKDOWN_HOME in a throwaway temp dir) on a fresh project. An agent finding (threads new --reason finding --as-agent) on a walkable rule, addressed by threads set --status addressed --reply --as-agent, first put the rule back as \"judge shop.cart.fixed again\" with the agent cell marked stale, and the human queue dropped that rule meanwhile. Once a newer agent pass was recorded, the agent queue read \"settle n-0015 (shop.cart.fixed) - the agent own note, its fix since judged; the agent closes it as settled\", and no human verify item named the thread in text or --json. A person trying threads set --verify on a settled agent note is refused. The same held for an agent observation (n-0019). An agent design request (n-0018) went to a person verify instead, as the step excepts. For step three, n-0016 was settled with --reply after a pass newer than its fix: the remark is stored with closes: true and is newer than the pass, yet the rule did not come back to be judged and the agent cell stayed a plain pass. Edge weighed: settling before the fix is judged is accepted by the CLI, but the fix claim still puts the rule back to be judged, so nothing is lost.",
+      "threads": []
+    }
+  ]
+}

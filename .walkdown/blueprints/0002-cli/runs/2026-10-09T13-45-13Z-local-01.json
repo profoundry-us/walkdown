@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-09T13-45-13Z-local-01",
+  "created": "2026-10-09T13:45:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "bd341c6-dirty",
+  "spec_hash": "sha256:4ed335b594d4",
+  "results": [
+    {
+      "rule": "status.attention.person-queue",
+      "status": "pass",
+      "statement_hash": "sha256:f147930f6564",
+      "evidence": [
+        "runs/evidence/2026-10-09T13-45-13Z/status-human-queue.txt",
+        "runs/evidence/2026-10-09T13-45-13Z/status-human-queue.json",
+        "runs/evidence/2026-10-09T13-45-13Z/status-final.txt"
+      ],
+      "reasoning": "Drove the working-tree CLI (node bin/walkdown.js, no server; HOME and WALKDOWN_HOME in a throwaway temp dir) over a fresh init + blueprints new project with seven rules, check-tagged tests, recorded checks and agent passes, and threads filed only through threads new/set. Every step held. (1) A rule with signoff [eng, design] signed by eng in a walkdown run gets one judge item for design only; one with [eng, product] and no signatures gets two, one per role. (2) Two person feedback notes and a design request on shop.cart.notes, addressed by the agent, give exactly one verify item for the rule naming n-0003, n-0001, n-0002 (\"2 notes of yours answered, 1 design request drawn\"), with requests listed in --json; it appears only once the agent has judged the claimed fix (before that the agent queue holds judge-again), and an agent-filed design request on another rule is likewise a person verify. (3) Two open questions on one rule give one answer item listing both; a question on a screen is its own answer item. (4) The unbuilt rule (no check claims it) asks to approve the wording of shop.cart.unbuilt, worded as not built yet, beside the agent queue cover item. (5) After retiring shop.cart.old, the person feedback on it and the person feedback and request on screen cart each became their own verify item; the agent finding and observation on the retired rule and on the screen appear in no queue. Edges weighed: the same rule may appear twice for a person (a role judge item and a notes verify item), which looks deliberate and costs little; a question cannot be filed on a retired rule (the CLI refuses), so that case only arises by retiring a rule that carries one, which the unit test covers.",
+      "threads": []
+    }
+  ]
+}

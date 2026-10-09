@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-09T13-45-10Z-local-01",
+  "created": "2026-10-09T13:45:10Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "bd341c6-dirty",
+  "spec_hash": "sha256:4ed335b594d4",
+  "results": [
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:3cc115b5be3c",
+      "evidence": [
+        "runs/evidence/2026-10-09T13-45-10Z/status-designer.txt",
+        "runs/evidence/2026-10-09T13-45-10Z/status-design-agent.txt"
+      ],
+      "reasoning": "Drove the real CLI (node bin/walkdown.js, no server, no port used) on a throwaway project with fresh HOME and WALKDOWN_HOME: one blueprint of eight rules with a recorded node:test checks run, agent verdicts, a two-role signoff rule, rules demanding checks that no check claims, an open person note, an answered question, a fix claimed after an agent fail, and three open design requests (one on a screen, one on a rule filed by a person, one on a rule filed --as-agent). `walkdown status --json` gave every attention item exactly one `who` of agent, human or design, and the text report printed each under one heading (NEEDS A HUMAN, DESIGN QUEUE, AGENT QUEUE), never one item twice. The only rule appearing under two headings is an unbuilt uncovered rule (cover for the agent, approve-the-wording for a person), which are two distinct items and which person-queue explicitly allows. All three open design requests were `draw` items for design and none was an `address` item in the agent queue, the agent-filed one included. With no design.by the heading read 'DESIGN QUEUE \u2014 for the designer' and items carried by:person; adding design.by: agent to spec.yml turned it to 'for the design agent, never the agent building the app' with by:agent, and the agent queue still held no draw. Edges: a person's open note on a built rule queues address for the agent and a walk-down for the person side by side; that is two items, each with one owner, so it does not touch this rule (raised under agent-queue). Nothing else found worth weighing.",
+      "threads": []
+    }
+  ]
+}
