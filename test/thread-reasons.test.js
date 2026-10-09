@@ -415,7 +415,7 @@ test('the browser doors carry the reason and say what a pass closed @rule:thread
   }
 });
 
-test('words said while settling a note are marked as closing it, and a claim is not @rule:status.attention.blocked-queues', () => {
+test('words said while settling a note are marked as closing it, and a claim is not @rule:status.attention.agent-settles-its-own', () => {
   const p = project();
   try {
     const t = openThread(p.load(), {

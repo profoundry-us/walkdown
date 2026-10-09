@@ -42,7 +42,7 @@ function fixture(name) {
   mkdirSync(join(bp, 'features'), { recursive: true });
   mkdirSync(runs, { recursive: true });
   // A check claims the rule, so its green checks are backed and it is
-  // nobody's to cover (status.attention.blocked-queues).
+  // nobody's to cover (status.attention.agent-queue).
   writeFileSync(join(bp, 'spec.yml'), 'blueprint: cli-fixture\nauthoring:\n  location: checks\n');
   mkdirSync(join(bp, 'checks'), { recursive: true });
   writeFileSync(

@@ -498,7 +498,7 @@ function conversation(r, picked) {
   const asked = openQuestionOn(r.rule);
   // Answered and not yet folded in: the rule is the agent's, and a verdict
   // now would be on words about to move - so the pair waits with the rule
-  // (status.attention.blocked-queues; Topher, 2026-09-18).
+  // (status.attention.agent-queue; Topher, 2026-09-18).
   const folding = threadsFor(r.rule).some((t) => t.kind === 'question' && t.status === 'answered');
   const turn = ruleTurn(r);
   const placeholder = asked

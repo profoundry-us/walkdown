@@ -230,7 +230,7 @@ test('drift: undesigned screens and thread-born rules are derived', () => {
   assert.deepEqual(deriveStatus(bp).drift.sources, []);
 });
 
-test('attention: human vs agent queues derived from rows and threads @rule:status.attention.blocked-queues', () => {
+test('attention: human vs agent queues derived from rows and threads @rule:status.attention.blocked-queues @rule:status.attention.agent-queue @rule:status.attention.person-queue', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],
     runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
@@ -319,7 +319,7 @@ test('attention: human vs agent queues derived from rows and threads @rule:statu
   assert.deepEqual(perRule.requests, ['n-10']);
 });
 
-test('a built rule no check claims is the cover item alone; an unbuilt one also asks for its wording to be approved @rule:status.attention.blocked-queues', () => {
+test('a built rule no check claims is the cover item alone; an unbuilt one also asks for its wording to be approved @rule:status.attention.agent-queue @rule:status.attention.person-queue', () => {
   const elsewhere = new Set(['demo.other.rule']);
   const built = deriveStatus(
     blueprint({
@@ -345,7 +345,7 @@ test('a built rule no check claims is the cover item alone; an unbuilt one also 
   assert.equal(ask?.unbuilt, true, 'the person is asked to approve wording, not to judge a build');
 });
 
-test('an agent observation is settled only once a pass is newer than its fix @rule:status.attention.blocked-queues', () => {
+test('an agent observation is settled only once a pass is newer than its fix @rule:status.attention.agent-settles-its-own', () => {
   const note = (reason) => ({
     id: 'n-1',
     kind: 'note',
@@ -374,7 +374,7 @@ test('an agent observation is settled only once a pass is newer than its fix @ru
   assert.ok(after.some((i) => i.action === 'settle' && i.thread === 'n-1'));
 });
 
-test('a remark made while settling a finding is no fix newer than the pass @rule:status.attention.blocked-queues', () => {
+test('a remark made while settling a finding is no fix newer than the pass @rule:status.attention.agent-settles-its-own', () => {
   const finding = (closes) => ({
     id: 'n-1',
     kind: 'note',
@@ -407,7 +407,7 @@ test('a remark made while settling a finding is no fix newer than the pass @rule
   assert.ok(!marked.attention.some((i) => i.action === 'rejudge'));
 });
 
-test('a person verifies no fix on a built rule the agent has not judged yet @rule:status.attention.agent-tier-queued @rule:status.attention.blocked-queues', () => {
+test('a person verifies no fix on a built rule the agent has not judged yet @rule:status.attention.agent-tier-queued @rule:status.attention.agent-queue', () => {
   const { attention } = deriveStatus(
     blueprint({
       runs: [checksRun('2026-01-01T00:00:00Z', 'local', 'pass')],
@@ -431,7 +431,7 @@ test('a person verifies no fix on a built rule the agent has not judged yet @rul
   assert.ok(!attention.some((i) => i.who === 'human'), JSON.stringify(attention));
 });
 
-test('a built rule no check claims is asked to be covered even while the agent owes its first look @rule:status.attention.blocked-queues', () => {
+test('a built rule no check claims is asked to be covered even while the agent owes its first look @rule:status.attention.agent-queue', () => {
   const { attention } = deriveStatus(
     blueprint({
       runs: [checksRun('2026-01-01T00:00:00Z', 'local', 'pass')],
@@ -444,7 +444,7 @@ test('a built rule no check claims is asked to be covered even while the agent o
   assert.ok(mine.includes('judge-first'), mine.join());
 });
 
-test('a built rule no check claims is the cover item’s alone, even with a person’s note answered, and is covered while a question is folded in @rule:status.attention.blocked-queues', () => {
+test('a built rule no check claims is the cover item’s alone, even with a person’s note answered, and is covered while a question is folded in @rule:status.attention.agent-queue', () => {
   const thread = (status, kind = 'note') => ({
     id: kind === 'question' ? 'q-1' : 'n-1',
     kind,
@@ -475,7 +475,7 @@ test('a built rule no check claims is the cover item’s alone, even with a pers
   assert.ok(folding.includes('cover') && folding.includes('incorporate'), folding.join());
 });
 
-test('a built rule the agent failed is the agent’s alone until it passes @rule:status.attention.blocked-queues', () => {
+test('a built rule the agent failed is the agent’s alone until it passes @rule:status.attention.agent-queue', () => {
   const { attention } = deriveStatus(
     blueprint({
       runs: [
@@ -503,7 +503,7 @@ test('a built rule the agent failed is the agent’s alone until it passes @rule
   );
 });
 
-test('a failed rule with nothing open on it is judged again, never held from everyone @rule:status.attention.blocked-queues', () => {
+test('a failed rule with nothing open on it is judged again, never held from everyone @rule:status.attention.agent-queue', () => {
   const runs = [
     checksRun('2026-01-01T00:00:00Z', 'local', 'pass'),
     walkdownRun('2026-02-01T00:00:00Z', 'agent', 'fail'),
@@ -528,7 +528,7 @@ test('a failed rule with nothing open on it is judged again, never held from eve
   }
 });
 
-test('an unbuilt rule no check claims asks a person only for its wording @rule:status.attention.blocked-queues', () => {
+test('an unbuilt rule no check claims asks a person only for its wording @rule:status.attention.person-queue', () => {
   const { attention } = deriveStatus(
     blueprint({
       targets: { local: {} },
@@ -551,7 +551,7 @@ test('an unbuilt rule no check claims asks a person only for its wording @rule:s
   assert.ok(!attention.some((i) => i.action === 'verify'), JSON.stringify(attention));
 });
 
-test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.blocked-queues', () => {
+test('the agent’s addressed note waits on its judgment, then on the agent, never on a person @rule:status.attention.agent-settles-its-own', () => {
   const bp = blueprint({
     verify: ['agent', 'human'],
     runs: [walkdownRun('2026-01-01', 'agent', 'pass')],
@@ -584,7 +584,7 @@ test('the agent’s addressed note waits on its judgment, then on the agent, nev
  * the rule is nobody else's: a person answering it and then being offered
  * Pass/Fail on the same rule is what this guards (2026-09-18).
  */
-test('a rule holding an answered question waits on the fold-in and on nobody else @rule:status.attention.blocked-queues', () => {
+test('a rule holding an answered question waits on the fold-in and on nobody else @rule:status.attention.agent-queue', () => {
   const { attention } = deriveStatus(
     blueprint({
       verify: ['checks', 'human'],
@@ -759,7 +759,7 @@ test('where nothing verifies a rule but a signature, the signature is the verdic
  * (ADR 0006 §3). A note on a retired rule has no rule to walk, so it stands
  * on its own where Verify is.
  */
-test('every note on a walkable rule waits under the rule; one on a retired rule waits as a thread', () => {
+test('every note on a walkable rule waits under the rule; one on a retired rule waits as a thread @rule:status.attention.person-queue', () => {
   const rule = 'demo.main.thing';
   const live = deriveStatus(
     blueprint({
@@ -1137,12 +1137,12 @@ test('a pass older than the fix claimed on its rule is marked, and owed to the a
     'the agent owes a fresh judgment',
   );
   // And no person is asked to accept the fix until the agent has judged it:
-  // the rule is the agent's alone meanwhile (status.attention.blocked-queues,
+  // the rule is the agent's alone meanwhile (status.attention.agent-queue,
   // n-0526). It used to sit in both queues, the person's item marked unjudged.
   assert.ok(!attention.some((i) => i.who === 'human'), JSON.stringify(attention));
 });
 
-test('a fail the agent gave, with a fix claimed after it, is the agent’s to judge again and nobody else’s @rule:status.attention.blocked-queues', () => {
+test('a fail the agent gave, with a fix claimed after it, is the agent’s to judge again and nobody else’s @rule:status.attention.agent-queue', () => {
   const { attention } = deriveStatus(
     blueprint({
       verify: ['agent'],
