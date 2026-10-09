@@ -14,6 +14,20 @@ anything, and ask before writing anything into the repository.
 walkdown is not on a package registry yet, and does not need to be. It runs
 from a clone.
 
+**Already installed?** If `walkdown where` answers, or a clone already exists,
+do not clone again. See which version it is on with
+`git -C <clone> describe --tags`. If that is older than `v0.4.0`, open the
+clone's `UPGRADING.md` and follow each section from its version up to 0.4.0,
+in order: it lists the exact commands and what each one changes. Most of them
+start with:
+
+```
+git -C <clone> fetch --tags
+git -C <clone> checkout v0.4.0
+```
+
+Then go to step 4. A clone already on `v0.4.0` needs nothing; go to step 4.
+
 ## 1. Clone it
 
 Ask where it should go. `~/.walkdown/walkdown` is a good default — one

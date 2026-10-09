@@ -22,8 +22,12 @@ not yours. Two things follow from that, and they govern everything below:
     git --version
     walkdown where 2>/dev/null     # already installed and pointed somewhere?
 
-If `walkdown where` answers, walkdown is installed - skip to step 3 and set up
-this project rather than the tool. If the project already has a blueprint,
+If `walkdown where` answers, walkdown is installed. Check its version first:
+`git -C <clone> describe --tags`. If it is older than the latest tag
+(`git -C <clone> fetch --tags`, then `git -C <clone> tag`), follow the clone's
+`UPGRADING.md` from that version up, section by section - it gives the exact
+commands, including `walkdown upgrade` where the files moved - and only then
+skip to step 3 and set up this project rather than the tool. If the project already has a blueprint,
 there is nothing to set up: say so and stop.
 
 ## 1. Clone it
