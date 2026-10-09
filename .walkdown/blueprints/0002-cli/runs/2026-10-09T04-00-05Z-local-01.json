@@ -1,0 +1,42 @@
+{
+  "run_id": "2026-10-09T04-00-05Z-local-01",
+  "created": "2026-10-09T04:00:05Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b3faf35-dirty",
+  "spec_hash": "sha256:85961afd7308",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:e4a3f1cc31d5"
+    },
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:976ba30819ab"
+    },
+    {
+      "rule": "commands.blueprints.runner-is-what-the-project-declares",
+      "status": "pass",
+      "statement_hash": "sha256:fcd35510a48e"
+    },
+    {
+      "rule": "status.acceptance.fix-on-their-thread-comes-back",
+      "status": "pass",
+      "statement_hash": "sha256:82b342b29e0d"
+    }
+  ]
+}
