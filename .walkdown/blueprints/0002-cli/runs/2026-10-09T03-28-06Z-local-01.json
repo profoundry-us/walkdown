@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-09T03-28-06Z-local-01",
+  "created": "2026-10-09T03:28:06Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2b861cd-dirty",
+  "spec_hash": "sha256:85961afd7308",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "pass",
+      "statement_hash": "sha256:e4a3f1cc31d5",
+      "evidence": [
+        "runs/evidence/2026-10-09T03-28-06Z/spec-none.yml",
+        "runs/evidence/2026-10-09T03-28-06Z/spec-pw.yml",
+        "runs/evidence/2026-10-09T03-28-06Z/spec-rspec.yml",
+        "runs/evidence/2026-10-09T03-28-06Z/spec-node.yml",
+        "runs/evidence/2026-10-09T03-28-06Z/probe-none.txt",
+        "runs/evidence/2026-10-09T03-28-06Z/probe-pw.txt",
+        "runs/evidence/2026-10-09T03-28-06Z/probe-rspec.txt",
+        "runs/evidence/2026-10-09T03-28-06Z/probe-node.txt",
+        "runs/evidence/2026-10-09T03-28-06Z/probe-node-recorded.txt",
+        "runs/evidence/2026-10-09T03-28-06Z/serve-probe.txt"
+      ],
+      "reasoning": "I git-cloned the working tree at 2b861cd into scratch (no node_modules) and ran the clone's bin/walkdown.js with fresh HOME/WALKDOWN_HOME per project, the npm registry pointed at 127.0.0.1:9 and offline set. I set up four projects: one declaring nothing, one with @playwright/test in devDependencies, one with gem 'rspec' in a Gemfile, one with test script `node --test`. init and `blueprints new` worked in all four. In each spec.yml only the declared framework's block is live: Playwright gets npx playwright test, RSpec gets bundle exec rspec with -I <clone>/adapters/rspec/lib, node gets node --test with --test-reporter=<clone>/lib/node-test-reporter.js. The project declaring nothing has every block commented and no run_all. Every block, live or commented, names the clone's reporter or formatter by an absolute path that exists in the clone: the Playwright comment says to add <clone>/lib/playwright-reporter.js to the reporter array. RSpec's `list` stays commented as intended. where, lint and status ran clean in all four. walkdown run in the empty project said there was nothing to run and what to uncomment; in the Playwright project, which has no node_modules, it refused by name, gave `npm i -D @playwright/test` and ran nothing; in the RSpec project bundle exec loaded the formatter from the clone's path. End to end in the node project, a rule plus one @rule-tagged node:test, recorded through the path-named reporter: a run file was written and status shows checks pass. serve from the clone (driven on port 4734, its own home registering only that project) answered /api/blueprint naming the scratch project and returned /, /panel.js, /embed.js and /walkdown.css with 200. The built-in browser could not reach the port, so the evidence is HTTP probes, not a screenshot. A grep of lib/, bin/ and adapters/ finds no bare import outside node:. package.json has no dependencies. vendor/ carries yaml, lit, marked, DOMPurify and Phosphor, each with a LICENSE file and a rollup config naming its source package and the do-not-edit banner. Edges, below 10%: the node and RSpec commands put the clone's path unquoted inside the command string, so a clone under a directory with a space in its name would split the argument. That is about 5%, because the setup skill clones into a home-relative path without spaces. Re-cloning or moving the clone leaves stale absolute paths in an existing spec.yml, about 5%, and the user fixes it by hand. Neither fails a step."
+      ,"threads": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-09T03-28-05Z-local-01",
+  "created": "2026-10-09T03:28:05Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2b861cd-dirty",
+  "spec_hash": "sha256:85961afd7308",
+  "results": [
+    {
+      "rule": "commands.blueprints.runner-is-what-the-project-declares",
+      "status": "pass",
+      "statement_hash": "sha256:fcd35510a48e",
+      "evidence": [
+        "runs/evidence/2026-10-09T03-28-05Z/runner-new-nodetest.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-new-none.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-new-pw-subdir.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-new-pw.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-new-rspec-rails-group.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-new-rspec.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-run-none.txt",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-spec-nodetest.yml",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-spec-none.yml",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-spec-pw.yml",
+        "runs/evidence/2026-10-09T03-28-05Z/runner-spec-rspec.yml"
+      ],
+      "reasoning": "Driven at the terminal, not on a port: four fresh git-initialised fixtures, each with its own fresh HOME and WALKDOWN_HOME, npm pointed at a dead registry and offline, working-tree bin/walkdown.js. Playwright in devDependencies: blueprints new exits 0, prints `runner: Playwright  what this project declares, so spec.yml runs it`, and spec.yml parses with runner.run_all `npx playwright test` while the RSpec and node:test blocks are comments, under a header naming Playwright as declared. `gem 'rspec'` in a Gemfile and scripts.test `node --test` do the same for RSpec and node:test (their block moved first and live, the others commented; also `gem \"rspec-rails\"` inside a group block). The empty project: every block commented, run_all and run_for_rule absent when parsed, a header saying no framework was found and to uncomment one or write the command, and `runner: none found ... uncomment the block for your framework in spec.yml`. `walkdown run` there exits 2, prints `spec.yml has no runner.run_all, so there is nothing to run. Nothing ran.` and names that blueprint's spec.yml by full path, and no runs folder appears. All three as-built captures show the same lines and exit codes. Edges weighed: run from a subdirectory of a Playwright repo, the subdirectory is the project and it says none found (consistent with blueprints new taking the directory you stand in as the project, and the message says what to do; ~10-15%, reported, not filed); a test script like `node --experimental-test-coverage --test` is not recognised (~5%, named only); a package declaring both Playwright and node --test gets Playwright (a choice, not a defect).",
+      "threads": []
+    }
+  ]
+}
