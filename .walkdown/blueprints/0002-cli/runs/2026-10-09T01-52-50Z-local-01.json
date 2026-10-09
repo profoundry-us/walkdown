@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-09T01-52-50Z-local-01",
+  "created": "2026-10-09T01:52:50Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "35283f1-dirty",
+  "spec_hash": "sha256:797db8dc9840",
+  "results": [
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:8467515c5cad",
+      "evidence": [
+        "runs/evidence/2026-10-09T01-52-50Z/00-fixture-setup.sh",
+        "runs/evidence/2026-10-09T01-52-50Z/01-before.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/02-dry-run.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/03-move.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/04-features-threads.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/05-records.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/06-status-after.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/07-later-move.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/08-sweep-progress.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/09-refusals.txt",
+        "runs/evidence/2026-10-09T01-52-50Z/10-dest-own-sweep.txt"
+      ],
+      "reasoning": "I judged at a terminal on two throwaway projects with their own HOME and WALKDOWN_HOME, serving nothing, so no port was driven; base_url is kept as printed. Blueprints a and b held a story of two rules with threads (one with a picture), a checks run, an agent pass with evidence, a signature and a checks sweep, and b had a passing rule of its own. The dry run named both rules and both thread ids, counted three run records, one sweep and one piece of evidence, and left every file under .walkdown byte for byte as it was. The move took shop.cart out of a's shop.yml and into a new shop.yml in b with comment, steps and hashes intact, and hash in b reads ok. Both threads moved under their original UUIDs with the attachment; the third stayed in a. Each copied record kept run_id, created and actor, held only the moved rules' results and carried copied_from naming a and the run; a's run records hashed identically before and after. The copied sweep named shop.cart.add and shop.cart.remove, swept only them, and b's own ship.track.link kept its pass (q-0528). A later move of shop.pay wrote a second sweep copy naming only shop.pay.card, and a fresh check in b counted toward the first copy's progress. The cart png was copied byte for byte, and status in b showed checks stale, agent pass and eng signed exactly as a had. A blueprint of another project, an unknown id, a rule id b already had, a verdict at :3000 when b's target pointed at :4999, and uncommitted features in either blueprint were each refused with exit 2 and nothing changed. The summary counted rules, threads and run records. I weighed two edges. A sweep b declared before the move also sweeps the arriving rules, so shop.cart.add's agent pass reads stale in b; I estimate 30%, since both of this repo's blueprints hold sweeps, and report it rather than fail. Two moves from one sweep show it as two identical-looking sections with the same run id in b's status; 30% meet it, it is cosmetic, and I report it.",
+      "threads": []
+    }
+  ]
+}

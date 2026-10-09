@@ -1,0 +1,23 @@
+id: q-0557
+uuid: fda780a8-9869-483e-8162-da3a72f0e943
+kind: question
+author: agent
+created: 2026-10-09T02:04:04.682Z
+anchor:
+  rule: locations.several.rules-move
+status: open
+body: "Should a sweep the destination declared before a move cover the rules
+  that arrive? Found judging at 35283f1. Blueprint b had its own agent sweep,
+  and then shop.cart.add arrived with an agent pass older than it. The rule read
+  pass in a but stale in b, and b's sweep listed it as owed. The step says b
+  shows every moved rule with the verdicts it had in a. It needs a sweep in b
+  newer than the moved rule's last verdict; this repository's blueprints hold
+  three each. Evidence:
+  runs/evidence/2026-10-09T01-52-50Z/10-dest-own-sweep.txt."
+options:
+  - label: Only the rules it was declared over
+    why: a sweep covers what stood in b when it was declared, and arrivals keep
+      their verdicts, as q-0528 has copies cover only what they came with
+  - label: Every rule in b
+    why: a sweep is a floor for its blueprint, so a rule that arrives is judged
+      again there, and the step is reworded to say so

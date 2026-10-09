@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-09T01-52-53Z-local-01",
+  "created": "2026-10-09T01:52:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "35283f1-dirty",
+  "spec_hash": "sha256:797db8dc9840",
+  "results": [
+    {
+      "rule": "status.acceptance.fix-on-their-thread-comes-back",
+      "status": "pass",
+      "statement_hash": "sha256:82b342b29e0d",
+      "evidence": [
+        "runs/evidence/2026-10-09T01-52-53Z/01-fixed-not-yet-judged.txt",
+        "runs/evidence/2026-10-09T01-52-53Z/02-judged.txt",
+        "runs/evidence/2026-10-09T01-52-53Z/03-settled.txt",
+        "runs/evidence/2026-10-09T01-52-53Z/04-pays-detail.txt",
+        "runs/evidence/2026-10-09T01-52-53Z/05-json.txt",
+        "runs/evidence/2026-10-09T01-52-53Z/06-verified-fix.txt",
+        "runs/evidence/2026-10-09T01-52-53Z/07-fresh-verdict.txt"
+      ],
+      "reasoning": "I judged at a terminal in a throwaway home, serving nothing, so no port was driven. Five agent-tier rules were judged, signed through the panel's walkdown door, failed with agent findings, fixed by the agent and judged again. Before the new judging nothing came back to the signer. After it, pays and tax came back as walk-again items naming n-0001 and n-0003, the two findings the signer replied on. Both rules stayed verified and signed by eng, with fixedSince in the JSON. Refunds, whose finding the signer never touched, did not come back. Receipts, a note the signer filed, came back only as the fix to verify. Ship, whose fix the signer verified, did not come back. The signer's fresh walkdown on pays cleared it while tax stayed queued. The as-built page shows the same line and shape as my probe, and its scenario test passes. Its design is not drawn yet (request n-0556), so there is no prototype to compare against. Edges weighed: the single-rule view does not say the rule waits on its signer, at about 15%, as the sent-back case does not either. A checks-only rule counts as judged as soon as the fix is claimed, at about 25%, from reading the code. The queue line says your thread whoever runs status, below 10%, as the existing note line says the same.",
+      "threads": []
+    }
+  ]
+}

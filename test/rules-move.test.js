@@ -352,6 +352,14 @@ test('several selections move as one, and a later move copies each run once more
     [['shop.cart.add', 'shop.pay.card'], ['shop.cart.remove']],
   );
   assert.equal(f.row('b', 'shop.cart.add').checks, 'stale', 'still under the sweep');
+  // And it reads as the one sweep it is, over every rule its copies name.
+  const sweeps = JSON.parse(f.wd(['status', '--blueprint', 'b', '--json']).stdout).sweeps.filter(
+    (x) => x.tier === 'checks',
+  );
+  assert.deepEqual(
+    sweeps.map((x) => x.of),
+    [3],
+  );
   const checks = copies.filter((c) => c.run_id === '2026-10-01T10-00-00Z-local-01');
   assert.deepEqual(checks.map((c) => c.results.map((r) => r.rule)).sort(), [
     ['shop.cart.add', 'shop.pay.card'],

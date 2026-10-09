@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-08T02:38:42.437Z
 anchor:
   rule: status.derived.stale-never-passes
-status: answered
+status: incorporated
 body: A signature lapses only when a rule's wording changes. So a fix to a rule
   a signer already passed never comes back to them, unless they had sent the
   rule back first. By a fix I mean a thread addressed and judged by the agent
@@ -29,4 +29,13 @@ replies:
     created: 2026-10-08T21:44:06Z
     body: Ask only when the thread was theirs
     answer: true
+  - author: agent
+    created: 2026-10-09T02:03:06Z
+    body: "New rule status.acceptance.fix-on-their-thread-comes-back: a signed rule
+      comes back to a signer once the agent's fix to a finding they replied on
+      is judged, and the signature counts while it waits. A note they filed
+      already comes back as a fix to verify, and a fix they verified is not
+      asked again (lib/status.js, bin/commands/status.js,
+      src/panel/rule-detail.js, commit 35283f1). Judged: run
+      2026-10-09T01-52-53Z-local-01, pass."
 chosen: Ask only when the thread was theirs

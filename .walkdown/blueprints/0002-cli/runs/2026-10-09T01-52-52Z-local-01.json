@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-09T01-52-52Z-local-01",
+  "created": "2026-10-09T01:52:52Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "35283f1-dirty",
+  "spec_hash": "sha256:797db8dc9840",
+  "results": [
+    {
+      "rule": "status.sweep.deliberate",
+      "status": "pass",
+      "statement_hash": "sha256:bd83ebeb2a0e",
+      "evidence": [
+        "runs/evidence/2026-10-09T01-52-52Z/sweep-probes.txt",
+        "runs/evidence/2026-10-09T01-52-52Z/sweep-probe-script.mjs.txt"
+      ],
+      "reasoning": "I judged this from the CLI alone on a throwaway machine, with HOME and WALKDOWN_HOME in a temp folder, and served nothing. The project shop was a real git repository holding checkout, with two rules, and search, with one, each carrying an agent pass recorded through lib/run-record.js. The q-0528 arrangement now holds. I declared an agent sweep on checkout with a reason, committed, and moved checkout.basics.one into search. search.basics.one kept its pass, and search's SWEEP line reads 0/1 judged with only the moved rule owed. The copied marker names that rule in its rules field and keeps the original why. A second move of checkout.basics.two copied a second marker naming only that rule, and search.basics.one still passed. No sweep was written by hash --write after a real statement change, a recorded agent walkdown, threads new, lint or walkdown run. Sweep with no --why, an empty --why and a --why of spaces each exited 2 with the sweep-needs-a-reason text and wrote nothing. A sweep declared with --why stored the reason in its why field, and status printed it under SWEEP with the actor. One edge does not fail the rule, at about 20%: after two moves, search shows the same sweep as two SWEEP blocks with one run id, and the summary repeats 1 awaiting the agent sweep. That figure is my guess at how often a person moves rules from a swept blueprint in more than one batch.",
+      "threads": []
+    }
+  ]
+}
