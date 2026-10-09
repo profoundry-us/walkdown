@@ -1,0 +1,42 @@
+{
+  "run_id": "2026-10-09T14-45-35Z-local-01",
+  "created": "2026-10-09T14:45:35Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6490ee3-dirty",
+  "spec_hash": "sha256:ec2f96ee6610",
+  "results": [
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:3cc115b5be3c"
+    },
+    {
+      "rule": "status.attention.agent-queue",
+      "status": "pass",
+      "statement_hash": "sha256:c66513b6eeb1"
+    },
+    {
+      "rule": "status.attention.person-queue",
+      "status": "pass",
+      "statement_hash": "sha256:f147930f6564"
+    },
+    {
+      "rule": "status.attention.agent-settles-its-own",
+      "status": "pass",
+      "statement_hash": "sha256:f840d377de4b"
+    }
+  ]
+}
