@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T14:27:20.605Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at 329c511. A gone checkout's row is taken over by an
   unrelated repository with the same folder layout. shop's cart was registered
   and shop deleted, then outlet (another origin) imported its billing with
@@ -22,3 +22,6 @@ replies:
       with neither, a rename with no remote, is judged by layout alone. Both
       import's riders and register use the same test (couldHaveMoved in
       lib/locations.js). Test in project-codes.test.js.
+  - author: agent
+    created: 2026-10-09T04:03:41Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

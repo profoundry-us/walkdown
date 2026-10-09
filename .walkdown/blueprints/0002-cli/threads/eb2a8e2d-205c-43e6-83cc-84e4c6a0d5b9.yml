@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T14:45:32.567Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at b98db06. Moves are still matched when the old
   checkout is not gone. shop (no remote) had cart and billing registered and sat
   at a commit before its homes. Importing billing from an unrelated repository
@@ -24,3 +24,6 @@ replies:
       back to the missing home. --only naming an already-listed folder says
       'already listed' and imports the rest. Tests: test/project-codes.test.js
       (still-standing, same-name, only-listed)."
+  - author: agent
+    created: 2026-10-09T04:03:44Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

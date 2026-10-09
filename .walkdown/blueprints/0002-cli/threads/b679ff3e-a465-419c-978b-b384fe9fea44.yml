@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T16:16:43.160Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at dc47aa5. A template sibling cloned at a moved
   checkout's old path keeps the row from moving, though its origin differs and
   none of its remotes names the row's. The sibling may have another origin or no
@@ -24,3 +24,6 @@ replies:
       made into a fork the way gh does it, keeping upstream, still keeps its
       rows. The terminal picker also refuses a word that is neither a number nor
       a folder, as --only does. Test: test/import-repositories.test.js."
+  - author: agent
+    created: 2026-10-09T04:03:44Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

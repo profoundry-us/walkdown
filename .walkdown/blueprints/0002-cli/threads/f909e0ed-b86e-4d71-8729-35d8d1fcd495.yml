@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T17:03:52.478Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at 236944b. An unrelated repository whose .git is
   older than the registration, renamed into a moved project's old path, passes
   as the same checkout. Its first commit and origin both disagree. The moved
@@ -23,3 +23,6 @@ replies:
       no longer consulted. A move's message now says when another repository
       stands at the old path, instead of claiming that path no longer exists.
       Test: test/import-repositories.test.js (swap)."
+  - author: agent
+    created: 2026-10-09T04:03:45Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

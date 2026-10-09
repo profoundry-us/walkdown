@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:56:18.747Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at 35323df. After a checkout moves, `blueprints
   import` of one of its homes, or `--only` one, re-points every row of that
   checkout. It reports only the one it was pointed at, so the other rows change
@@ -18,3 +18,6 @@ replies:
       home changed is said as moved, whatever path it was pointed at. A single
       home or --only after a move now reports all three rows. Test in
       project-codes.test.js.
+  - author: agent
+    created: 2026-10-09T04:03:45Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

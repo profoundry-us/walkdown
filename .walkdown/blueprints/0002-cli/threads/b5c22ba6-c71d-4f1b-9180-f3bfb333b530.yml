@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T16:07:21.997Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at 2e631c6. A sibling from the same template with no
   remote takes a deleted project's rows and label, though the row knew its
   origin and the sibling has no remote naming it. The real project is then
@@ -20,3 +20,6 @@ replies:
       sibling with no remote no longer takes it. The terminal picker also takes
       folder names as well as numbers. Test: test/import-repositories.test.js
       (bare sibling)."
+  - author: agent
+    created: 2026-10-09T04:03:43Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

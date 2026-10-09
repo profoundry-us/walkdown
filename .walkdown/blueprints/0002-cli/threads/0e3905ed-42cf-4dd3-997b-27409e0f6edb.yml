@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T15:19:15.904Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at 24f32ba. On a case-insensitive disk, importing
   ~/shop after ~/Shop registers the same homes twice, because canon keeps the
   case as typed. An unrelated repository put at a moved checkout's old path,
@@ -28,3 +28,6 @@ replies:
       same way whether or not anything is unlisted. It matches described names
       under --json, and a bare --json with no terminal keeps the list off
       stdout. Tests: test/project-codes.test.js."
+  - author: agent
+    created: 2026-10-09T04:03:40Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T13:37:07.709Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: "Found while judging at 793988a. Moving a checkout with three committed
   homes, then `blueprints import . --all` in the new place, reports one as `~
   moved` and the other two as `· already listed`. All three rows were rewritten
@@ -20,3 +20,6 @@ replies:
       each later home that reads as listed at a path it was not listed at is
       reported as moved too. All three rows now say `~ moved`. Test in
       project-codes.test.js.
+  - author: agent
+    created: 2026-10-09T04:03:44Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

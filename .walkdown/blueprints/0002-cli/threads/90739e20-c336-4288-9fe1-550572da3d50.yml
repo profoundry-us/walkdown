@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T15:58:51.851Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at 8f32045. Two projects cloned from one starter kit
   share a first commit. When one moves or is deleted, the other takes its rows
   as moved, even though their origins differ. The project that moved is then
@@ -20,3 +20,6 @@ replies:
       sibling from one template never has it. When a label is refused and its
       checkout is gone, the refusal now says that --project with that label
       keeps its IDs. Test: test/import-moves.test.js (one template)."
+  - author: agent
+    created: 2026-10-09T04:03:43Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."

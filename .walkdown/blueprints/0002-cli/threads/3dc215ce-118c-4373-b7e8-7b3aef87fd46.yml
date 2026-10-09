@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-08T16:55:37.381Z
 anchor:
   rule: commands.blueprints.import-takes-what-it-is-pointed-at
-status: addressed
+status: settled
 body: Found while judging at dd7e05c. A checkout that never moved is refused as
   another repository once the commit it was registered on leaves its history. An
   amend followed by git's own garbage collection does that, and so does a
@@ -22,3 +22,6 @@ replies:
       made there since, a re-clone or a sibling, is put to the first-commit and
       remote tests. A re-clone of the same origin passes those tests. Test:
       test/import-repositories.test.js (amend and gc, re-clone)."
+  - author: agent
+    created: 2026-10-09T04:03:41Z
+    body: "Fixed and judged since: a later agent pass is newer than the fix."
