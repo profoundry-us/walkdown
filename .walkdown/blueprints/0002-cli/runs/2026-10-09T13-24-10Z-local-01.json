@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-09T13-24-10Z-local-01",
+  "created": "2026-10-09T13:24:10Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2139048-dirty",
+  "spec_hash": "sha256:65f0bfad5030",
+  "results": [
+    {
+      "rule": "status.attention.blocked-queues",
+      "status": "pass",
+      "statement_hash": "sha256:8ba28b22f870",
+      "evidence": [
+        "runs/evidence/2026-10-09T13-24-10Z/status-settle-item.txt",
+        "runs/evidence/2026-10-09T13-24-10Z/status-after-settle-with-reply.txt"
+      ],
+      "reasoning": "Probed through the working tree's CLI on a throwaway project (fresh HOME and WALKDOWN_HOME, one rule verify [agent]), and its API served on port 4746. An agent finding (n-0001) addressed with a reply queued 'judge shop.cart.add again'; a newer agent pass turned that into 'settle n-0001 (shop.cart.add) - the agent's own note, its fix since judged; the agent closes it as settled' in the AGENT QUEUE, never under NEEDS A HUMAN, and --json files it who: agent, action: settle - so the settle item says whose it is. `threads set n-0001 --status settled --as-agent --reply \"...\"` stored the remark with closes: true and status then showed no re-judge item, only eng's walk-down. The same through POST /api/threads/n-0002/status {status: settled, reason, via: agent} stored closes: true and queued nothing. Control: a plain `threads reply` on the settled note afterwards (no closes) did queue a re-judge, so the closes mark is what separates a closing remark from a fix claim. Spot-checked existing steps too: an open question asked a person to answer; once answered, the rule went to the agent to incorporate and to no person (the eng walk-down left the human queue). test/status.test.js and test/thread-reasons.test.js pass (60/60) and the recorded checks cell is green. Edges under 10%: none worth filing; a settle written as two asks (reply, then set) leaves the reply as a fix claim and re-queues a judge, which is the documented behaviour and costs one extra pass.",
+      "threads": []
+    }
+  ]
+}
