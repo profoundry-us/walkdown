@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-09T13-53-56Z-local-01",
+  "created": "2026-10-09T13:53:56Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8a1ead5-dirty",
+  "spec_hash": "sha256:a3aa8e9ce784",
+  "results": [
+    {
+      "rule": "status.attention.agent-queue",
+      "status": "pass",
+      "statement_hash": "sha256:c66513b6eeb1",
+      "evidence": [
+        "runs/evidence/2026-10-09T13-53-56Z/agent-queue-status.txt",
+        "runs/evidence/2026-10-09T13-53-56Z/agent-queue-status.json"
+      ],
+      "reasoning": "Probed through the real CLI (no server, no port used) on a throwaway project with fresh HOME and WALKDOWN_HOME: blueprints new --commit spec, six rules with signoff [eng], a node:test runner recorded via `walkdown run`, one agent run record, and threads via `threads new/set`. `walkdown status` and `--json` show: an open person's note on an agent-passed rule gives the agent 'address n-0002' and, as the narrowed statement intends, still a person's 'walk down' beside it; a person's answered question gives 'incorporate q-0003' and removes the rule's walk-down item, and on an unbuilt rule (q-0004) removes even the wording approval, so a rule holding an answered question is queued to no person; a built rule demanding checks with no claiming check (agent-passed cover2) is 'cover' alone with no person item, while an unbuilt uncovered rule is 'cover' plus wording approval (no judgment of a build); a checks-passed rule never agent-judged is 'judge-first' with no signer; rewording a passed rule makes it 'judge ... stale' with no signer; an agent fail with its finding later set addressed --as-agent is 'judge again' (rejudge, after fail) and nobody else's. Every step holds, and the statement holds in each probe. Edges under 10%: none beyond hand-written arrangements, which are out of scope."
+    }
+  ]
+}
