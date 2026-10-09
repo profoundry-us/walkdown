@@ -3,7 +3,7 @@
 Each section takes an install from one version to the next. What changed is in
 [CHANGELOG.md](CHANGELOG.md); this file is only what you have to do about it.
 
-## From 0.3.0 to the next release
+## From 0.3.0 to 0.4.0
 
 The command line became nouns and verbs
 ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)), every write names
@@ -14,7 +14,8 @@ your scripts and your agents type changes, and `walkdown upgrade` moves the file
 ### 1. Update the clone
 
 ```
-git -C ~/.walkdown/walkdown pull
+git -C ~/.walkdown/walkdown fetch --tags
+git -C ~/.walkdown/walkdown checkout v0.4.0
 ```
 
 The skills are a link to the clone, so they speak the new commands as soon as it

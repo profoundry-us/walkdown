@@ -1,6 +1,6 @@
 {
   "name": "walkdown",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Verify that what you built is what you designed — blueprint lint & hashing for the walkdown spec format",
   "type": "module",
   "bin": {

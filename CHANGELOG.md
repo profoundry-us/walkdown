@@ -9,6 +9,12 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-09
+
+Upgrading from 0.3.0: see [UPGRADING.md](UPGRADING.md#from-030-to-040). The command
+line became nouns and verbs, every write names its blueprint, and `walkdown upgrade`
+moves walkdown's files once.
+
 ### Added
 
 - `walkdown upgrade` moves an install laid out before
@@ -39,6 +45,14 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   It refuses a destination outside the project, a rule the destination already has,
   uncommitted feature changes, and a destination whose targets would leave a copied
   verdict reading as never.
+
+- `walkdown blueprints new` makes live only the test runner the project declares:
+  Playwright in `package.json`, RSpec in the `Gemfile`, or `node --test` as the test
+  script. The other blocks stay in `spec.yml`, commented, and it says which runner it
+  chose. A project that declares none gets no `run_all`; `walkdown run` there exits 2,
+  runs nothing, and names the `spec.yml` to fill in.
+- A signed rule comes back to its signer when the agent fixes a finding on it that the
+  signer replied on, once the fix is judged. Their signature stands meanwhile.
 
 ### Changed
 
@@ -187,6 +201,22 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   address that matches a screen only after its query is dropped says it has no screen
   of its own.
 
+- `walkdown run` never has `npx` download a test runner. A command that starts with
+  `npx <tool>`, where no `node_modules/.bin/<tool>` is installed, is refused by name with
+  the install command to run. Nothing runs.
+- A sweep covers only the rules that stood in its blueprint when it was declared, so a
+  rule moved in later is not swept by an older sweep. A sweep copied by `rules move`
+  covers only the rules it came with, and copied in two batches it reads as one sweep.
+- The agent's own note, fixed and judged since, is listed in `walkdown status` as the
+  agent's to close, not as yours. Words written while settling a note no longer count
+  as a new fix, so they no longer send the rule back to be judged.
+- `walkdown blueprints import` knows a checkout's `.git` by its birth time as well as its
+  inode, so a drive that reuses an inode gives no one a deleted project's IDs. A
+  re-cloned checkout's rows learn its new `.git`. Where nothing can tell a checkout from
+  another repository, `--project <label>` says which it is.
+- The DOMPurify and Phosphor licence notices ship in `vendor/` beside the code they
+  cover.
+
 ## [0.3.0] - 2026-10-02
 
 Upgrading from 0.2.0: see [UPGRADING.md](UPGRADING.md#from-020-to-030). Two changes
@@ -312,7 +342,8 @@ Upgrading from 0.1.x: see [UPGRADING.md](UPGRADING.md#from-01x-to-020).
   full sitting, incorporating answers and working the backlog, and reporters for
   `node:test`, Playwright and RSpec.
 
-[Unreleased]: https://github.com/profoundry-us/walkdown/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/profoundry-us/walkdown/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/profoundry-us/walkdown/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/profoundry-us/walkdown/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/profoundry-us/walkdown/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/profoundry-us/walkdown/compare/v0.1.0...v0.1.1

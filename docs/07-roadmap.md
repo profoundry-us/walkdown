@@ -56,6 +56,18 @@ file disagrees with the code, the code is right and this file is out of date.
   reworded. The embed still travels by script tag — that is how a prototype page is
   pinnable — and only the panel's second layout is gone.
 
+## Earmarked for 0.5.0
+
+### Investigate Claude Code Mods
+
+Topher, 2026-10-09: look into [Claude Code Mods](https://code.claude.com/docs/en/plugins/mods/overview)
+for 0.5.0. walkdown already reaches Claude Code as a plugin (ADR 0010), and a mod is a
+plugin's function hooks drawn as a live pane, band, status line or toast. The question
+to answer is which of walkdown's surfaces would serve a person better there than at a
+terminal or in the panel: the attention queues, what the agent tier still owes, or
+a thread waiting on them. This is an investigation, not a commitment; its outcome is an
+ADR or a decision not to.
+
 ## Candidates, roughly in order of what they cost us
 
 ### `extract` — the biggest hole in the tool
