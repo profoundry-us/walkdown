@@ -414,3 +414,23 @@ test('the browser doors carry the reason and say what a pass closed @rule:thread
     p.cleanup();
   }
 });
+
+test('words said while settling a note are marked as closing it, and a claim is not @rule:status.attention.blocked-queues', () => {
+  const p = project();
+  try {
+    const t = openThread(p.load(), {
+      kind: 'note',
+      body: 'broken',
+      anchor: { rule: RULE },
+      via: 'agent',
+      reason: 'finding',
+    });
+    mutateThread(p.load(), t.id, { body: 'fixed it', status: 'addressed', via: 'agent' });
+    mutateThread(p.load(), t.id, { body: 'judged since', status: 'settled', via: 'agent' });
+    const [claim, closing] = p.onDisk(t.id).replies;
+    assert.equal(claim.closes, undefined, 'the fix claim is a claim');
+    assert.equal(closing.closes, true, 'the settle remark closes');
+  } finally {
+    p.cleanup();
+  }
+});

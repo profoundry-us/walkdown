@@ -367,11 +367,12 @@ function report(blueprint, values, ruleId, emit) {
       }`,
     rejudge: (i) =>
       `judge ${i.rule} again — ${i.thread} claims a fix newer than the ${i.after === 'fail' ? 'failing' : 'passing'} verdict`,
-    // The machine's own observation, addressed by the machine: it closes it
-    // itself. Missing from this table for a day, so the queue crashed the
-    // moment one existed (2026-09-21).
+    // The machine's own note, its fix since judged: it closes it itself.
+    // Missing from this table for a day, so the queue crashed the moment one
+    // existed (2026-09-21). It said "a note you wrote", and the person
+    // reading the report took it for theirs (2026-10-09).
     settle: (i) =>
-      `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — a note you wrote, addressed; close it`,
+      `settle ${i.thread}${i.rule ? dim(` (${i.rule})`) : ''} — the agent's own note, its fix since judged; the agent closes it as settled`,
     // A design request (ADR 0009): design's to draw, never the building agent's.
     draw: (i) =>
       `draw ${i.screen ?? i.rule ?? 'what it asks for'} — design request ${i.thread}${i.rule && i.screen ? dim(` (${i.rule})`) : ''}`,

@@ -585,6 +585,8 @@ stories:
             - "An agent is asked to address an open note that is not a design request, to incorporate an answered question into its rule, to cover a rule that demands checks while no check claims it, and to re-judge a rule whose fix was claimed after its last pass"
             - "A person is asked to judge a built rule once for each role that has not signed it, to verify the addressed notes a person wrote on a rule the walk can reach, and any addressed design request there - one item per rule, naming the threads - and to answer an open question, one item per rule where the question is on one the walk can reach"
             - "An addressed note the agent wrote on a walkable rule, other than a design request, is the agent's: it is judged again, and once the agent's pass is newer than the fix the agent is asked to settle it. It is never a person's to verify"
+            - The item asking the agent to settle says it is the agent's own note for the agent to close, so a person reading the report never takes it for theirs
+            - Words written in the same ask that settles a note are a closing remark and never a fix claim, so they put no rule back to be judged
             - A thread on no rule, or on a retired one, is its own item, and only a person's feedback or request makes a verify item there - a finding or an observation on a retired rule waits on nobody
             - "A cover item is a rule demanding checks while no check claims it: an agent writes the check, and it is never a person's to judge"
             - A rule not yet built asks a person to approve its wording, which judges no build, so that ask may stand beside its cover item and says it is about the wording
@@ -592,7 +594,7 @@ stories:
             - 'An open design request is design''s to draw and never the building agent''s to address. With design.by "agent" it is queued for the design agent, otherwise for the designer'
             - Every item names who is blocked, so nothing sits in two queues at once
             - A rule holding an answered question is the agent's to fold in and is queued to no person - not to judge, not to verify - until the question is incorporated
-          statement_hash: sha256:7d5377c322ba
+          statement_hash: sha256:8ba28b22f870
 
       - id: status.attention.names-the-role
         origin: walkdown

@@ -374,6 +374,39 @@ test('an agent observation is settled only once a pass is newer than its fix @ru
   assert.ok(after.some((i) => i.action === 'settle' && i.thread === 'n-1'));
 });
 
+test('a remark made while settling a finding is no fix newer than the pass @rule:status.attention.blocked-queues', () => {
+  const finding = (closes) => ({
+    id: 'n-1',
+    kind: 'note',
+    reason: 'finding',
+    author: 'agent',
+    status: 'settled',
+    anchor: { rule: 'demo.main.thing' },
+    replies: [
+      { author: 'agent', created: '2026-02-01T00:00:00Z', body: 'fixed' },
+      {
+        author: 'agent',
+        created: '2026-03-02T00:00:00Z',
+        body: 'judged since',
+        ...(closes ? { closes: true } : {}),
+      },
+    ],
+  });
+  const derive = (closes) =>
+    deriveStatus(
+      blueprint({
+        verify: ['agent'],
+        runs: [walkdownRun('2026-03-01', 'agent', 'pass')],
+        threads: [finding(closes)],
+      }),
+    );
+  // Unmarked, the same words read as a claim the pass never saw.
+  assert.ok(derive(false).attention.some((i) => i.action === 'rejudge'));
+  const marked = derive(true);
+  assert.equal(marked.rows[0].unjudgedFix, null);
+  assert.ok(!marked.attention.some((i) => i.action === 'rejudge'));
+});
+
 test('a person verifies no fix on a built rule the agent has not judged yet @rule:status.attention.agent-tier-queued @rule:status.attention.blocked-queues', () => {
   const { attention } = deriveStatus(
     blueprint({
