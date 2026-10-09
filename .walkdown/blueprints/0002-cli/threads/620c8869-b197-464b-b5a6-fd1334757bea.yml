@@ -19,6 +19,3 @@ replies:
     body: Fixed. `bestClaim` in lib/claims.js now scores with the panel's own
       `scoreRef` from lib/screen-match.js, so there is one matcher. Priority is
       a declared fragment, then each declared query value, then the longer path.
-  - author: agent
-    created: 2026-10-09T04:03:42Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

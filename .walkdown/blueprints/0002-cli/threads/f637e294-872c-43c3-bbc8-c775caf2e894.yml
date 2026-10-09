@@ -18,6 +18,3 @@ replies:
       home changed is said as moved, whatever path it was pointed at. A single
       home or --only after a move now reports all three rows. Test in
       project-codes.test.js.
-  - author: agent
-    created: 2026-10-09T04:03:45Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

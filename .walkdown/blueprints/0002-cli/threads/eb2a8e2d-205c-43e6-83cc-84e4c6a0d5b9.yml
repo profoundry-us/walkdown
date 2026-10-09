@@ -24,6 +24,3 @@ replies:
       back to the missing home. --only naming an already-listed folder says
       'already listed' and imports the rest. Tests: test/project-codes.test.js
       (still-standing, same-name, only-listed)."
-  - author: agent
-    created: 2026-10-09T04:03:44Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

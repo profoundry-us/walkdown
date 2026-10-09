@@ -24,6 +24,3 @@ replies:
       made into a fork the way gh does it, keeping upstream, still keeps its
       rows. The terminal picker also refuses a word that is neither a number nor
       a folder, as --only does. Test: test/import-repositories.test.js."
-  - author: agent
-    created: 2026-10-09T04:03:44Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

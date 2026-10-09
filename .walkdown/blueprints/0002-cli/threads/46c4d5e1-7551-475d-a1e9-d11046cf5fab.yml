@@ -27,6 +27,3 @@ replies:
       longer hand their label and code to what stands there now. A move learns
       the new HEAD, root and origin. The forget hint names every ID of that
       checkout. Tests: test/import-repositories.test.js."
-  - author: agent
-    created: 2026-10-09T04:03:42Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

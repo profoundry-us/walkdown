@@ -20,6 +20,3 @@ replies:
       sibling from one template never has it. When a label is refused and its
       checkout is gone, the refusal now says that --project with that label
       keeps its IDs. Test: test/import-moves.test.js (one template)."
-  - author: agent
-    created: 2026-10-09T04:03:43Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

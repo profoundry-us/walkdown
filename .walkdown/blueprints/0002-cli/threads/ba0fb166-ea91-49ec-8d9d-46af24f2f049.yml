@@ -20,6 +20,3 @@ replies:
       each later home that reads as listed at a path it was not listed at is
       reported as moved too. All three rows now say `~ moved`. Test in
       project-codes.test.js.
-  - author: agent
-    created: 2026-10-09T04:03:44Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

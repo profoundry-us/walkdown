@@ -24,6 +24,3 @@ replies:
       write could teach it its repository is still matched by its label. --only
       and --json now report each listed folder once and keep stdout JSON. Tests:
       test/project-codes.test.js."
-  - author: agent
-    created: 2026-10-09T04:03:41Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

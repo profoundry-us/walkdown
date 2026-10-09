@@ -23,6 +23,3 @@ replies:
       commit now treats a repository with no commits as another one. A moved row
       also learns the remote it moved under, so the next move is not asked for
       --project again. Tests: test/import-repositories.test.js."
-  - author: agent
-    created: 2026-10-09T04:03:45Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

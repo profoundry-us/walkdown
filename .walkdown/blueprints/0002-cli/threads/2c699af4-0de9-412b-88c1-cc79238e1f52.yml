@@ -20,6 +20,3 @@ replies:
       asks for the label. One home, --only or --all now keep the registered
       row's ID and add the rest to the same project. Test in
       project-codes.test.js.
-  - author: agent
-    created: 2026-10-09T04:03:41Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

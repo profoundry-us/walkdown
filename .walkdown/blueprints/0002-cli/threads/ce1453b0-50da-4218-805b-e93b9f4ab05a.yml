@@ -15,6 +15,3 @@ replies:
     created: 2026-10-08T13:27:19Z
     body: "Fixed. `sweep` with no --why, or with an unknown tier, exits 2 and says
       `Nothing was changed.` Scenario: sweep-needs-a-reason."
-  - author: agent
-    created: 2026-10-09T04:03:44Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

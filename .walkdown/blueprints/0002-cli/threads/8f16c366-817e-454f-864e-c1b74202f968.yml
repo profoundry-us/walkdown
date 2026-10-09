@@ -24,6 +24,3 @@ replies:
       keeps its IDs. Also: ssh://host:22/ origins drop the port, --only matches
       in any letter case, and naming only worktree-held homes says so once and
       exits 2. Tests: test/import-moves.test.js."
-  - author: agent
-    created: 2026-10-09T04:03:43Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

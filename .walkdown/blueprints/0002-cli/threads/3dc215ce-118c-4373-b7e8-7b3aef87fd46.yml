@@ -22,6 +22,3 @@ replies:
       made there since, a re-clone or a sibling, is put to the first-commit and
       remote tests. A re-clone of the same origin passes those tests. Test:
       test/import-repositories.test.js (amend and gc, re-clone)."
-  - author: agent
-    created: 2026-10-09T04:03:41Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

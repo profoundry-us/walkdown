@@ -22,6 +22,3 @@ replies:
       holds is refused by name, or left out of a repository import with a note:
       a worktree is never registered, so it never becomes a project. The move
       tests moved to test/import-moves.test.js."
-  - author: agent
-    created: 2026-10-09T04:03:43Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."

@@ -20,6 +20,3 @@ replies:
       sibling with no remote no longer takes it. The terminal picker also takes
       folder names as well as numbers. Test: test/import-repositories.test.js
       (bare sibling)."
-  - author: agent
-    created: 2026-10-09T04:03:43Z
-    body: "Fixed and judged since: a later agent pass is newer than the fix."
