@@ -589,8 +589,8 @@ stories:
       - id: status.attention.agent-queue
         origin: walkdown
         created_at: 2026-10-09
-        statement: The agent is asked for the work only it can do, and a rule waiting on the agent asks no person anything meanwhile.
-        because: A person asked to look at a rule the agent has not finished with looks twice, or signs something nobody has checked.
+        statement: The agent is asked for the work only it can do, and a rule the agent has yet to judge, or whose answered question it has yet to fold in, asks no person anything meanwhile.
+        because: A person asked to look at a rule the agent has not judged, or whose words are about to move, looks twice or signs something nobody has checked. An open note is different: a person's signed pass is what ends it.
         history: Split out of status.attention.blocked-queues on 2026-10-09, whose twelve steps were too many to judge in one sitting.
         verify: [checks]
         steps:
