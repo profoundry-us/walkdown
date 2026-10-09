@@ -837,11 +837,12 @@ stories:
             - Each run record holding a result for a moved rule is copied to b, keeping its run id, time and author, holding only the moved rules' results, and saying which blueprint and run it was copied from
             - a's run records are unchanged
             - Each sweep marker is copied to b naming the moved rules, and sweeps only them there; b's own rules keep their verdicts
+            - A sweep b declared before the move does not reach the rules that arrive, which keep their verdicts; one b declares after the move covers them
             - The evidence the copies cite is copied to b
             - "`walkdown status` in b shows every moved rule with the verdicts and signatures it had in a"
             - A destination outside the project, a rule id the destination already has, uncommitted changes in either blueprint's features, and verdicts recorded at an address the destination's target does not point at are each refused, and nothing moves
             - It says how many rules and threads moved, and how many run records were copied
-          statement_hash: sha256:8467515c5cad
+          statement_hash: sha256:976ba30819ab
   - id: locations.threads
     title: A thread is one conversation, wherever it was filed
     statement: As someone working on branches and with teammates, I can file a thread without it colliding with one somebody else filed at the same time.

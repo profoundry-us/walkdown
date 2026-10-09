@@ -632,3 +632,29 @@ test('the config init writes loads the RSpec formatter from the clone, not from 
   }
   assert.doesNotMatch(yml, /walkdown-rspec gem/, 'no gem to install');
 });
+
+test('walkdown run never has npx fetch a test runner: a missing one is refused by name, an installed one runs @rule:delivery.install.clone-is-the-install', () => {
+  const proj = join(root, 'npx-runner');
+  mkdirSync(proj, { recursive: true });
+  register({ id: 'npx-runner', project: proj, homeDir: proj });
+  writeFileSync(
+    join(proj, 'spec.yml'),
+    'blueprint: runner\nrunner: { run_all: "npx probe-runner test" }\n',
+  );
+  const blueprint = () => loadBlueprint(proj, { cwd: proj });
+  assert.throws(
+    () => runChecks(blueprint(), { stdio: 'pipe' }),
+    /`npx probe-runner` would download probe-runner from the npm registry[\s\S]*Nothing ran[\s\S]*never installs a test runner/,
+  );
+  // Installed in the project, it runs, and npx is told to fetch nothing.
+  const bin = join(proj, 'node_modules', '.bin');
+  mkdirSync(bin, { recursive: true });
+  writeFileSync(
+    join(bin, 'probe-runner'),
+    `#!/bin/sh\nprintf "%s" "$npm_config_yes" > "${join(proj, 'yes.txt')}"\n`,
+    { mode: 0o755 },
+  );
+  const ran = runChecks(blueprint(), { stdio: 'pipe' });
+  assert.equal(ran.code, 0, ran.stderr);
+  assert.equal(readFileSync(join(proj, 'yes.txt'), 'utf8'), 'false');
+});

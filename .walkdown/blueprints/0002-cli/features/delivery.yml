@@ -21,7 +21,8 @@ stories:
             - Nothing walkdown ships at runtime resolves outside itself or Node's own library
             - The config init writes names the clone's Playwright reporter by its file path, so a project with no walkdown package installed can record its checks
             - Third-party code it carries is committed, attributed, and built from a named source rather than edited by hand
-          statement_hash: sha256:72ed038ac8f5
+            - "`walkdown run` never has npx fetch a test runner: one the project has not installed is refused by name, saying how to install it, and nothing runs"
+          statement_hash: sha256:8ebfb3b4fd1b
 
   - id: delivery.plugin
     title: walkdown is one plugin in Claude Code

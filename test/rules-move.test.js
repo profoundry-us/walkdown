@@ -481,3 +481,27 @@ test("a sweep a move copies sweeps only the rules it came with, and the destinat
     [[1, ['shop.cart.add']]],
   );
 });
+
+test("a sweep the destination declared before a move leaves the arriving rules' verdicts alone, and one declared after covers them @rule:locations.several.rules-move", () => {
+  const f = fixture();
+  const sweep = (why) =>
+    f.wd(['sweep', '--tiers', 'agent', '--why', why, '--blueprint', 'b', '--target', 'local']);
+  const first = sweep('b was rebuilt');
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(f.row('a', 'shop.cart.add').agent, 'pass');
+  const r = f.wd(['rules', 'move', 'shop.cart.add', '--blueprint', 'a', '--to', 'b']);
+  assert.equal(r.status, 0, r.stderr);
+  // It arrived after b's sweep, so it reads as it did in a (q-0557).
+  assert.equal(f.row('b', 'shop.cart.add').agent, 'pass');
+  const owed = () =>
+    JSON.parse(f.wd(['status', '--blueprint', 'b', '--json']).stdout)
+      .sweeps.filter((x) => x.tier === 'agent')
+      .flatMap((x) => x.owed);
+  assert.deepEqual(owed(), []);
+  // A sweep b declares now is over every rule standing in b, the arrival too.
+  // (Times are kept to the second, so a second passes first.)
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1100);
+  assert.equal(sweep('b again').status, 0);
+  assert.equal(f.row('b', 'shop.cart.add').agent, 'stale');
+  assert.deepEqual(owed(), ['shop.cart.add']);
+});
