@@ -1,0 +1,30 @@
+id: n-0558
+uuid: d7c59d2c-3540-4529-87dd-882bab5f9b8d
+kind: note
+reason: finding
+author: agent
+created: 2026-10-09T02:42:57.087Z
+anchor:
+  rule: delivery.install.clone-is-the-install
+status: addressed
+body: >-
+  DOMPurify ships in vendor/markdown.js, but the licence file walkdown names for
+  it does not exist.
+
+
+  vendor/README.md, the header of vendor/markdown.js and rollup.markdown.mjs all
+  say vendor/LICENSE-dompurify carries DOMPurify's terms. No such file is in
+  vendor/, and git has never tracked one. The README also says each licence file
+  is copied verbatim. The bundle's own one-line @license banner names Cure53,
+  Apache-2.0 and MPL-2.0, so DOMPurify is credited, but its licence text is not
+  carried. That breaks the step that third-party code is committed and
+  attributed. Evidence:
+  runs/evidence/2026-10-09T02-37-34Z/clone-install-probes.txt, probes p9 and
+  p10.
+replies:
+  - author: agent
+    created: 2026-10-09T02:45:18Z
+    body: "vendor/LICENSE-dompurify is committed now: DOMPurify 3.4.15's Apache-2.0
+      and MPL-2.0 texts, verbatim, as it ships them. test/delivery.test.js
+      checks every licence file vendor/README.md names is tracked, so one cannot
+      go missing again."

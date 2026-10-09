@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-09T02-37-34Z-local-01",
+  "created": "2026-10-09T02:37:34Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "459957f-dirty",
+  "spec_hash": "sha256:4bdc646b20f2",
+  "results": [
+    {
+      "rule": "delivery.install.clone-is-the-install",
+      "status": "fail",
+      "statement_hash": "sha256:8ebfb3b4fd1b",
+      "evidence": [
+        "runs/evidence/2026-10-09T02-37-34Z/clone-install-probes.txt"
+      ],
+      "reasoning": "A local git clone at 459957f with no node_modules, under a throwaway home with the npm registry pointed at a dead port and offline, ran init, blueprints new, where, lint and status cleanly. Imported, the clone's own two blueprints linted with 0 errors. Served on 4734, it returned 200 for /, /panel.js, /embed.js and /api/blueprint, which named only the throwaway project. No shipped file in lib/, bin/ or adapters/ imports anything but relative paths and node:, and package.json has no dependencies. The spec.yml written names the clone's lib/playwright-reporter.js by path, and that file exists. The new step holds: with Playwright absent, run and run --rule exit 2 naming playwright and `npm i -D @playwright/test`, nothing spawns and the npm cache stays empty. With a stand-in script at node_modules/.bin/playwright, the same commands run it with npm_config_yes=false. The vendor step fails: DOMPurify is bundled into vendor/markdown.js, yet vendor/LICENSE-dompurify, which the README, the bundle header and rollup.markdown.mjs name as carrying its terms, has never been committed. Only a one-line @license banner credits it, so the finding is filed. Weighed edges, all under 10%: a runner command not starting with npx (`cd web && npx ...`) bypasses the name check, and npx's own yes=false refusal stops it after a registry metadata request (about 5%). A Playwright installed only globally is refused although npx would not fetch, but its tests could not import @playwright/test anyway (under 5%).",
+      "threads": ["d7c59d2c-3540-4529-87dd-882bab5f9b8d"]
+    }
+  ]
+}

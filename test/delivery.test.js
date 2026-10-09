@@ -9,7 +9,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import {
   cpSync,
   existsSync,
@@ -68,6 +68,14 @@ test('the third-party code it carries is attributed and machine-built @rule:deli
   assert.match(bundle, /npm run build:yaml/, 'the header says how to reproduce it');
   // And it is genuinely the library, not a stub that happens to satisfy imports.
   assert.ok(statSync(join(root, 'vendor', 'yaml.js')).size > 100_000);
+  // Every licence file the vendor README names is there, and tracked: one
+  // named and never committed left DOMPurify's terms out of every clone (n-0558).
+  const named = [...read('vendor/README.md').matchAll(/`(LICENSE[\w-]*)`/g)].map((m) => m[1]);
+  assert.ok(named.includes('LICENSE-dompurify'), named.join(', '));
+  const tracked = spawnSync('git', ['ls-files', 'vendor'], { cwd: root, encoding: 'utf8' }).stdout;
+  for (const f of new Set(named))
+    assert.match(tracked, new RegExp(`^vendor/${f}$`, 'm'), `vendor/${f} is committed`);
+  assert.match(read('vendor/LICENSE-dompurify'), /Apache License[\s\S]*Mozilla Public License/);
 });
 
 /*

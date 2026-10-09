@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-09T02-37-33Z-local-01",
+  "created": "2026-10-09T02:37:33Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "459957f-dirty",
+  "spec_hash": "sha256:4bdc646b20f2",
+  "results": [
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:976ba30819ab",
+      "evidence": [
+        "runs/evidence/2026-10-09T02-37-33Z/00-fixture-setup.sh",
+        "runs/evidence/2026-10-09T02-37-33Z/01-dest-sweep-before-move.txt",
+        "runs/evidence/2026-10-09T02-37-33Z/02-dest-sweep-after-move.txt",
+        "runs/evidence/2026-10-09T02-37-33Z/03-dry-run-and-move.txt",
+        "runs/evidence/2026-10-09T02-37-33Z/04-features-threads.txt",
+        "runs/evidence/2026-10-09T02-37-33Z/05-records-evidence.txt",
+        "runs/evidence/2026-10-09T02-37-33Z/06-status-b.txt",
+        "runs/evidence/2026-10-09T02-37-33Z/07-refusals.txt"
+      ],
+      "reasoning": "I drove the CLI headless at 459957f in throwaway homes, serving nothing, over a project with blueprints a and b. First I repeated the earlier failing arrangement: b declared an agent sweep, then shop.cart moved in. shop.cart.add kept its agent pass and eng signature in b, and b's sweep listed only ship.track.link as owed. Then b declared a second agent sweep after the move, and it covered both arrivals and ship.track.link, staling the agent pass as q-0557 decided. Every copied record carries copied_from.at, which is what status reads. On a fresh fixture the dry run named the rules and threads, counted the records, sweep and evidence, and changed no file. The move took both rules out of a's shop.yml into b's shop.yml with comment, steps and hashes intact, and hash in b reads ok. n-0001 and n-0002 moved keeping their ids and the attachment. Three records and a's checks sweep were copied with run id, time, author and only the moved results; a's run files are byte-identical. The cited cart.png was copied under the same key. A blueprint of another project by label, by id or by path, a duplicate rule id, uncommitted features in a or in b, and a target mismatch were each refused with exit 2 and no file changed. Weighed edges: the dry run counts the run records and evidence rather than naming them (15%, a careful mover may want run ids before committing). A sweep declared in the same second as a move reads as before it (under 5%, only a script does that)."
+    }
+  ]
+}

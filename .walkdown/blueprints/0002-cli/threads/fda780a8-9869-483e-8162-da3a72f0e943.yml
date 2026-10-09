@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-09T02:04:04.682Z
 anchor:
   rule: locations.several.rules-move
-status: answered
+status: incorporated
 body: "Should a sweep the destination declared before a move cover the rules
   that arrive? Found judging at 35283f1. Blueprint b had its own agent sweep,
   and then shop.cart.add arrived with an agent pass older than it. The rule read
@@ -29,3 +29,10 @@ replies:
     added: "Only the rules it was declared over: a sweep covers what stood in b when
       it was declared, and arrivals keep their verdicts."
     answer: true
+  - author: agent
+    created: 2026-10-09T02:45:18Z
+    body: "Folded into locations.several.rules-move: a sweep b declared before a
+      move does not reach the rules that arrive, which keep their verdicts; one
+      declared after covers them. Status reads each arrival from the move's
+      copied_from.at stamp (lib/status.js, commit 459957f). Judged: run
+      2026-10-09T02-37-33Z-local-01, pass."
