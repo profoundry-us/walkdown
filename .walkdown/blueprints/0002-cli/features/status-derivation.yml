@@ -590,7 +590,7 @@ stories:
         origin: walkdown
         created_at: 2026-10-09
         statement: The agent is asked for the work only it can do, and a rule the agent has yet to judge, or whose answered question it has yet to fold in, asks no person anything meanwhile.
-        because: A person asked to look before the agent has judged, or while the words are about to move, looks twice or signs what nobody checked. An open note does not hold them back, since their signed pass ends it.
+        because: A person asked to look before the agent has judged, or while the words are about to move, looks twice. An open note holds nobody back, since a signed pass ends it.
         history: Split out of status.attention.blocked-queues on 2026-10-09, whose twelve steps were too many to judge in one sitting.
         verify: [checks]
         steps:
