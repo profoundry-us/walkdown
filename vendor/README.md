@@ -52,6 +52,11 @@ Apache-2.0 or MPL-2.0 at your option, by Cure53 (`LICENSE-dompurify`). Each
 licence file is copied verbatim, and each bundle carries a header pointing
 back here.
 
+The panel and the embed also carry a handful of Phosphor icon paths, copied
+from `@phosphor-icons/core` into `src/panel/icons.js` and `src/embed/icons.js`
+by `tools/sync-phosphor.mjs`. Phosphor is MIT, by Phosphor Icons
+(`LICENSE-phosphor`).
+
 [yaml]: https://github.com/eemeli/yaml
 [lit]: https://lit.dev
 [marked]: https://marked.js.org
