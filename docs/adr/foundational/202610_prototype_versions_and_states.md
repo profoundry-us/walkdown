@@ -1,6 +1,7 @@
 # ADR 0015 — Prototype versions and states
 
-- **Status:** proposed 2026-10-09
+- **Status:** accepted 2026-10-09 by Topher; not yet built (0.5.0). Its
+    panel and CLI screens are designed first.
 - **Date:** 2026-10-09
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0007 (as-built drawings), ADR 0009 (design ownership and
