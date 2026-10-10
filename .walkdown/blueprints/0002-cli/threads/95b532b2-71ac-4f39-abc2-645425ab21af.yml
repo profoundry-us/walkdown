@@ -6,8 +6,14 @@ author: agent
 created: 2026-10-10T03:55:20.619Z
 anchor:
   screen: redline-filed
-status: open
+status: addressed
 body: ADR 0015 §4. A person runs 'walkdown threads new --reason redline --screen
   <id> --body ...'. It is filed closed. Say what was filed, and on which screen
   and element. Say that it is closed and waits on nobody, and that judges read
   it as an intended gap.
+replies:
+  - author: agent
+    created: 2026-10-10T03:57:05Z
+    body: "Drawn: prototype-cli/drafts/redline-filed.html. The filed line names the
+      redline, its screen and element, says it is closed and waits on nobody,
+      and that judges read it as an intended gap."

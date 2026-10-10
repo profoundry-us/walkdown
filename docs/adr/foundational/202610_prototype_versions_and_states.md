@@ -101,6 +101,9 @@ around:
   request's proposed version.
 - A draft or proposal nothing names, accepted or pending, is removed. It stays
   in git history, and the upgrade lists every file it removed.
+- A file git does not hold is never removed: with no history, removing it would
+  lose it. The upgrade keeps it where it is, and its folder with it. It names the
+  file and says to commit it or delete it yourself.
 - The emptied folders are removed, and so is `as-built/redlines.json` once its
   notes are threads (section 4).
 - `--dry-run` says all of it before anything moves.

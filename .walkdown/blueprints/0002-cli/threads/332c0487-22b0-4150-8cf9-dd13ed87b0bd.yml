@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:55:20.411Z
 anchor:
   screen: upgrade-prototypes
-status: open
+status: addressed
 body: ADR 0015 §2a. Draw 'walkdown upgrade --dry-run' on a blueprint with
   prototype/screens/, prototype/drafts/ and proposals/. It lists each accepted
   screen moving to prototypes/<screen>-YYYYMMDD.html, dated by its first commit.
@@ -15,3 +15,14 @@ body: ADR 0015 §2a. Draw 'walkdown upgrade --dry-run' on a blueprint with
   says they stay in git history. It names the folders it would remove, and
   as-built/redlines.json becoming redline threads. It ends saying nothing was
   moved, and how to run it for real.
+replies:
+  - author: agent
+    created: 2026-10-10T03:57:04Z
+    body: "Drawn: prototype-cli/drafts/upgrade-prototypes.html. A dry run lists each
+      prototype moving to its dated version, the files and folders it would
+      remove, and the redlines becoming threads, then says nothing moved."
+  - author: agent
+    created: 2026-10-10T03:58:33Z
+    body: "Revised in place: the dry run now covers the whole install, grouped per
+      blueprint (checkout and search), and ends with walkdown upgrade. An
+      uncommitted file is shown as kept, with what to do about it."

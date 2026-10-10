@@ -1,0 +1,72 @@
+<!doctype html>
+<!-- DESIGN DRAFT: upgrade-prototypes -->
+<!-- Drawn by the design agent for request n-0572. Not yet accepted. -->
+<!-- Intent: one dry run over every blueprint that says, file by file, where every prototype goes and what is removed, that removed files stay in git history, that a file git does not hold is kept, and that nothing moved until it is run for real. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>upgrade says where every prototype goes, and what it removes</title>
+<style>
+:root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown upgrade --dry-run</div>
+  <div class="ln">Dry run. This is what `walkdown upgrade` would do to every blueprint.</div>
+  <div class="ln"></div>
+  <div data-testid="cli.upgrade.prototypes">
+    <div class="ln">Prototypes move into prototypes/, each dated by its first commit:</div>
+    <div class="ln">  checkout</div>
+    <div class="ln">    → prototype/screens/cart.html      becomes prototypes/cart-20260918.html      accepted</div>
+    <div class="ln">    → prototype/screens/payment.html   becomes prototypes/payment-20260918.html   accepted</div>
+    <div class="ln">    → prototype/screens/receipt.html   becomes prototypes/receipt-20260921.html   accepted</div>
+    <div class="ln">    → prototype/drafts/receipt.html    becomes prototypes/receipt-20261003.html   proposed on n-0004</div>
+    <div class="ln">    → proposals/shipping.html          becomes prototypes/shipping-20261006.html  proposed on n-0006</div>
+    <div class="ln">    The storyboard is repointed at the 3 accepted versions.</div>
+    <div class="ln">  search</div>
+    <div class="ln">    → prototype/screens/results.html   becomes prototypes/results-20260925.html   accepted</div>
+    <div class="ln">    The storyboard is repointed at the 1 accepted version.</div>
+  </div>
+  <div class="ln"></div>
+  <div data-testid="cli.upgrade.removed">
+    <div class="ln">Removed, because no screen or open request names them. They stay in git history:</div>
+    <div class="ln">  checkout</div>
+    <div class="ln">    × prototype/drafts/cart-old.html</div>
+    <div class="ln">    × proposals/payment-sketch.html</div>
+    <div class="ln">    × prototype/screens/, prototype/drafts/, once they are empty</div>
+    <div class="ln">  search</div>
+    <div class="ln">    × prototype/screens/, once it is empty</div>
+    <div class="ln">Kept, because git does not hold it:</div>
+    <div class="ln">  checkout</div>
+    <div class="ln">    ! proposals/payment-notes.html KEPT</div>
+    <div class="ln">      It has no history, so the upgrade leaves it where it is, and proposals/ stays with it.</div>
+    <div class="ln">      Commit it to have it moved or removed next time, or delete it yourself.</div>
+  </div>
+  <div class="ln"></div>
+  <div class="ln">Redlines become threads:</div>
+  <div class="ln">  checkout</div>
+  <div class="ln">    → as-built/redlines.json's 2 notes become 2 redline threads, on cart and receipt,</div>
+  <div class="ln">      filed closed in topher's name. Then as-built/redlines.json is removed.</div>
+  <div class="ln"></div>
+  <div class="ln">Nothing was moved or removed. To do it, run:</div>
+  <div class="ln">  walkdown upgrade</div>
+  <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+</div>
+</body>
+</html>

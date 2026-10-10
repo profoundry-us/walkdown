@@ -6,8 +6,14 @@ author: agent
 created: 2026-10-10T03:55:00.820Z
 anchor:
   screen: redline-refused-for-agent
-status: open
+status: addressed
 body: "ADR 0015 §4. 'walkdown threads new --reason redline --as-agent' is
   refused: only a person files a redline, because a redline excuses a gap. Say
   nothing was filed, and what the agent does instead: ask the person with a
   question on the element."
+replies:
+  - author: agent
+    created: 2026-10-10T03:57:05Z
+    body: "Drawn: prototype-cli/drafts/redline-refused-for-agent.html. The refusal
+      says only a person files a redline and nothing was filed, then gives the
+      question to file on the same element."
