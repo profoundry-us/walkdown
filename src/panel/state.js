@@ -62,6 +62,12 @@ export const S = {
    * rest of the session describing a page you are not on.
    */
   ghostOverride: null,
+  /*
+   * The origin of an application that did not answer, while it does not
+   * (panel.dock.app-not-answering). The frame stays empty and the design is
+   * shown in its place until a poll hears the app again.
+   */
+  appDown: null,
 
   /*
    * Which of the three things the panel is doing: finding a server, choosing
@@ -240,6 +246,7 @@ export const STYLESHEET = cfg.stylesheet ?? S.SERVER + '/walkdown.css';
 export const W = 384; // the side panel
 export const TOP = 44; // the tool bar across the top
 export const GAP = 12; // how much desk shows around the wrapped page
+export const DOWN_H = 30; // the strip under the bar while the app does not answer
 // Nothing separates the bar from the page any more, so the bar's own bottom
 // padding does that job — a second 12px gap on top of it read as a gutter.
 export const HEAD = TOP;

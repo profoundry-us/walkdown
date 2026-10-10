@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:55:20.411Z
 anchor:
   screen: upgrade-prototypes
-status: addressed
+status: verified
 body: ADR 0015 §2a. Draw 'walkdown upgrade --dry-run' on a blueprint with
   prototype/screens/, prototype/drafts/ and proposals/. It lists each accepted
   screen moving to prototypes/<screen>-YYYYMMDD.html, dated by its first commit.
@@ -43,3 +43,4 @@ replies:
       receipt), and each blueprint says its storyboard's prototype: keys become
       design: and spec.yml's prototype.root becomes design.root. Removals, the
       kept untracked file, the redlines and the closing lines are unchanged."
+verified_by: topher

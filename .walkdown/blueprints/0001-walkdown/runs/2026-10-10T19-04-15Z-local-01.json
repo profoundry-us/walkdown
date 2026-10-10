@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-10T19-04-15Z-local-01",
+  "created": "2026-10-10T19:04:15Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "88b162d-dirty",
+  "tree_hash": "sha256:96f05a5d6ce3",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.dock.app-not-answering",
+      "status": "fail",
+      "statement_hash": "sha256:709522460f2e",
+      "duration_ms": 9449,
+      "checks": [
+        "checks/panel.spec.js:645"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-10T19-04-15Z/panel-nothing-answering-at-9da13-ows-the-design-and-says-why-test-failed-1.png",
+        "runs/evidence/2026-10-10T19-04-15Z/panel-nothing-answering-at-9da13-ows-the-design-and-says-why-error-context.md"
+      ]
+    }
+  ]
+}

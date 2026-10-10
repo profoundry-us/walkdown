@@ -242,6 +242,21 @@ export const defaultScreen = () =>
 export const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen();
 
 /**
+ * The address nothing answers at, when this screen's app lives there, or null
+ * (panel.dock.app-not-answering). Only the application's own address can be
+ * out: a drawing walkdown serves answers whenever walkdown does.
+ */
+export function appDownFor(screen) {
+  if (!S.appDown || !screen?.app?.path || !S.data?.appBase) return null;
+  try {
+    const origin = new URL(appUrlOf(screen.app.path, S.data.appBase)).origin;
+    return origin === S.appDown ? S.appDown : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * What each side of the fade shows on a screen, by the name the bar gives it
  * (panel.dock.surfaces-say-what-they-show). The design side is the design,
  * or a proposal where design has drawn nothing; the build side is the app,
@@ -261,8 +276,9 @@ export function surfaceSides(screen) {
         ? { label: 'Design', proposed: false }
         : null;
   const path = screen.app?.path;
+  // A build side nothing answers at has nothing to show either.
   const build =
-    path && (S.data?.appBase || surface === 'app')
+    path && (S.data?.appBase || surface === 'app') && !appDownFor(screen)
       ? {
           label: /\/as-built\//.test(path)
             ? 'As-built'

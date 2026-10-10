@@ -3,12 +3,15 @@
  * page — the surface the rules describe. Selection is by anchor
  * (getByTestId), never by CSS path, per blueprint/AGENTS.md.
  */
+import { unlinkSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 
 // The host page the panel docks into — absolute, because baseURL names the
 // system under test (walkdown itself), not the fixture that hosts it. Both
 // come from the config so the two run modes address the same pair of servers.
 import { DECLARED, FIXTURE, WD_ORIGIN } from '../playwright.config.js';
+import { CHECKSPACE, HOME } from './checkspace.mjs';
 
 /*
  * Where a verdict is RECORDED and where a check NAVIGATES are two different
@@ -249,7 +252,10 @@ test('which verdict pair a rule shows is derived from the ledger, not fixed chro
    * tiers anyway - it is build evidence versus none.
    */
   const built = rows.find((r) => r.built);
-  const unbuilt = rows.find((r) => !r.built);
+  // The checkspace's own unbuilt rule, never signed: the board's first
+  // unbuilt rule may have had its wording approved, and then the turn box
+  // says what comes next instead (n-0582, 2026-10-10).
+  const unbuilt = rows.find((r) => r.rule === 'fixture.unbuilt.never-recorded');
   expect(built, 'the blueprint needs a built rule to compare').toBeTruthy();
   expect(unbuilt, 'and one with no build evidence').toBeTruthy();
 
@@ -633,6 +639,95 @@ for (const [trip, from] of [
     await expect(page.getByTestId('panel.screen-picker')).toContainText('Sketch only');
     // And pins land on it once walkdown is running in there.
     await expect(page.getByTestId('panel.pin-mode')).toBeEnabled();
+  });
+}
+
+/*
+ * A dev server that is not running (issue #22). The panel used to frame the
+ * browser's "refused to connect" page where the design should have been.
+ * Playwright stands in for the server: it refuses, and then it answers.
+ */
+for (const withDesign of [true, false]) {
+  test(`nothing answering at the app shows ${withDesign ? 'the design' : 'an empty frame'} and says why`, {
+    tag: '@rule:panel.dock.app-not-answering',
+  }, async ({ page }) => {
+    const DOWN = 'http://127.0.0.1:39911';
+    let up = false;
+    await page.route(`${DOWN}/**`, (route) =>
+      up
+        ? route.fulfill({ contentType: 'text/html', body: '<h1>The app, answering</h1>' })
+        : route.abort('connectionrefused'),
+    );
+    await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+      const res = await route.fetch();
+      const data = await res.json();
+      data.storyboard = [
+        ...(data.storyboard ?? []),
+        {
+          id: 'app-down',
+          title: 'App down',
+          prototype: withDesign ? '/screens/review.html' : null,
+          app: { path: `${DOWN}/down` },
+        },
+      ];
+      await route.fulfill({ response: res, json: data });
+    });
+    await page.goto(fixtureFor({ build: 'stale', frame: `${DOWN}/down` }));
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+
+    const strip = page.getByTestId('panel.app-down');
+    await expect(strip).toBeVisible();
+    await expect(strip).toContainText(
+      "Nothing answers at 127.0.0.1:39911. Start the app, or remove this screen's app path.",
+    );
+    // The frame never holds the refused page.
+    await expect.poll(() => page.frames().some((f) => f.url().startsWith(DOWN))).toBe(false);
+    await expect(page.getByTestId('panel.surface-build')).toBeDisabled();
+    await expect(page.getByTestId('panel.fade')).toBeDisabled();
+    if (withDesign) {
+      await expect(page.locator('[data-walkdown-ghost]')).toHaveCSS('opacity', '1');
+      await expect
+        .poll(() => page.frames().some((f) => f.url().includes('/prototype/screens/review.html')))
+        .toBe(true);
+      await expect(page.getByTestId('panel.surface-build').locator('..')).toHaveAttribute(
+        'title',
+        /Nothing answers at 127\.0\.0\.1:39911, so the design is shown/,
+      );
+    } else {
+      await expect(page.getByTestId('panel.surface-design')).toBeDisabled();
+      await expect(page.getByTestId('panel.surface-design')).toHaveAttribute(
+        'title',
+        /design request/,
+      );
+    }
+
+    if (withDesign) {
+      // Put away, there is no bar for the line to hang off.
+      await page
+        .getByTestId('panel.bar')
+        .getByTitle(/Put walkdown away/i)
+        .click();
+      await expect(strip).toHaveCount(0);
+      await page.getByText('WALKDOWN', { exact: true }).click();
+      await expect(strip).toBeVisible();
+      // A screen whose app does answer says nothing about this one.
+      await page.getByTestId('panel.screen-picker').click();
+      await page.locator('[data-screen="review"]').first().click();
+      await expect(strip).toHaveCount(0);
+      await page.getByTestId('panel.screen-picker').click();
+      await page.locator('[data-screen="app-down"]').first().click();
+      await expect(strip).toBeVisible();
+    }
+
+    // The app starts: the App side comes back, without reloading walkdown.
+    await page.evaluate(() => {
+      window.__stillHere = true;
+    });
+    up = true;
+    await expect(strip).toHaveCount(0, { timeout: 8000 });
+    await expect(page.getByTestId('panel.surface-build')).toBeEnabled();
+    expect(await page.evaluate(() => window.__stillHere)).toBe(true);
+    await expect.poll(() => page.frames().some((f) => f.url().startsWith(DOWN))).toBe(true);
   });
 }
 
@@ -3060,6 +3155,37 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
     ).ok(),
   ).toBeTruthy();
 
+  /*
+   * The agent re-judges a claimed fix before a person is asked (q-0517,
+   * q-0528, 2026-10-08), so the pass is offered only after that. Written as
+   * the agent tier writes it, a second after the claim so it reads as later
+   * (n-0583: without it the turn box was the agent's and this check failed).
+   */
+  await page.waitForTimeout(1100);
+  const at = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+  const runId = `${at.replace(/:/g, '-')}-local-01`;
+  const agentRun = join(CHECKSPACE, HOME, 'runs', `${runId}.json`);
+  writeFileSync(
+    agentRun,
+    JSON.stringify({
+      run_id: runId,
+      created: at,
+      actor: 'agent',
+      kind: 'walkdown',
+      target: 'local',
+      base_url: 'http://localhost:4700',
+      results: [
+        {
+          rule,
+          status: 'pass',
+          evidence: [],
+          reasoning: 'Re-judged after the claimed fix, for the browser check.',
+          threads: [],
+        },
+      ],
+    }),
+  );
+
   // Opened after the filing, so the panel is reading the threads as they are.
   await review(page);
   await endSession(page);
@@ -3115,6 +3241,9 @@ test('a pass ends the rule\u2019s conversation, and says so first', {
     expect(closed.verified_via).toMatch(/\S/);
     expect(closed.replies.at(-1).via).toBe('verdict');
   }
+  // The re-judge was this check's scaffolding; the checks after it read the
+  // same ledger and must not find it there.
+  unlinkSync(agentRun);
 });
 
 /*

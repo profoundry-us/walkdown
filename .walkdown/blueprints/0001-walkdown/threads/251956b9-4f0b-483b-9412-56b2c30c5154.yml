@@ -1,0 +1,26 @@
+id: n-0582
+uuid: 251956b9-4f0b-483b-9412-56b2c30c5154
+kind: note
+reason: finding
+author: agent
+created: 2026-10-10T19:11:11.032Z
+anchor:
+  rule: panel.signoff.spec-pair-derived
+status: settled
+body: "Its check fails since Topher approved the 0.5.0 rules (2026-10-10): it
+  takes the first unbuilt rule in the blueprint and expects 'No build yet' on
+  it, but that rule (embed.pin.asks-its-kind) is now approved, so the turn box
+  says something else. The check should pick an unbuilt rule nobody has judged.
+  Last recorded pass 2026-10-06; it fails on the committed build too, so it is
+  not the #22 change."
+replies:
+  - author: agent
+    created: 2026-10-10T19:12:04Z
+    body: The check now reads the checkspace's own never-signed rule,
+      fixture.unbuilt.never-recorded, instead of the board's first unbuilt rule.
+      Passes and recorded.
+  - author: agent
+    via: verdict
+    created: 2026-10-10T19:39:04Z
+    body: Settled by the agent's pass on panel.signoff.spec-pair-derived
+      (2026-10-10T19-39-03Z-local-01).

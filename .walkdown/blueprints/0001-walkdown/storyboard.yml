@@ -206,11 +206,10 @@ screens:
       - panel.fade
       - panel.app-frame
 
-  # Issue #22. Designed before it is built; no build yet, so no app.
+  # Issue #22. Accepted 2026-10-10 (n-0578).
   - id: app-not-answering
     title: "The app is not answering, so the design is shown"
-    prototype: null
-    proposal: /app-not-answering.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
+    prototype: /screens/app-not-answering.html
     anchors:
       - panel.surface-build
       - panel.app-down

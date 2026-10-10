@@ -64,6 +64,7 @@ import {
   CHOICE,
   cfg,
   D,
+  DOWN_H,
   GAP,
   HEAD,
   IDENTITY_KEY,
@@ -87,6 +88,7 @@ import { toast } from './toast.js';
 import { api, esc } from './util.js';
 import { frameLoading, hideVeil, placeVeil, screenLabel, veilIsUp } from './veil.js';
 import {
+  appDownFor,
   CHIP,
   currentScreen,
   declaredAnchors,
@@ -679,9 +681,6 @@ function paintTabs() {
  */
 function buildAppFrame() {
   D.appFrame = document.createElement('iframe');
-  // At the server root there is nothing to frame yet; a null src would be
-  // asked for as the address "null", which the server would 404.
-  if (S.frameUrl) D.appFrame.src = S.frameUrl;
   D.appFrame.dataset.testid = 'panel.app-frame';
   D.appFrame.setAttribute('title', 'the application under review');
   // Whatever the frame lands on - our navigation or the app's own - the wait
@@ -689,6 +688,132 @@ function buildAppFrame() {
   // loading, which is what the veil should keep saying.
   D.appFrame.addEventListener('load', hideVeil);
   document.body.appendChild(D.appFrame);
+  // At the server root there is nothing to frame yet; a null src would be
+  // asked for as the address "null", which the server would 404.
+  if (S.frameUrl) loadFrame(S.frameUrl);
+}
+
+/*
+ * The desk starts under the bar, and under the strip that says the app is
+ * not answering while it is not: the strip pushes the page down rather than
+ * lying over its top, the lesson of the proposal banner (2026-10-10).
+ */
+const stageTop = () => HEAD + (stripShown() ? DOWN_H : 0);
+
+/*
+ * The strip is about the screen in hand: a screen whose app answers says
+ * nothing about another origin that does not, and put away there is no bar
+ * for it to hang off (edges the judge found, 2026-10-10).
+ */
+const stripShown = () => Boolean(S.docked && S.data && appDownFor(screenInHand()));
+
+/*
+ * Whether anything answers at an address. An opaque answer is an answer: a
+ * cross-origin page cannot be read, only reached. A slow one counts as
+ * answering, because slow is the app's business and the veil says so; only
+ * a refusal is "not answering".
+ */
+async function answers(url) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 2500);
+  try {
+    await fetch(url, { mode: 'no-cors', cache: 'no-store', signal: ctl.signal });
+    return true;
+  } catch (e) {
+    return e?.name === 'AbortError';
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** An address walkdown does not serve itself: the application's. */
+const isAppAddress = (url) => {
+  const o = originOf(url);
+  return Boolean(o) && o !== originOf(S.SERVER) && o !== location.origin;
+};
+
+/*
+ * Every trip the frame takes goes through here. An application address is
+ * asked first, so a stopped dev server never puts the browser's "refused to
+ * connect" page in the frame where the design should be
+ * (panel.dock.app-not-answering, issue #22).
+ */
+async function loadFrame(url) {
+  if (!D.appFrame) return;
+  if (isAppAddress(url) && !(await answers(url))) {
+    if (S.frameUrl !== url) return; // moved on while asking
+    D.appFrame.src = 'about:blank';
+    return appWentDown(originOf(url));
+  }
+  if (S.frameUrl !== url) return;
+  if (S.appDown && originOf(url) === S.appDown) appCameBack({ reload: false });
+  D.appFrame.src = url;
+}
+
+let downPoll = null;
+function appWentDown(origin) {
+  const was = S.appDown;
+  S.appDown = origin;
+  hideVeil();
+  placeAppFrame(S.docked);
+  placeGhost(S.docked);
+  render();
+  if (was === origin && downPoll) return;
+  clearInterval(downPoll);
+  downPoll = setInterval(async () => {
+    if (S.appDown && (await answers(`${S.appDown}/`))) appCameBack({ reload: true });
+  }, 3000);
+}
+
+/*
+ * The app answering again brings the App side back without a reload of
+ * walkdown: the frame loads the page it was meant to hold, and the design
+ * stays in front until the person chooses the App side.
+ */
+function appCameBack({ reload }) {
+  clearInterval(downPoll);
+  downPoll = null;
+  const origin = S.appDown;
+  S.appDown = null;
+  placeAppFrame(S.docked);
+  placeGhost(S.docked);
+  if (reload && S.frameUrl && originOf(S.frameUrl) === origin) D.appFrame.src = S.frameUrl;
+  render();
+}
+
+/** The line under the bar, there exactly while the app does not answer. */
+function syncAppDownStrip() {
+  const show = stripShown();
+  const was = Boolean(D.appDownStrip);
+  if (!show) {
+    D.appDownStrip?.remove();
+    D.appDownStrip = null;
+    if (was) {
+      placeAppFrame(S.docked);
+      placeGhost(S.docked);
+    }
+    return;
+  }
+  if (!was) {
+    queueMicrotask(() => {
+      placeAppFrame(S.docked);
+      placeGhost(S.docked);
+    });
+  }
+  if (!D.appDownStrip) {
+    D.appDownStrip = document.createElement('div');
+    D.appDownStrip.dataset.testid = 'panel.app-down';
+    D.appDownStrip.dataset.theme = 'blueprint';
+    D.appDownStrip.setAttribute('role', 'status');
+    D.appDownStrip.className =
+      'flex items-center justify-center bg-transparent pointer-events-auto';
+    D.host.appendChild(D.appDownStrip);
+  }
+  D.appDownStrip.style.cssText = `position:absolute; top:${HEAD}px; left:${GAP}px;
+    right:${W + GAP * 2}px; height:${DOWN_H - 6}px;`;
+  const host = S.appDown.replace(/^https?:\/\//, '');
+  D.appDownStrip.innerHTML = `<span class="badge badge-warning badge-sm gap-1.5 font-medium">
+    Nothing answers at <code>${esc(host)}</code>. Start the app, or remove this screen's app path.</span>`;
 }
 
 /** The desk space the frame may occupy, and the scale a preset needs. */
@@ -701,7 +826,7 @@ function frameSpace() {
    * make easy (n-0072).
    */
   const availW = S.docked ? innerWidth - (W + GAP * 3) : innerWidth;
-  const availH = S.docked ? innerHeight - (HEAD + GAP) : innerHeight;
+  const availH = S.docked ? innerHeight - (stageTop() + GAP) : innerHeight;
   const scale = S.viewportW ? Math.min(1, availW / S.viewportW) : 1;
   return { availW, availH, scale };
 }
@@ -718,7 +843,7 @@ function placeGhost(on) {
     S.ghost.style,
     on
       ? {
-          top: `${HEAD}px`,
+          top: `${stageTop()}px`,
           left: `${GAP}px`,
           right: `${W + GAP * 2}px`,
           bottom: `${GAP}px`,
@@ -751,15 +876,15 @@ function placeAppFrame(on) {
   // desktop layout seen as a desktop layout, never reflowed to a column.
   D.appFrame.style.cssText = on
     ? S.viewportW
-      ? `position:fixed; top:${HEAD}px;
+      ? `position:fixed; top:${stageTop()}px;
          left:${GAP + Math.max(0, (availW - S.viewportW * scale) / 2)}px;
          width:${S.viewportW}px; height:${availH / scale}px;
          transform:scale(${scale}); transform-origin:top left;
          border:0; border-radius:${10 / scale}px; background:#fff;
          box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
          transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
-      : `position:fixed; top:${HEAD}px; left:${GAP}px;
-         width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
+      : `position:fixed; top:${stageTop()}px; left:${GAP}px;
+         width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${stageTop() + GAP}px);
          border:0; border-radius:10px; background:#fff; transform:none;
          box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
          transition:width .22s ease, height .22s ease, top .22s ease, left .22s ease;`
@@ -1005,6 +1130,8 @@ function setDocked(on) {
     closeScreenPanel();
   }
   paintDesk(on);
+  // The not-answering strip hangs off the bar, so it goes where the bar goes.
+  syncAppDownStrip();
   // How much of the right edge the panel is occupying. The embed's badge
   // reads this so it comes to rest beside the panel instead of under it.
   // Docked, the embed's badge reads this so it comes to rest beside the panel
@@ -1178,6 +1305,11 @@ export function render() {
   if (!S.data) return;
   syncProjectModal();
   syncBareRoot();
+  syncAppDownStrip();
+  // While the app is out, the design takes the frame's place at full
+  // strength. Asked on every render, because the frame can be found out
+  // before the storyboard has said which screen this is.
+  if (appDownFor(screenInHand()) && !S.ghost && ghostSource(screenInHand())) return setFade(1);
   // The thread screen without a thread is not a screen.
   if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
   // The address follows the view, so a reload lands where you are.
@@ -1652,11 +1784,14 @@ function renderBar() {
       : sides.design.proposed
         ? 'Show the proposal — a sketch, not from design'
         : 'Show the design';
+  const down = appDownFor(inHand);
   const buildTip = !inHand
     ? noScreen
-    : !sides.build
-      ? 'The storyboard names no app for this screen'
-      : `Show the ${buildLabel.toLowerCase()}`;
+    : down
+      ? `Nothing answers at ${down.replace(/^https?:\/\//, '')}, so the design is shown. Start the app, or remove this screen's app path.`
+      : !sides.build
+        ? 'The storyboard names no app for this screen'
+        : `Show the ${buildLabel.toLowerCase()}`;
   const fadeTip = !inHand
     ? noScreen
     : canGhost
@@ -2313,7 +2448,7 @@ export function goTo(screen, surface = pageSurface(), pick = null) {
     S.frameUrl = url;
     sayAddress();
     if (!scrollOnly) frameLoading(url, `Loading ${screenLabel(screen)}…`);
-    D.appFrame.src = url;
+    loadFrame(url);
     // The root's first page: the sheet was not drawn until now.
     if (first) syncBareRoot();
   }
@@ -2349,8 +2484,8 @@ function syncHeadlessCover() {
     document.body.appendChild(S.headlessCover);
   }
   const cs = getComputedStyle(D.side);
-  S.headlessCover.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px;
-    width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${HEAD + GAP}px);
+  S.headlessCover.style.cssText = `position:fixed; top:${stageTop()}px; left:${GAP}px;
+    width:calc(100vw - ${W + GAP * 3}px); height:calc(100vh - ${stageTop() + GAP}px);
     z-index:2147482000; border-radius:10px; overflow:hidden;
     background:${cs.backgroundColor}; color:${cs.color};
     box-shadow:0 1px 2px rgba(0,0,0,.28), 0 12px 32px rgba(0,0,0,.34);
@@ -2768,7 +2903,7 @@ export function setGhost(on) {
    * Left to auto, painting follows DOM order inside the root - ghost first,
    * chrome after - which is the ordering the insert below is written for.
    */
-  S.ghost.style.cssText = `position:fixed; top:${HEAD}px; left:${GAP}px; bottom:${GAP}px;
+  S.ghost.style.cssText = `position:fixed; top:${stageTop()}px; left:${GAP}px; bottom:${GAP}px;
     right:${W + GAP * 2}px; border-radius:10px; overflow:hidden;
     width:${box.availW}px; height:${box.availH}px; max-width:none; max-height:none;
     min-width:0; min-height:0; margin:0; border:0; padding:0;

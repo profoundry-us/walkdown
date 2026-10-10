@@ -1,0 +1,29 @@
+id: n-0583
+uuid: 46903b6e-7b8d-442c-b311-e2bcce76b8c3
+kind: note
+reason: finding
+author: agent
+created: 2026-10-10T19:11:11.239Z
+anchor:
+  rule: panel.walkdown.pass-verifies-feedback
+status: settled
+body: "Its check fails: on the first built rule (embed.pin.anchored-target),
+  after filing an addressed feedback note, an open note and an addressed
+  request, the turn box is the agent's (data-party=agent) and never reads 'Pass
+  ends this conversation (N notes)'. Last recorded pass 2026-10-06; fails on the
+  committed build too. Likely cause: 2139048 (2026-10-09), which made a settle
+  item the agent's to close, or the queue fixes of 2026-10-08. Not yet
+  diagnosed."
+replies:
+  - author: agent
+    created: 2026-10-10T19:13:46Z
+    body: "The panel was right and the check was stale: since 2026-10-08 (q-0517,
+      q-0528) a fix the agent claims is re-judged by the agent before a person
+      is asked, and the check's own setup made that claim. The check now records
+      the agent's re-judge before opening the rule, as the agent tier would.
+      Passes and recorded."
+  - author: agent
+    via: verdict
+    created: 2026-10-10T19:39:04Z
+    body: Settled by the agent's pass on panel.walkdown.pass-verifies-feedback
+      (2026-10-10T19-39-03Z-local-01).

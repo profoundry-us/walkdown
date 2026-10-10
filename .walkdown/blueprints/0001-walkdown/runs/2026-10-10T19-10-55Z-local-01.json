@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-10-10T19-10-55Z-local-01",
+  "created": "2026-10-10T19:10:55Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "88b162d-dirty",
+  "tree_hash": "sha256:20d0b32184fa",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:491cff276765",
+      "duration_ms": 9476,
+      "checks": [
+        "checks/panel.spec.js:429",
+        "checks/panel.spec.js:459",
+        "checks/panel.spec.js:491",
+        "checks/panel.spec.js:535",
+        "checks/panel.spec.js:581"
+      ]
+    },
+    {
+      "rule": "panel.dock.app-not-answering",
+      "status": "pass",
+      "statement_hash": "sha256:709522460f2e",
+      "duration_ms": 6604,
+      "checks": [
+        "checks/panel.spec.js:645"
+      ]
+    }
+  ]
+}

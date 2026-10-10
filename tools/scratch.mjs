@@ -110,6 +110,10 @@ function make(label, why, port, id = 'walkdown') {
   symlinkSync(join(root, 'as-built'), join(path, 'as-built'), 'dir');
   if (existsSync(join(root, 'proposals')))
     symlinkSync(join(root, 'proposals'), join(path, 'proposals'), 'dir');
+  // And the suites, read-only: a copy without them read every built rule as
+  // owing a check, so a person's move never showed (a judge, 2026-10-10).
+  for (const suite of ['checks', 'test'])
+    if (existsSync(join(root, suite))) symlinkSync(join(root, suite), join(path, suite), 'dir');
   /*
    * Evidence is linked, not copied. It lives outside the repository now
    * (docs/08-locations.md) and is two orders of magnitude larger than

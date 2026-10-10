@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-10T19-12-03Z-local-01",
+  "created": "2026-10-10T19:12:03Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "88b162d-dirty",
+  "tree_hash": "sha256:8145b8504833",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:f5c753ec1d9b",
+      "duration_ms": 2043,
+      "checks": [
+        "checks/panel.spec.js:237"
+      ]
+    }
+  ]
+}

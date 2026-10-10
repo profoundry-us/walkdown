@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-10T19-18-47Z-local-01",
+  "created": "2026-10-10T19:18:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "88b162d-dirty",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.dock.app-not-answering",
+      "status": "pass",
+      "statement_hash": "sha256:709522460f2e",
+      "evidence": [
+        "runs/evidence/2026-10-10T19-11-35Z/proto-app-not-answering.png",
+        "runs/evidence/2026-10-10T19-11-35Z/app-app-not-answering-down.png",
+        "runs/evidence/2026-10-10T19-11-35Z/app-app-not-answering-came-back.png",
+        "runs/evidence/2026-10-10T19-11-35Z/app-app-not-answering-app-side.png",
+        "runs/evidence/2026-10-10T19-11-35Z/app-judge-nodesign-down.png",
+        "runs/evidence/2026-10-10T19-11-35Z/app-app-not-answering-put-away.png",
+        "runs/evidence/2026-10-10T19-11-35Z/probe.json"
+      ],
+      "reasoning": "Driven in the built-in browser against a scratch copy served on :4754 (its own home), with app-not-answering's app path set to http://127.0.0.1:4799/x/ and a fixture screen with no design at 127.0.0.1:4799/nodesign/; a python http.server on 4799 was started and stopped as the app. PNGs and probes were re-saved afterwards by a throwaway Playwright script echoing the same states. Every step holds. Opening on the screen, and picking it in the screen picker from the As-built side, both put the design ghost in front at opacity 1 while the app frame holds about:blank, never a refused page. panel.surface-build is disabled with the tooltip 'Nothing answers at 127.0.0.1:4799, so the design is shown. Start the app, or remove this screen's app path.'; panel.app-down reads 'Nothing answers at 127.0.0.1:4799. Start the app, or remove this screen's app path.' as a warning badge (oklch(0.84 0.15 85)) under the bar, pushing the desk down rather than lying over it, matching the accepted design. panel.fade is disabled; clicking App and dragging the fade left it at the design. Starting the server cleared the strip and enabled App within one 3s poll, with a window marker set before the start still present (no reload); choosing App then showed the app's page. The no-design screen shows the strip, an empty frame, and a disabled design side titled 'No design or proposal on file for this screen - a design request is how one gets drawn', which says what the step asks though not in the design's words ('This screen has no design yet. File a design request on it, and a design gets drawn.'). Edges, none failing the rule: put away with the app down, the strip stays at its docked place over the top of the full-bleed design until the panel comes back (estimate 25%, a person putting the panel away to see the design at full size while the app is down; cost a misplaced but still true band); on the no-design screen the App tooltip still says 'so the design is shown' when none is, as the accepted design also does (about 30%, low cost); and leaving the down screen for a screen whose app is on another origin that answers keeps the strip, wrongly telling the person to remove that screen's app path (about 10%, it needs app paths on two origins in one blueprint; the strip stays until the first app answers or the page reloads)."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-10T19-32-54Z-local-01",
+  "created": "2026-10-10T19:32:54Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "88b162d-dirty",
+  "tree_hash": "sha256:e658d395b930",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.dock.app-not-answering",
+      "status": "pass",
+      "statement_hash": "sha256:709522460f2e",
+      "duration_ms": 6908,
+      "checks": [
+        "checks/panel.spec.js:651"
+      ]
+    }
+  ]
+}

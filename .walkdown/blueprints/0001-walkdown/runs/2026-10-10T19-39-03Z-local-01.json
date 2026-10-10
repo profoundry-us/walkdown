@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-10T19-39-03Z-local-01",
+  "created": "2026-10-10T19:39:03Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "88b162d-dirty",
+  "note": "Re-judge of n-0582 and n-0583 after their checks were corrected; panel unchanged. Driven in scratch copy judge-two-rules on :4787.",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.signoff.spec-pair-derived",
+      "status": "pass",
+      "statement_hash": "sha256:f5c753ec1d9b",
+      "evidence": [
+        "runs/evidence/2026-10-10T19-32-01Z/spec-pair-derived-probe.json"
+      ],
+      "reasoning": "Driven in the built-in browser against scratch copy judge-two-rules served on :4787 with its own home (GET /api/blueprint named the copy), viewport 1440x900, in a walkdown started as eng. A rule the ledger holds no pass or fail for (embed.pin.both-surfaces: checks cell blocked, agent never, unsigned) offers Reply, Refine, Approve, and detail.turn reads 'No build yet: Approve signs the wording; Refine sends it back with what should change.', which labels the pair as signing off the rule, not judging a build; a block did not count as build evidence. A built rule (panel.dock.storyboard, checks pass) offers Fail and Pass with no Approve. Third step: pressing Approve in the scratch session was refused by my session's permission layer, so I did not see a freshly approved rule in-session; instead I read the real board read-only on :4700, where Topher approved six rules' wording on 2026-10-10 and five of them still derive built=false (the sixth, panel.dock.app-not-answering, has its own checks evidence), and the panel draws Pass/Fail only when built is true (rule-detail.js) while built counts only an applicable pass/fail/stale (lib/status.js), so an approval cannot flip the pair. n-0582 was the check, not the panel: the panel shows the right pair for an approved rule; the old check expected 'No build yet' on a rule that was no longer unsigned. Edges: none worth naming beyond the one step I read rather than drove.",
+      "threads": []
+    },
+    {
+      "rule": "panel.walkdown.pass-verifies-feedback",
+      "status": "pass",
+      "statement_hash": "sha256:b8cae5781199",
+      "evidence": [
+        "runs/evidence/2026-10-10T19-32-01Z/pass-verifies-feedback-probe.json"
+      ],
+      "reasoning": "Driven in the built-in browser against scratch copy judge-two-rules on :4787 (own home), 1440x900. On built rule panel.dock.storyboard I filed through the copy's API a person's feedback note answered by the agent (n-0584), a note left open (n-0585) and a request the agent marked drawn (n-0586). Before any re-judge the turn box was the agent's ('It has a note here to address', plus a cover item that came only from the copy lacking checks/ and test/, which I symlinked in read-only): that is the q-0517/q-0528 behaviour n-0583 describes, so the panel was right and the old check stale. After an agent re-judge pass appended to the copy's runs, as the agent tier writes it, a walkdown as eng showed detail.turn directly above detail.feedback (bottom 725, top 731) reading 'YOUR MOVE / The agent says its fix is done. Pass ends this conversation (3 notes); Fail continues it with your why.', the count matching the three live notes. Pass then Finish showed 'Recorded 1 verdict as 2026-10-10T19-37-35Z-local-01 - eng (scratch-judge-two-rules) - verified 3 threads (n-0584, n-0585, n-0586)', and all three read 'verified by scratch-judge-two-rules' in the CLI, with the stream saying so. Edge: that confirmation is a toast that leaves after 4.2s; a person looking away misses it, but the threads still read verified in the stream (reported, not filed).",
+      "threads": []
+    }
+  ]
+}
