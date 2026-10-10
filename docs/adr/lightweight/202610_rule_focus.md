@@ -1,9 +1,8 @@
 # ADR 0016 — Rule focus
 
-- **Status:** proposed 2026-10-10 by the agent, from
-    [issue #24](https://github.com/profoundry-us/walkdown/issues/24), for
-    Topher to accept or send back. Not built. Its rules are written, unbuilt,
-    so the walkdown is the review (ADR 0015 §8).
+- **Status:** accepted 2026-10-10 by Topher; not yet built. Proposed the same
+    day by the agent from [issue #24](https://github.com/profoundry-us/walkdown/issues/24);
+    its rules were approved in his walkdown first (ADR 0015 §8).
 - **Date:** 2026-10-10
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0015 §8 (the walkdown is the design review), the anchor
