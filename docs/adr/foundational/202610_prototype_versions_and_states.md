@@ -129,6 +129,21 @@ taught us something, the ADR is updated, and only then is the guide written from
 what shipped. The release procedure in [09-delivery.md](../../09-delivery.md)
 gains that step.
 
+### 6. The panel frames a proposed version the way it frames an as-built
+
+While a request proposes a version, the panel can put that version on the
+design side of the fade without moving the storyboard pointer. It is framed as
+the stand-in and the as-built are: a ring around the page and a corner label,
+but in **blue**, labelled **Proposed**. The as-built's red ring means "this is
+the build"; blue means "this is a design nobody has accepted yet". A person
+switches between the accepted and the proposed version on the design side, and
+the request is where they accept it.
+
+### 7. Existing prototypes are dated by their history
+
+The upgrade names each existing prototype for the day its file was first
+committed. A file git has no history for takes the day of the upgrade.
+
 ## The typical flow
 
 1. A screen is needed, so a design request is filed on it.
@@ -151,21 +166,6 @@ gains that step.
   not their names.
 - **Redlines staying in a file beside the as-built.** That cannot reach a live
   page, cannot point at an element, and gives a judge nothing to read.
-
-### 6. The panel frames a proposed version the way it frames an as-built
-
-While a request proposes a version, the panel can put that version on the
-design side of the fade without moving the storyboard pointer. It is framed as
-the stand-in and the as-built are: a ring around the page and a corner label,
-but in **blue**, labelled **Proposed**. The as-built's red ring means "this is
-the build"; blue means "this is a design nobody has accepted yet". A person
-switches between the accepted and the proposed version on the design side, and
-the request is where they accept it.
-
-### 7. Existing prototypes are dated by their history
-
-The upgrade names each existing prototype for the day its file was first
-committed. A file git has no history for takes the day of the upgrade.
 
 ## Consequences
 
