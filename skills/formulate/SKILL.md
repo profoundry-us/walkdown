@@ -25,8 +25,10 @@ derives from it.
    (`checkout.submit`) for elements that lack them.
 
 2. **Storyboard first.** One entry per screen/state in
-   the home's `storyboard.yml`: stable id, per-surface locators
-   (`prototype:` path, `app:` path), declared `anchors`. A screen the source
+   the home's `storyboard.yml`: stable id, the `prototype:` path, declared
+   `anchors`. Leave `app:` out until something is built at that path: a
+   screen with only a design is complete, and the panel shows its design side
+   alone. The agent that builds the screen adds its `app:` path. A screen the source
    implies but doesn't show gets `prototype: null` plus a design-request
    thread (see ownership rules). States (modal open, error showing) are
    screens too if rules need to point at them. **Design comes first:** a rule
@@ -45,7 +47,11 @@ derives from it.
    - id: `feature.story.slug`, assigned once, never regenerated
    - `origin`: `prd` or `prototype` (whichever the rule came from)
    - `verify`: honest — `[checks]` only for what a script can prove; visual
-     fidelity, tone, and feel get `[agent, human]` or `[human]`
+     fidelity, tone and feel get `[agent]` (a judge compares the two
+     surfaces), often beside `[checks]`. It lists only `checks` and `agent`.
+   - `signoff`: who accepts it, by role — `[eng, product]` or `[eng, design]`.
+     `eng` is always there. A person's acceptance is a signature, never a
+     `verify` tier
    - `screens`: the screens it touches (unordered; tooling derives flow)
    - `steps`: given/when/then referencing screens and anchors **in backticks
      by id** — never URLs or CSS. Steps double as the human walkthrough
@@ -74,7 +80,7 @@ derives from it.
    full `walkdown lint`.
 
 9. **Report.** `walkdown status` — say what's verified, what awaits judgment
-   (`agent`/`human` rules), what questions are open, and any drift (screens
+   (`agent` rules, and signatures), what questions are open, and any drift (screens
    awaiting design). Then say how to walk it: a `walkdown serve` already
    running anywhere on this machine serves the new blueprint as it is, with no
    restart and no `--blueprint`; otherwise `walkdown serve` from any directory.

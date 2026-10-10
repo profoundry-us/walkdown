@@ -48,7 +48,9 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   beside them, and approving every rule on a screen accepts its design. Either
   way the build waits for that acceptance. A screen built first leaves its
   design to be inferred from the build, and nobody signed off on what it should
-  have been.
+  have been. For the same reason a screen gets its `app:` path in the
+  storyboard when it is built, not before: until then there is nothing there
+  to frame, and the panel shows the design alone.
 - **Never edit `prototype/`** — design owns it. If the spec needs a screen that
   design hasn't drawn: set `prototype: null` on the storyboard screen, put a
   sketch under `proposals/` if a picture helps, and file a design request
