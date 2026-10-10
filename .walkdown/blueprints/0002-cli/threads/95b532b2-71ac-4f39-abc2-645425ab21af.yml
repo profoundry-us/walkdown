@@ -1,0 +1,13 @@
+id: n-0573
+uuid: 95b532b2-71ac-4f39-abc2-645425ab21af
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T03:55:20.619Z
+anchor:
+  screen: redline-filed
+status: open
+body: ADR 0015 §4. A person runs 'walkdown threads new --reason redline --screen
+  <id> --body ...'. It is filed closed. Say what was filed, and on which screen
+  and element. Say that it is closed and waits on nobody, and that judges read
+  it as an intended gap.

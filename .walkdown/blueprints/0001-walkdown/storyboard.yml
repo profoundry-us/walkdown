@@ -162,3 +162,42 @@ screens:
       - settings.timezone
       - settings.dials
       - settings.hide
+
+  # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
+  - id: pin-form-kinds
+    title: "The pin form asks what kind of pin it is"
+    prototype: null
+    anchors:
+      - pin.kind
+      - pin.note
+      - pin.shots
+      - pin.save
+      - pin.cancel
+
+  # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
+  - id: design-version-switch
+    title: "The design side offers a proposed version beside the accepted one"
+    prototype: null
+    anchors:
+      - panel.design-version
+      - panel.fade
+      - panel.app-frame
+
+  # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
+  - id: design-proposed
+    title: "A proposed version, framed as yours to accept"
+    prototype: null
+    anchors:
+      - panel.design-version
+      - panel.proposed-frame
+      - panel.proposed-label
+      - panel.fade
+
+  # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
+  - id: redline-pin
+    title: "A redline pinned where the build leaves the design"
+    prototype: null
+    anchors:
+      - pin.redline
+      - panel.fade
+      - panel.app-frame

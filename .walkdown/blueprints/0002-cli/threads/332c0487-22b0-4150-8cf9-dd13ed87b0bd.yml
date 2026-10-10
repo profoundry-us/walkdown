@@ -1,0 +1,17 @@
+id: n-0572
+uuid: 332c0487-22b0-4150-8cf9-dd13ed87b0bd
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T03:55:20.411Z
+anchor:
+  screen: upgrade-prototypes
+status: open
+body: ADR 0015 §2a. Draw 'walkdown upgrade --dry-run' on a blueprint with
+  prototype/screens/, prototype/drafts/ and proposals/. It lists each accepted
+  screen moving to prototypes/<screen>-YYYYMMDD.html, dated by its first commit.
+  Each draft or proposal an open request names becomes that request's proposed
+  version. It lists every file it would remove because nothing names it, and
+  says they stay in git history. It names the folders it would remove, and
+  as-built/redlines.json becoming redline threads. It ends saying nothing was
+  moved, and how to run it for real.

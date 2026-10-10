@@ -1,0 +1,13 @@
+id: n-0570
+uuid: 712393eb-9060-47f5-93df-2abfa39c1982
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T03:55:00.820Z
+anchor:
+  screen: redline-refused-for-agent
+status: open
+body: "ADR 0015 §4. 'walkdown threads new --reason redline --as-agent' is
+  refused: only a person files a redline, because a redline excuses a gap. Say
+  nothing was filed, and what the agent does instead: ask the person with a
+  question on the element."

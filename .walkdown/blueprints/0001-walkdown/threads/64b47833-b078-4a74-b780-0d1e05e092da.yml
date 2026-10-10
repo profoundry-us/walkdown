@@ -1,0 +1,16 @@
+id: n-0567
+uuid: 64b47833-b078-4a74-b780-0d1e05e092da
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T03:54:59.833Z
+anchor:
+  screen: pin-form-kinds
+status: open
+body: "ADR 0015 §4. After a spot is chosen in Pin Mode, the pin form asks what
+  kind of pin this is, in one control: note, question or redline. The control
+  replaces today's 'question (not a note)' checkbox. Tabs across the top of the
+  form and a single dropdown are both candidates, so draw the one you prefer and
+  say why. Redline is offered to a person only; say in a line under it what a
+  redline is for (the build leaves the design here, on purpose). The note box,
+  screenshots, Save and Cancel stay."

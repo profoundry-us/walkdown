@@ -1067,3 +1067,31 @@ screens:
       - cli.where.none
       - cli.why
       - cli.exit
+
+  # 0.5.0, ADR 0015. Designed before it is built; no scenario yet, so no app.
+  - id: upgrade-prototypes
+    title: "upgrade says where every prototype goes, and what it removes"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.upgrade.prototypes
+      - cli.upgrade.removed
+      - cli.exit
+
+  # 0.5.0, ADR 0015. Designed before it is built; no scenario yet, so no app.
+  - id: redline-refused-for-agent
+    title: "A redline the agent tries to file is refused"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.refusal
+      - cli.exit
+
+  # 0.5.0, ADR 0015. Designed before it is built; no scenario yet, so no app.
+  - id: redline-filed
+    title: "A redline a person files is closed as it is filed"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.thread.filed
+      - cli.exit

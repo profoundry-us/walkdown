@@ -1,0 +1,15 @@
+id: n-0571
+uuid: 57b5badd-94b5-4b9e-8b02-7b40c67371f8
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T03:55:20.203Z
+anchor:
+  screen: design-proposed
+status: open
+body: "ADR 0015 §6. This is the design side with Proposed chosen. The proposed
+  prototype is framed the way an as-built is, with a ring around the page and a
+  corner label. The ring is the panel's warning yellow, dashed. The label reads
+  'Proposed — yours to accept' and links to the design request. Also show a
+  brand-new screen with no accepted version: only Proposed exists, and there is
+  no switch."

@@ -1,0 +1,13 @@
+id: n-0569
+uuid: 33bb3ef7-c6b6-41f6-ab0c-942466e862ca
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T03:55:00.418Z
+anchor:
+  screen: redline-pin
+status: open
+body: "ADR 0015 §4. A redline pinned on an element, on either side of the fade:
+  it marks where the build leaves the design on purpose. It is filed closed and
+  waits on nobody, so it must read as an explanation, not an ask - distinct from
+  a note or question pin. Show its pin and its opened form with the reason."
