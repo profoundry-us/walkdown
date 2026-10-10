@@ -1,0 +1,22 @@
+id: n-0579
+uuid: 41d0c986-df2e-4d55-bb13-2cce4552b07f
+kind: note
+reason: request
+author: agent
+created: 2026-10-10T05:18:44.779Z
+anchor:
+  screen: lint-focus-undeclared
+status: addressed
+body: "ADR 0016 (proposed), issue #24. Draw walkdown lint run on ~/shop's
+  checkout blueprint where rule checkout.pay.card-declined has focus:
+  pay.decline-banner, an anchor neither of its screens (pay, pay-error)
+  declares. Lint prints an error on that rule (anchor lint.focus-error) naming
+  the focus and the rule's screens, then its summary line with 1 error, and
+  exits 1. Rule: ownership.authoring.focus-is-a-declared-anchor."
+replies:
+  - author: agent
+    created: 2026-10-10T05:19:27Z
+    body: "Drawn: prototype-cli/drafts/lint-focus-undeclared.html. Lint run on
+      checkout prints one error on checkout.pay.card-declined naming the focus
+      pay.decline-banner, its screens pay and pay-error, and the anchors they
+      declare, then a summary with 1 error and exit 1."

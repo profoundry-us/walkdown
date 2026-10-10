@@ -1,0 +1,190 @@
+<!doctype html>
+<!-- DESIGN DRAFT: app-not-answering -->
+<!-- Drawn for design request n-0578 (GitHub issue #22, rule panel.dock.app-not-answering). Not yet accepted. -->
+<!-- Intent: when nothing answers at localhost:3000 the frame shows the screen's design at full strength, the App button and the fade are disabled, and a warning line on the bar and an open tooltip on App both say what happened and what to do. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — the app is not answering, so the design is shown</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  .desk {
+    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
+    opacity: .08; transform: rotate(35deg);
+  }
+  #screen { width: 10.5rem; height: 1.6rem; min-height: 0; font-size: 11.5px; padding-block: 0; }
+  .layer { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; background: var(--color-base-100); }
+
+  /* The open tooltip. In the build it shows on hover over the disabled App
+     button (a disabled button swallows its own title, so the tooltip sits on a
+     wrapper). The draft holds it open so it can be read without hovering. */
+  .tip-wrap { position: relative; display: inline-flex; }
+  .tip { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30;
+    width: 17rem; padding: .5rem .65rem; border-radius: .4rem; font-size: 11.5px; line-height: 1.4;
+    text-align: left; white-space: normal;
+    background: var(--color-neutral); color: var(--color-neutral-content); box-shadow: 0 6px 18px rgb(0 0 0 / .18); }
+  .tip::before { content: ''; position: absolute; top: -5px; left: 50%; margin-left: -5px;
+    border: 5px solid transparent; border-top: 0; border-bottom-color: var(--color-neutral); }
+  /* Both tips can be open at once (no design, no app), so each opens away
+     from the other: Design's to the left, App's to the right. */
+  #design-tip { left: auto; right: -6px; transform: none; }
+  #design-tip::before { left: auto; right: 14px; }
+  #app-tip { left: -6px; transform: none; }
+  #app-tip::before { left: 18px; }
+  .tip b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; }
+
+  /* The line on the bar: the warning colour, one line, never wrapping. */
+  .app-down { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%;
+    font-size: 11.5px; color: var(--color-warning-content); background: color-mix(in oklab, var(--color-warning) 22%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-warning) 60%, transparent); border-radius: .35rem; padding: 2px 8px; }
+  .app-down .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-warning); flex: none; }
+  .app-down span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app-down code { font-size: 11px; font-weight: 600; }
+
+  .wl { height: 100%; display: grid; place-items: center; }
+  .wl-card { width: 22rem; padding: 1.75rem; border: 1px solid var(--color-base-300); border-radius: .75rem; }
+  .wl h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; }
+  .wl p { font-size: 12.5px; opacity: .65; margin-top: .25rem; }
+  .wl input { width: 100%; margin-top: 1rem; padding: .5rem .65rem; border: 1px solid var(--color-base-300); border-radius: .4rem; font-size: 13px; }
+  .wl .go { margin-top: .6rem; width: 100%; padding: .5rem; border-radius: .4rem; font-weight: 700; font-size: 13px; text-align: center;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+  .empty { height: 100%; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <div class="desk" data-testid="panel.desk"></div>
+
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 max-w-[calc(50%-9rem)] items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+      <!-- Mockup control: the picker moves between the two cases the rule names. -->
+      <select class="select select-xs w-44 border-dashed" id="screen" data-testid="panel.screen-picker"
+              title="Which screen this page is">
+        <option value="join">Join the waitlist</option>
+        <option value="export">Export the list (no design)</option>
+      </select>
+    </span>
+
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" title="Fade between the design and the app">
+      <span class="tip-wrap" id="design-wrap">
+        <button class="btn btn-xs btn-active" data-surface="design" data-testid="panel.surface-design"
+                id="design-btn" title="Show the design">Design</button>
+        <span class="tip" id="design-tip" hidden>This screen has no design yet. File a design request on it, and a design gets drawn.</span>
+      </span>
+      <input type="range" min="0" max="100" value="0" class="range range-xs w-28" id="fade"
+             data-testid="panel.fade" disabled
+             aria-label="Fade between the design and the app. Out while the app is not answering.">
+      <span class="tip-wrap" id="app-wrap">
+        <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-surface="app"
+                data-testid="panel.surface-build" id="app-btn" disabled
+                aria-describedby="app-tip">App</button>
+        <span class="tip" id="app-tip" role="tooltip">Nothing answers at <b>localhost:3000</b>, so the design is shown. Start the app, or remove this screen's app path.</span>
+      </span>
+    </span>
+
+    <span class="ml-auto flex items-center gap-2">
+      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
+        <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
+        <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
+        <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Start walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <!-- The line on the bar. It sits on the bar's lower edge, under the fade it
+       explains, and stays until the app answers. -->
+  <div class="relative z-10 flex justify-center border-b border-dashed border-base-content/25 bg-base-100 px-3 pb-1.5" id="down-row">
+    <div class="app-down" data-testid="panel.app-down" role="status">
+      <i class="dot"></i>
+      <span>Nothing answers at <code>localhost:3000</code>. Start the app, or remove this screen's app path.</span>
+    </div>
+  </div>
+
+  <main class="relative z-10 flex h-[calc(100vh-4.6rem)] gap-3 p-3">
+    <!-- The frame holds the design at full strength. It never holds the
+         browser's "localhost refused to connect" page. -->
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="layer" id="design-layer"></div>
+      <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 z-10 border-dashed"
+            data-testid="panel.zoom">fit 74%</span>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list" id="rules"></div>
+      <!-- Mockup control, not part of the design: shows the App side coming
+           back, without a reload, once something answers. -->
+      <div class="border-t border-dashed border-base-content/25 p-2 text-[10.5px] leading-relaxed opacity-60">
+        Try it: pick the screen with no design, then
+        <button class="btn btn-xs btn-ghost border-dashed" id="start">start the app</button>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const SCREENS = {
+    join: {
+      design: `<div class="wl"><div class="wl-card"><h1>Join the waitlist</h1><p>We'll email you when a spot opens.</p>
+        <input placeholder="you@example.com"><div class="go">Join</div></div></div>`,
+      app: `<div class="wl"><div class="wl-card"><h1>Join the waitlist</h1><p>We'll email you when a spot opens.</p>
+        <input value="ada@example.com"><div class="go">Join the waitlist</div></div></div>`,
+      rules: [['waitlist.join', [['○', 'opacity-30', 'email-required'], ['○', 'opacity-30', 'confirmation'], ['○', 'opacity-30', 'already-joined']]]],
+    },
+    export: {
+      design: null,
+      app: `<div class="wl"><div class="wl-card"><h1>Export the list</h1><p>A CSV of everyone waiting, oldest first.</p><div class="go">Download CSV</div></div></div>`,
+      rules: [['waitlist.export', [['□', 'opacity-30', 'says-why-it-waits']]]],
+    },
+  };
+  const state = { screen: 'join', answering: false, fade: 0 };
+  const $ = (id) => document.getElementById(id);
+
+  function render() {
+    const s = SCREENS[state.screen];
+    const appOut = !state.answering;
+    // The App side is out: the fade sits on the design and cannot be moved.
+    if (appOut) state.fade = 0;
+    $('fade').disabled = appOut; $('fade').value = state.fade;
+    $('app-btn').disabled = appOut;
+    $('app-tip').hidden = !appOut;
+    $('down-row').hidden = !appOut;
+    document.querySelector('main').style.height = appOut ? '' : 'calc(100vh - 2.5rem)';
+    $('design-btn').disabled = !s.design;
+    $('design-tip').hidden = !!s.design || !appOut;
+    $('design-btn').title = s.design ? 'Show the design' : 'This screen has no design yet. File a design request on it, and a design gets drawn.';
+    $('design-btn').classList.toggle('btn-active', state.fade < 50);
+    $('app-btn').classList.toggle('btn-active', state.fade >= 50);
+    const showApp = !appOut && (state.fade >= 50 || !s.design);
+    // A screen with no design and no app: the line, and nothing in the frame.
+    $('design-layer').innerHTML = showApp ? s.app : (s.design || '<div class="empty"></div>');
+    $('rules').innerHTML = s.rules.map(([story, rows]) =>
+      `<div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">${story}</div>` +
+      rows.map(([g, c, n]) => `<button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+        <span class="w-3.5 shrink-0 text-center ${c}">${g}</span><span class="truncate">${n}</span></button>`).join('')).join('');
+    $('start').textContent = state.answering ? 'stop the app' : 'start the app';
+  }
+  $('fade').addEventListener('input', () => { state.fade = +$('fade').value; render(); });
+  $('design-btn').onclick = () => { state.fade = 0; render(); };
+  $('app-btn').onclick = () => { state.fade = 100; render(); };
+  $('screen').onchange = () => { state.screen = $('screen').value; render(); };
+  $('start').onclick = () => { state.answering = !state.answering; render(); };
+  render();
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

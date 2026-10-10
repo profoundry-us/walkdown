@@ -58,6 +58,7 @@ is renamed.
 | 0013 | [Panel and CLI blueprint split](foundational/202610_panel_and_cli_blueprint_split.md) | foundational | accepted |
 | 0014 | [File layout and locations](foundational/202610_file_layout_and_locations.md) | foundational | accepted |
 | 0015 | [Prototype versions and states](foundational/202610_prototype_versions_and_states.md) | foundational | accepted |
+| 0016 | [Rule focus](lightweight/202610_rule_focus.md) | lightweight | proposed |
 
 A new ADR takes the next number and the current month:
 `docs/adr/foundational/202610_<topic>.md`, with `# ADR NNNN — <Topic>` as its

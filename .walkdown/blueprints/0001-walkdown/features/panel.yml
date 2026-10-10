@@ -90,6 +90,29 @@ stories:
             - Picking another screen renames the buttons for it
           statement_hash: sha256:a1644c475eb8
 
+      - id: panel.dock.app-not-answering
+        origin: walkdown
+        created_at: 2026-10-10
+        verify: [checks]
+        signoff: [eng, product]
+        statement: When nothing answers at the app's address, the panel shows the screen's design instead of a dead page, and says why the App side is out.
+        because: A refused connection in the frame reads as walkdown being broken, when the design was there to look at all along.
+        history: "Reported in issue #22 (2026-10-10): a blueprint whose screens named app paths before anything served them opened on \"localhost refused to connect\"."
+        screens: [app-not-answering]
+        steps:
+          given:
+            - A screen on `app-not-answering` with a design on file and an app path, and nothing answering at the target's address
+          when:
+            - The panel opens on that screen, or the App side is chosen
+          then:
+            - The design side is shown, and the frame never holds the browser's refused-connection page
+            - "`panel.surface-build` is disabled, and its tooltip names the address that did not answer and says to start the app or remove the screen's app path"
+            - "`panel.app-down` says the same in a line on the bar, in the warning colour, until the app answers"
+            - "`panel.fade` cannot be moved while the App side is out"
+            - When the app starts answering, the App side comes back without a reload
+            - A screen with no design and no answering app shows the line and nothing in the frame, and its design-side tooltip says a design request is how one gets drawn
+          statement_hash: sha256:709522460f2e
+
       - id: panel.dock.screen-picker
         origin: thread:n-0334
         statement: The screen picker in the bar says which screen this page is without being opened, and opens a list to pick a different one or to go back to detecting it. A pick by hand outranks detection, and detecting follows the page.
@@ -811,6 +834,27 @@ stories:
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
           statement_hash: sha256:a30a3e3e6888
+
+      - id: panel.rules.opens-at-its-focus
+        origin: walkdown
+        created_at: 2026-10-10
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Opening a rule scrolls its screen to the element the rule is about and outlines it, on both sides of the fade.
+        because: On a long screen every rule opened at the top, so the reviewer hunted for the part each rule meant, rule after rule.
+        history: "Asked for in issue #24 (2026-10-10), from a design system whose pages were split in seven to work around it. Proposed in ADR 0016."
+        screens: [review]
+        steps:
+          given:
+            - A rule on the screen `review` whose focus is an anchor below the fold of that screen
+          when:
+            - Open the rule
+          then:
+            - The screen arrives scrolled so the focus element is centred, outlined with the pin-mode ring, on the design side and the build side alike
+            - A rule with no focus scrolls to the first anchor its steps name, and a rule naming none opens at the top, as before
+            - Hovering an anchor in a step scrolls that element into view on the surface in front before outlining it
+            - Changing a rule's focus leaves its verdicts current, because focus is not part of its wording
+          statement_hash: sha256:f04a715ca5ed
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032

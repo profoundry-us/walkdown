@@ -58,6 +58,28 @@ file disagrees with the code, the code is right and this file is out of date.
 
 ## Earmarked for 0.5.0
 
+### Prototype versions and states (ADR 0015, accepted)
+
+The release's centre: one prototypes folder with dated versions, the proposed
+frame and the design side's version switch, redlines as pinned notes filed only by
+a person, the upgrade that clears `screens/`, `drafts/` and `proposals/`, and
+approving a screen's rules accepting its design. Its seven screens are drawn and
+walkable as proposals; its eight rules are written, unbuilt.
+
+### Folded in from the open issues (2026-10-10)
+
+- **#21 and #23, formulate's guidance.** Done in the skill, the scaffolds and
+  `AGENTS.md`: no `app:` path until a screen is built, and `signoff:` rather than
+  a `human` tier. Ships with 0.5.0 whatever else does.
+- **#22, a dead App side.** `panel.dock.app-not-answering`, unbuilt, with its
+  screen `app-not-answering` drawn for review. It sits beside ADR 0015's design
+  side: when the build cannot be reached, the panel shows the design.
+- **#24, rule focus.** Proposed as ADR 0016, with two unbuilt rules. Additive
+  and small; it suits 0.5.0 because the walkdown becomes the design review, and
+  can slip to 0.5.1 without touching ADR 0015.
+- **#20, a second blueprint per project.** Already built (ADR 0011, `blueprints
+  new`); the issue can be closed.
+
 ### Investigate Claude Code Mods
 
 Topher, 2026-10-09: look into [Claude Code Mods](https://code.claude.com/docs/en/plugins/mods/overview)

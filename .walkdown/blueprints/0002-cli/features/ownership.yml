@@ -189,6 +189,25 @@ stories:
             - Lint warns on the long statement under the category `voice`, saying what to do, never an error
           statement_hash: sha256:4c46fabe7d48
 
+      - id: ownership.authoring.focus-is-a-declared-anchor
+        origin: walkdown
+        created_at: 2026-10-10
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Lint refuses a rule whose focus names no anchor declared on one of its screens.
+        because: A focus nothing on the screen carries would open the rule at the top while it claims to open at an element.
+        history: Proposed with the focus field in ADR 0016 (issue #24, 2026-10-10).
+        screens: [lint-focus-undeclared]
+        steps:
+          given:
+            - A rule whose focus is an anchor none of its screens declares
+          when:
+            - Run `walkdown lint`
+          then:
+            - Lint reports an error on that rule naming the focus and the rule's screens, and exits non-zero
+            - A focus declared on one of the rule's screens passes, and a rule with no focus is never asked for one
+          statement_hash: sha256:0f4cacbd010f
+
   - id: ownership.writes
     title: The server writes specification, never implementation
     statement: As a team, we can let a browser talk to the review server because the only things a request can create are the things review is FOR - feedback, sittings, verdicts - and never the product itself.
