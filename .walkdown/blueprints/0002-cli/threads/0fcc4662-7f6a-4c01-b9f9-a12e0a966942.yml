@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.174Z
 anchor:
   screen: init-again
-status: addressed
+status: verified
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown init` prints the second time
   (commands.init.this-machine-only): everything already in place, nothing
@@ -24,3 +24,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

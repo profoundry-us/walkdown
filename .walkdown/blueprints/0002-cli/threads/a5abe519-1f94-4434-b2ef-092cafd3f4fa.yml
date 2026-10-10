@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:05:11.709Z
 anchor:
   screen: blueprints-new
-status: addressed
+status: verified
 body: "ADR 0014 changed this screen's shape. as-built/cli/blueprints-new.html is
   the build. A home is one flat folder now: the created lines are spec.yml,
   storyboard.yml, records.yml, features/_template.yml and AGENTS.md, under
@@ -27,3 +27,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

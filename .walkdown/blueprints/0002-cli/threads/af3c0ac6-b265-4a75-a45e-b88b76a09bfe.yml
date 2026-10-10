@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-03T00:52:00.382Z
 anchor:
   screen: writes-refused-among-several
-status: addressed
+status: verified
 body: "Same as our other new solution: use a separate agent to design."
 added: "Draw the refusal a command that writes prints when two blueprints stand
   here and none is named - `walkdown sweep --why ...`
@@ -25,3 +25,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

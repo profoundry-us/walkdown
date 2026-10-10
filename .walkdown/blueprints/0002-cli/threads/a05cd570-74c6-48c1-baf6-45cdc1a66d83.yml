@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T03:10:25.237Z
 anchor:
   screen: where-spec-unanswered
-status: addressed
+status: verified
 body: "Draw what `walkdown where spec --blueprint cart` prints when no blueprint
   is called cart. Nothing goes to stdout, so a script reads an empty answer. The
   person reads why on stderr, in brackets like every reason `where` gives
@@ -23,3 +23,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

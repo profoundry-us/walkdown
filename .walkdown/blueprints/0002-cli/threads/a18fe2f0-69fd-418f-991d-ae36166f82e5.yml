@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:30.973Z
 anchor:
   screen: run-files-in-home
-status: addressed
+status: verified
 body: "Draw what `walkdown run --blueprint checkout` prints for a blueprint
   whose home is outside the repository: the tagged test passing, the reporter
   filing its run into the home's runs where `walkdown where` says they go, and
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

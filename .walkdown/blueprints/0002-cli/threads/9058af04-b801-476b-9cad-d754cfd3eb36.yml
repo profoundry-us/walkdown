@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:53.097Z
 anchor:
   screen: pointer-several-agent-files
-status: addressed
+status: verified
 body: "Draw what `walkdown blueprints new checkout --commit spec` prints in a
   repository that keeps agent instructions in both CLAUDE.md and AGENTS.md: the
   pointer not written, both files named, and `walkdown pointer --into <file>` to
@@ -23,3 +23,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

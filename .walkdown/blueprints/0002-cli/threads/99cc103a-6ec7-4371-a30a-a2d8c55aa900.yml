@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:53.672Z
 anchor:
   screen: thread-file
-status: addressed
+status: verified
 body: "Draw a thread's file as cat prints it: its label in id, its uuid, and the
   rest of what was filed (locations.threads.uuid-is-the-identity). Anchors:
   cli.prompt, cli.thread.ids, cli.exit. as-built/cli/thread-file.html is the
@@ -20,3 +20,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:20.090Z
 anchor:
   screen: threads-relabel
-status: addressed
+status: verified
 body: "Draw what `walkdown threads relabel n-0001` prints with no terminal,
   where a merge left two threads labelled n-0001: the newer one by UUID, the
   label it would take, and the command that does it
@@ -22,3 +22,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

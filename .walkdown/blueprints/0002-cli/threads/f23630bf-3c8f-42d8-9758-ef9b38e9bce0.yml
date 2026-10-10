@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:31.163Z
 anchor:
   screen: run-record-signatures
-status: addressed
+status: verified
 body: "Draw a walkdown run record as the ledger keeps it, the file `cat` prints:
   the actor who drove the walk, and the signatures it was recorded with, a role
   and a person each, eng by topher and product by pat
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

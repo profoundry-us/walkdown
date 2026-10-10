@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:33.947Z
 anchor:
   screen: status-moved-target
-status: addressed
+status: verified
 body: "Draw what `walkdown status` prints once the review target points at
   https://pr-2.review.app: `pays`, which passed only at pr-1, reading never, and
   `totals`, whose passing run recorded no address, still passing
@@ -25,3 +25,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

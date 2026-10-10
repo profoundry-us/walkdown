@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:26.865Z
 anchor:
   screen: old-form-refused
-status: addressed
+status: verified
 body: ADR 0012 accepted, rules approved, build it
 added: 'Draw what `walkdown thread n-0001 --reply "fixed in 1a2b3c"` prints now
   that the form is retired (commands.shape.old-forms-say-the-new): that it is
@@ -25,3 +25,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

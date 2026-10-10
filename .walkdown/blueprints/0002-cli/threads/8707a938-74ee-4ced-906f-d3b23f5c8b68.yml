@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:33.758Z
 anchor:
   screen: status-latest-wins
-status: addressed
+status: verified
 body: "Draw what `walkdown status checkout.basics.pays` prints where local
   passed on Monday and failed on Wednesday, and staging passed on Tuesday: the
   rule failing, checks/local carrying Wednesday's fail and its message,
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

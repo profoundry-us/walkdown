@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:16.746Z
 anchor:
   screen: lint-across-blueprints
-status: addressed
+status: verified
 body: "Draw what `walkdown lint --blueprint search` prints when search shares a
   suite with checkout. One of search's rules came from a thread of checkout's.
   Lint names nothing about checkout's rule tags or checkout's thread. It names
@@ -25,3 +25,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

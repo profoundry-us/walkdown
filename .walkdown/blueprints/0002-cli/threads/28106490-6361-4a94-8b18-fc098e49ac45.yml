@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:33.191Z
 anchor:
   screen: status-evidence-key
-status: addressed
+status: verified
 body: "Draw what `walkdown status checkout.basics.pays` prints after the
   blueprint's evidence was moved out of the repository: the agent's pass still
   standing, and its picture cited by the logical key runs/evidence/..., never by
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

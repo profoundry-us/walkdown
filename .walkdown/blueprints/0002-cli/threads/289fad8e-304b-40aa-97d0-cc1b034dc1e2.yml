@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:21.400Z
 anchor:
   screen: records-move
-status: addressed
+status: verified
 body: "Draw what `walkdown records move evidence --to ../evidence-kept` prints:
   the kind moved, from and to, the registry row that records it, and that no
   record was edited (commands.records.move). Anchors: cli.prompt,
@@ -22,3 +22,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

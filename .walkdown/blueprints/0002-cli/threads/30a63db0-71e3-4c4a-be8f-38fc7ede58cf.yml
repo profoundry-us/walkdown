@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:20.838Z
 anchor:
   screen: blueprints-new-label-taken
-status: addressed
+status: verified
 body: "Draw what `walkdown blueprints new search` prints in a second checkout
   also called shop: the label refused as another checkout's, and how to choose a
   label and code (locations.registry.projects-are-labels). Anchors: cli.prompt,
@@ -32,3 +32,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

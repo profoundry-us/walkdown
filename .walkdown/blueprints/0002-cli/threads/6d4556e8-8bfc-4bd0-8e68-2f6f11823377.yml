@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:34.701Z
 anchor:
   screen: status-role-from-the-run
-status: addressed
+status: verified
 body: "Draw what `walkdown status checkout.basics.pays` prints where a walkdown
   recorded before roles existed and one recorded under product both passed it:
   eng signed by sam from the first, product signed by topher from the second,
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

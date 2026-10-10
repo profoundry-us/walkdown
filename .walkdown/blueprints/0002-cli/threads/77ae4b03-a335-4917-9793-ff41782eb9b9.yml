@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:52.150Z
 anchor:
   screen: where-says-why
-status: addressed
+status: verified
 body: "Draw what `walkdown where` prints for a blueprint kept on this machine:
   each path with the reason that chose it, the registry for the spec and the
   code, the blueprint's own records.yml for each kind of record
@@ -22,3 +22,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

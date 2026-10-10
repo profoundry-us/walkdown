@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:30.606Z
 anchor:
   screen: rules-move
-status: addressed
+status: verified
 body: "Draw what `walkdown rules move checkout.basics --blueprint checkout --to
   search` prints: how many rules moved and which, the thread that went with them
   keeping its id, the run record copied with only their results, and that
@@ -23,3 +23,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

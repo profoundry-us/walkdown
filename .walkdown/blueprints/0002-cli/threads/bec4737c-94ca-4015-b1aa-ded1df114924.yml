@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:52.527Z
 anchor:
   screen: where-hand-written-row
-status: addressed
+status: verified
 body: "Draw what `walkdown where` prints when the registry holds a row somebody
   wrote by hand, with no registered: line: the row set aside and said to be
   written by hand, and nothing answering for the directory
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

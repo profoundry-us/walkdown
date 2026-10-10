@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:19.026Z
 anchor:
   screen: threads-verify-nobody-named
-status: addressed
+status: verified
 body: "Draw what `walkdown threads set n-0001 --verify --blueprint checkout`
   prints on a machine where nobody has said who is sitting at it. The refusal
   names the guess it will not use (sam, from git). It names the file to say who
@@ -24,3 +24,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:05:11.950Z
 anchor:
   screen: blueprints-rename
-status: addressed
+status: verified
 body: "ADR 0014 changed this screen's shape. as-built/cli/blueprints-rename.html
   is the build. Rename changes only the name inside the ID, keeping its number
   and code: no folder or walkdown.yml lines unless --folder is given. The
@@ -20,3 +20,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

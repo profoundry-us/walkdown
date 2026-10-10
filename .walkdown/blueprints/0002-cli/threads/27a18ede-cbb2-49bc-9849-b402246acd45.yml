@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:05:12.912Z
 anchor:
   screen: init-fresh-machine
-status: addressed
+status: verified
 body: ADR 0014 changed this screen's shape. as-built/cli/init-fresh-machine.html
   is the build. The identity line names ~/.walkdown/profile.yml (was
   config.yml).
@@ -18,3 +18,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

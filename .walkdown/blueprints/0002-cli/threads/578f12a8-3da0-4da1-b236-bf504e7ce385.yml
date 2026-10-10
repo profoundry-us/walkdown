@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:18.457Z
 anchor:
   screen: status-design-agent
-status: addressed
+status: verified
 body: "Draw what `walkdown status` prints for a blueprint whose spec.yml says
   `design.by: agent`. A design request is open on the undrawn receipt screen.
   The request sits in a DESIGN QUEUE, titled for the design agent and never the
@@ -25,3 +25,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

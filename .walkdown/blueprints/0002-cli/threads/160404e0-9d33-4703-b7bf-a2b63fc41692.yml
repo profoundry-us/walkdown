@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:37.523Z
 anchor:
   screen: where-fresh-machine
-status: addressed
+status: verified
 body: "Draw what `walkdown where` prints on a machine with no ~/.walkdown at
   all: every row answered, the profile and registry named though neither exists,
   and the closing line that nothing was written
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

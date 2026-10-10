@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:18.268Z
 anchor:
   screen: status-after-commits
-status: addressed
+status: verified
 body: "Draw what `walkdown status` prints after two commits that touch neither
   the rules nor their code. The recorded checks pass still reads as a pass. The
   commit a run saw is kept for looking up, and never ages a verdict
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

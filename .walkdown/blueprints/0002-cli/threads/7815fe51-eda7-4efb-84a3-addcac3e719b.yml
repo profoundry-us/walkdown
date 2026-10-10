@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:34.512Z
 anchor:
   screen: status-reworded
-status: addressed
+status: verified
 body: "Draw what `walkdown status` prints after both of checkout's rules passed
   and then had their wording changed: `pays`, reworded with --reword as words
   only, still passing, and `totals`, given a new meaning, reading stale and
@@ -23,3 +23,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

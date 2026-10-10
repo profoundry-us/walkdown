@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.510Z
 anchor:
   screen: run-filed-by-rule
-status: addressed
+status: verified
 body: "Draw what `walkdown run` prints with no `--blueprint`, where checkout and
   search share one test suite. The suite runs once. Each result is recorded in
   the blueprint that holds its rule, under one run id. The tag neither blueprint
@@ -23,3 +23,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

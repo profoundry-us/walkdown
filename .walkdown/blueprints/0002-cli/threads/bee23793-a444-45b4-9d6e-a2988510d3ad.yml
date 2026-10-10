@@ -6,10 +6,15 @@ author: agent
 created: 2026-10-09T14:30:23.576Z
 anchor:
   screen: status-agent-first
-status: addressed
+status: verified
 body: "New screen: as-built/cli/status-agent-first.html is the build; it wants a
   design."
 replies:
   - author: agent
     created: 2026-10-09T18:21:45Z
-    body: "Drawn by copying the build: prototype-cli/screens/status-agent-first.html is as-built/cli/status-agent-first.html without its as-built marks. The screen was built before it was designed, so on Topher's direction (2026-10-09) the build is its first design of record. Accept it, or send it back with what to change."
+    body: "Drawn by copying the build: prototype-cli/screens/status-agent-first.html
+      is as-built/cli/status-agent-first.html without its as-built marks. The
+      screen was built before it was designed, so on Topher's direction
+      (2026-10-09) the build is its first design of record. Accept it, or send
+      it back with what to change."
+verified_by: topher

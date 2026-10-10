@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:20.653Z
 anchor:
   screen: import-moved-checkout
-status: addressed
+status: verified
 body: "Draw what `walkdown blueprints import . --all` prints in a checkout moved
   from ~/shop to ~/shop-moved: the row moved, still under its ID
   (locations.registry.ids-stay-here). Anchors: cli.prompt, cli.moved.row,
@@ -30,3 +30,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

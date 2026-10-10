@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.634Z
 anchor:
   screen: blueprints-rename
-status: addressed
+status: verified
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown blueprints rename search find` prints
   (commands.blueprints.rename): each place the id changed - folder, registry,
@@ -25,3 +25,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

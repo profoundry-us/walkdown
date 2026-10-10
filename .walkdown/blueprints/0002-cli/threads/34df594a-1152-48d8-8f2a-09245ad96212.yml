@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-03T00:52:00.529Z
 anchor:
   screen: init-another
-status: addressed
+status: verified
 body: "Same as our other new solution: use a separate agent to design."
 added: "Draw what `walkdown init --id search` prints in a project that already
   has the blueprint checkout (locations.several.init-makes-another): what it
@@ -35,3 +35,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

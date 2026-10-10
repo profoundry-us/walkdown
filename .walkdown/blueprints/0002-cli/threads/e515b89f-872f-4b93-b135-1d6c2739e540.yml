@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-08T12:31:40.598Z
 anchor:
   screen: threads-new-request
-status: addressed
+status: verified
 body: "A new screen: `walkdown threads new --screen receipt` confirms the thread
   was filed as a design request, not only as a note (n-0499). Anchors:
   cli.prompt, cli.thread.reason, cli.exit."
@@ -19,3 +19,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:30.420Z
 anchor:
   screen: reply-refused-voice
-status: addressed
+status: verified
 body: "Draw what `walkdown threads reply n-0001 '…' --as-agent` prints when the
   agent's reply chains two thoughts on dashes: the fault named with the sentence
   it is in, the way past with --as-is, and that nothing landed
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

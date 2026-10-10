@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:19.361Z
 anchor:
   screen: blueprints-import
-status: addressed
+status: verified
 body: "Draw what `walkdown blueprints import .` prints with no terminal, in a
   repository holding three committed homes, one already listed here: each home
   by its folder, the listed one marked with its ID, and the ask for --all or
@@ -23,3 +23,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

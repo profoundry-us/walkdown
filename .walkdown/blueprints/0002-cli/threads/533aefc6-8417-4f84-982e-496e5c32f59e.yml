@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:35:53.479Z
 anchor:
   screen: pointer-own-words
-status: addressed
+status: verified
 body: "Draw a CLAUDE.md the team writes in, as cat prints it, after a second
   blueprint is committed: their words above and below, and walkdown's fenced
   block between them (locations.pointer.owns-only-its-block). Anchors:
@@ -22,3 +22,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

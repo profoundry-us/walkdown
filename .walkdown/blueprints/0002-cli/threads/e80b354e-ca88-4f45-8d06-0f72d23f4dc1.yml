@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-08T13:11:35.291Z
 anchor:
   screen: threads-show-in-no-blueprint
-status: addressed
+status: verified
 body: "A new screen: `walkdown threads show n-0099` in a project with two
   blueprints, where neither holds it. It says the thread is in none of them, not
   that a blueprint must be chosen (n-0504). Anchors: cli.prompt, cli.refusal,
@@ -20,3 +20,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

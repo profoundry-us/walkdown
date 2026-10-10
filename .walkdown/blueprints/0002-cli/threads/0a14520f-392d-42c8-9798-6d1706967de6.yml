@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:23:27.240Z
 anchor:
   screen: help-one-noun
-status: addressed
+status: verified
 body: "A new verb, relabel, joins threads: the usage line reads
   <list|new|show|reply|set|relabel>, and its entry is last ('walkdown threads
   relabel <label|uuid> [--yes] [--blueprint <id>] [--json]', with what it does
@@ -20,3 +20,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:30.232Z
 anchor:
   screen: records-move-refused
-status: addressed
+status: verified
 body: "Draw what `walkdown records move evidence --to ../evidence-kept` prints
   when that folder already holds records: the destination named with how many
   files it holds, and the refusal that merging two ledgers would edit both, so
@@ -23,3 +23,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

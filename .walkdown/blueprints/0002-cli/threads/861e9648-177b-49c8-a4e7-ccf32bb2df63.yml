@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-08T12:22:30.254Z
 anchor:
   screen: skills-walkdown-name-taken
-status: addressed
+status: verified
 body: "A new screen: `walkdown skills --force` where the name `walkdown` in
   Claude Code's skills folder is a link somebody else made. It leaves the link
   alone and says the plugin is not installed there, never that the folder holds
@@ -20,3 +20,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

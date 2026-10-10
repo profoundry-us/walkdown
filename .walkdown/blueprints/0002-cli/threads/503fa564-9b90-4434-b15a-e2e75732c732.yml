@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.319Z
 anchor:
   screen: lint-steps-and-length
-status: addressed
+status: verified
 body: "Draw what `walkdown lint --no-checks` prints for a feature with two
   faulty rules. One has a statement and no steps. The other has a three-sentence
   statement and a because that tells a story. The missing steps show as an error
@@ -26,3 +26,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

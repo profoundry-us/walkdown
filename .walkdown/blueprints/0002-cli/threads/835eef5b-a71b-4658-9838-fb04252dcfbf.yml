@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-09T14:30:23.365Z
 anchor:
   screen: status-agent-settles
-status: addressed
+status: verified
 body: "New screen: as-built/cli/status-agent-settles.html is the build; it wants
   a design."
 replies:
@@ -18,3 +18,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

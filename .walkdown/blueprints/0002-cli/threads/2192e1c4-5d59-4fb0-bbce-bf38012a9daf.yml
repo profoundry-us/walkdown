@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.479Z
 anchor:
   screen: blueprints-new
-status: addressed
+status: verified
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown blueprints new` prints in a project with no
   blueprint (commands.blueprints.new-makes-one): what it created and registered,
@@ -30,3 +30,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

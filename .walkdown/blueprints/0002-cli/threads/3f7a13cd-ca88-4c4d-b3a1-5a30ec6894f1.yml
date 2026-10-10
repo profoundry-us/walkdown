@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:35.845Z
 anchor:
   screen: thread-screen-request
-status: addressed
+status: verified
 body: 'Draw the thread file `walkdown threads new --screen receipt` wrote with
   no rule and no --reason, as `cat` prints it: the reason "request", and an
   anchor holding the screen alone (ownership.design.request-on-a-screen).
@@ -23,3 +23,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

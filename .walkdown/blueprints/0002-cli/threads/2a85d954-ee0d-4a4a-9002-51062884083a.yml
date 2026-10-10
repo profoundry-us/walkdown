@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T02:05:13.874Z
 anchor:
   screen: writes-refused-among-several
-status: addressed
+status: verified
 body: "ADR 0014 changed this screen's shape.
   as-built/cli/writes-refused-among-several.html is the build. The refusal lists
   full IDs (0001-sp-checkout, 0002-sp-search), and its example takes the bare
@@ -20,3 +20,4 @@ replies:
       The screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

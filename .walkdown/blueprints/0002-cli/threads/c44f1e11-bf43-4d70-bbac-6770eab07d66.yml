@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-09T03:26:26.491Z
 anchor:
   screen: run-no-runner
-status: addressed
+status: verified
 body: "New screen for commands.blueprints.runner-is-what-the-project-declares:
   as-built/cli/run-no-runner.html is the build; it wants a design."
 replies:
@@ -17,3 +17,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

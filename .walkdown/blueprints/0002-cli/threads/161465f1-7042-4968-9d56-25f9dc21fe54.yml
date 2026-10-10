@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-07T02:46:27.959Z
 anchor:
   screen: threads-reply-names-its-blueprint
-status: addressed
+status: verified
 body: "Draw what `walkdown threads reply n-0001 \"fixed in 1a2b3c\" --as-agent`
   prints in a project with one blueprint, which holds the only thread called
   n-0001. The reply is refused all the same: the command acts on one blueprint
@@ -25,3 +25,4 @@ replies:
       marks. The screen was built before it was designed, so on Topher's
       direction (2026-10-09) the build is its first design of record. Accept it,
       or send it back with what to change."
+verified_by: topher

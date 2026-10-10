@@ -7,7 +7,7 @@ via: agent
 created: 2026-10-05T02:27:27.019Z
 anchor:
   screen: init-fresh-machine
-status: addressed
+status: verified
 body: ADR 0012 accepted, rules approved, build it
 added: "Draw what `walkdown init` prints on a machine with no ~/.walkdown
   (commands.init.this-machine-only): the home and registry created, who you are,
@@ -26,3 +26,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

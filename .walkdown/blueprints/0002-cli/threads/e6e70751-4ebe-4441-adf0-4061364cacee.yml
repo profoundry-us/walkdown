@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:31.551Z
 anchor:
   screen: skills-again
-status: addressed
+status: verified
 body: "Draw what `walkdown skills --into ~/.claude/skills` prints when
   walkdown's link is already there: the one link reported up to date, pointing
   at the clone, and the note that updating the clone updates the skills with
@@ -22,3 +22,4 @@ replies:
       built before it was designed, so on Topher's direction (2026-10-09) the
       build is its first design of record. Accept it, or send it back with what
       to change."
+verified_by: topher

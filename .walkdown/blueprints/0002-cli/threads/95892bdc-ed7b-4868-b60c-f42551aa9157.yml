@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T20:17:21.678Z
 anchor:
   screen: home-one-folder
-status: addressed
+status: verified
 body: "Draw a committed blueprint's home once it has been used, as tree -a
   prints it (locations.default.home-is-one-folder): drafts, evidence, features,
   runs and threads beside .gitignore, AGENTS.md, records.yml, spec.yml and
@@ -22,3 +22,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

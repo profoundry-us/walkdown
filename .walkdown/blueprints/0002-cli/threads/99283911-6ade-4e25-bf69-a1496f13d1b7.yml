@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:13:17.699Z
 anchor:
   screen: skills-asks-where
-status: addressed
+status: verified
 body: "Draw what `walkdown skills` prints with no `--into` and no terminal, in a
   repository whose spec is committed. It lists both places the skills could go,
   the person's own first, and what each already holds. Then it refuses: nothing
@@ -24,3 +24,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T19:43:21.585Z
 anchor:
   screen: skills-install
-status: addressed
+status: verified
 body: "Draw what `walkdown skills --into ~/.claude/skills` prints: the plugin
   linked to this clone, in the same lines `walkdown init` prints for it
   (commands.init.one-skill-installer). Anchors: cli.prompt, cli.init.skills,
@@ -21,3 +21,4 @@ replies:
       was built before it was designed, so on Topher's direction (2026-10-09)
       the build is its first design of record. Accept it, or send it back with
       what to change."
+verified_by: topher

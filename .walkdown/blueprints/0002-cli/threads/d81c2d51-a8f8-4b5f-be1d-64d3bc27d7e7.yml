@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-06T22:12:32.638Z
 anchor:
   screen: status-agent-assumed
-status: addressed
+status: verified
 body: "Draw what `walkdown status checkout.basics.pays` prints for a rule that
   says nothing about how it is verified: verify reading agent alone, and the
   agent tier the only evidence it owes (status.evidence.agent-assumed). Anchors:
@@ -23,3 +23,4 @@ replies:
       screen was built before it was designed, so on Topher's direction
       (2026-10-09) the build is its first design of record. Accept it, or send
       it back with what to change."
+verified_by: topher
