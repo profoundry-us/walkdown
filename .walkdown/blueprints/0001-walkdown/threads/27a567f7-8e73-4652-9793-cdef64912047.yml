@@ -1,0 +1,11 @@
+id: q-0576
+uuid: 27a567f7-8e73-4652-9793-cdef64912047
+kind: question
+author: agent
+created: 2026-10-10T04:05:38.567Z
+anchor:
+  screen: pin-form-kinds
+status: open
+body: When an agent is recording, the draft shows the Redline tab greyed out
+  with a line saying only a person files one. Would you rather the tab be hidden
+  from an agent altogether?

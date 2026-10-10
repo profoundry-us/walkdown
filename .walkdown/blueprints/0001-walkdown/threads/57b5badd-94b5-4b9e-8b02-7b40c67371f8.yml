@@ -6,10 +6,17 @@ author: agent
 created: 2026-10-10T03:55:20.203Z
 anchor:
   screen: design-proposed
-status: open
+status: addressed
 body: "ADR 0015 §6. This is the design side with Proposed chosen. The proposed
   prototype is framed the way an as-built is, with a ring around the page and a
   corner label. The ring is the panel's warning yellow, dashed. The label reads
   'Proposed — yours to accept' and links to the design request. Also show a
   brand-new screen with no accepted version: only Proposed exists, and there is
   no switch."
+replies:
+  - author: agent
+    created: 2026-10-10T04:04:51Z
+    body: "Drawn: prototype/drafts/design-proposed.html. The proposed version sits
+      in a dashed warning-yellow ring, and its corner label reads Proposed,
+      yours to accept, and opens the request; a new screen shows a single
+      Proposed label and no switch."

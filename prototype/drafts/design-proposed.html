@@ -1,0 +1,246 @@
+<!doctype html>
+<!-- DESIGN DRAFT: design-proposed -->
+<!-- Drawn for design request n-0571 (ADR 0015 section 6). Not yet accepted. -->
+<!-- Intent: a proposed version on the design side wears the as-built's ring and corner label in dashed warning yellow, reading "Proposed — yours to accept" and linking to its request; a brand-new screen shows only Proposed, with no switch. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — a proposed version, framed as yours to accept</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  .desk {
+    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
+    opacity: .08; transform: rotate(35deg);
+  }
+  .vswitch { display: inline-flex; border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent);
+    border-radius: .4rem; padding: 1px; gap: 1px; }
+  .vswitch button, .vswitch .only { font-size: 11px; line-height: 1; padding: 4px 8px; border-radius: .3rem;
+    display: inline-flex; align-items: center; gap: 5px; }
+  .vswitch button { cursor: pointer; }
+  .vswitch button[aria-pressed="true"], .vswitch .only { background: var(--color-base-content); color: var(--color-base-100); }
+  .vswitch button[aria-pressed="false"]:hover { background: var(--color-base-200); }
+  .waits { width: 6px; height: 6px; border-radius: 50%; background: var(--color-warning); }
+
+  #design-page { height: 100%; }
+  #screen { width: 10.5rem; height: 1.6rem; min-height: 0; font-size: 11.5px; padding-block: 0; }
+  .layer { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; background: var(--color-base-100); }
+
+  /* The proposed frame. The as-built's ring and label (as-built/*.html), in
+     the panel's warning yellow and dashed: yellow because a proposed version
+     waits on a person, dashed so it never reads as one of the solid rings that
+     mean "this is the build". 4px in with its own corner, as the as-built's. */
+  .proposed-ring { position: absolute; inset: 4px; z-index: 5; pointer-events: none;
+    border: 2px dashed var(--color-warning); border-radius: 10px; }
+  .proposed-label { position: absolute; left: 0; bottom: 0; z-index: 6; cursor: pointer;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--color-warning-content);
+    background: var(--color-warning); border-top-right-radius: 6px; text-decoration: none; }
+  .proposed-label:hover { text-decoration: underline; }
+
+  .wl { height: 100%; display: grid; place-items: center; }
+  .wl-card { width: 22rem; padding: 1.75rem; border: 1px solid var(--color-base-300); border-radius: .75rem; }
+  .wl h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; }
+  .wl p { font-size: 12.5px; opacity: .65; margin-top: .25rem; }
+  .wl input { width: 100%; margin-top: 1rem; padding: .5rem .65rem; border: 1px solid var(--color-base-300); border-radius: .4rem; font-size: 13px; }
+  .wl .go { margin-top: .6rem; width: 100%; padding: .5rem; border-radius: .4rem; font-weight: 700; font-size: 13px; text-align: center;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+  .wl .ahead { margin-top: .9rem; font-size: 11.5px; padding: .4rem .6rem; border-radius: .4rem; background: var(--color-base-200); }
+  .wl .tick { font-size: 2rem; line-height: 1; }
+  .nobuild { height: 100%; display: grid; place-items: center; text-align: center; font-size: 12px; opacity: .5; }
+
+  .msg { display: grid; grid-template-columns: 1.6rem 1fr; gap: .45rem; padding: .25rem 0; }
+  .ava { width: 1.6rem; height: 1.6rem; border-radius: .3rem; display: grid; place-items: center;
+    font-size: 10px; font-weight: 700; color: #fff; }
+  .who { font-weight: 600; font-size: 12px; }
+  .at { font-size: 10px; opacity: .45; }
+  .text { font-size: 12.5px; line-height: 1.45; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <div class="desk" data-testid="panel.desk"></div>
+
+  <header class="navbar relative z-10 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+    <!-- Mockup control: the picker moves between the two cases this draft shows. -->
+    <select class="select select-xs w-44 border-dashed" id="screen" data-testid="panel.screen-picker"
+            title="Which screen this page is">
+      <option value="join">Join the waitlist</option>
+      <option value="joined">You're on the list (new)</option>
+    </select>
+
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" data-testid="panel.fade">
+      <!-- One place, two shapes. A screen with an accepted version and a
+           proposal shows the switch. A brand-new screen has one version, so
+           it shows that one label and no switch. -->
+      <span class="vswitch" data-testid="panel.design-version" role="group" aria-label="Which design to show" id="version">
+        <button type="button" data-version="accepted" aria-pressed="false"
+                title="The design of record: rules are judged against it">Accepted</button>
+        <button type="button" data-version="proposed" aria-pressed="true"
+                title="A version waiting on your acceptance, filed on its design request"><span class="waits"></span>Proposed</button>
+        <span class="only" hidden title="This screen has no accepted design yet. Its only version is the proposal on its request."><span class="waits"></span>Proposed</span>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-surface="design">Design</button>
+      <input type="range" min="0" max="100" value="0" class="range range-xs w-28" id="fade"
+             aria-label="Fade between the design and the app">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-surface="app">App</button>
+    </span>
+
+    <span class="ml-auto flex items-center gap-2">
+      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
+        <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
+        <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
+        <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="layer" id="app-layer"></div>
+      <div class="layer" id="design-layer">
+        <div id="design-page"></div>
+        <div id="proposed-marks">
+          <div class="proposed-ring" data-testid="panel.proposed-frame" aria-hidden="true"></div>
+          <a class="proposed-label" data-testid="panel.proposed-label" id="label"
+             title="Open the design request to accept it or send it back">Proposed — yours to accept</a>
+        </div>
+      </div>
+      <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 z-10 border-dashed"
+            data-testid="panel.zoom">fit 74%</span>
+    </section>
+
+    <!-- The label opens the design request in the screen's conversation:
+         accepting happens there and nowhere else. -->
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg" id="aside">
+      <div class="flex items-center gap-1 px-2 pt-2">
+        <button class="btn btn-xs btn-ghost text-primary" id="back">← Join the waitlist</button>
+        <span class="ml-auto flex items-center gap-1 pr-1.5 text-[11px]">
+          <b class="opacity-60" id="req-id">n-0042</b>
+          <span class="badge badge-xs badge-warning" id="req-state">waiting on you</span>
+        </span>
+      </div>
+      <div class="px-3 pb-1 text-[11px] opacity-45">Design request · <span id="req-screen">Join the waitlist</span></div>
+      <div class="flex-1 overflow-y-auto px-3 pb-2" id="req-body"></div>
+      <p class="px-3 pb-2 text-[10.5px] leading-relaxed opacity-40">Try it: move the fade, switch to Accepted and back,
+        click the yellow label, and pick the new screen in the screen picker.</p>
+      <div class="border-t border-dashed border-base-content/25 p-2">
+        <textarea rows="2" class="textarea textarea-sm w-full border-dashed border-base-content/25" id="reply"
+                  placeholder="What should change? Sending it back keeps this version, edited in place."></textarea>
+        <div class="mt-1 flex items-center gap-1.5">
+          <span class="text-[10px] opacity-40">as Topher Fangio</span>
+          <button class="btn btn-xs btn-neutral ml-auto" id="accept">Accept this version</button>
+          <button class="btn btn-xs btn-ghost" id="send-back">Send back</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+
+<script>
+  const SCREENS = {
+    join: {
+      title: 'Join the waitlist', req: 'n-0042',
+      accepted: `<div class="wl"><div class="wl-card"><h1>Join the waitlist</h1><p>We'll email you when a spot opens.</p>
+        <input placeholder="you@example.com"><div class="go">Join</div></div></div>`,
+      proposed: `<div class="wl"><div class="wl-card"><h1>Join the waitlist</h1><p>We'll email you when a spot opens.</p>
+        <input placeholder="you@example.com"><div class="go">Join</div>
+        <div class="ahead">312 people are ahead of you. Most wait about two weeks.</div></div></div>`,
+      app: `<div class="wl"><div class="wl-card"><h1>Join the waitlist</h1><p>We'll email you when a spot opens.</p>
+        <input value="ada@example.com"><div class="go">Join the waitlist</div></div></div>`,
+      thread: [
+        ['AG', '#4f7a6f', 'Agent', '2h ago', 'The join page should say how many people are ahead and how long the wait usually is (rule shows-place-in-line).'],
+        ['DA', '#9b6f4f', 'Design agent', '1h ago', 'Proposed: <span class="font-mono">join-the-waitlist-20261009.html</span>. It adds one line under the button with the count ahead and the usual wait.'],
+      ],
+    },
+    joined: {
+      title: "You're on the list", req: 'n-0057', fresh: true,
+      proposed: `<div class="wl"><div class="wl-card"><div class="tick">✓</div><h1>You're on the list</h1>
+        <p>We sent a confirmation to ada@example.com. Nothing else to do until we write.</p>
+        <div class="ahead">You are number 313. Most wait about two weeks.</div></div></div>`,
+      app: null,
+      thread: [
+        ['AG', '#4f7a6f', 'Agent', '3h ago', "A new screen: what a person sees right after joining. It confirms the email and their place in line."],
+        ['DA', '#9b6f4f', 'Design agent', '40m ago', "Proposed: <span class=\"font-mono\">youre-on-the-list-20261009.html</span>. This screen has no accepted design, so it is the only version."],
+      ],
+    },
+  };
+  const state = { screen: 'join', version: 'proposed', accepted: {} };
+  const $ = (id) => document.getElementById(id);
+
+  function setFade(v) {
+    const s = SCREENS[state.screen];
+    if (!s.app) v = 0; // nothing built yet: the design side is all there is
+    $('fade').value = v;
+    $('design-layer').style.opacity = String(1 - v / 100);
+    $('design-layer').style.pointerEvents = v < 50 ? 'auto' : 'none';
+    document.querySelector('[data-surface=design]').classList.toggle('btn-active', v < 50);
+    document.querySelector('[data-surface=app]').classList.toggle('btn-active', v >= 50);
+  }
+  function render() {
+    const s = SCREENS[state.screen];
+    const isAccepted = state.accepted[state.screen];
+    const hasAccepted = !s.fresh || isAccepted;
+    const hasProposal = !isAccepted;
+    // A screen with both shows the switch; a screen with only a proposal shows
+    // the one label; a screen with only an accepted design shows neither.
+    const both = hasAccepted && hasProposal;
+    $('version').hidden = !hasProposal;
+    $('version').querySelectorAll('button').forEach((b) => (b.hidden = !both));
+    $('version').querySelector('.only').hidden = both;
+    const version = !hasProposal ? 'accepted' : !hasAccepted ? 'proposed' : state.version;
+    document.querySelectorAll('[data-version]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.version === version)));
+    $('design-page').innerHTML = version === 'proposed' ? s.proposed : (s.accepted || s.proposed);
+    $('proposed-marks').hidden = version !== 'proposed';
+    $('app-layer').innerHTML = s.app || '<div class="nobuild">Nothing is built for this screen yet.<br>The App side has nothing to show.</div>';
+    const appBtn = document.querySelector('[data-surface=app]');
+    appBtn.disabled = !s.app; $('fade').disabled = !s.app;
+    appBtn.title = s.app ? 'Show the app' : 'Nothing is built for this screen yet';
+    $('label').href = `#thread=${s.req}`;
+    $('back').textContent = `← ${s.title}`;
+    $('req-id').textContent = s.req; $('req-screen').textContent = s.title;
+    $('req-state').textContent = isAccepted ? 'accepted' : 'waiting on you';
+    $('req-state').className = `badge badge-xs ${isAccepted ? 'badge-success' : 'badge-warning'}`;
+    $('req-body').innerHTML = s.thread.map(([i, c, who, at, t]) =>
+      `<div class="msg"><div class="ava" style="background:${c}">${i}</div><div><div><span class="who">${who}</span> <span class="at">${at}</span></div><div class="text">${t}</div></div></div>`).join('');
+    $('accept').disabled = !!isAccepted; $('send-back').disabled = !!isAccepted;
+    const url = new URL(location.href);
+    url.searchParams.set('screen', state.screen);
+    url.searchParams.set('design', version);
+    history.replaceState(null, '', url);
+    setFade(+$('fade').value);
+  }
+  $('fade').addEventListener('input', () => setFade(+$('fade').value));
+  document.querySelector('[data-surface=design]').onclick = () => setFade(0);
+  document.querySelector('[data-surface=app]').onclick = () => setFade(100);
+  document.querySelectorAll('[data-version]').forEach((b) => (b.onclick = () => { state.version = b.dataset.version; render(); }));
+  $('screen').onchange = () => { state.screen = $('screen').value; render(); };
+  $('label').onclick = (e) => { e.preventDefault(); $('aside').animate([{ outline: '2px dashed var(--color-warning)' }, { outline: '0 solid transparent' }], 900); $('reply').focus(); };
+  $('accept').onclick = () => {
+    const s = SCREENS[state.screen];
+    s.thread.push(['TF', '#7c6f9b', 'Topher Fangio', 'just now', 'Accepted. The storyboard now points at this version, and it is frozen.']);
+    s.accepted = s.proposed;
+    state.accepted[state.screen] = true; render();
+  };
+  $('send-back').onclick = () => {
+    const s = SCREENS[state.screen]; const t = $('reply').value.trim();
+    if (!t) { $('reply').placeholder = 'Say what should change, then send it back.'; $('reply').focus(); return; }
+    s.thread.push(['TF', '#7c6f9b', 'Topher Fangio', 'just now', t]); $('reply').value = ''; render();
+  };
+  const q = new URL(location.href).searchParams;
+  if (SCREENS[q.get('screen')]) { state.screen = q.get('screen'); $('screen').value = state.screen; }
+  if (q.get('design') === 'accepted') state.version = 'accepted';
+  render();
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

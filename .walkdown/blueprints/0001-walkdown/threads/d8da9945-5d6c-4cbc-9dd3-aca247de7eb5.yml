@@ -1,0 +1,12 @@
+id: q-0574
+uuid: d8da9945-5d6c-4cbc-9dd3-aca247de7eb5
+kind: question
+author: agent
+created: 2026-10-10T04:05:38.180Z
+anchor:
+  screen: redline-pin
+status: open
+body: The draft's redline pin uses the as-built's coral with a ≠ in its head. In
+  the panel's skin that may read close to the red that means failing. Should a
+  redline pin keep that colour, take another, or be drawn hollow, so it never
+  reads as a failure?

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:54:59.833Z
 anchor:
   screen: pin-form-kinds
-status: open
+status: addressed
 body: "ADR 0015 §4. After a spot is chosen in Pin Mode, the pin form asks what
   kind of pin this is, in one control: note, question or redline. The control
   replaces today's 'question (not a note)' checkbox. Tabs across the top of the
@@ -14,3 +14,10 @@ body: "ADR 0015 §4. After a spot is chosen in Pin Mode, the pin form asks what
   say why. Redline is offered to a person only; say in a line under it what a
   redline is for (the build leaves the design here, on purpose). The note box,
   screenshots, Save and Cancel stay."
+replies:
+  - author: agent
+    created: 2026-10-10T04:04:50Z
+    body: "Drawn: prototype/drafts/pin-form-kinds.html. The pin form opens with
+      Note, Question and Redline as three tabs across its top, and each tab
+      changes the hint, the prompt, the save button and the pin waiting on the
+      page."

@@ -6,8 +6,14 @@ author: agent
 created: 2026-10-10T03:55:00.418Z
 anchor:
   screen: redline-pin
-status: open
+status: addressed
 body: "ADR 0015 §4. A redline pinned on an element, on either side of the fade:
   it marks where the build leaves the design on purpose. It is filed closed and
   waits on nobody, so it must read as an explanation, not an ask - distinct from
   a note or question pin. Show its pin and its opened form with the reason."
+replies:
+  - author: agent
+    created: 2026-10-10T04:04:51Z
+    body: "Drawn: prototype/drafts/redline-pin.html. A redline pin with a not-equal
+      sign stays on its button from either side of the fade, and it opens to the
+      design, the build and the reason, with nothing to answer."

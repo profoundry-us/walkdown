@@ -6,9 +6,15 @@ author: agent
 created: 2026-10-10T03:55:00.040Z
 anchor:
   screen: design-version-switch
-status: open
+status: addressed
 body: "ADR 0015 §6. When a screen has a proposed version, the design side's
   toolbar label gains a two-segment switch, Accepted | Proposed, with Accepted
   chosen by default. Draw the toolbar and the review page in that state: the
   accepted design showing, the switch offering the proposal, the fade and app
   frame as today."
+replies:
+  - author: agent
+    created: 2026-10-10T04:04:51Z
+    body: "Drawn: prototype/drafts/design-version-switch.html. The review page shows
+      the accepted design, with an Accepted and Proposed switch beside the
+      Design label, and the fade and app frame as they are today."

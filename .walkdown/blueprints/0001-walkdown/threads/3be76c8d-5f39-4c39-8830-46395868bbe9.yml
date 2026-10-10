@@ -1,0 +1,11 @@
+id: q-0575
+uuid: 3be76c8d-5f39-4c39-8830-46395868bbe9
+kind: question
+author: agent
+created: 2026-10-10T04:05:38.373Z
+anchor:
+  screen: design-version-switch
+status: open
+body: The drafts label the design side Design, as the build does, while the
+  accepted review screen says Prototype. ADR 0015 calls every design a
+  prototype. Which word should the toolbar use?

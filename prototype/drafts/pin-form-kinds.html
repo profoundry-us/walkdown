@@ -1,0 +1,240 @@
+<!doctype html>
+<!-- DESIGN DRAFT: pin-form-kinds -->
+<!-- Drawn for design request n-0567 (ADR 0015 section 4). Not yet accepted. -->
+<!-- Intent: the pin form asks Note, Question or Redline with three tabs across its top, chosen over a dropdown because all three choices and the one chosen are visible before a word is typed, one click changes it, and Redline is seen to exist rather than hidden in a menu. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — the pin form asks what kind of pin it is</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  :root { --redline: oklch(62% 0.17 25); }
+  .desk {
+    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
+    opacity: .08; transform: rotate(35deg);
+  }
+  /* Pin Mode: anchored elements light up under the cursor, as they do today. */
+  .pinning [data-anchor] { cursor: crosshair; }
+  .pinning [data-anchor]:hover { outline: 2px solid #4bb8dd; outline-offset: 2px; }
+
+  /* The pin, as the embed draws it: a map marker with a white disc in its head
+     carrying the kind. Amber is open; a redline is the as-built's redline
+     colour with a not-equal sign, because it says the build is not the design
+     here, and it is never open. */
+  .pin { position: absolute; z-index: 30; width: 22px; height: 22px; line-height: 0; cursor: pointer; }
+  .pin svg { width: 22px; height: 22px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .35)); }
+  .pin .k { position: absolute; top: 3px; left: 50%; transform: translateX(-50%);
+    width: 11px; height: 11px; border-radius: 50%; background: #fff; color: currentColor;
+    font: 700 8px/11px ui-sans-serif, system-ui, sans-serif; text-align: center; }
+  .pin.note, .pin.question { color: var(--color-warning); }
+  .pin.redline { color: var(--redline); }
+  .pin.ghost { opacity: .6; pointer-events: none; animation: bob 1.4s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+  /* The form: the panel's card at the size of a note, as today. */
+  .pinform { position: absolute; z-index: 40; width: 16.5rem; }
+  .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); border-radius: .45rem; }
+  .kinds button { font-size: 11.5px; padding: 4px 0; border-radius: .3rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 4px; }
+  .kinds button .g { font-weight: 800; font-size: 10px; width: 13px; height: 13px; line-height: 13px; border-radius: 50%;
+    background: currentColor; }
+  .kinds button .g span { color: var(--color-base-100); }
+  .kinds button[aria-selected="true"] { background: var(--color-base-content); color: var(--color-base-100); }
+  .kinds button[aria-selected="true"] .g span { color: var(--color-base-content); }
+  .kinds button[aria-selected="true"] .g { background: var(--color-base-100); }
+  .kinds button[aria-selected="false"]:hover:not(:disabled) { background: var(--color-base-200); }
+  .kinds button:disabled { opacity: .35; cursor: not-allowed; }
+  .kinds button[data-kind="redline"][aria-selected="true"] { background: var(--redline); color: #fff; }
+  .kinds button[data-kind="redline"][aria-selected="true"] .g span { color: var(--redline); }
+  .shot { width: 44px; height: 30px; border-radius: 4px; border: 1px solid var(--color-base-300);
+    background: repeating-linear-gradient(45deg, var(--color-base-200) 0 4px, var(--color-base-100) 4px 8px);
+    position: relative; }
+  .shot button { position: absolute; top: -6px; right: -6px; width: 14px; height: 14px; border-radius: 50%;
+    font-size: 9px; line-height: 14px; background: var(--color-base-content); color: var(--color-base-100); }
+
+  .wl { height: 100%; display: grid; place-items: center; }
+  .wl-card { width: 22rem; padding: 1.75rem; border: 1px solid var(--color-base-300); border-radius: .75rem; }
+  .wl h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; }
+  .wl p { font-size: 12.5px; opacity: .65; margin-top: .25rem; }
+  .wl input { display: block; width: 100%; margin-top: 1rem; padding: .5rem .65rem; border: 1px solid var(--color-base-300); border-radius: .4rem; font-size: 13px; }
+  .wl .go { margin-top: .6rem; width: 100%; padding: .5rem; border-radius: .4rem; font-weight: 700; font-size: 13px; text-align: center;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+  .toast { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 50; font-size: 12px;
+    padding: .35rem .75rem; border-radius: .45rem; background: var(--color-neutral); color: var(--color-neutral-content); }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <div class="desk" data-testid="panel.desk"></div>
+
+  <header class="navbar relative z-10 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+    <span class="text-xs">Join the waitlist</span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" data-testid="panel.fade">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28" aria-label="Fade between the design and the app">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-active" data-testid="panel.pin-mode" id="pin-mode"
+              title="Click anything on the page to pin to it">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg pinning" data-testid="panel.app-frame" id="frame">
+      <div class="wl"><div class="wl-card" data-anchor="waitlist.card">
+        <h1 data-anchor="waitlist.title">Join the waitlist</h1>
+        <p data-anchor="waitlist.lede">We'll email you when a spot opens.</p>
+        <input data-anchor="waitlist.email" value="ada@example.com" readonly>
+        <div class="go" data-anchor="waitlist.submit">Join the waitlist</div>
+      </div></div>
+
+      <div class="pin ghost note" id="ghost" hidden><svg viewBox="0 0 256 256" fill="currentColor"><path d="M128,16a88.1,88.1,0,0,0-88,88c0,75.3,80,132.17,83.41,134.55a8,8,0,0,0,9.18,0C136,236.17,216,179.3,216,104A88.1,88.1,0,0,0,128,16Zm0,56a32,32,0,1,1-32,32A32,32,0,0,1,128,72Z"/></svg><span class="k">!</span></div>
+
+      <!-- THE FORM. The kind comes first, because it changes what the box is
+           for: the hint line and the box's prompt follow the tab. -->
+      <div class="pinform rounded-box border border-base-content/25 bg-base-100 p-3 text-[13px] shadow-xl"
+           data-testid="pin.form" id="form" hidden>
+        <div class="kinds" role="tablist" aria-label="What kind of pin" data-testid="pin.kind">
+          <button type="button" role="tab" data-kind="note" aria-selected="true"><span class="g"><span>!</span></span>Note</button>
+          <button type="button" role="tab" data-kind="question" aria-selected="false"><span class="g"><span>?</span></span>Question</button>
+          <button type="button" role="tab" data-kind="redline" aria-selected="false"><span class="g"><span>≠</span></span>Redline</button>
+        </div>
+        <div class="mt-2 font-mono text-[11.5px] font-bold" id="anchor">waitlist.email</div>
+        <p class="mt-0.5 text-[11.5px] leading-snug opacity-60" id="hint"></p>
+        <textarea data-testid="pin.note" id="note" class="textarea textarea-sm mt-2 h-16 w-full"></textarea>
+        <div class="mt-1 flex flex-wrap items-center gap-1.5" data-testid="pin.shots" id="shots">
+          <button type="button" class="btn btn-xs btn-ghost border-dashed border-base-content/25 text-[11px] font-normal" id="add-shot"
+                  title="Or paste one into the box">+ Screenshot</button>
+        </div>
+        <div class="mt-2 flex gap-2">
+          <button data-testid="pin.save" class="btn btn-xs btn-neutral" id="save">Pin it</button>
+          <button data-testid="pin.cancel" class="btn btn-xs btn-ghost" id="cancel">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 p-3 text-xs shadow-lg">
+      <div class="font-bold">Pin mode</div>
+      <p class="mt-1 leading-relaxed opacity-70">Click an element on the page to pin to it. The form opens beside it.</p>
+      <div class="mt-4 border-t border-dashed border-base-content/25 pt-3" data-testid="panel.actor">
+        <div class="text-[10px] font-bold uppercase tracking-widest opacity-40">Mockup only</div>
+        <label class="mt-1 flex items-center gap-2"><input type="radio" name="who" value="person" checked> Recording as Topher Fangio</label>
+        <label class="mt-1 flex items-center gap-2"><input type="radio" name="who" value="agent"> Recording as an agent</label>
+        <p class="mt-1 leading-relaxed opacity-50">Only a person files a redline, so an agent sees the tab but cannot choose it.</p>
+      </div>
+      <div class="mt-4 border-t border-dashed border-base-content/25 pt-3">
+        <div class="text-[10px] font-bold uppercase tracking-widest opacity-40">Filed here</div>
+        <ul id="filed" class="mt-1 space-y-1 leading-snug opacity-80"><li class="opacity-50">Nothing yet.</li></ul>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const KINDS = {
+    note: { glyph: '!', save: 'Pin it',
+      hint: 'Something here should change. It stays open until it is dealt with.',
+      prompt: 'What should change here? Paste a screenshot to attach it.' },
+    question: { glyph: '?', save: 'Ask it',
+      hint: 'Something you want answered. It waits on whoever can answer it.',
+      prompt: 'What do you want to know about this?' },
+    redline: { glyph: '≠', save: 'File redline',
+      hint: 'The build leaves the design here on purpose. Say why. It is filed closed, and nothing waits on it.',
+      prompt: 'Why does the build leave the design here?' },
+  };
+  const $ = (id) => document.getElementById(id);
+  const frame = $('frame'), form = $('form'), ghost = $('ghost');
+  let kind = 'note', target = null, nextId = 573, shots = 0;
+  const PIN = ghost.querySelector('svg').outerHTML;
+  const isAgent = () => document.querySelector('input[name=who]:checked').value === 'agent';
+
+  function setKind(k) {
+    if (k === 'redline' && isAgent()) return;
+    kind = k;
+    form.querySelectorAll('[data-kind]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.kind === k)));
+    $('hint').textContent = KINDS[k].hint;
+    $('note').placeholder = KINDS[k].prompt;
+    $('save').textContent = KINDS[k].save;
+    ghost.className = `pin ghost ${k}`;
+    ghost.querySelector('.k').textContent = KINDS[k].glyph;
+  }
+  function syncAgent() {
+    const tab = form.querySelector('[data-kind=redline]');
+    tab.disabled = isAgent();
+    tab.title = isAgent() ? 'Only a person files a redline. Ask a question instead.' : 'The build leaves the design here on purpose';
+    if (isAgent() && kind === 'redline') setKind('question');
+  }
+  function spotOf(el) {
+    const f = frame.getBoundingClientRect(), r = el.getBoundingClientRect();
+    return { x: r.right - f.left - 14, y: r.top - f.top + 4 };
+  }
+  function openAt(el) {
+    target = el;
+    const p = spotOf(el);
+    ghost.style.left = `${p.x - 11}px`; ghost.style.top = `${p.y - 19}px`; ghost.hidden = false;
+    form.hidden = false;
+    form.style.left = `${Math.max(8, Math.min(p.x - 24, frame.clientWidth - form.offsetWidth - 8))}px`;
+    form.style.top = `${p.y + 18}px`;
+    $('anchor').textContent = el.dataset.anchor;
+    $('note').value = ''; shots = 0; $('shots').querySelectorAll('.shot').forEach((s) => s.remove());
+    setKind(kind); $('note').focus();
+  }
+  function close() { form.hidden = true; ghost.hidden = true; target = null; }
+  function toast(t) {
+    const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; frame.appendChild(d);
+    setTimeout(() => d.remove(), 2600);
+  }
+
+  frame.addEventListener('click', (e) => {
+    if (form.contains(e.target) || e.target.closest('.pin')) return;
+    const el = e.target.closest('[data-anchor]');
+    if (el) openAt(el);
+  });
+  form.querySelectorAll('[data-kind]').forEach((b) => (b.onclick = () => setKind(b.dataset.kind)));
+  // Arrow keys move between tabs, as a tablist should.
+  form.querySelector('[role=tablist]').addEventListener('keydown', (e) => {
+    const order = ['note', 'question', 'redline'].filter((k) => !(k === 'redline' && isAgent()));
+    const i = order.indexOf(kind);
+    if (e.key === 'ArrowRight') setKind(order[(i + 1) % order.length]);
+    if (e.key === 'ArrowLeft') setKind(order[(i + order.length - 1) % order.length]);
+  });
+  document.querySelectorAll('input[name=who]').forEach((r) => (r.onchange = syncAgent));
+  $('add-shot').onclick = () => {
+    shots++; const s = document.createElement('div'); s.className = 'shot'; s.title = `screenshot ${shots}`;
+    s.innerHTML = '<button type="button" title="Remove">×</button>';
+    s.querySelector('button').onclick = () => s.remove();
+    $('add-shot').before(s);
+  };
+  $('cancel').onclick = close;
+  $('save').onclick = () => {
+    const text = $('note').value.trim();
+    if (!text) { $('note').focus(); $('note').classList.add('textarea-warning'); return; }
+    $('note').classList.remove('textarea-warning');
+    const id = `${kind === 'question' ? 'q' : 'n'}-0${nextId++}`;
+    const pin = document.createElement('div');
+    pin.className = `pin ${kind}`; pin.style.left = ghost.style.left; pin.style.top = ghost.style.top;
+    pin.innerHTML = `${PIN}<span class="k">${KINDS[kind].glyph}</span>`;
+    pin.title = `${id} · ${kind} · ${kind === 'redline' ? 'closed' : 'open'}\n${text}`;
+    frame.appendChild(pin);
+    const li = document.createElement('li');
+    li.innerHTML = `<b class="font-mono">${id}</b> ${kind} on <span class="font-mono">${target.dataset.anchor}</span>, ${kind === 'redline' ? 'filed closed' : 'open'}`;
+    const list = $('filed'); if (list.firstElementChild?.classList.contains('opacity-50')) list.innerHTML = '';
+    list.appendChild(li);
+    toast(kind === 'redline' ? `Redline ${id} filed closed. Nothing waits on it.` : `${id} pinned to ${target.dataset.anchor}.`);
+    close();
+  };
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  openAt(document.querySelector('[data-anchor="waitlist.email"]'));
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

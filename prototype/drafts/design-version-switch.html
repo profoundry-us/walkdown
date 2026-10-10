@@ -1,0 +1,195 @@
+<!doctype html>
+<!-- DESIGN DRAFT: design-version-switch -->
+<!-- Drawn for design request n-0568 (ADR 0015 section 6). Not yet accepted. -->
+<!-- Intent: when a screen has a proposed version, the Design label in the toolbar gains an Accepted | Proposed switch, Accepted chosen by default, and nothing else on the review page moves. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — the design side offers a proposed version</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  .desk {
+    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
+    opacity: .08; transform: rotate(35deg);
+  }
+  /* The switch: two small segments in one dashed box, the chosen one filled.
+     The Proposed segment carries a warning-yellow dot while it waits on you,
+     the colour the panel already uses for "your turn". */
+  .vswitch { display: inline-flex; border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent);
+    border-radius: .4rem; padding: 1px; gap: 1px; }
+  .vswitch button { font-size: 11px; line-height: 1; padding: 4px 8px; border-radius: .3rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; }
+  .vswitch button[aria-pressed="true"] { background: var(--color-base-content); color: var(--color-base-100); }
+  .vswitch button[aria-pressed="false"]:hover { background: var(--color-base-200); }
+  .waits { width: 6px; height: 6px; border-radius: 50%; background: var(--color-warning); }
+
+  /* The app frame holds two layers: the build underneath, the design over it.
+     The fade sets the design layer's opacity, exactly as it does today. */
+  .layer { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; background: var(--color-base-100); }
+  .proposed-ring { position: absolute; inset: 4px; z-index: 5; pointer-events: none;
+    border: 2px dashed var(--color-warning); border-radius: 10px; }
+  .proposed-label { position: absolute; left: 0; bottom: 0; z-index: 6;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--color-warning-content);
+    background: var(--color-warning); border-top-right-radius: 6px; text-decoration: none; }
+  .proposed-label:hover { text-decoration: underline; }
+
+  /* The example waitlist page, in three versions. */
+  .wl { height: 100%; display: grid; place-items: center; }
+  .wl-card { width: 22rem; padding: 1.75rem; border: 1px solid var(--color-base-300); border-radius: .75rem; }
+  .wl h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; }
+  .wl p { font-size: 12.5px; opacity: .65; margin-top: .25rem; }
+  .wl input { width: 100%; margin-top: 1rem; padding: .5rem .65rem; border: 1px solid var(--color-base-300); border-radius: .4rem; font-size: 13px; }
+  .wl .go { margin-top: .6rem; width: 100%; padding: .5rem; border-radius: .4rem; font-weight: 700; font-size: 13px;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+  .wl .ahead { margin-top: .9rem; font-size: 11.5px; padding: .4rem .6rem; border-radius: .4rem; background: var(--color-base-200); }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <div class="desk" data-testid="panel.desk"></div>
+
+  <header class="navbar relative z-10 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+    <button class="btn btn-xs btn-ghost gap-1 font-normal" data-testid="panel.screen-picker"
+            title="Which screen this page is">Join the waitlist ▾</button>
+
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" data-testid="panel.fade">
+      <!-- The switch sits against the label it qualifies: it says which design
+           the Design side shows. It appears only on a screen with a proposed
+           version, so on every other screen the bar looks as it does today. -->
+      <span class="vswitch" data-testid="panel.design-version" role="group" aria-label="Which design to show">
+        <button type="button" data-version="accepted" aria-pressed="true"
+                title="The design of record: rules are judged against it">Accepted</button>
+        <button type="button" data-version="proposed" aria-pressed="false"
+                title="A version waiting on your acceptance, filed on the design request n-0042"><span class="waits"></span>Proposed</button>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-surface="design">Design</button>
+      <input type="range" min="0" max="100" value="0" class="range range-xs w-28" id="fade"
+             aria-label="Fade between the design and the app">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-surface="app">App</button>
+    </span>
+
+    <span class="ml-auto flex items-center gap-2">
+      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
+        <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
+        <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
+        <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <!-- The build: the waitlist page as the app serves it. -->
+      <div class="layer" id="app-layer">
+        <div class="wl"><div class="wl-card">
+          <h1>Join the waitlist</h1>
+          <p>We'll email you when a spot opens.</p>
+          <input placeholder="you@example.com" value="ada@example.com">
+          <div class="go">Join the waitlist</div>
+        </div></div>
+      </div>
+
+      <!-- The design side. Accepted shows the design of record, unframed, as
+           today. Proposed shows the version on the request, in its dashed
+           warning-yellow frame (drawn in full on the design-proposed draft). -->
+      <div class="layer" id="design-layer">
+        <div id="v-accepted" class="wl"><div class="wl-card">
+          <h1>Join the waitlist</h1>
+          <p>We'll email you when a spot opens.</p>
+          <input placeholder="you@example.com">
+          <div class="go">Join</div>
+        </div></div>
+        <div id="v-proposed" class="wl" hidden><div class="wl-card">
+          <h1>Join the waitlist</h1>
+          <p>We'll email you when a spot opens.</p>
+          <input placeholder="you@example.com">
+          <div class="go">Join</div>
+          <div class="ahead">312 people are ahead of you. Most wait about two weeks.</div>
+        </div></div>
+        <div id="proposed-marks" hidden>
+          <div class="proposed-ring" aria-hidden="true"></div>
+          <a class="proposed-label" href="#request-n-0042" title="Open the design request to accept it or send it back">Proposed — yours to accept</a>
+        </div>
+      </div>
+
+      <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 z-10 border-dashed"
+            data-testid="panel.zoom" title="Wider than the space? Scaled down whole, never reflowed">fit 74%</span>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
+      </div>
+      <div class="flex items-center gap-2 border-b border-dashed border-base-content/25 px-3 py-1.5 text-xs"
+           data-testid="panel.actor">
+        <span>Recording as <b>Topher Fangio</b></span>
+      </div>
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.join</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">email-required</span></button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center text-warning">○</span><span class="truncate">confirms-the-email</span>
+          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">walk</span></button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center opacity-60">✍︎</span><span class="truncate">shows-place-in-line</span></button>
+        <p class="mt-3 border-t border-dashed border-base-content/25 px-2 pt-2 text-[10.5px] leading-relaxed opacity-60" id="side-note">
+          Rules on this screen are judged against the <b>accepted</b> design.</p>
+        <p class="mt-3 px-2 text-[10.5px] leading-relaxed opacity-40">Try it: choose Proposed, then move the fade.
+          The fade and the App side work the same for either version. The choice is written into the address, so a link opens on it.</p>
+      </div>
+      <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
+              data-testid="panel.counts">
+        <span><b>1 of 3</b> rules verified</span>
+      </footer>
+    </aside>
+  </main>
+
+
+<script>
+  const fade = document.getElementById('fade');
+  const design = document.getElementById('design-layer');
+  const sideNote = document.getElementById('side-note');
+  function setFade(v) {
+    fade.value = v;
+    design.style.opacity = String(1 - v / 100);
+    design.style.pointerEvents = v < 50 ? 'auto' : 'none';
+    document.querySelector('[data-surface=design]').classList.toggle('btn-active', v < 50);
+    document.querySelector('[data-surface=app]').classList.toggle('btn-active', v >= 50);
+  }
+  function setVersion(v) {
+    document.querySelectorAll('[data-version]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.version === v)));
+    document.getElementById('v-accepted').hidden = v !== 'accepted';
+    document.getElementById('v-proposed').hidden = v !== 'proposed';
+    document.getElementById('proposed-marks').hidden = v !== 'proposed';
+    sideNote.innerHTML = v === 'accepted'
+      ? 'Rules on this screen are judged against the <b>accepted</b> design.'
+      : 'You are looking at a <b>proposed</b> version. Rules are still judged against the accepted one until you accept this.';
+    const url = new URL(location.href);
+    if (v === 'proposed') url.searchParams.set('design', 'proposed'); else url.searchParams.delete('design');
+    history.replaceState(null, '', url);
+  }
+  fade.addEventListener('input', () => setFade(+fade.value));
+  document.querySelector('[data-surface=design]').onclick = () => setFade(0);
+  document.querySelector('[data-surface=app]').onclick = () => setFade(100);
+  document.querySelectorAll('[data-version]').forEach((b) => (b.onclick = () => setVersion(b.dataset.version)));
+  setFade(0);
+  setVersion(new URL(location.href).searchParams.get('design') === 'proposed' ? 'proposed' : 'accepted');
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>
