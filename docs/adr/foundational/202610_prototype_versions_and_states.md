@@ -74,8 +74,8 @@ prototypes/<screen>-YYYYMMDD-v2.html    # a second version made the same day
   `-v2`, then `-v3`. The first is never renamed when a second arrives.
 - The storyboard's `prototype:` names the accepted version. That pointer is the
   only thing that makes a version accepted.
-- The design request names the version it proposes. A request with a proposed
-  version is the only thing that makes a version proposed.
+- The design request names the version it proposes. A request not yet accepted
+  or closed that names a version is the only thing that makes it proposed.
 - A version that is neither is superseded, and stays on disk as history.
 - **A proposed version is edited in place.** Every revision while it is under
   review, whether sent back with changes or reworked by its designer, is an
@@ -97,8 +97,8 @@ around:
 
 - An accepted screen in `screens/` moves into `prototypes/` as a dated version,
   and the storyboard is repointed at it.
-- A draft or proposal named by an open design request moves in as that
-  request's proposed version.
+- A draft or proposal named by a design request not yet accepted or closed,
+  whether open or addressed, moves in as that request's proposed version.
 - A draft or proposal nothing names, accepted or pending, is removed. It stays
   in git history, and the upgrade lists every file it removed.
 - A file git does not hold is never removed: with no history, removing it would
