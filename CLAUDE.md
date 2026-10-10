@@ -55,9 +55,12 @@ and ask him to accept it after the fact.
 
 In this order, for any screen:
 
-1. Write the screen's rules, unbuilt, with the screen in their `screens:`. A
-   screen is never designed without its rules (ADR 0015 §8). Put the screen in
-   the storyboard with `prototype: null`, and file the request:
+1. Work out the screen's rules and its design together. Neither has to come
+   first: where the PRD or prototype leaves how it works open, the rules and the
+   design go back and forth (a rules agent and the design agent, say) until
+   they agree. A screen never reaches Topher without its rules, unbuilt and
+   naming it (ADR 0015 §8). Put the screen in the storyboard with
+   `prototype: null`, and file the request:
    `walkdown threads new --blueprint <bp> --screen <id> --reason request
    --as-agent --body "<what the screen must show>"`.
 2. If Topher has given a design, use it. Otherwise dispatch the `designer`

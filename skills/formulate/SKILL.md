@@ -33,8 +33,9 @@ derives from it.
    on a screen with no design is not built until the screen's design has been
    drawn and a person has accepted it. A designer draws it where there is
    one; where there is none, a design agent drafts it (a separate agent,
-   never the one building). Every screen has rules, written before its
-   design so it is drawn against them; approving every rule on a screen
+   never the one building). Every screen has rules, worked out with its
+   design (the two may go back and forth until they agree), and no screen
+   reaches a person without them; approving every rule on a screen
    accepts its design. Say so in the report, and stop there for that screen
    rather than building ahead of its design.
 
