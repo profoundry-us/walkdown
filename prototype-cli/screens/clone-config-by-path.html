@@ -36,7 +36,8 @@
       <div class="ln">blueprint: checkout</div>
       <div class="ln"></div>
       <div class="ln"># How to run this project's checks (tests tagged with rule ids).</div>
-      <div class="ln"># Keep the block for your framework; delete the other.</div>
+      <div class="ln"># No test framework was found here, so nothing runs until you choose: uncomment</div>
+      <div class="ln"># the block for yours, or write the command that runs your tests.</div>
       <div class="ln">runner:</div>
       <div data-testid="cli.config.reporter">
       <div class="ln">  # Playwright — add ['~/src/walkdown/lib/playwright-reporter.js'] to the reporter array in playwright.config.</div>
@@ -44,14 +45,17 @@
       <div class="ln">  # nothing puts a `walkdown` package in your node_modules. With walkdown</div>
       <div class="ln">  # installed as a package, ['walkdown/reporter'] names the same file.</div>
       </div>
-      <div class="ln">  run_all: "npx playwright test"</div>
-      <div class="ln">  run_for_rule: "npx playwright test --grep '@rule:{id}'"</div>
+      <div class="ln">  # run_all: "npx playwright test"</div>
+      <div class="ln">  # run_for_rule: "npx playwright test --grep '@rule:{id}'"</div>
       <div data-testid="cli.config.formatter">
       <div class="ln">  # RSpec — the formatter is in this clone, loaded by its path; no gem to add:</div>
       </div>
       <div class="ln">  # run_all: "bundle exec rspec spec/workflows -I ~/src/walkdown/adapters/rspec/lib -r walkdown/formatter --format progress --format Walkdown::Formatter"</div>
       <div class="ln">  # run_for_rule: "bundle exec rspec spec/workflows -I ~/src/walkdown/adapters/rspec/lib -r walkdown/formatter --format progress --format Walkdown::Formatter --tag 'rule:{id}'"</div>
       <div class="ln">  # list: "bundle exec rspec spec/workflows -I ~/src/walkdown/adapters/rspec/lib -r walkdown/formatter --dry-run --format Walkdown::ListFormatter"</div>
+      <div class="ln">  # node:test — the reporter is in this clone, loaded by its path:</div>
+      <div class="ln">  # run_all: "node --test --test-reporter=~/src/walkdown/lib/node-test-reporter.js --test-reporter-destination=stdout"</div>
+      <div class="ln">  # run_for_rule: "node --test --test-name-pattern='@rule:{id}' --test-reporter=~/src/walkdown/lib/node-test-reporter.js --test-reporter-destination=stdout"</div>
       <div class="ln">  #</div>
       <div class="ln">  # No `list:` is needed: lint reads the rule tags written in the files</div>
       <div class="ln">  # under authoring.location. Name one only when your framework builds tags</div>
