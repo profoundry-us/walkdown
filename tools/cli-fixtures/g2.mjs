@@ -123,6 +123,49 @@ export default {
     );
     m.ok(['hash', '--write', '--blueprint', 'checkout']);
   },
+  /* `checkout` with two pay screens declaring seven anchors, and a rule whose focus neither declares (ADR 0016). */
+  'g2-focus-undeclared'(m, h) {
+    checkout(m, h);
+    const spec = m.specOf('checkout');
+    writeFileSync(
+      join(spec, 'storyboard.yml'),
+      [
+        'screens:',
+        '  - id: pay',
+        '    title: Pay for the order',
+        '    prototype: /screens/pay.html',
+        '    anchors: [pay.card-form, pay.card-number, pay.total, pay.submit]',
+        '  - id: pay-error',
+        '    title: The card was declined',
+        '    prototype: /screens/pay-error.html',
+        '    anchors: [pay-error.message, pay-error.retry, pay-error.other-card]',
+        '',
+      ].join('\n'),
+    );
+    writeFileSync(
+      join(spec, 'features', 'pay.yml'),
+      [
+        'feature: pay',
+        'stories:',
+        '  - id: checkout.pay',
+        '    title: A shopper pays for the order',
+        '    statement: As a shopper I can pay for what is in my cart.',
+        '    rules:',
+        '      - id: checkout.pay.card-declined',
+        '        statement: A declined card says so, and offers another way to pay.',
+        '        verify: [checks]',
+        '        signoff: [eng, product]',
+        '        screens: [pay, pay-error]',
+        '        focus: pay.decline-banner',
+        '        steps:',
+        '          given: [A card the bank declines]',
+        '          when: [The shopper pays with it]',
+        '          then: [The decline is said, and another card can be tried]',
+        '',
+      ].join('\n'),
+    );
+    m.ok(['hash', '--write', '--blueprint', 'checkout']);
+  },
   /* `checkout`, no rules yet, whose spec.yml says an agent draws its design, and an undrawn receipt screen with a design request. */
   'g2-design-by-agent'(m, h) {
     checkout(m, h);

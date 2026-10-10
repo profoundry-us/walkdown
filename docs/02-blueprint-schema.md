@@ -64,8 +64,10 @@ stories:
         statement: A guest must provide a valid email before payment is attempted.
         because: A payment attempt with no way to reach the buyer is one nobody can follow up.
         history: Two orders a week shipped to nobody before the field was required.   # optional
-        verify: [checks]           # required evidence: checks | agent | human (all listed required)
+        verify: [checks]           # required evidence: checks | agent (all listed required)
+        signoff: [eng, product]    # who accepts it, by role: eng always, with product or design
         screens: [checkout-payment]
+        focus: checkout.email      # optional: the anchor opening the rule takes you to (ADR 0016)
         environments: [local, staging]   # where this rule is verifiable (default: all)
         steps:
           statement_hash: "sha256:9b2f…"   # of `statement` at generation time
@@ -150,6 +152,11 @@ stories:
   "visitor sees a confirmation" rule ends on the confirmation screen; a "visitor
   *remains* on the form" rule ends on the form — both correct with no authoring
   convention). Rules without steps fall back to the first listed screen.
+- **`focus` says where on that screen the rule is about** (ADR 0016). Opening the rule
+  scrolls that anchor to the middle of both surfaces and rings it, as pin mode does.
+  Without it the panel uses the first anchor the steps name, and without one of those
+  the screen opens at the top. Lint refuses a focus none of the rule's screens
+  declares. It is not part of the wording, so changing it never makes a verdict stale.
 
 ### Headless rules
 

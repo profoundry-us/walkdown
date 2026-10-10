@@ -1,6 +1,6 @@
 # ADR 0016 — Rule focus
 
-- **Status:** accepted 2026-10-10 by Topher; not yet built. Proposed the same
+- **Status:** accepted 2026-10-10 by Topher; built the same day. Proposed the same
     day by the agent from [issue #24](https://github.com/profoundry-us/walkdown/issues/24);
     its rules were approved in his walkdown first (ADR 0015 §8).
 - **Date:** 2026-10-10

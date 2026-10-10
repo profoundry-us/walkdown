@@ -53,6 +53,9 @@ derives from it.
      `eng` is always there. A person's acceptance is a signature, never a
      `verify` tier
    - `screens`: the screens it touches (unordered; tooling derives flow)
+   - `focus` (optional): on a long screen, the anchor the rule is about, so
+     opening it in the panel scrolls there. Without it the panel uses the
+     first anchor the steps name
    - `steps`: given/when/then referencing screens and anchors **in backticks
      by id** — never URLs or CSS. Steps double as the human walkthrough
      script, so write them clickable.

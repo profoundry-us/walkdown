@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-10T20-02-13Z-local-01",
+  "created": "2026-10-10T20:02:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b7a4981-dirty",
+  "spec_hash": "sha256:3fa6c64de4fc",
+  "results": [
+    {
+      "rule": "ownership.authoring.focus-is-a-declared-anchor",
+      "status": "pass",
+      "statement_hash": "sha256:0f4cacbd010f",
+      "evidence": [
+        "runs/evidence/2026-10-10T20-00-32Z/proto-lint-focus-undeclared.png",
+        "runs/evidence/2026-10-10T20-00-32Z/app-lint-focus-undeclared.png",
+        "runs/evidence/2026-10-10T20-00-32Z/probe-lint-focus-cases.txt"
+      ],
+      "reasoning": "Passes. The capture (as-built/cli/lint-focus-undeclared.html, scenario lint-focus-undeclared, fixture g2-focus-undeclared) prints the design's error line verbatim: a [storyboard] error on checkout.pay.card-declined naming the focus pay.decline-banner and both screens, pay or pay-error, with the declared anchors offered as a way out, then the failing summary and exit 1. The two differ only in fixture placeholders the designer flagged: the design types `walkdown lint` where the capture runs `--no-checks`, and the summary counts (4 rules vs 2). Not judged as faults. Beyond the drawing I drove the working tree's `walkdown lint` (node bin/walkdown.js, no server, no port used) against a throwaway blueprint under a mktemp HOME and WALKDOWN_HOME, nine rules in one feature (probe-lint-focus-cases.txt): a focus undeclared on two screens errors with the plural wording and a list cut at five 'and 2 more'; undeclared on one screen errors with the singular wording and lists that screen's anchors; a focus declared on the rule's second screen passes; a rule with no focus, with or without screens, is never asked for one; a screen declaring no anchors errors without an empty suggestion list; a rule naming no screens errors saying so; an anchor declared only on a screen the rule does not name is refused. Lint exits 1 with any of these and 0 (no focus error) with only the passing cases, with and without --no-checks. Edge, under 10% (a typo in `screens` on a rule that also sets focus): screens: [nope] gets the correct 'unknown screen' error plus a second, misleading 'the rule names no screen' focus error; the first error points at the fix, so it costs a moment's confusion. Named, not filed. Two shots were taken headless by a throwaway Playwright script over the two HTML files at 1280 wide.",
+      "threads": []
+    }
+  ]
+}

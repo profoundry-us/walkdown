@@ -36,3 +36,17 @@ test('hashMatches rejects wrong, short, and malformed hashes', () => {
   assert.equal(hashMatches('not-a-hash', s), false);
   assert.equal(hashMatches(null, s), false);
 });
+
+/*
+ * A rule's focus says where opening it takes the panel, not what it says, so
+ * moving it never makes a verdict stale (ADR 0016).
+ */
+test('a rule hashes the same whatever its focus @rule:panel.rules.opens-at-its-focus', () => {
+  const rule = {
+    statement: 'A declined card says so.',
+    steps: { given: ['A card the bank declines'], when: ['Pay'], then: ['It says so'] },
+  };
+  const before = formatHash(rule);
+  assert.equal(formatHash({ ...rule, focus: 'pay.decline-banner' }), before);
+  assert.equal(formatHash({ ...rule, focus: 'pay-error.message' }), before);
+});

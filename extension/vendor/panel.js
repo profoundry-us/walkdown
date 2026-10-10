@@ -4296,6 +4296,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      * shown in its place until a poll hears the app again.
      */
     appDown: null,
+    // The anchor the open rule is about, told to each surface as it arrives (ADR 0016).
+    focusTarget: null,
 
     /*
      * Which of the three things the panel is doing: finding a server, choosing
@@ -10123,7 +10125,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      * was over a token never gets the mouseleave that would have put the
      * surface back; and the headless cover, which reads the selected rule.
      */
-    highlightAnchor(null);
+    // Only a ring a hover drew: the one opening a rule draws (ADR 0016) stays
+    // until a hover takes its place - or until no rule is open, when it is
+    // about nothing on the screen any more (n-0584).
+    const focusGone = S.focusTarget && S.view !== 'detail';
+    if (focusGone) S.focusTarget = null;
+    if (hoverLit || focusGone) {
+      hoverLit = false;
+      highlightAnchor(null);
+    }
     syncHeadlessCover();
   }
 
@@ -10838,8 +10848,38 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * built page too, and the frame that has no such element simply draws
    * nothing. `null` puts the surfaces back.
    */
-  function highlightAnchor(element) {
-    const msg = { type: 'walkdown:highlight', element: element ?? null };
+  /*
+   * Where opening a rule takes you on its screen (ADR 0016): its focus, else
+   * the first anchor its steps name, else nowhere - the top, as before.
+   */
+  function focusOf(row) {
+    if (!row) return null;
+    if (row.focus) return row.focus;
+    // The rule's own screens first: an anchor of another screen is not on the
+    // page opening the rule goes to, so it would ring nothing.
+    const own = new Set(row.screens ?? []);
+    const mine = (S.data?.storyboard ?? [])
+      .filter((s) => own.has(s.id))
+      .flatMap((s) => s.anchors ?? []);
+    const declared = mine.length ? new Set(mine) : declaredAnchors();
+    for (const phase of ['given', 'when', 'then'])
+      for (const step of row.steps?.[phase] ?? [])
+        for (const m of String(step).matchAll(/`([^`]+)`/g)) if (declared.has(m[1])) return m[1];
+    return null;
+  }
+
+  /** Centre the rule's element on both surfaces and ring it, as pin mode does. */
+  function focusAnchor(element) {
+    S.focusTarget = element ?? null;
+    // No element still says so: the last rule's ring and scroll are not this one's.
+    const msg = { type: 'walkdown:focus', element: element ?? null };
+    ghostFrame()?.contentWindow?.postMessage(msg, '*');
+    D.appFrame?.contentWindow?.postMessage(msg, '*');
+  }
+
+  let hoverLit = false;
+  function highlightAnchor(element, scroll = false) {
+    const msg = { type: 'walkdown:highlight', element: element ?? null, scroll };
     ghostFrame()?.contentWindow?.postMessage(msg, '*');
     D.appFrame?.contentWindow?.postMessage(msg, '*');
   }
@@ -11282,6 +11322,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       if (pane) pane.scrollTop = 0;
     };
     const want = ruleScreen(S.selected);
+    // Told now for a screen already in the frame; a page still on its way is
+    // told when it says it is ready.
+    focusAnchor(focusOf(S.selected));
     if (want && want.id !== currentScreen()?.id && (goTo(want) || showProposal(want))) return toTop();
     render();
     toTop();
@@ -11965,7 +12008,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const on = (verb, handle) => D.host.addEventListener(`wd-${verb}`, (e) => handle(e.detail));
     on('open-rule', ({ rule }) => open(rule));
     on('go-screen', ({ screen }) => goTo(screenById(screen)));
-    on('highlight', ({ anchor }) => highlightAnchor(anchor));
+    // A step's anchor under the pointer: brought into view, then ringed.
+    on('highlight', ({ anchor }) => {
+      hoverLit = Boolean(anchor);
+      highlightAnchor(anchor, true);
+    });
     on('verdict', ({ status }) => giveVerdict(status));
     on('pick-screen', ({ id }) => pickScreen(id));
     // List or storyboard: a way of looking, kept for this viewer (n-0095).
@@ -12163,6 +12210,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       const fromGhost = e.source === ghostFrame()?.contentWindow;
 
       if (msg.type === 'walkdown:ready') {
+        // A page that arrived after its rule was opened still goes to the
+        // rule's element.
+        if (S.focusTarget && S.view === 'detail')
+          e.source?.postMessage({ type: 'walkdown:focus', element: S.focusTarget }, '*');
         if (fromGhost) {
           S.ghostReady = true;
           paintGhostReach();

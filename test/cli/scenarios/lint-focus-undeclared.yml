@@ -1,0 +1,12 @@
+# `walkdown lint` on a rule whose focus is an anchor none of its screens declares (ADR 0016).
+screen: lint-focus-undeclared
+title: Lint refuses a focus no screen declares
+rule: ownership.authoring.focus-is-a-declared-anchor
+fixture: g2-focus-undeclared
+command: [lint, --no-checks]
+exit: 1
+expect:
+  - '^  ✗ \[storyboard\] checkout/features/pay\.yml › checkout\.pay\.card-declined: focus `pay\.decline-banner` is not an anchor on its screens, pay or pay-error — declare it on one of them in the storyboard, or point focus at an anchor they declare: pay\.card-form, pay\.card-number, pay\.total, pay\.submit, pay-error\.message and 2 more$'
+anchors:
+  - { id: lint.focus-error, match: '^  ✗ \[storyboard\] .*: focus ' }
+  - { id: cli.lint.summary, match: '^✗ \d+ rules' }

@@ -68,6 +68,8 @@ export const S = {
    * shown in its place until a poll hears the app again.
    */
   appDown: null,
+  // The anchor the open rule is about, told to each surface as it arrives (ADR 0016).
+  focusTarget: null,
 
   /*
    * Which of the three things the panel is doing: finding a server, choosing

@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-10T20-06-11Z-local-01",
+  "created": "2026-10-10T20:06:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b7a4981-dirty",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.rules.opens-at-its-focus",
+      "status": "fail",
+      "statement_hash": "sha256:f04a715ca5ed",
+      "evidence": [
+        "runs/evidence/2026-10-10T20-00-31Z/app-tall-focus.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/proto-tall-focus.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/proto-tall-fallback.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/proto-tall-no-anchor-stale-ring.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/list-stale-ring.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/app-tall-no-anchor-fresh.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/app-tall-hover.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/proto-tall-hover.jpg",
+        "runs/evidence/2026-10-10T20-00-31Z/probe.json"
+      ],
+      "reasoning": "Driven in the built-in browser against a scratch copy served on :4769 (its /api/blueprint named the copy), at 1400x900, with a tall screen of three anchors served from the copy's own design root and three rules moved onto it. Focus holds on both sides: opening the rule with focus tall.far brought the build frame to it centred to the pixel with the pin-mode ring (wd-hover), and sliding to Design loaded the design page already centred and ringed through the ready re-post. The fallback holds: the next rule, with no focus and tall.mid first in its steps, centred and ringed tall.mid on both surfaces and cleared the old ring. Hover holds on whichever side is in front: with both frames at the top, hovering tall.far in a step scrolled it into view and ringed it. The hash holds: focus is outside ruleHash, hash reports ok, and moving the scratch rule's focus and screen left its checks verdict current. The no-anchor case fails. Stepping to a rule naming no anchor on the same screen left both surfaces at the previous rule's element with its ring still drawn, and All rules left it up too. Only a fresh load opened that rule at the top with no ring. A walk steps through a long screen's rules one after another, and anchors are optional, so a reviewer meets this on nearly every mixed screen (over 80%); it fails the rule, filed as a finding. Under 10% and not filed: the hover's block-nearest scroll leaves an element flush with the frame edge and clips the bottom of its outline by a few pixels, and moving the pointer off a step's anchor clears the rule's own ring, which the ADR's comment means to do.",
+      "threads": [
+        "ec2bcf1e-dbf3-4dfa-8c58-9baa1bdb01af"
+      ]
+    }
+  ]
+}

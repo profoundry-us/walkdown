@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-10T20-16-04Z-local-01",
+  "created": "2026-10-10T20:16:04Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b7a4981-dirty",
+  "tree_hash": "sha256:677d9ab456c4",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.rules.opens-at-its-focus",
+      "status": "pass",
+      "statement_hash": "sha256:f04a715ca5ed",
+      "duration_ms": 3957,
+      "checks": [
+        "checks/panel.spec.js:1563"
+      ]
+    }
+  ]
+}

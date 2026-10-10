@@ -1554,6 +1554,113 @@ test('the steps are read outright and the check source waits behind a disclosure
   });
 });
 
+/*
+ * A rule opens at the element it is about (ADR 0016, issue #24). The page is
+ * served here, tall enough that every anchor but the first is below the fold,
+ * and two built rules are pointed at it: one naming its focus, one naming
+ * only an anchor in its steps.
+ */
+test('opening a rule centres the element it is about, and rings it', {
+  tag: '@rule:panel.rules.opens-at-its-focus',
+}, async ({ page }) => {
+  const PAGE = `${WD_ORIGIN}/prototype/screens/long-focus.html`;
+  const gap = '<div style="height:1400px"></div>';
+  await page.route(/\/prototype\/screens\/long-focus\.html/, (r) =>
+    r.fulfill({
+      contentType: 'text/html',
+      body: `<!doctype html><body style="margin:0"><div data-testid="long.top">Top</div>${gap}<div data-testid="long.mid">Middle</div>${gap}<div data-testid="long.far">Far</div>${gap}<script src="/embed.js" data-walkdown></script></body>`,
+    }),
+  );
+  let focused;
+  let fallback;
+  let bare;
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const data = await res.json();
+    data.storyboard = [
+      ...(data.storyboard ?? []),
+      {
+        id: 'long',
+        title: 'A long screen',
+        prototype: '/screens/long-focus.html',
+        anchors: ['long.top', 'long.mid', 'long.far'],
+      },
+    ];
+    const built = data.rows.filter((r) => r.built);
+    focused = built[0].rule;
+    fallback = built[1].rule;
+    bare = built[2].rule;
+    Object.assign(built[0], { screens: ['long'], flow: ['long'], focus: 'long.far' });
+    Object.assign(built[1], {
+      screens: ['long'],
+      flow: ['long'],
+      focus: null,
+      steps: {
+        given: ['On the screen `long`'],
+        when: ['Open it'],
+        then: ['`long.mid` is what it is about'],
+      },
+    });
+    Object.assign(built[2], {
+      screens: ['long'],
+      flow: ['long'],
+      focus: null,
+      steps: {
+        given: ['On the screen `long`'],
+        when: ['Open it'],
+        then: ['Nothing in particular'],
+      },
+    });
+    await route.fulfill({ response: res, json: data });
+  });
+  await page.goto(fixtureFor({ build: 'stale', frame: PAGE }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect.poll(() => focused, 'the blueprint, with the rules pointed at it').toBeTruthy();
+  const frame = page.frameLocator('iframe[title="the application under review"]');
+  const centred = (id) =>
+    frame.getByTestId(id).evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return Math.abs(r.top + r.height / 2 - innerHeight / 2) < 80;
+    });
+
+  // Found by search: the rules were moved onto a screen at the list's foot.
+  const find = async (rule) => {
+    await page.getByLabel('Search rules').fill(rule);
+    await openRule(page, rule);
+  };
+
+  // Its focus: centred and ringed.
+  await find(focused);
+  await expect(frame.getByTestId('long.far')).toHaveClass(/wd-hover/);
+  await expect.poll(() => centred('long.far')).toBe(true);
+
+  // Back at the list no rule is open, so nothing on the screen is ringed.
+  await page.getByTestId('detail.back').click();
+  await expect(frame.getByTestId('long.far')).not.toHaveClass(/wd-hover/);
+
+  // No focus: the first anchor its steps name.
+  await find(fallback);
+  await expect(frame.getByTestId('long.mid')).toHaveClass(/wd-hover/);
+  await expect.poll(() => centred('long.mid')).toBe(true);
+  await expect(frame.getByTestId('long.far')).not.toBeInViewport();
+
+  // Naming none, straight after one that did: the top, and the last rule's
+  // ring let go - it is not what this rule is about (n-0584).
+  await page.getByTestId('detail.back').click();
+  await find(bare);
+  await expect(frame.getByTestId('long.top')).toBeInViewport();
+  await expect(frame.getByTestId('long.mid')).not.toHaveClass(/wd-hover/);
+
+  // Hovering a step's anchor brings it into view before ringing it.
+  await page.getByTestId('detail.back').click();
+  await find(fallback);
+  await expect.poll(() => centred('long.mid')).toBe(true);
+  await frame.getByTestId('long.top').evaluate(() => scrollTo(0, 0));
+  await expect(frame.getByTestId('long.mid')).not.toBeInViewport();
+  await page.getByTestId('detail.steps').getByText('long.mid', { exact: true }).hover();
+  await expect(frame.getByTestId('long.mid')).toBeInViewport();
+});
+
 test('hovering an anchor a step names points at it on the surface', {
   tag: '@rule:panel.rules.steps-not-an-appendix',
 }, async ({ page }) => {
@@ -1564,7 +1671,9 @@ test('hovering an anchor a step names points at it on the surface', {
     .frameLocator('iframe[title="the application under review"]')
     .getByTestId('detail.steps');
   await expect(surface).toBeVisible();
-  await expect(surface).not.toHaveClass(/wd-hover/);
+  // Opening the rule already rings the first anchor its steps name, which
+  // is where a rule with no focus opens (ADR 0016).
+  await expect(surface).toHaveClass(/wd-hover/);
 
   // The same token the lint scanner keys off, in the panel's own steps.
   const token = page.getByTestId('detail.steps').getByText('detail.steps', { exact: true });

@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-10T19-55-05Z-local-01",
+  "created": "2026-10-10T19:55:05Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b7a4981-dirty",
+  "tree_hash": "sha256:d852d9f5cf91",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.rules.opens-at-its-focus",
+      "status": "pass",
+      "statement_hash": "sha256:f04a715ca5ed",
+      "duration_ms": 1,
+      "checks": [
+        "test/hash.test.js:44"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+id: n-0584
+uuid: ec2bcf1e-dbf3-4dfa-8c58-9baa1bdb01af
+kind: note
+reason: finding
+author: agent
+created: 2026-10-10T20:05:38.876Z
+anchor:
+  rule: panel.rules.opens-at-its-focus
+status: settled
+body: "A rule that names no anchor keeps the ring of the rule opened before it
+  on the same screen. On a tall screen I opened a rule whose steps name
+  tall.mid, which centred and ringed it, then stepped to a rule naming no anchor
+  on that screen. Both surfaces stayed scrolled to tall.mid with its pin-mode
+  ring still drawn, so the new rule looked to be about an element it never
+  mentions. Going back to All rules left the ring up as well. The same rule
+  opened by a fresh load sat at the top with no ring. In src/panel/app.js,
+  focusAnchor(null) returns before telling the surfaces anything, and render()
+  now clears only a ring a hover drew. Evidence:
+  runs/evidence/2026-10-10T20-00-31Z/proto-tall-no-anchor-stale-ring.jpg,
+  list-stale-ring.jpg, app-tall-no-anchor-fresh.jpg and probe.json."
+replies:
+  - author: agent
+    created: 2026-10-10T20:10:44Z
+    body: "Fixed: a rule naming no anchor now tells both surfaces so - the ring is
+      let go and the page goes back to the top (focusAnchor posts focus null;
+      the embed scrolls to 0,0). Its check steps from the tall.mid rule to an
+      anchorless one and asserts both. Also from your edge: focusOf now takes
+      the first anchor declared on the rule's own screens before any other."
+  - author: agent
+    created: 2026-10-10T20:17:25Z
+    body: "Re-judged after the fix. The no-anchor case now holds: stepping from the
+      tall.mid rule to a rule naming no anchor put both surfaces at the top with
+      no ring. The other half of this finding still holds. Going back to All
+      rules leaves the last rule's ring drawn on both surfaces, with no rule
+      open, and hovering list rows does not clear it. It stays until another
+      rule is opened or a step's anchor is hovered. A walk returns to the list
+      after most rules, so a reviewer meets this nearly every session. Evidence:
+      runs/evidence/2026-10-10T20-11-05Z/list-tall-stale-ring.jpg,
+      list-after-rule-ring.jpg and probe.json."
+  - author: agent
+    created: 2026-10-10T20:17:38Z
+    body: "Re-judged: the list still keeps the last rule's ring"
+  - author: agent
+    created: 2026-10-10T20:19:44Z
+    body: "The other half, fixed: with no rule open (back at the list, or any view
+      but a rule's), render() drops the focus and lets its ring go on both
+      surfaces. The check now goes back to the list after the focused rule and
+      asserts the ring is gone."
+  - author: agent
+    via: verdict
+    created: 2026-10-10T20:23:13Z
+    body: Settled by the agent's pass on panel.rules.opens-at-its-focus
+      (2026-10-10T20-23-13Z-local-01).

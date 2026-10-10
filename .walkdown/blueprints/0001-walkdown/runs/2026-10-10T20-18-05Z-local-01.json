@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-10T20-18-05Z-local-01",
+  "created": "2026-10-10T20:18:05Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b7a4981-dirty",
+  "spec_hash": "sha256:289323e454e0",
+  "results": [
+    {
+      "rule": "panel.rules.opens-at-its-focus",
+      "status": "fail",
+      "statement_hash": "sha256:f04a715ca5ed",
+      "evidence": [
+        "runs/evidence/2026-10-10T20-11-05Z/app-tall-focus.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/proto-tall-focus.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/proto-tall-fallback-own-screen.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/proto-tall-no-anchor-top.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/proto-tall-focus-cross-screen.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/proto-tall-hover.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/app-tall-hover.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/list-after-rule-ring.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/list-tall-stale-ring.jpg",
+        "runs/evidence/2026-10-10T20-11-05Z/probe.json"
+      ],
+      "reasoning": "Driven in the built-in browser against a scratch copy served on :4769 (its /api/blueprint named the copy), at 1400x900, on a tall screen of three anchors 1400px apart with three rules moved onto it. Every step holds. Opening the rule with focus tall.far centred it to the pixel with the pin-mode ring on the build side, and sliding to Design showed the design page centred and ringed the same way, as did arriving from another screen and a fresh deep link. The fallback holds and now prefers the rule's own screen: a rule whose steps name panel.legend before tall.mid centred and ringed tall.mid. The n-0584 fix holds: stepping on to a rule naming no anchor put both surfaces at the top with no ring, as a fresh load does. Hovering tall.mid in a step, with both frames at the top, scrolled it into view and ringed it with either side in front. The hash holds: focus is outside ruleHash, hash reports ok, and adding a focus to a passing rule in the copy left its checks cell current. It fails on the other half of n-0584, which the fix did not reach. Going back to All rules leaves the last rule's ring drawn on both surfaces with no rule open, and hovering list rows does not clear it; it stays until another rule opens or a step anchor is hovered. A walk returns to the list after most rules, so a reviewer meets this in nearly every session (about 85%); it fails the rule, and the finding n-0584 is reopened with a reply rather than a second note. Under 10% and not filed: a hover's block-nearest scroll leaves an element flush with the frame's bottom edge, clipping the lower edge of its outline.",
+      "threads": [
+        "ec2bcf1e-dbf3-4dfa-8c58-9baa1bdb01af"
+      ]
+    }
+  ]
+}

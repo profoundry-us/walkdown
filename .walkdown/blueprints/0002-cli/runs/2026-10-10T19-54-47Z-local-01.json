@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-10T19-54-47Z-local-01",
+  "created": "2026-10-10T19:54:47Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b7a4981-dirty",
+  "tree_hash": "sha256:cc22a08b1121",
+  "spec_hash": "sha256:3fa6c64de4fc",
+  "results": [
+    {
+      "rule": "ownership.authoring.focus-is-a-declared-anchor",
+      "status": "pass",
+      "statement_hash": "sha256:0f4cacbd010f",
+      "duration_ms": 679,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}
