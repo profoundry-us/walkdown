@@ -22,3 +22,10 @@ replies:
     created: 2026-10-10T04:13:27Z
     body: Moved to proposals/design-version-switch.html so the panel shows it on
       this screen's design side. Walk it there. A revision edits that same file.
+  - author: agent
+    created: 2026-10-10T17:52:08Z
+    body: "Redrawn: Proposed is chosen first, so the screen opens on the proposed
+      version in its dashed-yellow frame, and choosing Accepted shows the design
+      it would replace. The address now carries ?design=accepted for the
+      non-default pick, and the side note says the proposed version is what is
+      being judged."

@@ -253,11 +253,12 @@ export const screenInHand = () => screenById(S.ghostOverride) ?? currentScreen()
 export function surfaceSides(screen) {
   if (!screen) return { design: null, build: null };
   const surface = pageSurface();
+  // A proposal comes first: it is what is up for judgment (Topher, 2026-10-10).
   const design =
-    (screen.prototype && S.data?.hasPrototype) || surface === 'prototype'
-      ? { label: 'Design', proposed: false }
-      : screen.proposal
-        ? { label: 'Proposal', proposed: true }
+    screen.proposal && surface !== 'prototype'
+      ? { label: 'Proposal', proposed: true }
+      : (screen.prototype && S.data?.hasPrototype) || surface === 'prototype'
+        ? { label: 'Design', proposed: false }
         : null;
   const path = screen.app?.path;
   const build =
@@ -286,9 +287,10 @@ export function ghostSource(screen) {
       ? { url: appUrlOf(screen.app.path, S.data.appBase), proposed: false }
       : null;
   }
+  // A proposal before the design it would replace: it is what is being judged.
+  if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
   if (screen?.prototype && S.data.hasPrototype)
     return { path: '/prototype' + screen.prototype, proposed: false };
-  if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
   return null;
 }
 

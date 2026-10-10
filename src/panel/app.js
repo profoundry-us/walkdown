@@ -1876,11 +1876,15 @@ function pickScreen(id) {
  * screen and the bar compared that one, so the proposal under judgment was
  * nowhere (Topher, 2026-10-09, judging embed.pin.asks-its-kind). It comes up
  * on the design side at full strength, which is what lets it take the
- * pointer and the pins; the sketch banner says what it is. Standing on the
- * design surface the ghost carries the app, so there it cannot, and does not.
+ * pointer and the pins; the sketch banner says what it is.
+ *
+ * Whatever the frame holds, a design page included: a proposal is what is
+ * up for judgment, so it comes first (Topher, 2026-10-10). Naming the screen
+ * before anything else is what lets it - the page then reads as the build
+ * side of that screen, and the ghost carries the design side.
  */
 function showProposal(screen) {
-  if (!screen?.proposal || pageSurface() === 'prototype') return false;
+  if (!screen?.proposal) return false;
   if (screenUrl(screen, 'prototype') || screenUrl(screen, 'app')) return false;
   if (S.ghostOverride !== screen.id) {
     if (S.ghost) setGhost(false);

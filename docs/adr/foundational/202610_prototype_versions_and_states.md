@@ -180,8 +180,10 @@ How a person moves between them:
 
 - **The design side gets a version switch** whenever a screen has a proposed
   version: two segments, **Accepted** and **Proposed**, beside the surface's
-  label in the toolbar. Accepted is the default. Choosing Proposed loads the
-  proposed file into the design side in its yellow frame. The fade, the ghost
+  label in the toolbar. **Proposed is shown first** while one is pending,
+  because it is what is up for judgment (Topher, 2026-10-10: a proposed design
+  always takes priority). It sits in its yellow frame; choosing Accepted shows
+  the design it would replace. The fade, the ghost
   and pins work against the App side exactly as they do for the accepted
   version, so a proposal can be compared with the build it would replace.
 - **A screen with no accepted version yet** shows only Proposed, with no
@@ -274,3 +276,6 @@ with a new design IS the acceptance of the design*.
   proposed version is framed in dashed warning yellow; it is edited in place
   until accepted; the upgrade clears every retired folder; only a person files a
   redline; migration dates come from git history.
+- **Amended 2026-10-10:** a pending proposed version is shown first, ahead of
+  the accepted one (Topher: a proposed design always takes priority, because
+  it is what is being judged). §6 said Accepted was the default.

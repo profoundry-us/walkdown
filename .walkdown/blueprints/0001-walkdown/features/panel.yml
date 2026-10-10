@@ -82,13 +82,13 @@ stories:
           when:
             - Read the bar on each
           then:
-            - The design side reads Design where a design is on file. Where only a proposal is on file it reads Proposal, in the same amber as the "not from design" banner the sketch carries
+            - The design side reads Design where a design is on file. Where a proposal is on file it reads Proposal and shows the proposal, ahead of any design, in the same amber as the "not from design" banner the sketch carries
             - The build side reads App for the running app, As-built for a drawing under `as-built/`, and Stand-in where the server shows the design in the app's place
             - A side with nothing to show is disabled. With no design and no proposal, its tooltip says a design request is how one gets drawn
             - The fade can be moved only while both sides have something to show
             - On a page that is no screen, both buttons and the fade are disabled, and their tooltip points at the screen picker. Nothing in the bar opens another page
             - Picking another screen renames the buttons for it
-          statement_hash: sha256:a1644c475eb8
+          statement_hash: sha256:698a0d62d45f
 
       - id: panel.dock.app-not-answering
         origin: walkdown
@@ -830,10 +830,10 @@ stories:
             - A screen you are already on is not re-navigated to, because that would throw away the page's state for nothing
             - A blueprint that does cover the page you are on leaves you there; only one that does not moves you
             - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
-            - Where such a screen has a proposal, the proposal comes up on the design side at full strength, so it can be clicked and pinned like a design
+            - Where such a screen has a proposal, the proposal comes up on the design side at full strength, so it can be clicked and pinned like a design. It does so whatever the frame held before, a design page included
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
-          statement_hash: sha256:a30a3e3e6888
+          statement_hash: sha256:491cff276765
 
       - id: panel.rules.opens-at-its-focus
         origin: walkdown

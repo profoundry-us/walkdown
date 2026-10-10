@@ -4999,11 +4999,12 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   function surfaceSides(screen) {
     if (!screen) return { design: null, build: null };
     const surface = pageSurface();
+    // A proposal comes first: it is what is up for judgment (Topher, 2026-10-10).
     const design =
-      (screen.prototype && S.data?.hasPrototype) || surface === 'prototype'
-        ? { label: 'Design', proposed: false }
-        : screen.proposal
-          ? { label: 'Proposal', proposed: true }
+      screen.proposal && surface !== 'prototype'
+        ? { label: 'Proposal', proposed: true }
+        : (screen.prototype && S.data?.hasPrototype) || surface === 'prototype'
+          ? { label: 'Design', proposed: false }
           : null;
     const path = screen.app?.path;
     const build =
@@ -5032,9 +5033,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         ? { url: appUrlOf(screen.app.path, S.data.appBase), proposed: false }
         : null;
     }
+    // A proposal before the design it would replace: it is what is being judged.
+    if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
     if (screen?.prototype && S.data.hasPrototype)
       return { path: '/prototype' + screen.prototype, proposed: false };
-    if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
     return null;
   }
 
@@ -10347,11 +10349,15 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * screen and the bar compared that one, so the proposal under judgment was
    * nowhere (Topher, 2026-10-09, judging embed.pin.asks-its-kind). It comes up
    * on the design side at full strength, which is what lets it take the
-   * pointer and the pins; the sketch banner says what it is. Standing on the
-   * design surface the ghost carries the app, so there it cannot, and does not.
+   * pointer and the pins; the sketch banner says what it is.
+   *
+   * Whatever the frame holds, a design page included: a proposal is what is
+   * up for judgment, so it comes first (Topher, 2026-10-10). Naming the screen
+   * before anything else is what lets it - the page then reads as the build
+   * side of that screen, and the ghost carries the design side.
    */
   function showProposal(screen) {
-    if (!screen?.proposal || pageSurface() === 'prototype') return false;
+    if (!screen?.proposal) return false;
     if (screenUrl(screen, 'prototype') || screenUrl(screen, 'app')) return false;
     if (S.ghostOverride !== screen.id) {
       if (S.ghost) setGhost(false);

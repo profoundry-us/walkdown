@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T05:09:46.914Z
 anchor:
   rule: panel.rules.takes-you-there
-status: addressed
+status: settled
 body: >-
   Opening a rule on a proposal-only screen brings the proposal up, but the bar's
   screen picker still names the page underneath.
@@ -43,3 +43,8 @@ replies:
       routes agree. Opening a review rule afterwards returns the picker to 'The
       review page' and stays on the design side. The design-page edge remains,
       and is left as is by choice.
+  - author: agent
+    via: verdict
+    created: 2026-10-10T17:55:30Z
+    body: Settled by the agent's pass on panel.rules.takes-you-there
+      (2026-10-10T17-55-30Z-local-01).

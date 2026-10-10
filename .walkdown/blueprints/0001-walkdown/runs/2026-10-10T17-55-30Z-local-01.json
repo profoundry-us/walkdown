@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-10-10T17-55-30Z-local-01",
+  "created": "2026-10-10T17:55:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "26a55ee-dirty",
+  "spec_hash": "sha256:51e2f35d2b1e",
+  "results": [
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:491cff276765",
+      "evidence": [
+        "runs/evidence/2026-10-10T17-52-03Z/01-open-rule-from-design-page-proposal-up.jpg",
+        "runs/evidence/2026-10-10T17-52-03Z/04-scratch-pin-over-design-page.yml.txt",
+        "runs/evidence/2026-10-10T17-52-03Z/05-probe-states.json"
+      ],
+      "reasoning": "Judged the reworded proposal step on the case it now names: a design page held in the frame. I looked only on :4700 and pinned only in a scratch copy on :4732. With prototype/screens/review.html framed, the bar first read Design / As-built. Opening embed.pin.asks-its-kind from the Rules list then brought proposals/pin-form-kinds.html up at opacity 1, taking the pointer, with the sketch flag. The bar reads Proposal, with App disabled and its tooltip saying the storyboard names no app. The screen picker names 'The pin form asks what kind of pin it is' and Pin mode is enabled. In the scratch copy the same trip, taken from the address, let a pin be placed on the proposal. It recorded screen pin-form-kinds on the prototype surface, so it is clicked and pinned like a design whatever the frame held before. The first click in pin mode did nothing and a second click after a hover opened the form. That is likely the embed in the fresh proposal frame not yet listening, and it is not this rule's claim. Earlier passes today covered the as-built frame and the pick path, and both still hold. Picking a screen with a page from a proposal stays on the design side, and the picker follows every trip. The blueprint-switch and script-tag delivery steps were not re-driven, because this change does not touch them.",
+      "threads": []
+    },
+    {
+      "rule": "panel.dock.surfaces-say-what-they-show",
+      "status": "pass",
+      "statement_hash": "sha256:698a0d62d45f",
+      "evidence": [
+        "runs/evidence/2026-10-10T17-52-03Z/02-scratch-both-proposal-ahead-of-design.jpg",
+        "runs/evidence/2026-10-10T17-52-03Z/03-scratch-both-framed-on-design-page.jpg",
+        "runs/evidence/2026-10-10T17-52-03Z/01-open-rule-from-design-page-proposal-up.jpg",
+        "runs/evidence/2026-10-10T17-52-03Z/05-probe-states.json"
+      ],
+      "reasoning": "No real screen has both a design and a proposal, so I made one in a scratch copy on :4732. I added proposal: /design-proposed.html to its rule-detail screen beside the existing prototype, the way the storyboard puts a proposal on file. With the as-built rule-detail framed, the design side reads Proposal, tooltip 'Show the proposal — a sketch, not from design', and the build side reads As-built. Pressing Proposal ghosts proposals/design-proposed.html at full strength with the 'not from design' banner, not the accepted design, and the fade is live. So the proposal comes ahead of the design. In both screenshots the Proposal button carries the banner's amber. On :4700 I read the other cases this blueprint offers. Review, which has a design and an as-built, reads Design / As-built with the fade enabled. The proposal-only screens pin-form-kinds and redline-pin read Proposal, with App disabled and the tooltip 'The storyboard names no app for this screen'. A page that is no screen (as-built/docked.html) disables both buttons and the fade, with a tooltip pointing at the screen picker. Picking screens from there renames the buttons each time. This blueprint has no screen with neither a design nor a proposal and none with a stand-in, so those cases were not seen this pass. One edge remains. With the frame on the design page of a screen that also has a proposal, the design side reads Design and the proposal is not offered, because the frame is the design itself. Nothing in the panel puts the frame there for a screen with an app page, so I put it at roughly 10-20% and report it to the coordinator rather than failing the rule.",
+      "threads": []
+    }
+  ]
+}

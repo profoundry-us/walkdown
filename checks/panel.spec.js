@@ -573,8 +573,12 @@ test('a screen further down the same page is not left behind a veil', {
   }
 });
 
-for (const trip of ['picking the screen', 'opening its rule']) {
-  test(`a screen with only a proposal comes up, ready to click and pin, by ${trip}`, {
+for (const [trip, from] of [
+  ['picking the screen', 'app'],
+  ['opening its rule', 'app'],
+  ['opening its rule', 'design'],
+]) {
+  test(`a screen with only a proposal comes up, ready to click and pin, by ${trip} from the ${from}`, {
     tag: '@rule:panel.rules.takes-you-there',
   }, async ({ page }) => {
     // A screen with no page on either surface and a proposal on file. Before,
@@ -603,8 +607,14 @@ for (const trip of ['picking the screen', 'opening its rule']) {
         body: '<h1>The proposed screen</h1><script src="/embed.js" data-walkdown></script>',
       }),
     );
-    // Standing on the application, where the ghost carries the design side.
-    await page.goto(fixtureFor({ build: 'stale', frame: new URL('/app.html', FIXTURE).href }));
+    // From the application, or from a design page: a proposal is what is up
+    // for judgment, so it comes first whatever the frame held (Topher,
+    // 2026-10-10).
+    const frame =
+      from === 'app'
+        ? new URL('/app.html', FIXTURE).href
+        : `${WD_ORIGIN}/prototype/screens/review.html`;
+    await page.goto(fixtureFor({ build: 'stale', frame }));
     await expect(page.getByTestId('panel.bar')).toBeVisible();
 
     if (trip === 'opening its rule') await openRule(page, ruleId);

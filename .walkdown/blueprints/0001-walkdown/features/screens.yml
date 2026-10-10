@@ -123,22 +123,23 @@ stories:
         created_at: 2026-10-09
         verify: [checks]
         signoff: [eng, product]
-        statement: When a screen has a proposed version of its design, the design side offers it beside the accepted one and shows the accepted one until asked.
-        because: A proposal is compared with the design it would replace and with the build, without moving what the rules are judged against.
+        statement: When a screen has a proposed version of its design, the design side shows it first, with the accepted one a click away.
+        because: A proposal is what is up for judgment, so it comes first, and it is compared with the design it would replace and with the build.
         history: Proposals lived in their own folder, reached from a thread's button and never from the design side (ADR 0015).
         screens: [design-version-switch]
         steps:
           given:
             - The screen `design-version-switch`, with an accepted version and a proposed one
           when:
-            - The screen is opened, and then Proposed is chosen
+            - The screen is opened, and then Accepted is chosen
           then:
-            - "`panel.design-version` offers Accepted and Proposed beside the design side's label, with Accepted chosen"
-            - Choosing Proposed puts the proposed version on the design side, and the fade and pins work against `panel.app-frame` as before
+            - "`panel.design-version` offers Accepted and Proposed beside the design side's label, with Proposed chosen"
+            - The proposed version is on the design side, and the fade and pins work against `panel.app-frame` as they do for an accepted one
+            - Choosing Accepted shows the design the proposal would replace, and choosing Proposed brings it back
             - The choice is in the address, so a link opens on the version it names
             - A screen with only a proposed version shows it with no switch, and its App side says nothing is built
-            - The rules are still judged against the accepted version
-          statement_hash: sha256:7af097c92825
+            - Opening a rule on the screen, in a walk or from the list, shows the proposed version, because that is what is being judged
+          statement_hash: sha256:0842937f10e9
 
       - id: screens.surfaces.proposed-is-yours
         origin: walkdown

@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- DESIGN DRAFT: design-version-switch -->
-<!-- Drawn for design request n-0568 (ADR 0015 section 6). Not yet accepted. -->
-<!-- Intent: when a screen has a proposed version, the Design label in the toolbar gains an Accepted | Proposed switch, Accepted chosen by default, and nothing else on the review page moves. -->
+<!-- Drawn for design request n-0568 (ADR 0015 section 6). Redrawn 2026-10-10: Proposed is chosen first. Not yet accepted. -->
+<!-- Intent: when a screen has a proposed version, it opens on the design side in its dashed-yellow frame with Proposed chosen, and Accepted is one click away showing the design it would replace. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
@@ -65,10 +65,10 @@
            the Design side shows. It appears only on a screen with a proposed
            version, so on every other screen the bar looks as it does today. -->
       <span class="vswitch" data-testid="panel.design-version" role="group" aria-label="Which design to show">
-        <button type="button" data-version="accepted" aria-pressed="true"
-                title="The design of record: rules are judged against it">Accepted</button>
-        <button type="button" data-version="proposed" aria-pressed="false"
-                title="A version waiting on your acceptance, filed on the design request n-0042"><span class="waits"></span>Proposed</button>
+        <button type="button" data-version="accepted" aria-pressed="false"
+                title="The design this proposal would replace">Accepted</button>
+        <button type="button" data-version="proposed" aria-pressed="true"
+                title="The version up for judgment, waiting on your acceptance (design request n-0042)"><span class="waits"></span>Proposed</button>
       </span>
       <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-surface="design">Design</button>
       <input type="range" min="0" max="100" value="0" class="range range-xs w-28" id="fade"
@@ -100,24 +100,25 @@
         </div></div>
       </div>
 
-      <!-- The design side. Accepted shows the design of record, unframed, as
-           today. Proposed shows the version on the request, in its dashed
-           warning-yellow frame (drawn in full on the design-proposed draft). -->
+      <!-- The design side. Proposed comes first while one is pending, because
+           it is what is being judged: the version on the request, in its dashed
+           warning-yellow frame (drawn in full on the design-proposed draft).
+           Accepted shows the design it would replace, unframed, as today. -->
       <div class="layer" id="design-layer">
-        <div id="v-accepted" class="wl"><div class="wl-card">
+        <div id="v-accepted" class="wl" hidden><div class="wl-card">
           <h1>Join the waitlist</h1>
           <p>We'll email you when a spot opens.</p>
           <input placeholder="you@example.com">
           <div class="go">Join</div>
         </div></div>
-        <div id="v-proposed" class="wl" hidden><div class="wl-card">
+        <div id="v-proposed" class="wl"><div class="wl-card">
           <h1>Join the waitlist</h1>
           <p>We'll email you when a spot opens.</p>
           <input placeholder="you@example.com">
           <div class="go">Join</div>
           <div class="ahead">312 people are ahead of you. Most wait about two weeks.</div>
         </div></div>
-        <div id="proposed-marks" hidden>
+        <div id="proposed-marks">
           <div class="proposed-ring" aria-hidden="true"></div>
           <a class="proposed-label" href="#request-n-0042" title="Open the design request to accept it or send it back">Proposed — yours to accept</a>
         </div>
@@ -148,9 +149,9 @@
         <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
           <span class="w-3.5 shrink-0 text-center opacity-60">✍︎</span><span class="truncate">shows-place-in-line</span></button>
         <p class="mt-3 border-t border-dashed border-base-content/25 px-2 pt-2 text-[10.5px] leading-relaxed opacity-60" id="side-note">
-          Rules on this screen are judged against the <b>accepted</b> design.</p>
-        <p class="mt-3 px-2 text-[10.5px] leading-relaxed opacity-40">Try it: choose Proposed, then move the fade.
-          The fade and the App side work the same for either version. The choice is written into the address, so a link opens on it.</p>
+          You are judging the <b>proposed</b> version. Approving every rule on this screen accepts it.</p>
+        <p class="mt-3 px-2 text-[10.5px] leading-relaxed opacity-40">Try it: choose Accepted to see what this would replace, then move the fade.
+          The fade, pins and the App side work the same for either version. The choice is written into the address, so a link opens on it.</p>
       </div>
       <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
               data-testid="panel.counts">
@@ -176,11 +177,11 @@
     document.getElementById('v-accepted').hidden = v !== 'accepted';
     document.getElementById('v-proposed').hidden = v !== 'proposed';
     document.getElementById('proposed-marks').hidden = v !== 'proposed';
-    sideNote.innerHTML = v === 'accepted'
-      ? 'Rules on this screen are judged against the <b>accepted</b> design.'
-      : 'You are looking at a <b>proposed</b> version. Rules are still judged against the accepted one until you accept this.';
+    sideNote.innerHTML = v === 'proposed'
+      ? 'You are judging the <b>proposed</b> version. Approving every rule on this screen accepts it.'
+      : 'This is the <b>accepted</b> design, the one the proposal would replace. Choose Proposed to go back to what you are judging.';
     const url = new URL(location.href);
-    if (v === 'proposed') url.searchParams.set('design', 'proposed'); else url.searchParams.delete('design');
+    if (v === 'accepted') url.searchParams.set('design', 'accepted'); else url.searchParams.delete('design');
     history.replaceState(null, '', url);
   }
   fade.addEventListener('input', () => setFade(+fade.value));
@@ -188,7 +189,7 @@
   document.querySelector('[data-surface=app]').onclick = () => setFade(100);
   document.querySelectorAll('[data-version]').forEach((b) => (b.onclick = () => setVersion(b.dataset.version)));
   setFade(0);
-  setVersion(new URL(location.href).searchParams.get('design') === 'proposed' ? 'proposed' : 'accepted');
+  setVersion(new URL(location.href).searchParams.get('design') === 'accepted' ? 'accepted' : 'proposed');
 </script>
 <script src="/embed.js" data-walkdown></script>
 </body>
