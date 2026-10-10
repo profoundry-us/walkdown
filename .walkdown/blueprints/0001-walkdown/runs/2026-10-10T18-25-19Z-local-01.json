@@ -1,0 +1,66 @@
+{
+  "run_id": "2026-10-10T18-25-19Z-local-01",
+  "created": "2026-10-10T18:25:19Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6f0c308-dirty",
+  "spec_hash": "sha256:51e2f35d2b1e",
+  "results": [
+    {
+      "rule": "embed.pin.asks-its-kind",
+      "status": "approved",
+      "statement_hash": "sha256:85b398c3cdbb"
+    },
+    {
+      "rule": "screens.surfaces.proposed-beside-accepted",
+      "status": "approved",
+      "statement_hash": "sha256:0842937f10e9"
+    },
+    {
+      "rule": "screens.surfaces.proposed-is-yours",
+      "status": "approved",
+      "statement_hash": "sha256:0c8d5e77db4b"
+    },
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "approved",
+      "statement_hash": "sha256:49f01d2ca7d2"
+    },
+    {
+      "rule": "panel.dock.app-not-answering",
+      "status": "approved",
+      "statement_hash": "sha256:709522460f2e"
+    },
+    {
+      "rule": "panel.dock.surfaces-say-what-they-show",
+      "status": "pass",
+      "statement_hash": "sha256:698a0d62d45f"
+    },
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:491cff276765"
+    },
+    {
+      "rule": "panel.rules.opens-at-its-focus",
+      "status": "approved",
+      "statement_hash": "sha256:f04a715ca5ed"
+    }
+  ]
+}

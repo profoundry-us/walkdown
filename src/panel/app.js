@@ -947,6 +947,13 @@ function sayAddress() {
 function crossTo(nextBp) {
   S.session = null; // left behind, on disk, waiting to be resumed
   S.BP = nextBp;
+  /*
+   * A blueprint picked here is the one this panel now records against. Kept
+   * at the old one, the next reload read the pick as the server swapping
+   * blueprints underneath it, dropped the sitting just begun and said so in
+   * an error (Topher, 2026-10-10, filing a refinement after crossing to cli).
+   */
+  S.openedBlueprint = null;
   sayAddress();
   // The blueprint carries its project with it: picking one from another
   // project's list is how you cross, and the bar must say where you landed.

@@ -5,7 +5,13 @@ author: agent
 created: 2026-10-10T04:05:38.373Z
 anchor:
   screen: design-version-switch
-status: open
+status: answered
 body: The drafts label the design side Design, as the build does, while the
   accepted review screen says Prototype. ADR 0015 calls every design a
   prototype. Which word should the toolbar use?
+replies:
+  - author: topher
+    created: 2026-10-10T18:35:21Z
+    body: Let's use design everywhere, but note in the docs it is almost always a
+      prototype when we can make it one.
+    answer: true

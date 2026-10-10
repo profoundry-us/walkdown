@@ -5,8 +5,13 @@ author: agent
 created: 2026-10-10T04:05:38.180Z
 anchor:
   screen: redline-pin
-status: open
+status: answered
 body: The draft's redline pin uses the as-built's coral with a ≠ in its head. In
   the panel's skin that may read close to the red that means failing. Should a
   redline pin keep that colour, take another, or be drawn hollow, so it never
   reads as a failure?
+replies:
+  - author: topher
+    created: 2026-10-10T18:35:44Z
+    body: The built-in coral is good for now.
+    answer: true

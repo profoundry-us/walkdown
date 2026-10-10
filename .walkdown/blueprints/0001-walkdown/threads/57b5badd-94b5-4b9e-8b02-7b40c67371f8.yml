@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:55:20.203Z
 anchor:
   screen: design-proposed
-status: addressed
+status: verified
 body: "ADR 0015 §6. This is the design side with Proposed chosen. The proposed
   prototype is framed the way an as-built is, with a ring around the page and a
   corner label. The ring is the panel's warning yellow, dashed. The label reads
@@ -24,3 +24,4 @@ replies:
     created: 2026-10-10T04:13:27Z
     body: Moved to proposals/design-proposed.html so the panel shows it on this
       screen's design side. Walk it there. A revision edits that same file.
+verified_by: topher

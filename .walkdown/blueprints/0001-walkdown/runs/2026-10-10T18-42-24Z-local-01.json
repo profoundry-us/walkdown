@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-10T18-42-24Z-local-01",
+  "created": "2026-10-10T18:42:24Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6f0c308-dirty",
+  "tree_hash": "sha256:3853d14f2cc5",
+  "spec_hash": "sha256:51e2f35d2b1e",
+  "results": [
+    {
+      "rule": "panel.walkdown.records-to-ledger",
+      "status": "fail",
+      "statement_hash": "sha256:c38684308429",
+      "duration_ms": 8148,
+      "checks": [
+        "checks/panel.spec.js:4045"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-10T18-42-24Z/panel-a-blueprint-picked-i-d57e4--the-one-it-records-against-test-failed-1.png",
+        "runs/evidence/2026-10-10T18-42-24Z/panel-a-blueprint-picked-i-d57e4--the-one-it-records-against-error-context.md"
+      ]
+    }
+  ]
+}

@@ -4035,6 +4035,45 @@ test('the last proxy is offered on the next walk, unticked', {
  * can hand a judge exactly that (n-0202). Simulated by rewriting the answer,
  * because the panel's half is the same whatever put the other board there.
  */
+/*
+ * The other side of the same guard: a blueprint the person picks is not the
+ * server swapping blueprints underneath them. Crossing left the panel
+ * remembering the first one, so the first reload after it - filing a note,
+ * recording a verdict - dropped the sitting just begun and said so in an
+ * error (Topher, 2026-10-10).
+ */
+test('a blueprint picked in the panel is the one it records against', {
+  tag: '@rule:panel.walkdown.records-to-ledger',
+}, async ({ page }) => {
+  await page.goto(fixtureFor({ build: 'stale', bp: '' }));
+  await page.getByTestId('project.list').locator('[data-project]').first().click();
+  const picks = page.getByTestId('start.options').locator('[data-pick]');
+  await expect(picks.nth(1), 'the project must hold two blueprints').toBeVisible();
+  const first = await picks.first().getAttribute('data-pick');
+  await picks.first().click();
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+
+  // Cross to the other one from the Blueprints tab.
+  await page.getByTestId('panel.tabs').getByText('Blueprints').click();
+  await page
+    .getByTestId('start.options')
+    .locator(`[data-pick]:not([data-pick="${first}"])`)
+    .first()
+    .click();
+  await expect(page.getByTestId('panel.rules-list')).toBeVisible();
+
+  // A sitting there, and a verdict in it: the reload that follows must not
+  // read the pick as a swap.
+  await ensureSession(page);
+  await firstRule(page);
+  await expect(acceptVerdict(page)).toBeVisible();
+  await acceptVerdict(page).click();
+  await page.waitForTimeout(800);
+  await expect(page.locator('.alert-error')).toHaveCount(0);
+  await expect(page.getByTestId('panel.actor'), 'the sitting is still here').toBeVisible();
+  await endSession(page);
+});
+
 test('a server answering for another blueprint ends the sitting, out loud', {
   tag: '@rule:panel.walkdown.records-to-ledger',
 }, async ({ page }) => {

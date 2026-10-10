@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:55:00.040Z
 anchor:
   screen: design-version-switch
-status: addressed
+status: verified
 body: "ADR 0015 §6. When a screen has a proposed version, the design side's
   toolbar label gains a two-segment switch, Accepted | Proposed, with Accepted
   chosen by default. Draw the toolbar and the review page in that state: the
@@ -29,3 +29,4 @@ replies:
       it would replace. The address now carries ?design=accepted for the
       non-default pick, and the side note says the proposed version is what is
       being judged."
+verified_by: topher

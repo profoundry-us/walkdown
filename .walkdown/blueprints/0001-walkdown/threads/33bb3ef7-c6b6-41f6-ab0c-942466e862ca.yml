@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:55:00.418Z
 anchor:
   screen: redline-pin
-status: addressed
+status: verified
 body: "ADR 0015 §4. A redline pinned on an element, on either side of the fade:
   it marks where the build leaves the design on purpose. It is filed closed and
   waits on nobody, so it must read as an explanation, not an ask - distinct from
@@ -21,3 +21,4 @@ replies:
     created: 2026-10-10T04:13:27Z
     body: Moved to proposals/redline-pin.html so the panel shows it on this screen's
       design side. Walk it there. A revision edits that same file.
+verified_by: topher

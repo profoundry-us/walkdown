@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T03:54:59.833Z
 anchor:
   screen: pin-form-kinds
-status: addressed
+status: verified
 body: "ADR 0015 §4. After a spot is chosen in Pin Mode, the pin form asks what
   kind of pin this is, in one control: note, question or redline. The control
   replaces today's 'question (not a note)' checkbox. Tabs across the top of the
@@ -25,3 +25,4 @@ replies:
     created: 2026-10-10T04:13:26Z
     body: Moved to proposals/pin-form-kinds.html so the panel shows it on this
       screen's design side. Walk it there. A revision edits that same file.
+verified_by: topher

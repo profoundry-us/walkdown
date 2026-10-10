@@ -1,0 +1,19 @@
+id: n-0581
+uuid: 592d99ea-6479-4f66-9824-2f0bcee0cdbc
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-10T18:39:15.375Z
+anchor:
+  rule: locations.keeping.upgrade-moves-prototypes
+status: open
+body: >-
+  Two things:
+
+
+  1. We may have a lot of these, so would it be a good idea to separate them by
+  feature? I mean, put a directory between `prototypes` and the actual file,
+  like `prototypes/checkout/cart-20260918.html`.
+
+  2. Should we use the word `designs` here instead of `prototypes` so the UI is
+  consistent with the backend?

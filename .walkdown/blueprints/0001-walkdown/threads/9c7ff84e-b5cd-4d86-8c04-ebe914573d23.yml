@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-10T17:56:31.924Z
 anchor:
   screen: design-version-switch
-status: open
+status: answered
 body: While a new version of a screen's design is proposed, what are that
   screen's already-built rules judged against? The proposal is shown first now,
   but those rules were built to the accepted design.
@@ -16,3 +16,9 @@ options:
   - label: The proposed one at once
     why: Every built rule on the screen reads as failing or stale while the proposal
       waits, which says the build is behind a design nobody has accepted yet
+replies:
+  - author: topher
+    created: 2026-10-10T18:33:25Z
+    body: The accepted one until the proposal is accepted
+    answer: true
+chosen: The accepted one until the proposal is accepted

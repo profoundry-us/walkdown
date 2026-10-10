@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-10T05:17:28.361Z
 anchor:
   screen: app-not-answering
-status: addressed
+status: verified
 body: "Issue #22. Draw the panel framed on a screen that has a design and an app
   path, while nothing answers at the app's address (say localhost:3000). The
   design side is shown full-strength, never the browser's refused-connection
@@ -21,3 +21,4 @@ replies:
       frame while App and the fade are disabled, and a warning line on the bar
       and an open tooltip on App say to start the app at localhost:3000 or
       remove the app path."
+verified_by: topher
