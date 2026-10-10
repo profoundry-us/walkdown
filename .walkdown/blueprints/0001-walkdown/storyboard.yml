@@ -167,6 +167,7 @@ screens:
   - id: pin-form-kinds
     title: "The pin form asks what kind of pin it is"
     prototype: null
+    proposal: /pin-form-kinds.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - pin.kind
       - pin.note
@@ -178,6 +179,7 @@ screens:
   - id: design-version-switch
     title: "The design side offers a proposed version beside the accepted one"
     prototype: null
+    proposal: /design-version-switch.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - panel.design-version
       - panel.fade
@@ -187,6 +189,7 @@ screens:
   - id: design-proposed
     title: "A proposed version, framed as yours to accept"
     prototype: null
+    proposal: /design-proposed.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - panel.design-version
       - panel.proposed-frame
@@ -197,6 +200,7 @@ screens:
   - id: redline-pin
     title: "A redline pinned where the build leaves the design"
     prototype: null
+    proposal: /redline-pin.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - pin.redline
       - panel.fade

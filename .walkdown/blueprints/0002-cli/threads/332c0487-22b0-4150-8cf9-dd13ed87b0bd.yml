@@ -26,3 +26,7 @@ replies:
     body: "Revised in place: the dry run now covers the whole install, grouped per
       blueprint (checkout and search), and ends with walkdown upgrade. An
       uncommitted file is shown as kept, with what to do about it."
+  - author: agent
+    created: 2026-10-10T04:13:27Z
+    body: Moved to proposals/upgrade-prototypes.html so the panel shows it on this
+      screen's design side. Walk it there. A revision edits that same file.

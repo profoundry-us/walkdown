@@ -1072,6 +1072,7 @@ screens:
   - id: upgrade-prototypes
     title: "upgrade says where every prototype goes, and what it removes"
     prototype: null
+    proposal: /upgrade-prototypes.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - cli.prompt
       - cli.upgrade.prototypes
@@ -1082,6 +1083,7 @@ screens:
   - id: redline-refused-for-agent
     title: "A redline the agent tries to file is refused"
     prototype: null
+    proposal: /redline-refused-for-agent.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - cli.prompt
       - cli.refusal
@@ -1091,6 +1093,7 @@ screens:
   - id: redline-filed
     title: "A redline a person files is closed as it is filed"
     prototype: null
+    proposal: /redline-filed.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:
       - cli.prompt
       - cli.thread.filed

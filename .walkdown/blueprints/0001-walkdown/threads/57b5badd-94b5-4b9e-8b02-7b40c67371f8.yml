@@ -20,3 +20,7 @@ replies:
       in a dashed warning-yellow ring, and its corner label reads Proposed,
       yours to accept, and opens the request; a new screen shows a single
       Proposed label and no switch."
+  - author: agent
+    created: 2026-10-10T04:13:27Z
+    body: Moved to proposals/design-proposed.html so the panel shows it on this
+      screen's design side. Walk it there. A revision edits that same file.
