@@ -16,17 +16,17 @@ from a clone.
 
 **Already installed?** If `walkdown where` answers, or a clone already exists,
 do not clone again. See which version it is on with
-`git -C <clone> describe --tags`. If that is older than `v0.4.0`, open the
+`git -C <clone> describe --tags`. If that is older than `v0.4.1`, open the
 clone's `UPGRADING.md` and follow each section from its version up to 0.4.0,
 in order: it lists the exact commands and what each one changes. Most of them
 start with:
 
 ```
 git -C <clone> fetch --tags
-git -C <clone> checkout v0.4.0
+git -C <clone> checkout v0.4.1
 ```
 
-Then go to step 4. A clone already on `v0.4.0` needs nothing; go to step 4.
+Then go to step 4. A clone already on `v0.4.1` needs nothing; go to step 4.
 
 ## 1. Clone it
 
@@ -35,14 +35,14 @@ directory to delete, beside the records walkdown keeps — but a person with a
 `~/src` will usually want it there.
 
 ```
-git clone --branch v0.4.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+git clone --branch v0.4.1 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
 ```
 
 That is the latest tagged version, the one to use unless the person asks for
 something else. Tags are the stable copies; `main` moves daily. To follow `main`
-instead, leave `--branch v0.4.0` off. `git -C ~/.walkdown/walkdown tag` lists
+instead, leave `--branch v0.4.1` off. `git -C ~/.walkdown/walkdown tag` lists
 the versions a clone knows about.
-Git may warn that `refs/tags/v0.4.0` "is not a commit". That is how it
+Git may warn that `refs/tags/v0.4.1` "is not a commit". That is how it
 announces an annotated tag; the clone is fine.
 
 ## 2. There is no step 2

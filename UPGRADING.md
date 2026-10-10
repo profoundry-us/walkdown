@@ -3,6 +3,19 @@
 Each section takes an install from one version to the next. What changed is in
 [CHANGELOG.md](CHANGELOG.md); this file is only what you have to do about it.
 
+## From 0.4.0 to 0.4.1
+
+No data moves and no command changes.
+
+```
+git -C ~/.walkdown/walkdown fetch --tags
+git -C ~/.walkdown/walkdown checkout v0.4.1
+```
+
+A blueprint made before 0.4.1 keeps its `AGENTS.md`. To give it the new
+"Design comes first" convention, copy `lib/templates/AGENTS.md` from the clone
+over it.
+
 ## From 0.3.0 to 0.4.0
 
 The command line became nouns and verbs

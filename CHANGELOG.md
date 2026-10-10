@@ -9,6 +9,21 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-09
+
+Nothing to do from 0.4.0 but check out the tag; see
+[UPGRADING.md](UPGRADING.md#from-040-to-041).
+
+### Changed
+
+- Design comes first. The conventions every blueprint carries (`AGENTS.md`) say
+  no rule on a screen is built until a person has accepted its design. A
+  designer draws it where there is one; otherwise a separate design agent drafts
+  it, never the agent building the app. `/walkdown:formulate` stops at a screen
+  with no accepted design instead of building ahead of it.
+- `/walkdown:setup` checks the version of an existing install, and walks an
+  older one up through `UPGRADING.md` before setting up the project.
+
 ## [0.4.0] - 2026-10-09
 
 Upgrading from 0.3.0: see [UPGRADING.md](UPGRADING.md#from-030-to-040). The command
@@ -342,7 +357,8 @@ Upgrading from 0.1.x: see [UPGRADING.md](UPGRADING.md#from-01x-to-020).
   full sitting, incorporating answers and working the backlog, and reporters for
   `node:test`, Playwright and RSpec.
 
-[Unreleased]: https://github.com/profoundry-us/walkdown/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/profoundry-us/walkdown/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/profoundry-us/walkdown/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/profoundry-us/walkdown/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/profoundry-us/walkdown/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/profoundry-us/walkdown/compare/v0.1.1...v0.2.0
