@@ -75,13 +75,34 @@ prototypes/<screen>-YYYYMMDD-v2.html    # a second version made the same day
   only thing that makes a version accepted.
 - The design request names the version it proposes. A request with a proposed
   version is the only thing that makes a version proposed.
-- A version that is neither is superseded, or abandoned, and stays on disk as
-  history.
-- Accepting moves the storyboard pointer. No file is renamed, copied or edited,
-  so an accepted design cannot drift from the version a person looked at.
+- A version that is neither is superseded, and stays on disk as history.
+- **A proposed version is edited in place.** Every revision while it is under
+  review, whether sent back with changes or reworked by its designer, is an
+  edit to the same file. A new version is never made for an edit. It is
+  named for the day it was first proposed, so it is never renamed.
+- **An accepted version is frozen.** Accepting moves the storyboard pointer, and
+  from then on nothing edits that file. A change to an accepted design starts
+  the next version, which is proposed until it is accepted in turn. So there
+  is one version per accepted design, and an accepted design cannot drift from
+  the version a person looked at.
 
 The folder is `spec.yml`'s `prototype.root`, with `prototypes/` as the default.
-The `screens/` and `drafts/` subfolders and `proposals/` are retired.
+
+### 2a. The upgrade leaves nothing behind
+
+The `screens/` and `drafts/` subfolders and `proposals/` are retired, and
+`walkdown upgrade` clears every one of them rather than leaving them lying
+around:
+
+- An accepted screen in `screens/` moves into `prototypes/` as a dated version,
+  and the storyboard is repointed at it.
+- A draft or proposal named by an open design request moves in as that
+  request's proposed version.
+- A draft or proposal nothing names, accepted or pending, is removed. It stays
+  in git history, and the upgrade lists every file it removed.
+- The emptied folders are removed, and so is `as-built/redlines.json` once its
+  notes are threads (section 4).
+- `--dry-run` says all of it before anything moves.
 
 ### 3. As-built is only for a build that cannot be framed
 
@@ -98,15 +119,25 @@ and why. It becomes a thread reason beside `decision`:
 - **Anchored like a pin:** to a screen and an element, on either side of the
   fade, on a live page or an as-built page alike. The fade draws it where the
   gap is.
-- **Who closes it:** a redline a person files is filed closed, as a decision
-  is: it explains a gap and nothing waits on it. A redline the agent files waits
-  for a person's acceptance, as a finding's fix does. Otherwise an agent could
-  excuse any gap it left by writing it down.
+- **Only a person files one.** A redline excuses a gap, and an agent that could
+  file one could excuse any work it chose not to build. So the agent never
+  files a redline, and walkdown refuses one carrying `--as-agent` or any other
+  sign that a machine typed it, as it refuses a machine's `verified`. An agent
+  that thinks a gap was left on purpose asks the person, with a question on the
+  element. The person files the redline if they agree.
+- **Filed closed:** a redline explains a gap and nothing waits on it, as with a
+  decision.
 - **Judges read them:** a judge comparing the two surfaces treats an accepted
   redline as an intended gap, not a fail, and names it in its reasoning.
 - **Migration:** each note in `as-built/redlines.json` becomes a redline thread
-  on its screen, filed closed, since Topher has read them all. The JSON file
-  retires.
+  on its screen, filed closed in Topher's name, since he has read them all. The
+  JSON file retires.
+- **Filed from Pin Mode.** After choosing the spot, the pin form asks what kind
+  of pin it is: note, question or redline, in one control. Tabs across the top
+  of the form or a single dropdown are both candidates. That control replaces
+  today's "question, not a note" checkbox. The form is a screen, so it is
+  designed first: its prototype is drawn and accepted before any of this is
+  built.
 
 ### 5. The guide says how things are done now, and is brought up to date before each release
 
@@ -126,18 +157,40 @@ agents are pointed to, instead of the changelog.
 The guide is updated before a release, not when an ADR is accepted. That way
 what was actually built can be checked first, and any fixes made. If the build
 taught us something, the ADR is updated, and only then is the guide written from
-what shipped. The release procedure in [09-delivery.md](../../09-delivery.md)
-gains that step.
+what shipped. That step is written into `RELEASING.md` at the repository root,
+the release procedure in full, which
+[09-delivery.md](../../09-delivery.md) points to.
 
-### 6. The panel frames a proposed version the way it frames an as-built
+### 6. The panel frames a proposed version as waiting on you
 
 While a request proposes a version, the panel can put that version on the
-design side of the fade without moving the storyboard pointer. It is framed as
-the stand-in and the as-built are: a ring around the page and a corner label,
-but in **blue**, labelled **Proposed**. The as-built's red ring means "this is
-the build"; blue means "this is a design nobody has accepted yet". A person
-switches between the accepted and the proposed version on the design side, and
-the request is where they accept it.
+design side of the fade without moving the storyboard pointer. It is framed the
+way the stand-in and the as-built are, with a ring around the page and a corner
+label. The ring is the panel's **warning yellow**, the colour it already uses
+for "waiting on you", **dashed**, and the label reads **Proposed — yours to
+accept**. A proposed version is a person's to act on, so it wears the colour
+of a person's turn. The dashes keep it apart from the solid rings, which mean
+"this is the build".
+
+How a person moves between them:
+
+- **The design side gets a version switch** whenever a screen has a proposed
+  version: two segments, **Accepted** and **Proposed**, beside the surface's
+  label in the toolbar. Accepted is the default. Choosing Proposed loads the
+  proposed file into the design side in its yellow frame. The fade, the ghost
+  and pins work against the App side exactly as they do for the accepted
+  version, so a proposal can be compared with the build it would replace.
+- **A screen with no accepted version yet** shows only Proposed, with no
+  switch.
+- **The choice is in the address** (ADR 0001 §9: the address carries the pick),
+  so a link to a proposal opens on it.
+- **Accepting happens in one place**, on the design request in the screen's
+  conversation, as it does today. The frame's label links there. Sending it back
+  with changes leaves the switch where it is, and the next look shows the same
+  version, edited in place.
+
+The switch and the frame are panel screens, so they are designed first, along
+with the pin form.
 
 ### 7. Existing prototypes are dated by their history
 
@@ -150,11 +203,12 @@ committed. A file git has no history for takes the day of the upgrade.
 2. A proposed prototype is made for it, by the person's designer if they gave
    one and by the design agent if not.
 3. A person opens it in the panel, uses it, and accepts the request or sends it
-   back. Accepted, the storyboard points at it.
+   back. Sent back, it is revised in the same file and looked at again.
+   Accepted, the storyboard points at it and it is frozen.
 4. The screen is built to it. Where the build cannot be framed, its as-built is
    captured.
-5. The fade compares the prototype with the build, and redlines mark the gaps
-   left on purpose.
+5. The fade compares the prototype with the build. Where a person decides a
+   gap stays, they pin a redline on it.
 6. A later change proposes a new version. When it is accepted, the old one is
    superseded.
 
@@ -176,10 +230,17 @@ committed. A file git has no history for takes the day of the upgrade.
   [06-prototype-contract.md](../../06-prototype-contract.md) and the schema in
   [02-blueprint-schema.md](../../02-blueprint-schema.md) change with it.
 - **The `designer` agent** writes a dated version and names it on the request,
-  instead of writing into `drafts/`.
+  instead of writing into `drafts/`, and edits that same file when it is sent
+  back.
+- **Three panel screens are designed before anything is built:** the pin form
+  with its type control, the design side's version switch, and the proposed
+  frame.
+- **`RELEASING.md`** holds the release procedure, including bringing the guide
+  up to date.
 - **"Design comes first" is unchanged.** It now reads as: no rule on a screen is
   built until the screen has an accepted prototype.
 - **`GUIDE.md` is written** as part of the 0.5.0 release, from what shipped.
-- **Settled in review (2026-10-09):** CLI prototypes are not clickable; the
-  panel shows a proposed version in a blue frame; migration dates come from git
-  history.
+- **Settled in review (2026-10-09):** CLI prototypes are not clickable; a
+  proposed version is framed in dashed warning yellow; it is edited in place
+  until accepted; the upgrade clears every retired folder; only a person files a
+  redline; migration dates come from git history.

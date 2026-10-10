@@ -127,12 +127,13 @@ skill existed to stop it improvising. It lives in this repository's own
 
 ## Releasing
 
-A release moves the version in `package.json` (and its lockfile),
-`.claude-plugin/plugin.json`, `extension/manifest.json` and every install
-instruction that clones the tag; runs `node tools/released-skills.mjs` so the
-tag carries its own skill hashes; adds the version's section to `CHANGELOG.md`
-and any steps to `UPGRADING.md`; then tags it, makes the GitHub release from
-the changelog section, and syncs and deploys walkdown.dev's `setup.md`.
+[RELEASING.md](../RELEASING.md) is the procedure, step by step. In short, a release:
+- moves the version and every install instruction that clones the tag;
+- records the tag's skill hashes;
+- brings the guide, the changelog and the upgrade notes up to date before the
+  tag, never after;
+- tags it, makes the GitHub release from the changelog section, and redeploys
+  walkdown.dev's `setup.md`.
 
 ## The extension needs the clone
 
