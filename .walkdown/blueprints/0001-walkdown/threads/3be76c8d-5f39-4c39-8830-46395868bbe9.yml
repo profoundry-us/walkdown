@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-10T04:05:38.373Z
 anchor:
   screen: design-version-switch
-status: answered
+status: incorporated
 body: The drafts label the design side Design, as the build does, while the
   accepted review screen says Prototype. ADR 0015 calls every design a
   prototype. Which word should the toolbar use?
@@ -15,3 +15,7 @@ replies:
     body: Let's use design everywhere, but note in the docs it is almost always a
       prototype when we can make it one.
     answer: true
+  - author: agent
+    created: 2026-10-10T18:53:26Z
+    body: "Design everywhere: ADR 0015 §1 now says the artifact is called a design
+      on screen and on disk, and the docs say it is almost always a prototype."

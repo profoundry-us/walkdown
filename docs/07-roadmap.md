@@ -58,9 +58,9 @@ file disagrees with the code, the code is right and this file is out of date.
 
 ## Earmarked for 0.5.0
 
-### Prototype versions and states (ADR 0015, accepted)
+### Design versions and states (ADR 0015, accepted)
 
-The release's centre: one prototypes folder with dated versions, the proposed
+The release's centre: a designs folder with a folder of dated versions per screen, the proposed
 frame and the design side's version switch, redlines as pinned notes filed only by
 a person, the upgrade that clears `screens/`, `drafts/` and `proposals/`, and
 approving a screen's rules accepting its design. Its seven screens are drawn and

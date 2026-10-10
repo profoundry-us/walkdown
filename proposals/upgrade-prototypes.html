@@ -1,7 +1,8 @@
 <!doctype html>
 <!-- DESIGN DRAFT: upgrade-prototypes -->
 <!-- Drawn by the design agent for request n-0572. Not yet accepted. -->
-<!-- Intent: one dry run over every blueprint that says, file by file, where every prototype goes and what is removed, that removed files stay in git history, that a file git does not hold is kept, and that nothing moved until it is run for real. -->
+<!-- Revised for n-0581: designs/<screen>/YYYYMMDD.html, and the prototype: and prototype.root keys renamed to design: and design.root. -->
+<!-- Intent: one dry run over every blueprint that says, file by file, where every design goes, which keys are renamed and what is removed, that removed files stay in git history, that a file git does not hold is kept, and that nothing moved until it is run for real. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -31,17 +32,22 @@
   <div class="ln">Dry run. This is what `walkdown upgrade` would do to every blueprint.</div>
   <div class="ln"></div>
   <div data-testid="cli.upgrade.prototypes">
-    <div class="ln">Prototypes move into prototypes/, each dated by its first commit:</div>
+    <div class="ln">Designs move into designs/, a folder per screen, each dated by its first commit:</div>
     <div class="ln">  checkout</div>
-    <div class="ln">    → prototype/screens/cart.html      becomes prototypes/cart-20260918.html      accepted</div>
-    <div class="ln">    → prototype/screens/payment.html   becomes prototypes/payment-20260918.html   accepted</div>
-    <div class="ln">    → prototype/screens/receipt.html   becomes prototypes/receipt-20260921.html   accepted</div>
-    <div class="ln">    → prototype/drafts/receipt.html    becomes prototypes/receipt-20261003.html   proposed on n-0004</div>
-    <div class="ln">    → proposals/shipping.html          becomes prototypes/shipping-20261006.html  proposed on n-0006</div>
+    <div class="ln">    → prototype/screens/cart.html      becomes designs/cart/20260918.html         accepted</div>
+    <div class="ln">    → prototype/screens/payment.html   becomes designs/payment/20260918.html      accepted</div>
+    <div class="ln">    → prototype/screens/receipt.html   becomes designs/receipt/20260921.html      accepted</div>
+    <div class="ln">    → prototype/drafts/receipt.html    becomes designs/receipt/20260921-v2.html   proposed on n-0004</div>
+    <div class="ln">    → proposals/shipping.html          becomes designs/shipping/20261006.html     proposed on n-0006</div>
     <div class="ln">    The storyboard is repointed at the 3 accepted versions.</div>
+    <div class="ln">    storyboard.yml: 4 prototype: keys become design:</div>
+    <div class="ln">    spec.yml: prototype.root becomes design.root, set to designs/</div>
     <div class="ln">  search</div>
-    <div class="ln">    → prototype/screens/results.html   becomes prototypes/results-20260925.html   accepted</div>
+    <div class="ln">    → prototype/screens/results.html   becomes designs/results/20260925.html      accepted</div>
     <div class="ln">    The storyboard is repointed at the 1 accepted version.</div>
+    <div class="ln">    storyboard.yml: 1 prototype: key becomes design:</div>
+    <div class="ln">    spec.yml: prototype.root becomes design.root, set to designs/</div>
+    <div class="ln">  Two versions of a screen first committed the same day are told apart by -v2.</div>
   </div>
   <div class="ln"></div>
   <div data-testid="cli.upgrade.removed">

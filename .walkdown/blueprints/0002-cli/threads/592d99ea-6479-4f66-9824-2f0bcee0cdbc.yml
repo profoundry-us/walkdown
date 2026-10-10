@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-10T18:39:15.375Z
 anchor:
   rule: locations.keeping.upgrade-moves-prototypes
-status: open
+status: addressed
 body: >-
   Two things:
 
@@ -17,3 +17,14 @@ body: >-
 
   2. Should we use the word `designs` here instead of `prototypes` so the UI is
   consistent with the backend?
+replies:
+  - author: agent
+    created: 2026-10-10T18:53:09Z
+    body: "Both taken, with one change to the first. Designs now live in a folder
+      per screen, not per feature: designs/<screen>/YYYYMMDD.html. A screen
+      belongs to no single feature (rules from several can name it, and the
+      storyboard does not group screens), and a screen's folder puts all its
+      versions side by side. And the name is designs/, with the storyboard key
+      design: and spec.yml's design.root, matching your q-0575 answer. ADR 0015
+      is amended and renamed Design versions and states; the rule is reworded;
+      its design is being redrawn."

@@ -1070,7 +1070,7 @@ screens:
 
   # 0.5.0, ADR 0015. Designed before it is built; no scenario yet, so no app.
   - id: upgrade-prototypes
-    title: "upgrade says where every prototype goes, and what it removes"
+    title: "upgrade says where every design goes, and what it removes"
     prototype: null
     proposal: /upgrade-prototypes.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
     anchors:

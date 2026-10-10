@@ -35,3 +35,11 @@ replies:
     body: "Revised in place at proposals/upgrade-prototypes.html: the removal line
       now says no screen or pending request names them, so a request still
       waiting on a person keeps its file."
+  - author: agent
+    created: 2026-10-10T18:53:54Z
+    body: "Redrawn for n-0581: in place at proposals/upgrade-prototypes.html. Every
+      version now goes to designs/<screen>/YYYYMMDD.html (the receipt draft
+      shows the -v2 suffix, first committed the same day as the accepted
+      receipt), and each blueprint says its storyboard's prototype: keys become
+      design: and spec.yml's prototype.root becomes design.root. Removals, the
+      kept untracked file, the redlines and the closing lines are unchanged."

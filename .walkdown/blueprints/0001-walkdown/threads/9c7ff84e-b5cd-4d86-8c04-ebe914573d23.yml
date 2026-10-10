@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-10T17:56:31.924Z
 anchor:
   screen: design-version-switch
-status: answered
+status: incorporated
 body: While a new version of a screen's design is proposed, what are that
   screen's already-built rules judged against? The proposal is shown first now,
   but those rules were built to the accepted design.
@@ -21,4 +21,8 @@ replies:
     created: 2026-10-10T18:33:25Z
     body: The accepted one until the proposal is accepted
     answer: true
+  - author: agent
+    created: 2026-10-10T18:53:27Z
+    body: "Written into ADR 0015 §8: built rules keep their verdicts against the
+      accepted design, and accepting a new one makes them stale."
 chosen: The accepted one until the proposal is accepted

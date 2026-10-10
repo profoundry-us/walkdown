@@ -1,4 +1,4 @@
-# ADR 0015 — Prototype versions and states
+# ADR 0015 — Design versions and states
 
 - **Status:** accepted 2026-10-09 by Topher; not yet built (0.5.0). Its
     panel and CLI screens are designed first.
@@ -60,19 +60,29 @@ states:
 "Design" stays the name of the role, as in `design.by`, design request and the
 design queue. "Proposal" and "draft" are retired as names for artifacts.
 
-### 2. A prototype's state is in the record, never in its filename
+**The artifact is called a design wherever a person or a file meets it**: the
+toolbar, the folder, the storyboard key (amended 2026-10-10, q-0575 and n-0581).
+"Prototype" stays the word for what a design almost always is, a page you can
+click, and the docs say so, but nothing on screen or on disk is named for it.
 
-Every version of a screen's prototype is one file in the blueprint's prototypes
-folder, named for the screen and the day it was made:
+### 2. A design's state is in the record, never in its filename
+
+Every version of a screen's design is one file in that screen's own folder
+under the blueprint's designs folder, named for the day it was made:
 
 ```
-prototypes/<screen>-YYYYMMDD.html
-prototypes/<screen>-YYYYMMDD-v2.html    # a second version made the same day
+designs/<screen>/YYYYMMDD.html
+designs/<screen>/YYYYMMDD-v2.html    # a second version made the same day
 ```
+
+A folder per screen keeps a long list browsable and puts every version of one
+screen side by side. It is per screen, not per feature: a screen belongs to no
+one feature, since rules from several can name it, and the storyboard does not
+group screens (n-0581).
 
 - The first version made on a day has no suffix. A second one that day is
   `-v2`, then `-v3`. The first is never renamed when a second arrives.
-- The storyboard's `prototype:` names the accepted version. That pointer is the
+- The storyboard's `design:` (formerly `prototype:`) names the accepted version. That pointer is the
   only thing that makes a version accepted.
 - The design request names the version it proposes. A request not yet accepted
   or closed that names a version is the only thing that makes it proposed.
@@ -87,7 +97,8 @@ prototypes/<screen>-YYYYMMDD-v2.html    # a second version made the same day
   is one version per accepted design, and an accepted design cannot drift from
   the version a person looked at.
 
-The folder is `spec.yml`'s `prototype.root`, with `prototypes/` as the default.
+The folder is `spec.yml`'s `design.root` (formerly `prototype.root`), with
+`designs/` as the default.
 
 ### 2a. The upgrade leaves nothing behind
 
@@ -95,8 +106,11 @@ The `screens/` and `drafts/` subfolders and `proposals/` are retired, and
 `walkdown upgrade` clears every one of them rather than leaving them lying
 around:
 
-- An accepted screen in `screens/` moves into `prototypes/` as a dated version,
-  and the storyboard is repointed at it.
+- An accepted screen in `screens/` moves into `designs/<screen>/` as a dated
+  version, and the storyboard is repointed at it. The storyboard's `prototype:`
+  keys become `design:`, a null one included, and `spec.yml`'s `prototype.root`
+  becomes `design.root`. A root the blueprint set itself keeps its value; only
+  the key is renamed.
 - A draft or proposal named by a design request not yet accepted or closed,
   whether open or addressed, moves in as that request's proposed version.
 - A draft or proposal nothing names, accepted or pending, is removed. It stays
@@ -218,6 +232,10 @@ with a new design IS the acceptance of the design*.
   approve its wording, and the walk opens its screen with the proposed version
   on the design side. Reading the rule beside its design is the review; there
   is no separate design walk.
+- **Built rules are judged against the accepted design until a new one is
+  accepted.** While a new version waits, a screen's built rules keep their
+  verdicts. Accepting it makes them stale, so they are judged again against
+  the new design (Topher, q-0580, 2026-10-10).
 - **Approving every rule on a screen accepts its design.** Once a person has
   approved every rule naming a screen, that screen's pending design request is
   accepted in their name, and the proposed version becomes the accepted one.
@@ -256,7 +274,8 @@ with a new design IS the acceptance of the design*.
 ## Consequences
 
 - **A format change, for 0.5.0.** `walkdown upgrade` moves every blueprint's
-  `screens/`, `drafts/` and `proposals/` into one dated prototypes folder,
+  `screens/`, `drafts/` and `proposals/` into dated versions under
+  `designs/<screen>/`, renames the storyboard's `prototype:` to `design:`,
   repoints the storyboard, and turns `as-built/redlines.json` into redline
   threads. Lint's design rules, the prototype contract in
   [06-prototype-contract.md](../../06-prototype-contract.md) and the schema in
@@ -272,6 +291,10 @@ with a new design IS the acceptance of the design*.
 - **"Design comes first" is unchanged.** It now reads as: no rule on a screen is
   built until the screen has an accepted prototype.
 - **`GUIDE.md` is written** as part of the 0.5.0 release, from what shipped.
+- **Amended 2026-10-10 (q-0575, n-0581):** the artifact is called a design on
+  screen and on disk: `designs/<screen>/YYYYMMDD.html`, a folder per screen,
+  and the storyboard key `design:`. "Prototype" survives in the docs as what a
+  design almost always is.
 - **Settled in review (2026-10-09):** CLI prototypes are not clickable; a
   proposed version is framed in dashed warning yellow; it is edited in place
   until accepted; the upgrade clears every retired folder; only a person files a

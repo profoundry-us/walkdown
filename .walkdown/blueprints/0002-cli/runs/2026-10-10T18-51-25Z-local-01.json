@@ -1,0 +1,49 @@
+{
+  "run_id": "2026-10-10T18-51-25Z-local-01",
+  "created": "2026-10-10T18:51:25Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ed70cc2-dirty",
+  "spec_hash": "sha256:4db1605fe693",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "refining",
+      "threads": [
+        "592d99ea-6479-4f66-9824-2f0bcee0cdbc"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "approved",
+      "statement_hash": "sha256:768e7b46e642"
+    },
+    {
+      "rule": "ownership.authoring.focus-is-a-declared-anchor",
+      "status": "approved",
+      "statement_hash": "sha256:0f4cacbd010f"
+    },
+    {
+      "rule": "ownership.design.every-screen-has-rules",
+      "status": "approved",
+      "statement_hash": "sha256:1fdde981b0d9"
+    },
+    {
+      "rule": "ownership.design.approved-rules-accept-the-design",
+      "status": "approved",
+      "statement_hash": "sha256:9e79be5bc2f8"
+    }
+  ]
+}

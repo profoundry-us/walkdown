@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-10T04:05:38.567Z
 anchor:
   screen: pin-form-kinds
-status: answered
+status: incorporated
 body: When an agent is recording, the draft shows the Redline tab greyed out
   with a line saying only a person files one. Would you rather the tab be hidden
   from an agent altogether?
@@ -14,3 +14,7 @@ replies:
     created: 2026-10-10T18:34:25Z
     body: Greyed out with a tooltip saying why it is disabled is fine for now.
     answer: true
+  - author: agent
+    created: 2026-10-10T18:53:26Z
+    body: Greyed out with a tooltip saying why, as embed.pin.asks-its-kind's last
+      step and the drawn form already show.

@@ -512,9 +512,9 @@ stories:
         created_at: 2026-10-09
         verify: [checks]
         signoff: [eng, product]
-        statement: "`walkdown upgrade` moves every blueprint's prototypes into one folder of dated versions, and leaves no retired folder behind except to keep a file git does not hold."
+        statement: "`walkdown upgrade` moves every blueprint's designs into a folder per screen of dated versions, and leaves no retired folder behind except to keep a file git does not hold."
         because: A file left in a retired folder reads as part of the design. A file git does not hold has no other copy, so removing it would lose it.
-        history: Prototypes lived in screens/, drafts/ and proposals/, sorted by who drew them (ADR 0015).
+        history: "Designs lived in screens/, drafts/ and proposals/, sorted by who drew them (ADR 0015). A folder per screen, and the name designs/, came from Topher's refinement n-0581 (2026-10-10)."
         screens: [upgrade-prototypes]
         steps:
           given:
@@ -522,13 +522,14 @@ stories:
           when:
             - "`walkdown upgrade --dry-run` is run, and then `walkdown upgrade`"
           then:
-            - Each accepted screen becomes prototypes/<screen>-YYYYMMDD.html, dated by its first commit, and the storyboard points at it
+            - Each accepted screen becomes designs/<screen>/YYYYMMDD.html, dated by its first commit, and the storyboard points at it
+            - The storyboard's prototype keys become design keys, and spec.yml's prototype root becomes its design root
             - A draft or proposal that a pending design request names becomes that request's proposed version
             - A draft or proposal nothing names is removed, and the upgrade says it stays in git history
             - A file git does not hold is kept where it is and named, with what to do about it
             - The emptied folders are removed, and each redlines.json note becomes a closed redline thread in the person's name
             - The dry run lists all of it, grouped by blueprint, and moves nothing
-          statement_hash: sha256:5767632fe58e
+          statement_hash: sha256:ac77cd6c3b73
 
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
