@@ -51,6 +51,14 @@ checks:
     run: node tools/sync-phosphor.mjs --check
     fast: true
 
+  # An ADR is named for its topic, never a question or its answer
+  # (docs/adr/README.md). Ten had drifted into prose questions by 2026-10-09
+  # and were renamed; fast, because a name is chosen while the file is made.
+  - id: adr-names
+    name: Every ADR is named for its topic
+    run: .highball/checks/adr-names
+    fast: true
+
   # Every blueprint in this repo carries the agent conventions `walkdown init`
   # writes, and they used to carry them as symlinks into lib/templates so the
   # two could not drift. That link was a door: `init --force` writes through

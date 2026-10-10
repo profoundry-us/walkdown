@@ -21,7 +21,7 @@ over it.
 The command line became nouns and verbs
 ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.md)), every write names
 its blueprint, and walkdown's files moved
-([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)). What you,
+([ADR 0014](docs/adr/foundational/202610_file_layout_and_locations.md)). What you,
 your scripts and your agents type changes, and `walkdown upgrade` moves the files once.
 
 ### 1. Update the clone
@@ -69,7 +69,7 @@ project's IDs and change nothing. Inside the project the blueprint's name is eno
 
 ### 3. Move to the new layout
 
-Files moved too ([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)).
+Files moved too ([ADR 0014](docs/adr/foundational/202610_file_layout_and_locations.md)).
 Until they have, every command that loads a blueprint exits 2 and says an upgrade is due.
 See what would move, then move it:
 

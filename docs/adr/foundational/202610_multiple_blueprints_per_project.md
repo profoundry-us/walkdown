@@ -1,4 +1,4 @@
-# ADR 0011 — Several blueprints per project
+# ADR 0011 — Multiple blueprints per project
 
 - **Status:** accepted 2026-10-02 (Topher), with its three rules in
     `locations.several`.

@@ -1,4 +1,4 @@
-# ADR 0007 — Screens that cannot be framed
+# ADR 0007 — As-built drawings
 
 - **Status:** accepted 2026-09-18 by Topher; built the same day for walkdown's
     own blueprint.

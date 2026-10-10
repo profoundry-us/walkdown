@@ -68,6 +68,14 @@ In this order, for any screen:
 4. Once he accepts a draft, copy it to the `screens/` folder beside it, point
    the storyboard at it, and only then write the checks and the code.
 
+## Naming an ADR
+
+An ADR is named for its topic, as a short noun phrase: `blueprint_registry`,
+never `how_blueprints_are_found`, and never the answer. That means five words
+or fewer, with no question word or article first. `docs/adr/README.md`
+("Naming an ADR") has the rule and examples, and Highball's `adr-names` check
+refuses a name that breaks it. The number is the citation and never changes.
+
 ## Running walkdown's own CLI
 
 walkdown is not a dependency of itself, so `npx walkdown` and a bare `walkdown`

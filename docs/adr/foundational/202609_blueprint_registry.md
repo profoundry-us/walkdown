@@ -1,4 +1,4 @@
-# ADR 0003 — How blueprints are found
+# ADR 0003 — Blueprint registry
 
 - **Status:** accepted — drafted by the agent on 2026-09-11 from Topher's
   framing on n-0275; accepted by Topher the same day, build started at

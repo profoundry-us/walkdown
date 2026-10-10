@@ -1,4 +1,4 @@
-# ADR 0009 — Who draws the design
+# ADR 0009 — Design ownership and requests
 
 - **Status:** accepted 2026-10-01 by Topher. Not yet built; the rules it
     changes are drafted for his approval first.

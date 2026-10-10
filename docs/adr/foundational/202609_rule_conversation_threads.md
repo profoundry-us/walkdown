@@ -1,4 +1,4 @@
-# ADR 0006 — Where conversations about rules live
+# ADR 0006 — Rule conversation threads
 
 - **Status:** accepted 2026-09-18 by Topher; built the same day, to be
     felt before it is refined. Drafted by the agent after a conversation

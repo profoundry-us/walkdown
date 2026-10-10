@@ -33,7 +33,7 @@ moves walkdown's files once.
 ### Added
 
 - `walkdown upgrade` moves an install laid out before
-  [ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md) to the new
+  [ADR 0014](docs/adr/foundational/202610_file_layout_and_locations.md) to the new
   layout, once. `--dry-run` says what it would move. Until it has run, every command that
   loads a blueprint exits 2, says an upgrade is due and changes nothing. `--code <pc>`
   gives the project it is run in that code, instead of the one derived from its label.
@@ -44,7 +44,7 @@ moves walkdown's files once.
 - A refused `walkdown threads set` says that nothing changed and that its reply did not
   land.
 - A project can hold several blueprints
-  ([ADR 0011](docs/adr/foundational/202610_several_blueprints_per_project.md),
+  ([ADR 0011](docs/adr/foundational/202610_multiple_blueprints_per_project.md),
   [#20](https://github.com/profoundry-us/walkdown/issues/20)).
   `walkdown blueprints new <name>` gives a project that has a blueprint another one, in its
   own home, and says which blueprints the project already holds.
@@ -52,7 +52,7 @@ moves walkdown's files once.
   blueprint that holds its rule: one record per blueprint, sharing a run id. A tag no
   blueprint holds is named and recorded nowhere. This holds for the node:test and
   Playwright reporters and the RSpec formatter
-  ([ADR 0013](docs/adr/foundational/202610_a_project_split_into_blueprints.md)).
+  ([ADR 0013](docs/adr/foundational/202610_panel_and_cli_blueprint_split.md)).
 - `walkdown rules move <rule|story|feature>... --to <blueprint>` moves rules to another
   blueprint of the same project, with their threads, and copies the run records,
   sweeps and evidence behind their verdicts, so every verdict and signature reads the
@@ -72,7 +72,7 @@ moves walkdown's files once.
 ### Changed
 
 - Where walkdown keeps its files
-  ([ADR 0014](docs/adr/foundational/202610_where_walkdown_keeps_its_files.md)).
+  ([ADR 0014](docs/adr/foundational/202610_file_layout_and_locations.md)).
   `walkdown upgrade` makes every move below:
   - A blueprint's home is one folder: `spec.yml` (was `blueprint/walkdown.yml`),
     `storyboard.yml`, `features/`, `AGENTS.md`, `records.yml`, its own `.gitignore`,
@@ -278,7 +278,7 @@ Upgrading from 0.1.x: see [UPGRADING.md](UPGRADING.md#from-01x-to-020).
 
 - `design.by` in `walkdown.yml` says who draws a blueprint's design: `person` (the
   default) or `agent`. Lint reports any other value as an error
-  ([ADR 0009](docs/adr/foundational/202609_who_draws_the_design.md)).
+  ([ADR 0009](docs/adr/foundational/202609_design_ownership_and_requests.md)).
 - A **design queue** in `walkdown status`, listed before the agent's. Its heading says
   whether it is for the designer or for the design agent.
 - `walkdown thread new --screen <id>` files a design request on the screen when no

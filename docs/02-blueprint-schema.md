@@ -221,7 +221,7 @@ screens:
   screens and thread-born rules — until the sources catch up. Engineering may also keep
   an **as-built** drawing of a build that cannot be framed (an HTML page under
   `as-built/`, named as a screen's `app.path`) — the drawing revised after construction,
-  never the design ([ADR 0007](adr/lightweight/202609_screens_that_cannot_be_framed.md)).
+  never the design ([ADR 0007](adr/lightweight/202609_as_built_drawings.md)).
 
 ## Threads
 

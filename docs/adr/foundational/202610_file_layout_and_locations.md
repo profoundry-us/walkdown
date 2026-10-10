@@ -1,4 +1,4 @@
-# ADR 0014 — Where walkdown keeps its files
+# ADR 0014 — File layout and locations
 
 - **Status:** accepted 2026-10-05
 - **Date:** 2026-10-05

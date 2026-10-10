@@ -1,10 +1,10 @@
-# ADR 0015 — What a prototype is
+# ADR 0015 — Prototype versions and states
 
 - **Status:** proposed 2026-10-09
 - **Date:** 2026-10-09
 - **Deciders:** Topher (product, eng)
-- **Builds on:** ADR 0007 (screens that cannot be framed), ADR 0009 (who draws
-  the design), ADR 0005 (who closes a thread), "Design comes first" (0.4.1)
+- **Builds on:** ADR 0007 (as-built drawings), ADR 0009 (design ownership and
+  requests), ADR 0005 (thread closing permissions), "Design comes first" (0.4.1)
 - **Settles:** ADR 0009's open question of where drafts live and what they are
   called
 - **Threads:** none filed; decided in conversation.

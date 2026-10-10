@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+// An ADR is named for its topic, as a short noun phrase (docs/adr/README.md,
+// "Naming an ADR"). Ten of fifteen had drifted into questions written as
+// prose - who_draws_the_design, whose_turn_a_rule_is - and were renamed on
+// 2026-10-09 (Topher: "all of these ADR names are stupid"). This keeps the
+// next one from drifting back: every file under docs/adr/{foundational,
+// lightweight}/ is YYYYMM_<topic>.md, the topic is five words or fewer and
+// opens with neither a question word nor an article, and the index lists it.
+import { readdirSync, readFileSync } from "node:fs";
+
+const OPENERS = new Set([
+  "who", "what", "where", "whose", "how", "when", "which", "why",
+  "a", "an", "the",
+]);
+const index = readFileSync("docs/adr/README.md", "utf8");
+const bad = [];
+for (const kind of ["foundational", "lightweight"]) {
+  for (const file of readdirSync(`docs/adr/${kind}`)) {
+    if (!file.endsWith(".md")) continue;
+    const at = `docs/adr/${kind}/${file}`;
+    const m = /^(\d{6})_([a-z0-9]+(?:_[a-z0-9]+)*)\.md$/.exec(file);
+    if (!m) {
+      bad.push(`${at}: name it YYYYMM_<topic>.md, lower case, words joined by _`);
+      continue;
+    }
+    const words = m[2].split("_");
+    if (OPENERS.has(words[0]))
+      bad.push(`${at}: "${words[0]}" opens a question or an article - name the topic (who_draws_the_design -> design_ownership_and_requests)`);
+    if (words.length > 5)
+      bad.push(`${at}: ${words.length} words - a topic is five words or fewer`);
+    if (!/^# ADR \d{4} — \S/m.test(readFileSync(at, "utf8")))
+      bad.push(`${at}: its first line is "# ADR NNNN — <Topic>"`);
+    if (!index.includes(`(${kind}/${file})`))
+      bad.push(`${at}: docs/adr/README.md's table does not list it`);
+  }
+}
+if (bad.length) {
+  console.error(`ADR names (docs/adr/README.md, "Naming an ADR"):\n  ${bad.join("\n  ")}`);
+  process.exit(2);
+}

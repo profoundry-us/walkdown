@@ -1,4 +1,4 @@
-# ADR 0008 — Whose turn a rule is
+# ADR 0008 — Rule attention queues
 
 - **Status:** proposed 2026-09-20, for Topher's review. Nothing built.
 - **Date:** 2026-09-20

@@ -1,11 +1,11 @@
-# ADR 0013 — A project split into blueprints
+# ADR 0013 — Panel and CLI blueprint split
 
 - **Status:** accepted 2026-10-02 by Topher. Nothing is built; the rules it adds and
     rewords are drafted for his approval.
 - **Date:** 2026-10-02
 - **Deciders:** Topher (product, eng)
-- **Builds on:** ADR 0011 (several blueprints per project), ADR 0007 (as-built drawings),
-    ADR 0009 (who draws the design).
+- **Builds on:** ADR 0011 (multiple blueprints per project), ADR 0007 (as-built drawings),
+    ADR 0009 (design ownership and requests).
 - **Amends:** ADR 0011 §2, where `walkdown run` refused without `--blueprint`.
 - **Comes before:** ADR 0012 (CLI command structure). Its new rules are drafted in the
     blueprint this ADR creates.
