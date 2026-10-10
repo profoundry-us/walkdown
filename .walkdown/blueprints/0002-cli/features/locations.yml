@@ -507,6 +507,29 @@ stories:
             - Run again, it reports nothing to do
           statement_hash: sha256:49cd12caf11c
 
+      - id: locations.keeping.upgrade-moves-prototypes
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "`walkdown upgrade` moves every blueprint's prototypes into one folder of dated versions, and leaves no retired folder behind except to keep a file git does not hold."
+        because: A file left in a retired folder reads as part of the design. A file git does not hold has no other copy, so removing it would lose it.
+        history: Prototypes lived in screens/, drafts/ and proposals/, sorted by who drew them (ADR 0015).
+        screens: [upgrade-prototypes]
+        steps:
+          given:
+            - An install whose blueprints keep prototype screens, drafts and proposals, and an as-built redlines.json
+          when:
+            - "`walkdown upgrade --dry-run` is run, and then `walkdown upgrade`"
+          then:
+            - Each accepted screen becomes prototypes/<screen>-YYYYMMDD.html, dated by its first commit, and the storyboard points at it
+            - A draft or proposal that a pending design request names becomes that request's proposed version
+            - A draft or proposal nothing names is removed, and the upgrade says it stays in git history
+            - A file git does not hold is kept where it is and named, with what to do about it
+            - The emptied folders are removed, and each redlines.json note becomes a closed redline thread in the person's name
+            - The dry run lists all of it, grouped by blueprint, and moves nothing
+          statement_hash: sha256:5767632fe58e
+
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
     statement: As a second person cloning this project, the verdicts I read were made against a spec I can identify and point at evidence I can actually open, without anyone having to have used my directory layout.

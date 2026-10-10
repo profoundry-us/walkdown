@@ -33,8 +33,10 @@ derives from it.
    on a screen with no design is not built until the screen's design has been
    drawn and a person has accepted it. A designer draws it where there is
    one; where there is none, a design agent drafts it (a separate agent,
-   never the one building). Say so in the report, and stop there for that
-   screen rather than building ahead of its design.
+   never the one building). Every screen has rules, written before its
+   design so it is drawn against them; approving every rule on a screen
+   accepts its design. Say so in the report, and stop there for that screen
+   rather than building ahead of its design.
 
 3. **Stories, then rules.** One feature file per feature. Stories are user
    goals; rules are single verifiable statements — if a statement needs "and",

@@ -334,6 +334,49 @@ stories:
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
 
+      - id: embed.pin.asks-its-kind
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: After a spot is chosen, the pin form asks in one control whether the pin is a note, a question or a redline.
+        because: What a pin is decides who it waits on, so the choice is made where the pin is made and is seen before anything is typed.
+        history: Until 0.5.0 a checkbox said "question (not a note)", and a redline could not be pinned at all (ADR 0015).
+        screens: [pin-form-kinds]
+        steps:
+          given:
+            - Pin mode on, and a spot chosen on the screen `pin-form-kinds`
+          when:
+            - The pin form opens there
+          then:
+            - "`pin.kind` offers Note, Question and Redline, all visible before anything is typed, with Note chosen"
+            - Choosing one changes the form's hint and its save button to say what will be filed
+            - Choosing Redline says what a redline is for, that the build leaves the design here on purpose
+            - The note box `pin.note`, screenshots `pin.shots`, `pin.save` and `pin.cancel` work as they did
+            - While an agent is recording, Redline cannot be chosen, and the form says only a person files one
+          statement_hash: sha256:85b398c3cdbb
+
+      - id: embed.pin.redline-explains-a-gap
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: A redline pin marks an element where the build leaves the design on purpose, and reads as an explanation, never as an ask.
+        because: A gap left on purpose and a gap left by mistake look the same on the fade. The redline is what tells them apart.
+        history: Redlines were prose in as-built/redlines.json, one box per as-built page, tied to no element (ADR 0015).
+        screens: [redline-pin]
+        steps:
+          given:
+            - A redline a person filed on an element of the screen `redline-pin`
+          when:
+            - The screen is open, on either side of the fade
+          then:
+            - "`pin.redline` is drawn on that element on both sides, and looks unlike a note or a question pin"
+            - Opened, it says what the design shows, what the build shows, and why, with who filed it and when
+            - It has no reply box and no answer button, and says it waits on nobody
+            - The screen's thread list shows redlines apart from the pins still waiting
+          statement_hash: sha256:49f01d2ca7d2
+
   - id: embed.threads
     title: A thread you can read at a glance
     statement: As a reviewer opening a pin, I want the note itself - not a wall of provenance and instructions I have to read past.

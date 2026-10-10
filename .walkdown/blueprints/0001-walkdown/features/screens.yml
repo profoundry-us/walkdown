@@ -118,6 +118,47 @@ stories:
             - A path written from the root still lands on the target's address
           statement_hash: sha256:f5007e73e677
 
+      - id: screens.surfaces.proposed-beside-accepted
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: When a screen has a proposed version of its design, the design side offers it beside the accepted one and shows the accepted one until asked.
+        because: A proposal is compared with the design it would replace and with the build, without moving what the rules are judged against.
+        history: Proposals lived in their own folder, reached from a thread's button and never from the design side (ADR 0015).
+        screens: [design-version-switch]
+        steps:
+          given:
+            - The screen `design-version-switch`, with an accepted version and a proposed one
+          when:
+            - The screen is opened, and then Proposed is chosen
+          then:
+            - "`panel.design-version` offers Accepted and Proposed beside the design side's label, with Accepted chosen"
+            - Choosing Proposed puts the proposed version on the design side, and the fade and pins work against `panel.app-frame` as before
+            - The choice is in the address, so a link opens on the version it names
+            - A screen with only a proposed version shows it with no switch, and its App side says nothing is built
+            - The rules are still judged against the accepted version
+          statement_hash: sha256:7af097c92825
+
+      - id: screens.surfaces.proposed-is-yours
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: A proposed version of a design is framed as a person's to accept, in a dashed ring of the panel's warning yellow labelled "Proposed — yours to accept".
+        because: A proposal waits on a person's acceptance, so it wears the colour of a person's turn, and dashes keep it apart from the solid ring that means the build.
+        screens: [design-proposed]
+        steps:
+          given:
+            - The screen `design-proposed`, with Proposed chosen on the design side
+          when:
+            - The screen is opened
+          then:
+            - "`panel.proposed-frame` rings the page in a dashed line of the warning yellow"
+            - "`panel.proposed-label` reads \"Proposed — yours to accept\" and opens the screen's design request"
+            - An as-built page keeps its solid ring, so the two are never mistaken for each other
+          statement_hash: sha256:0c8d5e77db4b
+
   - id: screens.anchors
     title: Anchors move; records do not
     statement: As a reviewer, a thread I filed against an element still reads as the record I made when the element has since been renamed - and it says so, rather than warning forever or being rewritten.

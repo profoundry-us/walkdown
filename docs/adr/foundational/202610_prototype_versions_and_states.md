@@ -201,14 +201,35 @@ with the pin form.
 The upgrade names each existing prototype for the day its file was first
 committed. A file git has no history for takes the day of the upgrade.
 
+### 8. A screen's rules come with its design, and approving them accepts it
+
+Topher, 2026-10-09, walking the 0.5.0 designs: *approving all rules associated
+with a new design IS the acceptance of the design*.
+
+- **Every screen has rules.** No screen is designed without the rules it must
+  show. The rules are written with the design request, so the design is drawn
+  against them. Lint names any screen no rule names.
+- **The walkdown is the design review.** An unbuilt rule asks a person to
+  approve its wording, and the walk opens its screen with the proposed version
+  on the design side. Reading the rule beside its design is the review; there
+  is no separate design walk.
+- **Approving every rule on a screen accepts its design.** Once a person has
+  approved every rule naming a screen, that screen's pending design request is
+  accepted in their name, and the proposed version becomes the accepted one.
+  This is the same move as a signed pass verifying the notes on its rule
+  (ADR 0005). Sending any of the rules back leaves the design pending, and an
+  agent's verdict never accepts one.
+
 ## The typical flow
 
-1. A screen is needed, so a design request is filed on it.
+1. A screen is needed, so its rules are written and a design request is filed
+   on it together.
 2. A proposed prototype is made for it, by the person's designer if they gave
-   one and by the design agent if not.
-3. A person opens it in the panel, uses it, and accepts the request or sends it
-   back. Sent back, it is revised in the same file and looked at again.
-   Accepted, the storyboard points at it and it is frozen.
+   one and by the design agent if not, drawn against those rules.
+3. The person's walkdown steps through the rules, each opening the screen with
+   the proposal beside it. Sending a rule back sends the design back too, and
+   it is revised in the same file. Once every rule on the screen is approved,
+   the design is accepted: the storyboard points at it and it is frozen.
 4. The screen is built to it. Where the build cannot be framed, its as-built is
    captured.
 5. The fade compares the prototype with the build. Where a person decides a

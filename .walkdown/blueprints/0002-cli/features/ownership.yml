@@ -76,6 +76,45 @@ stories:
               at: 2026-10-05T02:28:57Z
               why: ADR 0012 renamed the commands it quotes; what it asks of the build is unchanged
 
+      - id: ownership.design.every-screen-has-rules
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Every screen in a storyboard is named by at least one rule, and lint names any screen no rule names.
+        because: A design is accepted by approving the rules on its screen, so a screen no rule names could never be accepted.
+        history: On 2026-10-09 seven screens were designed before any rule named them, and nothing walked Topher to them.
+        steps:
+          given:
+            - A storyboard with one screen that no rule's screens list names
+          when:
+            - The blueprint is linted
+          then:
+            - Lint names that screen and says to write the rules it must show
+            - A screen a retired rule alone names is named the same way
+          statement_hash: sha256:1fdde981b0d9
+
+      - id: ownership.design.approved-rules-accept-the-design
+        origin: walkdown
+        created_at: 2026-10-09
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Once a person has approved every rule on a screen, the screen's pending design request is accepted in their name.
+        because: Approving what a screen must do, with its design beside it, is accepting the design. A second click would ask for the same decision twice.
+        history: Topher, 2026-10-09, while walking the 0.5.0 designs.
+        steps:
+          given:
+            - A screen with a proposed design, its pending design request, and three unbuilt rules that name it
+          when:
+            - A person's walkdown approves the rules one by one
+          then:
+            - After two, the request is still pending
+            - After the third, the request is accepted in that person's name, and the proposed version becomes the accepted one
+            - Sending any of the rules back leaves the request pending
+            - An agent's verdict never accepts a design
+            - A rule that names two screens counts toward each
+          statement_hash: sha256:9e79be5bc2f8
+
   - id: ownership.authoring
     title: A rule is written so it can be built from
     statement: As a team, we can hand a rule to whoever implements it - a person or an agent - and have them build the right thing without asking us what we meant.

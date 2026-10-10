@@ -50,8 +50,15 @@ try {
 // With several blueprints the answer is one per blueprint (ADR 0011); this
 // repository has two since ADR 0013 split the CLI out of the panel's.
 const rows = (report.blueprints ?? [report]).flatMap((b) => b.rows ?? []);
+// An unbuilt rule owes nothing yet: there is no build to judge, and status
+// queues it to no judge either. Its first ask is a person approving its
+// wording, beside its screen's proposed design ("Design comes first", ADR
+// 0015). It comes due the moment a recorded check makes it built. Until
+// 2026-10-09 every rule here was built the turn it was written, so this
+// never had to be said.
 const owed = rows
   .filter((r) => (r.verify ?? []).includes("agent"))
+  .filter((r) => r.built !== false)
   .filter((r) => {
     const a = r.agent ?? { state: "never" };
     if (a.state === "never" || r.unjudgedFix) return true;

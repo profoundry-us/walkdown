@@ -106,7 +106,9 @@ function owed() {
 function owedIn(s, several, screens) {
   if (several) console.log(`━━ ${s.id} ━━`);
   const sweep = (s.sweeps ?? []).find((x) => x.tier === 'agent');
-  const rows = s.rows.filter((r) => (r.verify ?? []).includes('agent'));
+  // An unbuilt rule has no build to judge; it is owed once a check makes it
+  // built (the turn-end check says why).
+  const rows = s.rows.filter((r) => (r.verify ?? []).includes('agent') && r.built !== false);
   // A pass older than a fix a thread claims is a pass of the code before it.
   const need = rows.filter(
     (r) => ['never', 'stale', 'fail', 'blocked'].includes(r.agent?.state) || r.unjudgedFix,

@@ -55,18 +55,24 @@ and ask him to accept it after the fact.
 
 In this order, for any screen:
 
-1. Put the screen in the storyboard with `prototype: null`, and file the
-   request: `walkdown threads new --blueprint <bp> --screen <id> --reason
-   request --as-agent --body "<what the screen must show>"`.
+1. Write the screen's rules, unbuilt, with the screen in their `screens:`. A
+   screen is never designed without its rules (ADR 0015 §8). Put the screen in
+   the storyboard with `prototype: null`, and file the request:
+   `walkdown threads new --blueprint <bp> --screen <id> --reason request
+   --as-agent --body "<what the screen must show>"`.
 2. If Topher has given a design, use it. Otherwise dispatch the `designer`
    agent with the request ids. It draws into the blueprint's drafts folder,
    `prototype/drafts/` for `walkdown` and `prototype-cli/drafts/` for `cli`,
    and marks each request addressed. It never touches code, tests or the
    accepted `screens/`.
-3. Stop and tell Topher the drafts are waiting. He walks them and accepts each
-   or sends it back. Nothing on those screens is built meanwhile.
-4. Once he accepts a draft, copy it to the `screens/` folder beside it, point
-   the storyboard at it, and only then write the checks and the code.
+3. Until ADR 0015 is built, move each draft to `proposals/` and set the
+   screen's `proposal:`, so the walk shows it on the design side. Then stop and
+   tell Topher. His walkdown steps through the rules with each design beside
+   them. Approving every rule on a screen accepts its design; sending one back
+   sends the design back. Nothing on those screens is built meanwhile.
+4. Once a screen's rules are all approved, its design is accepted: put it in
+   `screens/`, point the storyboard at it, and only then write the checks and
+   the code.
 
 ## Naming an ADR
 
