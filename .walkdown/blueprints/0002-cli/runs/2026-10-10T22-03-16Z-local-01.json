@@ -1,0 +1,42 @@
+{
+  "run_id": "2026-10-10T22-03-16Z-local-01",
+  "created": "2026-10-10T22:03:16Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2a66a23-dirty",
+  "tree_hash": "sha256:b8f6cc612a89",
+  "spec_hash": "sha256:9d81d2cf706a",
+  "results": [
+    {
+      "rule": "ownership.design.every-screen-has-rules",
+      "status": "pass",
+      "statement_hash": "sha256:1fdde981b0d9",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-03-16Z/lint-unnamed-screens.txt"
+      ],
+      "reasoning": "Judged by doing, on a scratch copy of the cli blueprint (tmp/scratch/judge-ownership, its own home, served on :4733 for the other rules). Baseline lint of the copy named no screen, and the real repository's lint names none either, so no false positive today. I added two screens to the copy's storyboard: judge-orphan, which no rule names, and judge-retired-only, named only by a rule carrying `retired:`. `walkdown lint` then warned on both, each in the same words: 'no rule names this screen - write the rules it must show, with `screens: [<id>]`, before it reaches anyone'. Both steps hold: the screen is named and told to get its rules, and a screen only a retired rule names reads exactly like one no rule names. It is a warning rather than an error, which the statement does not ask more of. Edges below 10%: a rule writing `screens:` as a bare string rather than a list would not count as naming the screen, but rules here are written as lists and lint already checks their shape; a screen marked retired is skipped, which is the point of retiring it."
+    },
+    {
+      "rule": "ownership.design.approved-rules-accept-the-design",
+      "status": "pass",
+      "statement_hash": "sha256:9e79be5bc2f8",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-03-16Z/design-acceptance-walk.txt"
+      ],
+      "reasoning": "Judged by walking a scratch copy through POST /api/walkdowns, the door the panel's Finish uses, served on :4733 with the copy's own home and a declared person (scratch-judge-ownership). Fixture in the copy only: screen judge-accept with an accepted design and a design request (n-0585) proposing /judge-accept/20261010.html, a second screen judge-accept-two with its own request (n-0586), and three unbuilt rules signed off by eng and product, the third naming both screens. Approving one and two left both requests open; approving the third as eng alone left them open, because product's cell was still empty; sending the third back left them open. An agent run passing all three changed nothing, and the door refused a walk whose profile or signer was a machine's name (agent, claude) with 'an agent may claim work, never accept it'. The person's approval of the third, for both roles, returned accepted [n-0585, n-0586]: each request verified, verified_by the signer, verified_via the run, with a reply saying it was accepted by that person's approval of every rule on the screen. The screen's design moved to /judge-accept/20261010.html with the old one as `behind`, the proposed frame went away, and lint asks for `design:` to catch up. n-0586 shows the two-screen rule counting toward each screen. Every step holds. One caveat on the given: no CLI or HTTP door writes a request's `proposes:` today (only `walkdown upgrade` does), so I appended it by hand as the rule's own test does; that is a gap in how a proposal is filed, not in this rule's claim, and is reported to the agent that sent me. A second edge, also reported: a request with no proposed version (n-0586 here) is closed as accepted too, while the screen still has no design."
+    },
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:768e7b46e642",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-03-16Z/redline-cli-doors.txt",
+        "runs/evidence/2026-10-10T22-03-16Z/redline-relayed-machine-and-person.txt",
+        "runs/evidence/2026-10-10T22-03-16Z/redline-http-and-disk.txt"
+      ],
+      "reasoning": "Judged by trying to file a redline as an agent through every door, on a scratch copy of the cli blueprint with its own home, served on :4733 (GET /api/blueprint named the copy). CLI: `threads new --reason redline --as-agent` was refused with the redline-refused-for-agent wording, 'Nothing was filed.', and the ready-to-run question on the same screen and element; so were --as-agent with --said, with --said and --added, with --as-is, and with ' redline ' padded. `--via` is not a CLI flag and is refused as unknown; --said without --as-agent is refused. A profile whose username is a machine's name (agent, claude, Claude) is refused the same way without --as-agent. HTTP: POST /api/threads with via 'agent', via 'claude-code', a relayed `said`, an `added`, and as_is all returned 400 with the same refusal, and a blank or non-string via was refused rather than read as absent. A shasum of every file in the copy's blueprint and home was identical before and after an agent's CLI and HTTP attempts, so nothing lands on disk. The suggested question filed cleanly (q-0582). The person's redline (n-0583 by CLI, n-0584 by the browser door) was filed as a note with reason redline, status recorded, author the person, anchored to screen and element; it is absent from attention and from the open thread list, and a person's redline without --element is refused. `walkdown judge` on the copy afterwards printed a REDLINES block naming n-0583 as an intended gap. The as-built pages for redline-refused-for-agent and redline-filed match prototype-cli/screens line for line, the n-number aside. An unmarked call (CLI without --as-agent, HTTP without via) is a person's door and files in the person's name; walkdown cannot see who typed it, and that is reported to the agent that sent me rather than filed. The upgrade's migration of as-built/redlines.json files redlines in the person's name by ADR 0015's own decision, so it is not a breach."
+    }
+  ]
+}

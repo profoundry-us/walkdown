@@ -32,6 +32,7 @@ stories:
         origin: thread:n-0020
         statement: "A query string is data, not identity, so the same screen showing page two is still the same screen. A query written into the storyboard is the exception: it still tells two screens sharing one path apart."
         verify: [checks]
+        screens: [claims-url-query]
         steps:
           given:
             - Two screens declared at one path, distinguished by a query

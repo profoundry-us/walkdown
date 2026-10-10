@@ -634,7 +634,8 @@ for (const [trip, from] of [
       .toBe(true);
     // At full strength, so it is what the pointer reaches.
     await expect(page.locator('[data-walkdown-ghost]')).toHaveCSS('opacity', '1');
-    await expect(page.locator('[data-walkdown-sketch-flag]')).toBeVisible();
+    await expect(page.getByTestId('panel.proposed-frame')).toBeAttached();
+    await expect(page.getByTestId('panel.proposed-label')).toBeVisible();
     // The panel reports that screen as where you are.
     await expect(page.getByTestId('panel.screen-picker')).toContainText('Sketch only');
     // And pins land on it once walkdown is running in there.
@@ -1224,13 +1225,14 @@ test('the surface buttons are named for what each side shows, and a side with no
   await pick('fixture-stand-in');
   await expect(build).toHaveText('Stand-in');
 
-  // Only a proposal: named for it, in the warning colour the sketch's banner wears.
+  // Only a proposed design: still the design side, in the warning colour of
+  // the dashed frame the proposed version wears (ADR 0015 §6).
   await pick('fixture-sketch');
-  await expect(design).toHaveText('Proposal');
+  await expect(design).toHaveText('Design');
   await expect(design).toHaveClass(/btn-warning/);
-  await expect(design).toHaveAttribute('title', /not from design/);
+  await expect(design).toHaveAttribute('title', /waiting on your acceptance/);
   await expect(fade).toBeEnabled();
-  // And raised, the sketch's banner wears the warning colour the button is
+  // And raised, the frame round it wears the warning colour the button is
   // drawn from, as the bar's theme resolves it. (Not the button's own pixels:
   // a filled button shades its token for depth.)
   const amber = await page.getByTestId('panel.bar').evaluate((bar) => {
@@ -1246,8 +1248,8 @@ test('the surface buttons are named for what each side shows, and a side with no
     .poll(async () => {
       const banner = await page.evaluate(() => {
         const walk = (root) => {
-          const f = root.querySelector('[data-walkdown-sketch-flag]');
-          if (f) return getComputedStyle(f).backgroundColor;
+          const f = root.querySelector('[data-testid="panel.proposed-frame"]');
+          if (f) return getComputedStyle(f).borderTopColor;
           for (const e of root.querySelectorAll('*'))
             if (e.shadowRoot) {
               const r = walk(e.shadowRoot);
@@ -4857,4 +4859,175 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   await page.getByTestId('panel.screens-view').filter({ hasText: 'List' }).click();
   await expect(page.getByTestId('panel.screens-board')).toHaveCount(0);
   await expect(list.locator('[data-screen="rule-detail"]')).toBeVisible();
+});
+
+/*
+ * ADR 0015 §6: a screen's proposed version beside its accepted one. Served
+ * here - an accepted design, a proposed version a design request names, and
+ * an as-built drawing for the build - so the check is about the switch and
+ * the frame, not about whichever proposal the real blueprint holds.
+ */
+async function versionsScreen(page, { accepted = true } = {}) {
+  const page_ = (title, extra = '') =>
+    `<!doctype html><body style="margin:0;font:16px sans-serif"><h1 data-testid="v.title">${title}</h1>${extra}<script src="/embed.js" data-walkdown></script></body>`;
+  await page.route(/\/prototype\/screens\/versions-accepted\.html/, (r) =>
+    r.fulfill({ contentType: 'text/html', body: page_('The accepted design') }),
+  );
+  await page.route(/\/prototype\/versions\/20261010\.html/, (r) =>
+    r.fulfill({ contentType: 'text/html', body: page_('The proposed design') }),
+  );
+  await page.route(/\/as-built\/versions\.html/, (r) =>
+    r.fulfill({
+      contentType: 'text/html',
+      body: page_(
+        'The build, drawn',
+        '<div class="as-built-ring" style="position:fixed;inset:4px;border:2px solid oklch(72% 0.17 25);border-radius:10px;pointer-events:none"></div>',
+      ),
+    }),
+  );
+  let rule;
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const data = await res.json();
+    data.storyboard = [
+      ...(data.storyboard ?? []),
+      {
+        id: 'versions',
+        title: 'A screen with two versions',
+        prototype: accepted ? '/screens/versions-accepted.html' : null,
+        proposed: { path: '/prototype/versions/20261010.html', request: 'n-9042' },
+        ...(accepted ? { app: { path: '/as-built/versions.html' } } : {}),
+        anchors: ['v.title'],
+      },
+    ];
+    data.threads = [
+      ...(data.threads ?? []),
+      {
+        id: 'n-9042',
+        uuid: '00000000-0000-4000-8000-000000009042',
+        kind: 'note',
+        reason: 'request',
+        author: 'agent',
+        created: '2026-10-10T00:00:00Z',
+        anchor: { screen: 'versions' },
+        status: 'addressed',
+        proposes: '/versions/20261010.html',
+        body: 'Draw the screen with two versions.',
+      },
+    ];
+    const row = data.rows.find((r) => r.built) ?? data.rows[0];
+    rule = row.rule;
+    Object.assign(row, { screens: ['versions'], flow: ['versions'] });
+    await route.fulfill({ response: res, json: data });
+  });
+  return { rule: () => rule };
+}
+
+const ghostSrc = (page) =>
+  page.locator('[data-walkdown-ghost] iframe').evaluate((f) => f.getAttribute('src'));
+
+test('the design side shows a proposed version first, with the accepted one a click away', {
+  tag: '@rule:screens.surfaces.proposed-beside-accepted',
+}, async ({ page }) => {
+  const at = await versionsScreen(page);
+  await page.goto(fixtureFor({ build: 'stale', frame: `${WD_ORIGIN}/as-built/versions.html` }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect.poll(() => at.rule()).toBeTruthy();
+  await expect(page.getByTestId('panel.screen-picker')).toContainText('two versions');
+
+  // Beside the design side's label, Proposed chosen.
+  const sw = page.getByTestId('panel.design-version');
+  await expect(sw).toBeVisible();
+  await expect(sw.locator('[data-version="proposed"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(sw.locator('[data-version="accepted"]')).toHaveAttribute('aria-pressed', 'false');
+
+  // The proposed version on the design side, faded against the app frame.
+  await page.getByTestId('panel.surface-design').click();
+  await expect.poll(() => ghostSrc(page)).toContain('/prototype/versions/20261010.html');
+  await expect(page.locator('[data-walkdown-ghost]')).toHaveCSS('opacity', '1');
+  await page.getByTestId('panel.surface-build').click();
+  await expect(page.getByTestId('panel.fade')).toHaveValue('100');
+
+  // Accepted shows the design it would replace; Proposed brings it back.
+  await page.getByTestId('panel.surface-design').click();
+  await sw.locator('[data-version="accepted"]').click();
+  await expect.poll(() => ghostSrc(page)).toContain('/prototype/screens/versions-accepted.html');
+  await expect(page.getByTestId('panel.proposed-frame')).toHaveCount(0);
+  // The choice is in the address.
+  await expect.poll(() => new URL(page.url()).searchParams.get('design')).toBe('accepted');
+  await sw.locator('[data-version="proposed"]').click();
+  await expect.poll(() => ghostSrc(page)).toContain('/prototype/versions/20261010.html');
+  await expect.poll(() => new URL(page.url()).searchParams.get('design')).toBe(null);
+
+  // A link naming the accepted version opens on it.
+  const link = new URL(
+    fixtureFor({ build: 'stale', frame: `${WD_ORIGIN}/as-built/versions.html` }),
+  );
+  link.searchParams.set('design', 'accepted');
+  await page.goto(link.href);
+  await expect(
+    page.getByTestId('panel.design-version').locator('[data-version="accepted"]'),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await page.getByTestId('panel.surface-design').click();
+  await expect.poll(() => ghostSrc(page)).toContain('/prototype/screens/versions-accepted.html');
+
+  // Opening a rule on the screen shows the proposed version: it is what is judged.
+  await page.goto(fixtureFor({ build: 'stale', frame: `${WD_ORIGIN}/as-built/review.html` }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await expect.poll(() => at.rule()).toBeTruthy();
+  await page.getByLabel('Search rules').fill(at.rule());
+  await openRule(page, at.rule());
+  await expect
+    .poll(() => ghostSrc(page).catch(() => null))
+    .toContain('/prototype/versions/20261010.html');
+});
+
+test('a screen with only a proposed version shows it with no switch, and says nothing is built', {
+  tag: '@rule:screens.surfaces.proposed-beside-accepted',
+}, async ({ page }) => {
+  await versionsScreen(page, { accepted: false });
+  await page.goto(fixtureFor({ build: 'stale', frame: `${WD_ORIGIN}/as-built/review.html` }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.getByTestId('panel.screen-picker').click();
+  await page.getByTestId('panel.screens-list').locator('[data-screen="versions"]').click();
+  await expect.poll(() => ghostSrc(page)).toContain('/prototype/versions/20261010.html');
+  await expect(page.getByTestId('panel.design-version')).toHaveCount(0);
+  const build = page.getByTestId('panel.surface-build');
+  await expect(build).toBeDisabled();
+  await expect(build).toHaveAttribute('title', /Nothing is built for this screen yet/);
+});
+
+test('a proposed version is framed as yours to accept, and an as-built keeps its solid ring', {
+  tag: '@rule:screens.surfaces.proposed-is-yours',
+}, async ({ page }) => {
+  await versionsScreen(page);
+  await page.goto(fixtureFor({ build: 'stale', frame: `${WD_ORIGIN}/as-built/versions.html` }));
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await page.getByTestId('panel.surface-design').click();
+  await expect.poll(() => ghostSrc(page)).toContain('/prototype/versions/20261010.html');
+
+  // A dashed ring of the warning yellow, as the bar's theme resolves it.
+  const warn = await page.getByTestId('panel.bar').evaluate((bar) => {
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--color-warning)';
+    bar.appendChild(probe);
+    const c = getComputedStyle(probe).color;
+    probe.remove();
+    return c;
+  });
+  const ring = page.getByTestId('panel.proposed-frame');
+  await expect(ring).toHaveCSS('border-top-style', 'dashed');
+  await expect(ring).toHaveCSS('border-top-color', warn);
+
+  // The label reads as a person's turn, and opens the design request.
+  const label = page.getByTestId('panel.proposed-label');
+  await expect(label).toHaveText('Proposed — yours to accept');
+  await label.click();
+  await expect(page.getByTestId('thread.body')).toContainText('Draw the screen with two versions.');
+
+  // The build side's as-built drawing keeps its solid ring.
+  const asBuilt = page
+    .frameLocator('iframe[title="the application under review"]')
+    .locator('.as-built-ring');
+  await expect(asBuilt).toHaveCSS('border-top-style', 'solid');
 });

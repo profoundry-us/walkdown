@@ -166,8 +166,7 @@ screens:
   # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
   - id: pin-form-kinds
     title: "The pin form asks what kind of pin it is"
-    prototype: null
-    proposal: /pin-form-kinds.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
+    prototype: /screens/pin-form-kinds.html   # accepted 2026-10-10 in Topher's walk
     anchors:
       - pin.kind
       - pin.note
@@ -178,8 +177,7 @@ screens:
   # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
   - id: design-version-switch
     title: "The design side offers a proposed version beside the accepted one"
-    prototype: null
-    proposal: /design-version-switch.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
+    prototype: /screens/design-version-switch.html   # accepted 2026-10-10 in Topher's walk
     anchors:
       - panel.design-version
       - panel.fade
@@ -188,8 +186,7 @@ screens:
   # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
   - id: design-proposed
     title: "A proposed version, framed as yours to accept"
-    prototype: null
-    proposal: /design-proposed.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
+    prototype: /screens/design-proposed.html   # accepted 2026-10-10 in Topher's walk
     anchors:
       - panel.design-version
       - panel.proposed-frame
@@ -199,8 +196,7 @@ screens:
   # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
   - id: redline-pin
     title: "A redline pinned where the build leaves the design"
-    prototype: null
-    proposal: /redline-pin.html   # the design agent's draft, to walk; ADR 0015 retires proposals/ in 0.5.0
+    prototype: /screens/redline-pin.html   # accepted 2026-10-10 in Topher's walk
     anchors:
       - pin.redline
       - panel.fade

@@ -1,0 +1,43 @@
+{
+  "run_id": "2026-10-10T21-53-30Z-local-01",
+  "created": "2026-10-10T21:53:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2a66a23-dirty",
+  "spec_hash": "sha256:d9845ff0f261",
+  "results": [
+    {
+      "rule": "embed.pin.asks-its-kind",
+      "status": "pass",
+      "statement_hash": "sha256:85b398c3cdbb",
+      "evidence": [
+        "runs/evidence/2026-10-10T21-53-30Z/app-pin-form-kinds-note.png",
+        "runs/evidence/2026-10-10T21-53-30Z/app-pin-form-kinds-question.png",
+        "runs/evidence/2026-10-10T21-53-30Z/app-pin-form-kinds-redline.png",
+        "runs/evidence/2026-10-10T21-53-30Z/app-pin-form-kinds-agent.png",
+        "runs/evidence/2026-10-10T21-53-30Z/probe.json"
+      ],
+      "reasoning": "Driven in headless Chromium against a scratch copy served on port 4731 with its own home, through the extension fixture framing the as-built review page, with the real panel's Pin mode on and a spot chosen on panel.walk. pin.kind is one tablist of three tabs, Note, Question and Redline, above the box and all visible before typing, with Note selected (aria-selected true). Each choice changed the hint, the box's prompt and pin.save: Pin it, Ask it, File redline. Redline's hint reads that the build leaves the design here on purpose, and that it is filed closed and nothing waits on it; the placeholder pin turned red with a not-equal sign. pin.cancel removed the form and its placeholder pin, an empty save kept the form open, and pin.shots was present. Saving each kind filed a note, a question, and a note with reason redline and status recorded. With /api/blueprint answering username agent, the Redline tab was visible, greyed and disabled, a click left Note selected, and its title said only a person files a redline, as the accepted design does with a title too. That message is hover-only, which matches the design; no page errors. Edges: the Redline tab is also disabled on a spot with no anchored element, explained only by its title (about 15%, reported, not filed; not met here because the as-built page anchors every spot); an identity with no username is treated as an agent (under 10%, usernames fall back to the machine's).",
+      "threads": []
+    },
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "fail",
+      "statement_hash": "sha256:49f01d2ca7d2",
+      "evidence": [
+        "runs/evidence/2026-10-10T21-53-30Z/app-redline-pin.png",
+        "runs/evidence/2026-10-10T21-53-30Z/app-redline-pin-open.png",
+        "runs/evidence/2026-10-10T21-53-30Z/app-note-pin-open-contrast.png",
+        "runs/evidence/2026-10-10T21-53-30Z/app-thread-list.png",
+        "runs/evidence/2026-10-10T21-53-30Z/proto-redline-pin.png",
+        "runs/evidence/2026-10-10T21-53-30Z/probe.json"
+      ],
+      "reasoning": "Driven on the same scratch copy, port 4731. A redline filed on panel.walk from the app side (scratch n-0586) is drawn as pin.redline in red with a not-equal sign beside an amber ! note and ? question on the same button, and on the design side it is drawn on the prototype's panel.walk while the app-only note and question are not. Opened on either side it says the build leaves the design here on purpose, gives the why, says Filed by, the date and the element, and that nothing waits on it; it has no textarea and its only button is Close. The panel's thread list shows it under Where the build leaves the design, apart from the waiting question, with a redline chip. Design and Build lines are absent because the form never collects them; open question q-0585 already asks about that, so it is not the fail. The fail is the hover tooltip: the redline shows n-0586 · note · recorded, on both sides, where the accepted design shows Redline · id · closed and why. The tooltip shows on contact, so about 95% of people meet it before opening the pin, and it labels the redline a note, which is what the rule says it never reads as. Finding filed. Smaller: Filed by shows the raw handle when the username has punctuation, because nameMap keys are normalised and the lookup is not (about 20%, reported, not filed).",
+      "threads": [
+        "007e0107-82b4-495b-b3b5-e95a56c5a7ba"
+      ]
+    }
+  ]
+}

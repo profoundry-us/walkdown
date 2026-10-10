@@ -116,7 +116,7 @@ function board(screens, here) {
           <span class="flex items-center gap-1 font-mono text-[10.5px] opacity-40">
             <span class="truncate">${sc.id}</span>
             <span class="ml-auto shrink-0 font-sans ${design ? '' : 'text-warning opacity-100'}">${
-              design ? (design.proposed ? 'sketch' : 'design') : 'no design'
+              design ? (design.proposed ? 'proposed' : 'design') : 'no design'
             }</span>
           </span>
         </span>
@@ -171,7 +171,7 @@ export function screensPane() {
           <span class="block truncate font-mono text-[10.5px] opacity-40">${sc.id}</span>
         </span>
         <span class="ml-auto shrink-0 pt-0.5 text-[10.5px] ${design ? 'opacity-50' : 'text-warning'}">${
-          design ? (design.proposed ? 'sketch' : 'design') : 'no design'
+          design ? (design.proposed ? 'proposed' : 'design') : 'no design'
         }</span>
       </button>`;
           })

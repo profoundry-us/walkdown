@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-10T22-13-20Z-local-01",
+  "created": "2026-10-10T22:13:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2a66a23-dirty",
+  "spec_hash": "sha256:d9845ff0f261",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:49f01d2ca7d2",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-13-20Z/app-redline-tip.png",
+        "runs/evidence/2026-10-10T22-13-20Z/app-redline-open.png",
+        "runs/evidence/2026-10-10T22-13-20Z/app-thread-list.png",
+        "runs/evidence/2026-10-10T22-13-20Z/proto-redline-tip.png",
+        "runs/evidence/2026-10-10T22-13-20Z/proto-redline-open.png",
+        "runs/evidence/2026-10-10T22-13-20Z/probe.json"
+      ],
+      "reasoning": "Re-judged after the fix for finding n-0586, in headless Chromium against a new scratch copy served on port 4731 with its own home, through the extension fixture framing the as-built review page in the real panel. A redline filed on panel.walk from the app side (scratch n-0587) is drawn as pin.redline in red with a not-equal sign beside an amber ! note and ? question on the same button. On the design side it is drawn on the prototype's panel.walk, while the app-only note and question are not. Its hover tip, measured visible on both sides, now reads Redline · n-0587 · closed and then The build leaves the design here on purpose with the why, which matches the accepted design; the note and question keep their id · kind · status tips. Opened on either side, it gives the why, Filed by with the person's display name (a hyphenated username now resolves), the date and the element, and says nothing waits on it; it has no textarea, and its only button is Close. The panel's thread list shows it under Where the build leaves the design, apart from the waiting pins. Design and Build lines are absent because the form never collects them; open question q-0585 already asks about that, so it does not fail the rule. No page errors. The redline's card in the panel's thread list carries a Reply link, which agrees with the design's Open the conversation link and is not counted against the rule.",
+      "threads": []
+    }
+  ]
+}

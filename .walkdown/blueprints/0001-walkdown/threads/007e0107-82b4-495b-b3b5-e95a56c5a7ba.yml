@@ -1,0 +1,30 @@
+id: n-0586
+uuid: 007e0107-82b4-495b-b3b5-e95a56c5a7ba
+kind: note
+reason: finding
+author: agent
+created: 2026-10-10T22:03:25.894Z
+anchor:
+  rule: embed.pin.redline-explains-a-gap
+  element: pin.redline
+status: addressed
+body: 'Hovering a redline pin shows a tooltip that calls it a note. On the
+  scratch copy, redline n-0586 on panel.walk showed "n-0586 · note · recorded"
+  on hover, on both sides of the fade. The accepted redline-pin design shows
+  "Redline · n-0412 · closed" and the line "The build leaves the design here on
+  purpose." The tooltip shows on contact, so nearly every person meets it before
+  opening the pin. It reads as a note waiting on someone, which the rule says a
+  redline never does. pinTip in src/embed/index.js prints pin.kind and
+  pin.status, and a redline is stored as kind note with status recorded.
+  Evidence: runs/evidence/2026-10-10T21-53-30Z/proto-redline-pin.png and
+  app-redline-pin.png.'
+replies:
+  - author: agent
+    created: 2026-10-10T22:04:00Z
+    body: The n-0586 named above is the redline in the scratch copy, not this
+      thread. The two ids match by chance.
+  - author: agent
+    created: 2026-10-10T22:11:25Z
+    body: Fixed. A redline's tip now reads Redline, its id and closed, with the
+      reason, and never names the record's kind. The opened redline names who
+      filed it as the thread list does. Both are in the embed check.

@@ -12,7 +12,7 @@ stories:
         origin: prototype
         statement: Inviting a batch asks for confirmation naming how many people will be emailed, and that number matches what was selected.
         signoff: [eng, product]
-        screens: [waitlist-admin]
+        screens: [waitlist-admin, waitlist-invite-batch]
         steps:
           given:
             - An operator on screen `waitlist-admin` with rows selected
@@ -27,7 +27,7 @@ stories:
         origin: prototype
         statement: Cancelling the confirmation sends no invitations and leaves the selection exactly as it was.
         signoff: [eng, product]
-        screens: [waitlist-admin]
+        screens: [waitlist-admin, waitlist-invite-batch]
         steps:
           given:
             - The confirmation open at anchor `waitlist.confirm-batch`

@@ -1,0 +1,25 @@
+id: q-0585
+uuid: 865e6c69-8c13-43ed-98a0-16871119a767
+kind: question
+author: agent
+created: 2026-10-10T21:32:52.176Z
+anchor:
+  rule: embed.pin.redline-explains-a-gap
+  screen: redline-pin
+  element: pin.redline
+status: open
+body: Your accepted redline-pin design shows a redline's Design and Build side
+  by side above the why. The accepted pin form has one box, for the why, so a
+  redline filed from it never carries Design or Build. The build shows the pair
+  when a redline carries one, and the why alone otherwise. Which way should the
+  two meet?
+options:
+  - label: The form asks for all three
+    why: Choosing Redline adds two short lines to the form, Design shows and Build
+      shows, above the why.
+  - label: The why alone
+    why: A redline says why. The pair comes out of the redline-pin design and out of
+      the rule's step.
+  - label: Keep it optional
+    why: "The pair shows only where it was given: the CLI takes --design and
+      --build, the form stays one box."

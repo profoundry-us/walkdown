@@ -878,3 +878,46 @@ test('design.by is person or agent, and anything else is an error naming both @r
   assert.equal(bad[0].level, 'error');
   assert.match(bad[0].message, /`person` or `agent`/);
 });
+
+test('a screen no rule names is named, and so is one only a retired rule names @rule:ownership.design.every-screen-has-rules', () => {
+  const h = writeFixture(join(root, 'unnamed-screens'));
+  writeFileSync(
+    join(h.spec, 'storyboard.yml'),
+    [
+      'screens:',
+      '  - id: home',
+      '    prototype: /home.html',
+      '    app: { path: / }',
+      '    anchors: [home.cta]',
+      '  - id: receipt',
+      '    prototype: /receipt.html',
+      '  - id: old-cart',
+      '    prototype: /old-cart.html',
+    ].join('\n'),
+  );
+  writeFileSync(
+    join(h.spec, 'features', 'old.yml'),
+    [
+      'feature: old',
+      'stories:',
+      '  - id: old.cart',
+      '    rules:',
+      '      - id: old.cart.totals',
+      '        statement: The cart showed a running total.',
+      '        retired: Folded into the receipt, which says the total now.',
+      '        screens: [old-cart]',
+    ].join('\n'),
+  );
+  const named = lint(load(h), { checks: false }).findings.filter((f) =>
+    /no rule names this screen/.test(f.message),
+  );
+  assert.deepEqual(
+    named.map((f) => f.subject),
+    ['receipt', 'old-cart'],
+  );
+  for (const f of named) {
+    assert.equal(f.level, 'warn');
+    assert.match(f.message, /write the rules it must show/);
+    assert.match(f.message, new RegExp(`screens: \\[${f.subject}\\]`));
+  }
+});

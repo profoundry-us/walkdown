@@ -98,9 +98,11 @@ import {
   hereLocation,
   isHeadless,
   needsYou,
+  offersVersions,
   orderedRows,
   owedRows,
   pageSurface,
+  proposedShown,
   ruleScreen,
   screenById,
   screenInHand,
@@ -1062,6 +1064,8 @@ function sayAddress() {
     else url.searchParams.delete('rule');
     if (thread) url.searchParams.set('thread', thread);
     else url.searchParams.delete('thread');
+    if (S.designVersion === 'accepted') url.searchParams.set('design', 'accepted');
+    else url.searchParams.delete('design');
     if (S.frameUrl) url.hash = encodeURIComponent(S.frameUrl);
     if (url.href !== location.href) history.replaceState(history.state, '', url.href);
   } catch {
@@ -1310,6 +1314,11 @@ export function render() {
   // strength. Asked on every render, because the frame can be found out
   // before the storyboard has said which screen this is.
   if (appDownFor(screenInHand()) && !S.ghost && ghostSource(screenInHand())) return setFade(1);
+  // A rule just opened on a screen with a proposed version: up it comes.
+  if (S.raiseProposed && S.raiseProposed === screenInHand()?.id) {
+    S.raiseProposed = null;
+    if (ghostSource(screenInHand())?.proposed && S.ghostOpacity !== 1) return setFade(1);
+  }
   // The thread screen without a thread is not a screen.
   if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
   // The address follows the view, so a reload lands where you are.
@@ -1790,7 +1799,7 @@ function renderBar() {
     : !sides.design
       ? 'No design or proposal on file for this screen — a design request is how one gets drawn'
       : sides.design.proposed
-        ? 'Show the proposal — a sketch, not from design'
+        ? 'Show the proposed design, waiting on your acceptance'
         : 'Show the design';
   const down = appDownFor(inHand);
   const buildTip = !inHand
@@ -1798,7 +1807,9 @@ function renderBar() {
     : down
       ? `Nothing answers at ${down.replace(/^https?:\/\//, '')}, so the design is shown. Start the app, or remove this screen's app path.`
       : !sides.build
-        ? 'The storyboard names no app for this screen'
+        ? inHand.app?.path
+          ? 'The storyboard names no app for this screen'
+          : 'Nothing is built for this screen yet'
         : `Show the ${buildLabel.toLowerCase()}`;
   const fadeTip = !inHand
     ? noScreen
@@ -1895,6 +1906,29 @@ function renderBar() {
 
     <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2"
       title="${fadeTip}">
+      ${
+        /*
+         * Which design the Design side shows, set against the label it
+         * qualifies (ADR 0015 §6). Only on a screen with a proposed version
+         * beside an accepted one, so every other screen's bar is as it was.
+         * Proposed carries the warning dot while it waits on a person.
+         */
+        offersVersions(inHand)
+          ? html`<span class="inline-flex gap-px rounded-md border-[1.5px] border-dashed border-base-content/25 p-px"
+              data-testid="panel.design-version" role="group" aria-label="Which design to show">
+              <button type="button" data-version="accepted"
+                class="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] leading-none ${S.designVersion === 'accepted' ? 'bg-base-content text-base-100' : 'hover:bg-base-200'}"
+                aria-pressed=${String(S.designVersion === 'accepted')}
+                title="The design this proposal would replace"
+                @click=${() => setDesignVersion('accepted')}>Accepted</button>
+              <button type="button" data-version="proposed"
+                class="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] leading-none ${S.designVersion !== 'accepted' ? 'bg-base-content text-base-100' : 'hover:bg-base-200'}"
+                aria-pressed=${String(S.designVersion !== 'accepted')}
+                title="The version up for judgment, waiting on your acceptance${inHand.proposed?.request ? ` (design request ${inHand.proposed.request})` : ''}"
+                @click=${() => setDesignVersion('proposed')}><span class="size-1.5 rounded-full bg-warning"></span>Proposed</button>
+            </span>`
+          : nothing
+      }
       <button class="btn btn-xs ${sides.design?.proposed ? 'btn-warning' : 'btn-primary'}${share === 1 ? '' : ' btn-outline'}"
         data-surface="prototype" data-testid="panel.surface-design" title="${designTip}"
         ?disabled=${!sides.design}
@@ -2034,7 +2068,7 @@ function pickScreen(id) {
  * side of that screen, and the ghost carries the design side.
  */
 function showProposal(screen) {
-  if (!screen?.proposal) return false;
+  if (!proposedShown(screen)) return false;
   if (screenUrl(screen, 'prototype') || screenUrl(screen, 'app')) return false;
   if (S.ghostOverride !== screen.id) {
     if (S.ghost) setGhost(false);
@@ -2047,6 +2081,19 @@ function showProposal(screen) {
   // Built fresh, the ghost repaints only the bar; the rule says where you are.
   render();
   return true;
+}
+
+/*
+ * Choosing which version the design side shows (ADR 0015 §6). The ghost is
+ * rebuilt on the other version where one is up, at the strength it was; the
+ * address says the choice, so a reload or a link opens on it.
+ */
+function setDesignVersion(v) {
+  if (S.designVersion === v) return;
+  S.designVersion = v;
+  if (S.ghost) setGhost(true);
+  sayAddress();
+  render();
 }
 
 /*
@@ -2780,8 +2827,12 @@ async function finishWalkdown() {
       Array.isArray(out.closed) && out.closed.length
         ? ` — verified ${out.closed.length} thread${out.closed.length === 1 ? '' : 's'} (${out.closed.map((id) => esc(id)).join(', ')})`
         : '';
+    const accepted =
+      Array.isArray(out.accepted) && out.accepted.length
+        ? ` — accepted the design on ${out.accepted.map((id) => esc(id)).join(', ')}, since every rule on its screen is approved`
+        : '';
     toast(
-      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b> — ${filed}${closed}`,
+      `Recorded ${results.length} verdict${results.length === 1 ? '' : 's'} as <b>${esc(out.run_id)}</b> — ${filed}${closed}${accepted}`,
       { tone: 'success' },
     );
   } catch {
@@ -2829,6 +2880,9 @@ export function open(ruleId) {
   // Told now for a screen already in the frame; a page still on its way is
   // told when it says it is ready.
   focusAnchor(focusOf(S.selected));
+  // A proposed version is what the rule is judged against (ADR 0015 §6), so
+  // it comes up once the screen is in hand.
+  S.raiseProposed = want && proposedShown(want) ? want.id : null;
   if (want && want.id !== currentScreen()?.id && (goTo(want) || showProposal(want))) return toTop();
   render();
   toTop();
@@ -2840,9 +2894,6 @@ export function open(ruleId) {
  * copy inside it. Kept apart from building the ghost so a window resize
  * re-measures rather than reloading the page in there.
  */
-/** The proposal banner's height, given up by the sheet above it. */
-const SKETCH_FLAG_H = 24;
-
 function sizeGhost() {
   const frame = ghostFrame();
   if (!S.ghost || !frame) return;
@@ -2850,16 +2901,10 @@ function sizeGhost() {
   // At a preset the ghost lays out at that width too, scaling down whole
   // when the stage is narrower - the same rule the app frame follows.
   const gs = S.ghostWidth ? Math.min(1, availW / S.ghostWidth) : 1;
-  /*
-   * A proposal's banner sits under the page, not over it: laid across the
-   * top it hid the page's own header, the part a reviewer reads first
-   * (Topher, 2026-10-10). The sheet gives up that strip at the bottom.
-   */
-  const flagH = 'walkdownProposed' in S.ghost.dataset ? SKETCH_FLAG_H : 0;
-  const pageH = availH - flagH;
+  const pageH = availH;
   S.ghost.style.width = `${availW}px`;
   S.ghost.style.height = `${availH}px`;
-  S.ghost.style.alignItems = S.ghostWidth || flagH ? 'flex-start' : 'center';
+  S.ghost.style.alignItems = S.ghostWidth ? 'flex-start' : 'center';
   frame.style.width = `${S.ghostWidth || availW}px`;
   frame.style.height = `${gs < 1 ? pageH / gs : pageH}px`;
   frame.style.transform = gs < 1 ? `scale(${gs})` : '';
@@ -2921,7 +2966,6 @@ export function setGhost(on) {
   // Named so a probe can measure the element the fade is actually set on -
   // opacity is not inherited, and the iframe inside reads 1 forever.
   S.ghost.dataset.walkdownGhost = '';
-  // Said before the box is measured: a proposal's sheet is shorter by its banner.
   if (src.proposed) S.ghost.dataset.walkdownProposed = '';
   /*
    * The box is stated in pixels, not left to the four insets to work out.
@@ -2978,26 +3022,40 @@ export function setGhost(on) {
   // Built while the panel is put away, it must be built full-bleed: the box
   // stated at creation is the docked one.
   placeGhost(S.docked);
-  // A proposal is an agent's sketch, not design's work. It says so on its
-  // face, so nobody walks a screen down against a drawing we made up. In the
-  // theme's warning colour, the one the bar's Proposal button wears, so the
-  // button and the banner read as the same thing
-  // (panel.dock.surfaces-say-what-they-show).
+  /*
+   * A proposed version is a person's to accept, so it wears the colour of a
+   * person's turn (ADR 0015 §6): a dashed ring of the warning yellow round
+   * the page - dashed, so it is never read as the solid ring that means
+   * "this is the build" - and a corner label that opens the screen's design
+   * request, the one place it is accepted or sent back.
+   */
   if (src.proposed) {
-    const flag = document.createElement('div');
-    flag.dataset.walkdownSketchFlag = '';
-    flag.textContent = '\u26a0 Proposed sketch \u2014 not from design';
     // Read off the bar: the ghost sits outside the element the theme is set
     // on, so a var() here would find nothing and fall back.
     const themed = getComputedStyle(D.bar);
     const warn = themed.getPropertyValue('--color-warning').trim() || '#d97706';
     const onWarn = themed.getPropertyValue('--color-warning-content').trim() || '#fff';
-    flag.style.cssText = `position:absolute; bottom:0; left:0; right:0; z-index:1; text-align:center;
-      height:${SKETCH_FLAG_H}px; box-sizing:border-box;
-      background:${warn}; color:${onWarn};
-      font:600 11px/1 -apple-system, sans-serif;
-      letter-spacing:.06em; padding:${(SKETCH_FLAG_H - 11) / 2}px 8px;`;
-    S.ghost.appendChild(flag);
+    const ring = document.createElement('div');
+    ring.dataset.testid = 'panel.proposed-frame';
+    ring.setAttribute('aria-hidden', 'true');
+    ring.style.cssText = `position:absolute; inset:4px; z-index:1; pointer-events:none;
+      border:2px dashed ${warn}; border-radius:10px;`;
+    const label = document.createElement('a');
+    label.dataset.testid = 'panel.proposed-label';
+    label.textContent = 'Proposed \u2014 yours to accept';
+    label.title = src.request
+      ? `Open design request ${src.request} to accept it or send it back`
+      : 'No design request names this version yet';
+    label.href = '#';
+    label.style.cssText = `position:absolute; left:0; bottom:0; z-index:2; pointer-events:auto;
+      padding:3px 10px; font:700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing:.08em; text-transform:uppercase; color:${onWarn}; background:${warn};
+      border-top-right-radius:6px; text-decoration:none; cursor:pointer;`;
+    label.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (src.request) openThreadView(src.request);
+    });
+    S.ghost.append(ring, label);
   }
   /*
    * Into the panel's own shadow root, ahead of the chrome, rather than into
@@ -3027,24 +3085,35 @@ const ghostFrame = () => S.ghost?.querySelector('iframe') ?? null;
 
 function pinsForScreen(id) {
   if (!id) return [];
-  return (S.data?.threads ?? [])
-    .filter((t) => t.anchor?.screen === id && !TERMINAL.includes(t.status))
-    .map((t) => ({
-      id: t.id,
-      kind: t.kind,
-      status: t.status,
-      element: t.anchor?.element,
-      offset: t.anchor?.offset,
-      position: t.anchor?.position,
-      surface: t.anchor?.surface,
-      viewport: t.anchor?.viewport,
-      // What it is about, for the tooltip: a pin should say where it belongs
-      // before you spend a click finding out.
-      rule: t.anchor?.rule ?? null,
-      screen: t.anchor?.screen ?? null,
-      body: t.body,
-      replies: t.replies ?? [],
-    }));
+  return (
+    (S.data?.threads ?? [])
+      // A redline is filed closed and is drawn all the same: it says why the
+      // build leaves the design at this element (ADR 0015 §4).
+      .filter(
+        (t) => t.anchor?.screen === id && (!TERMINAL.includes(t.status) || t.reason === 'redline'),
+      )
+      .map((t) => ({
+        id: t.id,
+        kind: t.kind,
+        reason: t.reason ?? null,
+        author: t.author ?? null,
+        created: t.created ?? null,
+        design: t.design ?? null,
+        build: t.build ?? null,
+        status: t.status,
+        element: t.anchor?.element,
+        offset: t.anchor?.offset,
+        position: t.anchor?.position,
+        surface: t.anchor?.surface,
+        viewport: t.anchor?.viewport,
+        // What it is about, for the tooltip: a pin should say where it belongs
+        // before you spend a click finding out.
+        rule: t.anchor?.rule ?? null,
+        screen: t.anchor?.screen ?? null,
+        body: t.body,
+        replies: t.replies ?? [],
+      }))
+  );
 }
 
 /*
@@ -3084,6 +3153,8 @@ function pushContext(frame, surface, pinMode) {
       surface,
       pinMode,
       pins: pinsForScreen(sc?.id),
+      // Who is recording, so the pin form knows whether a redline is theirs to file.
+      identity: S.data?.identity ?? null,
       /*
        * Which blueprint a pin from this surface files against. The embed in a
        * frame is on somebody else's page - there is no script tag there to
@@ -3802,6 +3873,8 @@ function wireGlobals() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           kind: msg.kind,
+          // A redline says so in its reason (ADR 0015 §4).
+          ...(msg.reason && { reason: msg.reason }),
           body: msg.body,
           // The pictures pasted into the pin form ride along (n-0096).
           ...(msg.attachments?.length && { attachments: msg.attachments }),

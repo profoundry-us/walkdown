@@ -2,8 +2,9 @@
  * Fixtures for group g2's cli screens: design ownership, authoring, screen
  * identity and time.
  */
-import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 /* `checkout` with one rule, `checkout.basics.pays`, and nothing else in features/. */
 function checkout(m, h) {
@@ -166,6 +167,17 @@ export default {
     );
     m.ok(['hash', '--write', '--blueprint', 'checkout']);
   },
+  /* `checkout` with a drawn receipt screen whose anchors are receipt.items and receipt.total. */
+  'g2-receipt-drawn'(m, h) {
+    checkout(m, h);
+    storyboard(m, [
+      '  - id: receipt',
+      '    title: Receipt',
+      '    prototype: /screens/receipt.html',
+      '    app: { path: /receipt }',
+      '    anchors: [receipt.items, receipt.total]',
+    ]);
+  },
   /* `checkout`, no rules yet, whose spec.yml says an agent draws its design, and an undrawn receipt screen with a design request. */
   'g2-design-by-agent'(m, h) {
     checkout(m, h);
@@ -183,5 +195,94 @@ export default {
   'g2-undrawn-screens'(m, h) {
     checkout(m, h);
     undrawn(m);
+    // Both screens have their rule, so the one warning is the missing request.
+    const file = join(m.specOf('checkout'), 'features', 'checkout.yml');
+    writeFileSync(
+      file,
+      readFileSync(file, 'utf8').replace(
+        '        verify: [checks]\n',
+        '        verify: [checks]\n        screens: [cart, receipt]\n',
+      ),
+    );
+  },
+  /*
+   * `shop`, from before ADR 0015: checkout and search keep their designs in
+   * prototype/screens/, prototype/drafts/ and proposals/, committed on the
+   * days the upgrade dates them by, with a pending request on receipt and on
+   * shipping, a draft and a sketch nothing names, a page git does not hold,
+   * and two redlines in as-built/redlines.json.
+   */
+  'g2-old-prototypes'(m, h) {
+    h.realRepo(m);
+    const page = (rel) => {
+      const f = join(m.shop, rel);
+      mkdirSync(dirname(f), { recursive: true });
+      writeFileSync(f, `<!doctype html><title>${rel}</title>\n`);
+    };
+    const commit = (day, files) => {
+      for (const f of files) page(f);
+      const at = `${day}T12:00:00-05:00`;
+      const r = spawnSync('git', ['add', '-A'], { cwd: m.shop, env: m.env });
+      const c = spawnSync('git', ['commit', '-q', '-m', `designs ${day}`], {
+        cwd: m.shop,
+        env: { ...m.env, GIT_AUTHOR_DATE: at, GIT_COMMITTER_DATE: at },
+      });
+      if (r.status || c.status) throw new Error(`fixture: commit on ${day} failed\n${c.stderr}`);
+    };
+    commit('2026-09-18', ['prototype/screens/cart.html', 'prototype/screens/payment.html']);
+    commit('2026-09-21', ['prototype/screens/receipt.html', 'prototype/drafts/receipt.html']);
+    commit('2026-09-25', ['prototype/screens/results.html']);
+    commit('2026-09-30', ['prototype/drafts/cart-old.html', 'proposals/payment-sketch.html']);
+    commit('2026-10-06', ['proposals/shipping.html']);
+    page('proposals/payment-notes.html');
+
+    for (const [name, screens] of [
+      [
+        'checkout',
+        [
+          ['cart', '/screens/cart.html'],
+          ['payment', '/screens/payment.html'],
+          ['receipt', '/screens/receipt.html'],
+          ['shipping', 'null'],
+        ],
+      ],
+      ['search', [['results', '/screens/results.html']]],
+    ]) {
+      m.ok(['blueprints', 'new', name]);
+      const spec = m.specOf(name);
+      writeFileSync(
+        join(spec, 'spec.yml'),
+        `${readFileSync(join(spec, 'spec.yml'), 'utf8')}\nprototype:\n  root: prototype/\n`,
+      );
+      writeFileSync(
+        join(spec, 'storyboard.yml'),
+        `screens:\n${screens
+          .map(
+            ([id, path]) =>
+              `  - id: ${id}\n    title: ${id}\n    prototype: ${path}\n    app: { path: /${id} }\n`,
+          )
+          .join('')}`,
+      );
+    }
+    for (const [screen, body] of [
+      ['receipt', 'Draw the receipt with the order number first.'],
+      ['shipping', 'Draw the shipping step.'],
+    ])
+      m.ok(['threads', 'new', '--screen', screen, '--body', body, '--blueprint', 'checkout']);
+    mkdirSync(join(m.shop, 'as-built'), { recursive: true });
+    writeFileSync(
+      join(m.shop, 'as-built', 'redlines.json'),
+      `${JSON.stringify(
+        {
+          cart: {
+            title: 'Cart',
+            redlines: ['The build totals the cart in <code>cart.total</code> above the list.'],
+          },
+          receipt: { title: 'Receipt', redlines: ['The build leaves out the printed logo.'] },
+        },
+        null,
+        2,
+      )}\n`,
+    );
   },
 };

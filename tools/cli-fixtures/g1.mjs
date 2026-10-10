@@ -129,13 +129,7 @@ export default {
     m.ok(['blueprints', 'new', 'checkout']);
     const spec = m.specOf('checkout');
     const file = join(spec, 'spec.yml');
-    writeFileSync(
-      file,
-      readFileSync(file, 'utf8').replace(
-        '# prototype:\n#   root: prototype/',
-        'prototype:\n  root: prototype/',
-      ),
-    );
+    writeFileSync(file, `${readFileSync(file, 'utf8')}\nprototype:\n  root: prototype/\n`);
     mkdirSync(join(spec, 'prototype', 'screens'), { recursive: true });
     writeFileSync(
       join(spec, 'prototype', 'screens', 'pay.html'),

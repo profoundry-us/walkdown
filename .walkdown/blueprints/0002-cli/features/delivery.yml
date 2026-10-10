@@ -77,7 +77,7 @@ stories:
         because: Writing through a link changes whatever the link points at.
         history: walkdown's own installer once wrote through this repository's skill links into its shipped source (n-0197, 2026-09-05).
         verify: [checks]
-        screens: [skills-others-links]
+        screens: [skills-others-links, skills-walkdown-name-taken]
         signoff: [eng]
         steps:
           given:

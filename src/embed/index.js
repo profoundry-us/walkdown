@@ -12,7 +12,7 @@
  */
 import { MSG } from '../../lib/message-stream.js';
 import { matchScreen, normalizeFragment } from '../../lib/screen-match.js';
-import { CHIP, TERMINAL } from '../../lib/vocab.js';
+import { CHIP, isMachineName, TERMINAL } from '../../lib/vocab.js';
 import { icon } from './icons.js';
 
 (() => {
@@ -294,6 +294,38 @@ import { icon } from './icons.js';
     return `${upDown} ${along} [--tt-trans:0]`;
   }
 
+  /*
+   * What a pin is, chosen where the pin is made and seen before anything is
+   * typed (embed.pin.asks-its-kind): it decides who the pin waits on. Each
+   * kind says what will be filed, in the hint, the box's prompt and the save
+   * button. A redline is the as-built's red with a not-equal sign, because it
+   * says the build is not the design here, and it is never open (ADR 0015 §4).
+   */
+  const REDLINE = 'oklch(62% 0.17 25)';
+  const KINDS = {
+    note: {
+      glyph: '!',
+      save: 'Pin it',
+      hint: 'Something here should change. It stays open until it is dealt with.',
+      prompt: 'What should change here? Paste a screenshot to attach it.',
+    },
+    question: {
+      glyph: '?',
+      save: 'Ask it',
+      hint: 'Something you want answered. It waits on whoever can answer it.',
+      prompt: 'What do you want to know about this?',
+    },
+    redline: {
+      glyph: '\u2260',
+      save: 'File redline',
+      hint: 'The build leaves the design here on purpose. Say why. It is filed closed, and nothing waits on it.',
+      prompt: 'Why does the build leave the design here?',
+    },
+  };
+  // Only a person files a redline: a machine recording sees the tab, greyed,
+  // and is told why (q-0576).
+  const agentRecording = () => !identity?.username || isMachineName(identity.username);
+
   function renderPins() {
     root.querySelectorAll('.wd-pin').forEach((p) => p.remove());
     for (const pin of ctx.pins) {
@@ -305,7 +337,10 @@ import { icon } from './icons.js';
        * at, and the anchor only says where on it. Pins from before the
        * surface was recorded carry none and still draw wherever they match.
        */
-      if (pin.surface && ctx.surface && pin.surface !== ctx.surface) continue;
+      // A redline is about the gap BETWEEN the two sides, so it is drawn on
+      // both, wherever its element is (embed.pin.redline-explains-a-gap).
+      const redline = pin.reason === 'redline';
+      if (!redline && pin.surface && ctx.surface && pin.surface !== ctx.surface) continue;
       const el =
         pin.element && document.querySelector(`[${ANCHOR_ATTR}="${CSS.escape(pin.element)}"]`);
       /*
@@ -342,7 +377,7 @@ import { icon } from './icons.js';
        */
       const wrap = document.createElement('div');
       wrap.className = `wd-pin pointer-events-auto absolute z-[99998] ${tipSide(left, top)} tooltip`;
-      wrap.dataset.testid = 'pin.marker';
+      wrap.dataset.testid = redline ? 'pin.redline' : 'pin.marker';
       wrap.dataset.thread = pin.id;
       wrap.style.left = `${left}px`;
       wrap.style.top = `${top}px`;
@@ -354,14 +389,21 @@ import { icon } from './icons.js';
       // A map pin, because that is what it is. Colour carries the state -
       // amber while the conversation is open, green once it has settled - and
       // the letter in the head says note or question.
+      // A redline wears the as-built's red and a not-equal sign: the build is
+      // not the design here, and it is never open.
       const settled = pin.status !== 'open';
       dot.className = `wd-dot pointer-events-auto relative cursor-pointer
-        ${settled ? 'text-success' : 'text-warning'}`;
+        ${redline ? '' : settled ? 'text-success' : 'text-warning'}`;
+      if (redline) dot.style.color = REDLINE;
       dot.innerHTML = `${icon('map-pin-fill', 'size-[22px] drop-shadow')}
-        <span class="wd-kind">${pin.kind === 'question' ? '?' : '!'}</span>`;
+        <span class="wd-kind">${redline ? KINDS.redline.glyph : pin.kind === 'question' ? '?' : '!'}</span>`;
       dot.onclick = (e) => {
         e.stopPropagation();
-        if (framed) window.parent.postMessage({ type: 'walkdown:open-thread', id: pin.id }, '*');
+        // A redline explains itself on the page: nothing in it asks, so
+        // there is no conversation to go and have.
+        if (redline) openRedline(pin, wrap);
+        else if (framed)
+          window.parent.postMessage({ type: 'walkdown:open-thread', id: pin.id }, '*');
         else openThreadPopover(pin, wrap);
       };
       wrap.append(tip, dot);
@@ -386,12 +428,68 @@ import { icon } from './icons.js';
     const text = String(pin.body ?? '')
       .replace(/\s+/g, ' ')
       .trim();
+    // A redline is never read as a note (embed.pin.redline-explains-a-gap).
+    if (pin.reason === 'redline')
+      return `<div class="font-semibold">Redline · ${esc(pin.id)} · closed</div>
+      <div>The build leaves the design here on purpose.${text ? ` ${esc(text.length > 90 ? `${text.slice(0, 89)}…` : text)}` : ''}</div>`;
     return `<div class="font-semibold">${esc(pin.id)} · ${esc(pin.kind)} · ${esc(pin.status)}</div>
       <div class="opacity-70">${esc(where)}</div>${
         text
           ? `<div class="mt-0.5">“${esc(text.length > 90 ? text.slice(0, 89) + '…' : text)}”</div>`
           : ''
       }`;
+  }
+
+  /*
+   * A redline, opened (embed.pin.redline-explains-a-gap). It says what the
+   * design shows, what the build shows where the person said so, and why;
+   * who filed it and when; and that nothing waits on it. No reply box and no
+   * answer button: it was filed closed, by a person, and is read, not worked.
+   */
+  function openRedline(pin, dot) {
+    overlay?.remove();
+    const esc = (v) =>
+      String(v ?? '').replace(
+        /[&<>"]/g,
+        (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+      );
+    overlay = document.createElement('div');
+    overlay.className = FORM;
+    overlay.dataset.testid = 'pin.redline-detail';
+    overlay.style.borderColor = REDLINE;
+    overlay.style.left = `${Math.max(
+      window.scrollX + 8,
+      Math.min(parseFloat(dot.style.left), window.scrollX + window.innerWidth - 268),
+    )}px`;
+    overlay.style.top = `${parseFloat(dot.style.top) + 24}px`;
+    const when = pin.created
+      ? new Date(pin.created).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      : '';
+    const who = MSG.displayName(pin.author, MSG.nameMap(identity));
+    overlay.innerHTML = `
+      <div class="flex items-center gap-1.5 text-[11px]">
+        <span class="inline-flex size-4 items-center justify-center rounded-full text-[10px] font-extrabold text-white" style="background:${REDLINE}">${KINDS.redline.glyph}</span>
+        <b>Redline</b><span class="font-mono opacity-60">${esc(pin.id)}</span>
+        <span class="badge badge-xs badge-ghost ml-auto border-dashed">closed</span>
+      </div>
+      <p class="mt-2 text-[11.5px] opacity-60">The build leaves the design here on purpose.</p>
+      ${
+        pin.design || pin.build
+          ? `<div class="mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[12px]" data-testid="pin.redline-pair">
+              <span class="opacity-50">Design</span><span>${esc(pin.design ?? '—')}</span>
+              <span class="opacity-50">Build</span><span>${esc(pin.build ?? '—')}</span>
+            </div>`
+          : ''
+      }
+      <div class="mt-2.5 text-[12.5px] leading-snug" data-testid="pin.redline-why">${esc(pin.body)}</div>
+      <p class="mt-2 text-[10.5px] opacity-45">Filed by ${esc(who)}${when ? ` · ${esc(when)}` : ''}${
+        pin.element ? ` · on <span class="font-mono">${esc(pin.element)}</span>` : ''
+      }</p>
+      <p class="mt-2 border-t border-dashed border-base-content/25 pt-2 text-[11px] leading-snug opacity-60">
+        Nothing waits on this. A judge comparing the two sides reads it as an intended gap, not a fail.</p>
+      <div class="mt-2 flex"><button class="btn btn-xs btn-ghost wd-cancel ml-auto">Close</button></div>`;
+    root.appendChild(overlay);
+    overlay.querySelector('.wd-cancel').onclick = () => closeForm();
   }
 
   // --- standalone thread popover: read + reply (lifecycle actions live in the
@@ -589,6 +687,7 @@ import { icon } from './icons.js';
   }
 
   // --- pin creation -----------------------------------------------------------
+
   // Opens for an anchored element, or — when nothing anchored was under the
   // click — at the click point itself, pinning by position.
   function openForm(el, point) {
@@ -618,13 +717,20 @@ import { icon } from './icons.js';
     placeholder.innerHTML = `${icon('map-pin-fill', 'size-[22px] drop-shadow')}
       <span class="wd-kind">!</span>`;
     root.appendChild(placeholder);
+    const tab = (k, label) =>
+      `<button type="button" role="tab" data-kind="${k}" aria-selected="false"
+        class="flex items-center justify-center gap-1 rounded py-1 text-[11.5px] disabled:cursor-not-allowed disabled:opacity-35"><span
+        class="inline-flex size-[13px] items-center justify-center rounded-full border border-current text-[9px] font-extrabold leading-none">${KINDS[k].glyph}</span>${label}</button>`;
     overlay.innerHTML = `
-      <b class="font-mono text-[11.5px]">${el ? anchorId(el) : 'unanchored spot'}</b>
+      <div class="grid grid-cols-3 gap-0.5 rounded-md border-[1.5px] border-dashed border-base-content/25 p-0.5"
+        role="tablist" aria-label="What kind of pin" data-testid="pin.kind">
+        ${tab('note', 'Note')}${tab('question', 'Question')}${tab('redline', 'Redline')}
+      </div>
+      <b class="mt-2 block font-mono text-[11.5px]">${el ? anchorId(el) : 'unanchored spot'}</b>
       ${el ? '' : '<div class="text-[11px] opacity-50">no anchored element here — pinned by position</div>'}
-      <textarea data-testid="pin.note" class="textarea textarea-sm mt-2 h-16 w-full" placeholder="What should change here? Paste a screenshot to attach it."></textarea>
+      <p class="wd-hint mt-0.5 text-[11.5px] leading-snug opacity-60" data-testid="pin.hint"></p>
+      <textarea data-testid="pin.note" class="textarea textarea-sm mt-2 h-16 w-full"></textarea>
       <div class="wd-shots-pending mt-1 flex flex-wrap gap-1" data-testid="pin.shots"></div>
-      <label class="mt-1 flex items-center gap-2 text-[12px]">
-        <input type="checkbox" data-testid="pin.kind" class="checkbox checkbox-xs wd-q"> question (not a note)</label>
       <div class="mt-2 flex gap-2">
         <button data-testid="pin.save" class="btn btn-xs btn-primary wd-primary">Pin it</button>
         <button data-testid="pin.cancel" class="btn btn-xs btn-ghost wd-cancel">Cancel</button>
@@ -634,13 +740,46 @@ import { icon } from './icons.js';
     const h = overlay.getBoundingClientRect().height;
     if (point.y - window.scrollY + 18 + h > window.innerHeight)
       overlay.style.top = `${Math.max(window.scrollY + 8, point.y - h - 18)}px`;
-    // The kind switch moves the placeholder's letter with it, so the pin on the
-    // page always says what is about to be filed.
-    const kindBox = overlay.querySelector('.wd-q');
-    kindBox.onchange = () => {
+    // The kind moves the placeholder's mark with it, so the pin on the page
+    // always says what is about to be filed.
+    let kind = 'note';
+    const tabs = [...overlay.querySelectorAll('[data-kind]')];
+    const redlineTab = overlay.querySelector('[data-kind="redline"]');
+    // A redline is on an element, and only a person files one.
+    redlineTab.disabled = agentRecording() || !el;
+    redlineTab.title = agentRecording()
+      ? 'Only a person files a redline. Ask a question instead.'
+      : !el
+        ? 'A redline is on an element: click the one the build leaves'
+        : 'The build leaves the design here on purpose';
+    const setKind = (k) => {
+      if (k === 'redline' && redlineTab.disabled) return;
+      kind = k;
+      for (const b of tabs) {
+        const on = b.dataset.kind === k;
+        b.setAttribute('aria-selected', String(on));
+        b.classList.toggle('bg-base-content', on && k !== 'redline');
+        b.classList.toggle('text-base-100', on && k !== 'redline');
+        b.classList.toggle('hover:bg-base-200', !on);
+        b.style.background = on && k === 'redline' ? REDLINE : '';
+        b.style.color = on && k === 'redline' ? '#fff' : '';
+      }
+      overlay.querySelector('.wd-hint').textContent = KINDS[k].hint;
+      overlay.querySelector('textarea').placeholder = KINDS[k].prompt;
+      overlay.querySelector('.wd-primary').textContent = KINDS[k].save;
       const mark = placeholder?.querySelector('.wd-kind');
-      if (mark) mark.textContent = kindBox.checked ? '?' : '!';
+      if (mark) mark.textContent = KINDS[k].glyph;
+      if (placeholder) placeholder.style.color = k === 'redline' ? REDLINE : '';
     };
+    for (const b of tabs) b.onclick = () => setKind(b.dataset.kind);
+    // Arrow keys move between the kinds, as a tablist's should.
+    overlay.querySelector('[role="tablist"]').addEventListener('keydown', (e) => {
+      const order = tabs.filter((b) => !b.disabled).map((b) => b.dataset.kind);
+      const i = order.indexOf(kind);
+      if (e.key === 'ArrowRight') setKind(order[(i + 1) % order.length]);
+      if (e.key === 'ArrowLeft') setKind(order[(i + order.length - 1) % order.length]);
+    });
+    setKind('note');
     overlay.querySelector('textarea').focus();
     overlay.querySelector('.wd-cancel').onclick = () => closeForm();
     /*
@@ -760,7 +899,6 @@ import { icon } from './icons.js';
     });
     overlay.querySelector('.wd-primary').onclick = () => {
       const body = overlay.querySelector('textarea').value.trim();
-      const kind = overlay.querySelector('.wd-q').checked ? 'question' : 'note';
       if (!body) return;
       /*
        * The click point is recorded either way: it is where the person was
@@ -780,7 +918,9 @@ import { icon } from './icons.js';
         }),
         position: point,
         body,
-        kind,
+        // A redline is a note whose reason says so (ADR 0015 §4).
+        kind: kind === 'question' ? 'question' : 'note',
+        ...(kind === 'redline' && { reason: 'redline' }),
         surface: ctx.surface,
         viewport: currentViewport(),
         ...(shots.length && { attachments: shots }),
@@ -825,7 +965,7 @@ import { icon } from './icons.js';
           ctx.pins.push({
             ...pin,
             id: data.id,
-            status: 'open',
+            status: data.thread?.status ?? 'open',
             author: data.thread?.author,
             via: data.thread?.via ?? null,
             created: data.thread?.created,
@@ -1028,6 +1168,7 @@ import { icon } from './icons.js';
         viewport: msg.viewport ?? ctx.viewport,
         pins: msg.pins ?? [],
       };
+      if (msg.identity !== undefined) identity = msg.identity;
       if (typeof msg.pinMode === 'boolean') setPinMode(msg.pinMode);
       renderPins();
     }
@@ -1081,12 +1222,19 @@ import { icon } from './icons.js';
       ctx.pins = !hit
         ? []
         : blueprint.threads
-            .filter((t) => t.anchor?.screen === hit.screen.id && !TERMINAL.includes(t.status))
+            // A redline is filed closed and is drawn all the same (ADR 0015 §4).
+            .filter(
+              (t) =>
+                t.anchor?.screen === hit.screen.id &&
+                (!TERMINAL.includes(t.status) || t.reason === 'redline'),
+            )
             .map((t) => ({
               id: t.id,
               kind: t.kind,
               status: t.status,
               reason: t.reason ?? null,
+              design: t.design ?? null,
+              build: t.build ?? null,
               element: t.anchor?.element,
               position: t.anchor?.position,
               surface: t.anchor?.surface,

@@ -269,7 +269,7 @@ export function threadPane() {
         sketch?.proposed
           ? html`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
         @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
-        ⚠ View the proposed sketch</button>`
+        View the proposed design</button>`
           : nothing
       }
       ${

@@ -58,7 +58,7 @@ stories:
         because: The screen that most needs a request is one that design has not drawn, and it often has no rule yet to anchor to.
         history: AGENTS.md told agents to file a design request anchored to the screen while `walkdown thread new` refused any thread without `--rule` (found 2026-09-29, deferred until ADR 0009 was decided).
         verify: [checks]
-        screens: [thread-screen-request]
+        screens: [thread-screen-request, threads-new-request]
         signoff: [eng]
         steps:
           given:

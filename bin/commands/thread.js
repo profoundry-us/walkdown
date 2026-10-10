@@ -212,6 +212,27 @@ export function run(args) {
       // A refusal at the door (the voice, a missing body) is words, never a
       // stack trace - the same courtesy the mutating path already extends.
       console.error(err.message);
+      if (err.code === 'redline-by-machine') {
+        // The way past is the question the agent should have asked, on the
+        // same element, ready to run (ADR 0015 §4).
+        const ask = String(body)
+          .trim()
+          .replace(/[.!?]*$/, '. Is that meant?');
+        const where = [
+          screen && `--screen ${screen}`,
+          values.element && `--element ${values.element}`,
+          rule && `--rule ${rule}`,
+        ].filter(Boolean);
+        console.error('Nothing was filed.');
+        console.error('');
+        console.error(
+          'To ask the person whether the gap is meant, file a question on the same element:',
+        );
+        console.error(
+          `  walkdown threads new --kind question ${where.join(' ')} --body ${JSON.stringify(ask)} --as-agent${values.blueprint ? ` --blueprint ${values.blueprint}` : blueprintFlag(blueprint.dir)}`,
+        );
+        console.error('If they agree, they file the redline.');
+      }
       return end(2);
     }
     // Whose name went on it is the record's answer, not this door's guess.
@@ -229,6 +250,17 @@ export function run(args) {
           anchor,
         }),
       );
+      return end(0);
+    }
+    if (thread.reason === 'redline') {
+      // Filed closed, so it says so, and says what it is for.
+      console.log(`✓ ${opened} filed · note · redline · by ${by} · closed`);
+      console.log(dim(`  screen ${anchor.screen}, element ${thread.anchor.element}`));
+      console.log(dim('  It is closed as filed, and waits on nobody.'));
+      console.log(
+        dim('  A judge reads this gap as intended, not as a fail, and names it in its reasoning.'),
+      );
+      console.log(dim(`  walkdown threads show ${opened} reads it in full`));
       return end(0);
     }
     console.log(

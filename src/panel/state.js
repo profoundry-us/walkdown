@@ -70,6 +70,22 @@ export const S = {
   appDown: null,
   // The anchor the open rule is about, told to each surface as it arrives (ADR 0016).
   focusTarget: null,
+  raiseProposed: null, // a screen whose proposed version comes up once it is in hand
+  /*
+   * Which version the design side shows on a screen with a proposed one
+   * (ADR 0015 §6): the proposal first, because it is what is being judged.
+   * The address carries the other choice (`?design=accepted`), so a link
+   * opens on the version it names.
+   */
+  designVersion: (() => {
+    try {
+      return new URLSearchParams(location.search).get('design') === 'accepted'
+        ? 'accepted'
+        : 'proposed';
+    } catch {
+      return 'proposed';
+    }
+  })(),
 
   /*
    * Which of the three things the panel is doing: finding a server, choosing

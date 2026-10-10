@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-10T22-12-25Z-local-01",
+  "created": "2026-10-10T22:12:25Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "2a66a23-dirty",
+  "spec_hash": "sha256:9d81d2cf706a",
+  "results": [
+    {
+      "rule": "ownership.design.approved-rules-accept-the-design",
+      "status": "pass",
+      "statement_hash": "sha256:9e79be5bc2f8",
+      "duration_ms": 1573,
+      "checks": [
+        "test/design-acceptance.test.js:92",
+        "test/design-acceptance.test.js:132",
+        "test/design-acceptance.test.js:140",
+        "test/design-acceptance.test.js:148"
+      ]
+    }
+  ]
+}

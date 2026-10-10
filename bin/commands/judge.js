@@ -111,6 +111,23 @@ export function run(args) {
       for (const m of String(step).matchAll(/`([A-Za-z0-9][A-Za-z0-9._-]*)`/g))
         if (m[1].includes('.')) anchors.add(m[1]);
 
+  /*
+   * The redlines on the rule's screens: a person said the build leaves the
+   * design there on purpose, so a judge reads each as an intended gap and
+   * never as a fail (ADR 0015 §4).
+   */
+  const onScreens = new Set(wanted.map((s) => s.id));
+  const redlines = (blueprint.threads ?? [])
+    .map((t) => t.data)
+    .filter((t) => t?.reason === 'redline' && onScreens.has(t.anchor?.screen))
+    .map((t) => ({
+      id: t.id,
+      screen: t.anchor.screen,
+      element: t.anchor.element ?? null,
+      by: t.author ?? null,
+      body: String(t.body ?? '').trim(),
+    }));
+
   // A governance line arrives as one string; fold it to the block's width.
   const bullet = (text) => {
     const out = [];
@@ -194,6 +211,7 @@ export function run(args) {
             setup: s.app?.setup ?? null,
           })),
           anchors: [...anchors],
+          redlines,
           target: values.target,
           base_url: baseUrl,
           serve,
@@ -258,6 +276,18 @@ export function run(args) {
       `ANCHORS the steps name: ${[...anchors].join(', ')}`,
       '  (declared per screen in the storyboard; in pin mode, hovering highlights them)',
     );
+
+  if (redlines.length) {
+    say(
+      '',
+      'REDLINES (where a person said the build leaves the design on purpose)',
+      ...redlines.flatMap((r) => [
+        `  ${r.id} on ${r.screen}${r.element ? `, element ${r.element}` : ''}, by ${r.by}:`,
+        ...bullet(r.body).map((l) => `  ${l.replace(/^ {2}-/, '   ')}`),
+      ]),
+      '  A gap a redline names is intended, not a fail. Name each one you meet in your reasoning.',
+    );
+  }
 
   say(
     '',

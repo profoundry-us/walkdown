@@ -795,3 +795,140 @@ test('beside the pin, Verify is offered to a declared person on an answered note
   expect(t.status).toBe('verified');
   expect(t.verified_by).toBe('checks-person');
 });
+
+/*
+ * ADR 0015 §4: what a pin is, chosen where it is made - a note, a question
+ * or a redline - and a redline drawn as an explanation, never as an ask.
+ */
+test('the pin form asks in one control whether the pin is a note, a question or a redline', {
+  tag: '@rule:embed.pin.asks-its-kind',
+}, async ({ page }) => {
+  await pinning(page);
+  const box = await app(page).getByTestId('host.cta').boundingBox();
+  await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.6);
+  const form = app(page).getByTestId('pin.form');
+  await expect(form).toBeVisible();
+
+  // All three, visible before anything is typed, with Note chosen.
+  const kind = form.getByTestId('pin.kind');
+  for (const label of ['Note', 'Question', 'Redline'])
+    await expect(kind.getByRole('tab', { name: label })).toBeVisible();
+  await expect(kind.getByRole('tab', { name: 'Note' })).toHaveAttribute('aria-selected', 'true');
+  await expect(form.getByTestId('pin.save')).toHaveText('Pin it');
+
+  // Each kind says what will be filed: the hint and the save button follow it.
+  await kind.getByRole('tab', { name: 'Question' }).click();
+  await expect(form.getByTestId('pin.hint')).toContainText('want answered');
+  await expect(form.getByTestId('pin.save')).toHaveText('Ask it');
+  await kind.getByRole('tab', { name: 'Redline' }).click();
+  await expect(form.getByTestId('pin.hint')).toContainText('leaves the design here on purpose');
+  await expect(form.getByTestId('pin.save')).toHaveText('File redline');
+
+  // The rest works as it did: cancel closes it, and a save files the kind chosen.
+  await form.getByTestId('pin.cancel').click();
+  await expect(form).toHaveCount(0);
+  await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.6);
+  await app(page).getByTestId('pin.kind').getByRole('tab', { name: 'Redline' }).click();
+  await app(page)
+    .getByTestId('pin.note')
+    .fill('The button says more than the design, so a phone reader knows what it does.');
+  await expect(app(page).getByTestId('pin.shots')).toBeAttached();
+  const posted = page.waitForResponse(
+    (r) => r.url().includes('/api/threads') && r.request().method() === 'POST',
+  );
+  await app(page).getByTestId('pin.save').click();
+  const { thread } = await (await posted).json();
+  expect(thread.kind).toBe('note');
+  expect(thread.reason).toBe('redline');
+  expect(thread.status).toBe('recorded');
+});
+
+test('while an agent is recording, Redline cannot be chosen, and the form says only a person files one', {
+  tag: '@rule:embed.pin.asks-its-kind',
+}, async ({ page }) => {
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const data = await res.json();
+    data.identity = { ...(data.identity ?? {}), username: 'agent', declared: true };
+    await route.fulfill({ response: res, json: data });
+  });
+  await pinning(page);
+  const box = await app(page).getByTestId('host.cta').boundingBox();
+  await page.mouse.click(box.x + box.width * 0.85, box.y + box.height * 0.6);
+  const redline = app(page).getByTestId('pin.kind').getByRole('tab', { name: 'Redline' });
+  await expect(redline).toBeVisible();
+  await expect(redline).toBeDisabled();
+  await expect(redline).toHaveAttribute('title', /Only a person files a redline/);
+});
+
+test('a redline pin explains a gap on both sides of the fade, and asks nothing', {
+  tag: '@rule:embed.pin.redline-explains-a-gap',
+}, async ({ page }) => {
+  // The design of the same screen, carrying the same element, so the
+  // redline has somewhere to stand on the design side too.
+  await page.route(/\/prototype\/screens\/review\.html/, (r) =>
+    r.fulfill({
+      contentType: 'text/html',
+      body: '<!doctype html><body><h1 data-testid="host.title">Design</h1><button data-testid="host.cta">Join</button><script src="/embed.js" data-walkdown></script></body>',
+    }),
+  );
+  await pinning(page);
+  const box = await app(page).getByTestId('host.title').boundingBox();
+  await page.mouse.click(box.x + box.width * 0.4, box.y + box.height * 0.6);
+  await app(page).getByTestId('pin.kind').getByRole('tab', { name: 'Redline' }).click();
+  const why = 'On a phone, the short label read as a link to sign in.';
+  await app(page).getByTestId('pin.note').fill(why);
+  const posted = page.waitForResponse(
+    (r) => r.url().includes('/api/threads') && r.request().method() === 'POST',
+  );
+  await app(page).getByTestId('pin.save').click();
+  const { id } = await (await posted).json();
+
+  // Drawn on its element, unlike a note's or a question's pin.
+  const pin = app(page).locator(`[data-testid="pin.redline"][data-thread="${id}"]`);
+  await expect(pin).toBeVisible();
+  const colour = await pin.locator('.wd-dot').evaluate((d) => getComputedStyle(d).color);
+  const amber = await app(page)
+    .locator('html')
+    .evaluate(() => {
+      const p = document.createElement('span');
+      p.className = 'text-warning';
+      document.body.appendChild(p);
+      const c = getComputedStyle(p).color;
+      p.remove();
+      return c;
+    });
+  expect(colour).not.toBe(amber);
+
+  // Its tip says redline and closed on contact, never note and recorded.
+  const tip = pin.getByTestId('pin.tip');
+  await expect(tip).toContainText(`Redline · ${id} · closed`);
+  await expect(tip).toContainText(why);
+  await expect(tip).not.toContainText('note');
+
+  // Opened: why, who and when, and that nothing waits on it. No reply box,
+  // no answer button.
+  await pin.locator('.wd-dot').click();
+  const detail = app(page).getByTestId('pin.redline-detail');
+  await expect(detail).toBeVisible();
+  await expect(detail.getByTestId('pin.redline-why')).toHaveText(why);
+  await expect(detail).toContainText('Filed by');
+  await expect(detail).toContainText('Nothing waits on this');
+  await expect(detail.locator('textarea')).toHaveCount(0);
+  await expect(detail.getByRole('button', { name: /Reply|Answer/ })).toHaveCount(0);
+  await detail.getByRole('button', { name: 'Close' }).click();
+
+  // On the design side as well.
+  await page.getByTestId('panel.pin-mode').click();
+  await page.getByTestId('panel.surface-design').click();
+  const ghost = page.frameLocator('[data-walkdown-ghost] iframe');
+  await expect(ghost.locator(`[data-testid="pin.redline"][data-thread="${id}"]`)).toBeVisible();
+
+  // Listed apart from what still waits, in the screen's thread list.
+  await realPanel(page)
+    .getByTestId('panel.tabs')
+    .getByText(/Threads/)
+    .click();
+  await realPanel(page).locator('[data-tfilter="active"]').click();
+  await expect(realPanel(page).getByTestId('panel.redlines')).toContainText(id);
+});

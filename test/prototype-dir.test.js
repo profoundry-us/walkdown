@@ -35,8 +35,9 @@ test('a relative prototype root beside the spec answers before the code, and the
 test('the design pages, the stand-ins and the storyboard picture all read the one helper @rule:locations.default.prototype-beside-the-spec', async () => {
   const { readFileSync } = await import('node:fs');
   const serve = readFileSync(new URL('../lib/serve.js', import.meta.url), 'utf8');
-  // Both routes that read files ask the helper; nothing resolves the root by hand.
-  assert.equal(serve.match(/prototypeDir\(blueprint\)/g)?.length, 2);
+  // The two routes that read files and the storyboard picture ask the
+  // helper; nothing resolves the root by hand.
+  assert.equal(serve.match(/prototypeDir\(blueprint\)/g)?.length, 3);
   assert.doesNotMatch(serve, /resolve\([^)]*prototype\?\.root/);
 });
 

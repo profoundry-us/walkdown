@@ -1,0 +1,70 @@
+{
+  "run_id": "2026-10-10T22-25-26Z-local-01",
+  "created": "2026-10-10T22:25:26Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2a66a23-dirty",
+  "tree_hash": "sha256:77dabeadf0ec",
+  "spec_hash": "sha256:d9845ff0f261",
+  "results": [
+    {
+      "rule": "panel.dock.surfaces-say-what-they-show",
+      "status": "pass",
+      "statement_hash": "sha256:282502d9f880",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-08-01Z/app-review.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-fx-versions.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-fx-proposal-only.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-fx-neither.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-fx-running.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-fx-standin.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-no-screen.png",
+        "runs/evidence/2026-10-10T22-08-01Z/probe.json"
+      ],
+      "threads": [],
+      "reasoning": "Driven on a scratch copy served on :4732 (tmp/scratch/judge-proposed, its own home), first in the built-in browser pane and then re-driven with a Playwright script that saved the screenshots and probe.json. The fixture added to the copy only: a live design request proposing a version for design-version-switch (stand-in app), fx-versions (accepted + proposed, as-built app), fx-proposal-only, fx-neither, fx-running (a real app path) and fx-standin. The panel showed Stale server mid-session because lib/upgrade*.js was being edited by another agent. Nothing it touches is panel code; the server was restarted once. Every case read as the steps say. A design and a running app: Design / App, fade live. An as-built drawing: Design / As-built. A stand-in: Design / Stand-in. With a proposed version, Design is shown first and wears btn-warning, the same oklch(0.84 0.15 85) as the dashed ring, with the tip Show the proposed design, waiting on your acceptance. On a proposal-only screen the build side is disabled (Nothing is built for this screen yet) and so is the fade. With neither, Design is disabled with the tip No design or proposal on file for this screen, a design request is how one gets drawn. On a page that is no screen (/stand-in/review), both buttons and the fade are disabled, their tooltip points at the screen picker, and clicking them left both the address and the frame where they were. Picking each screen in turn renamed the buttons (As-built, then Stand-in, then App). Edges: the pin-mode tooltip mid-fade still says slide fully to the prototype or the app. That is pin mode's wording, outside this rule's buttons, and under 10% likely to mislead. The tooltips were read from the title attribute and not seen as native hover bubbles, which a screenshot cannot show."
+    },
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "fail",
+      "statement_hash": "sha256:963ddcac795e",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-08-01Z/app-thread-detour.png",
+        "runs/evidence/2026-10-10T22-08-01Z/probe.json"
+      ],
+      "threads": [
+        "d0231464-7d99-49a5-8b68-ad6a43508030"
+      ],
+      "reasoning": "Driven on a scratch copy served on :4732 (tmp/scratch/judge-proposed, its own home), first in the built-in browser pane and then re-driven with a Playwright script that saved the screenshots and probe.json. The fixture added to the copy only: a live design request proposing a version for design-version-switch (stand-in app), fx-versions (accepted + proposed, as-built app), fx-proposal-only, fx-neither, fx-running (a real app path) and fx-standin. The panel showed Stale server mid-session because lib/upgrade*.js was being edited by another agent. Nothing it touches is panel code; the server was restarted once. A note on fx-proposal-only (a proposed design, no accepted one) offers View the proposed design. Pressing it ghosts the proposed page over the review page at 0.5 opacity in the dashed warning ring, labelled Proposed — yours to accept. The picker still reads The review page, and picking another screen swaps to it and ends the detour. A screen with an accepted design and no proposal (review) still ghosts its prototype. The last step does not hold: nothing in the bar turns the ghost off. For the detour the bar describes the proposal-only screen, so App is disabled (Nothing is built for this screen yet) and the fade is disabled while it reads 100 at the App end, which also disagrees with the 50% ghost on screen. Escape leaves it up too. Since the rule's given is a screen with no accepted design, which is normally unbuilt, every person who takes this detour meets it. Finding n-0588."
+    },
+    {
+      "rule": "screens.surfaces.proposed-beside-accepted",
+      "status": "pass",
+      "statement_hash": "sha256:0842937f10e9",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-08-01Z/proto-design-version-switch-proposed.png",
+        "runs/evidence/2026-10-10T22-08-01Z/proto-design-version-switch-accepted.png",
+        "runs/evidence/2026-10-10T22-08-01Z/proto-rule-opened-proposed.png",
+        "runs/evidence/2026-10-10T22-08-01Z/bar-fx-proposal-only.png",
+        "runs/evidence/2026-10-10T22-08-01Z/probe.json"
+      ],
+      "threads": [],
+      "reasoning": "Driven on a scratch copy served on :4732 (tmp/scratch/judge-proposed, its own home), first in the built-in browser pane and then re-driven with a Playwright script that saved the screenshots and probe.json. The fixture added to the copy only: a live design request proposing a version for design-version-switch (stand-in app), fx-versions (accepted + proposed, as-built app), fx-proposal-only, fx-neither, fx-running (a real app path) and fx-standin. The panel showed Stale server mid-session because lib/upgrade*.js was being edited by another agent. Nothing it touches is panel code; the server was restarted once. On design-version-switch, given an accepted version plus a live request proposing one, panel.design-version sits beside the design side's button with Proposed pressed. Design ghosts the proposed page in the dashed ring. Choosing Accepted shows design-version-switch.html with no ring and writes design=accepted into the address. Proposed brings the proposal back and clears the parameter. A fresh load of a link carrying design=accepted opens with Accepted pressed and the accepted page on the design side. The fade worked against panel.app-frame on the proposed version: dragged to 49, the ghost sat at 0.51 with both pages blended. Pins worked too: at full design, pin mode on and a click opened the pin form anchored to panel.app-frame (cancelled, nothing filed). A proposal-only screen shows its proposal with no switch, and its App button is disabled with Nothing is built for this screen yet. Opening the rule from an address (?rule=) on the review page brought up its screen with the proposed version at full strength. The walk path was not driven separately. Its check covers it."
+    },
+    {
+      "rule": "screens.surfaces.proposed-is-yours",
+      "status": "pass",
+      "statement_hash": "sha256:0c8d5e77db4b",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-08-01Z/proto-design-version-switch-proposed.png",
+        "runs/evidence/2026-10-10T22-08-01Z/proto-design-proposed-label-opened.png",
+        "runs/evidence/2026-10-10T22-08-01Z/app-review.png",
+        "runs/evidence/2026-10-10T22-08-01Z/probe.json"
+      ],
+      "threads": [],
+      "reasoning": "Driven on a scratch copy served on :4732 (tmp/scratch/judge-proposed, its own home), first in the built-in browser pane and then re-driven with a Playwright script that saved the screenshots and probe.json. The fixture added to the copy only: a live design request proposing a version for design-version-switch (stand-in app), fx-versions (accepted + proposed, as-built app), fx-proposal-only, fx-neither, fx-running (a real app path) and fx-standin. The panel showed Stale server mid-session because lib/upgrade*.js was being edited by another agent. Nothing it touches is panel code; the server was restarted once. With Proposed chosen, panel.proposed-frame rings the page in a 2px dashed border of oklch(0.84 0.15 85). That is exactly what var(--color-warning) resolves to in the bar. panel.proposed-label reads Proposed — yours to accept and sits on top at the bottom-left. CSS sets it in capitals, which is how the accepted design-proposed drawing sets it too. Clicking it opened the screen's design request (the fixture's request, with ?thread= in the address). The as-built page's own ring stayed solid (2px solid oklch(0.72 0.17 25)), so the two never look alike. Edge, under 10% and in a fixture only: where the proposed page is itself a mock of the panel, its painted label sits right above the real one."
+    }
+  ]
+}

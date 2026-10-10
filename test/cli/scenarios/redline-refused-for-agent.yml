@@ -1,0 +1,17 @@
+# `walkdown threads new --reason redline --as-agent`: an agent cannot file a redline (ADR 0015 §4).
+screen: redline-refused-for-agent
+title: A redline the agent tries to file is refused
+rule: threads.lifecycle.redline-is-a-persons
+fixture: g2-receipt-drawn
+command: [threads, new, --reason, redline, --screen, receipt, --element, receipt.total, --body, 'The total sits under the items, not beside them.', --as-agent, --blueprint, checkout]
+exit: 2
+expect:
+  - '^An agent cannot file a redline\. A redline excuses a gap between the design and the build,$'
+  - '^so only a person files one\.$'
+  - '^Nothing was filed\.$'
+  - '^To ask the person whether the gap is meant, file a question on the same element:$'
+  - '^  walkdown threads new --kind question --screen receipt --element receipt\.total --body "The total sits under the items, not beside them\. Is that meant\?" --as-agent --blueprint checkout$'
+  - '^If they agree, they file the redline\.$'
+anchors:
+  - { id: cli.refusal, match: '^An agent cannot|^so only a person' }
+  - { id: cli.unchanged, match: '^Nothing was filed' }

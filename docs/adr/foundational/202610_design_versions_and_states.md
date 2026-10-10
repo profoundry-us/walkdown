@@ -1,7 +1,12 @@
 # ADR 0015 — Design versions and states
 
-- **Status:** accepted 2026-10-09 by Topher; not yet built (0.5.0). Its
-    panel and CLI screens are designed first.
+- **Status:** accepted 2026-10-09 by Topher; built 2026-10-10. Proposed
+    versions, redlines, acceptance by approval and `walkdown upgrade` for
+    designs are in. A storyboard's `design:` pointer follows the record: a
+    verified request's `proposes:` is the accepted version, and lint asks for
+    the pointer to catch up, because the server never writes the storyboard.
+    This repository has not run the upgrade yet, so its own designs still sit
+    in `prototype/` and `prototype-cli/`. The hooks run it `--layout-only`.
 - **Date:** 2026-10-09
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0007 (as-built drawings), ADR 0009 (design ownership and

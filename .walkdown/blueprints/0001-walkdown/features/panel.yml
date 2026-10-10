@@ -82,13 +82,13 @@ stories:
           when:
             - Read the bar on each
           then:
-            - The design side reads Design where a design is on file. Where a proposal is on file it reads Proposal and shows the proposal, ahead of any design, in the same amber as the "not from design" banner the sketch carries
+            - The design side reads Design where a design is on file, a proposed version included. A proposed version is shown ahead of the accepted one, and the button wears the warning colour of the dashed frame round it
             - The build side reads App for the running app, As-built for a drawing under `as-built/`, and Stand-in where the server shows the design in the app's place
             - A side with nothing to show is disabled. With no design and no proposal, its tooltip says a design request is how one gets drawn
             - The fade can be moved only while both sides have something to show
             - On a page that is no screen, both buttons and the fade are disabled, and their tooltip points at the screen picker. Nothing in the bar opens another page
             - Picking another screen renames the buttons for it
-          statement_hash: sha256:698a0d62d45f
+          statement_hash: sha256:282502d9f880
 
       - id: panel.dock.app-not-answering
         origin: walkdown
@@ -1398,29 +1398,22 @@ stories:
 
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
-        statement: When a thread's screen has a proposal on file, the panel can show it over the running app, badged as a proposal.
-        because: A sketch must never be mistaken for the design.
+        statement: When a thread's screen has a proposed design, the panel can show it over the running app, framed as proposed.
+        because: A design nobody has accepted must never be mistaken for the accepted one.
         signoff: [eng, product]
         screens: [rule-detail]
         steps:
           given:
-            - A thread anchored to a screen whose storyboard entry has a proposal and no prototype
+            - A thread anchored to a screen with a proposed design and no accepted one
           when:
-            - Choose to view the sketch from the thread
+            - Choose to view the proposed design from the thread
           then:
-            - The proposal is drawn over the app the way a prototype ghost is
-            - It is labelled as a proposal that did not come from design
+            - The proposed design is drawn over the app the way an accepted design's ghost is
+            - It is framed as proposed, labelled "Proposed — yours to accept"
             - Screens with a real prototype still ghost the prototype
             - Looking at it is a detour - which screen the panel thinks this page is does not change, and the picker still swaps screens
             - The detour is named while it lasts, and turning the ghost off ends it
-          statement_hash: sha256:7763b1dccd96
-          reworded:
-            - hash: sha256:8244263349d7
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:693cf5703fb8
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+          statement_hash: sha256:963ddcac795e
 
       - id: panel.threads.own-view
         origin: thread:n-0094

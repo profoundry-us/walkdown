@@ -1,0 +1,15 @@
+# `walkdown threads new --reason redline` by a person: filed closed, waiting on nobody (ADR 0015 §4).
+screen: redline-filed
+title: A redline a person files is closed as it is filed
+rule: threads.lifecycle.redline-is-a-persons
+fixture: g2-receipt-drawn
+command: [threads, new, --reason, redline, --screen, receipt, --element, receipt.total, --body, 'The total sits under the items. It reads better on a phone.', --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ n-\d+ filed · note · redline · by \S+ · closed$'
+  - '^  screen receipt, element receipt\.total$'
+  - '^  It is closed as filed, and waits on nobody\.$'
+  - '^  A judge reads this gap as intended, not as a fail, and names it in its reasoning\.$'
+  - '^  walkdown threads show n-\d+ reads it in full$'
+anchors:
+  - { id: cli.thread.filed, match: '^✓ n-' }

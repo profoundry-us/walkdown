@@ -6,7 +6,7 @@ import { html } from '../../vendor/lit.js';
 import { requestRender } from './shell.js';
 import { S } from './state.js';
 import { threadCard } from './thread-pane.js';
-import { onWalkableRule, screenById, TERMINAL, threadTouched } from './vocab.js';
+import { onWalkableRule, screenById, screenInHand, TERMINAL, threadTouched } from './vocab.js';
 
 /*
  * ---- the Threads tab -------------------------------------------------
@@ -104,7 +104,23 @@ export function threadsPane() {
     you: html`Nothing is waiting on you.`,
     all: html`No threads yet. Drop a pin on the page, or leave a note on a rule, to start one.`,
   };
-  return list.length
+  /*
+   * The redlines on the screen in hand, apart from what still waits: they
+   * are not something to do, they are why something is the way it is (ADR
+   * 0015 §4). Under All they are in the list like any thread.
+   */
+  const here = screenInHand()?.id;
+  const redlines =
+    S.threadFilter === 'all' || !here
+      ? []
+      : (S.data?.threads ?? []).filter((t) => t.reason === 'redline' && t.anchor?.screen === here);
+  const waiting = list.length
     ? list.map((t) => threadCard(t, threadWhere(t)))
     : html`<p class="p-3.5 text-[12.5px] opacity-40">${EMPTY[S.threadFilter]}</p>`;
+  return redlines.length
+    ? html`${waiting}<div data-testid="panel.redlines">
+        <div class="px-3.5 pb-0.5 pt-3 text-[10px] font-bold uppercase tracking-widest opacity-40">Where the build leaves the design</div>
+        ${redlines.map((t) => threadCard(t, threadWhere(t)))}
+      </div>`
+    : waiting;
 }

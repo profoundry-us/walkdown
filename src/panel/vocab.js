@@ -257,6 +257,26 @@ export function appDownFor(screen) {
 }
 
 /**
+ * A screen's proposed version, as the server reads it off the design request
+ * (`proposed`), or a `proposal:` from before 0.5.0.
+ *
+ * Whether the design side shows a screen's proposed version (ADR 0015 §6):
+ * whenever it has one, unless the person chose Accepted - and a screen with
+ * nothing accepted has no other version to choose.
+ */
+export const proposedOf = (screen) =>
+  screen?.proposed ??
+  (screen?.proposal ? { path: `/proposals${screen.proposal}`, request: null } : null);
+
+export const proposedShown = (screen) =>
+  Boolean(proposedOf(screen)) &&
+  (S.designVersion !== 'accepted' || !(screen.prototype && S.data?.hasPrototype));
+
+/** Whether a screen offers the choice at all: a proposed version beside an accepted one. */
+export const offersVersions = (screen) =>
+  Boolean(proposedOf(screen) && screen.prototype && S.data?.hasPrototype);
+
+/**
  * What each side of the fade shows on a screen, by the name the bar gives it
  * (panel.dock.surfaces-say-what-they-show). The design side is the design,
  * or a proposal where design has drawn nothing; the build side is the app,
@@ -270,8 +290,8 @@ export function surfaceSides(screen) {
   const surface = pageSurface();
   // A proposal comes first: it is what is up for judgment (Topher, 2026-10-10).
   const design =
-    screen.proposal && surface !== 'prototype'
-      ? { label: 'Proposal', proposed: true }
+    proposedShown(screen) && surface !== 'prototype'
+      ? { label: 'Design', proposed: true }
       : (screen.prototype && S.data?.hasPrototype) || surface === 'prototype'
         ? { label: 'Design', proposed: false }
         : null;
@@ -304,7 +324,10 @@ export function ghostSource(screen) {
       : null;
   }
   // A proposal before the design it would replace: it is what is being judged.
-  if (screen?.proposal) return { path: '/proposals' + screen.proposal, proposed: true };
+  if (proposedShown(screen)) {
+    const { path, request } = proposedOf(screen);
+    return { path, proposed: true, request };
+  }
   if (screen?.prototype && S.data.hasPrototype)
     return { path: '/prototype' + screen.prototype, proposed: false };
   return null;

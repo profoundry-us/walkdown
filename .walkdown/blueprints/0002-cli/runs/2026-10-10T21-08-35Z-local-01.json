@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-10T21-08-35Z-local-01",
+  "created": "2026-10-10T21:08:35Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "2a66a23-dirty",
+  "tree_hash": "sha256:93b2ecfae007",
+  "spec_hash": "sha256:02a303cdde80",
+  "results": [
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:768e7b46e642",
+      "duration_ms": 1868,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/redline.test.js:58",
+        "test/redline.test.js:84",
+        "test/redline.test.js:100"
+      ]
+    }
+  ]
+}

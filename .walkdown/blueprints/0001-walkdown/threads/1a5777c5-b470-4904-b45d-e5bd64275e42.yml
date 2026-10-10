@@ -1,0 +1,22 @@
+id: q-0589
+uuid: 1a5777c5-b470-4904-b45d-e5bd64275e42
+kind: question
+author: agent
+created: 2026-10-10T22:29:43.548Z
+anchor:
+  rule: panel.threads.show-the-sketch
+status: open
+body: How should the proposal detour end? panel.threads.show-the-sketch says
+  turning the ghost off ends it, and finding n-0588 found nothing in the bar
+  that turns it off. screens.surfaces.proposed-beside-accepted says a screen
+  with only a proposal shows App disabled, because nothing is built. The detour
+  is that screen, so App cannot be the way off without breaking the second rule.
+  Today only picking another screen ends it.
+options:
+  - label: Picking another screen ends it
+    why: reword the step to say so; nothing in the build changes
+  - label: Escape and a close mark on the label
+    why: the dashed label gets a ×, and Escape works too; App stays disabled
+  - label: App takes you back
+    why: during a detour App names the page beneath and ends it; the other rule's
+      step is reworded for detours

@@ -1,0 +1,30 @@
+# `walkdown upgrade --dry-run` where the designs still sit in screens/, drafts/ and proposals/.
+screen: upgrade-prototypes
+title: upgrade says where every design goes, and what it removes
+rule: locations.keeping.upgrade-moves-prototypes
+fixture: g2-old-prototypes
+command: [upgrade, --dry-run]
+exit: 0
+expect:
+  - '^Dry run\. This is what `walkdown upgrade` would do to every blueprint\.$'
+  - '^Designs move into designs/, a folder per screen, each dated by its first commit:$'
+  - '^    → prototype/screens/cart\.html +becomes designs/cart/20260918\.html +accepted$'
+  - '^    → prototype/screens/receipt\.html +becomes designs/receipt/20260921\.html +accepted$'
+  - '^    → prototype/drafts/receipt\.html +becomes designs/receipt/20260921-v2\.html +proposed on n-\d{4}$'
+  - '^    → proposals/shipping\.html +becomes designs/shipping/20261006\.html +proposed on n-\d{4}$'
+  - '^    The storyboard is repointed at the 3 accepted versions\.$'
+  - '^    storyboard\.yml: 4 prototype: keys become design:$'
+  - '^    spec\.yml: prototype\.root becomes design\.root, set to designs/$'
+  - '^    → prototype/screens/results\.html +becomes designs/results/20260925\.html +accepted$'
+  - '^  Two versions of a screen first committed the same day are told apart by -v2\.$'
+  - '^Removed, because no screen or pending request names them\. They stay in git history:$'
+  - '^    × prototype/drafts/cart-old\.html$'
+  - '^    × proposals/payment-sketch\.html$'
+  - '^Kept, because git does not hold it:$'
+  - '^    ! proposals/payment-notes\.html KEPT$'
+  - '^    → as-built/redlines\.json''s 2 notes become 2 redline threads, on cart and receipt,$'
+  - '^      filed closed in topher''s name\. Then as-built/redlines\.json is removed\.$'
+  - '^Nothing was moved or removed\. To do it, run:$'
+anchors:
+  - { id: cli.upgrade.prototypes, match: '^Designs move into' }
+  - { id: cli.upgrade.removed, match: '^Removed, because' }

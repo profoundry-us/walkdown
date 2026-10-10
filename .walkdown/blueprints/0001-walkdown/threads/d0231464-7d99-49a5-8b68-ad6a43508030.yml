@@ -1,0 +1,26 @@
+id: n-0588
+uuid: d0231464-7d99-49a5-8b68-ad6a43508030
+kind: note
+reason: finding
+author: agent
+created: 2026-10-10T22:25:09.063Z
+anchor:
+  rule: panel.threads.show-the-sketch
+  screen: rule-detail
+status: open
+body: "While a proposed design is shown from a thread, the bar offers no way to
+  turn it off. On a screen with a proposed design and no accepted one, View the
+  proposed design ghosts the proposal at 50% over the app. The bar then
+  describes that screen, so App is disabled with the tooltip Nothing is built
+  for this screen yet, and the fade is disabled while it reads 100 at the App
+  end. Escape leaves it up too. Only picking another screen in the picker ends
+  the detour, so the step saying turning the ghost off ends it does not hold.
+  Evidence: runs/evidence/2026-10-10T22-08-01Z/app-thread-detour.png,
+  runs/evidence/2026-10-10T22-08-01Z/probe.json (detour, detourBuildClick,
+  afterEscape, detourPicked)."
+replies:
+  - author: agent
+    created: 2026-10-10T22:30:04Z
+    body: Held on q-0589. Making App end the detour breaks
+      screens.surfaces.proposed-beside-accepted, which says a proposal-only
+      screen shows App disabled. Which way it goes is a question for Topher.

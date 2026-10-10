@@ -1,0 +1,22 @@
+id: q-0587
+uuid: efd27db0-1564-4f71-a127-1447b5e6beea
+kind: question
+author: agent
+created: 2026-10-10T22:12:55.319Z
+anchor:
+  rule: ownership.design.approved-rules-accept-the-design
+status: open
+body: Which door should write a design request's `proposes:`? Today only
+  `walkdown upgrade` writes it. A designer, or the design agent, who draws a new
+  version has to edit the thread's YAML by hand to name it, and AGENTS.md tells
+  agents never to.
+options:
+  - label: A flag on threads set
+    why: "`walkdown threads set <id> --proposes /receipt/20261010.html`, by anyone,
+      like a reply"
+  - label: Inferred from designs/
+    why: the newest version in designs/<screen>/ that no accepted pointer names is
+      the proposed one, so nothing is written
+  - label: Leave it for now
+    why: the upgrade writes it for drafts that exist today, and a designer asks when
+      they need it

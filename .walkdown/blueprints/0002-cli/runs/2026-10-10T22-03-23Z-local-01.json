@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-10-10T22-03-23Z-local-01",
+  "created": "2026-10-10T22:03:23Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2a66a23-dirty",
+  "spec_hash": "sha256:9d81d2cf706a",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:ac77cd6c3b73",
+      "evidence": [
+        "runs/evidence/2026-10-10T22-03-23Z/base-upgrade.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-untracked-named.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-shared-proposals.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-spec-design-block.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-spec-design-flow.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-spec-proto-flow.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-storyboard-bytes.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-stray-redline.txt",
+        "runs/evidence/2026-10-10T22-03-23Z/variant-untracked-leftover-in-screens.txt"
+      ],
+      "reasoning": "Drove `walkdown upgrade --dry-run` then `walkdown upgrade` (no serve, no port needed) on throwaway machines from tools/cli-scenarios.mjs machine() + the g2-old-prototypes fixture, each guarded so cwd and WALKDOWN_HOME sat under a mktemp dir and the registry named no real checkout; the real repo was never upgraded (no designs/ appeared there). Every step holds. Accepted screens became designs/<screen>/YYYYMMDD.html dated by first commit (cart 20260918, receipt 20260921, results 20260925) and the storyboards point at them; prototype: keys became design: and prototype.root became design.root; the receipt draft and shipping proposal named by pending requests became 20260921-v2 and 20261006 and each request got proposes:; cart-old and payment-sketch were removed under a heading saying they stay in git history; untracked payment-notes.html was kept in proposals/ and named with what to do; prototype/ and drafts/ were removed; both redlines became recorded redline threads authored topher and redlines.json was removed. The dry run matches the accepted design line for line, grouped by blueprint, and a before/after checksum of the tree showed it moved nothing. Variants held too: a second run says nothing to upgrade; a proposal named only by the other blueprint`s request survived and moved; an existing design: block (block or flow) took the root; folded titles, flow maps and comments in the storyboard survived; a redline on a screen no storyboard holds stayed in redlines.json and was said; tracked unnamed files nested under screens/ were removed and stray assets moved as they are. Edges weighed: a line beginning `prototype:` inside a block scalar of the storyboard is rewritten (under 5%, needs that exact text in a notes block); the dry run counts other files beside a shared prototype/ once per blueprint (cosmetic); the real run names what it kept but not what it removed, which only the dry run lists (the design covers only the dry run). Three edges between 10% and 80% were reported to the requesting agent rather than filed.",
+      "threads": []
+    }
+  ]
+}

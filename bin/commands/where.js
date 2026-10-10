@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { proposalsDir, prototypeDir } from '../../lib/blueprint.js';
+import { designRoot, proposalsDir, prototypeDir } from '../../lib/blueprint.js';
 import { KINDS, resolveLocations, SPEC_FILE } from '../../lib/locations.js';
 import { dim, green, red, yellow } from '../../lib/report/tty.js';
 import { tracking } from '../../lib/standard.js';
@@ -236,9 +236,16 @@ function designRows(loc) {
       proto
         ? {
             ...cell(proto),
-            why: `\`prototype.root: ${config.prototype.root}\`, ${cell(proto).why}`,
+            why: config?.design?.root
+              ? `\`design.root: ${config.design.root}\`, ${cell(proto).why}`
+              : designRoot(config)
+                ? `\`prototype.root: ${designRoot(config)}\`, ${cell(proto).why}`
+                : `a \`designs/\` folder, ${cell(proto).why}`,
           }
-        : { path: null, why: 'spec.yml declares no `prototype.root`' },
+        : {
+            path: null,
+            why: 'spec.yml declares no `design.root`, and there is no `designs/` folder',
+          },
     ],
     ['proposals', cell(proposalsDir(bp))],
   ];
