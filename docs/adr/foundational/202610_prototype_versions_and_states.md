@@ -43,8 +43,10 @@ described loosely in the same conversation:
 
 ### 1. There is one design artifact: the prototype
 
-Every design is a prototype. A prototype is clickable: a page a person can open
-in the panel and use, not a picture of one. A candidate design, a designer's
+Every design is a prototype. A prototype of an interface is clickable: a page a
+person can open in the panel and use, not a picture of one. A CLI prototype is
+the exception: it is one moment at a terminal, drawn as a single page, and
+nothing in it needs clicking. A candidate design, a designer's
 drawing and the design of record are all prototypes. Each is in one of three
 states:
 
@@ -68,7 +70,7 @@ prototypes/<screen>-YYYYMMDD-v2.html    # a second version made the same day
 ```
 
 - The first version made on a day has no suffix. A second one that day is
-  `-v2`, then `-v3`.
+  `-v2`, then `-v3`. The first is never renamed when a second arrives.
 - The storyboard's `prototype:` names the accepted version. That pointer is the
   only thing that makes a version accepted.
 - The design request names the version it proposes. A request with a proposed
@@ -150,20 +152,20 @@ gains that step.
 - **Redlines staying in a file beside the as-built.** That cannot reach a live
   page, cannot point at an element, and gives a judge nothing to read.
 
-## Open questions
+### 6. The panel frames a proposed version the way it frames an as-built
 
-- **What makes a CLI prototype clickable.** A CLI screen is one moment at a
-  terminal. "Clickable" there could mean linked moments: a command, its output,
-  and the next command a person would type, each a link to the next screen.
-  That is a real change to how CLI screens are drawn, and wants its own
-  decision. Until then a CLI prototype is a single terminal page, as today.
-- **Where the panel shows a proposed version.** The panel needs a way to put a
-  pending version on the design side of the fade without moving the storyboard
-  pointer, probably from the open request. That is ADR 0009's draft surface, and
-  its shape is decided when it is built.
-- **How dates are chosen during migration.** Each existing prototype needs a
-  date for its filename: the day it was first committed, or the day of the
-  upgrade.
+While a request proposes a version, the panel can put that version on the
+design side of the fade without moving the storyboard pointer. It is framed as
+the stand-in and the as-built are: a ring around the page and a corner label,
+but in **blue**, labelled **Proposed**. The as-built's red ring means "this is
+the build"; blue means "this is a design nobody has accepted yet". A person
+switches between the accepted and the proposed version on the design side, and
+the request is where they accept it.
+
+### 7. Existing prototypes are dated by their history
+
+The upgrade names each existing prototype for the day its file was first
+committed. A file git has no history for takes the day of the upgrade.
 
 ## Consequences
 
@@ -178,3 +180,6 @@ gains that step.
 - **"Design comes first" is unchanged.** It now reads as: no rule on a screen is
   built until the screen has an accepted prototype.
 - **`GUIDE.md` is written** as part of the 0.5.0 release, from what shipped.
+- **Settled in review (2026-10-09):** CLI prototypes are not clickable; the
+  panel shows a proposed version in a blue frame; migration dates come from git
+  history.
