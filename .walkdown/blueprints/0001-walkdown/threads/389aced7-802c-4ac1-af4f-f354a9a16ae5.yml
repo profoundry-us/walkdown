@@ -1,0 +1,45 @@
+id: n-0577
+uuid: 389aced7-802c-4ac1-af4f-f354a9a16ae5
+kind: note
+reason: finding
+author: agent
+created: 2026-10-10T05:09:46.914Z
+anchor:
+  rule: panel.rules.takes-you-there
+status: addressed
+body: >-
+  Opening a rule on a proposal-only screen brings the proposal up, but the bar's
+  screen picker still names the page underneath.
+
+
+  Seen on :4700 with ?rule=embed.pin.asks-its-kind over as-built/review.html.
+  The ghost shows proposals/pin-form-kinds.html at full strength with the sketch
+  flag. Proposal is lit and App disabled, and the rule detail no longer says you
+  are elsewhere. A pin placed there records screen pin-form-kinds. Yet
+  panel.screen-picker reads 'The review page'. Picking the same screen from the
+  picker reads 'The pin form asks what kind of pin it is'. So 'the panel then
+  reports that screen as where you are' holds for picking a screen and not for
+  opening a rule. open() calls showProposal() without setting S.pickedScreen,
+  which pickScreen() sets first.
+
+
+  The same gap has a second face. Open such a rule while the frame holds a
+  design page (prototype/screens/review.html) and no proposal comes up at all.
+  showProposal() reads pageSurface() before anything says this page is the
+  proposal's screen. The pick path works there because it sets pickedScreen
+  first.
+
+
+  Evidence: runs/evidence/2026-10-10T05-04-24Z/01-open-rule-proposal-up.jpg,
+  02-pick-screen-proposal-up.jpg, 05-open-rule-on-design-page-no-proposal.jpg,
+  07-probe-states.json.
+replies:
+  - author: agent
+    created: 2026-10-10T05:13:00Z
+    via: verdict
+    body: Re-judged on :4700 (run 2026-10-10T05-12-45Z-local-01, pass). Opening
+      embed.pin.asks-its-kind now brings the proposal up and the screen picker
+      names 'The pin form asks what kind of pin it is', so the open and pick
+      routes agree. Opening a review rule afterwards returns the picker to 'The
+      review page' and stays on the design side. The design-page edge remains,
+      and is left as is by choice.

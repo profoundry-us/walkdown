@@ -807,16 +807,10 @@ stories:
             - A screen you are already on is not re-navigated to, because that would throw away the page's state for nothing
             - A blueprint that does cover the page you are on leaves you there; only one that does not moves you
             - A screen with no URL on either surface still does the one thing it can - record that this page is that screen
+            - Where such a screen has a proposal, the proposal comes up on the design side at full strength, so it can be clicked and pinned like a design
             - Where a move means a real page load rather than a frame, it stays something you ask for on the rule rather than something opening a rule does to you
             - Whether a trip that means a real page load is taken or merely offered depends on whether walkdown survives it - framed, walkdown owns the frame and goes; docked by the extension it also goes, because the extension re-injects itself into the next page; docked by a script tag it offers a link instead, because navigating would unload the very script drawing the panel and leave you on the other site with no walkdown at all
-          statement_hash: sha256:9e04008bfcdf
-          reworded:
-            - hash: sha256:708e2433c9b5
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:0df515aeceb7
-              at: 2026-09-14T02:38:10Z
-              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+          statement_hash: sha256:a30a3e3e6888
 
       - id: panel.rules.one-pane-per-tab
         origin: thread:n-0032

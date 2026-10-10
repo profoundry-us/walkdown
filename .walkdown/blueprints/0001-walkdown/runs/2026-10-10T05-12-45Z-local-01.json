@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-10T05-12-45Z-local-01",
+  "created": "2026-10-10T05:12:45Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6868b83-dirty",
+  "spec_hash": "sha256:8b325bbc0389",
+  "results": [
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "pass",
+      "statement_hash": "sha256:a30a3e3e6888",
+      "evidence": [
+        "runs/evidence/2026-10-10T05-11-38Z/01-open-rule-picker-names-proposal.jpg",
+        "runs/evidence/2026-10-10T05-11-38Z/02-open-review-rule-leaves-proposal.jpg",
+        "runs/evidence/2026-10-10T05-11-38Z/03-probe-states.json",
+        "runs/evidence/2026-10-10T05-04-24Z/03-proposal-takes-a-click.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/06-scratch-pin-landed-on-proposal.jpg"
+      ],
+      "reasoning": "Re-judged after the fix for n-0577, looking only on :4700 and writing nothing there. With the as-built review page framed, opening embed.pin.asks-its-kind fresh from the address now brings up proposals/pin-form-kinds.html at full strength, with Proposal lit, App greyed out and Pin mode enabled. The screen picker now names 'The pin form asks what kind of pin it is', which closes the earlier gap between opening a rule and picking a screen. The newly kept picked screen does not stick. Opening a rule on the review screen from there brings the design of review up at full strength, and the picker names 'The review page' again: you stay on the design side, as the surface step asks. Picking pin-form-kinds and then design-proposed moves from one proposal to the other, with the picker following each time. The pin half rests on the previous pass, made 6 minutes earlier against the same proposal on the open-a-rule route. In a scratch copy on :4732, a pin placed on the proposal opened the form and recorded screen pin-form-kinds on the prototype surface (05-04-24Z/06). Today's fix only adds the picked screen and leaves the ghost path the pin used untouched. One edge remains. Opening such a rule while the frame holds a design page, which only a hand-typed address does in this blueprint, still shows no proposal. Picking the screen there works. I put it at about 15%, low cost, and the coordinator has chosen to leave it. The blueprint-switch and script-tag delivery steps were not re-driven, because this change does not touch them.",
+      "threads": []
+    }
+  ]
+}

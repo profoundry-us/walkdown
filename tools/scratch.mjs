@@ -103,9 +103,13 @@ function make(label, why, port, id = 'walkdown') {
     filter: (src) => !/\/(evidence|drafts)(\/|$)/.test(src.slice(join(root, HOME).length)),
   });
   // `prototype.root` resolves against the code root, which is this directory;
-  // the as-built drawings the app paths name are served from it too.
+  // the as-built drawings the app paths name are served from it too, and so
+  // are the proposals a screen with no design shows (a judge found Pin mode
+  // dead on one, 2026-10-10, because the copy answered 404 for it).
   symlinkSync(join(root, 'prototype'), join(path, 'prototype'), 'dir');
   symlinkSync(join(root, 'as-built'), join(path, 'as-built'), 'dir');
+  if (existsSync(join(root, 'proposals')))
+    symlinkSync(join(root, 'proposals'), join(path, 'proposals'), 'dir');
   /*
    * Evidence is linked, not copied. It lives outside the repository now
    * (docs/08-locations.md) and is two orders of magnitude larger than

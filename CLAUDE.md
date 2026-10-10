@@ -233,7 +233,7 @@ The stamp exists because six unstamped copies once sat in `tmp/scratch` for
 weeks, and by the time anyone found them nobody could say which sitting had
 made which.
 
-A copy's `prototype/` and `as-built/` are symlinks to the real ones, so a
+A copy's `prototype/`, `as-built/` and `proposals/` are symlinks to the real ones, so a
 throwaway page written "into the copy" lands in the real folder (a judge did
 this to `prototype/screens/` on 2026-09-13 and had to clean up). A fixture
 that needs a page of its own goes in a second throwaway blueprint, never

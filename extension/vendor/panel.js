@@ -7391,7 +7391,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * an event the shell answers.
    */
   function elsewhere$1(r) {
-    const here = currentScreen();
+    // The screen being looked at, which is a proposal's when one is up over
+    // the page: that is what the reader is comparing the rule with.
+    const here = screenInHand();
     const want = ruleScreen(r);
     // A headless rule says so ONCE, in the Screen block below, which is where
     // a reader looks for the screen. This used to add a second sentence here
@@ -10331,11 +10333,37 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     }
     // Picked by hand, so the pick rides along and survives the arrival.
     if (goTo(screenById(id), pageSurface(), id)) return;
-    // Nowhere to go: a screen with no URL on either surface. Then the only
-    // thing the picker can do is what it always did — record that this page
-    // is that screen.
+    // Nowhere to go: a screen with no URL on either surface. Then the picker
+    // records that this page is that screen, and shows its proposal if it has
+    // one.
     S.pickedScreen = id;
+    if (showProposal(screenById(id))) return;
     reghost();
+  }
+
+  /*
+   * A screen with only a proposal has no page to go to, but it does have
+   * something to look at. Left where it was, the frame kept showing the last
+   * screen and the bar compared that one, so the proposal under judgment was
+   * nowhere (Topher, 2026-10-09, judging embed.pin.asks-its-kind). It comes up
+   * on the design side at full strength, which is what lets it take the
+   * pointer and the pins; the sketch banner says what it is. Standing on the
+   * design surface the ghost carries the app, so there it cannot, and does not.
+   */
+  function showProposal(screen) {
+    if (!screen?.proposal || pageSurface() === 'prototype') return false;
+    if (screenUrl(screen, 'prototype') || screenUrl(screen, 'app')) return false;
+    if (S.ghostOverride !== screen.id) {
+      if (S.ghost) setGhost(false);
+      S.ghostOverride = screen.id;
+    }
+    // The page is now that screen, however we got here: opening a rule left
+    // the picker naming the last one while the proposal showed (n-0577).
+    S.pickedScreen = screen.id;
+    setFade(1);
+    // Built fresh, the ghost repaints only the bar; the rule says where you are.
+    render();
+    return true;
   }
 
   /*
@@ -11085,7 +11113,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       if (pane) pane.scrollTop = 0;
     };
     const want = ruleScreen(S.selected);
-    if (want && want.id !== currentScreen()?.id && goTo(want)) return toTop();
+    if (want && want.id !== currentScreen()?.id && (goTo(want) || showProposal(want))) return toTop();
     render();
     toTop();
   }

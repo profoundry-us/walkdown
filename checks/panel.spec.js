@@ -573,6 +573,59 @@ test('a screen further down the same page is not left behind a veil', {
   }
 });
 
+for (const trip of ['picking the screen', 'opening its rule']) {
+  test(`a screen with only a proposal comes up, ready to click and pin, by ${trip}`, {
+    tag: '@rule:panel.rules.takes-you-there',
+  }, async ({ page }) => {
+    // A screen with no page on either surface and a proposal on file. Before,
+    // the trip left the last screen in the frame and the bar comparing that
+    // one, so the proposal under judgment was nowhere (Topher, 2026-10-09);
+    // then opening a rule brought it up with the picker still naming the
+    // last screen (n-0577). Served here, so the check is about the trip and
+    // not about whichever proposal the real blueprint holds this week.
+    let ruleId;
+    await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+      const res = await route.fetch();
+      const data = await res.json();
+      data.storyboard = [
+        ...(data.storyboard ?? []),
+        { id: 'sketch-only', title: 'Sketch only', prototype: null, proposal: '/sketch-only.html' },
+      ];
+      const row = data.rows.find((r) => !r.flow?.length) ?? data.rows[0];
+      ruleId = row.rule;
+      row.flow = ['sketch-only'];
+      row.screens = ['sketch-only'];
+      await route.fulfill({ response: res, json: data });
+    });
+    await page.route(/\/proposals\/sketch-only\.html/, (r) =>
+      r.fulfill({
+        contentType: 'text/html',
+        body: '<h1>The proposed screen</h1><script src="/embed.js" data-walkdown></script>',
+      }),
+    );
+    // Standing on the application, where the ghost carries the design side.
+    await page.goto(fixtureFor({ build: 'stale', frame: new URL('/app.html', FIXTURE).href }));
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+
+    if (trip === 'opening its rule') await openRule(page, ruleId);
+    else {
+      await page.getByTestId('panel.screen-picker').click();
+      await page.locator('[data-screen="sketch-only"]').first().click();
+    }
+
+    await expect
+      .poll(() => page.frames().some((f) => f.url().includes('/proposals/sketch-only.html')))
+      .toBe(true);
+    // At full strength, so it is what the pointer reaches.
+    await expect(page.locator('[data-walkdown-ghost]')).toHaveCSS('opacity', '1');
+    await expect(page.locator('[data-walkdown-sketch-flag]')).toBeVisible();
+    // The panel reports that screen as where you are.
+    await expect(page.getByTestId('panel.screen-picker')).toContainText('Sketch only');
+    // And pins land on it once walkdown is running in there.
+    await expect(page.getByTestId('panel.pin-mode')).toBeEnabled();
+  });
+}
+
 test('put away, the badge still crosses between the design and what shipped', {
   tag: '@rule:panel.dock.toolbar',
 }, async ({ page }) => {

@@ -42,7 +42,6 @@ import { toast } from './toast.js';
 import { api, fire } from './util.js';
 import {
   conversationOf,
-  currentScreen,
   declaredAnchors,
   isHeadless,
   LBL,
@@ -51,6 +50,7 @@ import {
   pageSurface,
   ruleScreen,
   screenById,
+  screenInHand,
   screenUrl,
   shortName,
   threadsFor,
@@ -71,7 +71,9 @@ import {
  * an event the shell answers.
  */
 function elsewhere(r) {
-  const here = currentScreen();
+  // The screen being looked at, which is a proposal's when one is up over
+  // the page: that is what the reader is comparing the rule with.
+  const here = screenInHand();
   const want = ruleScreen(r);
   // A headless rule says so ONCE, in the Screen block below, which is where
   // a reader looks for the screen. This used to add a second sentence here

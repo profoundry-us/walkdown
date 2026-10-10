@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-10T05-10-07Z-local-01",
+  "created": "2026-10-10T05:10:07Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6868b83-dirty",
+  "spec_hash": "sha256:8b325bbc0389",
+  "results": [
+    {
+      "rule": "panel.rules.takes-you-there",
+      "status": "fail",
+      "statement_hash": "sha256:a30a3e3e6888",
+      "evidence": [
+        "runs/evidence/2026-10-10T05-04-24Z/01-open-rule-proposal-up.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/02-pick-screen-proposal-up.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/03-proposal-takes-a-click.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/04-pick-from-design-surface.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/05-open-rule-on-design-page-no-proposal.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/06-scratch-pin-landed-on-proposal.jpg",
+        "runs/evidence/2026-10-10T05-04-24Z/06-scratch-pin-thread.yml.txt",
+        "runs/evidence/2026-10-10T05-04-24Z/07-probe-states.json"
+      ],
+      "reasoning": "Judged the new proposal step on the real proposal-only screen pin-form-kinds, looking on :4700 and pinning only in a scratch copy served on :4732. Picking pin-form-kinds from the screen picker holds every part of it: from the as-built review page and from a framed design page alike, the ghost loads proposals/pin-form-kinds.html at opacity 1 with pointer events on and the sketch flag up, the picker names the screen, a click inside the proposal switches its Question tab, and picking review again lands on the design of review rather than snapping back to the app. Opening the rule embed.pin.asks-its-kind from the app surface also brings the proposal up at full strength, and in the scratch copy a pin placed on it opened the form and recorded screen pin-form-kinds on the prototype surface, so it pins like a design. But on that same open-a-rule trip the bar's screen picker still reads 'The review page' while the proposal is what is on screen, App is disabled and the rule detail treats you as there; picking the screen names it correctly. Every reviewer who opens a proposal-only rule meets this (near 100%), and it is the step 'the panel then reports that screen as where you are' not holding for opening a rule, so the rule fails with finding 389aced7. The cause is that open() calls showProposal() without setting the picked screen the way pickScreen() does. The same gap means opening such a rule while the frame holds a design page shows no proposal at all (05); every screen of this blueprint has an app page, so that arrangement is uncommon here, and it is folded into the same finding. Steps not touched by this change were spot-checked only (already-there pick does not reload; design-side picks stay on the design); the blueprint-switch and script-tag delivery steps were not re-driven this pass.",
+      "threads": [
+        "389aced7-802c-4ac1-af4f-f354a9a16ae5"
+      ]
+    }
+  ]
+}
