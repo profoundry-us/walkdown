@@ -11130,6 +11130,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * copy inside it. Kept apart from building the ghost so a window resize
    * re-measures rather than reloading the page in there.
    */
+  /** The proposal banner's height, given up by the sheet above it. */
+  const SKETCH_FLAG_H = 24;
+
   function sizeGhost() {
     const frame = ghostFrame();
     if (!S.ghost || !frame) return;
@@ -11137,11 +11140,18 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     // At a preset the ghost lays out at that width too, scaling down whole
     // when the stage is narrower - the same rule the app frame follows.
     const gs = S.ghostWidth ? Math.min(1, availW / S.ghostWidth) : 1;
+    /*
+     * A proposal's banner sits under the page, not over it: laid across the
+     * top it hid the page's own header, the part a reviewer reads first
+     * (Topher, 2026-10-10). The sheet gives up that strip at the bottom.
+     */
+    const flagH = 'walkdownProposed' in S.ghost.dataset ? SKETCH_FLAG_H : 0;
+    const pageH = availH - flagH;
     S.ghost.style.width = `${availW}px`;
     S.ghost.style.height = `${availH}px`;
-    S.ghost.style.alignItems = S.ghostWidth ? 'flex-start' : 'center';
+    S.ghost.style.alignItems = S.ghostWidth || flagH ? 'flex-start' : 'center';
     frame.style.width = `${S.ghostWidth || availW}px`;
-    frame.style.height = `${gs < 1 ? availH / gs : availH}px`;
+    frame.style.height = `${gs < 1 ? pageH / gs : pageH}px`;
     frame.style.transform = gs < 1 ? `scale(${gs})` : '';
     frame.style.transformOrigin = 'top center';
     /*
@@ -11201,6 +11211,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     // Named so a probe can measure the element the fade is actually set on -
     // opacity is not inherited, and the iframe inside reads 1 forever.
     S.ghost.dataset.walkdownGhost = '';
+    // Said before the box is measured: a proposal's sheet is shorter by its banner.
+    if (src.proposed) S.ghost.dataset.walkdownProposed = '';
     /*
      * The box is stated in pixels, not left to the four insets to work out.
      * An inset-sized box has collapsed before - back when this rode in the
@@ -11270,10 +11282,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       const themed = getComputedStyle(D.bar);
       const warn = themed.getPropertyValue('--color-warning').trim() || '#d97706';
       const onWarn = themed.getPropertyValue('--color-warning-content').trim() || '#fff';
-      flag.style.cssText = `position:absolute; top:0; left:0; right:0; z-index:1; text-align:center;
+      flag.style.cssText = `position:absolute; bottom:0; left:0; right:0; z-index:1; text-align:center;
+      height:${SKETCH_FLAG_H}px; box-sizing:border-box;
       background:${warn}; color:${onWarn};
       font:600 11px/1 -apple-system, sans-serif;
-      letter-spacing:.06em; padding:6px 8px;`;
+      letter-spacing:.06em; padding:${(SKETCH_FLAG_H - 11) / 2}px 8px;`;
       S.ghost.appendChild(flag);
     }
     /*
