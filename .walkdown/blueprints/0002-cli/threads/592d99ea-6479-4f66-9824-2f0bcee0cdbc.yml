@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-10T18:39:15.375Z
 anchor:
   rule: locations.keeping.upgrade-moves-prototypes
-status: addressed
+status: verified
 body: >-
   Two things:
 
@@ -28,3 +28,10 @@ replies:
       design: and spec.yml's design.root, matching your q-0575 answer. ADR 0015
       is amended and renamed Design versions and states; the rule is reworded;
       its design is being redrawn."
+  - author: topher
+    via: verdict
+    created: 2026-10-12T23:13:18Z
+    body: Verified by topher's pass on locations.keeping.upgrade-moves-prototypes
+      (2026-10-12T23-13-18Z-local-01).
+verified_by: topher
+verified_via: 2026-10-12T23-13-18Z-local-01

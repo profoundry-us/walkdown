@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-12T22:35:08.603Z
 anchor:
   screen: hash-reword-adds-excuse
-status: addressed
+status: verified
 body: 'What `walkdown hash --write --reword "<why>"` prints for
   status.derived.reword-never-adds-an-excuse when one rule has gained an excuse
   since it was last stamped (here an agent-tier excuse on a rule that had none).
@@ -42,3 +42,4 @@ replies:
       and approved again. The closing line still says to run this again to
       reword the rest.
 proposes: /drafts/hash-reword-adds-excuse.html
+verified_by: topher

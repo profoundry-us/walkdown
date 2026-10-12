@@ -59,8 +59,17 @@ function report(blueprint, values) {
   const s = summary;
   const counts = `${s.rules} rules, ${s.screens} screens, ${s.anchors} anchors, ${s.threads} threads, ${s.runs} runs`;
   const verdict = s.errors ? red(`${s.errors} error(s)`) : green('0 errors');
+  // What was left out is said apart, and only when there is any.
+  const plural = (n, word) => `${n} retired ${word}${n === 1 ? '' : 's'}`;
+  const left = [
+    s.retiredRules ? plural(s.retiredRules, 'rule') : null,
+    s.retiredScreens ? plural(s.retiredScreens, 'screen') : null,
+  ].filter(Boolean);
+  const retired = left.length
+    ? `. ${left.join(' and ')} ${left.length > 1 || s.retiredRules + s.retiredScreens > 1 ? 'were' : 'was'} not linted`
+    : '';
   console.log(
-    `${s.errors ? red('✗') : green('✓')} ${counts} — ${verdict}, ${s.warnings} warning(s)`,
+    `${s.errors ? red('✗') : green('✓')} ${counts} — ${verdict}, ${s.warnings} warning(s)${retired}`,
   );
   return exitCode;
 }

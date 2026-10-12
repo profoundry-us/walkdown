@@ -7,7 +7,7 @@
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { writeRunRecord } from '../../lib/run-record.js';
-import { parse } from '../../vendor/yaml.js';
+import { parse, parseDocument } from '../../vendor/yaml.js';
 
 /*
  * `checkout` holding exactly the rules given, each `[suffix, statement,
@@ -38,6 +38,14 @@ function checkout(m, rules) {
   );
   m.ok(['hash', '--write', '--blueprint', 'checkout']);
   return hashes(m);
+}
+
+/* checkout's storyboard, from the lines under `screens:`. */
+function storyboard(m, lines) {
+  writeFileSync(
+    join(m.specOf('checkout'), 'storyboard.yml'),
+    ['screens:', ...lines, ''].join('\n'),
+  );
 }
 
 /* Each rule's current statement hash, as `hash --write` left it. */
@@ -275,7 +283,7 @@ export default {
   },
 
   /* Three excuses that do not argue their case. */
-  'g4-weak-excuses'(m) {
+  'g4-weak-excuses'(m, h) {
     checkout(m, [
       ['pays', 'A card payment goes through.', 'unverifiable:', '  agent: hard'],
       [
@@ -292,15 +300,121 @@ export default {
         "  agent: No agent can open the shopper's inbox to see the receipt arrive.",
       ],
     ]);
+    h.headless(m, 'checkout');
+  },
+
+  /*
+   * lint-no-screen: `receipt` names no screen and excuses nothing, `refunds`
+   * excuses only checks, `emails` excuses the agent tier and passes, and the
+   * retired `wrapping` is left out. A check cites a rule nobody holds, and
+   * `totals` cites a thread nobody filed, so the other kinds of finding show.
+   */
+  'g4-no-screen'(m) {
+    const h = checkout(m, [
+      ['pays', 'A card payment goes through.', 'verify: [checks]', 'screens: [cart]'],
+      ['totals', 'The total is the sum of the cart.', 'origin: thread:n-0099', 'screens: [cart]'],
+      ['receipt', 'A receipt is emailed after payment.'],
+      [
+        'refunds',
+        'A refund goes back to the card.',
+        'unverifiable:',
+        '  checks: A refund is settled by the payment provider, out of sight of the shop.',
+      ],
+      [
+        'emails',
+        'An order confirmation is emailed.',
+        'unverifiable:',
+        '  agent: The email leaves through a provider, and no page shows it.',
+      ],
+      ['wrapping', 'Gift wrapping is offered at checkout.', 'retired: Gift wrapping was dropped.'],
+    ]);
+    storyboard(m, [
+      '  - id: cart',
+      '    prototype: /screens/cart.html',
+      '    anchors: [cart.items, cart.total, cart.checkout]',
+    ]);
+    suite(m, 'pays', 'gift-cards');
+    run(m, '2026-10-01T09-00-00Z-local-01', CHECKS, [
+      { rule: 'checkout.basics.pays', status: 'pass', statement_hash: h.pays },
+    ]);
+  },
+
+  /*
+   * lint-unnamed-screen: `refund` no rule names, `gift-card` only the retired
+   * `gift-wrap` names, and `old-cart` is retired itself.
+   */
+  'g4-unnamed-screen'(m) {
+    checkout(m, [
+      ['pays', 'A card payment goes through.', 'screens: [cart]'],
+      ['totals', 'The total is the sum of the cart.', 'origin: thread:n-0099', 'screens: [cart]'],
+      ['receipt', 'A receipt is emailed after payment.', 'screens: [cart]'],
+      ['coupons', 'A coupon takes its amount off the total.', 'screens: [cart]'],
+      [
+        'gift-wrap',
+        'A gift card can be wrapped.',
+        'retired: Wrapping was dropped.',
+        'screens: [gift-card]',
+      ],
+    ]);
+    storyboard(m, [
+      '  - id: cart',
+      '    prototype: /screens/cart.html',
+      '    anchors: [cart.items, cart.total]',
+      '  - id: refund',
+      '    prototype: /screens/refund.html',
+      '    anchors: [refund.amount, refund.submit]',
+      '  - id: gift-card',
+      '    prototype: /screens/gift-card.html',
+      '    anchors: [gift-card.code, gift-card.apply]',
+      '  - id: old-cart',
+      '    retired: The cart was redrawn.',
+      '    prototype: /screens/old-cart.html',
+    ]);
+  },
+
+  /*
+   * hash-reword-adds-excuse: stamped, then `receipt` gains an agent excuse,
+   * `refunds` moves its excuse from checks to agent, and `totals` only
+   * rewords the excuse it already had.
+   */
+  'g4-reword-adds-excuse'(m) {
+    checkout(m, [
+      ['pays', 'A card payment goes through.'],
+      ['receipt', 'A receipt is emailed after payment.'],
+      [
+        'refunds',
+        'A refund goes back to the card.',
+        'unverifiable:',
+        '  checks: A refund is settled by the payment provider, out of sight of the shop.',
+      ],
+      [
+        'totals',
+        'The total is the sum of the cart.',
+        'unverifiable:',
+        '  agent: The total is worked out on the server, and no page shows the sum.',
+      ],
+    ]);
+    const file = join(m.specOf('checkout'), 'features', 'checkout.yml');
+    const doc = parseDocument(readFileSync(file, 'utf8'));
+    const at = (i) => ['stories', 0, 'rules', i, 'unverifiable'];
+    doc.setIn([...at(1), 'agent'], 'The receipt is an email, and no page shows it.');
+    doc.deleteIn(at(2));
+    doc.setIn(
+      [...at(2), 'agent'],
+      'A refund is settled by the payment provider, out of sight of the shop.',
+    );
+    doc.setIn([...at(3), 'agent'], 'The total is worked out on the server; no page shows the sum.');
+    writeFileSync(file, String(doc));
   },
 
   /* `pays` with no signoff line, `totals` naming only product, `receipt` an empty list. */
-  'g4-signoff-product'(m) {
+  'g4-signoff-product'(m, h) {
     checkout(m, [
       ['pays', 'A card payment goes through.'],
       ['totals', 'The total is the sum of the cart.', 'signoff: [product]'],
       ['receipt', 'A receipt is emailed after payment.', 'signoff: []'],
     ]);
+    h.headless(m, 'checkout');
   },
 
   /*

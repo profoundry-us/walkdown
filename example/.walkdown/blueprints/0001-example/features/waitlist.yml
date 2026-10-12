@@ -91,6 +91,7 @@ stories:
             - hash: sha256:bb8fc4a8fd6e
               at: 2026-10-12T14:16:35Z
               why: the hash covers the excuses now; the rule and its excuse are unchanged
+          excused: [checks]
 
   - id: waitlist.export
     title: An operator exports the waitlist

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-12T14:19:34.408Z
 anchor:
   screen: lint-no-screen
-status: addressed
+status: verified
 body: "What `walkdown lint` prints for
   status.evidence.no-screen-needs-an-excuse. A blueprint with one live rule
   naming no screen and excusing nothing, one excusing only the checks tier (also
@@ -29,3 +29,4 @@ replies:
       retired screen, so that part is not printed. A fixture comment states the
       counts."
 proposes: /drafts/lint-no-screen.html
+verified_by: topher

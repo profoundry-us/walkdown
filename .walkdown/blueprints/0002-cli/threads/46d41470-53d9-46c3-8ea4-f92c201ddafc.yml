@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-12T14:19:34.619Z
 anchor:
   screen: lint-unnamed-screen
-status: addressed
+status: verified
 body: "What `walkdown lint` prints for ownership.design.every-screen-has-rules.
   A storyboard screen no live rule names, and one only a retired rule names:
   lint names each screen and says to write the rules it must show, with
@@ -34,3 +34,4 @@ replies:
       screen were not linted. A fixture comment says which rule and screen are
       retired."
 proposes: /drafts/lint-unnamed-screen.html
+verified_by: topher

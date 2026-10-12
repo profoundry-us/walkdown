@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- DESIGN DRAFT: threads-set-proposes -->
+<!-- Drawn by the design agent for request n-0597. Not yet accepted. -->
+<!-- Intent: threads set --proposes says which version the request now names, what it named before, who named it and that a reply records it, then where the walk shows it; a path no file under the design root has is refused by name, nothing is written, and it exits 2. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>threads set --proposes names a request's design version</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads set n-0002 --proposes /receipt/20261012.html --as-agent --blueprint checkout</div>
+      <div data-testid="cli.thread.proposes">
+      <div class="ln">✓ n-0002 proposes /receipt/20261012.html (was none) · by agent · +1 reply</div>
+      </div>
+      <div class="ln dim">  screen receipt · design request · open</div>
+      <div class="ln dim">  The walk shows designs/receipt/20261012.html beside the accepted /receipt/20260921.html.</div>
+      <div class="ln dim">  walkdown threads show n-0002 reads it in full</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+
+    <div class="ln"></div>
+    <div class="ln dim"># A version no file under the design root has is refused by name</div>
+    <div class="ln prompt"><b>~/shop $</b> walkdown threads set n-0002 --proposes /receipt/20261013.html --as-agent --blueprint checkout</div>
+      <div class="ln">✗ /receipt/20261013.html is no file under the design root, designs/. Draw it there first, or name one that is.</div>
+      <div class="ln">Nothing was changed.</div>
+    <div class="ln exit bad">[exit 2]</div>
+  </div>
+</body>
+</html>

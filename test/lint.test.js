@@ -599,7 +599,7 @@ test('a thin excuse is worse than none @rule:status.evidence.excuse-must-argue',
   const wrongTier = ruleFixture(join(root, 'excuse-tier'), [
     '        unverifiable:',
     `          human: ${REAL_EXCUSE}`,
-  ]).filter((x) => x.category === 'evidence');
+  ]).filter((x) => x.category === 'evidence' && !/names no screen/.test(x.message));
   assert.equal(wrongTier.length, 1);
   assert.match(wrongTier[0].message, /which is not a tier/);
   // And it says where acceptance went, because that is the mistake being made.
@@ -955,8 +955,74 @@ test('a screen no rule names is named, and so is one only a retired rule names @
     ['receipt', 'old-cart'],
   );
   for (const f of named) {
-    assert.equal(f.level, 'warn');
+    assert.equal(f.level, 'error');
     assert.match(f.message, /write the rules it must show/);
     assert.match(f.message, new RegExp(`screens: \\[${f.subject}\\]`));
   }
+});
+
+/*
+ * A rule names a screen or excuses the agent tier (status.evidence.no-screen-
+ * needs-an-excuse). The lint-no-screen scenario shows the two errors; these
+ * are the rules that pass, and the one whose excuse is held to its length.
+ */
+test('a rule with a screen passes whatever it excuses, and an agent excuse is held to its length @rule:status.evidence.no-screen-needs-an-excuse', () => {
+  const noScreen = (fs) => fs.filter((f) => /names no screen/.test(f.message));
+  const onScreen = (label, body) => {
+    const h = ruleHome(join(root, label), ['        screens: [home]', ...body]);
+    writeFileSync(
+      join(h.spec, 'storyboard.yml'),
+      'screens:\n  - id: home\n    prototype: /home.html\n',
+    );
+    return lint(load(h), { checks: false }).findings;
+  };
+  assert.deepEqual(noScreen(onScreen('screen-bare', [])), []);
+  assert.deepEqual(
+    noScreen(
+      onScreen('screen-checks', ['        unverifiable:', `          checks: ${REAL_EXCUSE}`]),
+    ),
+    [],
+  );
+  const thin = ruleFixture(join(root, 'no-screen-thin'), [
+    '        unverifiable:',
+    '          agent: n/a',
+  ]);
+  assert.deepEqual(noScreen(thin), [], 'the agent tier is excused, so the screen is not asked for');
+  assert.match(
+    thin.find((f) => f.category === 'evidence')?.message ?? '',
+    /too thin to argue with/,
+  );
+});
+
+/*
+ * ownership.design.retired-counted-apart: the counts are of live rules and
+ * screens, and the retired are said apart only when there are any. The
+ * lint-unnamed-screen and lint-no-screen scenarios show them said.
+ */
+test('the closing counts are of the live; nothing retired, nothing is said of it @rule:ownership.design.retired-counted-apart', () => {
+  const h = ruleHome(join(root, 'counts'), [
+    '        screens: [home]',
+    '      - id: demo.main.old',
+    '        statement: The visitor could do the old thing.',
+    '        retired: The old thing went.',
+  ]);
+  writeFileSync(
+    join(h.spec, 'storyboard.yml'),
+    'screens:\n  - id: home\n    prototype: /home.html\n  - id: gone\n    retired: Redrawn.\n    prototype: /gone.html\n',
+  );
+  const { summary, findings } = lint(load(h), { checks: false });
+  assert.equal(summary.rules, 1);
+  assert.equal(summary.screens, 1);
+  assert.equal(summary.retiredRules, 1);
+  assert.equal(summary.retiredScreens, 1);
+  assert.deepEqual(
+    findings.filter((f) => /demo\.main\.old|gone/.test(`${f.subject} ${f.message}`)),
+    [],
+    'nothing is said about a retired rule or screen',
+  );
+  const none = lint(load(ruleHome(join(root, 'counts-none'), ['        screens: []'])), {
+    checks: false,
+  }).summary;
+  assert.equal(none.retiredRules, 0);
+  assert.equal(none.retiredScreens, 0);
 });

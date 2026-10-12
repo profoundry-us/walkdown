@@ -123,6 +123,7 @@ export default {
       ].join('\n'),
     );
     m.ok(['hash', '--write', '--blueprint', 'checkout']);
+    h.headless(m, 'checkout');
   },
   /* `checkout` with two pay screens declaring seven anchors, and a rule whose focus neither declares (ADR 0016). */
   'g2-focus-undeclared'(m, h) {
@@ -166,6 +167,7 @@ export default {
       ].join('\n'),
     );
     m.ok(['hash', '--write', '--blueprint', 'checkout']);
+    h.headless(m, 'checkout');
   },
   /* `checkout` with a drawn receipt screen whose anchors are receipt.items and receipt.total. */
   'g2-receipt-drawn'(m, h) {
@@ -263,6 +265,27 @@ export default {
           )
           .join('')}`,
       );
+      // A rule on each screen, so the upgraded blueprint lints clean.
+      writeFileSync(
+        join(spec, 'features', `${name}.yml`),
+        [
+          `feature: ${name}`,
+          'stories:',
+          `  - id: ${name}.basics`,
+          `    title: The basics of ${name}`,
+          `    statement: As a shopper I use ${name}.`,
+          '    rules:',
+          ...screens.flatMap(([id]) => [
+            `      - id: ${name}.basics.${id}`,
+            `        statement: The ${id} screen shows what it is for.`,
+            `        screens: [${id}]`,
+            '        steps:',
+            '          then: [It does]',
+          ]),
+          '',
+        ].join('\n'),
+      );
+      m.ok(['hash', '--write', '--blueprint', name]);
     }
     for (const [screen, body] of [
       ['receipt', 'Draw the receipt with the order number first.'],

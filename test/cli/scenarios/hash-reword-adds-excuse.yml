@@ -1,0 +1,15 @@
+# `walkdown hash --write --reword` when two rules have gained an excuse since they were stamped.
+screen: hash-reword-adds-excuse
+title: hash --reword refuses a rule that gained an excuse
+rule: status.derived.reword-never-adds-an-excuse
+fixture: g4-reword-adds-excuse
+command: [hash, --write, --reword, the excuse reads more plainly, --blueprint, checkout]
+exit: 2
+expect:
+  - '^  ✗ checkout\.basics\.receipt now excuses the agent tier, and it excused nothing when it was last stamped:$'
+  - '^      agent: The receipt is an email, and no page shows it\.$'
+  - '^  ✗ checkout\.basics\.refunds now excuses the agent tier, and it excused only the checks tier when it was last stamped:$'
+  - '^  Run `walkdown hash \-\-write checkout\.basics\.receipt checkout\.basics\.refunds \-\-blueprint checkout` to stamp only these two\. Their verdicts then read stale until each is judged and approved again\.$'
+  - '^  Nothing was written for any rule\. Once checkout\.basics\.receipt and checkout\.basics\.refunds are stamped on their own, run this again to reword the rest\.$'
+anchors:
+  - { id: cli.hash.refused, match: '^  ✗ ' }

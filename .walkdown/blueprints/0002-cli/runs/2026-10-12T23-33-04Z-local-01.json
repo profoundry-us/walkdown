@@ -1,0 +1,134 @@
+{
+  "run_id": "2026-10-12T23-33-04Z-local-01",
+  "created": "2026-10-12T23:33:04Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "82e1fc2-dirty",
+  "tree_hash": "sha256:5fca9f60471c",
+  "spec_hash": "sha256:fd3d04c8c82b",
+  "results": [
+    {
+      "rule": "locations.several.lint-reads-the-project",
+      "status": "pass",
+      "statement_hash": "sha256:a2090d8e2e07",
+      "duration_ms": 2793,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "status.acceptance.signoff-defaults-to-eng",
+      "status": "pass",
+      "statement_hash": "sha256:8dd40d6249dc",
+      "duration_ms": 883,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:549",
+        "test/lint.test.js:654"
+      ]
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:ac77cd6c3b73",
+      "duration_ms": 3125,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/upgrade-designs.test.js:25",
+        "test/upgrade-designs.test.js:33",
+        "test/upgrade-designs.test.js:93"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.focus-is-a-declared-anchor",
+      "status": "pass",
+      "statement_hash": "sha256:0f4cacbd010f",
+      "duration_ms": 1462,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "ownership.authoring.steps-are-required",
+      "status": "pass",
+      "statement_hash": "sha256:3227ee91ac45",
+      "duration_ms": 1142,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:623"
+      ]
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:d031d2757c27",
+      "duration_ms": 1531,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/hash-reword.test.js:24",
+        "test/hash-reword.test.js:52"
+      ]
+    },
+    {
+      "rule": "ownership.design.every-screen-has-rules",
+      "status": "pass",
+      "statement_hash": "sha256:01920019bc11",
+      "duration_ms": 838,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:921"
+      ]
+    },
+    {
+      "rule": "status.evidence.no-screen-needs-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:4c7cbc94f0fa",
+      "duration_ms": 1174,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:969"
+      ]
+    },
+    {
+      "rule": "status.evidence.excuse-must-argue",
+      "status": "pass",
+      "statement_hash": "sha256:3bc6240e9f9b",
+      "duration_ms": 1014,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:577",
+        "test/lint.test.js:609"
+      ]
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:feda1ef23a24",
+      "duration_ms": 1124,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:304",
+        "test/lint.test.js:358"
+      ]
+    },
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "statement_hash": "sha256:5040dfedc0c3",
+      "duration_ms": 105,
+      "checks": [
+        "test/lint.test.js:304"
+      ]
+    },
+    {
+      "rule": "ownership.design.retired-counted-apart",
+      "status": "pass",
+      "statement_hash": "sha256:dc971fcf98e1",
+      "duration_ms": 62,
+      "checks": [
+        "test/lint.test.js:1002"
+      ]
+    }
+  ]
+}

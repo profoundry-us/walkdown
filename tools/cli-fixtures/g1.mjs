@@ -184,6 +184,8 @@ export default {
       ].join('\n'),
     );
     m.ok(['hash', '--write', '--blueprint', 'search']);
+    h.headless(m, 'checkout');
+    h.headless(m, 'search');
     suite(
       m,
       [

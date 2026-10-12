@@ -29,7 +29,7 @@ import {
 } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import { dirname, join } from 'node:path';
-import { parse } from '../vendor/yaml.js';
+import { parse, parseDocument } from '../vendor/yaml.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
 const REPO = dirname(dirname(CLI));
@@ -113,6 +113,28 @@ export function machine({ path } = {}) {
     specOf,
     done: () => rmSync(root, { recursive: true, force: true }),
   };
+}
+
+/*
+ * A fixture's rules name no screen, because the shop is never served. Lint
+ * asks such a rule to excuse the agent tier (status.evidence.no-screen-needs-
+ * an-excuse), so a screen about something else excuses them here, and its
+ * output stays what was drawn.
+ */
+const HEADLESS = 'This fixture is never served, so there is nothing to look at.';
+function headless(m, id) {
+  const dir = join(m.specOf(id), 'features');
+  for (const f of readdirSync(dir).filter((n) => n.endsWith('.yml'))) {
+    const doc = parseDocument(readFileSync(join(dir, f), 'utf8'));
+    (doc.toJS()?.stories ?? []).forEach((story, si) =>
+      (story?.rules ?? []).forEach((rule, ri) => {
+        if (rule.retired || rule.screens?.length || rule.unverifiable?.agent) return;
+        doc.setIn(['stories', si, 'rules', ri, 'unverifiable', 'agent'], HEADLESS);
+      }),
+    );
+    writeFileSync(join(dir, f), String(doc));
+  }
+  m.ok(['hash', '--write', '--blueprint', id]);
 }
 
 /* A feature with one story of the given rules, written into a blueprint. */
@@ -429,7 +451,8 @@ for (const f of (() => {
   for (const [name, fn] of Object.entries(extra)) {
     if (FIXTURES[name])
       throw new Error(`tools/cli-fixtures/${f}: fixture "${name}" is already defined`);
-    FIXTURES[name] = (m) => fn(m, { feature, git, realRepo, committedHome, fixtures: FIXTURES });
+    FIXTURES[name] = (m) =>
+      fn(m, { feature, headless, git, realRepo, committedHome, fixtures: FIXTURES });
   }
 }
 

@@ -1,0 +1,21 @@
+id: n-0597
+uuid: 5d5ae60e-66d3-42c8-860a-373c103d85a6
+kind: note
+reason: request
+author: agent
+created: 2026-10-12T23:15:11.250Z
+anchor:
+  screen: threads-set-proposes
+status: addressed
+body: "What `walkdown threads set <request> --proposes <version>` prints for
+  ownership.design.request-names-its-version: the success (the request now names
+  /receipt/20261012.html, and who named it), and a refusal (a path no file under
+  the design root has: named, nothing written, exit 2). Match
+  threads-set-refused and the other threads set screens."
+replies:
+  - author: agent
+    created: 2026-10-12T23:16:23Z
+    body: "Drawn: prototype-cli/drafts/threads-set-proposes.html. The success names
+      the version the request now proposes, what it named before, who named it
+      and the reply that records it. A path with no file under the design root
+      is refused by name, changes nothing, and exits 2."

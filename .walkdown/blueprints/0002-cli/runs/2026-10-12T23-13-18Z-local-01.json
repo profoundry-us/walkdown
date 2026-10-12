@@ -1,0 +1,63 @@
+{
+  "run_id": "2026-10-12T23-13-18Z-local-01",
+  "created": "2026-10-12T23:13:18Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "82e1fc2-dirty",
+  "tree_hash": "sha256:ac14ef90b314",
+  "spec_hash": "sha256:084cd062be8c",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:ac77cd6c3b73"
+    },
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:768e7b46e642"
+    },
+    {
+      "rule": "ownership.authoring.focus-is-a-declared-anchor",
+      "status": "pass",
+      "statement_hash": "sha256:0f4cacbd010f"
+    },
+    {
+      "rule": "ownership.design.retired-counted-apart",
+      "status": "approved",
+      "statement_hash": "sha256:dc971fcf98e1"
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "approved",
+      "statement_hash": "sha256:d031d2757c27"
+    },
+    {
+      "rule": "locations.several.serve-shows-each-screen",
+      "status": "pass",
+      "statement_hash": "sha256:6d1216ead47a"
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:b82aec1ea7cc"
+    },
+    {
+      "rule": "status.evidence.no-screen-needs-an-excuse",
+      "status": "approved",
+      "statement_hash": "sha256:4c7cbc94f0fa"
+    }
+  ]
+}

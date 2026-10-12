@@ -486,10 +486,11 @@ screens:
       - cli.lint.both-tiers
       - cli.exit
 
-  # Requested 2026-10-12; no design accepted yet.
+  # Accepted in Topher's walkdown, 2026-10-12 (n-0590, n-0591, n-0595).
   - id: lint-no-screen
     title: "Lint refuses a rule with no screen and no excuse"
-    prototype: null
+    prototype: /screens/lint-no-screen.html
+    app: { path: /as-built/cli/lint-no-screen.html }
     anchors:
       - cli.prompt
       - cli.lint.no-screen
@@ -497,7 +498,8 @@ screens:
 
   - id: lint-unnamed-screen
     title: "Lint names a screen no rule names"
-    prototype: null
+    prototype: /screens/lint-unnamed-screen.html
+    app: { path: /as-built/cli/lint-unnamed-screen.html }
     anchors:
       - cli.prompt
       - cli.lint.unnamed-screen
@@ -512,10 +514,20 @@ screens:
 
   - id: hash-reword-adds-excuse
     title: "hash --reword refuses a rule that gained an excuse"
-    prototype: null
+    prototype: /screens/hash-reword-adds-excuse.html
+    app: { path: /as-built/cli/hash-reword-adds-excuse.html }
     anchors:
       - cli.prompt
       - cli.hash.refused
+      - cli.exit
+
+  - id: threads-set-proposes
+    title: "threads set --proposes names a request's design version"
+    prototype: null
+    proposal: /threads-set-proposes.html
+    anchors:
+      - cli.prompt
+      - cli.thread.proposes
       - cli.exit
 
   - id: plugin-skills

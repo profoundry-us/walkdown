@@ -118,6 +118,7 @@ stories:
             - An agent's verdict never accepts a design
             - A rule that names two screens counts toward each
           statement_hash: sha256:98aad72d33a6
+          excused: [agent]
 
       - id: ownership.design.retired-counted-apart
         origin: walkdown
@@ -139,6 +140,28 @@ stories:
             - It then says how many were left out, as `2 retired rules and 1 retired screen were not linted`
             - With nothing retired, that part is not printed
           statement_hash: sha256:dc971fcf98e1
+
+      - id: ownership.design.request-names-its-version
+        origin: thread:q-0587
+        created_at: 2026-10-12
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "`walkdown threads set <id> --proposes <version>` names the design version a request proposes. Anyone may set it, a person or an agent, and nothing else writes it except the upgrade."
+        because: The walk shows a proposed design beside its rules only when its request names it, and a designer should not have to edit a thread's file by hand to do that.
+        history: Until 2026-10-12 only `walkdown upgrade` wrote `proposes:`, so new drafts were named by editing the thread's YAML, which AGENTS.md forbids (Topher, q-0587).
+        screens: [threads-set-proposes]
+        steps:
+          given:
+            - A design request on screen receipt, and a version drawn at /receipt/20261012.html under the blueprint's design root
+          when:
+            - "`walkdown threads set <request> --proposes /receipt/20261012.html --blueprint <bp>` is run"
+          then:
+            - The request names that version, and the walk shows it beside the screen's accepted design
+            - A reply on the request says who named which version, so a later change of version is in its history
+            - A path that names no file under the design root is refused by name, nothing is written, and it exits 2
+            - A thread that is not a design request is refused the same way
+            - An accepted request is refused, because a new version of an accepted design goes on a new request
+          statement_hash: sha256:0680eae68b81
 
   - id: ownership.authoring
     title: A rule is written so it can be built from
@@ -255,6 +278,7 @@ stories:
             - Nothing under features, the storyboard, the prototype root, source or checks moved by a byte
             - The one module every write passes through names the author policy once, so a new writer cannot re-invent it
           statement_hash: sha256:b82aec1ea7cc
+          excused: [agent]
 
   - id: ownership.evidence
     title: A check is evidence only for what it actually exercises

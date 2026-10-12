@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-12T14:27:04.125Z
 anchor:
   rule: status.derived.stale-never-passes
-status: open
+status: answered
 body: "Should `walkdown hash --write --reword` refuse when a rule's excuses
   changed, rather than only their words? Today --reword keeps every verdict
   whatever moved, so an agent can add `unverifiable.agent` and pass --reword,
@@ -24,3 +24,7 @@ replies:
     added: Folded into status.derived.reword-never-adds-an-excuse (screen
       hash-reword-adds-excuse, request n-0595). Removing an excuse under
       --reword stays allowed, since it sets nothing aside.
+  - author: topher
+    created: 2026-10-12T23:06:10Z
+    body: Go with a
+    answer: true

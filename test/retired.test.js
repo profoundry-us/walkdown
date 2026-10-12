@@ -40,6 +40,9 @@ function fixture(label) {
       '      - id: demo.main.live',
       `        statement: ${live}`,
       '        verify: [checks]',
+      // No screen: the fixture is never served, and lint asks it to say so.
+      '        unverifiable:',
+      '          agent: This fixture is never served, so there is nothing to look at.',
       '        steps:',
       `          statement_hash: "${formatHash(live)}"`,
       '      - id: demo.main.gone',
@@ -118,9 +121,6 @@ test('a retired screen leaves the surfaces but keeps the threads anchored to it 
     join(h.spec, 'storyboard.yml'),
     [
       'screens:',
-      '  - id: live',
-      '    prototype: /live.html',
-      '    app: { path: /live }',
       '  - id: gone',
       '    retired: The layout it described was withdrawn.',
       '    prototype: /gone.html',

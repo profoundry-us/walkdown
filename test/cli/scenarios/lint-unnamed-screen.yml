@@ -1,0 +1,13 @@
+# `walkdown lint` on a storyboard with a screen no rule names, and one only a retired rule names.
+screen: lint-unnamed-screen
+title: Lint names a screen no rule names
+rule: ownership.design.every-screen-has-rules
+fixture: g4-unnamed-screen
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[storyboard\] checkout/storyboard\.yml › refund: no rule names this screen — write the rules it must show, with `screens: \[refund\]`, before it reaches anyone$'
+  - '^  ✗ \[storyboard\] checkout/storyboard\.yml › gift\-card: no rule names this screen — write the rules it must show, with `screens: \[gift\-card\]`, before it reaches anyone$'
+  - '^✗ 4 rules, 3 screens, 6 anchors, 0 threads, 0 runs — 2 error\(s\), 1 warning\(s\)\. 1 retired rule and 1 retired screen were not linted$'
+anchors:
+  - { id: cli.lint.unnamed-screen, match: '^  ✗ \[storyboard\] .*no rule names this screen' }

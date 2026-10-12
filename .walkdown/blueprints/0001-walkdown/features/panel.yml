@@ -499,6 +499,7 @@ stories:
             - hash: sha256:7e8666198401
               at: 2026-10-12T14:16:25Z
               why: the hash covers the excuses now; the rule and its excuse are unchanged
+          excused: [agent, checks]
 
       - id: panel.delivery.framed-isolation
         origin: thread:n-0030
@@ -578,6 +579,7 @@ stories:
             - hash: sha256:2a7b364ef850
               at: 2026-10-12T14:16:25Z
               why: the hash covers the excuses now; the rule and its excuse are unchanged
+          excused: [agent, checks]
 
       - id: panel.delivery.stale-copy-says-so
         origin: thread:n-0062

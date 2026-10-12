@@ -844,6 +844,7 @@ stories:
             - "A file a and b each have, but as different files, is refused with status 409, naming a and b and saying `?bp=` picks one"
             - A file no blueprint has is not found, and a request naming its blueprint is served as before
           statement_hash: sha256:6d1216ead47a
+          excused: [agent]
       - id: locations.several.rules-move
         statement: "`walkdown rules move <rule|story|feature> --to <blueprint>` moves rules to another blueprint in the same project, with their threads, and copies the run records and evidence behind their verdicts."
         because: A project that grows a second blueprint should not lose the verdicts and signatures its rules already earned.

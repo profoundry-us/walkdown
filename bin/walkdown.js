@@ -43,7 +43,7 @@ Threads
 Rules and verdicts
   walkdown status [<rule-id>] [--blueprint <id>] [--target <name>] [--json]
   walkdown lint [--blueprint <id>] [--no-checks] [--json]
-  walkdown hash [--blueprint <id>] [--write [--reword <why>]]    (--write needs --blueprint)
+  walkdown hash [<rule>...] [--blueprint <id>] [--write [--reword <why>]]    (--write needs --blueprint)
   walkdown run [--target <name>] [--rule <id>] [--blueprint <id>]
   walkdown judge <rule-id> --blueprint <id> [--target <name>] [--serve <origin>] [--json]
   walkdown sweep --why <reason> --blueprint <id> [--tiers checks,agent] [--target <name>]
@@ -67,7 +67,7 @@ const ABOUT = {
   status:
     'Derived per-rule verification from the runs ledger: latest checks per target,\nthe latest agent walkdown, which roles have accepted the rule, and open\nthreads. With a rule id: that rule in full (statement, evidence, the excuses\nfor any tier it does not ask for, who has signed and who has not, threads).',
   lint: 'Validate the blueprint: schema, ids, storyboard refs, staleness, check\ncoverage (the rule tags in the test files, or runner.list), threads, and runs.',
-  hash: 'Report statement_hash status for every rule - the hash pins the statement and\nthe steps; --write updates missing/stale hashes in place (formatting\npreserved), and every verdict on a re-stamped rule reads stale. --reword\n"<why>" keeps the old hash under steps.reworded so the verdicts stay current:\nthe words changed, the rule did not.',
+  hash: 'Report statement_hash status for every rule - the hash pins the statement and\nthe steps; --write updates missing/stale hashes in place (formatting\npreserved), and every verdict on a re-stamped rule reads stale. --reword\n"<why>" keeps the old hash under steps.reworded so the verdicts stay current:\nthe words changed, the rule did not, and it never adds an excuse. Rules named\nare the only ones stamped.',
   judge:
     'Print the judging prompt for one rule — statement, steps, setup, screens with\nreal addresses, where evidence goes and how a verdict is recorded — ready to\npaste into any agent with a browser. The first step toward prompt-driven\njudging (docs/11-architecture.md): the prompt ends where the reader begins,\nand this judges nothing.',
   sweep:

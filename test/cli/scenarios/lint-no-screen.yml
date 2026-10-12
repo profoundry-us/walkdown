@@ -1,0 +1,13 @@
+# `walkdown lint` on a blueprint with rules that name no screen: one excuses nothing, one excuses only checks.
+screen: lint-no-screen
+title: Lint refuses a rule with no screen and no excuse
+rule: status.evidence.no-screen-needs-an-excuse
+fixture: g4-no-screen
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[evidence\] checkout/features/checkout\.yml › checkout\.basics\.receipt: names no screen and excuses no tier, so nobody ever looks at it — name the screen it is on, with `screens: \[<id>\]`, or excuse the agent tier and say why there is nothing to look at$'
+  - '^  ✗ \[evidence\] checkout/features/checkout\.yml › checkout\.basics\.refunds: names no screen, and excuses only the checks tier, which says nothing about a screen — name the screen it is on, with `screens: \[<id>\]`, or excuse the agent tier and say why there is nothing to look at$'
+  - '^✗ 5 rules, 1 screens, 3 anchors, 0 threads, 1 runs — 3 error\(s\), 1 warning\(s\)\. 1 retired rule was not linted$'
+anchors:
+  - { id: cli.lint.no-screen, match: '^  ✗ \[evidence\] .*names no screen' }
