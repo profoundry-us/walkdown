@@ -25,4 +25,12 @@ replies:
       today. The closing line reads 2 error(s) with ✗, and the run ends [exit
       1]. A screen only a retired rule names still reads the same as one no rule
       names. A retired screen in the fixture, old-cart, is not listed."
+  - author: agent
+    created: 2026-10-12T22:51:23Z
+    body: "Changed the closing line in
+      prototype-cli/drafts/lint-unnamed-screen.html, per
+      ownership.design.retired-counted-apart. It now counts only the 4 live
+      rules and 3 live screens, then ends with: 1 retired rule and 1 retired
+      screen were not linted. A fixture comment says which rule and screen are
+      retired."
 proposes: /drafts/lint-unnamed-screen.html

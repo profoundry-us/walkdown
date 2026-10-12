@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-12T22-50-02Z-local-01",
+  "created": "2026-10-12T22:50:02Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f3aec8c-dirty",
+  "spec_hash": "sha256:a2ef4d347071",
+  "results": [
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "fail",
+      "statement_hash": "sha256:07405f98cd04",
+      "evidence": [
+        "runs/evidence/2026-10-12T23-00-00Z/serve-anywhere.txt"
+      ],
+      "threads": [
+        "3c94271b-9425-4ada-b6dd-399f42c0a34c"
+      ],
+      "reasoning": "Fail on the first step as reworded today. Driven by starting node bin/walkdown.js serve on port 4791 from an empty mktemp directory, against this checkout's hook home where three blueprints are registered, and reading what it printed before stopping it. It starts and serves, but says only 'every blueprint registered on this machine (3)': no blueprint is listed by id or project, which the rule now asks for (Topher, 2026-10-12). The other steps were not re-driven here; nothing about them changed, and the earlier agent pass covered them. The build waits on the serve-anywhere design (n-0592)."
+    }
+  ]
+}

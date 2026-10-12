@@ -326,13 +326,13 @@ stories:
           when:
             - "`walkdown serve` is started there"
           then:
-            - It starts, and says it serves every blueprint registered on this machine
+            - It starts, and lists every blueprint registered on this machine by id with the project it belongs to, not only how many there are
             - Its root, opened with no blueprint in the address, shows the registered blueprints to choose from, and no rules
             - Named by id, any registered blueprint is served as it would be by a server started in its own project
             - A request that needs a blueprint and names none is refused, and the refusal says how to name one
-            - Started instead inside a registered project, or with `--blueprint`, that blueprint is the one a page naming none shows
+            - Started instead inside a registered project, or with `--blueprint`, that blueprint is the one a page naming none shows, and the list marks it as the default
             - A blueprint registered, or a storyboard edited, after the server started is recognised from its own app pages without a restart
-          statement_hash: sha256:8fc3f6d54231
+          statement_hash: sha256:07405f98cd04
 
       - id: locations.answer.adapters-file-where-walkdown-says
         origin: walkdown

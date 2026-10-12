@@ -20,4 +20,10 @@ replies:
       blueprint holds, serve lists every registered blueprint by id with its
       project and says a page naming none asks the person to choose, with a run
       using --blueprint below it for comparison."
+  - author: agent
+    created: 2026-10-12T22:51:24Z
+    body: Checked prototype-cli/drafts/serve-anywhere.html against the reworded
+      locations.answer.serve-starts-anywhere. It lists every registered
+      blueprint by id with its project. The --blueprint run marks the default.
+      Nothing changed.
 proposes: /drafts/serve-anywhere.html

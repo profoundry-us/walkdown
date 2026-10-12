@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- DESIGN DRAFT: hash-reword-adds-excuse -->
 <!-- Drawn by the design agent for request n-0595. Not yet accepted. -->
-<!-- Intent: refuse by name a rule that gained an excuse since it was last stamped, say why rewording cannot add one and what to run instead, say nothing was written for any rule, and exit 2. -->
-<!-- Fixture: checkout.basics.receipt was stamped with no excuse and has since gained an agent-tier excuse; checkout.basics.totals had an agent-tier excuse already, and only its reason was reworded. -->
+<!-- Intent: refuse by name every rule that gained an excuse since it was last stamped, show the tier each now excuses and the excuse itself, say why rewording cannot add one and what to run instead, say nothing was written for any rule, and exit 2. -->
+<!-- Fixture: checkout.basics.receipt was stamped with no excuse and has since gained an agent-tier excuse. checkout.basics.refunds excused the checks tier when stamped and now excuses the agent tier instead, which counts as adding one. checkout.basics.totals had an agent-tier excuse already, and only its reason was reworded; it is not refused. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -30,12 +30,16 @@
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
     <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown hash --write --reword "the excuse reads more plainly" --blueprint checkout</div>
       <div data-testid="cli.hash.refused">
-      <div class="ln">✗ checkout.basics.receipt excuses the agent tier, and it did not when it was last stamped.</div>
-      <div class="ln">  Rewording cannot add an excuse: a rewording keeps every verdict, so the tier would be set aside with nobody reading the rule again.</div>
-      <div class="ln">  Run `walkdown hash --write --blueprint checkout` without --reword. Its verdicts then read stale until it is judged and approved again.</div>
+      <div class="ln">✗ checkout.basics.receipt now excuses the agent tier, and it excused nothing when it was last stamped:</div>
+      <div class="ln dim">    agent: The receipt is an email, and no page shows it.</div>
+      <div class="ln">✗ checkout.basics.refunds now excuses the agent tier, and it excused only the checks tier when it was last stamped:</div>
+      <div class="ln dim">    agent: A refund is settled by the payment provider, out of sight of the shop.</div>
+      <div class="ln"></div>
+      <div class="ln">Rewording cannot add an excuse. A rewording keeps every verdict, so the tier would be set aside with nobody reading the rule again.</div>
+      <div class="ln">Run `walkdown hash --write checkout.basics.receipt checkout.basics.refunds --blueprint checkout` to stamp only these two. Their verdicts then read stale until each is judged and approved again.</div>
       </div>
       <div class="ln"></div>
-      <div class="ln">Nothing was written for any rule. Once checkout.basics.receipt is stamped on its own, run this again to reword the rest.</div>
+      <div class="ln">Nothing was written for any rule. Once checkout.basics.receipt and checkout.basics.refunds are stamped on their own, run this again to reword the rest.</div>
     <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
   </div>
 </body>

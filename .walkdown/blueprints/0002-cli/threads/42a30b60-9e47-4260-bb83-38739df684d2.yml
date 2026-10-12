@@ -21,4 +21,11 @@ replies:
     body: "Drawn: prototype-cli/drafts/lint-no-screen.html. Two lint errors, one for
       a rule that excuses nothing and one for a rule that excuses only checks,
       each offering the same two fixes, and the run exits 1."
+  - author: agent
+    created: 2026-10-12T22:51:23Z
+    body: "Changed the closing line in prototype-cli/drafts/lint-no-screen.html, per
+      ownership.design.retired-counted-apart. It now counts the 5 live rules,
+      not 6, then ends with: 1 retired rule was not linted. The fixture has no
+      retired screen, so that part is not printed. A fixture comment states the
+      counts."
 proposes: /drafts/lint-no-screen.html

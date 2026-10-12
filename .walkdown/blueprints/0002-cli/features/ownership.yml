@@ -119,6 +119,27 @@ stories:
             - A rule that names two screens counts toward each
           statement_hash: sha256:98aad72d33a6
 
+      - id: ownership.design.retired-counted-apart
+        origin: walkdown
+        created_at: 2026-10-12
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Lint checks nothing about a retired rule or a retired screen, and its closing line says how many of each it left out.
+        because: A retired rule or screen describes something we stopped meaning, so a finding on one is noise. Counting them apart keeps them visible without mixing them into what was linted.
+        history: Topher, 2026-10-12, while reading the lint-unnamed-screen draft.
+        screens: [lint-unnamed-screen, lint-no-screen]
+        steps:
+          given:
+            - A blueprint holding live rules and screens, two retired rules and one retired screen
+          when:
+            - The blueprint is linted
+          then:
+            - Nothing is said about the retired rules or the retired screen, other than that a retired rule's id still resolves
+            - The closing line counts only the live rules and screens
+            - It then says how many were left out, as `2 retired rules and 1 retired screen were not linted`
+            - With nothing retired, that part is not printed
+          statement_hash: sha256:dc971fcf98e1
+
   - id: ownership.authoring
     title: A rule is written so it can be built from
     statement: As a team, we can hand a rule to whoever implements it - a person or an agent - and have them build the right thing without asking us what we meant.

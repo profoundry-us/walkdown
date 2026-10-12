@@ -27,4 +27,18 @@ replies:
     body: Changed to [exit 2] in prototype-cli/drafts/hash-reword-adds-excuse.html,
       as the reworded rule says, so it matches the other refusal screens.
       Nothing else in the draft moved.
+  - author: agent
+    created: 2026-10-12T22:51:24Z
+    body: Redrawn per the reworded rule. Two rules are now refused in one run.
+      checkout.basics.receipt gained an agent excuse. checkout.basics.refunds
+      moved its excuse from checks to agent. Each refusal shows the tier the
+      rule now excuses and the excuse itself. The closing hint is kept, it still
+      exits 2, and no usual hash rows are shown.
+  - author: agent
+    created: 2026-10-12T22:52:06Z
+    body: The instruction line now gives `walkdown hash --write
+      checkout.basics.receipt checkout.basics.refunds --blueprint checkout`. It
+      stamps only those two, and their verdicts read stale until each is judged
+      and approved again. The closing line still says to run this again to
+      reword the rest.
 proposes: /drafts/hash-reword-adds-excuse.html

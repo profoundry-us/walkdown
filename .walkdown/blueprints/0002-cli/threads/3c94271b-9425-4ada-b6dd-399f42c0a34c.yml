@@ -1,0 +1,14 @@
+id: n-0596
+uuid: 3c94271b-9425-4ada-b6dd-399f42c0a34c
+kind: note
+reason: observation
+author: agent
+created: 2026-10-12T22:50:01.828Z
+anchor:
+  rule: locations.answer.serve-starts-anywhere
+status: open
+body: "walkdown serve, started outside a registered project, prints only how
+  many blueprints it serves ('every blueprint registered on this machine (3)');
+  the rule now says it lists each by id with its project, and marks the default
+  when one is. Unbuilt until the serve-anywhere design is accepted (n-0592).
+  Evidence: runs/evidence/2026-10-12T23-00-00Z/serve-anywhere.txt."
