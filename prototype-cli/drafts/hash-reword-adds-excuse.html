@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- DESIGN DRAFT: hash-reword-adds-excuse -->
+<!-- Drawn by the design agent for request n-0595. Not yet accepted. -->
+<!-- Intent: refuse by name a rule that gained an excuse since it was last stamped, say why rewording cannot add one and what to run instead, say nothing was written for any rule, and exit 2. -->
+<!-- Fixture: checkout.basics.receipt was stamped with no excuse and has since gained an agent-tier excuse; checkout.basics.totals had an agent-tier excuse already, and only its reason was reworded. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>hash --reword refuses a rule that gained an excuse</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown hash --write --reword "the excuse reads more plainly" --blueprint checkout</div>
+      <div data-testid="cli.hash.refused">
+      <div class="ln">✗ checkout.basics.receipt excuses the agent tier, and it did not when it was last stamped.</div>
+      <div class="ln">  Rewording cannot add an excuse: a rewording keeps every verdict, so the tier would be set aside with nobody reading the rule again.</div>
+      <div class="ln">  Run `walkdown hash --write --blueprint checkout` without --reword. Its verdicts then read stale until it is judged and approved again.</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">Nothing was written for any rule. Once checkout.basics.receipt is stamped on its own, run this again to reword the rest.</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+  </div>
+</body>
+</html>

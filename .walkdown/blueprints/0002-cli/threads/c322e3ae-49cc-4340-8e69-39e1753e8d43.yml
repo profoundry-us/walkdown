@@ -15,3 +15,12 @@ body: "Should `walkdown hash --write --reword` refuse when a rule's excuses
   Options: (a) --reword refuses when a tier is excused or un-excused, and allows
   only a changed reason; (b) it warns and proceeds; (c) leave it, since --reword
   is already a person's declaration."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-10-12T22:35:43Z
+    body: Reword should not allow adding an excuse; it can only reword one if it
+      already exists.
+    added: Folded into status.derived.reword-never-adds-an-excuse (screen
+      hash-reword-adds-excuse, request n-0595). Removing an excuse under
+      --reword stays allowed, since it sets nothing aside.

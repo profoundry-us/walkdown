@@ -83,7 +83,7 @@ stories:
         signoff: [eng, product]
         statement: Every screen in a storyboard is named by at least one rule, and lint names any screen no rule names.
         because: A design is accepted by approving the rules on its screen, so a screen no rule names could never be accepted.
-        history: On 2026-10-09 seven screens were designed before any rule named them, and nothing walked Topher to them.
+        history: On 2026-10-09 seven screens were designed before any rule named them, and nothing walked Topher to them. It was a warning until 2026-10-12, when Topher made it an error like a rule with no screen.
         screens: [lint-unnamed-screen]
         steps:
           given:
@@ -91,9 +91,10 @@ stories:
           when:
             - The blueprint is linted
           then:
-            - Lint names that screen and says to write the rules it must show
-            - A screen a retired rule alone names is named the same way
-          statement_hash: sha256:1fdde981b0d9
+            - Lint names that screen as an error and says to write the rules it must show, and exits 1
+            - A retired rule does not count as naming a screen, so a screen only a retired rule names is named the same way
+            - A retired screen is not linted
+          statement_hash: sha256:01920019bc11
 
       - id: ownership.design.approved-rules-accept-the-design
         origin: walkdown

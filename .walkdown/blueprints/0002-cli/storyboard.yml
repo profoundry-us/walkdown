@@ -510,6 +510,14 @@ screens:
       - cli.prompt
       - cli.serve.serving
 
+  - id: hash-reword-adds-excuse
+    title: "hash --reword refuses a rule that gained an excuse"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.hash.refused
+      - cli.exit
+
   - id: plugin-skills
     title: "The walkdown plugin holds walkdown's five skills and nothing else"
     prototype: /screens/plugin-skills.html

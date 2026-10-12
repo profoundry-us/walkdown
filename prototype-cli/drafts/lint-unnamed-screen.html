@@ -1,7 +1,8 @@
 <!doctype html>
 <!-- DESIGN DRAFT: lint-unnamed-screen -->
-<!-- Drawn by the design agent for request n-0591. Not yet accepted. -->
-<!-- Intent: name each storyboard screen no live rule names, in the same words whether no rule ever named it or only a retired one does, and say to write the rules it must show with screens: [id] before it reaches anyone; a warning, so the run still exits 0. -->
+<!-- Drawn by the design agent for request n-0591. Not yet accepted. Revised 2026-10-12: an error, not a warning (Topher). -->
+<!-- Intent: list each storyboard screen no live rule names as an error, in the same words whether no rule ever named it or only a retired one does, and say to write the rules it must show with screens: [id]; the run fails with exit 1. -->
+<!-- Fixture: refund is named by no rule; gift-card is named only by a retired rule; old-cart is a retired screen no rule names, and is not listed. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -30,15 +31,17 @@
     <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown lint</div>
       <div class="ln">walkdown lint — ~/.walkdown/projects/shop/blueprints/checkout</div>
       <div class="ln"></div>
-      <div class="ln">WARNINGS</div>
-      <div class="ln">  ⚠ [drift] checkout/features/checkout.yml › checkout.basics.totals: origin references unknown thread "n-0099"</div>
+      <div class="ln">ERRORS</div>
       <div data-testid="cli.lint.unnamed-screen">
-      <div class="ln">  ⚠ [storyboard] checkout/storyboard.yml › refund: no rule names this screen — write the rules it must show, with `screens: [refund]`, before it reaches anyone</div>
-      <div class="ln">  ⚠ [storyboard] checkout/storyboard.yml › gift-card: no rule names this screen — write the rules it must show, with `screens: [gift-card]`, before it reaches anyone</div>
+      <div class="ln">  ✗ [storyboard] checkout/storyboard.yml › refund: no rule names this screen — write the rules it must show, with `screens: [refund]`, before it reaches anyone</div>
+      <div class="ln">  ✗ [storyboard] checkout/storyboard.yml › gift-card: no rule names this screen — write the rules it must show, with `screens: [gift-card]`, before it reaches anyone</div>
       </div>
       <div class="ln"></div>
-      <div class="ln">✓ 4 rules, 3 screens, 6 anchors, 0 threads, 0 runs — 0 errors, 3 warning(s)</div>
-    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+      <div class="ln">WARNINGS</div>
+      <div class="ln">  ⚠ [drift] checkout/features/checkout.yml › checkout.basics.totals: origin references unknown thread "n-0099"</div>
+      <div class="ln"></div>
+      <div class="ln">✗ 4 rules, 3 screens, 6 anchors, 0 threads, 0 runs — 2 error(s), 1 warning(s)</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 1]</div>
   </div>
 </body>
 </html>

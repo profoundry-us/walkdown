@@ -52,6 +52,29 @@ stories:
             - A rule that carries no excuse hashes as it did before excuses were part of the hash
           statement_hash: sha256:feda1ef23a24
 
+      - id: status.derived.reword-never-adds-an-excuse
+        origin: thread:q-0593
+        created_at: 2026-10-12
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "`walkdown hash --write --reword` refuses a rule that excuses a tier it did not excuse when it was last stamped. It may reword an excuse that was already there."
+        because: A rewording keeps every verdict on the rule, so an excuse added under one would set a tier aside with nobody reading the rule again.
+        history: Topher, 2026-10-12 (q-0593), after a judge added an excuse under --reword and the approval given before it still stood.
+        screens: [hash-reword-adds-excuse]
+        steps:
+          given:
+            - A rule stamped with no excuse, which then has an agent-tier excuse added
+            - A second rule whose agent-tier excuse already existed, with its reason reworded
+          when:
+            - "`walkdown hash --write --reword \"<why>\"` is run"
+          then:
+            - The first rule is refused by name. The refusal says rewording cannot add an excuse, and to run `walkdown hash --write` without --reword, so its verdicts read stale until it is judged and approved again
+            - Nothing is written for any rule, and it exits 2, as other refusals do
+            - Run again once the first rule is stamped on its own, the second rule is reworded and its verdicts stand
+            - Moving an excuse to a different tier is adding one, and is refused the same way
+            - Removing an excuse under --reword is allowed, because it sets nothing aside
+          statement_hash: sha256:fa52d7c42dc2
+
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
         statement: A verdict counts only at the address it was made against. Point a target somewhere new and its evidence empties; point it back and the evidence returns.

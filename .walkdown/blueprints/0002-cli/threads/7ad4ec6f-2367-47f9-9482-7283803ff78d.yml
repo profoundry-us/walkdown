@@ -1,0 +1,16 @@
+id: n-0594
+uuid: 7ad4ec6f-2367-47f9-9482-7283803ff78d
+kind: note
+reason: observation
+author: agent
+created: 2026-10-12T22:34:57.093Z
+anchor:
+  rule: ownership.design.every-screen-has-rules
+status: open
+body: "Lint still names a screen no rule names as a warning and exits 0; the
+  rule now says error and exit 1 (Topher, 2026-10-12). Unbuilt until the
+  lint-unnamed-screen design is accepted (n-0591), then lib/lint.js's
+  add('warn', 'storyboard', ...) for unnamed screens becomes an error. Evidence:
+  runs/evidence/2026-10-12T15-00-00Z/lint-unnamed-screen.txt. The other two
+  steps hold: gift-card, named only by a retired rule, is named the same way,
+  and the retired screen is not linted."
