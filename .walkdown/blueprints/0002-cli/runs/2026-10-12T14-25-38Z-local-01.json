@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-12T14-25-38Z-local-01",
+  "created": "2026-10-12T14:25:38Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "bdb4faa-dirty",
+  "spec_hash": "sha256:32f585fb6008",
+  "results": [
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:feda1ef23a24",
+      "evidence": [
+        "runs/evidence/2026-10-12T14-20-40Z/00-baseline.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/01-added.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/02-changed.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/03-removed.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/04-legacy-edge.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/05-real-blueprints-sweep.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/06-rewrap-and-reword.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/07-reword-adds-excuse.txt",
+        "runs/evidence/2026-10-12T14-20-40Z/features-0-noexcuse.yml",
+        "runs/evidence/2026-10-12T14-20-40Z/features-1-added.yml",
+        "runs/evidence/2026-10-12T14-20-40Z/features-2-changed.yml",
+        "runs/evidence/2026-10-12T14-20-40Z/features-3-removed.yml"
+      ],
+      "reasoning": "Pass. Driven with node bin/walkdown.js against a throwaway fixture project (mktemp HOME and WALKDOWN_HOME, blueprint checkout with rules pays and totals, checks and agent passes written into runs/ as a reporter would); the scratch copy judge-stale-excuse was served on port 4763 (confirmed via /api/blueprint) only to check the screen pages. Excuse added: an unverifiable.agent excuse on pays turned `walkdown hash` to stale and the checks cell to '~ stale' both before and after `hash --write` without --reword (01); a fresh checks pass against the new hash cleared it. Excuse changed: a new reason on the same tier staled it again, before and after hash --write (02). Excuse removed: the checks pass recorded against the excused wording read stale (03); the agent pass from before the excuse reads pass again because the rule now hashes exactly as it did when judged, the same as a statement reverted to judged words. No excuse: both fixture rules hash to the value a reimplementation of the pre-excuse ruleHash (git 3579b9d~1) gives, and across the real blueprints 219 excuse-free rules hash identically under both algorithms (05). Stale counted as pending in every summary line, the old run files were never touched, a folded re-wrap of the same excuse words did not stale (06), and `--reword` keeps an excuse rewording's pass exactly as it does a statement's (06). The status-reworded design (prototype-cli/screens) and as-built capture carry the same lines and the same five anchors. Edges: a legacy statement-only hash survives an excuse change exactly as it survives a step change, which the rule's own step sanctions; 1 of roughly 12,500 recorded results on excused rules carries one, under 10%, named only. `--reword` also keeps a pass when an excuse is ADDED rather than reworded (07); that is the same mechanism the steps describe, so it does not fail the rule, and it was reported to the dispatching agent as a mid-likelihood edge rather than filed.",
+      "threads": []
+    }
+  ]
+}

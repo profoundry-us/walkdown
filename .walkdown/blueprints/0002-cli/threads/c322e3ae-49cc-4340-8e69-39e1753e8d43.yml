@@ -1,0 +1,17 @@
+id: q-0593
+uuid: c322e3ae-49cc-4340-8e69-39e1753e8d43
+kind: question
+author: agent
+created: 2026-10-12T14:27:04.125Z
+anchor:
+  rule: status.derived.stale-never-passes
+status: open
+body: "Should `walkdown hash --write --reword` refuse when a rule's excuses
+  changed, rather than only their words? Today --reword keeps every verdict
+  whatever moved, so an agent can add `unverifiable.agent` and pass --reword,
+  and the approval you gave before the excuse still stands (judge evidence
+  07-reword-adds-excuse.txt, 2026-10-12). That is the hole hashing the excuses
+  was meant to close, and lint will soon ask rules with no screen for an excuse.
+  Options: (a) --reword refuses when a tier is excused or un-excused, and allows
+  only a changed reason; (b) it warns and proceeds; (c) leave it, since --reword
+  is already a person's declaration."

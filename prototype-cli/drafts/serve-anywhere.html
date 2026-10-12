@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- DESIGN DRAFT: serve-anywhere -->
+<!-- Drawn by the design agent for request n-0592. Not yet accepted. -->
+<!-- Intent: started from a folder no blueprint holds, serve says it serves every registered blueprint, lists each by id with its project and home, gives the address, and says a page naming no blueprint lets the person choose; then the same command inside ~/shop names the one blueprint a page naming none opens. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>walkdown serve, started outside any blueprint, serves them all</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/Downloads</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/Downloads $</b> walkdown serve</div>
+      <div data-testid="cli.serve.serving">
+      <div class="ln">walkdown serve — every blueprint registered on this machine (3)</div>
+      <div class="ln">  0001-sp-checkout  shop       ~/.walkdown/projects/shop/blueprints/checkout</div>
+      <div class="ln">  0002-sp-search    shop       ~/.walkdown/projects/shop/blueprints/search</div>
+      <div class="ln">  0003-am-search    acme_main  ~/.walkdown/projects/acme_main/blueprints/search</div>
+      <div class="ln dim">  Started outside a registered project, so no blueprint is the default. A page that names none asks you to choose one.</div>
+      </div>
+      <div class="ln">  review:  http://localhost:4700/</div>
+      <div class="ln">  in your app:  &lt;script src="http://localhost:4700/embed.js" data-walkdown data-bp="&lt;id&gt;"&gt;&lt;/script&gt;</div>
+      <div class="ln dim">  Ctrl-C to stop</div>
+      <div class="ln">^C</div>
+      <div class="ln"></div>
+      <div class="ln dim"># For comparison: the same command inside a project with one blueprint, or with --blueprint</div>
+      <div class="ln prompt"><b>~/shop $</b> walkdown serve --blueprint checkout</div>
+      <div class="ln">walkdown serve — every blueprint registered on this machine (3)</div>
+      <div class="ln">  0001-sp-checkout  shop       ~/.walkdown/projects/shop/blueprints/checkout  (default)</div>
+      <div class="ln">  0002-sp-search    shop       ~/.walkdown/projects/shop/blueprints/search</div>
+      <div class="ln">  0003-am-search    acme_main  ~/.walkdown/projects/acme_main/blueprints/search</div>
+      <div class="ln dim">  A page that names no blueprint opens 0001-sp-checkout.</div>
+      <div class="ln">  review:  http://localhost:4700/</div>
+      <div class="ln">  in your app:  &lt;script src="http://localhost:4700/embed.js" data-walkdown data-bp="0001-sp-checkout"&gt;&lt;/script&gt;</div>
+      <div class="ln dim">  Ctrl-C to stop</div>
+  </div>
+</body>
+</html>

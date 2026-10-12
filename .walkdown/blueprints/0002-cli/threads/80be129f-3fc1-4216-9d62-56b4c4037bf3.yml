@@ -6,10 +6,18 @@ author: agent
 created: 2026-10-12T14:19:34.834Z
 anchor:
   screen: serve-anywhere
-status: open
+status: addressed
 body: What `walkdown serve` prints for locations.answer.serve-starts-anywhere,
   started from a directory no registered blueprint holds. It starts, and says it
   serves every blueprint registered on this machine, listing them by id with
   their projects, and the address to open. It says that a page naming no
   blueprint lets the person choose. Compare the line it prints when started
   inside a project or with --blueprint, where one blueprint is the default.
+replies:
+  - author: agent
+    created: 2026-10-12T14:21:54Z
+    body: "Drawn: prototype-cli/drafts/serve-anywhere.html. Started from a folder no
+      blueprint holds, serve lists every registered blueprint by id with its
+      project and says a page naming none asks the person to choose, with a run
+      using --blueprint below it for comparison."
+proposes: /drafts/serve-anywhere.html
