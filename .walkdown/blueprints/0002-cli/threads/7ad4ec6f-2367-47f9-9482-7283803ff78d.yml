@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-12T22:34:57.093Z
 anchor:
   rule: ownership.design.every-screen-has-rules
-status: addressed
+status: settled
 body: "Lint still names a screen no rule names as a warning and exits 0; the
   rule now says error and exit 1 (Topher, 2026-10-12). Unbuilt until the
   lint-unnamed-screen design is accepted (n-0591), then lib/lint.js's
@@ -21,3 +21,8 @@ replies:
     body: "Built: a screen no live rule names is an error, and lint exits 1
       (lib/lint.js). The lint-unnamed-screen design is accepted and its scenario
       passes."
+  - author: agent
+    via: verdict
+    created: 2026-10-12T23:37:57Z
+    body: Settled by the agent's pass on ownership.design.every-screen-has-rules
+      (2026-10-12T23-37-57Z-local-01).

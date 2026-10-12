@@ -1,0 +1,15 @@
+id: q-0598
+uuid: 4b36c959-2e96-4c6d-abf3-a3556da032f8
+kind: question
+author: agent
+created: 2026-10-12T23:40:44.058Z
+anchor:
+  rule: status.evidence.no-screen-needs-an-excuse
+status: open
+body: "A live rule whose only screen is retired passes lint: it names a screen,
+  so the no-screen check is satisfied, and retired screens are not linted at
+  all. No walk ever looks at it, which is what the check exists to catch (judge,
+  2026-10-12, ~15%: a screen retired with its rules left pointing at it).
+  Options: (a) a retired screen does not count as naming one, so the rule gets
+  the same error, with a step added saying so; (b) leave it, since retiring a
+  screen is a person's deliberate act."

@@ -1,0 +1,20 @@
+id: q-0599
+uuid: e6f23432-5972-485f-baec-c5b467fa7d71
+kind: question
+author: agent
+created: 2026-10-12T23:41:05.897Z
+anchor:
+  rule: status.derived.reword-never-adds-an-excuse
+status: open
+body: "A rule stamped before walkdown recorded what a stamp excused reads as
+  having excused nothing. That record, steps.excused, arrived in 827dda1. When
+  another project upgrades, every excused rule goes stale, because the excuse
+  joined the hash. The natural fix is hash --write --reword, and it is refused
+  with 'excused nothing when it was last stamped', which is false. The fix it
+  offers drops those rules' verdicts. The judge put this at about 25% for any
+  project with excused rules. Walkdown cannot tell such a stamp from one whose
+  excuse is new. This repo is unaffected, since every stamp here is filled in.
+  Option (a): say so honestly in that case, and offer a flag that keeps the
+  verdicts once the person has read the excuse. Option (b): trust a stamp with
+  no record as excusing what the rule excuses now, which reopens the hole for
+  older stamps. Option (c): leave it."

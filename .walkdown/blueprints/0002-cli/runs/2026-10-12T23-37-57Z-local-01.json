@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-10-12T23-37-57Z-local-01",
+  "created": "2026-10-12T23:37:57Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "827dda1-dirty",
+  "note": "Agent tier for the four rules built in 827dda1, driven as CLI moments on throwaway machines (mktemp HOME and WALKDOWN_HOME via tools/cli-scenarios.mjs machine()), no server served.",
+  "spec_hash": "sha256:fd3d04c8c82b",
+  "results": [
+    {
+      "rule": "status.evidence.no-screen-needs-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:4c7cbc94f0fa",
+      "evidence": [
+        "runs/evidence/2026-10-12T23-33-57Z/lint-no-screen.txt",
+        "runs/evidence/2026-10-12T23-33-59Z/probe.mjs"
+      ],
+      "reasoning": "Drove `node bin/walkdown.js lint` on throwaway machines (no port; CLI only). On the scenario fixture g4-no-screen, receipt (no excuse) and refunds (checks excuse only) are each an [evidence] error saying to name the screen or excuse the agent tier and say why there is nothing to look at; emails (agent excuse) is not named; the retired wrapping is not named; pays and totals, which name cart, pass; exit 1. The output matches prototype-cli/screens/lint-no-screen.html line for line. Break attempts: `screens: []` with no excuse is the same error; an excuse on an unknown tier only (visual) is the 'excuses only the visual tier' error plus the unknown-tier warning; a screenless rule with a thin ('n/a') or empty agent excuse passes this check and gets the same too-thin warning any other excuse gets, which is what 'held to the same length as any other' asks; a rule naming a screen with only a checks excuse passes. Edge below 10%, named only: none beyond those. One edge between 10% and 80% is reported to the caller, not filed: a live rule whose only screen is retired is not flagged by this check or any other."
+    },
+    {
+      "rule": "ownership.design.every-screen-has-rules",
+      "status": "pass",
+      "statement_hash": "sha256:01920019bc11",
+      "evidence": [
+        "runs/evidence/2026-10-12T23-33-58Z/lint-unnamed-screen.txt"
+      ],
+      "reasoning": "n-0594 failed this rule because lint only warned about an unnamed screen and exited 0. Now built: on the scenario fixture g4-unnamed-screen, lint lists refund (named by no rule) and gift-card (named only by the retired gift-wrap) under ERRORS, each saying to write the rules it must show with `screens: [<id>]`, and exits 1; the retired old-cart is not named. Output matches prototype-cli/screens/lint-unnamed-screen.html. Break attempts: with the unnamed screen as the blueprint's only problem, lint still exits 1 on that error alone (L6); a retired screen with no design, no request and an anchor raises nothing (L3). Edge under 10%: none found. Driven via node bin/walkdown.js on mktemp machines, no server."
+    },
+    {
+      "rule": "ownership.design.retired-counted-apart",
+      "status": "pass",
+      "statement_hash": "sha256:dc971fcf98e1",
+      "evidence": [
+        "runs/evidence/2026-10-12T23-33-58Z/retired-counted-apart.txt"
+      ],
+      "reasoning": "Built a blueprint with one live rule and screen, two retired rules (one deliberately faulty: an unknown screen ref, verify: [bogus], an origin thread that does not exist, an excuse on an unknown tier) and one retired screen with an anchor and no design, plus a check tagged with a retired rule id. Lint said nothing about any of them, the check naming the retired id raised no 'no such rule' error (the id still resolves), and the closing line read `1 rules, 1 screens ... 2 retired rules and 1 retired screen were not linted`. With nothing retired the suffix is absent; one retired screen alone reads `1 retired screen was not linted`; the two scenario fixtures read `1 retired rule was not linted` and `1 retired rule and 1 retired screen were not linted`, with live counts (5 rules/1 screen, 4 rules/3 screens). Edge under 10%, named only: the anchors count in the same line still includes a retired screen's anchors (2 anchors where the live screen has 1); the rule speaks of rules and screens, so it does not fail on it. Driven via node bin/walkdown.js on mktemp machines."
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:d031d2757c27",
+      "evidence": [
+        "runs/evidence/2026-10-12T23-33-59Z/hash-reword-adds-excuse.txt",
+        "runs/evidence/2026-10-12T23-33-59Z/probe.mjs"
+      ],
+      "reasoning": "Scenario fixture g4-reword-adds-excuse matches prototype-cli/screens/hash-reword-adds-excuse.html: receipt and refunds are both refused by name with the tier and excuse text, the line that rewording cannot add an excuse, the `walkdown hash --write <ids> --blueprint checkout` command, exit 2. My own fixture (with a passing agent run on every rule): receipt gaining two tiers at once is refused as 'the agent and checks tiers' with both excuses; refunds moving checks to agent is refused; coupons removing its excuse and pays with a plain statement rewording are not refused; the features file is byte-identical after the refusal. `hash --write receipt refunds` stamped only those two and left pays, coupons and totals stale with their old hashes. The rerun of --reword then reworded pays, totals and coupons and their agent passes stood. An unknown id to `hash --write` exits 2 naming it. Edge under 10%, named only: `hash --write <retired rule id>` exits 0 and writes nothing, silently. One edge between 10% and 80% is reported to the caller, not filed: a rule stamped before `steps.excused` existed is read as having excused nothing."
+    }
+  ]
+}
