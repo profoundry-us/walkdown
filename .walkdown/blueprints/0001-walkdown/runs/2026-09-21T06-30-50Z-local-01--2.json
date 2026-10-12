@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-21T06-30-50Z-local-01",
+  "created": "2026-09-21T06:30:50Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "71c8030-dirty",
+  "spec_hash": "sha256:5b0573fe2066",
+  "note": "The 2026-09-21 agent sitting under the sweep of 2026-09-21T05-16-03Z, after Topher's findings were fixed: 142 rules. Screen rules were driven against a stamped scratch copy served on 4730 (node tools/scratch.mjs new sitting-0921) so filing, verdicts and pins never touched this ledger; the real board on 4700 was read only. Headless rules were probed with the CLI and the API against throwaway homes. Evidence: this sitting's probes under runs/evidence/2026-09-21T05-18-16Z/ and the harness captures under 2026-09-21T05-33-54Z/ and 2026-09-21T05-37-40Z/.",
+  "results": [
+    {
+      "rule": "screens.identity.follows-navigation",
+      "status": "pass",
+      "evidence": [
+        "runs/evidence/2026-09-21T05-33-54Z/dock-list-follows-the-page.json",
+        "runs/evidence/2026-09-21T05-33-54Z/spa-pushstate-refollows.json"
+      ],
+      "reasoning": "Navigating the frame to rule-detail moved the picker to it; a pushState inside the app re-followed without a reload and Back followed again (harness dock-list-follows-the-page, spa-pushstate-refollows).",
+      "statement_hash": "sha256:5b51c16f7b2b"
+    }
+  ],
+  "copied_from": {
+    "blueprint": "cli",
+    "run": "2026-09-21T06-30-50Z-local-01",
+    "at": "2026-10-12T14:20:00Z"
+  }
+}
