@@ -1,0 +1,17 @@
+id: n-0590
+uuid: 42a30b60-9e47-4260-bb83-38739df684d2
+kind: note
+reason: request
+author: agent
+created: 2026-10-12T14:19:34.408Z
+anchor:
+  screen: lint-no-screen
+status: open
+body: "What `walkdown lint` prints for
+  status.evidence.no-screen-needs-an-excuse. A blueprint with one live rule
+  naming no screen and excusing nothing, one excusing only the checks tier (also
+  an error), and one excusing the agent tier (passes, not shown). Each error
+  names the rule and its file, and says what to do: name the screen the rule is
+  on, or excuse the agent tier and say why there is nothing to look at. It sits
+  among lint's other errors in the same style as lint-weak-excuses, and the run
+  ends with the error count and exit 1."

@@ -349,6 +349,45 @@ test('hash --write --reword keeps the old hash and says why; without it the old 
   );
 });
 
+/*
+ * An excuse is what a rule owes nothing for, so it is part of what a verdict
+ * was given against: one written after the rule was approved stales the
+ * approval rather than setting a tier aside unread. A rule with no excuse
+ * hashes as it always has.
+ */
+test('an excuse is in the hash: adding, changing or removing one stales the rule @rule:status.derived.stale-never-passes', () => {
+  const h = writeFixture(join(root, 'excuse-hashed'));
+  runHashCommand(load(h), { write: true });
+  const file = join(h.spec, 'features', 'demo.yml');
+  const plain = load(h).features[0].data.stories[0].rules[0];
+  const before = plain.steps.statement_hash;
+  const { unverifiable: _none, ...withoutKey } = plain;
+  assert.equal(formatHash(withoutKey), before, 'no excuse, no change to the hash');
+
+  const excuse = (text) =>
+    writeFileSync(
+      file,
+      readFileSync(file, 'utf8')
+        .replace(/\n {8}unverifiable:\n.*\n/, '\n')
+        .replace('        verify: [agent]\n', `        verify: [agent]\n${text}`),
+    );
+  excuse(`        unverifiable:\n          agent: ${REAL_EXCUSE}\n`);
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'stale', 'added');
+  assert.equal(hashMatches(before, load(h).features[0].data.stories[0].rules[0]), false);
+  assert.equal(lint(load(h), { checks: false }).exitCode, 1);
+  runHashCommand(load(h), { write: true });
+  const excused = load(h).features[0].data.stories[0].rules[0].steps.statement_hash;
+
+  excuse(`        unverifiable:\n          agent: ${REAL_EXCUSE} It never will.\n`);
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'stale', 'changed');
+  excuse(`        unverifiable:\n          agent: "${REAL_EXCUSE.replace(/ /g, '  ')}"\n`);
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'ok', 'rewrapped is the same excuse');
+  assert.equal(load(h).features[0].data.stories[0].rules[0].steps.statement_hash, excused);
+
+  excuse('');
+  assert.equal(runHashCommand(load(h)).rows[0].status, 'stale', 'removed');
+});
+
 test('changing a step stales the hash the same as changing the statement', () => {
   const h = writeFixture(join(root, 'stepmove'));
   runHashCommand(load(h), { write: true });

@@ -1,0 +1,43 @@
+{
+  "run_id": "2026-10-12T14-19-13Z-local-01",
+  "created": "2026-10-12T14:19:13Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "0b2f535-dirty",
+  "tree_hash": "sha256:8059dc252eae",
+  "spec_hash": "sha256:53efc274c4ff",
+  "results": [
+    {
+      "rule": "ownership.design.approved-rules-accept-the-design",
+      "status": "pass",
+      "statement_hash": "sha256:98aad72d33a6",
+      "duration_ms": 564,
+      "checks": [
+        "test/design-acceptance.test.js:92",
+        "test/design-acceptance.test.js:132",
+        "test/design-acceptance.test.js:140",
+        "test/design-acceptance.test.js:148"
+      ]
+    },
+    {
+      "rule": "locations.several.serve-shows-each-screen",
+      "status": "pass",
+      "statement_hash": "sha256:6d1216ead47a",
+      "duration_ms": 752,
+      "checks": [
+        "test/several-project.test.js:533"
+      ]
+    },
+    {
+      "rule": "ownership.writes.spec-never-implementation",
+      "status": "pass",
+      "statement_hash": "sha256:b82aec1ea7cc",
+      "duration_ms": 309,
+      "checks": [
+        "test/writes.test.js:232",
+        "test/writes.test.js:300"
+      ]
+    }
+  ]
+}

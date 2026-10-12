@@ -82,7 +82,11 @@ stories:
           then:
             - It is rejected; with a reason, the reason is appended as a reply and waived_by records the person
             - Reopening a verified or waived thread takes a person's acceptance back, so only a person may do it; a machine is refused and files a new thread instead
-          statement_hash: sha256:97912647f98b
+          statement_hash: sha256:b4f231a94e4c
+          reworded:
+            - hash: sha256:97912647f98b
+              at: 2026-10-12T14:16:25Z
+              why: the hash covers the excuses now; the rule and its excuse are unchanged
 
       - id: threads.lifecycle.says-why-it-exists
         origin: walkdown

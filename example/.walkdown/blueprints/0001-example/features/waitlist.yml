@@ -80,13 +80,17 @@ stories:
           checks: Whether one screen resembles another is a judgment about how it looks. A check can assert that every element is present and still pass on a page nobody would call a match, so the cheapest tier here is the one most able to lie. The agent looks, and a person signs.
         screens: [waitlist-join, waitlist-confirm]
         steps:
-          statement_hash: "sha256:bb8fc4a8fd6e"
+          statement_hash: "sha256:2aa7339d7eab"
           given:
             - The app on screens `waitlist-join` and `waitlist-confirm`, with the prototype ghost faded over each
           when:
             - Compare card layout, heading hierarchy, field/button placement, and copy
           then:
             - Structure, hierarchy, and copy correspond; minor rendering differences are acceptable
+          reworded:
+            - hash: sha256:bb8fc4a8fd6e
+              at: 2026-10-12T14:16:35Z
+              why: the hash covers the excuses now; the rule and its excuse are unchanged
 
   - id: waitlist.export
     title: An operator exports the waitlist

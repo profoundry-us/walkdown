@@ -486,6 +486,30 @@ screens:
       - cli.lint.both-tiers
       - cli.exit
 
+  # Requested 2026-10-12; no design accepted yet.
+  - id: lint-no-screen
+    title: "Lint refuses a rule with no screen and no excuse"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.no-screen
+      - cli.exit
+
+  - id: lint-unnamed-screen
+    title: "Lint names a screen no rule names"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.unnamed-screen
+      - cli.exit
+
+  - id: serve-anywhere
+    title: "walkdown serve, started outside any blueprint, serves them all"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.serve.serving
+
   - id: plugin-skills
     title: "The walkdown plugin holds walkdown's five skills and nothing else"
     prototype: /screens/plugin-skills.html

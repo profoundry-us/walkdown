@@ -66,7 +66,7 @@ stories:
           then:
             - Each browser file carries a generated copy, not a hand-written one
             - A copy that has drifted from the source fails the build rather than shipping
-          statement_hash: sha256:94c5e18bf909
+          statement_hash: sha256:9dc36939b131
           reworded:
             - hash: sha256:c7d51f5c89d3
               at: 2026-09-13
@@ -74,6 +74,9 @@ stories:
             - hash: sha256:8481b0cbb2e4
               at: 2026-09-13
               why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
+            - hash: sha256:94c5e18bf909
+              at: 2026-10-12T14:16:25Z
+              why: the hash covers the excuses now; the rule and its excuse are unchanged
 
       - id: screens.identity.follows-navigation
         origin: thread:n-0020

@@ -31,6 +31,7 @@ stories:
       - id: status.derived.stale-never-passes
         origin: prd
         statement: A pass recorded against older wording of a rule reads as stale, unless a person declared the rewording as words only, with the meaning unchanged.
+        history: Excuses joined the hash on 2026-10-12, when lint began asking a rule with no screen for one. An excuse written onto an approved rule would otherwise have set a tier aside with nobody reading it.
         verify: [checks]
         screens: [status-reworded]
         steps:
@@ -47,7 +48,9 @@ stories:
             - A rewording declared as such (`walkdown hash --write --reword "<why>"`) keeps the old hash on the rule with when and why, and a pass against it stays a pass - better English is not a new rule
             - A change of meaning, written without `--reword`, ends that list, so a pass against any earlier wording reads stale, not only one against the wording it replaced
             - A hash from before the steps were part of it still matches while the statement holds, so the change itself stales nothing
-          statement_hash: sha256:ba73225874b1
+            - An excuse added, changed or removed stales it the same way. An excuse is what the rule owes nothing for, so it is part of what was judged
+            - A rule that carries no excuse hashes as it did before excuses were part of the hash
+          statement_hash: sha256:feda1ef23a24
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
@@ -243,6 +246,30 @@ stories:
             - hash: sha256:d7a9cd1761c3
               at: 2026-09-21T06:25:06Z
               why: "2026-09-21 agent sitting: counts-legible's steps still named the footer's walk badge Topher removed under n-0309 - the rows and the Rules tab carry it now; excuse-must-argue's step called a not-a-tier excuse an error while the statement and lint both make it a warning. Same claims, words brought in line with what was decided."
+
+      - id: status.evidence.no-screen-needs-an-excuse
+        origin: walkdown
+        created_at: 2026-10-12
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Every live rule names a screen or excuses the agent tier, and lint refuses a rule that does neither.
+        because: A screen is where a person walks a rule and accepts its design, so a rule without one is never looked at. Where there is nothing to look at, an excuse says why in words a person can argue with.
+        history: By 2026-10-12 six CLI rules had been written with no screen and no excuse, three of them that week, and nothing said so. Topher found one while reading a lint rule that had no screen of its own.
+        screens: [lint-no-screen]
+        steps:
+          given:
+            - A blueprint with three live rules that name no screen. One excuses the agent tier, one excuses only the checks tier, and one excuses nothing
+            - A retired rule that names no screen
+          when:
+            - The blueprint is linted
+          then:
+            - The rule that excuses nothing is an error. Lint says to name the screen it is on, or to excuse the agent tier and say why there is nothing to look at
+            - The rule that excuses only checks is the same error, because an excuse for checks says nothing about a screen
+            - The rule that excuses the agent tier passes, and its excuse is held to the same length as any other
+            - The retired rule is not named
+            - A rule that names a screen passes whether or not it excuses a tier
+            - Lint exits 1 while any such error stands
+          statement_hash: sha256:4c7cbc94f0fa
 
   - id: status.acceptance
     title: Acceptance is a set of people, not a kind of evidence

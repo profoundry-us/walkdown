@@ -84,6 +84,7 @@ stories:
         statement: Every screen in a storyboard is named by at least one rule, and lint names any screen no rule names.
         because: A design is accepted by approving the rules on its screen, so a screen no rule names could never be accepted.
         history: On 2026-10-09 seven screens were designed before any rule named them, and nothing walked Topher to them.
+        screens: [lint-unnamed-screen]
         steps:
           given:
             - A storyboard with one screen that no rule's screens list names
@@ -102,6 +103,8 @@ stories:
         statement: Once a person has approved every rule on a screen, the screen's pending design request is accepted in their name.
         because: Approving what a screen must do, with its design beside it, is accepting the design. A second click would ask for the same decision twice.
         history: Topher, 2026-10-09, while walking the 0.5.0 designs.
+        unverifiable:
+          agent: What it changes is a record, the request's status and the name that accepted it. How an accepted design then shows is judged under screens.surfaces.proposed-beside-accepted, so a look here would judge that rule again. The checks read the request on disk after each approval.
         steps:
           given:
             - A screen with a proposed design, its pending design request, and three unbuilt rules that name it
@@ -113,7 +116,7 @@ stories:
             - Sending any of the rules back leaves the request pending
             - An agent's verdict never accepts a design
             - A rule that names two screens counts toward each
-          statement_hash: sha256:9e79be5bc2f8
+          statement_hash: sha256:98aad72d33a6
 
   - id: ownership.authoring
     title: A rule is written so it can be built from
@@ -218,6 +221,8 @@ stories:
         because: The browser captures intent and the agent structures it; the product is never written from a web page.
         verify: [checks]
         signoff: [eng, product]
+        unverifiable:
+          agent: The claim is about every byte on disk after every write the API offers. No screen shows which files did not change, and the checks compare the whole tree before and after.
         steps:
           given:
             - A running review server, and a browser that can reach it
@@ -227,17 +232,7 @@ stories:
             - Everything that changed on disk is under the resolved threads, drafts or runs directories
             - Nothing under features, the storyboard, the prototype root, source or checks moved by a byte
             - The one module every write passes through names the author policy once, so a new writer cannot re-invent it
-          statement_hash: sha256:037b0d10dcea
-          reworded:
-            - hash: sha256:a966a60dc9bc
-              at: 2026-09-13
-              why: the hash covers the steps now; this one named the statement alone
-            - hash: sha256:67ee12c8ddd0
-              at: 2026-09-13
-              why: the statement is the claim alone now; its reason moved to `because` and what happened to `history` - same rule, split (n-0286, 2026-09-13)
-            - hash: sha256:40dc9f5b5b37
-              at: 2026-09-14T02:30:43Z
-              why: the statement is the goal in a breath; what it restated of its own steps went back to the steps (ADR 0004, walked with Topher 2026-09-13)
+          statement_hash: sha256:b82aec1ea7cc
 
   - id: ownership.evidence
     title: A check is evidence only for what it actually exercises

@@ -1,0 +1,15 @@
+id: n-0592
+uuid: 80be129f-3fc1-4216-9d62-56b4c4037bf3
+kind: note
+reason: request
+author: agent
+created: 2026-10-12T14:19:34.834Z
+anchor:
+  screen: serve-anywhere
+status: open
+body: What `walkdown serve` prints for locations.answer.serve-starts-anywhere,
+  started from a directory no registered blueprint holds. It starts, and says it
+  serves every blueprint registered on this machine, listing them by id with
+  their projects, and the address to open. It says that a page naming no
+  blueprint lets the person choose. Compare the line it prints when started
+  inside a project or with --blueprint, where one blueprint is the default.

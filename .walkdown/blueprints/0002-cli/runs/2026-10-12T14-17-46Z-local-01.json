@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-12T14-17-46Z-local-01",
+  "created": "2026-10-12T14:17:46Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "0b2f535-dirty",
+  "tree_hash": "sha256:5c93b92f16c6",
+  "spec_hash": "sha256:1843fe5286f3",
+  "results": [
+    {
+      "rule": "time.records.stored-as-utc",
+      "status": "pass",
+      "statement_hash": "sha256:5040dfedc0c3",
+      "duration_ms": 43,
+      "checks": [
+        "test/lint.test.js:304"
+      ]
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:feda1ef23a24",
+      "duration_ms": 66,
+      "checks": [
+        "test/lint.test.js:304",
+        "test/lint.test.js:358",
+        "test/status.test.js:116",
+        "test/status.test.js:129"
+      ]
+    }
+  ]
+}
