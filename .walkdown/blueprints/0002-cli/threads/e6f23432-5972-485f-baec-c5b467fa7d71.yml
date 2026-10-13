@@ -18,3 +18,10 @@ body: "A rule stamped before walkdown recorded what a stamp excused reads as
   verdicts once the person has read the excuse. Option (b): trust a stamp with
   no record as excusing what the rule excuses now, which reopens the hole for
   older stamps. Option (c): leave it."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-10-13T01:53:20Z
+    body: Gotcha, yes, we should have the upgrade do a backfill.
+    added: Written as locations.keeping.upgrade-records-excuses (screen
+      upgrade-records-excuses).

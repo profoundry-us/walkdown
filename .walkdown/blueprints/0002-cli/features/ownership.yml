@@ -170,18 +170,20 @@ stories:
         signoff: [eng, product]
         statement: A live rule that names a retired screen is a lint error on that rule.
         because: Lint validates live rules, and a live rule on a retired screen is one no walk reaches.
-        history: Topher, 2026-10-12 (q-0598), after a judge found such a rule passing lint because it named a screen, though that screen was retired.
+        history: Topher, 2026-10-12 (q-0598), after a judge found such a rule passing lint because it named a screen, though that screen was retired. A retired screen may name its replacement with `replaced_by:`, so the error can say where the rule belongs.
         screens: [lint-retired-screen-named]
         steps:
           given:
-            - A storyboard with a retired screen old-cart that two live rules still name, and a retired screen old-receipt that only a retired rule names
+            - "A storyboard with a retired screen old-cart, declared `replaced_by: cart`, that two live rules still name"
+            - A retired screen old-receipt that only a retired rule names, and a retired screen old-promo with no replacement that one live rule names
           when:
             - The blueprint is linted
           then:
-            - Each of the two live rules is an error, named in its file and at the rule, saying it names the retired screen old-cart and to point it at a live screen or retire the rule too
-            - Neither retired screen is linted, and both are counted among the retired screens that were not linted
+            - Each live rule naming old-cart is an error, named in its file and at the rule. It says the rule names the retired screen old-cart, which cart replaced, and to point it at cart or retire the rule too
+            - The rule naming old-promo is the same error, saying to point it at a live screen, since nothing names a replacement
+            - No retired screen is linted, and all three are counted among the retired screens that were not linted
             - Lint exits 1
-          statement_hash: sha256:492bb94d6426
+          statement_hash: sha256:4455e2293cb6
 
   - id: ownership.authoring
     title: A rule is written so it can be built from

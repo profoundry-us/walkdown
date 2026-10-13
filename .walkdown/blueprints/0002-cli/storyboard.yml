@@ -539,6 +539,15 @@ screens:
       - cli.lint.retired-screen-named
       - cli.exit
 
+  - id: upgrade-records-excuses
+    title: "upgrade records what old stamps excused"
+    prototype: null
+    proposal: /upgrade-records-excuses.html
+    anchors:
+      - cli.prompt
+      - cli.upgrade.excuses
+      - cli.exit
+
   - id: plugin-skills
     title: "The walkdown plugin holds walkdown's five skills and nothing else"
     prototype: /screens/plugin-skills.html

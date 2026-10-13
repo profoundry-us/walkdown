@@ -31,3 +31,10 @@ replies:
       old-cart is now its own error, saying to point it at a live screen or
       retire the rule too. The screen has no error of its own, and the closing
       line counts both retired screens as not linted.
+  - author: agent
+    created: 2026-10-13T01:54:52Z
+    body: Revised proposals/lint-retired-screen-named.html for replaced_by. The two
+      rules naming old-cart now say cart replaced it and to point them at cart.
+      A third live rule names old-promo, which has no replacement, and keeps the
+      generic advice. The closing line counts all three retired screens as not
+      linted, with 3 errors.

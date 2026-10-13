@@ -532,6 +532,29 @@ stories:
             - The dry run lists all of it, grouped by blueprint, and moves nothing
           statement_hash: sha256:ac77cd6c3b73
 
+      - id: locations.keeping.upgrade-records-excuses
+        origin: thread:q-0599
+        created_at: 2026-10-12
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "`walkdown upgrade` records, on each rule that excuses a tier, the tiers its stamp excused, so a later rewording can tell an excuse it keeps from one it adds."
+        because: A stamp from before 0.5.0 records nothing about excuses, so `hash --reword` would read every excused rule as excusing nothing and refuse to reword it.
+        history: Topher, 2026-10-12 (q-0599), after a judge found that the first `hash --reword` in an upgraded project would refuse every excused rule.
+        screens: [upgrade-records-excuses]
+        steps:
+          given:
+            - A blueprint stamped before stamps recorded their excuses, with two rules that excuse the agent tier and one that excuses nothing
+          when:
+            - "`walkdown upgrade --dry-run` is run, then `walkdown upgrade`"
+          then:
+            - The dry run names the two rules and the tiers it would record for each, and writes nothing
+            - The upgrade records those tiers on each rule's stamp and changes no hash, so no verdict goes stale on its account
+            - It records them whether the rule's hash is current or stale, since excuses joining the hash left every excused rule stale
+            - The rule that excuses nothing is not touched
+            - Afterwards `walkdown hash --write --reword` rewords both excused rules without refusing either
+            - Run again, the upgrade finds nothing to do
+          statement_hash: sha256:429c87ffe89d
+
   - id: locations.travel
     title: A record means the same thing on somebody else's machine
     statement: As a second person cloning this project, the verdicts I read were made against a spec I can identify and point at evidence I can actually open, without anyone having to have used my directory layout.

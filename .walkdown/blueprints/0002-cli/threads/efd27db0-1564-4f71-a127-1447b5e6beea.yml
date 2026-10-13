@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-10T22:12:55.319Z
 anchor:
   rule: ownership.design.approved-rules-accept-the-design
-status: answered
+status: incorporated
 body: Which door should write a design request's `proposes:`? Today only
   `walkdown upgrade` writes it. A designer, or the design agent, who draws a new
   version has to edit the thread's YAML by hand to name it, and AGENTS.md tells
@@ -25,4 +25,9 @@ replies:
     created: 2026-10-12T23:07:41Z
     body: A flag on threads set
     answer: true
+  - author: topher
+    via: agent
+    created: 2026-10-13T01:53:35Z
+    body: "Folded in: ownership.design.request-names-its-version, written and its
+      draft proposed."
 chosen: A flag on threads set

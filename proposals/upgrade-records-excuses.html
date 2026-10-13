@@ -1,0 +1,60 @@
+<!doctype html>
+<!-- DESIGN DRAFT: upgrade-records-excuses -->
+<!-- Drawn by the design agent for request n-0602. Not yet accepted. -->
+<!-- Intent: the dry run names each rule whose old stamp excused a tier and the tiers it would record, and says nothing is written and no hash changes; the real run then says it recorded them. -->
+<!-- Fixture: ~/shop with one blueprint, checkout, stamped before stamps recorded their excuses, with no old designs to move and no redlines, so only the excuses section shows. checkout.payment.declined-card and checkout.receipt.email both excuse the agent tier; declined-card's hash is current and receipt.email's is stale, and both are recorded alike. checkout.cart.add excuses nothing and is not named. The anchors sit on the dry run, the moment the rule's first step describes. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>upgrade records what old stamps excused</title>
+<style>
+:root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  .gap { height: 22px; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+  <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown upgrade --dry-run</div>
+  <div class="ln">Dry run. This is what `walkdown upgrade` would do to every blueprint.</div>
+  <div class="ln"></div>
+  <div data-testid="cli.upgrade.excuses">
+    <div class="ln">Stamps record the tiers their rules excuse, so a later `hash --reword` can tell an excuse kept from one added:</div>
+    <div class="ln">  checkout</div>
+    <div class="ln">    → checkout.payment.declined-card   would record: agent</div>
+    <div class="ln">    → checkout.receipt.email           would record: agent</div>
+    <div class="ln">    No hash changes, so no verdict goes stale.</div>
+  </div>
+  <div class="ln"></div>
+  <div class="ln">Nothing was written. To do it, run:</div>
+  <div class="ln">  walkdown upgrade</div>
+  <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+
+  <div class="gap"></div>
+
+  <div class="ln prompt"><b>~/shop $</b> walkdown upgrade</div>
+  <div class="ln">Stamps record the tiers their rules excuse, so a later `hash --reword` can tell an excuse kept from one added:</div>
+  <div class="ln">  checkout</div>
+  <div class="ln">    ✓ checkout.payment.declined-card   recorded: agent</div>
+  <div class="ln">    ✓ checkout.receipt.email           recorded: agent</div>
+  <div class="ln">    No hash changed, so no verdict went stale.</div>
+  <div class="ln"></div>
+  <div class="ln">Upgraded 1 blueprint. Run again, it finds nothing to do.</div>
+  <div class="ln exit">[exit 0]</div>
+</div>
+</body>
+</html>
