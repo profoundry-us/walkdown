@@ -531,7 +531,7 @@ screens:
       - cli.exit
 
   - id: lint-retired-screen-named
-    title: "Lint names a retired screen a live rule still points at"
+    title: "Lint names a live rule that points at a retired screen"
     prototype: null
     proposal: /lint-retired-screen-named.html
     anchors:

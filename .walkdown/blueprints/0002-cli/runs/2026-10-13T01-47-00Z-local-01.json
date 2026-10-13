@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-13T01-47-00Z-local-01",
+  "created": "2026-10-13T01:47:00Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "60a52975-dirty",
+  "spec_hash": "sha256:128618db4f95",
+  "results": [
+    {
+      "rule": "ownership.design.retired-counted-apart",
+      "status": "pass",
+      "statement_hash": "sha256:dc971fcf98e1",
+      "evidence": [
+        "runs/evidence/2026-10-12T23-33-58Z/retired-counted-apart.txt",
+        "runs/evidence/2026-10-13T00-00-00Z/retired-screen-named.txt"
+      ],
+      "threads": [],
+      "reasoning": "Pass. The rule is back at the wording the 2026-10-12 judge passed (run 2026-10-12T23-37-57Z-local-01, evidence retired-counted-apart.txt), after a reworded exception was withdrawn on Topher's answer to q-0598, and the code has not changed since. That evidence drove two retired rules, one deliberately faulty, and a retired screen: lint said nothing about any of them, a retired rule's id still resolved, the counts were of live rules and screens, the suffix read 2 retired rules and 1 retired screen were not linted, and it was absent with nothing retired. The probe of 2026-10-13 (retired-screen-named.txt) adds a retired screen a live rule still names: lint says nothing about the screen and counts it as retired, which is what this rule says. Flagging the live rule is a different rule, ownership.design.live-rule-names-a-live-screen, unbuilt."
+    }
+  ]
+}

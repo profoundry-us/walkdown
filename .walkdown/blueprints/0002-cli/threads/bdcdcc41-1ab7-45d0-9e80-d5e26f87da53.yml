@@ -24,3 +24,10 @@ replies:
     body: "Revised: the closing line now says 1 retired rule and 1 retired screen
       were not linted. old-cart was linted, so only old-receipt is counted
       there."
+  - author: agent
+    created: 2026-10-13T01:47:42Z
+    body: Redrawn at proposals/lint-retired-screen-named.html for
+      ownership.design.live-rule-names-a-live-screen. Each live rule that names
+      old-cart is now its own error, saying to point it at a live screen or
+      retire the rule too. The screen has no error of its own, and the closing
+      line counts both retired screens as not linted.

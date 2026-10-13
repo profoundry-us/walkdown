@@ -135,11 +135,11 @@ stories:
           when:
             - The blueprint is linted
           then:
-            - Nothing is said about the retired rules or the retired screen, other than that a retired rule's id still resolves. A retired screen a live rule still names is the one exception, and is an error (ownership.design.retired-screen-has-no-live-rules)
+            - Nothing is said about the retired rules or the retired screen, other than that a retired rule's id still resolves
             - The closing line counts only the live rules and screens
             - It then says how many were left out, as `2 retired rules and 1 retired screen were not linted`
             - With nothing retired, that part is not printed
-          statement_hash: sha256:de650b40d1f7
+          statement_hash: sha256:dc971fcf98e1
 
       - id: ownership.design.request-names-its-version
         origin: thread:q-0587
@@ -163,13 +163,13 @@ stories:
             - An accepted request is refused, because a new version of an accepted design goes on a new request
           statement_hash: sha256:0680eae68b81
 
-      - id: ownership.design.retired-screen-has-no-live-rules
+      - id: ownership.design.live-rule-names-a-live-screen
         origin: thread:q-0598
         created_at: 2026-10-12
         verify: [checks]
         signoff: [eng, product]
-        statement: A retired screen that a live rule still names is a lint error, naming the rules that point at it.
-        because: A screen with a live rule is still in use, so retiring it leaves that rule where no walk reaches it.
+        statement: A live rule that names a retired screen is a lint error on that rule.
+        because: Lint validates live rules, and a live rule on a retired screen is one no walk reaches.
         history: Topher, 2026-10-12 (q-0598), after a judge found such a rule passing lint because it named a screen, though that screen was retired.
         screens: [lint-retired-screen-named]
         steps:
@@ -178,11 +178,10 @@ stories:
           when:
             - The blueprint is linted
           then:
-            - old-cart is an error that names both live rules, and says to bring the screen back or move the rules to the screen that replaced it
-            - The two rules are not flagged again on their own; the one error names them
-            - old-receipt is not linted, and is counted among the retired screens that were not linted. old-cart is not counted there, because it was linted
+            - Each of the two live rules is an error, named in its file and at the rule, saying it names the retired screen old-cart and to point it at a live screen or retire the rule too
+            - Neither retired screen is linted, and both are counted among the retired screens that were not linted
             - Lint exits 1
-          statement_hash: sha256:e0c7f3146277
+          statement_hash: sha256:492bb94d6426
 
   - id: ownership.authoring
     title: A rule is written so it can be built from

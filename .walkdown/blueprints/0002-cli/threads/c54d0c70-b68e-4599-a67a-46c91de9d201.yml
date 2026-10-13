@@ -6,9 +6,22 @@ author: agent
 created: 2026-10-13T01:41:52.878Z
 anchor:
   rule: ownership.design.retired-counted-apart
-status: open
+status: settled
 body: "Lint says nothing about a retired screen that a live rule still names:
   with checkout.basics.pays pointed at the retired old-cart, no error names
   old-cart (runs/evidence/2026-10-13T00-00-00Z/retired-screen-named.txt). The
   reworded step makes that the one exception, an error. Unbuilt until the
   lint-retired-screen-named design is accepted (n-0600)."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-10-13T01:47:00Z
+    body: "Moot: Topher put the finding on the live rule instead (q-0598), so
+      retired-counted-apart is back to saying nothing about any retired screen,
+      and the new ownership.design.live-rule-names-a-live-screen carries the
+      error."
+  - author: agent
+    via: verdict
+    created: 2026-10-13T01:47:00Z
+    body: Settled by the agent's pass on ownership.design.retired-counted-apart
+      (2026-10-13T01-47-00Z-local-01).
