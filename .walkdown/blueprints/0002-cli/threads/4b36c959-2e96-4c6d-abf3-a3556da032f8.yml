@@ -13,3 +13,12 @@ body: "A live rule whose only screen is retired passes lint: it names a screen,
   Options: (a) a retired screen does not count as naming one, so the rule gets
   the same error, with a step added saying so; (b) leave it, since retiring a
   screen is a person's deliberate act."
+replies:
+  - author: topher
+    via: agent
+    created: 2026-10-13T01:41:53Z
+    body: A live rule that points to a retired screen should definitely error on
+      lint. If any screen has a live rule, it shouldn't be retired and we need
+      to alert the system about that.
+    added: Written as ownership.design.retired-screen-has-no-live-rules (screen
+      lint-retired-screen-named, request n-0600).

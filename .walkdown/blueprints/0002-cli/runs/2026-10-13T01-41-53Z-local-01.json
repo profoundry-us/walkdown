@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-13T01-41-53Z-local-01",
+  "created": "2026-10-13T01:41:53Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "531abfa-dirty",
+  "spec_hash": "sha256:a0a0ed346f93",
+  "results": [
+    {
+      "rule": "ownership.design.retired-counted-apart",
+      "status": "fail",
+      "statement_hash": "sha256:de650b40d1f7",
+      "evidence": [
+        "runs/evidence/2026-10-13T00-00-00Z/retired-screen-named.txt",
+        "runs/evidence/2026-10-13T00-00-00Z/probe.mjs"
+      ],
+      "threads": [
+        "c54d0c70-b68e-4599-a67a-46c91de9d201"
+      ],
+      "reasoning": "Fail on the reworded first step only. Driven on a throwaway machine (machine() and the g4-unnamed-screen fixture, mktemp HOME and WALKDOWN_HOME, network-free), with the live rule checkout.basics.pays pointed at the retired screen old-cart and linted with node bin/walkdown.js lint --no-checks. Lint names nothing about old-cart, where the step now makes a retired screen a live rule names an error (Topher, q-0598). The other steps hold as the 2026-10-12 agent pass found: counts are of the live, and the suffix reads 1 retired rule and 1 retired screen were not linted. The build waits on the lint-retired-screen-named design (n-0600)."
+    }
+  ]
+}

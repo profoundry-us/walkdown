@@ -530,6 +530,15 @@ screens:
       - cli.thread.proposes
       - cli.exit
 
+  - id: lint-retired-screen-named
+    title: "Lint names a retired screen a live rule still points at"
+    prototype: null
+    proposal: /lint-retired-screen-named.html
+    anchors:
+      - cli.prompt
+      - cli.lint.retired-screen-named
+      - cli.exit
+
   - id: plugin-skills
     title: "The walkdown plugin holds walkdown's five skills and nothing else"
     prototype: /screens/plugin-skills.html

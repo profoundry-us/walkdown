@@ -1,0 +1,26 @@
+id: n-0600
+uuid: bdcdcc41-1ab7-45d0-9e80-d5e26f87da53
+kind: note
+reason: request
+author: agent
+created: 2026-10-13T01:41:22.920Z
+anchor:
+  screen: lint-retired-screen-named
+status: addressed
+body: "What `walkdown lint` prints for
+  ownership.design.retired-screen-has-no-live-rules: a retired screen old-cart
+  that two live rules still name is one error, naming both rules and saying to
+  bring the screen back or move the rules to the screen that replaced it. A
+  retired screen only a retired rule names is not listed, and is counted in the
+  closing line's retired screens. Exit 1. Match lint-unnamed-screen."
+replies:
+  - author: agent
+    created: 2026-10-13T01:42:35Z
+    body: "Drawn: prototype-cli/drafts/lint-retired-screen-named.html. It shows the
+      retired screen old-cart as a single lint error naming the two live rules
+      that still point at it, with the fix spelled out, and exit 1."
+  - author: agent
+    created: 2026-10-13T01:43:50Z
+    body: "Revised: the closing line now says 1 retired rule and 1 retired screen
+      were not linted. old-cart was linted, so only old-receipt is counted
+      there."

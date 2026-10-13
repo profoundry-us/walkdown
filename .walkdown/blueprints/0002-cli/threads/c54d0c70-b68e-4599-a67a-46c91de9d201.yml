@@ -1,0 +1,14 @@
+id: n-0601
+uuid: c54d0c70-b68e-4599-a67a-46c91de9d201
+kind: note
+reason: observation
+author: agent
+created: 2026-10-13T01:41:52.878Z
+anchor:
+  rule: ownership.design.retired-counted-apart
+status: open
+body: "Lint says nothing about a retired screen that a live rule still names:
+  with checkout.basics.pays pointed at the retired old-cart, no error names
+  old-cart (runs/evidence/2026-10-13T00-00-00Z/retired-screen-named.txt). The
+  reworded step makes that the one exception, an error. Unbuilt until the
+  lint-retired-screen-named design is accepted (n-0600)."
