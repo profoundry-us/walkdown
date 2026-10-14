@@ -6,10 +6,16 @@ author: agent
 created: 2026-10-14T22:22:06.930Z
 anchor:
   screen: question-answered-by-approval
-status: open
+status: addressed
 body: Draw walkdown threads show q-0001 after a person's approval of
   checkout.cart.empty answered it, for
   threads.lifecycle.approval-answers-a-moved-question. It is incorporated,
   answered in the approver's name by the run that approved the rule. It was
   asked on checkout.cart.add and is now on checkout.cart.empty. Its replies end
   with the one saying the approval answered it.
+replies:
+  - author: agent
+    created: 2026-10-14T22:24:29Z
+    body: "Drawn: prototype-cli/drafts/question-answered-by-approval.html. threads
+      show reads q-0001 as incorporated by topher, names both rules and the run
+      and role whose approval answered it, and ends with the reply saying so."

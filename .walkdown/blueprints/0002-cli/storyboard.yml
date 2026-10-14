@@ -542,6 +542,7 @@ screens:
   - id: threads-written-as
     title: "A question moves onto the rule written from its answer"
     prototype: null
+    proposal: /threads-written-as.html
     anchors:
       - cli.prompt
       - cli.exit
@@ -549,6 +550,7 @@ screens:
   - id: question-answered-by-approval
     title: "Approving a rule answers the question moved onto it"
     prototype: null
+    proposal: /question-answered-by-approval.html
     anchors:
       - cli.prompt
       - cli.exit
@@ -556,6 +558,7 @@ screens:
   - id: lint-question-asked-twice
     title: "Lint refuses a question asked twice"
     prototype: null
+    proposal: /lint-question-asked-twice.html
     anchors:
       - cli.prompt
       - cli.exit

@@ -1,0 +1,60 @@
+<!doctype html>
+<!-- DESIGN DRAFT: threads-written-as -->
+<!-- Drawn by the design agent for request n-0603. Not yet accepted. -->
+<!-- Intent: threads set reports the move the way it reports any change (still open, whose name, the reply that landed), then names the rule the question left and the rule it reached, and says approving that rule answers it; beside it, a move onto a retired rule is refused and nothing is written. -->
+<!-- Fixture: q-0001 open on checkout.cart.add; checkout.cart.empty written from its answer, not yet approved; q-0002 open on checkout.cart.add; checkout.cart.coupons retired, its note naming checkout.cart.discounts. The second command is a separate run, drawn on the same screen so the refusal sits beside the success. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A question moves onto the rule written from its answer</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  .gap { height: 18px; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads set q-0001 --written-as checkout.cart.empty --blueprint checkout</div>
+      <div data-testid="cli.thread.moved">
+      <div class="ln">✓ q-0001 still open · by topher · +1 reply</div>
+      </div>
+      <div data-testid="cli.thread.rules">
+      <div class="ln dim">  asked on rule checkout.cart.add, now on rule checkout.cart.empty</div>
+      </div>
+      <div data-testid="cli.thread.answers">
+      <div class="ln dim">  Approving checkout.cart.empty answers it, in the name of whoever approves.</div>
+      </div>
+      <div data-testid="cli.thread.next">
+      <div class="ln dim">  walkdown threads show q-0001 reads it in full</div>
+      </div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+
+    <div class="gap"></div>
+
+    <div class="ln prompt" data-testid="cli.prompt.refused"><b>~/shop $</b> walkdown threads set q-0002 --written-as checkout.cart.coupons --blueprint checkout</div>
+      <div data-testid="cli.refusal">
+      <div class="ln">checkout.cart.coupons is retired, so no question can move onto it. Its note: Folded into checkout.cart.discounts.</div>
+      <div class="ln">Move it onto the rule that carries the answer now, such as checkout.cart.discounts.</div>
+      </div>
+      <div data-testid="cli.unchanged">
+      <div class="ln">Nothing was changed. q-0002 is still open on checkout.cart.add.</div>
+      </div>
+    <div class="ln exit bad" data-testid="cli.exit.refused">[exit 2]</div>
+  </div>
+</body>
+</html>

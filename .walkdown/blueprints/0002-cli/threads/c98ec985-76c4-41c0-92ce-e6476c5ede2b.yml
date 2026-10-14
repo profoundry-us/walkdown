@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-14T22:21:50.656Z
 anchor:
   screen: threads-written-as
-status: open
+status: addressed
 body: Draw what walkdown threads set q-0001 --written-as checkout.cart.empty
   --blueprint checkout prints, for threads.lifecycle.question-moves-to-its-rule.
 replies:
@@ -16,3 +16,9 @@ replies:
       open, whose name, replies landed). Name the rule the question left and the
       rule it reached, and say that approving that rule answers it. Draw one
       refusal beside it too: a retired rule, with nothing written."
+  - author: agent
+    created: 2026-10-14T22:24:28Z
+    body: "Drawn: prototype-cli/drafts/threads-written-as.html. threads set reports
+      q-0001 still open with one reply, names the rule it was asked on and the
+      rule it is on now, and says approving that rule answers it, beside a
+      refused move onto a retired rule that writes nothing."
