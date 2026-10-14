@@ -1,0 +1,18 @@
+# `walkdown upgrade --dry-run` where every stamp predates stamps recording what they excused.
+screen: upgrade-records-excuses
+title: upgrade records what old stamps excused
+rule: locations.keeping.upgrade-records-excuses
+fixture: g2-old-excuses
+command: [upgrade, --dry-run]
+exit: 0
+expect:
+  - '^Dry run\. This is what `walkdown upgrade` would do to every blueprint\.$'
+  - '^Stamps record the tiers their rules excuse, so a later `hash --reword` can tell an excuse kept from one added:$'
+  - '^  checkout$'
+  - '^    → checkout\.payment\.declined-card   would record: agent$'
+  - '^    → checkout\.receipt\.email           would record: agent$'
+  - '^    No hash changes, so no verdict goes stale\.$'
+  - '^Nothing was written\. To do it, run:$'
+  - '^  walkdown upgrade$'
+anchors:
+  - { id: cli.upgrade.excuses, match: '^Stamps record the tiers' }

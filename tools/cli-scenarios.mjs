@@ -29,6 +29,7 @@ import {
 } from 'node:fs';
 import { tmpdir, userInfo } from 'node:os';
 import { dirname, join } from 'node:path';
+import { formatHash } from '../lib/hash.js';
 import { parse, parseDocument } from '../vendor/yaml.js';
 
 const CLI = new URL('../bin/walkdown.js', import.meta.url).pathname;
@@ -433,7 +434,7 @@ export const FIXTURES = {
 /*
  * More fixtures, a file per group of screens in tools/cli-fixtures/, each
  * exporting an object of them by name: `(m, h) => ...`, where `h` holds the
- * helpers here (feature, git, realRepo, committedHome, and the base fixtures
+ * helpers here (feature, formatHash, git, realRepo, committedHome, and the base fixtures
  * by name). A name two files share is refused, so one group's machine is
  * never quietly another's.
  */
@@ -452,7 +453,7 @@ for (const f of (() => {
     if (FIXTURES[name])
       throw new Error(`tools/cli-fixtures/${f}: fixture "${name}" is already defined`);
     FIXTURES[name] = (m) =>
-      fn(m, { feature, headless, git, realRepo, committedHome, fixtures: FIXTURES });
+      fn(m, { feature, headless, formatHash, git, realRepo, committedHome, fixtures: FIXTURES });
   }
 }
 

@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-14T22-21-37Z-local-01",
+  "created": "2026-10-14T22:21:37Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "985c3902-dirty",
+  "spec_hash": "sha256:825cf98ce3fb",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-records-excuses",
+      "status": "pass",
+      "statement_hash": "sha256:429c87ffe89d",
+      "evidence": [
+        "/private/tmp/claude-501/-Users-topherfangio-Development-profoundry-walkdown/a4b82035-8223-4ceb-ba51-48805ca23580/scratchpad/judge/main.txt",
+        "/private/tmp/claude-501/-Users-topherfangio-Development-profoundry-walkdown/a4b82035-8223-4ceb-ba51-48805ca23580/scratchpad/judge/edges.txt",
+        "/private/tmp/claude-501/-Users-topherfangio-Development-profoundry-walkdown/a4b82035-8223-4ceb-ba51-48805ca23580/scratchpad/judge/design-compare.txt",
+        "/private/tmp/claude-501/-Users-topherfangio-Development-profoundry-walkdown/a4b82035-8223-4ceb-ba51-48805ca23580/scratchpad/judge/main.mjs",
+        "/private/tmp/claude-501/-Users-topherfangio-Development-profoundry-walkdown/a4b82035-8223-4ceb-ba51-48805ca23580/scratchpad/judge/edges.mjs"
+      ],
+      "reasoning": "Drove every step on throwaway machines (machine() + FIXTURES[\"g2-old-excuses\"] from tools/cli-scenarios.mjs, HOME and WALKDOWN_HOME in mktemp dirs, never this repo or the real home; no server, the screen is a terminal). Before the upgrade, `hash` read declined-card ok and receipt.email stale, and `hash --write --reword` refused receipt.email for adding an excuse: that is the bug the rule exists for. `upgrade --dry-run` printed, line for line and blank for blank, exactly what prototype-cli/screens/upgrade-records-excuses.html draws (checked by script: verbatim match). It named both excused rules with `would record: agent`, and the feature file was byte-identical afterwards. `upgrade` then printed the design's second block verbatim. It wrote `excused: [agent]` beside each stamp, left both statement_hash values as they were, recorded the stale rule the same as the current one, and left cart.add, which excuses nothing, untouched. `hash` afterwards read the same ok/ok/stale as before, so no verdict moved on the upgrade's account. `hash --write --reword` then reworded receipt.email and left declined-card ok, refusing neither. A rerun of the upgrade, dry or real, said there was nothing to upgrade. Edges: with --layout-only (dry and real) nothing was recorded, and a plain dry run afterwards still offered both rules. A rule excusing both tiers recorded `agent, checks`. A retired rule, one already carrying `excused` (even `[]`), and an unstamped rule were all skipped, and a second blueprint was planned and written in its own section (\"Upgraded 2 blueprints\"), with the rerun finding nothing. Newly stamped rules already carry `excused`, so a current project is never offered the step. The unit test (test/upgrade-excuses.test.js) passes 4/4. Two edges sit between 10% and 80%, so they are reported to the caller rather than filed, and neither fails the rule. With two blueprints, the closing `No hash changes` line hangs at four spaces under the last blueprint only, so it reads as that blueprint's. Likelihood about 25%; the cost is cosmetic. An excuse truly added after an old stamp is recorded as one the stamp excused, so a later reword keeps its verdicts. This is the trade the third then-step chooses. Likelihood about 10 to 15%; the cost is one tier set aside without a re-read. Below 10%: an upgrade run where layout steps and excuses both fall due was read in code only, not driven. All steps hold.",
+      "threads": []
+    }
+  ]
+}

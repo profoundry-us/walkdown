@@ -1,0 +1,18 @@
+id: n-0603
+uuid: c98ec985-76c4-41c0-92ce-e6476c5ede2b
+kind: note
+reason: request
+author: agent
+created: 2026-10-14T22:21:50.656Z
+anchor:
+  screen: threads-written-as
+status: open
+body: Draw what walkdown threads set q-0001 --written-as checkout.cart.empty
+  --blueprint checkout prints, for threads.lifecycle.question-moves-to-its-rule.
+replies:
+  - author: agent
+    created: 2026-10-14T22:22:06Z
+    body: "The full brief: report the change the way threads set does (status kept
+      open, whose name, replies landed). Name the rule the question left and the
+      rule it reached, and say that approving that rule answers it. Draw one
+      refusal beside it too: a retired rule, with nothing written."

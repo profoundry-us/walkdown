@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-12T23:15:11.250Z
 anchor:
   screen: threads-set-proposes
-status: addressed
+status: verified
 body: "What `walkdown threads set <request> --proposes <version>` prints for
   ownership.design.request-names-its-version: the success (the request now names
   /receipt/20261012.html, and who named it), and a refusal (a path no file under
@@ -19,3 +19,4 @@ replies:
       the version the request now proposes, what it named before, who named it
       and the reply that records it. A path with no file under the design root
       is refused by name, changes nothing, and exits 2."
+verified_by: topher

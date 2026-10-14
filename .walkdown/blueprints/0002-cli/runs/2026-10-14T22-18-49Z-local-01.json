@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-14T22-18-49Z-local-01",
+  "created": "2026-10-14T22:18:49Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "985c3902-dirty",
+  "tree_hash": "sha256:e960b3a4f8e5",
+  "spec_hash": "sha256:8bfd12d6889d",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-records-excuses",
+      "status": "pass",
+      "statement_hash": "sha256:429c87ffe89d",
+      "duration_ms": 1430,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/upgrade-excuses.test.js:23",
+        "test/upgrade-excuses.test.js:33",
+        "test/upgrade-excuses.test.js:40",
+        "test/upgrade-excuses.test.js:55"
+      ]
+    }
+  ]
+}

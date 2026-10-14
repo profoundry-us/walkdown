@@ -539,10 +539,31 @@ screens:
       - cli.lint.retired-screen-named
       - cli.exit
 
+  - id: threads-written-as
+    title: "A question moves onto the rule written from its answer"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.exit
+
+  - id: question-answered-by-approval
+    title: "Approving a rule answers the question moved onto it"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.exit
+
+  - id: lint-question-asked-twice
+    title: "Lint refuses a question asked twice"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.exit
+
   - id: upgrade-records-excuses
     title: "upgrade records what old stamps excused"
-    prototype: null
-    proposal: /upgrade-records-excuses.html
+    prototype: /screens/upgrade-records-excuses.html   # accepted 2026-10-14 in Topher's walk
+    app: { path: /as-built/cli/upgrade-records-excuses.html }
     anchors:
       - cli.prompt
       - cli.upgrade.excuses

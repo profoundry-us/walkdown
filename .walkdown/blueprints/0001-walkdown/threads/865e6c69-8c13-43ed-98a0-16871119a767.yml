@@ -7,7 +7,7 @@ anchor:
   rule: embed.pin.redline-explains-a-gap
   screen: redline-pin
   element: pin.redline
-status: open
+status: answered
 body: Your accepted redline-pin design shows a redline's Design and Build side
   by side above the why. The accepted pin form has one box, for the why, so a
   redline filed from it never carries Design or Build. The build shows the pair
@@ -23,3 +23,9 @@ options:
   - label: Keep it optional
     why: "The pair shows only where it was given: the CLI takes --design and
       --build, the form stays one box."
+replies:
+  - author: topher
+    created: 2026-10-14T21:57:31Z
+    body: The form should ask all three, but be optional.
+    answer: true
+chosen: The form asks for all three

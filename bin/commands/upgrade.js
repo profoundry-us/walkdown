@@ -85,18 +85,36 @@ export async function run(args) {
   }
   if (values['dry-run']) {
     console.log('Dry run. This is what `walkdown upgrade` would do to every blueprint.');
-    const layout = steps.filter((s) => !s.designs && !s.redlines);
+    const layout = steps.filter((s) => !s.designs && !s.redlines && !s.excuses);
     if (layout.length) {
       console.log('');
       for (const s of layout) console.log(`  · ${s.what}`);
     }
     sayDesigns(steps);
-    console.log('\nNothing was moved or removed. To do it, run:');
+    const excuses = steps.flatMap((s) => (s.excuses ? [s.excuses] : []));
+    if (excuses.length) {
+      console.log('');
+      sayExcuses(excuses, 'would record');
+      console.log('    No hash changes, so no verdict goes stale.');
+    }
+    console.log(
+      excuses.length === steps.length
+        ? '\nNothing was written. To do it, run:'
+        : '\nNothing was moved or removed. To do it, run:',
+    );
     console.log('  walkdown upgrade');
     return end(0);
   }
+  const recorded = [];
   try {
-    runUpgrade({ code, designs, say: (what) => console.log(`  ${green('✓')} ${what}`) });
+    runUpgrade({
+      code,
+      designs,
+      say: (what, step) => {
+        if (step.excuses) recorded.push(step.excuses);
+        else console.log(`  ${green('✓')} ${what}`);
+      },
+    });
   } catch (e) {
     console.error(red(`✗ ${e.message}`));
     console.error(
@@ -105,6 +123,18 @@ export async function run(args) {
       ),
     );
     return end(2);
+  }
+  // Said as one section once they have all landed, the way the dry run says it.
+  if (recorded.length) {
+    if (recorded.length < steps.length) console.log('');
+    sayExcuses(recorded, 'recorded', green('✓'));
+    console.log('    No hash changed, so no verdict went stale.');
+  }
+  if (recorded.length && recorded.length === steps.length) {
+    console.log(
+      `\nUpgraded ${recorded.length} blueprint${recorded.length === 1 ? '' : 's'}. Run again, it finds nothing to do.`,
+    );
+    return end(0);
   }
   const kept = steps.flatMap((s) => (s.designs?.kept.length ? [s.designs] : []));
   if (kept.length) {
@@ -211,6 +241,21 @@ function sayDesigns(steps) {
           : `      filed closed in ${who}'s name. Then ${file} is removed.`,
       );
     }
+  }
+}
+
+/** Each old stamp's excused tiers (locations.keeping.upgrade-records-excuses). */
+function sayExcuses(plans, verb, mark = '→') {
+  console.log(
+    'Stamps record the tiers their rules excuse, so a later `hash --reword` can tell an excuse kept from one added:',
+  );
+  for (const p of plans) {
+    console.log(`  ${p.name}`);
+    const rules = p.files.flatMap((f) => f.rules);
+    for (const line of columns(
+      rules.map((r) => [`${mark} ${r.id}`, `${verb}: ${r.tiers.join(', ')}`]),
+    ))
+      console.log(`    ${line}`);
   }
 }
 

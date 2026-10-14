@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-13T01:41:22.920Z
 anchor:
   screen: lint-retired-screen-named
-status: addressed
+status: verified
 body: "What `walkdown lint` prints for
   ownership.design.retired-screen-has-no-live-rules: a retired screen old-cart
   that two live rules still name is one error, naming both rules and saying to
@@ -38,3 +38,4 @@ replies:
       A third live rule names old-promo, which has no replacement, and keeps the
       generic advice. The closing line counts all three retired screens as not
       linted, with 3 errors.
+verified_by: topher

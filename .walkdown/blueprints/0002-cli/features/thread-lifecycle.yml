@@ -202,3 +202,66 @@ stories:
             - The person's is filed closed as a note with reason redline, naming its screen and element (`redline-filed`)
             - It waits on nobody, and a judge reads it as an intended gap
           statement_hash: sha256:768e7b46e642
+      - id: threads.lifecycle.question-moves-to-its-rule
+        origin: walkdown
+        created_at: 2026-10-14
+        verify: [checks]
+        signoff: [eng, product]
+        statement: When a person's answer to a question is written as a new rule, `walkdown threads set` moves the question onto that rule, so the walk asks it once.
+        because: A question left on the rule it was asked on, beside the rule written from its answer, asks the person twice, and the two answers can disagree.
+        history: Topher, 2026-10-14. A walk asked q-0598 and q-0599 again beside the rules written from his answers, and his second answer to q-0599 contradicted his approval of the rule.
+        screens: [threads-written-as]
+        steps:
+          given:
+            - The question q-0001, open on checkout.cart.add, and checkout.cart.empty, a rule written from the person's answer and not yet approved
+          when:
+            - "`walkdown threads set q-0001 --written-as checkout.cart.empty --blueprint checkout` is run"
+          then:
+            - "The question is anchored to checkout.cart.empty, and keeps the rule it was asked on as `asked_on: checkout.cart.add`"
+            - A reply in the agent's name says the question moved to the rule written from its answer
+            - The question stays open, and nothing else about it changes
+            - The output names the rule it left and the rule it reached, and says that approving that rule answers it
+            - A rule that does not exist, a retired rule, or the rule the question is already on is refused, and nothing is written
+            - "`walkdown threads show q-0001` names both rules"
+          statement_hash: sha256:ef2b55a9db1c
+      - id: threads.lifecycle.approval-answers-a-moved-question
+        origin: walkdown
+        created_at: 2026-10-14
+        verify: [checks]
+        signoff: [eng, product]
+        statement: A person's approval of a rule answers every open question that was moved onto it, in that person's name.
+        because: The rule is the answer written down, so approving its words gives the answer, and asking again asks for what the person has already given.
+        history: Topher, 2026-10-14, beside threads.lifecycle.question-moves-to-its-rule.
+        screens: [question-answered-by-approval]
+        steps:
+          given:
+            - The question q-0001 moved onto checkout.cart.empty, a question asked on that rule in the first place, and a note open on it
+          when:
+            - The person records a walkdown signed in a role, approving checkout.cart.empty
+          then:
+            - q-0001 reads as incorporated, answered in the approver's name by the run that approved the rule, with a reply saying so
+            - The question asked on the rule in the first place stays open, because approving the words is not answering it
+            - The note is untouched, because approving words is not passing a build
+            - An approval signed in no role answers nothing
+            - Refining the rule instead leaves q-0001 open on it, with the person's reason as a reply
+          statement_hash: sha256:31c0208897df
+      - id: threads.lifecycle.no-question-asked-twice
+        origin: walkdown
+        created_at: 2026-10-14
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Lint refuses an open question that sits on one rule while another rule says it was written from that question.
+        because: The walk would ask the question and the rule written from its answer as two stops, and the person can answer them two ways.
+        history: Topher, 2026-10-14, beside threads.lifecycle.question-moves-to-its-rule.
+        screens: [lint-question-asked-twice]
+        steps:
+          given:
+            - "q-0001 open on checkout.cart.add, and checkout.cart.empty, whose `origin:` is `thread:q-0001`"
+          when:
+            - "`walkdown lint --blueprint checkout` is run"
+          then:
+            - A `[threads]` error on q-0001 names checkout.cart.empty and gives the `walkdown threads set q-0001 --written-as checkout.cart.empty` command that moves it
+            - Lint exits 1
+            - Once the question is moved, or has ended, the error goes
+            - A question already on the rule that names it as its origin draws nothing
+          statement_hash: sha256:8ec190463e94

@@ -1,0 +1,15 @@
+id: n-0605
+uuid: 866b1608-a448-4937-98bc-65cb02807708
+kind: note
+reason: request
+author: agent
+created: 2026-10-14T22:22:07.165Z
+anchor:
+  screen: lint-question-asked-twice
+status: open
+body: Draw walkdown lint --blueprint checkout refusing q-0001, for
+  threads.lifecycle.no-question-asked-twice. It is open on checkout.cart.add
+  while checkout.cart.empty has origin thread:q-0001. The [threads] error names
+  both rules and gives the walkdown threads set q-0001 --written-as
+  checkout.cart.empty command. Lint exits 1. Follow the accepted lint screens,
+  such as lint-no-screen.

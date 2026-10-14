@@ -1,0 +1,15 @@
+id: n-0604
+uuid: b9c68a3f-db79-43f3-9b00-52e5f184d542
+kind: note
+reason: request
+author: agent
+created: 2026-10-14T22:22:06.930Z
+anchor:
+  screen: question-answered-by-approval
+status: open
+body: Draw walkdown threads show q-0001 after a person's approval of
+  checkout.cart.empty answered it, for
+  threads.lifecycle.approval-answers-a-moved-question. It is incorporated,
+  answered in the approver's name by the run that approved the rule. It was
+  asked on checkout.cart.add and is now on checkout.cart.empty. Its replies end
+  with the one saying the approval answered it.

@@ -1,0 +1,57 @@
+{
+  "run_id": "2026-10-14T21-57-55Z-local-01",
+  "created": "2026-10-14T21:57:55Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "985c3902-dirty",
+  "tree_hash": "sha256:180c3edf9d78",
+  "spec_hash": "sha256:1e6d0031f039",
+  "results": [
+    {
+      "rule": "panel.dock.surfaces-say-what-they-show",
+      "status": "pass",
+      "statement_hash": "sha256:282502d9f880"
+    },
+    {
+      "rule": "panel.rules.opens-at-its-focus",
+      "status": "pass",
+      "statement_hash": "sha256:f04a715ca5ed"
+    },
+    {
+      "rule": "embed.pin.asks-its-kind",
+      "status": "pass",
+      "statement_hash": "sha256:85b398c3cdbb"
+    },
+    {
+      "rule": "screens.surfaces.proposed-beside-accepted",
+      "status": "pass",
+      "statement_hash": "sha256:0842937f10e9"
+    },
+    {
+      "rule": "screens.surfaces.proposed-is-yours",
+      "status": "pass",
+      "statement_hash": "sha256:0c8d5e77db4b"
+    },
+    {
+      "rule": "panel.dock.app-not-answering",
+      "status": "pass",
+      "statement_hash": "sha256:709522460f2e"
+    }
+  ]
+}

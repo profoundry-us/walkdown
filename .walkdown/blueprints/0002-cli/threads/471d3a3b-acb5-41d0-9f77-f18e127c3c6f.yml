@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-13T01:53:19.979Z
 anchor:
   screen: upgrade-records-excuses
-status: addressed
+status: verified
 body: "What `walkdown upgrade --dry-run` and then `walkdown upgrade` print for
   locations.keeping.upgrade-records-excuses, on a blueprint stamped before
   stamps recorded their excuses: two rules excusing the agent tier, one excusing
@@ -20,3 +20,4 @@ replies:
     body: "Drawn: prototype-cli/drafts/upgrade-records-excuses.html. The dry run
       names the two rules that excuse the agent tier and says nothing is written
       and no hash changes, then the real run says it recorded them."
+verified_by: topher

@@ -1,0 +1,58 @@
+{
+  "run_id": "2026-10-14T22-05-54Z-local-01",
+  "created": "2026-10-14T22:05:54Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "985c3902-dirty",
+  "tree_hash": "sha256:3a44eeedaf2e",
+  "spec_hash": "sha256:dd90bc82a6c7",
+  "results": [
+    {
+      "rule": "ownership.design.every-screen-has-rules",
+      "status": "pass",
+      "statement_hash": "sha256:01920019bc11"
+    },
+    {
+      "rule": "ownership.design.retired-counted-apart",
+      "status": "pass",
+      "statement_hash": "sha256:dc971fcf98e1"
+    },
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "approved",
+      "statement_hash": "sha256:0680eae68b81"
+    },
+    {
+      "rule": "ownership.design.live-rule-names-a-live-screen",
+      "status": "approved",
+      "statement_hash": "sha256:4455e2293cb6"
+    },
+    {
+      "rule": "locations.keeping.upgrade-records-excuses",
+      "status": "approved",
+      "statement_hash": "sha256:429c87ffe89d"
+    },
+    {
+      "rule": "status.derived.stale-never-passes",
+      "status": "pass",
+      "statement_hash": "sha256:feda1ef23a24"
+    },
+    {
+      "rule": "ownership.design.approved-rules-accept-the-design",
+      "status": "pass",
+      "statement_hash": "sha256:98aad72d33a6"
+    }
+  ]
+}

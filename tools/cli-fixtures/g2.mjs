@@ -308,4 +308,48 @@ export default {
       )}\n`,
     );
   },
+  /*
+   * `checkout`, stamped before stamps recorded what they excused: two rules
+   * excuse the agent tier, declined-card's hash current and receipt.email's
+   * stale, and cart.add excuses nothing. No old designs and no redlines, so
+   * the excuses are all the upgrade finds.
+   */
+  'g2-old-excuses'(m, h) {
+    h.realRepo(m);
+    m.ok(['blueprints', 'new', 'checkout']);
+    const dir = join(m.specOf('checkout'), 'features');
+    for (const f of readdirSync(dir)) rmSync(join(dir, f));
+    const excuse = 'The email leaves the machine, so there is no screen to look at.';
+    const rules = [
+      ['cart', 'add', 'A shopper adds an item to the cart.', null],
+      ['payment', 'declined-card', 'A declined card says why and keeps the cart.', excuse],
+      ['receipt', 'email', 'The receipt is emailed once the order is placed.', excuse],
+    ];
+    writeFileSync(
+      join(dir, 'checkout.yml'),
+      [
+        'feature: checkout',
+        'stories:',
+        ...rules.flatMap(([story, id, statement, why]) => {
+          const rule = { statement, steps: { then: ['It does'] } };
+          if (why) rule.unverifiable = { agent: why };
+          // receipt.email's excuse joined the hash after it was stamped.
+          const stamp = h.formatHash(id === 'email' ? { ...rule, unverifiable: undefined } : rule);
+          return [
+            `  - id: checkout.${story}`,
+            `    title: The ${story}`,
+            '    rules:',
+            `      - id: checkout.${story}.${id}`,
+            `        statement: ${statement}`,
+            '        verify: [checks, agent]',
+            ...(why ? ['        unverifiable:', `          agent: ${why}`] : []),
+            '        steps:',
+            `          statement_hash: "${stamp}"`,
+            '          then: [It does]',
+          ];
+        }),
+        '',
+      ].join('\n'),
+    );
+  },
 };

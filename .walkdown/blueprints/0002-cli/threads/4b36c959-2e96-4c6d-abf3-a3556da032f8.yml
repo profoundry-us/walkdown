@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-12T23:40:44.058Z
 anchor:
   rule: status.evidence.no-screen-needs-an-excuse
-status: open
+status: incorporated
 body: "A live rule whose only screen is retired passes lint: it names a screen,
   so the no-screen check is satisfied, and retired screens are not linted at
   all. No walk ever looks at it, which is what the check exists to catch (judge,
@@ -22,3 +22,14 @@ replies:
       to alert the system about that.
     added: Written as ownership.design.retired-screen-has-no-live-rules (screen
       lint-retired-screen-named, request n-0600).
+  - author: topher
+    created: 2026-10-14T21:59:23Z
+    body: It should error and mention that the current screen is retired. Also, you
+      shouldn't be able to retire a screen if it has live rules pointing at it.
+    answer: true
+  - author: agent
+    created: 2026-10-14T22:19:06Z
+    body: Incorporated into ownership.design.live-rule-names-a-live-screen, which
+      you approved on 2026-10-14. Its error line says the screen is retired.
+      Retiring a screen is an edit to the storyboard, so this lint error is what
+      refuses a screen with live rules.
