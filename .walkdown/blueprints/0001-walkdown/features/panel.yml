@@ -1407,23 +1407,23 @@ stories:
 
       - id: panel.threads.show-the-sketch
         origin: thread:n-0010
-        statement: When a thread's screen has a proposed design, the panel can show it over the running app, framed as proposed.
-        because: A design nobody has accepted must never be mistaken for the accepted one.
+        statement: A thread on a screen with a proposed design offers to open that screen, with the proposed version chosen.
+        because: A design nobody has accepted must never be mistaken for the accepted one, and the design side already shows a proposal as proposed.
+        history: Until 2026-10-14 the button drew the proposal over whatever page was open, as a detour the bar could not end. Topher dropped the detour on q-0589, once ADR 0015 put the proposal on the design side.
         signoff: [eng, product]
-        screens: [rule-detail]
+        screens: [thread-panel]
         steps:
           given:
-            - A thread anchored to a screen with a proposed design and no accepted one
+            - A thread anchored to a screen that has a proposed design
           when:
-            - Choose to view the proposed design from the thread
+            - Choose to open the screen from the thread
           then:
-            - The proposed design is drawn over the app the way an accepted design's ghost is
-            - It is framed as proposed, labelled "Proposed — yours to accept"
-            - Screens with a real prototype still ghost the prototype
-            - Looking at it is a detour - which screen the panel thinks this page is does not change, and the picker still swaps screens
-            - The detour is named while it lasts, and turning the ghost off ends it
-          statement_hash: sha256:963ddcac795e
-
+            - The panel switches to that screen the way the picker does, with Proposed chosen beside the design side's label
+            - The proposal is framed as proposed there, as it is on any screen with one
+            - Nothing is drawn over a page that is not the screen's own
+            - Picking another screen leaves it, as it leaves any screen
+            - A thread on a screen with no proposed design offers no such button
+          statement_hash: sha256:7a23515241e7
       - id: panel.threads.own-view
         origin: thread:n-0094
         statement: The panel has a threads view of its own. Its live filters list the threads the walk cannot reach - on no rule, or on a retired one - and All lists every thread on the blueprint, rule conversations and closed ones included.

@@ -1,0 +1,14 @@
+# `walkdown lint` where live rules still name retired screens, one replaced and one not.
+screen: lint-retired-screen-named
+title: Lint names a live rule that points at a retired screen
+rule: ownership.design.live-rule-names-a-live-screen
+fixture: g4-retired-screen-named
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[storyboard\] checkout/features/checkout\.yml › checkout\.basics\.totals: names the retired screen old-cart, which cart replaced — point it at cart, or retire the rule too$'
+  - '^  ✗ \[storyboard\] checkout/features/checkout\.yml › checkout\.basics\.promo-code: names the retired screen old-cart, which cart replaced — point it at cart, or retire the rule too$'
+  - '^  ✗ \[storyboard\] checkout/features/checkout\.yml › checkout\.promo\.stacking: names the retired screen old-promo — point it at a live screen, or retire the rule too$'
+  - '^✗ 5 rules, 2 screens, 6 anchors, 0 threads, 0 runs — 3 error\(s\), 1 warning\(s\)\. 1 retired rule and 3 retired screens were not linted$'
+anchors:
+  - { id: cli.lint.retired-screen-named, match: '^  ✗ \[storyboard\] .*names the retired screen' }

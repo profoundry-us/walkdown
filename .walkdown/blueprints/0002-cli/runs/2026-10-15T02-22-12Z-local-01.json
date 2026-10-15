@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-15T02-22-12Z-local-01",
+  "created": "2026-10-15T02:22:12Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd1e1962-dirty",
+  "spec_hash": "sha256:9ae5f6c67dc9",
+  "results": [
+    {
+      "rule": "ownership.design.live-rule-names-a-live-screen",
+      "status": "pass",
+      "statement_hash": "sha256:4455e2293cb6",
+      "evidence": [
+        "runs/evidence/2026-10-15T02-19-45Z/probe-out.txt",
+        "runs/evidence/2026-10-15T02-19-45Z/serve-out.txt"
+      ],
+      "reasoning": "Drove the g4-retired-screen-named fixture on throwaway machines (machine() from tools/cli-scenarios.mjs, node bin/walkdown.js, no network; the one serve probe ran on port 4770 from the machine's own home). `walkdown lint` exits 1 and prints three [storyboard] errors, each naming checkout/features/checkout.yml and the rule. totals and promo-code each say they name the retired screen old-cart, which cart replaced, and to point the rule at cart or retire it too. stacking says it names old-promo and to point it at a live screen, since old-promo names no replacement. The retired rule paper on old-receipt gets nothing, and no retired screen is linted. The summary reads '1 retired rule and 3 retired screens were not linted'. The printed lines match the accepted design prototype-cli/screens/lint-retired-screen-named.html word for word, and the as-built capture is identical apart from its header note. `lint --json` carries the same three findings (level error, category storyboard, file, subject = rule id) and summary.retiredScreens 3. `status` and `status <rule>` list the rules normally, and `serve` loads the blueprint with the rule's screens [old-cart] and nothing odd. Edges: a rule naming both cart and old-cart still gets the error, which is correct. A rule whose focus is an anchor on the retired screen gets only the retired-screen error, which is enough. An empty replaced_by falls back to the no-replacement wording. Two edges are passed on to the agent that asked, with estimates: replaced_by naming a screen that is itself retired, and replaced_by naming an id no screen declares. In both, lint recommends pointing the rule at that screen without checking that it is live and declared. Following the advice then raises a different error, so the cost is one extra lint round. One edge stays in the reasoning only: a rule listing the same retired screen twice gets the error twice, under 10% likely and harmless.",
+      "threads": []
+    }
+  ]
+}

@@ -7,7 +7,7 @@ created: 2026-10-10T22:25:09.063Z
 anchor:
   rule: panel.threads.show-the-sketch
   screen: rule-detail
-status: open
+status: settled
 body: "While a proposed design is shown from a thread, the bar offers no way to
   turn it off. On a screen with a proposed design and no accepted one, View the
   proposed design ghosts the proposal at 50% over the app. The bar then
@@ -24,3 +24,8 @@ replies:
     body: Held on q-0589. Making App end the detour breaks
       screens.surfaces.proposed-beside-accepted, which says a proposal-only
       screen shows App disabled. Which way it goes is a question for Topher.
+  - author: agent
+    created: 2026-10-15T02:25:39Z
+    body: Moot. The detour this finding was about is dropped (q-0589), so there is
+      nothing left to turn off.
+    closes: true

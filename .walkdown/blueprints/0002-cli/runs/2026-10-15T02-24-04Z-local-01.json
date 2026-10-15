@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-15T02-24-04Z-local-01",
+  "created": "2026-10-15T02:24:04Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "dd1e1962-dirty",
+  "tree_hash": "sha256:4982386eea28",
+  "spec_hash": "sha256:f6564319ec63",
+  "results": [
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "pass",
+      "statement_hash": "sha256:0680eae68b81",
+      "duration_ms": 3073,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/threads-proposes.test.js:27",
+        "test/threads-proposes.test.js:38",
+        "test/threads-proposes.test.js:45",
+        "test/threads-proposes.test.js:80"
+      ]
+    }
+  ]
+}

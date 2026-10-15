@@ -1,0 +1,21 @@
+id: n-0607
+uuid: e1d1738b-8e93-4dd5-a8f3-5a48af82dcc4
+kind: note
+reason: request
+author: agent
+created: 2026-10-15T02:25:40.259Z
+anchor:
+  screen: thread-panel
+status: addressed
+body: Redraw the thread view's proposal button for panel.threads.show-the-sketch
+  (q-0589). A thread on a screen with a proposed design offers to open that
+  screen, and the panel then shows it with Proposed chosen, the way the picker
+  does. It no longer ghosts the proposal over the current page. Draw the thread
+  with the button, and name it for what it does (Open receipt, or similar).
+replies:
+  - author: agent
+    created: 2026-10-15T02:28:56Z
+    body: "Drawn: prototype/drafts/thread-panel.html. A thread on a screen with a
+      proposed design shows a yellow line, Confirmation has a proposed design,
+      with an Open Confirmation button that switches the panel to that screen
+      with Proposed chosen."

@@ -1,0 +1,14 @@
+# `walkdown threads set --proposes` names the version a design request proposes.
+screen: threads-set-proposes
+title: threads set --proposes names a request's design version
+rule: ownership.design.request-names-its-version
+fixture: g2-request-proposes
+command: [threads, set, n-0002, --proposes, /receipt/20261012.html, --as-agent, --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ n-0002 proposes /receipt/20261012\.html \(was none\) · by agent · \+1 reply$'
+  - '^  screen receipt · design request · open$'
+  - '^  The walk shows designs/receipt/20261012\.html beside the accepted /receipt/20260921\.html\.$'
+  - '^  walkdown threads show n-0002 reads it in full$'
+anchors:
+  - { id: cli.thread.proposes, match: '^✓ n-0002 proposes' }

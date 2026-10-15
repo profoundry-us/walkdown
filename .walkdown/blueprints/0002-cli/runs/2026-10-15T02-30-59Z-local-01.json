@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-15T02-30-59Z-local-01",
+  "created": "2026-10-15T02:30:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd1e1962-dirty",
+  "spec_hash": "sha256:f6564319ec63",
+  "results": [
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "pass",
+      "statement_hash": "sha256:0680eae68b81",
+      "evidence": [
+        "runs/evidence/2026-10-15T02-24-40Z/probes-refusals-and-edges.txt",
+        "runs/evidence/2026-10-15T02-24-40Z/probes-waived-accepted.txt",
+        "runs/evidence/2026-10-15T02-24-40Z/walk-api-blueprint.txt",
+        "runs/evidence/2026-10-15T02-24-40Z/walk-accepted-and-same-version.txt"
+      ],
+      "reasoning": "Driven on throwaway machines (machine() + FIXTURES['g2-request-proposes'] from tools/cli-scenarios.mjs), each write checked by hashing the whole machine before and after; the walk read from a throwaway `walkdown serve` on port 4772-4774 (the machine's own home, project ~/shop), never this repository's ledger. Step 1 holds: `threads set n-0002 --proposes /receipt/20261012.html --as-agent` exits 0, sets `proposes`, and its four lines match prototype-cli/screens/threads-set-proposes.html verbatim (the as-built shows the same four). /api/blueprint then gives screen receipt `prototype: /receipt/20260921.html` with `proposed: {path: /prototype/receipt/20261012.html, request: n-0002}`, and both pages serve 200 with their own titles. Step 2 holds: each set adds one reply, `<who> named <version> as the version this request proposes, in place of <was>`, and five changes in a row read as a history in `threads show`; a person without --as-agent records as topher, so a person and an agent may both set it. Step 3 holds: /receipt/20261013.html is refused with the design's second block verbatim (`✗ ... is no file under the design root, designs/. Draw it there first, or name one that is.` / `Nothing was changed.`, exit 2), and so are /../outside.html, /receipt/../../outside.html, a directory, `/` and an empty value, each exit 2 with nothing written. A relative path with no leading slash and an inside `..` are normalised to the file they name, which is right. Step 4 holds: a rule note, a request on a rule, a request on rule+screen, a question and screen feedback are each refused `is not a design request`, exit 2, nothing written; an unknown id is refused too. Step 5 holds: a request taken through addressed then --verify is refused `was accepted ... A new version goes on a new request`, exit 2, nothing written, and the walk then reads the accepted 20261012 as prototype with `behind`. A waived request is refused `is waived`. --proposes beside --status, --reply, --waive or --option is refused before anything is written, and --json prints {id, proposes, was, by}. A grep of lib/bin/src finds `proposes` written only by setProposes and lib/upgrade-designs.js, and openThread whitelists its fields, so nothing else writes it. Edges under 10%, not filed: a symlink inside the design root that points outside it is accepted, because existsSync/statSync follow links (~2%: designs are drawn as files); naming the version already accepted prints 'The walk shows X beside the accepted X' while the walk shows no proposal, because readDesigns hides a proposal equal to the prototype (~5%: a request exists to propose a different version). One edge between 10% and 80% went to the agent that asked, not filed: `threads new --rule ... --reason request` prints 'design request' and `threads set --proposes` on it then says it 'is not a design request'.",
+      "threads": []
+    }
+  ]
+}

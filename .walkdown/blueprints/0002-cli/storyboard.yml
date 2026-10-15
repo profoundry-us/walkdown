@@ -523,8 +523,8 @@ screens:
 
   - id: threads-set-proposes
     title: "threads set --proposes names a request's design version"
-    prototype: null
-    proposal: /threads-set-proposes.html
+    prototype: /screens/threads-set-proposes.html   # accepted 2026-10-14 in Topher's walk
+    app: { path: /as-built/cli/threads-set-proposes.html }
     anchors:
       - cli.prompt
       - cli.thread.proposes
@@ -532,8 +532,8 @@ screens:
 
   - id: lint-retired-screen-named
     title: "Lint names a live rule that points at a retired screen"
-    prototype: null
-    proposal: /lint-retired-screen-named.html
+    prototype: /screens/lint-retired-screen-named.html   # accepted 2026-10-14 in Topher's walk
+    app: { path: /as-built/cli/lint-retired-screen-named.html }
     anchors:
       - cli.prompt
       - cli.lint.retired-screen-named

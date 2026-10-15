@@ -309,6 +309,61 @@ export default {
     );
   },
   /*
+   * threads-set-proposes: `checkout` keeps its designs in designs/, with
+   * receipt's accepted version /receipt/20260921.html and a new one drawn at
+   * /receipt/20261012.html. n-0001 is a note on a rule, n-0002 the open
+   * design request on receipt, which names no version yet.
+   */
+  'g2-request-proposes'(m, h) {
+    h.realRepo(m);
+    checkout(m, h);
+    const spec = m.specOf('checkout');
+    writeFileSync(
+      join(spec, 'spec.yml'),
+      `${readFileSync(join(spec, 'spec.yml'), 'utf8')}\ndesign:\n  root: designs/\n`,
+    );
+    for (const day of ['20260921', '20261012']) {
+      const f = join(m.shop, 'designs', 'receipt', `${day}.html`);
+      mkdirSync(dirname(f), { recursive: true });
+      writeFileSync(f, `<!doctype html><title>receipt ${day}</title>\n`);
+    }
+    storyboard(m, [
+      '  - id: receipt',
+      '    title: Receipt',
+      '    design: /receipt/20260921.html',
+      '    app: { path: /receipt }',
+    ]);
+    const file = join(spec, 'features', 'checkout.yml');
+    writeFileSync(
+      file,
+      readFileSync(file, 'utf8').replace(
+        '        verify: [checks]\n',
+        '        verify: [checks]\n        screens: [receipt]\n',
+      ),
+    );
+    m.ok(['hash', '--write', '--blueprint', 'checkout']);
+    m.ok([
+      'threads',
+      'new',
+      '--rule',
+      'checkout.basics.pays',
+      '--body',
+      'The total reads before the items.',
+      '--blueprint',
+      'checkout',
+    ]);
+    m.ok([
+      'threads',
+      'new',
+      '--screen',
+      'receipt',
+      '--body',
+      'Draw the receipt with the order number first.',
+      '--blueprint',
+      'checkout',
+    ]);
+  },
+  /*
    * `checkout`, stamped before stamps recorded what they excused: two rules
    * excuse the agent tier, declined-card's hash current and receipt.email's
    * stale, and cart.add excuses nothing. No old designs and no redlines, so

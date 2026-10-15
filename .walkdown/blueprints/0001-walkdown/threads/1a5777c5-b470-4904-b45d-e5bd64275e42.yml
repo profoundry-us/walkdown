@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-10T22:29:43.548Z
 anchor:
   rule: panel.threads.show-the-sketch
-status: answered
+status: incorporated
 body: How should the proposal detour end? panel.threads.show-the-sketch says
   turning the ghost off ends it, and finding n-0588 found nothing in the bar
   that turns it off. screens.surfaces.proposed-beside-accepted says a screen
@@ -29,3 +29,8 @@ replies:
       screen. Retire or reword show-the-sketch to match, and file a design
       request for the new button before building it."
     answer: true
+  - author: agent
+    created: 2026-10-15T02:25:39Z
+    body: "Incorporated. panel.threads.show-the-sketch is reworded: the thread's
+      button opens the screen with Proposed chosen, and the detour is gone. Its
+      new button is requested on thread-panel before it is built."

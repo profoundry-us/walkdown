@@ -340,6 +340,75 @@ export default {
   },
 
   /*
+   * lint-retired-screen-named: old-cart is retired with `replaced_by: cart`
+   * and two live rules still name it; old-promo is retired with no
+   * replacement and one live rule names it; old-receipt is named only by the
+   * retired rule paper. `totals` cites a thread nobody filed, so a warning
+   * shows beside the errors.
+   */
+  'g4-retired-screen-named'(m) {
+    m.ok(['blueprints', 'new', 'checkout']);
+    const dir = join(m.specOf('checkout'), 'features');
+    for (const f of readdirSync(dir)) rmSync(join(dir, f));
+    const story = (id, rules) => [
+      `  - id: checkout.${id}`,
+      `    title: The ${id} of checkout`,
+      '    rules:',
+      ...rules.flatMap(([rule, statement, ...extra]) => [
+        `      - id: checkout.${id}.${rule}`,
+        `        statement: ${statement}`,
+        ...extra.map((l) => `        ${l}`),
+        '        steps:',
+        '          then: [It does]',
+      ]),
+    ];
+    writeFileSync(
+      join(dir, 'checkout.yml'),
+      [
+        'feature: checkout',
+        'stories:',
+        ...story('cart', [['add', 'An item can be added to the cart.', 'screens: [cart]']]),
+        ...story('basics', [
+          [
+            'totals',
+            'The total is the sum of the cart.',
+            'origin: thread:n-0099',
+            'screens: [old-cart]',
+          ],
+          ['promo-code', 'A promo code field sits under the total.', 'screens: [old-cart]'],
+        ]),
+        ...story('promo', [['stacking', 'Two promo codes never stack.', 'screens: [old-promo]']]),
+        ...story('receipt', [
+          ['email', 'A receipt is emailed after payment.', 'screens: [receipt]'],
+          [
+            'paper',
+            'A paper receipt prints at the till.',
+            'retired: The shop stopped printing receipts.',
+            'screens: [old-receipt]',
+          ],
+        ]),
+        '',
+      ].join('\n'),
+    );
+    m.ok(['hash', '--write', '--blueprint', 'checkout']);
+    storyboard(m, [
+      '  - id: cart',
+      '    prototype: /screens/cart.html',
+      '    anchors: [cart.items, cart.total, cart.checkout]',
+      '  - id: receipt',
+      '    prototype: /screens/receipt.html',
+      '    anchors: [receipt.number, receipt.items, receipt.email]',
+      '  - id: old-cart',
+      '    retired: The cart was redrawn.',
+      '    replaced_by: cart',
+      '  - id: old-promo',
+      '    retired: Promo codes moved to the payment step.',
+      '  - id: old-receipt',
+      '    retired: The shop stopped printing receipts.',
+    ]);
+  },
+
+  /*
    * lint-unnamed-screen: `refund` no rule names, `gift-card` only the retired
    * `gift-wrap` names, and `old-cart` is retired itself.
    */

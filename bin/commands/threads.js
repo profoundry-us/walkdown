@@ -11,7 +11,7 @@ import { dispatch } from './noun.js';
  */
 
 /* The flags that change a thread's status; `set` takes them and nothing else does. */
-const SETS = ['--status', '--verify', '--reopen', '--waive', '--option'];
+const SETS = ['--status', '--verify', '--reopen', '--waive', '--option', '--proposes'];
 const sets = (args) => args.filter((a) => SETS.some((s) => a === s || a.startsWith(`${s}=`)));
 const thread = async (args) => (await import('./thread.js')).run(args);
 
@@ -76,7 +76,7 @@ export const VERBS = {
   },
   set: {
     usage:
-      'walkdown threads set <id> --status <s> | --verify | --reopen | --waive | --option "<label> :: <why>"...\n' +
+      'walkdown threads set <id> --status <s> | --verify | --reopen | --waive | --option "<label> :: <why>"... | --proposes <version>\n' +
       '                     --blueprint <id> [--reason <text>] [--reply <text>] [--as-agent [--said <text>] [--added <text>]] [--json]',
     about:
       'Change a thread: its status, or the choices a question offers. Transitions are checked\n(a note: open → addressed → verified | reopen | waived; a question: open → answered →\nincorporated | reopen | waived). Verified and waived need a named person; waiving and\nreopening need --reason. --reply lands with the change, or neither lands.',

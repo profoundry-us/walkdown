@@ -1,0 +1,38 @@
+{
+  "run_id": "2026-10-15T02-26-30Z-local-01",
+  "created": "2026-10-15T02:26:30Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "dd1e1962-dirty",
+  "spec_hash": "sha256:9d74acfb9b40",
+  "results": [
+    {
+      "rule": "embed.pin.asks-its-kind",
+      "status": "fail",
+      "statement_hash": "sha256:0a620db73066",
+      "evidence": [
+        "prototype/screens/pin-form-kinds.html",
+        "src/embed/index.js"
+      ],
+      "reasoning": "Not built yet. On 2026-10-14 the rule gained a step from q-0585: choosing Redline adds two short optional lines, Design shows and Build shows, above the why. The pin form in src/embed/index.js still has one box for every kind, and the accepted pin-form-kinds design has no such lines either, so the step cannot hold. The new form is requested from the designer as n-0606 and is built only once Topher accepts it. The other steps were passing before the rewording and are unchanged.",
+      "threads": [
+        "10615b6c-7e7b-4b9e-a646-4f6c8ba57d22"
+      ]
+    },
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "fail",
+      "statement_hash": "sha256:639e94f7a075",
+      "evidence": [
+        "prototype/screens/redline-pin.html",
+        "src/embed/index.js"
+      ],
+      "reasoning": "Not built as now worded. Since q-0585 the opened redline shows what the design and the build show wherever the filer said so, and the pair comes from the pin form. The form cannot supply the pair yet, because its two optional lines wait on design n-0606. A redline filed from the panel therefore never carries Design or Build. The step reads true only for redlines filed some other way, which is not what the rule means. This is recorded as a fail so the gap is visible until the form is built.",
+      "threads": [
+        "10615b6c-7e7b-4b9e-a646-4f6c8ba57d22"
+      ]
+    }
+  ]
+}

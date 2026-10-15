@@ -7,7 +7,7 @@ anchor:
   rule: embed.pin.redline-explains-a-gap
   screen: redline-pin
   element: pin.redline
-status: answered
+status: incorporated
 body: Your accepted redline-pin design shows a redline's Design and Build side
   by side above the why. The accepted pin form has one box, for the why, so a
   redline filed from it never carries Design or Build. The build shows the pair
@@ -28,4 +28,10 @@ replies:
     created: 2026-10-14T21:57:31Z
     body: The form should ask all three, but be optional.
     answer: true
+  - author: agent
+    created: 2026-10-15T02:25:01Z
+    body: Incorporated. embed.pin.asks-its-kind now says choosing Redline adds
+      Design shows and Build shows above the why, both optional.
+      embed.pin.redline-explains-a-gap shows the pair only where it was given.
+      The pin form needs a new design first, requested on pin-form-kinds.
 chosen: The form asks for all three

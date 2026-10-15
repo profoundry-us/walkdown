@@ -9,7 +9,7 @@ import { dim, yellow } from '../../lib/report/tty.js';
 import { getThread, labelOwners } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { reasonText, saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
-import { mutateThread, offer, openThread } from '../../lib/writes.js';
+import { mutateThread, offer, openThread, proposeVersion } from '../../lib/writes.js';
 import { candidatesHere, end, loadOrExit, namedOrExit } from './context.js';
 
 export function run(args) {
@@ -33,6 +33,7 @@ export function run(args) {
       element: { type: 'string' },
       body: { type: 'string' },
       option: { type: 'string', multiple: true },
+      proposes: { type: 'string' },
       'as-is': { type: 'boolean', default: false },
       attach: { type: 'string', multiple: true },
     },
@@ -46,7 +47,12 @@ export function run(args) {
   const verb =
     id === 'new'
       ? 'new'
-      : values.status || values.verify || values.reopen || values.waive || values.option?.length
+      : values.status ||
+          values.verify ||
+          values.reopen ||
+          values.waive ||
+          values.option?.length ||
+          values.proposes !== undefined
         ? 'set'
         : values.reply != null || values.said != null || values.added != null
           ? 'reply'
@@ -268,6 +274,48 @@ export function run(args) {
     );
     console.log(dim(`  ${anchorText(anchor)}`));
     console.log(dim(`  walkdown threads show ${opened} reads it in full`));
+    return end(0);
+  }
+
+  /*
+   * The design version a request proposes (ownership.design.request-names-
+   * its-version): a change of its own, so nothing else rides along with it.
+   */
+  if (values.proposes !== undefined) {
+    if (replying || status || values.option?.length) {
+      console.error(
+        '--proposes is a change of its own, and its reply is written for it. Run the rest separately.',
+      );
+      return end(2);
+    }
+    let done;
+    try {
+      done = proposeVersion(blueprint, id, values.proposes, { via });
+    } catch (err) {
+      console.error(`✗ ${err.message}`);
+      console.error('Nothing was changed.');
+      return end(2);
+    }
+    const t = done.thread;
+    if (values.json) {
+      console.log(JSON.stringify({ id: t.id, proposes: done.named, was: done.was, by: done.as }));
+      return end(0);
+    }
+    const marked = via && done.as !== 'agent' ? ` (via ${via})` : '';
+    console.log(
+      `✓ ${t.id} proposes ${done.named} (was ${done.was ?? 'none'}) · by ${done.as}${marked} · +1 reply`,
+    );
+    console.log(dim(`  ${anchorText(t.anchor)} · ${reasonText(t.reason)} · ${t.status}`));
+    const screen = loadBlueprint(blueprint.dir).storyboard?.screens?.find(
+      (s) => s?.id === t.anchor.screen,
+    );
+    const shown = `${done.said.replace(/\/?$/, '')}${done.named}`;
+    console.log(
+      screen?.prototype
+        ? `  The walk shows ${shown} beside the accepted ${screen.prototype}.`
+        : `  The walk shows ${shown} on the design side. ${t.anchor.screen} has no accepted design yet.`,
+    );
+    console.log(dim(`  walkdown threads show ${t.id} reads it in full`));
     return end(0);
   }
 

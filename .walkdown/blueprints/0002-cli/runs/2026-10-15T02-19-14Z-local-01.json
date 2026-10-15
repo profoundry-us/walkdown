@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-15T02-19-14Z-local-01",
+  "created": "2026-10-15T02:19:14Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "dd1e1962-dirty",
+  "tree_hash": "sha256:45b99b4fb858",
+  "spec_hash": "sha256:9ae5f6c67dc9",
+  "results": [
+    {
+      "rule": "ownership.design.live-rule-names-a-live-screen",
+      "status": "pass",
+      "statement_hash": "sha256:4455e2293cb6",
+      "duration_ms": 512,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}

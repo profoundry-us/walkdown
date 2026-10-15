@@ -352,9 +352,10 @@ stories:
             - "`pin.kind` offers Note, Question and Redline, all visible before anything is typed, with Note chosen"
             - Choosing one changes the form's hint and its save button to say what will be filed
             - Choosing Redline says what a redline is for, that the build leaves the design here on purpose
+            - Choosing Redline adds two short lines above the why, Design shows and Build shows, and both may be left empty
             - The note box `pin.note`, screenshots `pin.shots`, `pin.save` and `pin.cancel` work as they did
             - While an agent is recording, Redline cannot be chosen, and the form says only a person files one
-          statement_hash: sha256:85b398c3cdbb
+          statement_hash: sha256:0a620db73066
 
       - id: embed.pin.redline-explains-a-gap
         origin: walkdown
@@ -372,10 +373,10 @@ stories:
             - The screen is open, on either side of the fade
           then:
             - "`pin.redline` is drawn on that element on both sides, and looks unlike a note or a question pin"
-            - Opened, it says what the design shows, what the build shows, and why, with who filed it and when
+            - Opened, it says why, with who filed it and when, and what the design and the build show wherever the person filing it said so
             - It has no reply box and no answer button, and says it waits on nobody
             - The screen's thread list shows redlines apart from the pins still waiting
-          statement_hash: sha256:49f01d2ca7d2
+          statement_hash: sha256:639e94f7a075
 
   - id: embed.threads
     title: A thread you can read at a glance

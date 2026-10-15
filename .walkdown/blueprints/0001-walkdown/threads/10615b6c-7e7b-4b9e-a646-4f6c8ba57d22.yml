@@ -1,0 +1,22 @@
+id: n-0606
+uuid: 10615b6c-7e7b-4b9e-a646-4f6c8ba57d22
+kind: note
+reason: request
+author: agent
+created: 2026-10-15T02:25:01.661Z
+anchor:
+  screen: pin-form-kinds
+status: addressed
+body: "Redraw the pin form for q-0585. With Redline chosen, two short optional
+  lines sit above the why box: Design shows and Build shows. They follow
+  embed.pin.asks-its-kind and the accepted redline-pin design, which shows the
+  pair above the why. Note and Question keep one box. Show the form with Redline
+  chosen and the two lines filled, so the walk can compare it with the accepted
+  pin-form-kinds."
+replies:
+  - author: agent
+    created: 2026-10-15T02:28:56Z
+    body: "Drawn: prototype/drafts/pin-form-kinds.html. With Redline chosen, the
+      form shows two optional one-line inputs, Design shows and Build shows,
+      above the why, filled as the accepted redline-pin reads them, and Note and
+      Question are unchanged."
