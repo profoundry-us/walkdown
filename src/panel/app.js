@@ -3645,11 +3645,11 @@ function wireGlobals() {
     S.phase = 'loading';
     start();
   });
-  on('view-sketch', ({ screen }) => {
-    S.ghostOverride = screen;
-    setGhost(false);
-    S.ghostOverride = screen;
-    setGhost(true);
+  // The thread's screen, with Proposed chosen, reached as the picker reaches
+  // a screen (panel.threads.show-the-sketch, q-0589).
+  on('open-proposed', ({ screen }) => {
+    setDesignVersion('proposed');
+    pickScreen(screen);
   });
   /*
    * Ids written into MESSAGE BODIES are links - thread ids open that thread,
@@ -3875,6 +3875,9 @@ function wireGlobals() {
           kind: msg.kind,
           // A redline says so in its reason (ADR 0015 §4).
           ...(msg.reason && { reason: msg.reason }),
+          // and what the design and the build show, where the person said.
+          ...(msg.design && { design: msg.design }),
+          ...(msg.build && { build: msg.build }),
           body: msg.body,
           // The pictures pasted into the pin form ride along (n-0096).
           ...(msg.attachments?.length && { attachments: msg.attachments }),

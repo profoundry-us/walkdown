@@ -1,0 +1,10 @@
+# `walkdown lint` refusing a question left on the rule it was asked on.
+screen: lint-question-asked-twice
+title: Lint refuses a question asked twice
+rule: threads.lifecycle.no-question-asked-twice
+fixture: g5-question-asked-twice
+command: [lint, --blueprint, checkout]
+exit: 1
+expect:
+  - '^  ✗ \[threads\] checkout/threads/\S+\.yml › q-0001: open on checkout\.cart\.add, but checkout\.cart\.empty was written from its answer, so the walk would ask it twice — move it onto that rule with `walkdown threads set q-0001 --written-as checkout\.cart\.empty --blueprint \S+`$'
+  - '^✗ 4 rules, 2 screens, 4 anchors, 2 threads, 0 runs — 1 error\(s\), 0 warning\(s\)$'

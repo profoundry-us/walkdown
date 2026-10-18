@@ -820,15 +820,28 @@ test('the pin form asks in one control whether the pin is a note, a question or 
   await kind.getByRole('tab', { name: 'Question' }).click();
   await expect(form.getByTestId('pin.hint')).toContainText('want answered');
   await expect(form.getByTestId('pin.save')).toHaveText('Ask it');
+  await expect(form.getByTestId('pin.redline-pair')).toBeHidden();
   await kind.getByRole('tab', { name: 'Redline' }).click();
   await expect(form.getByTestId('pin.hint')).toContainText('leaves the design here on purpose');
   await expect(form.getByTestId('pin.save')).toHaveText('File redline');
+  // Redline alone adds Design shows and Build shows above the why (q-0585).
+  const pair = form.getByTestId('pin.redline-pair');
+  await expect(pair).toBeVisible();
+  await expect(pair.getByLabel('Design shows')).toBeVisible();
+  await expect(pair.getByLabel('Build shows')).toBeVisible();
+  const above = await pair.boundingBox();
+  const note = await form.getByTestId('pin.note').boundingBox();
+  expect(above.y).toBeLessThan(note.y);
+  await kind.getByRole('tab', { name: 'Note' }).click();
+  await expect(pair).toBeHidden();
 
   // The rest works as it did: cancel closes it, and a save files the kind chosen.
   await form.getByTestId('pin.cancel').click();
   await expect(form).toHaveCount(0);
   await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.6);
   await app(page).getByTestId('pin.kind').getByRole('tab', { name: 'Redline' }).click();
+  await app(page).getByLabel('Design shows').fill('a button that reads Join');
+  await app(page).getByLabel('Build shows').fill('a button that reads Join the waitlist');
   await app(page)
     .getByTestId('pin.note')
     .fill('The button says more than the design, so a phone reader knows what it does.');
@@ -841,6 +854,9 @@ test('the pin form asks in one control whether the pin is a note, a question or 
   expect(thread.kind).toBe('note');
   expect(thread.reason).toBe('redline');
   expect(thread.status).toBe('recorded');
+  // Both lines are optional, and what was typed is what the redline carries.
+  expect(thread.design).toBe('a button that reads Join');
+  expect(thread.build).toBe('a button that reads Join the waitlist');
 });
 
 test('while an agent is recording, Redline cannot be chosen, and the form says only a person files one', {
@@ -912,6 +928,8 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
   const detail = app(page).getByTestId('pin.redline-detail');
   await expect(detail).toBeVisible();
   await expect(detail.getByTestId('pin.redline-why')).toHaveText(why);
+  // Filed with the why alone, so it shows no Design and Build pair.
+  await expect(detail.getByTestId('pin.redline-pair')).toHaveCount(0);
   await expect(detail).toContainText('Filed by');
   await expect(detail).toContainText('Nothing waits on this');
   await expect(detail.locator('textarea')).toHaveCount(0);

@@ -33,8 +33,8 @@ import { askOptions } from './ask.js';
 import {
   CHIP,
   composerPlaceholder,
-  ghostSource,
   myRole,
+  proposedOf,
   screenById,
   shortName,
   TERMINAL,
@@ -194,7 +194,8 @@ export function threadPane() {
         : '',
     t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
   ].filter(Boolean);
-  const sketch = ghostSource(sc);
+  // A proposed design on the thread's screen: the thread offers to go there.
+  const proposed = sc && proposedOf(sc) ? sc : null;
   const role = myRole();
   const acts = threadActions(t, role);
   /*
@@ -256,6 +257,24 @@ export function threadPane() {
           )}</div>`
         : nothing
     }
+    ${
+      /*
+       * A thread on a screen with a proposed design offers to go there, with
+       * Proposed chosen, the way the picker goes (panel.threads.show-the-
+       * sketch). It never lays the proposal over the page that is open: that
+       * detour had no way back the bar could offer (q-0589).
+       */
+      proposed
+        ? html`<div class="mx-3 mb-1.5 flex items-center gap-2 rounded-[.45rem] border-[1.5px] border-dashed border-warning bg-warning/10 px-2 py-1.5"
+            data-testid="thread.proposal">
+            <span class="size-1.5 flex-none rounded-full bg-warning"></span>
+            <span class="flex-1 text-[11px] leading-snug">${proposed.title ?? proposed.id} has a proposed design.</span>
+            <button class="btn btn-xs btn-warning" data-open-proposed="${proposed.id}"
+              title="Switch to the ${proposed.title ?? proposed.id} screen, with Proposed chosen on the design side"
+              @click=${(e) => fire(e.currentTarget, 'open-proposed', { screen: proposed.id })}>Open ${proposed.title ?? proposed.id}</button>
+          </div>`
+        : nothing
+    }
     <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
       ${unsafeHTML(
         MSG.stream(t, {
@@ -265,13 +284,6 @@ export function threadPane() {
           names: names(),
         }),
       )}
-      ${
-        sketch?.proposed
-          ? html`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
-        @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
-        View the proposed design</button>`
-          : nothing
-      }
       ${
         /*
          * An open question re-asks itself at the END of the stream, where

@@ -169,6 +169,7 @@ screens:
     prototype: /screens/pin-form-kinds.html   # accepted 2026-10-10, redrawn and accepted 2026-10-18 (n-0606)
     anchors:
       - pin.kind
+      - pin.redline-pair
       - pin.note
       - pin.shots
       - pin.save

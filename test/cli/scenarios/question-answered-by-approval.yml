@@ -1,0 +1,17 @@
+# `walkdown threads show` on a moved question that an approval answered.
+screen: question-answered-by-approval
+title: Approving a rule answers the question moved onto it
+rule: threads.lifecycle.approval-answers-a-moved-question
+fixture: g5-question-answered
+command: [threads, show, q-0001]
+exit: 0
+expect:
+  - '^q-0001 · question · incorporated by topher$'
+  - '^  rule checkout\.cart\.empty$'
+  - '^  asked on rule checkout\.cart\.add$'
+  - '^  answered when topher approved checkout\.cart\.empty as product · run \S+-local-01$'
+  - '^  dana · '
+  - '^  ↳ agent · '
+  - '^    Moved to checkout\.cart\.empty, the rule written from this answer\. Approving that rule answers it\.$'
+  - '^  ↳ topher · via walkdown · '
+  - '^    Answered by approving checkout\.cart\.empty, signed as product, in run \S+-local-01\.$'

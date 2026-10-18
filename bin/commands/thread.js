@@ -9,7 +9,7 @@ import { dim, yellow } from '../../lib/report/tty.js';
 import { getThread, labelOwners } from '../../lib/threads.js';
 import { whenIn } from '../../lib/time.js';
 import { reasonText, saysSomething, THREAD_KINDS } from '../../lib/vocab.js';
-import { mutateThread, offer, openThread, proposeVersion } from '../../lib/writes.js';
+import { mutateThread, offer, openThread, proposeVersion, writtenAs } from '../../lib/writes.js';
 import { candidatesHere, end, loadOrExit, namedOrExit } from './context.js';
 
 export function run(args) {
@@ -34,6 +34,7 @@ export function run(args) {
       body: { type: 'string' },
       option: { type: 'string', multiple: true },
       proposes: { type: 'string' },
+      'written-as': { type: 'string' },
       'as-is': { type: 'boolean', default: false },
       attach: { type: 'string', multiple: true },
     },
@@ -52,7 +53,8 @@ export function run(args) {
           values.reopen ||
           values.waive ||
           values.option?.length ||
-          values.proposes !== undefined
+          values.proposes !== undefined ||
+          values['written-as'] !== undefined
         ? 'set'
         : values.reply != null || values.said != null || values.added != null
           ? 'reply'
@@ -278,6 +280,37 @@ export function run(args) {
   }
 
   /*
+   * A question moved onto the rule written from its answer
+   * (threads.lifecycle.question-moves-to-its-rule), so the walk asks it once.
+   */
+  if (values['written-as'] !== undefined) {
+    if (replying || status || values.option?.length || values.proposes !== undefined) {
+      console.error(
+        '--written-as is a change of its own, and its reply is written for it. Run the rest separately.',
+      );
+      return end(2);
+    }
+    let done;
+    try {
+      done = writtenAs(blueprint, id, values['written-as']);
+    } catch (err) {
+      for (const line of err.lines ?? [err.message, 'Nothing was changed.']) console.error(line);
+      return end(2);
+    }
+    const t = done.thread;
+    const by = via ? 'agent' : done.as;
+    if (values.json) {
+      console.log(JSON.stringify({ id: t.id, from: done.from, to: done.to, by }));
+      return end(0);
+    }
+    console.log(`✓ ${t.id} still ${paintStatus(t.status)} · by ${by} · +1 reply`);
+    console.log(dim(`  asked on rule ${done.from}, now on rule ${done.to}`));
+    console.log(`  Approving ${done.to} answers it, in the name of whoever approves.`);
+    console.log(dim(`  walkdown threads show ${t.id} reads it in full`));
+    return end(0);
+  }
+
+  /*
    * The design version a request proposes (ownership.design.request-names-
    * its-version): a change of its own, so nothing else rides along with it.
    */
@@ -471,10 +504,22 @@ export function run(args) {
         ? dim(` by ${t.waived_by}`)
         : t.status === 'verified' && t.verified_by
           ? dim(` by ${t.verified_by}`)
-          : ''
+          : t.status === 'incorporated' && t.incorporated_by
+            ? dim(` by ${t.incorporated_by}`)
+            : ''
     }`,
   );
   console.log(dim(`  ${anchorText(t.anchor)}`));
+  // Moved onto the rule written from its answer, and answered by approving it.
+  if (t.asked_on) console.log(dim(`  asked on rule ${t.asked_on}`));
+  if (t.answered_by?.run)
+    console.log(
+      dim(
+        `  answered when ${t.incorporated_by ?? 'someone'} approved ${t.answered_by.rule}${
+          t.answered_by.roles?.length ? ` as ${t.answered_by.roles.join(' and ')}` : ''
+        } · run ${t.answered_by.run}`,
+      ),
+    );
   /*
    * A label that has meant two threads says so, and which holds it now: an
    * old commit message citing it reads one of them, and the reader should

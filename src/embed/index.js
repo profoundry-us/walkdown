@@ -729,6 +729,16 @@ import { icon } from './icons.js';
       <b class="mt-2 block font-mono text-[11.5px]">${el ? anchorId(el) : 'unanchored spot'}</b>
       ${el ? '' : '<div class="text-[11px] opacity-50">no anchored element here — pinned by position</div>'}
       <p class="wd-hint mt-0.5 text-[11.5px] leading-snug opacity-60" data-testid="pin.hint"></p>
+      <div class="wd-pair mt-2 grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 border-l-[3px] pl-2"
+        style="border-color:${REDLINE}" data-testid="pin.redline-pair" hidden>
+        <label class="whitespace-nowrap text-[11px] opacity-55" for="wd-design-shows">Design shows</label>
+        <input id="wd-design-shows" maxlength="120" placeholder="a button that reads Join"
+          class="input input-xs h-6 w-full text-[12px]">
+        <label class="whitespace-nowrap text-[11px] opacity-55" for="wd-build-shows">Build shows</label>
+        <input id="wd-build-shows" maxlength="120" placeholder="a button that reads Join the waitlist"
+          class="input input-xs h-6 w-full text-[12px]">
+        <span class="col-span-2 text-[10.5px] opacity-45">Both optional. Leave them empty if the why says it.</span>
+      </div>
       <textarea data-testid="pin.note" class="textarea textarea-sm mt-2 h-16 w-full"></textarea>
       <div class="wd-shots-pending mt-1 flex flex-wrap gap-1" data-testid="pin.shots"></div>
       <div class="mt-2 flex gap-2">
@@ -765,6 +775,8 @@ import { icon } from './icons.js';
         b.style.color = on && k === 'redline' ? '#fff' : '';
       }
       overlay.querySelector('.wd-hint').textContent = KINDS[k].hint;
+      // Design shows and Build shows belong to a redline alone (q-0585).
+      overlay.querySelector('.wd-pair').hidden = k !== 'redline';
       overlay.querySelector('textarea').placeholder = KINDS[k].prompt;
       overlay.querySelector('.wd-primary').textContent = KINDS[k].save;
       const mark = placeholder?.querySelector('.wd-kind');
@@ -921,6 +933,11 @@ import { icon } from './icons.js';
         // A redline is a note whose reason says so (ADR 0015 §4).
         kind: kind === 'question' ? 'question' : 'note',
         ...(kind === 'redline' && { reason: 'redline' }),
+        // What the design and the build show, each optional (q-0585).
+        ...(kind === 'redline' && {
+          design: overlay.querySelector('#wd-design-shows').value.trim() || undefined,
+          build: overlay.querySelector('#wd-build-shows').value.trim() || undefined,
+        }),
         surface: ctx.surface,
         viewport: currentViewport(),
         ...(shots.length && { attachments: shots }),

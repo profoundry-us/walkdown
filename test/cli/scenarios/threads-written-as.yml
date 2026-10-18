@@ -1,0 +1,12 @@
+# `walkdown threads set --written-as` moves a question onto the rule written from its answer.
+screen: threads-written-as
+title: A question moves onto the rule written from its answer
+rule: threads.lifecycle.question-moves-to-its-rule
+fixture: g5-question-written-as
+command: [threads, set, q-0001, --written-as, checkout.cart.empty, --blueprint, checkout]
+exit: 0
+expect:
+  - '^✓ q-0001 still open · by topher · \+1 reply$'
+  - '^  asked on rule checkout\.cart\.add, now on rule checkout\.cart\.empty$'
+  - '^  Approving checkout\.cart\.empty answers it, in the name of whoever approves\.$'
+  - '^  walkdown threads show q-0001 reads it in full$'

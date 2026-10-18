@@ -7079,7 +7079,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           : '',
       t.anchor?.viewport ? `${t.anchor.viewport.name} ${t.anchor.viewport.width}` : '',
     ].filter(Boolean);
-    const sketch = ghostSource(sc);
+    // A proposed design on the thread's screen: the thread offers to go there.
+    const proposed = sc && proposedOf(sc) ? sc : null;
     const role = myRole();
     const acts = threadActions(t, role);
     /*
@@ -7141,6 +7142,24 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           )}</div>`
         : A
     }
+    ${
+      /*
+       * A thread on a screen with a proposed design offers to go there, with
+       * Proposed chosen, the way the picker goes (panel.threads.show-the-
+       * sketch). It never lays the proposal over the page that is open: that
+       * detour had no way back the bar could offer (q-0589).
+       */
+      proposed
+        ? b`<div class="mx-3 mb-1.5 flex items-center gap-2 rounded-[.45rem] border-[1.5px] border-dashed border-warning bg-warning/10 px-2 py-1.5"
+            data-testid="thread.proposal">
+            <span class="size-1.5 flex-none rounded-full bg-warning"></span>
+            <span class="flex-1 text-[11px] leading-snug">${proposed.title ?? proposed.id} has a proposed design.</span>
+            <button class="btn btn-xs btn-warning" data-open-proposed="${proposed.id}"
+              title="Switch to the ${proposed.title ?? proposed.id} screen, with Proposed chosen on the design side"
+              @click=${(e) => fire(e.currentTarget, 'open-proposed', { screen: proposed.id })}>Open ${proposed.title ?? proposed.id}</button>
+          </div>`
+        : A
+    }
     <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
       ${o$1(
         MSG.stream(t, {
@@ -7150,13 +7169,6 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           names: names(),
         }),
       )}
-      ${
-        sketch?.proposed
-          ? b`<button class="btn btn-xs btn-outline mt-2 w-full" data-sketch="${t.anchor.screen}"
-        @click=${(e) => fire(e.currentTarget, 'view-sketch', { screen: t.anchor.screen })}>
-        View the proposed design</button>`
-          : A
-      }
       ${
         /*
          * An open question re-asks itself at the END of the stream, where
@@ -12209,11 +12221,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       S.phase = 'loading';
       start();
     });
-    on('view-sketch', ({ screen }) => {
-      S.ghostOverride = screen;
-      setGhost(false);
-      S.ghostOverride = screen;
-      setGhost(true);
+    // The thread's screen, with Proposed chosen, reached as the picker reaches
+    // a screen (panel.threads.show-the-sketch, q-0589).
+    on('open-proposed', ({ screen }) => {
+      setDesignVersion('proposed');
+      pickScreen(screen);
     });
     /*
      * Ids written into MESSAGE BODIES are links - thread ids open that thread,
@@ -12439,6 +12451,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
             kind: msg.kind,
             // A redline says so in its reason (ADR 0015 §4).
             ...(msg.reason && { reason: msg.reason }),
+            // and what the design and the build show, where the person said.
+            ...(msg.design && { design: msg.design }),
+            ...(msg.build && { build: msg.build }),
             body: msg.body,
             // The pictures pasted into the pin form ride along (n-0096).
             ...(msg.attachments?.length && { attachments: msg.attachments }),
