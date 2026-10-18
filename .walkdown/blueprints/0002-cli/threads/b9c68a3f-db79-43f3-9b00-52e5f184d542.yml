@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-14T22:22:06.930Z
 anchor:
   screen: question-answered-by-approval
-status: addressed
+status: verified
 body: Draw walkdown threads show q-0001 after a person's approval of
   checkout.cart.empty answered it, for
   threads.lifecycle.approval-answers-a-moved-question. It is incorporated,
@@ -19,3 +19,4 @@ replies:
     body: "Drawn: prototype-cli/drafts/question-answered-by-approval.html. threads
       show reads q-0001 as incorporated by topher, names both rules and the run
       and role whose approval answered it, and ends with the reply saying so."
+verified_by: topher

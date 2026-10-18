@@ -541,24 +541,24 @@ screens:
 
   - id: threads-written-as
     title: "A question moves onto the rule written from its answer"
-    prototype: null
-    proposal: /threads-written-as.html
+    prototype: /screens/threads-written-as.html   # accepted 2026-10-18 in Topher's walk
+    app: { path: /as-built/cli/threads-written-as.html }
     anchors:
       - cli.prompt
       - cli.exit
 
   - id: question-answered-by-approval
     title: "Approving a rule answers the question moved onto it"
-    prototype: null
-    proposal: /question-answered-by-approval.html
+    prototype: /screens/question-answered-by-approval.html   # accepted 2026-10-18 in Topher's walk
+    app: { path: /as-built/cli/question-answered-by-approval.html }
     anchors:
       - cli.prompt
       - cli.exit
 
   - id: lint-question-asked-twice
     title: "Lint refuses a question asked twice"
-    prototype: null
-    proposal: /lint-question-asked-twice.html
+    prototype: /screens/lint-question-asked-twice.html   # accepted 2026-10-18 in Topher's walk
+    app: { path: /as-built/cli/lint-question-asked-twice.html }
     anchors:
       - cli.prompt
       - cli.exit

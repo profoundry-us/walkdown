@@ -1,11 +1,14 @@
 <!doctype html>
+<!-- DESIGN DRAFT: thread-panel -->
+<!-- Drawn for design request n-0607 (q-0589), from the accepted thread-panel. Not yet accepted. -->
+<!-- Intent: a thread on a screen with a proposed design offers one button, named for where it goes, that switches the panel to that screen with Proposed chosen, the way the picker does, instead of ghosting the proposal over the page that is open. -->
 <!-- The thread's own screen: one slide to the right of the rule it belongs to,
      inside the same column. The embed's popover beside a pin shows the same
      stream in a smaller frame — one vocabulary, two places. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
-<title>Mockup — The thread screen</title>
+<title>Draft — The thread screen (open the proposed design)</title>
 <link rel="stylesheet" href="/walkdown.css">
 <style>
   /* The message vocabulary, as the build renders it (lib/message-stream.js). */
@@ -24,13 +27,23 @@
     font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .45; }
   .day span, .new span { flex: 1; height: 1px; background: currentColor; opacity: .25; }
   .new { color: #dc2626; opacity: .9; }
+  /* The proposal line: the panel's warning yellow, the colour the design side
+     frames a proposal in, so the button reads as "go and judge it". */
+  .proposal { border: 1.5px dashed var(--color-warning); border-radius: .45rem;
+    background: color-mix(in oklab, var(--color-warning) 10%, transparent); }
+  .waits { width: 6px; height: 6px; border-radius: 50%; background: var(--color-warning); flex: none; }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body class="h-screen overflow-hidden bg-base-200 text-sm">
   <main class="flex h-screen gap-3 p-3">
-    <section class="grid flex-1 place-items-center wire rounded-xl bg-base-100 text-center text-xs opacity-50 shadow-lg">
-      THE APP — unchanged. Reading a conversation does not move the surface<br>
-      under review; the pin it was left on is still where it was.
+    <section class="grid flex-1 place-items-center wire rounded-xl bg-base-100 text-center text-xs opacity-50 shadow-lg" id="surface">
+      <span id="surface-before">THE APP — unchanged. Reading a conversation does not move the surface<br>
+      under review; the pin it was left on is still where it was.</span>
+      <span id="surface-after" hidden>THE PANEL HAS SWITCHED SCREENS, as the picker does.<br>
+      The bar now reads <b>Confirmation ▾</b>, the Design side is showing, and <b>Proposed</b> is chosen<br>
+      beside its label, in the proposal's dashed-yellow frame (as drawn on design-version-switch).<br>
+      Nothing is drawn over any other page. Picking another screen leaves it.</span>
     </section>
 
     <!-- The third screen in the column: list → rule → thread. It slides in from
@@ -47,6 +60,17 @@
       </div>
       <div class="px-3 pb-1 text-[11px] opacity-45">Waitlist join ·
         <span class="font-mono">waitlist.submit</span> · desktop 1440</div>
+
+      <!-- Only on a thread whose screen has a proposed design. A thread on a
+           screen without one shows nothing here, so the column looks as it
+           did. The button goes to the screen; it never lays the proposal
+           over the page that is open. -->
+      <div class="proposal mx-3 mb-1.5 flex items-center gap-2 px-2 py-1.5" id="proposal">
+        <span class="waits"></span>
+        <span class="flex-1 text-[11px] leading-snug">Confirmation has a proposed design.</span>
+        <button class="btn btn-xs btn-warning" id="open-proposed"
+                title="Switch to the Confirmation screen, with Proposed chosen on the design side">Open Confirmation</button>
+      </div>
 
       <!-- THE STREAM. The opening note is not special: it is the first message,
            by a person, at a time - so the eye reads one conversation instead of
@@ -109,6 +133,16 @@
   <p class="fixed bottom-2 left-3 max-w-140 text-xs leading-relaxed opacity-40">Replies post optimistically: the message is on
     screen before the server answers, and is marked if it fails. Reason-required actions (waive, reopen) take their reason from
     the composer. A thread that reached a terminal state shows how it ended and offers no way back — the lifecycle has none.</p>
+  <label class="fixed right-3 bottom-2 flex items-center gap-1.5 text-[11px] opacity-50">
+    <input type="checkbox" id="has-proposal" checked> Mockup only: this thread's screen has a proposed design</label>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    $('open-proposed').onclick = () => { $('surface-before').hidden = true; $('surface-after').hidden = false; };
+    $('has-proposal').onchange = (e) => {
+      $('proposal').hidden = !e.target.checked;
+      $('surface-before').hidden = false; $('surface-after').hidden = true;
+    };
+  </script>
   <script src="/embed.js" data-walkdown></script>
 </body>
 </html>

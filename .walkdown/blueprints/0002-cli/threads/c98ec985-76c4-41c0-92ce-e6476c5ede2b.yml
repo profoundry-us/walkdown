@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-14T22:21:50.656Z
 anchor:
   screen: threads-written-as
-status: addressed
+status: verified
 body: Draw what walkdown threads set q-0001 --written-as checkout.cart.empty
   --blueprint checkout prints, for threads.lifecycle.question-moves-to-its-rule.
 replies:
@@ -22,3 +22,4 @@ replies:
       q-0001 still open with one reply, names the rule it was asked on and the
       rule it is on now, and says approving that rule answers it, beside a
       refused move onto a retired rule that writes nothing."
+verified_by: topher

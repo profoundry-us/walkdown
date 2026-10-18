@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-15T02:25:40.259Z
 anchor:
   screen: thread-panel
-status: addressed
+status: verified
 body: Redraw the thread view's proposal button for panel.threads.show-the-sketch
   (q-0589). A thread on a screen with a proposed design offers to open that
   screen, and the panel then shows it with Proposed chosen, the way the picker
@@ -19,3 +19,4 @@ replies:
       proposed design shows a yellow line, Confirmation has a proposed design,
       with an Open Confirmation button that switches the panel to that screen
       with Proposed chosen."
+verified_by: topher

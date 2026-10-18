@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-14T22:22:07.165Z
 anchor:
   screen: lint-question-asked-twice
-status: addressed
+status: verified
 body: Draw walkdown lint --blueprint checkout refusing q-0001, for
   threads.lifecycle.no-question-asked-twice. It is open on checkout.cart.add
   while checkout.cart.empty has origin thread:q-0001. The [threads] error names
@@ -19,3 +19,4 @@ replies:
     body: "Drawn: prototype-cli/drafts/lint-question-asked-twice.html. Lint gives
       one threads error on q-0001 that names both rules and the threads set
       command that moves it, and exits 1."
+verified_by: topher

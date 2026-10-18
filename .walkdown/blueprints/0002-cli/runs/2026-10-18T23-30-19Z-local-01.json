@@ -1,0 +1,63 @@
+{
+  "run_id": "2026-10-18T23-30-19Z-local-01",
+  "created": "2026-10-18T23:30:19Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "3875727a-dirty",
+  "tree_hash": "sha256:d989b4cc9251",
+  "spec_hash": "sha256:f6564319ec63",
+  "results": [
+    {
+      "rule": "status.evidence.no-screen-needs-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:4c7cbc94f0fa"
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:d031d2757c27"
+    },
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "pass",
+      "statement_hash": "sha256:0680eae68b81"
+    },
+    {
+      "rule": "ownership.design.live-rule-names-a-live-screen",
+      "status": "pass",
+      "statement_hash": "sha256:4455e2293cb6"
+    },
+    {
+      "rule": "threads.lifecycle.question-moves-to-its-rule",
+      "status": "approved",
+      "statement_hash": "sha256:ef2b55a9db1c"
+    },
+    {
+      "rule": "threads.lifecycle.approval-answers-a-moved-question",
+      "status": "approved",
+      "statement_hash": "sha256:31c0208897df"
+    },
+    {
+      "rule": "threads.lifecycle.no-question-asked-twice",
+      "status": "approved",
+      "statement_hash": "sha256:8ec190463e94"
+    },
+    {
+      "rule": "locations.keeping.upgrade-records-excuses",
+      "status": "pass",
+      "statement_hash": "sha256:429c87ffe89d"
+    }
+  ]
+}

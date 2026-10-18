@@ -84,7 +84,6 @@ screens:
   - id: thread-panel
     title: The thread screen (state — open a thread, or a pin)
     prototype: /screens/thread-panel.html
-    proposal: /thread-panel.html
     app: { path: /as-built/thread-panel.html }
     anchors:
       - thread.panel
@@ -167,8 +166,7 @@ screens:
   # 0.5.0, ADR 0015. Designed before it is built; no build yet, so no app.
   - id: pin-form-kinds
     title: "The pin form asks what kind of pin it is"
-    prototype: /screens/pin-form-kinds.html   # accepted 2026-10-10 in Topher's walk
-    proposal: /pin-form-kinds.html
+    prototype: /screens/pin-form-kinds.html   # accepted 2026-10-10, redrawn and accepted 2026-10-18 (n-0606)
     anchors:
       - pin.kind
       - pin.note

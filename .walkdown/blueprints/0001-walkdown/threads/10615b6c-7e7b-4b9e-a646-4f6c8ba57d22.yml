@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-15T02:25:01.661Z
 anchor:
   screen: pin-form-kinds
-status: addressed
+status: verified
 body: "Redraw the pin form for q-0585. With Redline chosen, two short optional
   lines sit above the why box: Design shows and Build shows. They follow
   embed.pin.asks-its-kind and the accepted redline-pin design, which shows the
@@ -20,3 +20,4 @@ replies:
       form shows two optional one-line inputs, Design shows and Build shows,
       above the why, filled as the accepted redline-pin reads them, and Note and
       Question are unchanged."
+verified_by: topher
