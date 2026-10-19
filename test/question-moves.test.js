@@ -7,7 +7,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { FIXTURES, machine } from '../tools/cli-scenarios.mjs';
@@ -146,6 +146,12 @@ test(`approving the rule answers the moved question and nothing else ${ANSWERS}`
     'checkout',
   ]);
 
+  // While the rule waits on its approval, the moved question is not asked
+  // again; the one asked on the rule in the first place still is.
+  const owed = m.wd(['status', '--blueprint', 'checkout']).stdout;
+  assert.doesNotMatch(owed, /◆ answer .*q-0001/, owed);
+  assert.match(owed, /◆ answer checkout\.cart\.empty — 1 question \(q-0004\)/, owed);
+
   // Unsigned, or a refinement, answers nothing.
   assert.deepEqual(
     walk(m, { results: [{ rule: 'checkout.cart.empty', status: 'approved' }], signatures: [] }),
@@ -180,4 +186,42 @@ test(`lint refuses a question left where it was asked, and is quiet once it move
   const afterwards = m.wd(['lint', '--blueprint', 'checkout']);
   assert.equal(afterwards.status, 0, afterwards.stdout);
   assert.doesNotMatch(afterwards.stdout, /asked twice|ask it twice/);
+});
+
+test(`one answer written as two rules: on either, lint does not ask it twice ${TWICE}`, () => {
+  const m = fresh('g5-question-asked-twice');
+  // checkout.cart.totals is written from q-0001's answer too.
+  const file = join(m.specOf('checkout'), 'features', 'checkout.yml');
+  writeFileSync(
+    file,
+    readFileSync(file, 'utf8').replace('origin: thread:q-0002', 'origin: thread:q-0001'),
+  );
+  m.ok(['hash', '--write', '--blueprint', 'checkout']);
+  const before = m.wd(['lint', '--blueprint', 'checkout']);
+  assert.equal((before.stdout.match(/ask it twice/g) ?? []).length, 2, before.stdout);
+  set(m, 'q-0001', '--written-as', 'checkout.cart.empty');
+  const afterwards = m.wd(['lint', '--blueprint', 'checkout']);
+  assert.doesNotMatch(afterwards.stdout, /ask it twice/);
+});
+
+test(`a question asked on a screen moves too, and keeps the screen as where it was asked ${MOVES}`, () => {
+  const m = fresh('g5-question-written-as');
+  m.ok([
+    'threads',
+    'new',
+    '--kind',
+    'question',
+    '--screen',
+    'cart',
+    '--element',
+    'cart.checkout',
+    '--body',
+    'Should the button hide when the cart is empty?',
+    '--blueprint',
+    'checkout',
+  ]);
+  const r = set(m, 'q-0003', '--written-as', 'checkout.cart.empty');
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /asked on screen cart, now on rule checkout\.cart\.empty/);
+  assert.equal(thread(m, 'q-0003').asked_on, 'screen cart');
 });

@@ -280,6 +280,46 @@ test('which verdict pair a rule shows is derived from the ledger, not fixed chro
   await expect(page.getByTestId('detail.turn')).toContainText(/No build yet/);
 });
 
+test('a question moved onto an unbuilt rule is not asked again: Approve answers it, Refine sends it back', {
+  tag: '@rule:threads.lifecycle.approval-answers-a-moved-question',
+}, async ({ page }) => {
+  // The rule written from a question's answer, holding that question, moved
+  // there from where it was asked (threads set --written-as).
+  const rule = 'fixture.unbuilt.never-recorded';
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const data = await res.json();
+    data.threads = [
+      ...(data.threads ?? []),
+      {
+        id: 'q-9901',
+        uuid: '9a9a9a9a-0000-4000-8000-000000009901',
+        kind: 'question',
+        author: 'dana',
+        created: '2026-10-18T12:00:00Z',
+        anchor: { rule },
+        asked_on: 'fixture.other.rule',
+        status: 'open',
+        body: 'Should an empty cart still offer the checkout button?',
+        options: [
+          { label: 'Hide it', why: 'and say the cart is empty' },
+          { label: 'Keep it', why: 'disabled' },
+        ],
+      },
+    ];
+    await route.fulfill({ response: res, json: data });
+  });
+  await review(page);
+  await ensureSession(page);
+  await openRuleForVerdict(page, rule);
+  const verdicts = (
+    await page.getByTestId('detail.verdict').locator('button').allTextContents()
+  ).join(' ');
+  expect(verdicts).toMatch(/Approve/);
+  expect(verdicts).toMatch(/Refine/);
+  await expect(page.getByTestId('detail.ask')).toHaveCount(0);
+});
+
 test('finishing appends a verdict under a named person; discarding records nothing', {
   tag: '@rule:panel.walkdown.records-to-ledger',
 }, async ({ page }) => {

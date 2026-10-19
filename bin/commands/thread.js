@@ -304,7 +304,11 @@ export function run(args) {
       return end(0);
     }
     console.log(`✓ ${t.id} still ${paintStatus(t.status)} · by ${by} · +1 reply`);
-    console.log(dim(`  asked on rule ${done.from}, now on rule ${done.to}`));
+    console.log(
+      dim(
+        `  asked on ${/^screen /.test(done.from) ? done.from : `rule ${done.from}`}, now on rule ${done.to}`,
+      ),
+    );
     console.log(`  Approving ${done.to} answers it, in the name of whoever approves.`);
     console.log(dim(`  walkdown threads show ${t.id} reads it in full`));
     return end(0);
@@ -511,7 +515,10 @@ export function run(args) {
   );
   console.log(dim(`  ${anchorText(t.anchor)}`));
   // Moved onto the rule written from its answer, and answered by approving it.
-  if (t.asked_on) console.log(dim(`  asked on rule ${t.asked_on}`));
+  if (t.asked_on)
+    console.log(
+      dim(`  asked on ${/^screen /.test(t.asked_on) ? t.asked_on : `rule ${t.asked_on}`}`),
+    );
   if (t.answered_by?.run)
     console.log(
       dim(

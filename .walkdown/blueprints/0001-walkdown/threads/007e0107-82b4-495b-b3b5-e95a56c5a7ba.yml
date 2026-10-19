@@ -7,7 +7,7 @@ created: 2026-10-10T22:03:25.894Z
 anchor:
   rule: embed.pin.redline-explains-a-gap
   element: pin.redline
-status: addressed
+status: settled
 body: 'Hovering a redline pin shows a tooltip that calls it a note. On the
   scratch copy, redline n-0586 on panel.walk showed "n-0586 · note · recorded"
   on hover, on both sides of the fade. The accepted redline-pin design shows
@@ -28,3 +28,8 @@ replies:
     body: Fixed. A redline's tip now reads Redline, its id and closed, with the
       reason, and never names the record's kind. The opened redline names who
       filed it as the thread list does. Both are in the embed check.
+  - author: agent
+    via: verdict
+    created: 2026-10-18T23:59:18Z
+    body: Settled by the agent's pass on embed.pin.redline-explains-a-gap
+      (2026-10-18T23-59-18Z-local-01).

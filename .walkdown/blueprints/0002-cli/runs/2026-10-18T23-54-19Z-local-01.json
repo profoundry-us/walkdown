@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-18T23-54-19Z-local-01",
+  "created": "2026-10-18T23:54:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e4740604-dirty",
+  "note": "Agent tier for the three question-moves rules, judged on throwaway machines (tools/cli-scenarios.mjs machine() + FIXTURES g5-*); the panel was driven on a throwaway machine served on port 4789 with its own WALKDOWN_HOME.",
+  "spec_hash": "sha256:6aed55030385",
+  "results": [
+    {
+      "rule": "threads.lifecycle.question-moves-to-its-rule",
+      "status": "pass",
+      "statement_hash": "sha256:ef2b55a9db1c",
+      "evidence": [
+        "runs/evidence/2026-10-18T23-39-14Z/question-moves-probe.txt"
+      ],
+      "reasoning": "On a throwaway machine from FIXTURES['g5-question-written-as'], `threads set q-0001 --written-as checkout.cart.empty --blueprint checkout` exits 0 and prints the design's four lines verbatim (`✓ q-0001 still open · by topher · +1 reply`, `asked on rule checkout.cart.add, now on rule checkout.cart.empty`, `Approving checkout.cart.empty answers it, in the name of whoever approves.`, `walkdown threads show q-0001 reads it in full`). A key-by-key diff of the thread file before and after shows only three changes: anchor.rule add -> empty, asked_on: checkout.cart.add, and one reply authored `agent` reading `Moved to checkout.cart.empty, the rule written from this answer. Approving that rule answers it.`; status stays open. The retired rule refusal prints the design's three lines verbatim with exit 2; an unknown rule, the rule it is already on, an empty name, a note, an answered question and an unknown id are each refused with exit 2. `threads show` prints `rule checkout.cart.empty` and `asked on rule checkout.cart.add`. Moving it a second time keeps asked_on at the first rule. --written-as with --status, --reply, --option, --proposes or --waive is refused as a change of its own. Edges I weighed: --written-as with --reason is accepted and the reason is silently dropped (under 10%: a reason is not asked for by a move); on a second move the output says `asked on rule <the previous rule>` while asked_on correctly keeps the first (under 10%); moving a question back to the rule it was asked on is accepted with asked_on equal to the anchor (under 10%). A question filed on a screen rather than a rule moves with output `asked on rule undefined` and no asked_on, which I report separately as a 10-80% edge. The as-built page shows only the move, not the retired refusal the design also draws; the live output of both matches the design."
+    },
+    {
+      "rule": "threads.lifecycle.no-question-asked-twice",
+      "status": "pass",
+      "statement_hash": "sha256:8ec190463e94",
+      "evidence": [
+        "runs/evidence/2026-10-18T23-39-14Z/lint-probe.txt",
+        "runs/evidence/2026-10-18T23-39-14Z/lint-hint-runs.txt"
+      ],
+      "reasoning": "On FIXTURES['g5-question-asked-twice'], `lint --blueprint checkout` exits 1 and prints exactly one `[threads]` error on q-0001. It names checkout.cart.empty and gives the `walkdown threads set q-0001 --written-as checkout.cart.empty` command. The summary line `✗ 4 rules, 2 screens, 4 anchors, 2 threads, 0 runs — 1 error(s), 0 warning(s)` matches the design verbatim. q-0002, already on checkout.cart.totals whose origin names it, draws nothing. After the move, lint exits 0. After a waive, or an answer, it also exits 0, leaving only the usual answered-but-not-incorporated warning. With the origin rule retired, nothing is drawn. The one copy difference from the design is the hint's `--blueprint 0001-sp-checkout` (the registry id) where the design wrote `--blueprint checkout`. I do not fail the step on it. The step's own text quotes the command without the flag. Every other lint hint in the same run names the registry id (question-without-choices prints `--blueprint 0001-sp-checkout`). Pasted verbatim, the hint runs, moves the question and clears lint (lint-hint-runs.txt). It is a redline, not a defect. Edges I weighed, both reported separately as 10-80%: when two live rules carry `origin: thread:q-0001`, lint errors for each, and moving the question onto one leaves an error naming the other, which no move can clear; a question on a screen is told to move, and moving it records no asked_on.",
+      "threads": []
+    }
+  ]
+}

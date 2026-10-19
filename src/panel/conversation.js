@@ -298,9 +298,15 @@ export const liveNoteOn = (rule) =>
  * by when it was deferred instead of when it was filed. Only the head of
  * this list is drawn; the rest are the dots beside it.
  */
+/*
+ * A question moved here from the rule it was asked on is not asked again:
+ * this rule is its answer written down, and approving the rule answers it
+ * (threads.lifecycle.approval-answers-a-moved-question). Asked here, it hid
+ * Approve, so the approval that would answer it could never be given.
+ */
 export const asksOn = (rule) =>
   threadsFor(rule)
-    .filter((t) => t.kind === 'question' && t.status === 'open')
+    .filter((t) => t.kind === 'question' && t.status === 'open' && !t.asked_on)
     .sort((a, b) =>
       String(a.deferred ?? a.created ?? '').localeCompare(String(b.deferred ?? b.created ?? '')),
     );
@@ -362,7 +368,18 @@ export async function laterOnRule(rule) {
  * about one thing (2026-09-18). Returns the thread id the words landed in,
  * null on refusal.
  */
+/* An open question moved onto this rule from where it was asked, if any. */
+export const movedQuestionOn = (rule) =>
+  threadsFor(rule).find((t) => t.kind === 'question' && t.status === 'open' && t.asked_on) ?? null;
+
 export async function sayOnRule(rule, text, { reopen = false } = {}) {
+  /*
+   * Sending back a rule written from a question's answer says why on that
+   * question, which stays open on the rule (threads.lifecycle.approval-
+   * answers-a-moved-question): the reason is about the answer it wrote down.
+   */
+  const moved = reopen ? movedQuestionOn(rule) : null;
+  if (moved) return (await postReply(moved.id, text, whoAmI(), 'ruleShots')) ? moved.id : null;
   const live = liveNoteOn(rule);
   if (!live) return postRuleNote(rule, text, 'feedback');
   const actor = whoAmI();

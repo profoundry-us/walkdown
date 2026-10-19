@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-10-18T23-59-18Z-local-01",
+  "created": "2026-10-18T23:59:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e4740604-dirty",
+  "spec_hash": "sha256:4407af5bf5f7",
+  "results": [
+    {
+      "rule": "embed.pin.asks-its-kind",
+      "status": "pass",
+      "statement_hash": "sha256:0a620db73066",
+      "evidence": [
+        "runs/evidence/2026-10-18T23-44-45Z/pin-form-design.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/pin-form-note-framed.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/pin-form-redline-design-only-framed.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/pin-form-redline-both-bare.jpg"
+      ],
+      "reasoning": "Judged on scratch copy judge-1018 served on :4754 (confirmed via /api/blueprint naming only scratch-judge-1018), framed in the panel and on the bare page. In pin mode on pin-form-kinds, a spot opens the real embed form beside the accepted design's drawing of it (pin-form-note-framed): pin.kind offers Note, Question and Redline before anything is typed, Note chosen, save 'Pin it'. Question changes the hint to 'Something you want answered...' and save to 'Ask it'. Redline gives 'The build leaves the design here on purpose. Say why. It is filed closed, and nothing waits on it.' and 'File redline', and shows pin.redline-pair: 'Design shows' and 'Build shows' over the why, at y=338 against the why's 433, with 'Both optional. Leave them empty if the why says it.' The structure and copy match prototype/screens/pin-form-kinds.html. Filed framed with only Design filled: the record (n-0612) carries reason redline, status recorded, design and no build key. Filed bare (walkdownEmbed.setPinMode, POST straight to /api/threads) with both filled and padded with spaces: n-0614 carries both, trimmed. Typed the pair under Redline, then switched to Question and saved: q-0613 carries no design or build, so the pair never leaks onto a note or question. Long input: both lines stop at 120 characters (maxlength) and the server trims to 120 too; the cut is silent and mid-word, but these are labelled short lines, so this is under 10% to matter. pin.note, pin.shots, pin.save and pin.cancel work as before. Escape closes the form first and leaves pin mode on the second press, and the panel's Pin mode button follows. An unanchored spot greys Redline with 'A redline is on an element'. The agent-recording refusal was not driven, since this copy records as a person; the code path is unchanged by this commit, the tab is disabled and titled 'Only a person files a redline. Ask a question instead.', and the recorded Playwright check covers it. Under 10%, not filed: the accepted design shows a '+ Screenshot' button where the build takes a pasted picture (pre-existing). On this screen the design page's own mockup takes clicks on its main card, so the embed form opens only on the side column; that is the drawing's script, not the embed."
+    },
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:639e94f7a075",
+      "evidence": [
+        "runs/evidence/2026-10-18T23-44-45Z/redline-opened-design-only.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/redline-opened-both-bare.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/redline-asbuilt-side-build-only.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/thread-list-redlines-apart.jpg",
+        "runs/evidence/2026-10-18T23-44-45Z/panel-thread-view-redline.jpg"
+      ],
+      "reasoning": "Judged on scratch copy judge-1018 on :4754. Redlines filed by a person (scratch-judge-1018) are drawn as pin.redline in the as-built's red with a not-equal mark, unlike the ! and ? pins beside them. One filed on the prototype of the review screen (n-0615, on panel.rules-list) is also drawn on the As-built side and opens there (redline-asbuilt-side-build-only), so it shows on both sides. Opened, it reads 'Redline n-0615 closed', 'The build leaves the design here on purpose.', then the pair, the why, 'Filed by A scratch sitting (judge-1018) · Oct 18 · on panel.rules-list', and 'Nothing waits on this. A judge comparing the two sides reads it as an intended gap, not a fail.' The only button is Close; there is no textarea and no answer button. The pair, the change under judgment, behaves as follows. With both lines given (n-0614, bare page) it shows Design and Build as in prototype/screens/redline-pin.html. With one given, it shows that line and an em dash for the other: n-0612 has Design only, n-0615 Build only. With neither, the pin.redline-pair block is not rendered (code and recorded check). The panel's Threads tab on the screen lists redlines under 'WHERE THE BUILD LEAVES THE DESIGN', apart from the waiting q-0613, as the design does. Not failing, reported to the caller: the dash row for an unsaid half, and the panel's thread view of a redline, which shows the why with a Reply box but neither the pair nor 'nothing waits'. The rule's 'opened' is the pin's popover, which the accepted design draws, and that holds. Under 10%: the design's 'Open the conversation' link is absent from the built popover, which predates this commit."
+    }
+  ]
+}

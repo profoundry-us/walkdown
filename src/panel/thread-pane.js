@@ -265,13 +265,15 @@ export function threadPane() {
        * detour had no way back the bar could offer (q-0589).
        */
       proposed
-        ? html`<div class="mx-3 mb-1.5 flex items-center gap-2 rounded-[.45rem] border-[1.5px] border-dashed border-warning bg-warning/10 px-2 py-1.5"
+        ? html`<div class="mx-3 mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[.45rem] border-[1.5px] border-dashed border-warning bg-warning/10 px-2 py-1.5"
             data-testid="thread.proposal">
             <span class="size-1.5 flex-none rounded-full bg-warning"></span>
-            <span class="flex-1 text-[11px] leading-snug">${proposed.title ?? proposed.id} has a proposed design.</span>
-            <button class="btn btn-xs btn-warning" data-open-proposed="${proposed.id}"
-              title="Switch to the ${proposed.title ?? proposed.id} screen, with Proposed chosen on the design side"
-              @click=${(e) => fire(e.currentTarget, 'open-proposed', { screen: proposed.id })}>Open ${proposed.title ?? proposed.id}</button>
+            <span class="min-w-0 flex-[1_1_9rem] text-[11px] leading-snug">${proposed.title ?? proposed.id} has a proposed design.</span>
+            <!-- Most titles are long: the button keeps one line and
+                 clips, and its tooltip says the whole of where it goes. -->
+            <button class="btn btn-xs btn-warning ml-auto max-w-full" data-open-proposed="${proposed.id}"
+              title="Switch to ${proposed.title ?? proposed.id}, with Proposed chosen on the design side"
+              @click=${(e) => fire(e.currentTarget, 'open-proposed', { screen: proposed.id })}><span class="truncate">Open ${proposed.title ?? proposed.id}</span></button>
           </div>`
         : nothing
     }

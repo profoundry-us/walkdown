@@ -1,0 +1,42 @@
+{
+  "run_id": "2026-10-19T00-01-35Z-local-01",
+  "created": "2026-10-19T00:01:35Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "e4740604-dirty",
+  "tree_hash": "sha256:8e092949cdb9",
+  "spec_hash": "sha256:6aed55030385",
+  "results": [
+    {
+      "rule": "threads.lifecycle.question-moves-to-its-rule",
+      "status": "pass",
+      "statement_hash": "sha256:ef2b55a9db1c",
+      "duration_ms": 2503,
+      "checks": [
+        "test/question-moves.test.js:63",
+        "test/question-moves.test.js:91",
+        "test/question-moves.test.js:207"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.approval-answers-a-moved-question",
+      "status": "pass",
+      "statement_hash": "sha256:31c0208897df",
+      "duration_ms": 1534,
+      "checks": [
+        "test/question-moves.test.js:120"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.no-question-asked-twice",
+      "status": "pass",
+      "statement_hash": "sha256:8ec190463e94",
+      "duration_ms": 2492,
+      "checks": [
+        "test/question-moves.test.js:176",
+        "test/question-moves.test.js:191"
+      ]
+    }
+  ]
+}
