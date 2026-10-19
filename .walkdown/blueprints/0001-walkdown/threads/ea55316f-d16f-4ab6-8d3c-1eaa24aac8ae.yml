@@ -16,3 +16,9 @@ replies:
     created: 2026-10-19T19:17:37Z
     body: "Drawn: prototype/drafts/redline-pin.html. The accepted redline popover
       with its thread link relabelled 'Open the redline'; nothing else changed."
+  - author: agent
+    created: 2026-10-19T21:21:42Z
+    body: "Withdrawn (Topher, 2026-10-19): a text-only change needs no design
+      request; those are for big changes and new pages. The relabel is in the
+      rule embed.pin.redline-explains-a-gap and is built from there. Nothing is
+      proposed for redline-pin."

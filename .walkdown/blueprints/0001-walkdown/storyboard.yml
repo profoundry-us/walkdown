@@ -199,7 +199,6 @@ screens:
   - id: redline-pin
     title: "A redline pinned where the build leaves the design"
     prototype: /screens/redline-pin.html   # accepted 2026-10-10 in Topher's walk
-    proposal: /redline-pin.html
     anchors:
       - pin.redline
       - panel.fade
