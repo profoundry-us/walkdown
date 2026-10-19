@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-19T01-16-55Z-local-01",
+  "created": "2026-10-19T01:16:55Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8f6e3f98-dirty",
+  "spec_hash": "sha256:2faeacff9a95",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "blocked",
+      "statement_hash": "sha256:976133338368",
+      "evidence": [
+        "prototype/screens/thread-panel.html",
+        "runs/evidence/2026-10-18T23-44-45Z/redline-asbuilt-side-build-only.png"
+      ],
+      "reasoning": "Blocked on its design. On 2026-10-19 Topher asked for a redline opened from the Threads list to show its Design and Build pair, as the popover does, so the rule gained a step on the thread-panel screen. Every other step passed on 2026-10-18. The new step waits on design request n-0608, and the panel's thread view of a redline still shows only the why and a Reply box. Nothing is judged until the design is accepted and built.",
+      "threads": [
+        "02eb63df-779b-46ad-9bd0-074bf669808f"
+      ]
+    }
+  ]
+}

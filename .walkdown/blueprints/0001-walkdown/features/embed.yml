@@ -365,7 +365,7 @@ stories:
         statement: A redline pin marks an element where the build leaves the design on purpose, and reads as an explanation, never as an ask.
         because: A gap left on purpose and a gap left by mistake look the same on the fade. The redline is what tells them apart.
         history: Redlines were prose in as-built/redlines.json, one box per as-built page, tied to no element (ADR 0015).
-        screens: [redline-pin]
+        screens: [redline-pin, thread-panel]
         steps:
           given:
             - A redline a person filed on an element of the screen `redline-pin`
@@ -376,7 +376,8 @@ stories:
             - Opened, it says why, with who filed it and when, and what the design and the build show wherever the person filing it said so
             - It has no reply box and no answer button, and says it waits on nobody
             - The screen's thread list shows redlines apart from the pins still waiting
-          statement_hash: sha256:639e94f7a075
+            - Opened from that list, the thread view shows the same Design and Build pair, with a dash for a half not given, and says it waits on nobody
+          statement_hash: sha256:976133338368
 
   - id: embed.threads
     title: A thread you can read at a glance

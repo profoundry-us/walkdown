@@ -508,6 +508,7 @@ screens:
   - id: serve-anywhere
     title: "walkdown serve, started outside any blueprint, serves them all"
     prototype: null
+    proposal: /serve-anywhere.html
     anchors:
       - cli.prompt
       - cli.serve.serving

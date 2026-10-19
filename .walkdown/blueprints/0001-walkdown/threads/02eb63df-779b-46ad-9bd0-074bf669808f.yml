@@ -1,0 +1,23 @@
+id: n-0608
+uuid: 02eb63df-779b-46ad-9bd0-074bf669808f
+kind: note
+reason: request
+author: agent
+created: 2026-10-19T01:16:35.146Z
+anchor:
+  screen: thread-panel
+status: addressed
+body: Draw the thread view of a redline, opened from the Threads list, for
+  embed.pin.redline-explains-a-gap (Topher, 2026-10-19). Today it shows the why
+  and a Reply box. Show the same Design and Build pair the redline-pin popover
+  shows, with a dash for a half not given (Topher wants the dash kept), and the
+  line saying nothing waits on it. Start from the accepted thread-panel and
+  redline-pin designs. Decide whether a redline's thread view keeps a reply box,
+  and say why.
+replies:
+  - author: agent
+    created: 2026-10-19T01:18:19Z
+    body: "Drawn: prototype/drafts/thread-panel.html. A redline opened from the
+      Threads list shows the Design and Build pair with a dash for a missing
+      half, the why as its first message, and a foot saying nothing waits on it,
+      with no reply box."

@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-19T01-16-05Z-local-01",
+  "created": "2026-10-19T01:16:05Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8f6e3f98-dirty",
+  "spec_hash": "sha256:1992c3ebadd8",
+  "results": [
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "blocked",
+      "statement_hash": "sha256:07405f98cd04",
+      "evidence": [
+        "proposals/serve-anywhere.html",
+        "runs/evidence/2026-10-12T23-00-00Z/serve-anywhere.txt"
+      ],
+      "reasoning": "Blocked on its design, not failing. On 2026-10-12 the rule was reworded so serve lists every registered blueprint by id with its project. The new output is drawn in the serve-anywhere draft, now proposed beside the rule. Per Design comes first it is built only once Topher accepts that design. The fail recorded that day was the reworded step against the old build, and a fail on a built rule is held from every signer. That kept the rule and its design out of his walk, which is the opposite of what an unbuilt rewording needs. Blocked says what is true: there is nothing to judge until the design is accepted and the rule is built.",
+      "threads": [
+        "80be129f-3fc1-4216-9d62-56b4c4037bf3",
+        "3c94271b-9425-4ada-b6dd-399f42c0a34c"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-10-19T01-13-06Z-local-01",
+  "created": "2026-10-19T01:13:06Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8f6e3f98-dirty",
+  "spec_hash": "sha256:6aed55030385",
+  "results": [
+    {
+      "rule": "threads.lifecycle.question-moves-to-its-rule",
+      "status": "pass",
+      "statement_hash": "sha256:ef2b55a9db1c"
+    },
+    {
+      "rule": "threads.lifecycle.approval-answers-a-moved-question",
+      "status": "pass",
+      "statement_hash": "sha256:31c0208897df"
+    },
+    {
+      "rule": "threads.lifecycle.no-question-asked-twice",
+      "status": "pass",
+      "statement_hash": "sha256:8ec190463e94"
+    }
+  ]
+}
