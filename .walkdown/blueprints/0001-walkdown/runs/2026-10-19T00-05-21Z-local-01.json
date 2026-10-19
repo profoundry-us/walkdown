@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-19T00-05-21Z-local-01",
+  "created": "2026-10-19T00:05:21Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e676cfa-dirty",
+  "spec_hash": "sha256:4407af5bf5f7",
+  "results": [
+    {
+      "rule": "panel.threads.show-the-sketch",
+      "status": "pass",
+      "statement_hash": "sha256:7a23515241e7",
+      "evidence": [
+        "runs/evidence/2026-10-19T00-02-02Z/strip-long-title-1024.jpg",
+        "runs/evidence/2026-10-19T00-02-02Z/strip-long-title-1400.jpg",
+        "runs/evidence/2026-10-19T00-02-02Z/strip-long-title-1400-zoom.png",
+        "runs/evidence/2026-10-19T00-02-02Z/short-title-strip-and-proposal-only-open.jpg",
+        "runs/evidence/2026-10-19T00-02-02Z/open-then-design-side-proposed.jpg",
+        "runs/evidence/2026-10-19T00-02-02Z/picked-settings-leaves-proposal.jpg",
+        "runs/evidence/2026-10-19T00-02-02Z/strip-geometry.json"
+      ],
+      "reasoning": "Re-judged after 0e676cfa on a fresh scratch copy, judge-sketch2, served from inside it on :4779; /api/blueprint names only scratch-judge-sketch2. I drove my own tab. The proposals were made in the copy only: request n-0608 on thread-panel with --proposes /screens/redline-pin.html, for an accepted design plus a proposal. A copy-only sketch-only screen has prototype null and proposal /claim-this-page.html. The layout fault from the previous pass is gone. At the panel's normal width (382px, at both 1024 and 1400 viewports), the long title 'The thread screen (state — open a thread, or a pin)' wraps the sentence across the strip. The button moves to its own row on one line, at 24px tall, inside the strip and the panel: button right 1366, strip right 1375, panel right 1387. It reads 'Open The thread screen (state — open a thread, or a pin)' in full without clipping. A cloned 100-character label, measured in place and removed, also stays inside the strip, clipped with text-overflow ellipsis. The tooltip now reads 'Switch to The thread screen (state — open a thread, or a pin), with Proposed chosen on the design side', with no doubled article. The short title 'Sketch only' keeps the design's single row: dot, sentence, button. The behaviour still holds. Open on n-0608 picks thread-panel with Proposed pressed and Accepted not. On the Design side the proposal is framed 'PROPOSED — YOURS TO ACCEPT' on that screen's own page. Picking Settings leaves it, with no proposed label or version control, and the thread view stays open throughout. Open Sketch only brings the proposal-only screen up on the design side under the same label. A thread on redline-pin, which has no proposal, has no strip. The As-built-side landing (Proposed chosen, but the build in view until Design is chosen) is the picker's own behaviour and goes to Topher as a question, so it is not weighed here."
+    }
+  ]
+}

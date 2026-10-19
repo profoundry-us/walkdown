@@ -5609,9 +5609,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * (threads.lifecycle.approval-answers-a-moved-question). Asked here, it hid
    * Approve, so the approval that would answer it could never be given.
    */
+  // Once built, the approval is past, and a moved question is asked as any is
+  // (lib/status.js leaves it out of the asks only while the rule is unbuilt).
+  const builtRule = (rule) => Boolean((S.data?.rows ?? []).find((r) => r.rule === rule)?.built);
   const asksOn = (rule) =>
     threadsFor(rule)
-      .filter((t) => t.kind === 'question' && t.status === 'open' && !t.asked_on)
+      .filter(
+        (t) => t.kind === 'question' && t.status === 'open' && !(t.asked_on && !builtRule(rule)),
+      )
       .sort((a, b) =>
         String(a.deferred ?? a.created ?? '').localeCompare(String(b.deferred ?? b.created ?? '')),
       );

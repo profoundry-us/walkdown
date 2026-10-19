@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-19T00-05-20Z-local-01",
+  "created": "2026-10-19T00:05:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e676cfa-dirty",
+  "note": "Third judging of the approval rule, at commit 0e676cfa. Two throwaway machines from FIXTURES g5-question-written-as, each with its own WALKDOWN_HOME: A on port 4773 for Approve, B on port 4774 for Refine.",
+  "spec_hash": "sha256:6aed55030385",
+  "results": [
+    {
+      "rule": "threads.lifecycle.approval-answers-a-moved-question",
+      "status": "pass",
+      "statement_hash": "sha256:31c0208897df",
+      "evidence": [
+        "runs/evidence/2026-10-19T00-02-00Z/approve-panel-turn-line.jpg",
+        "runs/evidence/2026-10-19T00-02-00Z/approve-disk.txt",
+        "runs/evidence/2026-10-19T00-02-00Z/refine-disk.txt",
+        "runs/evidence/2026-10-19T00-02-00Z/finish-walkdown-probe.txt"
+      ],
+      "reasoning": "At commit 0e676cfa, on two throwaway machines served on ports 4773 and 4774 (each /api/blueprint key checked against the machine's own home), each holding q-0001 moved onto checkout.cart.empty, q-0003 asked there in the first place and the note n-0004, with a walkdown started and signed as eng. q-0003, still open, would hide Approve; that is known and being reported separately, so I waived it from the CLI first. On the rule holding only the moved q-0001, the panel shows no ask card, and the turn line above Approve now reads `YOUR MOVE No build yet: Approve signs the wording; Refine sends it back with what should change.`, not that the rule asks a question. The server's attention for the rule is only `judge … unbuilt` for eng and the agent's note. `walkdown status` lists `approve the wording of checkout.cart.empty` and no `answer checkout.cart.empty` line. Approve then Finish on A: q-0001 reads `incorporated by topher` and `answered when topher approved checkout.cart.empty as eng · run 2026-10-19T00-02-44Z-local-01`, with the `topher · via walkdown` reply saying so; the note and q-0003 carry no new reply. Refine with a typed reason then Finish on B: q-0001 stays open on the rule with the reason as its last reply in topher's name. The run's `refining` result names f640c117-…, which the thread files show is q-0001's uuid, and the note is untouched. finishWalkdown rerun at this commit: an approval in no role, a refine, a pass and an approval of another rule answer nothing. A signed approval leaves the native question and the note byte-identical. An answered question is not re-answered. Edges, weighed: a native question open on the same rule still hides Approve until it is answered and folded in, so the moved one waits (about 15%; being reported to Topher). A walk with two signers credits every role to the machine's user, already reported. Once a rule holding a moved question is built, status asks it again (by design, per 0e676cfa). But the panel's asksOn still leaves out anything with asked_on, so on a built rule the turn line would say the rule asks a question while no ask card is drawn and Reply goes to a note. I read this in the code and did not drive it (about 10–15%: a rule written from an answer is normally approved before it is built). A Fail reason on a built rule lands on the moved question (under 10%).",
+      "threads": []
+    }
+  ]
+}
