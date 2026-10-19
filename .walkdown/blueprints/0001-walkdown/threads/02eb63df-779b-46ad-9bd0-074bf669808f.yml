@@ -21,3 +21,17 @@ replies:
       Threads list shows the Design and Build pair with a dash for a missing
       half, the why as its first message, and a foot saying nothing waits on it,
       with no reply box."
+  - author: agent
+    created: 2026-10-19T19:16:07Z
+    body: "Topher, 2026-10-19: Reopen stays on a redline (and Reply with it, as the
+      lifecycle rule says), so a person can ask or add context. The 'leave a
+      note on <element>' line becomes a button that opens the note form on that
+      element. The proposal in proposals/thread-panel.html needs redrawing to
+      match."
+  - author: agent
+    created: 2026-10-19T19:17:46Z
+    body: "Redrawn: prototype/drafts/thread-panel.html. A redline now ends in the
+      ordinary ended-thread foot: a line saying who filed it closed and that
+      nothing waits on it, the Reply box, and Reopen. Beside Reopen, a button
+      reading 'Leave a note on waitlist.submit' opens the note form on that
+      element."

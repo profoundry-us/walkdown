@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-19T19-18-21Z-local-01",
+  "created": "2026-10-19T19:18:21Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "422c8706-dirty",
+  "spec_hash": "sha256:9a3f8dbcc392",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "blocked",
+      "statement_hash": "sha256:a1105830fc34",
+      "evidence": [
+        "prototype/screens/thread-panel.html",
+        "runs/evidence/2026-10-18T23-44-45Z/redline-asbuilt-side-build-only.png"
+      ],
+      "reasoning": "Blocked on its design. On 2026-10-19 Topher answered the designer's questions: a redline opened from the Threads list keeps Reply and Reopen like any ended thread, gains a button opening the note form on its element, and the popover's link reads 'Open the redline'. The rule's steps were reworded to say so. Those steps wait on design requests n-0608 (thread-panel) and n-0609 (redline-pin), both now proposed; the built panel shows none of them yet. Nothing is judged until the designs are accepted and built.",
+      "threads": [
+        "02eb63df-779b-46ad-9bd0-074bf669808f",
+        "ea55316f-d16f-4ab6-8d3c-1eaa24aac8ae"
+      ]
+    }
+  ]
+}

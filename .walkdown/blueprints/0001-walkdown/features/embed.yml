@@ -374,10 +374,11 @@ stories:
           then:
             - "`pin.redline` is drawn on that element on both sides, and looks unlike a note or a question pin"
             - Opened, it says why, with who filed it and when, and what the design and the build show wherever the person filing it said so
-            - It has no reply box and no answer button, and says it waits on nobody
+            - It has no reply box and no answer button, says it waits on nobody, and its link to the thread reads "Open the redline"
             - The screen's thread list shows redlines apart from the pins still waiting
             - Opened from that list, the thread view shows the same Design and Build pair, with a dash for a half not given, and says it waits on nobody
-          statement_hash: sha256:976133338368
+            - Like any ended thread it still offers Reply and Reopen, and a button that opens the note form on that element for anyone who disagrees
+          statement_hash: sha256:a1105830fc34
 
   - id: embed.threads
     title: A thread you can read at a glance

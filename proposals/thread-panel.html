@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- DESIGN DRAFT: thread-panel -->
-<!-- Drawn for design request n-0608 (embed.pin.redline-explains-a-gap), from the accepted thread-panel and redline-pin. Not yet accepted. -->
-<!-- Intent: a redline opened from the Threads list reads as the popover does, with the Design and Build pair (a dash where the filer gave no half), the why as its first message, and a foot saying nothing waits on it; it keeps no reply box, because a redline is filed closed, waits on nobody and is an explanation rather than a conversation, so disagreeing with one starts a note on the element instead. -->
+<!-- Drawn for design request n-0608 (embed.pin.redline-explains-a-gap), from the accepted thread-panel and redline-pin, revised after Topher's answers of 2026-10-19. Not yet accepted. -->
+<!-- Intent: a redline opened from the Threads list reads as the popover does, with the Design and Build pair (a dash where the filer gave no half), the why as its first message, and a foot saying nothing waits on it; like any ended thread it still offers Reply and Reopen, and a button opens the note form on its element for anyone who disagrees. -->
 <!-- The thread's own screen: one slide to the right of where it was opened,
      inside the same column. A note thread is drawn exactly as accepted; the
      mockup toggle at the foot switches the column to the redline state. -->
@@ -46,6 +46,9 @@
     <section class="grid flex-1 place-items-center wire rounded-xl bg-base-100 text-center text-xs opacity-50 shadow-lg" id="surface">
       <span id="surface-before">THE APP — unchanged. Reading a conversation does not move the surface<br>
       under review; the pin it was left on is still where it was.</span>
+      <span id="surface-note" hidden>THE NOTE FORM IS OPEN ON <b class="font-mono">waitlist.submit</b>, as drawn on pin-form-kinds,<br>
+      pinned to the same element as the redline. What is sent there is a new note,<br>
+      which waits on someone as any note does. The redline stays as it was.</span>
       <span id="surface-after" hidden>THE PANEL HAS SWITCHED SCREENS, as the picker does.<br>
       The bar now reads <b id="after-screen">Confirmation</b> <b>▾</b>, the Design side is showing, and <b>Proposed</b> is chosen<br>
       beside its label, in the proposal's dashed-yellow frame (as drawn on design-version-switch).<br>
@@ -143,30 +146,37 @@
         </div>
       </div>
 
-      <!-- NOTE STATE: the composer, as accepted. -->
-      <div class="border-t border-dashed border-base-content/25 p-2" data-testid="thread.reply" data-state="note">
+      <!-- The composer. A note thread draws it exactly as accepted. A redline
+           is an ended thread, so it gets the ordinary ended foot
+           (threads.conversation: a person gets Reply and Reopen, the agent
+           Reply alone, and a line says how it ended and by whom), plus the
+           line that nothing waits on it and the way to disagree. -->
+      <div class="border-t border-dashed border-base-content/25 p-2" data-testid="thread.reply">
+        <div data-state="redline" hidden class="mb-1.5 text-[11px] leading-snug">
+          <p class="opacity-60">Filed closed as a redline by Topher Fangio, Oct 7.
+            Nothing waits on this. A judge comparing the two sides reads it as an intended gap, not a fail.</p>
+        </div>
         <textarea rows="2" class="textarea textarea-sm w-full border-dashed border-base-content/25"
                   placeholder="Reply…"></textarea>
         <div class="mt-1 flex items-center gap-1.5" data-testid="thread.actions">
-          <span class="text-[10px] opacity-40">as <span class="link link-hover">Topher Fangio</span> ·
+          <span class="text-[10px] opacity-40" data-state="note">as <span class="link link-hover">Topher Fangio</span> ·
             <b>Enter</b> sends</span>
-          <button class="btn btn-xs btn-neutral ml-auto">Answer</button>
-          <button class="btn btn-xs btn-ghost opacity-50">Waive</button>
+          <button class="btn btn-xs btn-neutral ml-auto" data-state="note">Answer</button>
+          <button class="btn btn-xs btn-ghost opacity-50" data-state="note">Waive</button>
+          <!-- A redline: Reply is Enter in the box, as on any ended thread.
+               Reopen takes its reason from the box, as the accepted screen
+               says of reason-required actions. -->
+          <button class="btn btn-xs btn-ghost border-dashed border-base-content/30" id="leave-note" data-state="redline" hidden
+                  title="Open the note form on this element">Leave a note on <span class="font-mono">waitlist.submit</span></button>
+          <button class="btn btn-xs btn-neutral ml-auto" data-state="redline" hidden>Reopen</button>
         </div>
-      </div>
-
-      <!-- REDLINE STATE: no composer and no buttons. The foot where the
-           composer would be says what happened and what to do instead. -->
-      <div class="border-t border-dashed border-base-content/25 p-2.5 text-[11px] leading-snug" data-state="redline" hidden>
-        <p class="opacity-60">Nothing waits on this. A judge comparing the two sides reads it as an intended gap, not a fail.</p>
-        <p class="mt-1.5 opacity-45">To disagree with it, leave a note on <span class="font-mono">waitlist.submit</span>.</p>
       </div>
     </aside>
   </main>
 
-  <p class="fixed bottom-2 left-3 max-w-140 text-xs leading-relaxed opacity-40">A redline is filed closed and waits on nobody, so its
-    thread offers no reply box, no Answer and no Reopen. It is an explanation, not a conversation. Disagreeing with one is a new
-    note on the same element, which then waits on someone as any note does.</p>
+  <p class="fixed bottom-2 left-3 max-w-140 text-xs leading-relaxed opacity-40">A redline is filed closed and waits on nobody, so it
+    has no Answer and no Waive. Like any ended thread it still offers Reply and Reopen, so a person can ask about it or add context.
+    Disagreeing with it is a new note on the same element: the button beside Reopen opens that form.</p>
   <div class="fixed right-3 bottom-2 flex flex-col items-end gap-1 text-[11px] opacity-50">
     <label class="flex items-center gap-1.5"><input type="radio" name="kind" value="note"> Mockup only: a note thread</label>
     <label class="flex items-center gap-1.5"><input type="radio" name="kind" value="redline" checked> Mockup only: a redline</label>
@@ -185,12 +195,13 @@
       $('build-half').innerHTML = $('build-given').checked ? BUILD : '<span class="none">—</span>';
       $('build-given').closest('label').hidden = kind !== 'redline';
       $('proposal').hidden = !$('has-proposal').checked;
-      $('surface-before').hidden = false; $('surface-after').hidden = true;
+      $('surface-before').hidden = false; $('surface-after').hidden = true; $('surface-note').hidden = true;
     }
     document.querySelectorAll('input[name=kind]').forEach((r) => (r.onchange = () => { kind = r.value; render(); }));
     $('build-given').onchange = render;
     $('has-proposal').onchange = render;
-    $('open-proposed').onclick = () => { $('surface-before').hidden = true; $('surface-after').hidden = false; };
+    $('open-proposed').onclick = () => { $('surface-before').hidden = true; $('surface-note').hidden = true; $('surface-after').hidden = false; };
+    $('leave-note').onclick = () => { $('surface-before').hidden = true; $('surface-after').hidden = true; $('surface-note').hidden = false; };
     render();
   </script>
   <script src="/embed.js" data-walkdown></script>

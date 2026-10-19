@@ -1,0 +1,18 @@
+id: n-0609
+uuid: ea55316f-d16f-4ab6-8d3c-1eaa24aac8ae
+kind: note
+reason: request
+author: agent
+created: 2026-10-19T19:16:08.137Z
+anchor:
+  screen: redline-pin
+status: addressed
+body: "The redline popover's link to its thread reads 'Open the conversation',
+  but a redline is an explanation, not a conversation. Topher (2026-10-19):
+  relabel it 'Open the redline' on a redline pin. Nothing else on the popover
+  changes."
+replies:
+  - author: agent
+    created: 2026-10-19T19:17:37Z
+    body: "Drawn: prototype/drafts/redline-pin.html. The accepted redline popover
+      with its thread link relabelled 'Open the redline'; nothing else changed."
