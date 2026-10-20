@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-20T00:59:43.194Z
 anchor:
   rule: embed.pin.redline-explains-a-gap
-status: open
+status: answered
 body: A redline is filed closed, and today nothing reopens a closed record (a
   decision or a redline). You said Reopen stays on a redline so a person can ask
   or add context. Once someone reopens one, what is it, and who is it waiting
@@ -16,3 +16,10 @@ options:
   - label: An open note, waiting on the agent
     why: the redline's words stay in its history, and the build is changed to match
       the design
+replies:
+  - author: topher
+    created: 2026-10-20T02:20:44Z
+    body: I think the main use-case is working with the agent to confirm things
+      about a redline, so open note for agent makes the most sense.
+    answer: true
+chosen: An open note, waiting on the agent

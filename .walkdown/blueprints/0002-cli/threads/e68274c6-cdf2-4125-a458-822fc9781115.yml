@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-20T01:16:23.914Z
 anchor:
   screen: lint-proposes-gone
-status: addressed
+status: verified
 body: "Built ahead of its design (my mistake): lint, run on a blueprint where a
   live design request's proposes: names a file that is not there. It prints one
   error per such request, naming the thread, the version it proposes, the path
@@ -26,3 +26,4 @@ replies:
       path it looked at and the two ways out, leaves the waived n-0004 unnamed,
       and exits 1."
 proposes: /drafts/lint-proposes-gone.html
+verified_by: topher
