@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-20T14-01-01Z-local-01",
+  "created": "2026-10-20T14:01:01Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "7dac9c75-dirty",
+  "spec_hash": "sha256:d8690f345fc8",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:8d45dfbf1888",
+      "evidence": [
+        "runs/evidence/2026-10-20T14-00-49Z/threads-show-pair.txt",
+        "runs/evidence/2026-10-20T14-00-49Z/threads-show-decision-agent.txt",
+        "runs/evidence/2026-10-20T02-38-04Z/probes.txt",
+        "runs/evidence/2026-10-20T02-38-04Z/app-thread-n-0613-reopened.png",
+        "runs/evidence/2026-10-20T02-38-04Z/app-threads-active.png"
+      ],
+      "reasoning": "Re-judged after 7dac9c75, which added one step: walkdown threads show prints the same pair, with a dash for a half not given, and says when a note was reopened from a redline. Nothing in the panel or embed changed since run 2026-10-20T02-46-47Z-local-01, so the seven panel steps carry that run's pass and its evidence; I did not re-drive the browser. I judged the new step on a throwaway machine from tools/cli-scenarios.mjs with fixture g2-receipt-drawn, network-free. I filed four redlines on receipt.total and wrote their halves into the thread files the way the pin form writes them. One had both halves, one design only, one build only, and one neither. Plain threads show printed a design line and a build line under the anchor on each. A missing half read as a dash, and the one with neither read two dashes. None of them said reopened. A person then reopened two of them with a reason. Each became an open feedback note, and show now printed reopened from a redline above the same pair, with dashes kept and the reason as a reply. A plain design-request note, a decision note and a question printed no pair lines and no reopened line. The --json output still carries design, build and reopened_from as stored. The agent's reopen was refused, and the redline still showed its pair afterwards. The pair matches the panel's Design and Build pair seen in the earlier run, so the step holds. Two edges I set aside. A design or build value with a newline would break the two-line layout, but the panel trims these and the CLI cannot set them, so it is under 10%. An empty string would print blank instead of a dash, but the embed writes undefined for an empty field, also under 10%. One edge went to the requester unfiled: on a closed redline, threads show's header still reads recorded, while threads new and the panel say closed."
+    }
+  ]
+}

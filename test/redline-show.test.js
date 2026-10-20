@@ -38,6 +38,8 @@ test(`threads show prints a redline's pair, a dash for the half not given ${RULE
   assert.match(out, /^ {2}design {2}the total above the items$/m, out);
   assert.match(out, /^ {2}build {3}—$/m, out);
   assert.doesNotMatch(out, /reopened from a redline/);
+  // Closed, as the panel says it - never the store's "recorded".
+  assert.match(out, /^n-0001 · note · .* · closed$/m, out);
 });
 
 test(`reopened by a person, it says it was a redline and keeps the pair ${RULE}`, () => {

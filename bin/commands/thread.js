@@ -503,7 +503,10 @@ export function run(args) {
     return end(0);
   }
   console.log(
-    `${t.id} · ${t.kind}${t.reason ? ` · ${reasonText(t.reason)}` : ''} · ${paintStatus(t.status)}${
+    // A redline reads closed, as the panel and `threads new` say it.
+    `${t.id} · ${t.kind}${t.reason ? ` · ${reasonText(t.reason)}` : ''} · ${
+      t.reason === 'redline' ? paintStatus('closed') : paintStatus(t.status)
+    }${
       t.status === 'waived' && t.waived_by
         ? dim(` by ${t.waived_by}`)
         : t.status === 'verified' && t.verified_by
