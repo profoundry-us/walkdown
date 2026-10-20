@@ -50,8 +50,9 @@ designs/waitlist-admin/20260824.html
 ```
 
 Screen ids are kebab-case, stable across regenerations for the same reason anchors are,
-and name the screen's folder. Each file in it is one dated version of that screen; a
-redraw is a new version beside the old, never an edit of it (ADR 0015).
+and name the screen's folder. Each file in it is one dated version of that screen. A
+proposed version is edited in place while it is under review; once accepted it is
+frozen, and a redraw after that is a new version beside it (ADR 0015).
 
 **States that a URL fragment expresses are separate screens.** Modals, drawers, tabs and
 SPA routes are exactly the states worth walking down, and they are addressed by

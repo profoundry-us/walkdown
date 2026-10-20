@@ -506,8 +506,11 @@ both.
 ### Redlines, filed only by a person
 
 A redline says the build leaves the design at one element on purpose, and why.
-The person files it from pin mode, by choosing redline in the pin form. It
-records what the design shows and what the build shows. It is filed closed,
+The person files it from pin mode, by choosing redline in the pin form, or at a
+terminal with `walkdown threads new --reason redline --screen <id> --element
+<sel> --design "<what the design shows>" --build "<what the build shows>"
+--body "<why>" --blueprint <id>`. It records what the design shows and what the
+build shows, and either half may be left out. It is filed closed,
 drawn in red on both sides of the fade, and listed apart in the Threads tab.
 
 - You never file a redline. walkdown refuses one from an agent.
