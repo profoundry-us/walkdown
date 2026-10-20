@@ -218,6 +218,9 @@ export function threadPane() {
   // the line: whoever opened the thread, unless a machine did.
   const opener = MSG.displayName(t.author, names());
   const redline = t.reason === 'redline';
+  // Reopened, it is a note for the agent, and keeps what the gap was in
+  // view: the pair is why it was reopened (q-0610, n-0612).
+  const wasRedline = !redline && t.reopened_from === 'redline';
   const turn = turnLine(t, role, {
     person: /^agent$/i.test(t.author ?? '') ? 'the person' : opener,
     endedBy: ended?.author ? MSG.displayName(ended.author, names()) : null,
@@ -263,7 +266,15 @@ export function threadPane() {
         }
         <b class="opacity-60 ${redline ? 'font-mono' : ''}">${t.id}</b>
         ${redline ? nothing : reasonChip(t)}
-        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
+        ${
+          // A reopened redline says what it was: the gap is why it is open.
+          wasRedline
+            ? html`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">reopened redline</span>`
+            : nothing
+        }
+        <!-- A redline reads closed, as its popover and its design say:
+             "recorded" is the store's word, not the reader's. -->
+        <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${redline ? 'closed' : t.status}</span>
       </span>
     </div>
     ${
@@ -303,8 +314,12 @@ export function threadPane() {
          * and Build pair, both rows always, a dash for a half the filer did
          * not give - so a missing half shows (embed.pin.redline-explains-a-gap).
          */
-        redline
-          ? html`<p class="mt-1 text-[11.5px] opacity-60">The build leaves the design here on purpose.</p>
+        redline || wasRedline
+          ? html`<p class="mt-1 text-[11.5px] opacity-60">${
+              redline
+                ? 'The build leaves the design here on purpose.'
+                : 'Filed as a redline: the build left the design here on purpose. Reopened, it waits on the agent.'
+            }</p>
             <div class="mt-2 mb-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 border-l-[3px] pl-2 text-[12px]"
               style="border-color:${REDLINE}" data-testid="thread.redline-pair">
               <span class="opacity-50">Design</span><span>${t.design ?? '—'}</span>

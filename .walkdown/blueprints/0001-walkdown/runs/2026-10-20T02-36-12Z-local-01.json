@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-20T02-36-12Z-local-01",
+  "created": "2026-10-20T02:36:12Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "03782186-dirty",
+  "spec_hash": "sha256:028e61fc12ff",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "fail",
+      "statement_hash": "sha256:69aa7b8cf35a",
+      "evidence": [
+        "runs/evidence/2026-10-20T02-25-07Z/probes.txt",
+        "runs/evidence/2026-10-20T02-25-07Z/proto-redline-pin.png",
+        "runs/evidence/2026-10-20T02-25-07Z/proto-thread-panel.png",
+        "runs/evidence/2026-10-20T02-25-07Z/app-popover-n-0611.png",
+        "runs/evidence/2026-10-20T02-25-07Z/app-popover-n-0614-why-only.png",
+        "runs/evidence/2026-10-20T02-25-07Z/design-side-pins.png",
+        "runs/evidence/2026-10-20T02-25-07Z/app-threads-list.png",
+        "runs/evidence/2026-10-20T02-25-07Z/app-thread-n-0611.png",
+        "runs/evidence/2026-10-20T02-25-07Z/app-thread-n-0614.png",
+        "runs/evidence/2026-10-20T02-25-07Z/app-thread-n-0613.png"
+      ],
+      "reasoning": "Driven in the built-in browser on scratch copy judge-redline-1020 served on :4740, on the review screen (as-built app side, prototype design side), 1440x900; PNGs were re-driven by a throwaway Playwright script. From pin mode I filed three redlines: design half only (n-0611), both halves (n-0613), why only (n-0614), plus a plain note. Six steps hold. The redline pin stands on its element on both sides of the fade at the same offset, red with a not-equal mark, unlike the amber note pin, and its tip says Redline and closed. The popover gives the why, filer, date and element, shows the pair only where a half was given (dash for the empty half, no pair for why-only), has no text box and only Open the redline and Close, and says nothing waits on it; the same from the design-side pin. The Threads list puts redlines under Where the build leaves the design, apart from the open note. The thread view shows the pair with a dash per missing half, the nothing-waits line, Reply, Reopen, and Leave a note on <element>, which opened the note form on that element. Breaking it held: the agent was refused a reopen through the API and the CLI, the panel seated as agent offered Reply alone, an empty Reopen asked for a reason, and a decision refused to reopen and offered only Reply. The last step fails. Reopened by a person, n-0613 became an open note on the agent's move with its why first, but its Design and Build pair survives only in the record file: the thread view stops drawing it once the reason is no longer redline, nothing says it was a redline, and threads show prints no pair. A person reopening it to work the gap out with the agent loses what the gap was. Finding filed. Also in it: the thread view's status badge reads recorded where the accepted design and the popover say closed, seen on every redline opened. Below 10%: the agent seat also lacks Leave a note, but agents work from the CLI. The server showed Stale server because lib/locations.js changed mid-run (unrelated to this rule).",
+      "threads": [
+        "2ea551df-1d14-4b44-80a7-174671fd9ea0"
+      ]
+    }
+  ]
+}

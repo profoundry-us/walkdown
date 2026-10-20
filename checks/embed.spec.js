@@ -940,7 +940,7 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
   await detail.getByRole('button', { name: 'Open the redline' }).click();
   await expect(detail).toBeHidden();
   const view = realPanel(page).getByTestId('thread.screen');
-  await expect(view.getByTestId('thread.provenance')).toContainText(/Redline\s*n-\d+/);
+  await expect(view.getByTestId('thread.provenance')).toContainText(/Redline\s*n-\d+\s*closed/);
   const pair = view.getByTestId('thread.redline-pair');
   await expect(pair).toHaveText(/Design\s*—\s*Build\s*—/);
   await expect(view.getByTestId('thread.turn')).toContainText('Nothing waits on this');
@@ -978,5 +978,7 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
   await view.locator('[data-act="open"]').click();
   await expect(view.getByTestId('thread.provenance')).not.toContainText('Redline');
   await expect(view.getByTestId('thread.turn')).toHaveAttribute('data-party', 'agent');
-  await expect(view.getByTestId('thread.redline-pair')).toHaveCount(0);
+  // Its why and its pair stay in view, and it says what it was.
+  await expect(view.getByTestId('thread.reason')).toHaveText('reopened redline');
+  await expect(view.getByTestId('thread.redline-pair')).toHaveText(/Design\s*—\s*Build\s*—/);
 });

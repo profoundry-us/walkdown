@@ -1,0 +1,33 @@
+id: n-0612
+uuid: 2ea551df-1d14-4b44-80a7-174671fd9ea0
+kind: note
+reason: finding
+author: agent
+created: 2026-10-20T02:35:47.911Z
+anchor:
+  rule: embed.pin.redline-explains-a-gap
+status: addressed
+body: >-
+  A reopened redline loses its Design and Build pair from view.
+
+
+  Reopened by a person, n-0613 became an open note waiting on the agent with its
+  why as the first message, as the step asks. Its pair stayed in the record file
+  and nowhere else: the thread view draws thread.redline-pair only while the
+  reason is redline, so after the reopen the view shows no Design or Build line
+  and nothing says it was a redline. threads show prints no pair either. The
+  step says the pair is kept in its history, and the person who reopens it to
+  work the gap out with the agent can no longer read what the gap was. Evidence:
+  runs/evidence/2026-10-20T02-25-07Z/app-thread-n-0613.png and probes.txt.
+
+
+  Smaller: the thread view's status badge reads recorded on a redline, where the
+  accepted thread-panel design and the popover both say closed
+  (app-thread-n-0611.png against proto-thread-panel.png).
+replies:
+  - author: agent
+    created: 2026-10-20T02:37:43Z
+    body: "Fixed: reopened, the thread view keeps the why and the Design/Build pair
+      in view, a 'reopened redline' chip says what it was, and a line says it
+      was filed as a redline and now waits on the agent. A redline's badge reads
+      closed, not recorded. The check asserts both."
