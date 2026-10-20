@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-20T02-24-26Z-local-01",
+  "created": "2026-10-20T02:24:26Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "230a6800-dirty",
+  "tree_hash": "sha256:a317b360a319",
+  "spec_hash": "sha256:028e61fc12ff",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:69aa7b8cf35a",
+      "duration_ms": 4,
+      "checks": [
+        "test/thread-mutations.test.js:207"
+      ]
+    }
+  ]
+}

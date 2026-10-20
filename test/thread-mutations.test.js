@@ -193,5 +193,39 @@ test('an ended thread reopens append-only, and only a person reopens an accepted
   });
   assert.equal(onDisk('q-1').status, 'open');
   // A decision is a record, not a task: it never reopens.
-  assert.equal(canTransition('note', 'recorded', 'open'), false);
+  writeFileSync(
+    join(h.threads, 'n-2.yml'),
+    'id: n-2\nkind: note\nreason: decision\nstatus: recorded\nbody: Keep the old URL.\n',
+  );
+  assert.throws(
+    () => transitionThread(load(), 'n-2', { status: 'open', actor: 'topher', reason: 'why?' }),
+    /recorded decision and never reopens/,
+  );
+  assert.equal(canTransition('note', 'recorded', 'addressed'), false);
+});
+
+test('a person reopens a redline into a note waiting on the agent, and keeps its pair @rule:embed.pin.redline-explains-a-gap', () => {
+  writeFileSync(
+    join(h.threads, 'n-3.yml'),
+    'id: n-3\nkind: note\nreason: redline\nstatus: recorded\nauthor: topher\ndesign: a button that reads Join\nbody: On a phone, Join read as sign in.\n',
+  );
+  // Never the agent, by name or by mark.
+  for (const by of [{ actor: 'agent' }, { actor: 'topher', via: 'agent' }])
+    assert.throws(
+      () => transitionThread(load(), 'n-3', { status: 'open', reason: 'why?', ...by }),
+      /only a person reopens a redline/,
+    );
+  assert.equal(onDisk('n-3').status, 'recorded');
+  transitionThread(load(), 'n-3', {
+    status: 'open',
+    actor: 'topher',
+    reason: 'Is Join the waitlist too long on the smallest phones?',
+  });
+  const t = onDisk('n-3');
+  assert.equal(t.status, 'open');
+  assert.equal(t.reason, 'feedback');
+  assert.equal(t.reopened_from, 'redline');
+  assert.equal(t.design, 'a button that reads Join');
+  assert.equal(t.body, 'On a phone, Join read as sign in.');
+  assert.equal(t.replies.at(-1).body, 'Is Join the waitlist too long on the smallest phones?');
 });

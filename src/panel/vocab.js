@@ -391,6 +391,9 @@ const OFFERS = {
       verified: ENDED,
       waived: ENDED,
       settled: ENDED,
+      // A redline reopens into a note for the agent (q-0610); a decision
+      // only takes replies.
+      recorded: (t) => (t.reason === 'redline' ? ENDED : [REPLY]),
     },
     question: {
       open: [WAIVE, REPLY, ['Answer', '__answer', 'primary']],

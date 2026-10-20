@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-20T00:59:43.194Z
 anchor:
   rule: embed.pin.redline-explains-a-gap
-status: answered
+status: incorporated
 body: A redline is filed closed, and today nothing reopens a closed record (a
   decision or a redline). You said Reopen stays on a redline so a person can ask
   or add context. Once someone reopens one, what is it, and who is it waiting
@@ -22,4 +22,10 @@ replies:
     body: I think the main use-case is working with the agent to confirm things
       about a redline, so open note for agent makes the most sense.
     answer: true
+  - author: agent
+    created: 2026-10-20T02:24:27Z
+    body: "Folded into embed.pin.redline-explains-a-gap: a person reopens a redline
+      into an open note waiting on the agent, its why and pair kept; a decision
+      still never reopens, and the agent can't reopen a redline. ADR 0015 §4
+      says so too."
 chosen: An open note, waiting on the agent

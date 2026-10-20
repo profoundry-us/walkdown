@@ -150,6 +150,11 @@ and why. It becomes a thread reason beside `decision`:
   element. The person files the redline if they agree.
 - **Filed closed:** a redline explains a gap and nothing waits on it, as with a
   decision.
+- **Reopened, it becomes a note.** A person may reopen a redline, to ask about
+  it or add context with the agent (Topher, 2026-10-19, q-0610). It becomes an
+  open note waiting on the agent: its reason turns to feedback, and its why and
+  its Design and Build pair stay in its history. A decision still never
+  reopens.
 - **Judges read them:** a judge comparing the two surfaces treats an accepted
   redline as an intended gap, not a fail, and names it in its reasoning.
 - **Migration:** each note in `as-built/redlines.json` becomes a redline thread

@@ -40,8 +40,9 @@ test('terminal is derived from the flows, so the two cannot disagree', () => {
     for (const flow of Object.values(FLOWS))
       for (const next of flow[status] ?? [])
         assert.equal(next, 'open', `${status} may only reopen`);
-  // A decision is a record, not a task: it never reopens.
-  assert.deepEqual(FLOWS.note.recorded, []);
+  // A record reopens only as a redline does (q-0610); checkTransition
+  // refuses a decision by its reason.
+  assert.deepEqual(FLOWS.note.recorded, ['open']);
 });
 
 test('canTransition answers exactly what the flows table says', () => {

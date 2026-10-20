@@ -378,7 +378,8 @@ stories:
             - The screen's thread list shows redlines apart from the pins still waiting
             - Opened from that list, the thread view shows the same Design and Build pair, with a dash for a half not given, and says it waits on nobody
             - Like any ended thread it still offers Reply and Reopen, and a button that opens the note form on that element for anyone who disagrees
-          statement_hash: sha256:a1105830fc34
+            - Reopened by a person, it becomes an open note waiting on the agent, and keeps its why and its Design and Build pair in its history
+          statement_hash: sha256:69aa7b8cf35a
 
   - id: embed.threads
     title: A thread you can read at a glance

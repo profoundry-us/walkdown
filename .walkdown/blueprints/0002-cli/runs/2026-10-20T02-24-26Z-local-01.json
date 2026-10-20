@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-10-20T02-24-26Z-local-01",
+  "created": "2026-10-20T02:24:26Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "230a6800-dirty",
+  "tree_hash": "sha256:a317b360a319",
+  "spec_hash": "sha256:089187c64771",
+  "results": [
+    {
+      "rule": "threads.lifecycle.validated-transitions",
+      "status": "pass",
+      "statement_hash": "sha256:c2384ee386f5",
+      "duration_ms": 23,
+      "checks": [
+        "test/thread-mutations.test.js:151"
+      ]
+    },
+    {
+      "rule": "threads.lifecycle.reasoned-endings",
+      "status": "pass",
+      "statement_hash": "sha256:b4f231a94e4c",
+      "duration_ms": 23,
+      "checks": [
+        "test/thread-mutations.test.js:151"
+      ]
+    }
+  ]
+}

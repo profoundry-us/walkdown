@@ -944,10 +944,10 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
   const pair = view.getByTestId('thread.redline-pair');
   await expect(pair).toHaveText(/Design\s*—\s*Build\s*—/);
   await expect(view.getByTestId('thread.turn')).toContainText('Nothing waits on this');
-  // Reply, as on any ended thread, and a way to disagree, which opens the
-  // note form on the redline's element. (Reopen waits on what a reopened
-  // redline becomes: a recorded thread does not move yet.)
+  // Reply and Reopen, as on any ended thread, and a way to disagree, which
+  // opens the note form on the redline's element.
   await expect(view.getByTestId('thread.reply')).toBeVisible();
+  await expect(view.locator('[data-act="open"]')).toBeVisible();
   await view.getByTestId('thread.leave-note').click();
   await expect(app(page).getByTestId('pin.form')).toBeVisible();
   await expect(app(page).getByTestId('pin.form')).toContainText('host.title');
@@ -968,4 +968,15 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
     .click();
   await realPanel(page).locator('[data-tfilter="active"]').click();
   await expect(realPanel(page).getByTestId('panel.redlines')).toContainText(id);
+
+  // Reopened, with a reason from the box, it is a note waiting on the agent.
+  await realPanel(page)
+    .locator(`[data-open-thread="${id}"]`)
+    .first()
+    .click({ position: { x: 8, y: 6 } });
+  await view.getByTestId('thread.reply').fill('Is the full label too long on the smallest phones?');
+  await view.locator('[data-act="open"]').click();
+  await expect(view.getByTestId('thread.provenance')).not.toContainText('Redline');
+  await expect(view.getByTestId('thread.turn')).toHaveAttribute('data-party', 'agent');
+  await expect(view.getByTestId('thread.redline-pair')).toHaveCount(0);
 });
