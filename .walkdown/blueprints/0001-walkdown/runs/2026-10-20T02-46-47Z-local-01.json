@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-20T02-46-47Z-local-01",
+  "created": "2026-10-20T02:46:47Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "20bbc18a-dirty",
+  "spec_hash": "sha256:028e61fc12ff",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:69aa7b8cf35a",
+      "evidence": [
+        "runs/evidence/2026-10-20T02-38-04Z/probes.txt",
+        "runs/evidence/2026-10-20T02-38-04Z/app-thread-n-0613-reopened.png",
+        "runs/evidence/2026-10-20T02-38-04Z/app-thread-n-0614-reopened-design-only.png",
+        "runs/evidence/2026-10-20T02-38-04Z/app-thread-n-0615-reopened-why-only.png",
+        "runs/evidence/2026-10-20T02-38-04Z/app-thread-n-0617-closed.png",
+        "runs/evidence/2026-10-20T02-38-04Z/app-threads-active.png"
+      ],
+      "reasoning": "Re-judged after 20bbc18a, which answers finding n-0612. I drove the built-in browser on scratch copy rejudge-redline-1020, served on :4740 with its own home, on the review screen. A throwaway script re-drove the PNGs read-only afterwards. I filed two redlines from pin mode, one with both halves (n-0613) and one with the design half only (n-0614). From the CLI I filed two why-only redlines and a plain note. The six steps that held last time hold again. The red not-equal pin stands on its element on both sides of the fade, unlike the amber note pin, and its tip reads Redline and closed. The popover gives the why, the filer, the date, and the pair with a dash for an empty half. It has no input and offers only Open the redline and Close, and it says nothing waits on it. The Threads list shows redlines under Where the build leaves the design, apart from the waiting pins. In the thread view the pair carries its dashes and the badge now reads closed where it used to read recorded, as the popover and the accepted design do. The view offers Reply, Reopen, and Leave a note on its element. The fixed step holds. A person's empty Reopen asks for a reason. With a reason, n-0613 became an open note on the agent's move (data-party agent) with its why as the first message. It now shows a reopened redline chip, a line saying it was filed as a redline and now waits on the agent, and its Design and Build pair. The record keeps reopened_from redline, both halves, and the reason as a reply. The design-only n-0614 shows Build with a dash after a fresh load. The why-only n-0615 shows two dashes. Their pins became note pins, and the agent's seat sees the same pair. Breaking it held. Seated as the agent, the panel offered only Reply on a closed redline. The CLI and POST /api/threads/:id/status both refused an agent's reopen and changed nothing. Three things outside the steps went to the requester unfiled, and none breaks the claim. The Threads list's row badge on a closed redline still reads recorded. After an empty Reopen and then a successful one, the reason-needed hint stays under the composer. Plain-text threads show prints no pair for a reopened redline, though --json carries it, and that is the cli blueprint's ground.",
+      "threads": [
+        "2ea551df-1d14-4b44-80a7-174671fd9ea0"
+      ]
+    }
+  ]
+}

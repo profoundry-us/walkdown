@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-20T02:35:47.911Z
 anchor:
   rule: embed.pin.redline-explains-a-gap
-status: addressed
+status: settled
 body: >-
   A reopened redline loses its Design and Build pair from view.
 
@@ -31,3 +31,8 @@ replies:
       in view, a 'reopened redline' chip says what it was, and a line says it
       was filed as a redline and now waits on the agent. A redline's badge reads
       closed, not recorded. The check asserts both."
+  - author: agent
+    via: verdict
+    created: 2026-10-20T02:46:48Z
+    body: Settled by the agent's pass on embed.pin.redline-explains-a-gap
+      (2026-10-20T02-46-47Z-local-01).
