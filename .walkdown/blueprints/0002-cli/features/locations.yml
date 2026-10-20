@@ -526,13 +526,14 @@ stories:
             - Each accepted screen becomes designs/<screen>/YYYYMMDD.html, dated by its first commit, and the storyboard points at it
             - A version is dated by the first commit that held it under its own name, never through a differently named file git reads as its rename or copy
             - The storyboard's prototype keys become design keys, and spec.yml's prototype root becomes its design root
+            - A root named prototype* is renamed designs* (prototype/ to designs/, prototype-cli/ to designs-cli/); any other root stays where it is, its versions go inside it, and only the spec's key is renamed
             - "A draft or proposal that a pending design request names, in its words or by its `proposes:`, becomes that request's proposed version, and `proposes:` names the version; a `proposes:` that already names a version is kept"
             - A draft or proposal nothing names is removed, and the upgrade says it stays in git history
             - A file git does not hold is kept where it is and named, with what to do about it
             - The emptied folders are removed, and each redlines.json note becomes a closed redline thread in the person's name
             - "A redlines.json key names its screen by id or by its as-built page, so a CLI screen's `cli/<screen>` note lands on that screen"
             - The dry run lists all of it, grouped by blueprint, and moves nothing
-          statement_hash: sha256:b64d4e40bf7e
+          statement_hash: sha256:ba28f1d14bfe
 
       - id: locations.keeping.upgrade-records-excuses
         origin: thread:q-0599

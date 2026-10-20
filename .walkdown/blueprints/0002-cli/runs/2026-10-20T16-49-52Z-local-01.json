@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-20T16-49-52Z-local-01",
+  "created": "2026-10-20T16:49:52Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "aec7b490-dirty",
+  "spec_hash": "sha256:7c51d51972c1",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:ba28f1d14bfe",
+      "evidence": [
+        "runs/evidence/2026-10-20T16-48-54Z/custom-roots.txt",
+        "runs/evidence/2026-10-20T16-48-54Z/probe.txt"
+      ],
+      "reasoning": "Headless rule, judged at the terminal on throwaway tools/cli-scenarios machines; no server or port, and the real ledger was not written. With four blueprints - checkout and search on prototype/, gallery on claude-design/, admin on ui/prototype-admin/ - the dry run listed every move, removal, kept file and redline per blueprint and moved nothing, and its heading named all three roots. The upgrade then renamed prototype/ to designs/ and ui/prototype-admin/ to ui/designs-admin/ (beside the old one, not doubled under ui/), while gallery's claude-design/ stayed put: art's accepted design became claude-design/art/20261014.html, its pending request's draft claude-design/art/20261014-v2.html, an unnamed draft was removed, README.md stayed where it was, and spec.yml's prototype.root became design.root: claude-design/ with the storyboard pointing at /art/20261014.html. A second upgrade found nothing to do, and lint raised no design-root complaint (only the fixture's rule-less screen). The earlier probe still holds: near-copies are dated by their own first commit (gift 20261003, not coupon's 20260919), a proposes: naming a draft is moved and rewritten while one naming a version is kept, and a cli/<screen> redline lands on the screen whose app path is /as-built/cli/<screen>.html while an unmatched key stays in redlines.json. Edges below 10%: a nested root's dry-run lines are shown relative to the root's parent (prototype-admin/... rather than ui/prototype-admin/...), cosmetic; a screen named screens or drafts inside a kept custom root would collide with the retired folders. Edge about 15-25%: a design file renamed along with its screen is dated by the rename.",
+      "threads": []
+    }
+  ]
+}

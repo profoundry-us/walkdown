@@ -113,11 +113,14 @@ The `screens/` and `drafts/` subfolders and `proposals/` are retired, and
 `walkdown upgrade` clears every one of them rather than leaving them lying
 around:
 
-- An accepted screen in `screens/` moves into `designs/<screen>/` as a dated
+- An accepted screen in `screens/` moves into `<root>/<screen>/` as a dated
   version, and the storyboard is repointed at it. The storyboard's `prototype:`
   keys become `design:`, a null one included, and `spec.yml`'s `prototype.root`
-  becomes `design.root`. A root the blueprint set itself keeps its value; only
-  the key is renamed.
+  becomes `design.root`. A root named `prototype*` is renamed `designs*`
+  (`prototype/` to `designs/`, `prototype-cli/` to `designs-cli/`). Any other
+  root the blueprint set itself (`claude-design/`, say) stays where it is: its
+  versions go into `<root>/<screen>/`, and only the key is renamed (Topher,
+  2026-10-20).
 - A draft or proposal named by a design request not yet accepted or closed,
   whether open or addressed, moves in as that request's proposed version.
 - A draft or proposal nothing names, accepted or pending, is removed. It stays

@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-20T16-48-28Z-local-01",
+  "created": "2026-10-20T16:48:28Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "aec7b490-dirty",
+  "tree_hash": "sha256:7c9556b577aa",
+  "spec_hash": "sha256:7c51d51972c1",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:ba28f1d14bfe",
+      "duration_ms": 2702,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}

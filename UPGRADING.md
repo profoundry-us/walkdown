@@ -28,22 +28,29 @@ walkdown upgrade
 For every blueprint at once, it:
 
 - moves each accepted design, `<root>/screens/<screen>.html`, to
-  `designs/<screen>/YYYYMMDD.html`, dated by the file's first commit;
-- moves each draft or proposal that an open design request names to the same
-  folder as that request's proposed version, and removes one no request names
-  (git still has it);
+  `<root>/<screen>/YYYYMMDD.html`, dated by the file's first commit under its
+  own name. A root named `prototype*` is renamed `designs*` on the way
+  (`prototype/` becomes `designs/`, `prototype-cli/` becomes `designs-cli/`);
+  any other root, such as `claude-design/`, stays where it is;
+- moves each draft or proposal that an open design request names, in its words
+  or by its `proposes:`, to the same folder as that request's proposed version
+  (and points `proposes:` at it), and removes one no request names (git still
+  has it);
 - leaves a file git does not hold, and no screen names, where it is, and says
   so: commit it or delete it yourself;
 - renames the storyboard's `prototype:` keys to `design:`, drops `proposal:`,
   and renames `spec.yml`'s `prototype.root` to `design.root`;
-- turns each note in `as-built/redlines.json` into a closed redline thread, and
-  removes the file;
+- turns each note in `as-built/redlines.json` into a closed redline thread on
+  the screen its key names (a `cli/<screen>` key included), and removes the
+  file. A note whose key matches no screen stays in it, so the file stays too;
 - fills in `steps.excused` on any rule whose old hash excused a tier, so it does
   not read as stale.
 
 Run again, it finds nothing to do. Old keys still load meanwhile, so nothing
-breaks before you run it. `walkdown upgrade --layout-only` does everything but
-the designs, if you need to put that part off.
+breaks before you run it. `walkdown upgrade --layout-only` does only the
+ADR 0014 layout: it leaves the designs where they are, the redlines in
+`as-built/redlines.json`, and `steps.excused` unwritten, if you need to put
+that part off.
 
 ### 3. Run lint, and fix what it now refuses
 

@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-20T16-48-23Z-local-01",
+  "created": "2026-10-20T16:48:23Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "aec7b490-dirty",
+  "tree_hash": "sha256:7c9556b577aa",
+  "spec_hash": "sha256:7c51d51972c1",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:ba28f1d14bfe",
+      "duration_ms": 3713,
+      "checks": [
+        "test/upgrade-designs.test.js:119",
+        "test/upgrade-designs.test.js:127",
+        "test/upgrade-designs.test.js:137",
+        "test/upgrade-designs.test.js:197",
+        "test/upgrade-designs.test.js:212",
+        "test/upgrade-designs.test.js:221",
+        "test/upgrade-designs.test.js:228"
+      ]
+    }
+  ]
+}

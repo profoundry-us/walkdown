@@ -167,7 +167,7 @@ function sayDesigns(steps) {
     const roots = [...new Set(moving.map((p) => p.newSaid))];
     console.log('');
     console.log(
-      `Designs move into ${roots.length === 1 ? roots[0] : 'designs/'}, a folder per screen, each dated by its first commit:`,
+      `Designs move into ${roots.join(' and ')}, a folder per screen, each dated by its first commit:`,
     );
     let vN = false;
     for (const p of moving) {

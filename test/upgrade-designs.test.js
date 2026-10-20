@@ -42,12 +42,12 @@ const threadsOf = (name) => {
     mkdirSync(dirname(f), { recursive: true });
     writeFileSync(f, text);
   };
-  const commit = (day, change) => {
+  const commit = (day, change, also = []) => {
     change();
     const at = `${day}T12:00:00-05:00`;
     // Only what this commit drew: payment-notes.html stays out of git.
     for (const args of [
-      ['add', '-A', 'prototype', 'proposals/old-idea.html'],
+      ['add', '-A', 'prototype', 'proposals/old-idea.html', ...also],
       ['commit', '-q', '-m', `designs ${day}`],
     ]) {
       const r = spawnSync('git', args, {
@@ -66,7 +66,20 @@ const threadsOf = (name) => {
     unlinkSync(join(m.shop, 'proposals', 'old-idea.html'));
     write('prototype/screens/coupon.html', long('coupon'));
     write('prototype/drafts/results-wide.html', '<!doctype html><title>wide results</title>\n');
-  });
+    write('claude-design/screens/art.html', '<!doctype html><title>art</title>\n');
+    write('claude-design/README.md', '# Drawn in Claude Design\n');
+  }, ['claude-design']);
+  // gallery keeps its designs under a root of its own naming, claude-design/.
+  m.ok(['blueprints', 'new', 'gallery']);
+  const gallery = m.specOf('gallery');
+  writeFileSync(
+    join(gallery, 'spec.yml'),
+    `${readFileSync(join(gallery, 'spec.yml'), 'utf8')}\nprototype:\n  root: claude-design/\n`,
+  );
+  writeFileSync(
+    join(gallery, 'storyboard.yml'),
+    'screens:\n  - id: art\n    title: art\n    prototype: /screens/art.html\n    app: { path: /art }\n',
+  );
   // On search, which the lint below never reads, so they need no rules.
   const board = join(m.specOf('search'), 'storyboard.yml');
   writeFileSync(
@@ -179,6 +192,21 @@ test('upgrade moves each design into a dated version of its screen, and repoints
   // The panel's reading of it: accepted beside proposed, both served from designs/.
   const status = m.wd(['lint', '--no-checks', '--blueprint', 'checkout']);
   assert.doesNotMatch(status.stdout, /✗/, status.stdout);
+});
+
+test('a root the blueprint named itself keeps its place, and only the spec key is renamed @rule:locations.keeping.upgrade-moves-prototypes', () => {
+  const d = (...p) => join(m.shop, 'claude-design', ...p);
+  assert.ok(existsSync(d('art', '20261008.html')));
+  assert.ok(!existsSync(d('screens')));
+  assert.ok(existsSync(d('README.md')));
+  assert.ok(!existsSync(join(m.shop, 'designs', 'art')));
+  const spec = parse(readFileSync(join(m.specOf('gallery'), 'spec.yml'), 'utf8'));
+  assert.equal(spec.design?.root, 'claude-design/');
+  assert.equal(spec.prototype, undefined);
+  assert.match(
+    readFileSync(join(m.specOf('gallery'), 'storyboard.yml'), 'utf8'),
+    /^ {4}design: \/art\/20261008\.html$/m,
+  );
 });
 
 test('a CLI screen redline, kept under cli/<screen>, becomes a thread on that screen @rule:locations.keeping.upgrade-moves-prototypes', () => {
