@@ -540,6 +540,15 @@ screens:
       - cli.lint.retired-screen-named
       - cli.exit
 
+  - id: lint-proposes-gone
+    title: "Lint names a design request whose proposed version is gone"
+    prototype: null
+    app: { path: /as-built/cli/lint-proposes-gone.html }
+    anchors:
+      - cli.prompt
+      - cli.lint.proposes-gone
+      - cli.exit
+
   - id: threads-written-as
     title: "A question moves onto the rule written from its answer"
     prototype: /screens/threads-written-as.html   # accepted 2026-10-18 in Topher's walk

@@ -1,0 +1,13 @@
+# `walkdown lint` where two live design requests propose versions no longer under the design root, and a waived one does too.
+screen: lint-proposes-gone
+title: Lint names a design request whose proposed version is gone
+rule: ownership.design.proposed-version-exists
+fixture: g2-request-proposes-gone
+command: [lint, --no-checks]
+exit: 1
+expect:
+  - '^  ✗ \[threads\] checkout/threads/[0-9a-f-]+\.yml › n-0002: proposes /receipt/20261012\.html, and nothing is at ~/shop/designs/receipt/20261012\.html — put the draft back there, or name where it is now with `walkdown threads set n-0002 --proposes <path> --blueprint 0001-sp-checkout`$'
+  - '^  ✗ \[threads\] checkout/threads/[0-9a-f-]+\.yml › n-0003: proposes /cart/20261015\.html, and nothing is at ~/shop/designs/cart/20261015\.html — put the draft back there, or name where it is now with `walkdown threads set n-0003 --proposes <path> --blueprint 0001-sp-checkout`$'
+  - '^✗ 1 rules, 2 screens, 0 anchors, 4 threads, 0 runs — 2 error\(s\), 0 warning\(s\)$'
+anchors:
+  - { id: cli.lint.proposes-gone, match: 'proposes /' }

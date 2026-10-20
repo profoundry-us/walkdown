@@ -3,7 +3,7 @@
  * identity and time.
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 /* `checkout` with one rule, `checkout.basics.pays`, and nothing else in features/. */
@@ -362,6 +362,49 @@ export default {
       '--blueprint',
       'checkout',
     ]);
+  },
+  /*
+   * lint-proposes-gone: g2-request-proposes, after the designer drew and
+   * moved on. n-0002 on receipt proposes /receipt/20261012.html and is
+   * addressed, and that draft was since moved to designs/drafts/receipt.html.
+   * n-0003, open on cart, proposes /cart/20261015.html, since deleted.
+   * n-0004 on cart proposed /cart/20261001.html, deleted too, and was
+   * waived, so nothing waits on it.
+   */
+  'g2-request-proposes-gone'(m, h) {
+    h.fixtures['g2-request-proposes'](m);
+    const designs = join(m.shop, 'designs');
+    for (const f of ['cart/20261001.html', 'cart/20261015.html']) {
+      mkdirSync(dirname(join(designs, f)), { recursive: true });
+      writeFileSync(join(designs, f), '<!doctype html><title>cart</title>\n');
+    }
+    storyboard(m, [
+      '  - id: receipt',
+      '    title: Receipt',
+      '    design: /receipt/20260921.html',
+      '    app: { path: /receipt }',
+      '  - id: cart',
+      '    title: Cart',
+      '    prototype: null',
+      '    app: { path: /cart }',
+    ]);
+    const file = join(m.specOf('checkout'), 'features', 'checkout.yml');
+    writeFileSync(
+      file,
+      readFileSync(file, 'utf8').replace('screens: [receipt]', 'screens: [receipt, cart]'),
+    );
+    m.ok(['hash', '--write', '--blueprint', 'checkout']);
+    for (const body of ['Draw the cart with the total at the top.', 'Draw the cart as a list.'])
+      m.ok(['threads', 'new', '--screen', 'cart', '--body', body, '--blueprint', 'checkout']);
+    const set = (...args) => m.ok(['threads', 'set', ...args, '--blueprint', 'checkout']);
+    set('n-0002', '--proposes', '/receipt/20261012.html', '--as-agent');
+    set('n-0002', '--status', 'addressed', '--as-agent');
+    set('n-0003', '--proposes', '/cart/20261015.html', '--as-agent');
+    set('n-0004', '--proposes', '/cart/20261001.html', '--as-agent');
+    set('n-0004', '--status', 'waived', '--reason', 'The list was drawn on n-0003 instead.');
+    mkdirSync(join(designs, 'drafts'));
+    renameSync(join(designs, 'receipt', '20261012.html'), join(designs, 'drafts', 'receipt.html'));
+    for (const f of ['cart/20261001.html', 'cart/20261015.html']) rmSync(join(designs, f));
   },
   /*
    * `checkout`, stamped before stamps recorded what they excused: two rules

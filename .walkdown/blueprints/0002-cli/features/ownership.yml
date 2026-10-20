@@ -185,6 +185,30 @@ stories:
             - Lint exits 1
           statement_hash: sha256:4455e2293cb6
 
+      - id: ownership.design.proposed-version-exists
+        origin: walkdown
+        created_at: 2026-10-19
+        verify: [checks]
+        signoff: [eng, product]
+        statement: A live design request whose `proposes:` names a version with no file under the design root is a lint error on that request.
+        because: The walk opens a request's proposed version beside the screen's rules, so a version that has gone shows a person "not found" where the design should be.
+        history: On 2026-10-19 n-0592 proposed /drafts/serve-anywhere.html after the draft had been moved. The panel showed "not found", and lint said nothing.
+        screens: [lint-proposes-gone]
+        steps:
+          given:
+            - A design request n-0002 on screen receipt, addressed, that proposes /receipt/20261012.html, a draft since moved to /drafts/receipt.html
+            - An open request n-0003 on screen cart that proposes /cart/20261015.html, since deleted
+            - A waived request n-0004 on cart whose /cart/20261001.html was deleted too
+          when:
+            - The blueprint is linted
+          then:
+            - n-0002 and n-0003 are each an error, named in the thread's file and by its id
+            - Each error names the version the request proposes and the path lint looked for it at, which is the path the panel opens it from
+            - Each says to put the draft back there, or to name where it is now with `walkdown threads set <id> --proposes <path>`
+            - The waived request is not named, because nothing waits on it
+            - Lint exits 1
+          statement_hash: sha256:7d08a2878a3e
+
   - id: ownership.authoring
     title: A rule is written so it can be built from
     statement: As a team, we can hand a rule to whoever implements it - a person or an agent - and have them build the right thing without asking us what we meant.
