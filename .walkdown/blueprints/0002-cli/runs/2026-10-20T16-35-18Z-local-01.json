@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-20T16-35-18Z-local-01",
+  "created": "2026-10-20T16:35:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "154c852b-dirty",
+  "spec_hash": "sha256:beac3d22809e",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:b64d4e40bf7e",
+      "evidence": [
+        "runs/evidence/2026-10-20T16-32-20Z/probe.txt",
+        "runs/evidence/2026-10-20T16-32-20Z/this-repo-dry-run.txt"
+      ],
+      "reasoning": "Headless rule, judged at the terminal; no server was needed, so no port was driven and the real ledger was never written (the upgrade ran only on a throwaway tools/cli-scenarios machine). On g2-old-prototypes plus a probe's own additions, `walkdown upgrade --dry-run` listed every move, removal, kept file and redline grouped by blueprint and moved nothing; `walkdown upgrade` then did exactly that. Accepted screens landed at designs/<screen>/YYYYMMDD.html dated by first commit and the storyboard points at them; prototype keys became design and the spec's root design.root. Dating: a gift screen first committed as a near-copy of an existing coupon draft was dated by its own first commit (20261003), not the coupon's (20260919), and a drafts/->screens/ move under the same name kept its earlier date; in this repo's own dry run redline-filed is now dated 20261009 (the commit that first held it under that name, a C057 copy of where-one-kind) where it was 20261002. A request whose proposes: named /drafts/payment-two.html had the draft moved to /payment/20261012.html and proposes rewritten to it (one proposes: line); a proposes: already naming /cart/20260918.html was kept. Unnamed drafts and proposals were removed and said to stay in git history; the untracked payment-notes.html was kept and named with what to do. A cli/init-another redline key landed as a closed redline in topher's name on the screen whose app path is /as-built/cli/init-another.html, and a cli/nowhere key no screen matches was left in redlines.json. Edge, about 15-25%: a screen whose file was renamed when the screen itself was renamed is now dated by the rename, not its first drawing; cosmetic, nothing lost.",
+      "threads": []
+    }
+  ]
+}

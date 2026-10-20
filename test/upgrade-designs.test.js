@@ -4,8 +4,16 @@
  * versions, on a throwaway machine of its own (tools/cli-scenarios.mjs).
  */
 import assert from 'node:assert/strict';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
 import { FIXTURES, machine } from '../tools/cli-scenarios.mjs';
 import { parse } from '../vendor/yaml.js';
@@ -22,12 +30,95 @@ const threadsOf = (name) => {
   }));
 };
 
+/*
+ * Three cases g2-old-prototypes leaves out (the ADR 0015 audit, 2026-10-20),
+ * added before the upgrade runs: a screen first committed as a near-copy of
+ * another file, a CLI screen's redline under `cli/<screen>`, and a request
+ * whose `proposes:` already names its draft.
+ */
+{
+  const write = (rel, text) => {
+    const f = join(m.shop, rel);
+    mkdirSync(dirname(f), { recursive: true });
+    writeFileSync(f, text);
+  };
+  const commit = (day, change) => {
+    change();
+    const at = `${day}T12:00:00-05:00`;
+    // Only what this commit drew: payment-notes.html stays out of git.
+    for (const args of [
+      ['add', '-A', 'prototype', 'proposals/old-idea.html'],
+      ['commit', '-q', '-m', `designs ${day}`],
+    ]) {
+      const r = spawnSync('git', args, {
+        cwd: m.shop,
+        env: { ...m.env, GIT_AUTHOR_DATE: at, GIT_COMMITTER_DATE: at },
+      });
+      if (r.status) throw new Error(`commit on ${day} failed\n${r.stderr}`);
+    }
+  };
+  const long = (title) =>
+    `<!doctype html><title>${title}</title>\n${Array.from({ length: 30 }, (_, i) => `<p>line ${i} of a page much like another</p>`).join('\n')}\n`;
+  // A sketch, then a coupon screen drawn from it the day the sketch was retired:
+  // git's likeness reads the coupon as the sketch renamed.
+  commit('2026-09-27', () => write('proposals/old-idea.html', long('old idea')));
+  commit('2026-10-08', () => {
+    unlinkSync(join(m.shop, 'proposals', 'old-idea.html'));
+    write('prototype/screens/coupon.html', long('coupon'));
+    write('prototype/drafts/results-wide.html', '<!doctype html><title>wide results</title>\n');
+  });
+  // On search, which the lint below never reads, so they need no rules.
+  const board = join(m.specOf('search'), 'storyboard.yml');
+  writeFileSync(
+    board,
+    `${readFileSync(board, 'utf8')}  - id: coupon\n    title: coupon\n    prototype: /screens/coupon.html\n    app: { path: /coupon }\n  - id: help\n    title: help\n    prototype: null\n    app: { path: /as-built/cli/help.html }\n`,
+  );
+  const redlines = join(m.shop, 'as-built', 'redlines.json');
+  writeFileSync(
+    redlines,
+    `${JSON.stringify(
+      {
+        ...JSON.parse(readFileSync(redlines, 'utf8')),
+        'cli/help': { title: 'help', redlines: ['The build prints the commands in two columns.'] },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  // A request on results that names its draft the way CLAUDE.md step 3 says to.
+  m.ok([
+    'threads',
+    'new',
+    '--screen',
+    'results',
+    '--body',
+    'Draw the results wider.',
+    '--blueprint',
+    'search',
+  ]);
+  const req = threadsOf('search').find((t) => t.data.reason === 'request');
+  writeFileSync(
+    req.file,
+    `${readFileSync(req.file, 'utf8').replace(/\n*$/, '\n')}proposes: /drafts/results-wide.html\n`,
+  );
+}
+
 test('the dry run moves nothing @rule:locations.keeping.upgrade-moves-prototypes', () => {
   const r = m.wd(['upgrade', '--dry-run']);
   assert.equal(r.status, 0, r.stderr);
   assert.ok(existsSync(join(m.shop, 'prototype', 'screens', 'cart.html')));
   assert.ok(!existsSync(join(m.shop, 'designs')));
   assert.ok(existsSync(join(m.shop, 'as-built', 'redlines.json')));
+});
+
+test('a screen is dated by its own first commit, never by a near-copy git follows it to @rule:locations.keeping.upgrade-moves-prototypes', () => {
+  const r = m.wd(['upgrade', '--dry-run']);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(
+    r.stdout,
+    /prototype\/screens\/coupon\.html +becomes designs\/coupon\/20261008\.html/,
+  );
+  assert.doesNotMatch(r.stdout, /designs\/coupon\/20260927/);
 });
 
 test('upgrade moves each design into a dated version of its screen, and repoints the records @rule:locations.keeping.upgrade-moves-prototypes', () => {
@@ -88,6 +179,22 @@ test('upgrade moves each design into a dated version of its screen, and repoints
   // The panel's reading of it: accepted beside proposed, both served from designs/.
   const status = m.wd(['lint', '--no-checks', '--blueprint', 'checkout']);
   assert.doesNotMatch(status.stdout, /✗/, status.stdout);
+});
+
+test('a CLI screen redline, kept under cli/<screen>, becomes a thread on that screen @rule:locations.keeping.upgrade-moves-prototypes', () => {
+  const redlines = threadsOf('search').filter((t) => t.data.reason === 'redline');
+  assert.deepEqual(
+    redlines.map((t) => t.data.anchor.screen),
+    ['help'],
+  );
+  assert.ok(!existsSync(join(m.shop, 'as-built', 'redlines.json')));
+});
+
+test('a draft a request already names by proposes: becomes its proposed version, and proposes: follows it @rule:locations.keeping.upgrade-moves-prototypes', () => {
+  assert.ok(existsSync(join(m.shop, 'designs', 'results', '20261008.html')));
+  const req = threadsOf('search').find((t) => t.data.reason === 'request');
+  assert.equal(req.data.proposes, '/results/20261008.html');
+  assert.equal((readFileSync(req.file, 'utf8').match(/^proposes:/gm) ?? []).length, 1);
 });
 
 test('run again, the upgrade finds nothing to do @rule:locations.keeping.upgrade-moves-prototypes', () => {

@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-10-20T16-31-30Z-local-01",
+  "created": "2026-10-20T16:31:30Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "154c852b-dirty",
+  "tree_hash": "sha256:91a8d556fb0f",
+  "spec_hash": "sha256:deb1adac4280",
+  "results": [
+    {
+      "rule": "commands.shape.help-by-noun",
+      "status": "pass",
+      "statement_hash": "sha256:db2770fb32c4",
+      "duration_ms": 98,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:b64d4e40bf7e",
+      "duration_ms": 2373,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}
