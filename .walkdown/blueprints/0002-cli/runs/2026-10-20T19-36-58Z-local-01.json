@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-20T19-36-58Z-local-01",
+  "created": "2026-10-20T19:36:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8f412217-dirty",
+  "tree_hash": "sha256:f68fc5123d7f",
+  "spec_hash": "sha256:b8ed4f5fca75",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:8de33a8e97f5",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-36-58Z/01-lint-before.txt",
+        "runs/evidence/2026-10-20T19-36-58Z/02-command-filled.txt",
+        "runs/evidence/2026-10-20T19-36-58Z/03-threads.txt",
+        "runs/evidence/2026-10-20T19-36-58Z/04-lint-after.txt",
+        "runs/evidence/2026-10-20T19-36-58Z/05-other-reason-and-ended.txt",
+        "runs/evidence/2026-10-20T19-36-58Z/06-ended-placeholder.txt",
+        "runs/evidence/2026-10-20T19-36-58Z/07-version-and-retired.txt"
+      ],
+      "reasoning": "Judged headless (the rule's screen is a terminal moment; no server or port used) on throwaway machines built with tools/cli-scenarios.mjs machine() and fixture g2-undrawn-screens, running the working tree's lib/lint.js. Lint names cart as having no design and no open design request, says a proposed version counts only once a request's proposes: names it, and now prints `walkdown threads new --screen cart --reason request --body \"<what the screen must show>\" --blueprint 0001-sp-checkout`: the screen's real id, --reason request, a body placeholder and the registered blueprint id. I extracted that command from lint's own output, replaced only the placeholder, and ran it: it exited 0 and filed n-0002, a note with reason request anchored to screen cart, and the next lint reads 0 warnings. The same command run from /private/tmp, outside the project, files too, since the blueprint travels in the flag. A note with reason finding on cart leaves the warning standing; a request clears it; a version dropped in designs/cart/ with no request leaves it standing; a retired cart is not linted for it (lint says one retired screen was not linted; the remaining error is a different check about a rule naming the retired screen). The ended-thread step I read in code rather than drove, because only verified or waived end a request through the CLI and this judging writes neither: isLiveRequest in lib/vocab.js excludes TERMINAL statuses, and the hint change does not touch it. Edges: running the printed command without filling the body is accepted and files a request whose body is the literal placeholder, which clears the warning (estimated 10-20%, reported to the dispatching agent, not filed). A blueprint with no registry row would print --blueprint <id>, but under ADR 0003 lint only reaches registered blueprints (under 5%). A body a person fills with a double quote or $ needs ordinary shell escaping (under 10%).",
+      "threads": []
+    }
+  ]
+}

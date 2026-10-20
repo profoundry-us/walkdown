@@ -16,12 +16,13 @@ stories:
             - The blueprint is linted
           then:
             - The screen is named as having no design and no open design request, and the message says a proposed version counts only once a request's `proposes:` names it
+            - "The message gives a `walkdown threads new` command that files the request as printed: the screen's id, `--reason request`, a `--body` to fill in, and the blueprint"
             - An open note with the reason "request", anchored to that screen, clears it, because a request is queued for design
             - A note with any other reason does not clear it, because it is queued for the agent, where design will not see it
             - "A note whose thread has ended stops clearing it: a request is open work or it is nothing"
             - "A proposed version is not a request: a version nobody asked design for routes nothing"
             - A retired screen is exempt, because it describes something we stopped meaning
-          statement_hash: sha256:0e9584c2d6df
+          statement_hash: sha256:8de33a8e97f5
 
   - id: ownership.design
     title: The design is drawn by someone other than the builder

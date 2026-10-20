@@ -100,6 +100,11 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
 - A long screen title no longer runs under the Accepted / Proposed switch.
 - A proposal's strip in a thread holds a long screen title.
 - The reason hint under a thread's box clears once the move it asked for lands.
+- Lint's hint for a screen with no design and no request is a command that
+  works as printed: the screen's id, `--reason request` and a `--body` to fill in.
+- `walkdown upgrade` repoints a screen whose design is part of another screen's
+  page (`/screens/waitlist-admin.html#invite-batch`) at that page's new version,
+  fragment kept, where it left the old path behind.
 
 
 ## [0.4.1] - 2026-10-09

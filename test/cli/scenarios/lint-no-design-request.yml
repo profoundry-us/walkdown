@@ -6,7 +6,7 @@ fixture: g2-undrawn-screens
 command: [lint, --no-checks]
 exit: 0
 expect:
-  - '^  ⚠ \[drift\] checkout/storyboard\.yml › cart: screen has no design and no open design request — file one with `walkdown threads new --screen <id> --blueprint 0001-sp-checkout` \(a proposed version counts only once a request''s `proposes:` names it\)$'
+  - '^  ⚠ \[drift\] checkout/storyboard\.yml › cart: screen has no design and no open design request — file one with `walkdown threads new --screen cart --reason request --body "<what the screen must show>" --blueprint 0001-sp-checkout` \(a proposed version counts only once a request''s `proposes:` names it\)$'
   - '^✓ 1 rules, 2 screens, 0 anchors, 1 threads, 0 runs — 0 errors, 1 warning\(s\)$'
 anchors:
   - { id: cli.lint.drift, match: '^  ⚠ \[drift\]' }

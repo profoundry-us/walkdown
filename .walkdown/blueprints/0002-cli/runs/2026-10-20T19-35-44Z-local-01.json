@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-10-20T19-35-44Z-local-01",
+  "created": "2026-10-20T19:35:44Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "8f412217-dirty",
+  "tree_hash": "sha256:dc664b1f787b",
+  "spec_hash": "sha256:b8ed4f5fca75",
+  "results": [
+    {
+      "rule": "locations.keeping.old-layout-warns",
+      "status": "pass",
+      "statement_hash": "sha256:d575b0345c14",
+      "duration_ms": 2036,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:1030",
+        "test/upgrade-designs.test.js:128",
+        "test/upgrade-designs.test.js:264"
+      ]
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:6c8969174ce9",
+      "duration_ms": 4257,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/upgrade-designs.test.js:138",
+        "test/upgrade-designs.test.js:146",
+        "test/upgrade-designs.test.js:156",
+        "test/upgrade-designs.test.js:216",
+        "test/upgrade-designs.test.js:231",
+        "test/upgrade-designs.test.js:240",
+        "test/upgrade-designs.test.js:247",
+        "test/upgrade-designs.test.js:258"
+      ]
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:8de33a8e97f5",
+      "duration_ms": 1114,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:421"
+      ]
+    }
+  ]
+}
