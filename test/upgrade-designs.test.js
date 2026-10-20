@@ -31,10 +31,11 @@ const threadsOf = (name) => {
 };
 
 /*
- * Three cases g2-old-prototypes leaves out (the ADR 0015 audit, 2026-10-20),
+ * Cases g2-old-prototypes leaves out (the ADR 0015 audit, 2026-10-20),
  * added before the upgrade runs: a screen first committed as a near-copy of
- * another file, a CLI screen's redline under `cli/<screen>`, and a request
- * whose `proposes:` already names its draft.
+ * another file, a CLI screen's redline under `cli/<screen>`, a request
+ * whose `proposes:` already names its draft, and screens that point into
+ * another screen's file by fragment (docs/06-prototype-contract.md).
  */
 {
   const write = (rel, text) => {
@@ -66,6 +67,7 @@ const threadsOf = (name) => {
     unlinkSync(join(m.shop, 'proposals', 'old-idea.html'));
     write('prototype/screens/coupon.html', long('coupon'));
     write('prototype/drafts/results-wide.html', '<!doctype html><title>wide results</title>\n');
+    write('prototype/screens/pager.html', '<!doctype html><title>pager</title>\n');
     write('claude-design/screens/art.html', '<!doctype html><title>art</title>\n');
     write('claude-design/README.md', '# Drawn in Claude Design\n');
   }, ['claude-design']);
@@ -84,7 +86,10 @@ const threadsOf = (name) => {
   const board = join(m.specOf('search'), 'storyboard.yml');
   writeFileSync(
     board,
-    `${readFileSync(board, 'utf8')}  - id: coupon\n    title: coupon\n    prototype: /screens/coupon.html\n    app: { path: /coupon }\n  - id: help\n    title: help\n    prototype: null\n    app: { path: /as-built/cli/help.html }\n`,
+    `${readFileSync(board, 'utf8')}  - id: coupon\n    title: coupon\n    prototype: /screens/coupon.html\n    app: { path: /coupon }\n  - id: help\n    title: help\n    prototype: null\n    app: { path: /as-built/cli/help.html }\n` +
+      // One part of results' page, and a page only fragments name.
+      '  - id: results-filters\n    title: filters\n    prototype: /screens/results.html#filters\n    app: { path: /results#filters }\n' +
+      '  - id: pager-top\n    title: pager\n    prototype: /screens/pager.html#top\n    app: { path: /pager }\n',
   );
   const redlines = join(m.shop, 'as-built', 'redlines.json');
   writeFileSync(
@@ -237,6 +242,17 @@ test('a draft a request already names by proposes: becomes its proposed version,
   const req = threadsOf('search').find((t) => t.data.reason === 'request');
   assert.equal(req.data.proposes, '/results/20261008.html');
   assert.equal((readFileSync(req.file, 'utf8').match(/^proposes:/gm) ?? []).length, 1);
+});
+
+test("a screen whose ref names another screen's file with a fragment follows that file, fragment kept @rule:locations.keeping.upgrade-moves-prototypes", () => {
+  const board = readFileSync(join(m.specOf('search'), 'storyboard.yml'), 'utf8');
+  assert.match(board, /^ {4}design: \/results\/20260925\.html$/m);
+  assert.match(board, /^ {4}design: \/results\/20260925\.html#filters$/m);
+  assert.ok(!existsSync(join(m.shop, 'designs', 'results-filters')));
+  // A file no screen names plainly goes to the first screen that points into it.
+  assert.match(board, /^ {4}design: \/pager-top\/20261008\.html#top$/m);
+  assert.ok(existsSync(join(m.shop, 'designs', 'pager-top', '20261008.html')));
+  assert.doesNotMatch(board, /\/screens\//);
 });
 
 test('run again, the upgrade finds nothing to do @rule:locations.keeping.upgrade-moves-prototypes', () => {

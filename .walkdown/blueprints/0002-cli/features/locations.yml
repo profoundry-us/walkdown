@@ -527,6 +527,7 @@ stories:
           then:
             - Each accepted screen becomes designs/<screen>/YYYYMMDD.html, dated by its first commit, and the storyboard points at it
             - A version is dated by the first commit that held it under its own name, never through a differently named file git reads as its rename or copy
+            - "A screen whose ref names another screen's file with a fragment or query (`/screens/waitlist-admin.html#invite-batch`) follows that file to its version, and keeps the fragment; a file only such refs name moves to the first screen that names it"
             - The storyboard's prototype keys become design keys, and spec.yml's prototype root becomes its design root
             - A root named prototype* is renamed designs* (prototype/ to designs/, prototype-cli/ to designs-cli/); any other root stays where it is, its versions go inside it, and only the spec's key is renamed
             - "A draft or proposal that a pending design request names, in its words or by its `proposes:`, becomes that request's proposed version, and `proposes:` names the version; a `proposes:` that already names a version is kept"
@@ -535,7 +536,7 @@ stories:
             - The emptied folders are removed, and each redlines.json note becomes a closed redline thread in the person's name
             - "A redlines.json key names its screen by id or by its as-built page, so a CLI screen's `cli/<screen>` note lands on that screen"
             - The dry run lists all of it, grouped by blueprint, and moves nothing
-          statement_hash: sha256:ba28f1d14bfe
+          statement_hash: sha256:6c8969174ce9
 
       - id: locations.keeping.old-layout-warns
         origin: walkdown

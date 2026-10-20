@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T19-36-59Z-local-01",
+  "created": "2026-10-20T19:36:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "8f412217-dirty",
+  "tree_hash": "sha256:f68fc5123d7f",
+  "spec_hash": "sha256:b8ed4f5fca75",
+  "results": [
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:6c8969174ce9",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-36-59Z/upgrade-fragment-refs.txt",
+        "runs/evidence/2026-10-20T19-36-59Z/upgrade-fragment-refs.probe.mjs"
+      ],
+      "reasoning": "Headless rule, judged on a throwaway machine (tools/cli-scenarios.mjs machine() under the session scratchpad, its own WALKDOWN_HOME and git repo; no server, no port used) built from g2-old-prototypes plus my own additions aimed at the new fragment step: a fragment screen listed before the plain owner of the same file (admin-invite on /screens/admin.html#invite-batch, quoted in YAML, ahead of admin), a query ref with a trailing comment on cart's file (?state=empty   # empty state), a file only fragments name, by two screens with #step-1 and ?step=2#top (wizard-1, wizard-2), an uncommitted file only a fragment names (loose-a), and a request whose proposes: names a draft with a fragment. Dry run then upgrade, then upgrade again, then lint. The new step holds in every case: admin.html went to designs/admin/20261002.html and admin-invite now reads /admin/20261002.html#invite-batch even though it came first in the storyboard; cart-empty reads /cart/20260918.html?state=empty with its comment kept; wizard.html moved to the first screen naming it, designs/wizard-1/20261002.html, and wizard-2 follows it with ?step=2#top intact; no folder was made for any follower; the uncommitted loose.html moved to loose-a dated today, as any uncommitted accepted file does. The dry run listed each file move once, grouped by blueprint, and the tree was byte-identical before and after it; the second upgrade found nothing to do (a version ref with a fragment is still read as a version). The other steps are held by the existing fixture's output in the same run (dating by first commit, -v2 for same-day versions, proposals bound to their requests, unnamed drafts removed with the git-history line, payment-notes.html kept and named, emptied folders gone, redlines filed as threads, spec root renamed) and by test/upgrade-designs.test.js, which I ran unrecorded: 10/10 pass. Edges, weighed: (1) the dry run's 'repointed at the N accepted versions' counts only owners, so screens that merely follow by fragment are not itemized; every file move is listed, so nothing that moves goes unsaid - reported to the dispatcher, roughly 30% a person notices, low cost. (2) A request whose proposes: carried a fragment keeps it, and lint then reads the fragment as part of the path and errors 'nothing is at .../20261002.html#wide'; under 10%, since a proposes: names a whole draft and lint's same existence check would already refuse a fragmented one before the upgrade. No finding filed.",
+      "threads": []
+    }
+  ]
+}
