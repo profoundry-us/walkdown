@@ -9,6 +9,79 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
+## [0.5.0] - unreleased (draft)
+
+Upgrading from 0.4.1: see [UPGRADING.md](UPGRADING.md#from-041-to-050). Designs
+move into a folder per screen, and `walkdown upgrade` moves them once.
+
+### Added
+
+- **Design versions** ([ADR 0015](docs/adr/foundational/202610_design_versions_and_states.md)).
+  Every design of a screen is a dated version in `designs/<screen>/`
+  (`20261019.html`, then `-v2` for a second one that day). The storyboard's
+  `design:` names the accepted one; a design request's `proposes:` names the
+  one waiting on you. A design's state is in the record, never its filename.
+- **Proposed beside accepted.** On a screen with a proposed version, the Design
+  side gets an Accepted / Proposed switch, with Proposed shown first. The
+  proposal sits in a dashed yellow frame labelled "Proposed — yours to accept",
+  and the choice is in the address, so a link opens on it.
+- **Approving a screen's rules accepts its design.** The walkdown is the design
+  review: an unbuilt rule opens with its proposed design beside it, and once a
+  person approves every rule on a screen, that screen's design request is
+  accepted in their name.
+- **Redlines.** A pin can now be a note, a question or a redline, chosen in the
+  pin form. A redline says the build leaves the design at this element on
+  purpose, and why, with what the design and the build each show. It is filed
+  closed, drawn in red on both sides of the fade, listed apart in the Threads
+  tab, and read by judges as an intended gap rather than a fail. Only a person
+  files one. A person can reopen one to work it out with the agent: it becomes
+  an open note waiting on the agent, and keeps its why and its Design and Build
+  pair in view. `as-built/redlines.json` retires; its notes become redlines.
+- **Rule focus** ([ADR 0016](docs/adr/lightweight/202610_rule_focus.md)). A
+  rule opens at what it is about: the frame scrolls to and rings the element it
+  names, not the top of a long page.
+- **When the app doesn't answer**, the panel shows the screen's design and says
+  why, instead of an empty frame (issue #22).
+- **Questions follow their answers.** When an answer is written up as a new
+  rule, `walkdown threads set <id> --written-as <rule>` moves the question onto
+  that rule, so the walk asks it once; approving the rule answers it. Lint
+  refuses a question left open where it was first asked.
+- **`walkdown threads set <id> --proposes <version>`** names the version a
+  design request proposes; a version no file holds is refused.
+- **A thread's Open button.** A thread on a screen with a proposed design offers
+  "Open <screen>", which goes there with the proposal showing, in one click from
+  either side of the fade.
+- **`walkdown serve` lists what it serves:** every registered blueprint by ID
+  with its project, marking the one a page that names none opens.
+
+### Changed
+
+- **Lint is stricter.** These are now errors: a screen no live rule names; a
+  live rule that names a retired screen; a rule with no screen that does not
+  excuse the agent tier; a question still open on a rule after its answer
+  became another rule; and a design request whose proposed version is not on
+  disk. Lint counts retired rules and screens apart from the live ones.
+- **Excuses are part of a rule's hash**, so adding, changing or removing one
+  makes the rule stale. `hash --write --reword` never adds an excuse.
+- **Every screen has rules before it reaches a person** (ADR 0015 §8): the
+  rules and the design grow together, and no screen goes to review without
+  the rules it must show.
+- **A blueprint picked in the panel is the one it records against**, never a
+  swap underneath it.
+- **`walkdown threads show`** prints a redline's Design and Build pair, and a
+  redline reads "closed" there and in the panel, never "recorded".
+- `/walkdown:formulate` leaves app paths out until a screen is built, and asks
+  for signoff rather than a human tier.
+- ADRs are named for their topic, and the number is the citation
+  (`docs/adr/README.md`).
+
+### Fixed
+
+- A long screen title no longer runs under the Accepted / Proposed switch.
+- A proposal's strip in a thread holds a long screen title.
+- The reason hint under a thread's box clears once the move it asked for lands.
+
+
 ## [0.4.1] - 2026-10-09
 
 Nothing to do from 0.4.0 but check out the tag; see

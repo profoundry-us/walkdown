@@ -3,6 +3,70 @@
 Each section takes an install from one version to the next. What changed is in
 [CHANGELOG.md](CHANGELOG.md); this file is only what you have to do about it.
 
+## From 0.4.1 to 0.5.0
+
+Designs move into a folder per screen
+([ADR 0015](docs/adr/foundational/202610_design_versions_and_states.md)), and
+lint refuses a few things it used to let pass.
+
+### 1. Update the clone
+
+```
+git -C ~/.walkdown/walkdown fetch --tags
+git -C ~/.walkdown/walkdown checkout v0.5.0
+```
+
+### 2. Move the designs
+
+See what would move, then move it:
+
+```
+walkdown upgrade --dry-run
+walkdown upgrade
+```
+
+For every blueprint at once, it:
+
+- moves each accepted design, `<root>/screens/<screen>.html`, to
+  `designs/<screen>/YYYYMMDD.html`, dated by the file's first commit;
+- moves each draft or proposal that an open design request names to the same
+  folder as that request's proposed version, and removes one no request names
+  (git still has it);
+- leaves a file git does not hold, and no screen names, where it is, and says
+  so: commit it or delete it yourself;
+- renames the storyboard's `prototype:` keys to `design:`, drops `proposal:`,
+  and renames `spec.yml`'s `prototype.root` to `design.root`;
+- turns each note in `as-built/redlines.json` into a closed redline thread, and
+  removes the file;
+- fills in `steps.excused` on any rule whose old hash excused a tier, so it does
+  not read as stale.
+
+Run again, it finds nothing to do. Old keys still load meanwhile, so nothing
+breaks before you run it. `walkdown upgrade --layout-only` does everything but
+the designs, if you need to put that part off.
+
+### 3. Run lint, and fix what it now refuses
+
+```
+walkdown lint
+```
+
+These are new errors, each with the fix in its message:
+
+| Lint says | What to do |
+|---|---|
+| no rule names this screen | write the rules it must show, with `screens: [<id>]`, or retire the screen |
+| a live rule names a retired screen | point the rule at the screen that replaced it, or retire the rule too |
+| a rule names no screen and excuses no tier | name its screen with `screens: [<id>]`, or excuse the agent tier under `unverifiable:` and say why there is nothing to look at |
+| a question is open on a rule while another rule was written from its answer | `walkdown threads set <q> --written-as <rule> --blueprint <bp>` |
+| a design request proposes a version that is not there | put the draft back where it names, or `walkdown threads set <id> --proposes <path> --blueprint <bp>` |
+
+### 4. Refresh `AGENTS.md`
+
+A blueprint made before 0.5.0 keeps its `AGENTS.md`. Copy
+`lib/templates/AGENTS.md` from the clone over it, so agents learn that the
+walkdown is the design review and that a screen's rules come with its design.
+
 ## From 0.4.0 to 0.4.1
 
 No data moves and no command changes.
