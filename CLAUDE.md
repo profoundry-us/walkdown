@@ -68,8 +68,12 @@ In this order, for any screen:
    `prototype/drafts/` for `walkdown` and `prototype-cli/drafts/` for `cli`,
    and marks each request addressed. It never touches code, tests or the
    accepted `screens/`.
-3. Until ADR 0015 is built, move each draft to `proposals/` and set the
-   screen's `proposal:`, so the walk shows it on the design side. Then stop and
+3. Make sure the walk shows each draft on the design side. A request whose
+   `proposes:` names the draft (the designer sets it, or `walkdown threads set
+   <id> --proposes /drafts/<screen>.html`) is enough: leave the draft in
+   `drafts/`, where the panel loads it from. Moving it away leaves the walk a
+   "not found" (serve-anywhere, 2026-10-19). Only a draft no request names
+   goes to `proposals/` with the screen's `proposal:` set. Then stop and
    tell Topher. His walkdown steps through the rules with each design beside
    them. Approving every rule on a screen accepts its design; sending one back
    sends the design back. Nothing on those screens is built meanwhile.
