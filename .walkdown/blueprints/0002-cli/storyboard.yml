@@ -542,7 +542,7 @@ screens:
 
   - id: lint-proposes-gone
     title: "Lint names a design request whose proposed version is gone"
-    prototype: null
+    prototype: /screens/lint-proposes-gone.html   # accepted 2026-10-19 in Topher's walk
     app: { path: /as-built/cli/lint-proposes-gone.html }
     anchors:
       - cli.prompt
