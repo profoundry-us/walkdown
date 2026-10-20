@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { loadBlueprint } from '../lib/blueprint.js';
+import { transitionThread } from '../lib/threads.js';
 import { closesOnVerdict, waitsOnPerson } from '../lib/vocab.js';
 import { openThread } from '../lib/writes.js';
 import { declareProject } from '../tools/test-home.mjs';
@@ -115,4 +116,38 @@ test("a judge reads a redline on the rule's screen as an intended gap @rule:thre
   const json = JSON.parse(run('--json').stdout);
   assert.equal(json.redlines.length, 1);
   assert.equal(json.redlines[0].element, 'receipt.total');
+});
+
+test("a person's reopening makes a redline a note waiting on the agent, and only a person may @rule:threads.lifecycle.redline-is-a-persons", () => {
+  const { thread } = openThread(load(), {
+    kind: 'note',
+    reason: 'redline',
+    body,
+    anchor,
+    design: 'the total above the items',
+  });
+  const reason = 'Is the total still easy to find on the widest screens?';
+  for (const by of [
+    { actor: 'agent' },
+    { actor: 'redline-person', via: 'claude-code' },
+    { actor: 'redline-person', via: 'agent' },
+  ])
+    assert.throws(
+      () => transitionThread(load(), thread.id, { status: 'open', reason, ...by }),
+      /only a person reopens a redline/,
+      JSON.stringify(by),
+    );
+  const reread = () => load().threads.find((t) => t.data.id === thread.id).data;
+  assert.equal(reread().status, 'recorded', 'a refused reopening changes nothing');
+  assert.equal(reread().reason, 'redline');
+
+  transitionThread(load(), thread.id, { status: 'open', actor: 'redline-person', reason });
+  const t = reread();
+  assert.equal(t.status, 'open', "open, so it is the agent's to address");
+  assert.equal(t.reason, 'feedback');
+  assert.equal(t.reopened_from, 'redline');
+  assert.equal(closesOnVerdict(t), true, 'a task again, which a pass on the rule can end');
+  assert.equal(t.body, body, 'its why stays');
+  assert.equal(t.design, 'the total above the items', 'and so does its pair');
+  assert.equal(t.replies.at(-1).body, reason);
 });

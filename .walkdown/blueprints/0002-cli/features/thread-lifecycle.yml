@@ -201,7 +201,8 @@ stories:
             - A redline carrying any sign that a machine typed it is refused the same way
             - The person's is filed closed as a note with reason redline, naming its screen and element (`redline-filed`)
             - It waits on nobody, and a judge reads it as an intended gap
-          statement_hash: sha256:768e7b46e642
+            - A person who reopens it makes it an open note with reason feedback, marked as reopened from a redline and waiting on the agent, and an agent's reopening is refused the same way
+          statement_hash: sha256:fa32f0de6fd6
       - id: threads.lifecycle.question-moves-to-its-rule
         origin: walkdown
         created_at: 2026-10-14

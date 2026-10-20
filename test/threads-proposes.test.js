@@ -5,7 +5,7 @@
  */
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { FIXTURES, machine } from '../tools/cli-scenarios.mjs';
@@ -75,6 +75,52 @@ test(`the request names the version, a reply says who named it, and the walk sho
   // Naming another records what it named before.
   const again = set('n-0002', '--proposes', '/receipt/20260921.html', '--as-agent');
   assert.match(again.stdout, /\(was \/receipt\/20261012\.html\) · by agent/);
+});
+
+/*
+ * The judge is handed the proposed version too. It used to read only the
+ * storyboard's `proposal:`, which `walkdown upgrade` drops, so a screen whose
+ * one design was a request's proposed version gave the judge no design
+ * address at all.
+ */
+test(`the judge is given the proposed version beside the accepted one, and told it is not yet accepted ${R}`, () => {
+  const judge = () => {
+    const r = m.wd(['judge', 'checkout.basics.pays', '--blueprint', 'checkout']);
+    assert.equal(r.status, 0, r.stderr);
+    return r.stdout.replace(/\x1b\[[0-9;]*m/g, '');
+  };
+  // The test above left n-0002 naming the accepted version itself.
+  assert.equal(set('n-0002', '--proposes', '/receipt/20261012.html', '--as-agent').status, 0);
+  const both = judge();
+  assert.match(both, /^ {4}accepted {3}\S+\/prototype\/receipt\/20260921\.html$/m);
+  assert.match(both, /^ {4}proposed {3}\S+\/prototype\/receipt\/20261012\.html$/m);
+  assert.match(
+    both,
+    /the proposed version on n-0002, awaiting a person's acceptance and not yet accepted/,
+  );
+  assert.match(both, /the accepted version above is what it would replace/);
+  assert.doesNotMatch(both, /a sketch, not design authority/);
+
+  // A screen whose only design is the proposed version still has an address.
+  const board = join(m.specOf('checkout'), 'storyboard.yml');
+  const was = readFileSync(board, 'utf8');
+  writeFileSync(board, was.replace('design: /receipt/20260921.html', 'design: null'));
+  try {
+    const alone = judge();
+    assert.doesNotMatch(alone, /^ {4}accepted /m);
+    assert.match(alone, /^ {4}proposed {3}\S+\/prototype\/receipt\/20261012\.html$/m);
+    assert.match(alone, /not yet accepted\. Judge against it, and say so when you do\)$/m);
+    assert.doesNotMatch(alone, /no address on either surface/);
+    const json = JSON.parse(
+      m.wd(['judge', 'checkout.basics.pays', '--blueprint', 'checkout', '--json']).stdout,
+    );
+    const receipt = json.screens.find((s) => s.id === 'receipt');
+    assert.equal(receipt.prototype, null);
+    assert.match(receipt.proposed, /\/prototype\/receipt\/20261012\.html$/);
+    assert.equal(receipt.proposed_request, 'n-0002');
+  } finally {
+    writeFileSync(board, was);
+  }
 });
 
 test(`an accepted request is refused ${R}`, () => {

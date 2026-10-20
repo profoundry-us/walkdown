@@ -96,9 +96,17 @@ export function run(args) {
       4730 + (Number.parseInt(createHash('sha1').update(id).digest('hex').slice(0, 8), 16) % 60),
     );
   const appUrl = (s) => (s.app?.path && baseUrl ? baseUrl + s.app.path : null);
-  const protoUrl = (s) =>
-    s.prototype
-      ? serve + '/prototype' + s.prototype
+  /*
+   * A screen has up to two designs (ADR 0015 §2): the accepted one, and the
+   * version a live design request proposes, which `readDesigns` derives. The
+   * judge gets both addresses. Reading only the storyboard's `proposal:` left
+   * a screen whose one design was a request's proposed version with no design
+   * address at all once `walkdown upgrade` had dropped that field.
+   */
+  const protoUrl = (s) => (s.prototype ? serve + '/prototype' + s.prototype : null);
+  const proposedUrl = (s) =>
+    s.proposed?.path
+      ? serve + s.proposed.path
       : s.proposal
         ? serve + '/proposals' + s.proposal
         : null;
@@ -206,7 +214,8 @@ export function run(args) {
             id: s.id,
             title: s.title ?? null,
             prototype: protoUrl(s),
-            proposed: Boolean(!s.prototype && s.proposal),
+            proposed: proposedUrl(s),
+            proposed_request: s.proposed?.request ?? null,
             app: appUrl(s),
             setup: s.app?.setup ?? null,
           })),
@@ -254,13 +263,16 @@ export function run(args) {
     for (const s of wanted) {
       say(`  ${s.id} — ${s.title ?? ''}`.trimEnd());
       const p = protoUrl(s);
-      if (p)
+      if (p) say(`    accepted   ${p}`);
+      const q = proposedUrl(s);
+      if (q)
         say(
-          `    ${s.prototype ? 'prototype' : 'proposal '}  ${p}${s.prototype ? '' : '   (a sketch, not design authority — say so if you compare against it)'}`,
+          `    proposed   ${q}`,
+          `               (the proposed version${s.proposed?.request ? ` on ${s.proposed.request}` : ''}, awaiting a person's acceptance and not yet accepted. Judge against it, and say so when you do${p ? '; the accepted version above is what it would replace' : ''})`,
         );
       const a = appUrl(s);
       if (a) say(`    app        ${a}`);
-      if (!p && !a) say('    (no address on either surface — reach it by hand and say how)');
+      if (!p && !q && !a) say('    (no address on either surface — reach it by hand and say how)');
     }
   } else {
     say(

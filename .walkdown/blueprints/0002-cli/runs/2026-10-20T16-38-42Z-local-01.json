@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-10-20T16-38-42Z-local-01",
+  "created": "2026-10-20T16:38:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "de401a1d-dirty",
+  "note": "Judged headless on throwaway cli-scenarios machines (g2-request-proposes, g2-receipt-drawn), no server; an independent judge agent drove the commands.",
+  "spec_hash": "sha256:beac3d22809e",
+  "results": [
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "pass",
+      "statement_hash": "sha256:222aa7fa471e",
+      "evidence": [
+        "runs/evidence/2026-10-20-judge-proposed-redline/proposes-probe.txt",
+        "runs/evidence/2026-10-20-judge-proposed-redline/proposes-accepted-probe.txt"
+      ],
+      "reasoning": "On a throwaway g2-request-proposes machine, walkdown judge checkout.basics.pays printed only the accepted /prototype/receipt/20260921.html before threads set n-0002 --proposes /receipt/20261012.html, and afterwards added a proposed line for 20261012 saying it is the proposed version on n-0002, awaiting a person's acceptance and not yet accepted, beside the accepted one; --json agreed (prototype, proposed, proposed_request n-0002). With design: null only the proposed line appears; proposes equal to the accepted version prints no proposed line; a legacy proposal: field still gives /proposals/...; after a person's verify the accepted line moves to 20261012. The reply naming the version, the (was ...) on renaming, refusals of missing files, non-requests and accepted requests (exit 2, nothing changed) all held. Under 10%: renaming the same version adds a duplicate reply.",
+      "threads": []
+    },
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:fa32f0de6fd6",
+      "evidence": [
+        "runs/evidence/2026-10-20-judge-proposed-redline/redline-probe.txt",
+        "runs/evidence/2026-10-20-judge-proposed-redline/redline-machine-signs-probe.txt"
+      ],
+      "reasoning": "On a throwaway g2-receipt-drawn machine, threads new --reason redline --as-agent (and with --said, --said plus --added) exited 2, filed nothing and offered the question command on the element; openThread with via claude-code, Agent and codex was refused with redline-by-machine. A person's redline filed closed (recorded, reason redline, screen and element), raised no attention item, and judge printed it in REDLINES as an intended gap. Reopening with --as-agent, with --said, or via transitionThread as agent/AGENT or via a machine mark was refused and left the file recorded; a person's reopen with a reason made it status open, reason feedback, reopened_from redline, with the reason as a reply, threads show says reopened from a redline, and status lists AGENT QUEUE address n-0001. The reopen refusal names no ready-made command, unlike the filing one, but it refuses and points at a question, which the step's 'the same way' covers.",
+      "threads": []
+    }
+  ]
+}

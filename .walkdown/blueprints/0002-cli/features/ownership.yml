@@ -157,11 +157,12 @@ stories:
             - "`walkdown threads set <request> --proposes /receipt/20261012.html --blueprint <bp>` is run"
           then:
             - The request names that version, and the walk shows it beside the screen's accepted design
+            - "`walkdown judge` on a rule naming receipt gives the version's address as the proposed version, beside the accepted one, and says it is not yet accepted"
             - A reply on the request says who named which version, so a later change of version is in its history
             - A path that names no file under the design root is refused by name, nothing is written, and it exits 2
             - A thread that is not a design request is refused the same way
             - An accepted request is refused, because a new version of an accepted design goes on a new request
-          statement_hash: sha256:0680eae68b81
+          statement_hash: sha256:222aa7fa471e
 
       - id: ownership.design.live-rule-names-a-live-screen
         origin: thread:q-0598

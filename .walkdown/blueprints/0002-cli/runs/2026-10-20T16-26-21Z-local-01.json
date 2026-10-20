@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-10-20T16-26-21Z-local-01",
+  "created": "2026-10-20T16:26:21Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "154c852b-dirty",
+  "tree_hash": "sha256:b7250fdb32bd",
+  "spec_hash": "sha256:2eb9dcc0bc41",
+  "results": [
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:fa32f0de6fd6",
+      "duration_ms": 1029,
+      "checks": [
+        "test/redline.test.js:59",
+        "test/redline.test.js:85",
+        "test/redline.test.js:101",
+        "test/redline.test.js:121"
+      ]
+    },
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "pass",
+      "statement_hash": "sha256:222aa7fa471e",
+      "duration_ms": 3899,
+      "checks": [
+        "test/threads-proposes.test.js:27",
+        "test/threads-proposes.test.js:38",
+        "test/threads-proposes.test.js:45",
+        "test/threads-proposes.test.js:86",
+        "test/threads-proposes.test.js:126"
+      ]
+    }
+  ]
+}
