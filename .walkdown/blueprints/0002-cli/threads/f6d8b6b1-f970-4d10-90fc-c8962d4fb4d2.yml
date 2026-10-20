@@ -1,0 +1,21 @@
+id: q-0613
+uuid: f6d8b6b1-f970-4d10-90fc-c8962d4fb4d2
+kind: question
+author: agent
+created: 2026-10-20T17:00:37.123Z
+anchor:
+  rule: ownership.design.approved-rules-accept-the-design
+status: open
+body: A signature given before a design request was filed still counts toward
+  'every rule on the screen approved'. So when a screen has two rules and one
+  was already signed, a walk that looks at only the other one accepts the new
+  design, though nobody read the signed rule beside it. Since today that skipped
+  rule reads stale afterwards and its signer is asked to look again, so nothing
+  is lost, but the design is already accepted by then. Should only approvals
+  given after the request was filed count toward accepting it?
+options:
+  - label: Only looks after the request count
+    why: a design is accepted only once every rule on its screen has been read
+      beside it
+  - label: Keep it as is
+    why: the stale re-ask afterwards is enough

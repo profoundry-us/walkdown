@@ -115,7 +115,9 @@ function renderRuleDetail(blueprint, derived, ruleId, json, emit) {
         signed: 'signed',
         approved: 'approved the wording',
         'sent-back': 'sent back',
-        stale: 'signed an older wording',
+        stale: a.designAccepted
+          ? `signed before ${a.designAccepted.thread} accepted a new design`
+          : 'signed an older wording',
         none: 'not yet',
       }[a.state] ?? a.state;
     // Who accepted, and - when somebody else drove the walk - who typed it.
