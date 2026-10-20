@@ -16,6 +16,10 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
 
 ### Added
 
+- **[GUIDE.md](GUIDE.md)**, the guide agents read first: setting walkdown up,
+  then building with a blueprint from a design request to a signed rule, with
+  the commands for each step. Each blueprint's `AGENTS.md` and the setup skill
+  point to it.
 - **Design versions** ([ADR 0015](docs/adr/foundational/202610_design_versions_and_states.md)).
   Every design of a screen is a dated version in `designs/<screen>/`
   (`20261019.html`, then `-v2` for a second one that day). The storyboard's

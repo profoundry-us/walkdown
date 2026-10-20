@@ -5,6 +5,7 @@
  * record" - so the check stays a check of shape and never of meaning.
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { voiceFindings } from '../lib/voice.js';
 
@@ -84,4 +85,36 @@ test('a rule is not in the first person; a thread may be; a statement does not r
     [],
     'quoted copy shared with a step is a name, not a restatement',
   );
+});
+
+/*
+ * GUIDE.md is what agents are pointed to first, and it is rewritten before
+ * every release (RELEASING.md step 3), so its prose is held to the same voice
+ * a rule is. Claims no rule: the guide is documentation, not the built thing.
+ * Code blocks, indented commands, tables and headings are names, not prose.
+ */
+test('the guide passes the voice', () => {
+  const text = readFileSync(new URL('../GUIDE.md', import.meta.url), 'utf8');
+  const paragraphs = [];
+  let current = [];
+  let fenced = false;
+  const close = () => {
+    if (current.length) paragraphs.push(current.join(' '));
+    current = [];
+  };
+  for (const line of text.split('\n')) {
+    if (line.startsWith('```')) {
+      fenced = !fenced;
+      close();
+    } else if (fenced || /^( {4}|\||#)/.test(line) || !line.trim()) close();
+    else {
+      if (/^\s*([-*]|\d+\.)\s/.test(line)) close();
+      current.push(line.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1'));
+    }
+  }
+  close();
+  const faults = paragraphs.flatMap((p) =>
+    voiceFindings(p, { field: 'thread' }).map((f) => `${f.message}\n    in: ${p.slice(0, 80)}`),
+  );
+  assert.deepEqual(faults, []);
 });

@@ -306,9 +306,9 @@ with a new design IS the acceptance of the design*.
   up to date.
 - **"Design comes first" is unchanged.** It now reads as: no rule on a screen is
   built until the screen has an accepted prototype.
-- **`GUIDE.md` is written** from what shipped. (Amended 2026-10-20: deferred
-  past 0.5.0. For 0.5.0 the docs under `docs/` were brought up to date
-  instead, as `RELEASING.md` step 3 allows until `GUIDE.md` exists.)
+- **`GUIDE.md` is written** from what shipped. (Amended 2026-10-20: written
+  for 0.5.0, and it covers setting walkdown up as well as the flow, so it is
+  the first thing an agent reads (Topher).)
 - **Amended 2026-10-10 (q-0575, n-0581):** the artifact is called a design on
   screen and on disk: `designs/<screen>/YYYYMMDD.html`, a folder per screen,
   and the storyboard key `design:`. "Prototype" survives in the docs as what a

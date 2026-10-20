@@ -5,6 +5,13 @@ This project's spec lives in this directory - `walkdown where spec` names it: fe
 notes), and the runs ledger. The blueprint is the single source of truth for
 *what to build*. Read this before building, testing, or reviewing.
 
+This file is the conventions in short form. `GUIDE.md`, at the root of the
+walkdown clone, is the guide to read first: setup, then the flow from a design
+request to a signed rule, in order. In Claude Code it is
+`~/.claude/skills/walkdown/GUIDE.md`, the plugin's link to the clone; a default
+clone puts it at `~/.walkdown/walkdown/GUIDE.md`; online it is
+https://github.com/profoundry-us/walkdown/blob/main/GUIDE.md.
+
 ## Before you build
 
 - `walkdown status --json` gives per-rule verification state, drift, and your

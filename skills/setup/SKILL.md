@@ -176,6 +176,13 @@ their product's rules to fill the file - a blueprint full of guessed
 requirements is worse than an empty one, because somebody has to read it before
 they can disagree with it.
 
+## 7. Read the guide
+
+Before the first feature, read `GUIDE.md` at the root of the clone
+(`<where>/GUIDE.md`). It picks up where this skill ends: the flow from a design
+request to a signed rule, in order, with the commands for each step. Tell the
+person it is there, since their agents will want it too.
+
 ## Report
 
 Say what was written and where, in this order: the clone, the skills, the

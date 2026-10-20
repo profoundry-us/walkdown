@@ -30,8 +30,13 @@ panel riding beside the running app and rendering those same files.
 
 ## Documentation
 
+**Start with [GUIDE.md](GUIDE.md).** It is the guide agents read to set walkdown
+up and build with a blueprint: setup, then the flow from a design request to a
+signed rule, linking to the docs below for each topic.
+
 | Doc | Contents |
 |---|---|
+| [GUIDE.md](GUIDE.md) | Setting walkdown up, and building with a blueprint from a design request to a signed rule |
 | [00-vision.md](docs/00-vision.md) | The problems walkdown takes on, thesis, principles, v1 scope and non-goals |
 | [01-glossary.md](docs/01-glossary.md) | The vocabulary — every term, one meaning |
 | [02-blueprint-schema.md](docs/02-blueprint-schema.md) | Entities, file layout, IDs, dual representation |
@@ -74,7 +79,8 @@ walkdown blueprints new --dir <your-project>   # a spec and its ledger — outsi
 
 Or hand the whole thing to an agent: **"visit https://walkdown.dev/setup and set walkdown
 up for this project"** — [site/setup.md](site/setup.md) is written to be followed, and the
-setup skill (`/walkdown:setup`) takes it from there. [docs/09-delivery.md](docs/09-delivery.md) has
+setup skill (`/walkdown:setup`) takes it from there. After setup, [GUIDE.md](GUIDE.md)
+says how to build with the blueprint. [docs/09-delivery.md](docs/09-delivery.md) has
 the reasoning, including what it would take to remove the last package.
 
 ## CLI

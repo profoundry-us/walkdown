@@ -15,8 +15,7 @@ release once went out without it.
 3. **The guide is brought up to date.** `GUIDE.md` says how to build with a
    blueprint as walkdown is today (ADR 0015). Rewrite whatever this release
    changed, from what shipped rather than from the ADR. It is what agents are
-   pointed to, so it is current before the tag, never after. (Until `GUIDE.md`
-   exists, this step is the docs under `docs/` that describe what changed.)
+   pointed to, so it is current before the tag, never after.
 4. **The changelog's Unreleased section covers everything since the last tag.**
    Walk `git log v<last>..HEAD` for what a person or an agent using walkdown
    would notice, and add what is missing. Each entry says what changed, in
@@ -30,7 +29,7 @@ release once went out without it.
 6. **Move the version** in `package.json` and `package-lock.json` (its top two
    `version` fields), `.claude-plugin/plugin.json` and `extension/manifest.json`.
 7. **Pin the install instructions** to the new tag: `README.md`,
-   `site/setup.md`, `skills/setup/SKILL.md` and the clone line in
+   `GUIDE.md`, `site/setup.md`, `skills/setup/SKILL.md` and the clone line in
    `docs/09-delivery.md`.
 8. **Record the skill hashes:** `node tools/released-skills.mjs`, then `--check`.
    The tag carries its own hashes, so the installer can tell a copy this version
