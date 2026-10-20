@@ -47,7 +47,8 @@ For every blueprint at once, it:
   not read as stale.
 
 Run again, it finds nothing to do. Old keys still load meanwhile, so nothing
-breaks before you run it. `walkdown upgrade --layout-only` does only the
+breaks before you run it, and `walkdown lint` warns once on each blueprint still
+on the old layout until you do. `walkdown upgrade --layout-only` does only the
 ADR 0014 layout: it leaves the designs where they are, the redlines in
 `as-built/redlines.json`, and `steps.excused` unwritten, if you need to put
 that part off.
@@ -66,7 +67,7 @@ These are new errors, each with the fix in its message:
 | a live rule names a retired screen | point the rule at the screen that replaced it, or retire the rule too |
 | a rule names no screen and excuses no tier | name its screen with `screens: [<id>]`, or excuse the agent tier under `unverifiable:` and say why there is nothing to look at |
 | a question is open on a rule while another rule was written from its answer | `walkdown threads set <q> --written-as <rule> --blueprint <bp>` |
-| a design request proposes a version that is not there | put the draft back where it names, or `walkdown threads set <id> --proposes <path> --blueprint <bp>` |
+| a design request proposes a version that is not there | put the version back where it names, or `walkdown threads set <id> --proposes <path> --blueprint <bp>` |
 
 ### 4. Refresh `AGENTS.md`
 

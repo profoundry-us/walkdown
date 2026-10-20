@@ -40,7 +40,7 @@ function checkout(m, stories, screens) {
     `screens:\n${screens
       .map(
         ([id, anchors]) =>
-          `  - id: ${id}\n    prototype: /screens/${id}.html\n    anchors: [${anchors.join(', ')}]\n`,
+          `  - id: ${id}\n    design: /screens/${id}.html\n    anchors: [${anchors.join(', ')}]\n`,
       )
       .join('')}`,
   );

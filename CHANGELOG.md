@@ -63,6 +63,11 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
   either side of the fade.
 - **`walkdown serve` lists what it serves:** every registered blueprint by ID
   with its project, marking the one a page that names none opens.
+- **Lint warns on a blueprint still on the old design layout**: storyboard
+  `prototype:` or `proposal:` keys, `prototype.root` in spec.yml, or a
+  `screens/`, `drafts/` or `proposals/` folder under the design root. One
+  warning per blueprint, naming what it found and saying to run
+  `walkdown upgrade --dry-run`, then `walkdown upgrade`.
 
 ### Changed
 
@@ -80,6 +85,11 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
   swap underneath it.
 - **`walkdown threads show`** prints a redline's Design and Build pair, and a
   redline reads "closed" there and in the panel, never "recorded".
+- **`walkdown where`** prints a `designs` row for the design root, where it
+  printed `prototype`, and a `proposals` row only while a retired `proposals/`
+  folder is still on disk. `walkdown where prototype` still answers.
+- Lint's design messages speak of versions: a proposed version counts once a
+  request's `proposes:` names it, and a gone one is put back, not "the draft".
 - `/walkdown:formulate` leaves app paths out until a screen is built, and asks
   for signoff rather than a human tier.
 - ADRs are named for their topic, and the number is the citation

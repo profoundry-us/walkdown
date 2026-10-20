@@ -9,7 +9,7 @@ and Playwright — no walkdown CLI.
 
 | Path | Playing the role of |
 |---|---|
-| `prototype/` | A Claude Design export — two screens, anchors as `data-testid` |
+| `designs/` | A Claude Design export, one folder of dated versions per screen, anchors as `data-testid` |
 | `app/` | The built product (vanilla HTML/JS), anchors carried over |
 | `.walkdown/blueprints/0001-example/` | The hand-written blueprint: config, storyboard, one feature (5 rules), runs, threads. It was `blueprint/` at the milestone; since ADR 0014 it is one flat home around a `spec.yml` |
 | `checks/` | The project's "own" test suite — Playwright tests tagged `@rule:<id>` |

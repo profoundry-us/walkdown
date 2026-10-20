@@ -549,6 +549,14 @@ screens:
       - cli.lint.proposes-gone
       - cli.exit
 
+  - id: lint-old-layout
+    title: "Lint names each blueprint still on the old design layout, once"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.old-layout
+      - cli.exit
+
   - id: threads-written-as
     title: "A question moves onto the rule written from its answer"
     prototype: /screens/threads-written-as.html   # accepted 2026-10-18 in Topher's walk
@@ -1126,13 +1134,12 @@ screens:
       - cli.exit
 
   - id: where-prototype-beside
-    title: "The prototype is found beside the spec before the code"
+    title: "The designs are found beside the spec before the code"
     prototype: /screens/where-prototype-beside.html
     app: { path: /as-built/cli/where-prototype-beside.html }
     anchors:
       - cli.prompt
       - cli.where.prototype
-      - cli.where.proposals
       - cli.exit
 
   - id: threads-reply-names-its-blueprint

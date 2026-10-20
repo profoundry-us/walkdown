@@ -330,7 +330,7 @@ export default {
     ]);
     storyboard(m, [
       '  - id: cart',
-      '    prototype: /screens/cart.html',
+      '    design: /screens/cart.html',
       '    anchors: [cart.items, cart.total, cart.checkout]',
     ]);
     suite(m, 'pays', 'gift-cards');
@@ -393,10 +393,10 @@ export default {
     m.ok(['hash', '--write', '--blueprint', 'checkout']);
     storyboard(m, [
       '  - id: cart',
-      '    prototype: /screens/cart.html',
+      '    design: /screens/cart.html',
       '    anchors: [cart.items, cart.total, cart.checkout]',
       '  - id: receipt',
-      '    prototype: /screens/receipt.html',
+      '    design: /screens/receipt.html',
       '    anchors: [receipt.number, receipt.items, receipt.email]',
       '  - id: old-cart',
       '    retired: The cart was redrawn.',
@@ -427,17 +427,17 @@ export default {
     ]);
     storyboard(m, [
       '  - id: cart',
-      '    prototype: /screens/cart.html',
+      '    design: /screens/cart.html',
       '    anchors: [cart.items, cart.total]',
       '  - id: refund',
-      '    prototype: /screens/refund.html',
+      '    design: /screens/refund.html',
       '    anchors: [refund.amount, refund.submit]',
       '  - id: gift-card',
-      '    prototype: /screens/gift-card.html',
+      '    design: /screens/gift-card.html',
       '    anchors: [gift-card.code, gift-card.apply]',
       '  - id: old-cart',
       '    retired: The cart was redrawn.',
-      '    prototype: /screens/old-cart.html',
+      '    design: /screens/old-cart.html',
     ]);
   },
 

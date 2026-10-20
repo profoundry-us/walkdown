@@ -1,0 +1,59 @@
+{
+  "run_id": "2026-10-20T19-19-14Z-local-01",
+  "created": "2026-10-20T19:19:14Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b43ec51d-dirty",
+  "tree_hash": "sha256:3d5e0b25f983",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "locations.keeping.old-layout-warns",
+      "status": "fail",
+      "statement_hash": "sha256:d575b0345c14",
+      "duration_ms": 7460,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/upgrade-designs.test.js:123",
+        "test/upgrade-designs.test.js:248"
+      ]
+    },
+    {
+      "rule": "ownership.design.proposed-version-exists",
+      "status": "pass",
+      "statement_hash": "sha256:3457d3988f00",
+      "duration_ms": 9941,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:0e9584c2d6df",
+      "duration_ms": 3606,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-once",
+      "status": "pass",
+      "statement_hash": "sha256:49cd12caf11c",
+      "duration_ms": 640,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:63c4c1304ed6",
+      "duration_ms": 1345,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}

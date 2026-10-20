@@ -23,11 +23,11 @@ function storyboard(m, screens) {
 function undrawn(m, { cart = true } = {}) {
   storyboard(m, [
     ...(cart
-      ? ['  - id: cart', '    title: Cart', '    prototype: null', '    app: { path: /cart }']
+      ? ['  - id: cart', '    title: Cart', '    design: null', '    app: { path: /cart }']
       : []),
     '  - id: receipt',
     '    title: Receipt',
-    '    prototype: null',
+    '    design: null',
     '    app: { path: /receipt }',
   ]);
   m.ok([
@@ -65,11 +65,11 @@ export default {
     storyboard(m, [
       '  - id: cart',
       '    title: Cart',
-      '    prototype: null',
+      '    design: null',
       '    app: { path: /cart }',
       '  - id: cart-coupon',
       '    title: Cart, with the coupon drawer open',
-      '    prototype: null',
+      '    design: null',
       '    app: { path: "/cart#coupon" }',
     ]);
   },
@@ -79,11 +79,11 @@ export default {
     storyboard(m, [
       '  - id: orders',
       '    title: Orders',
-      '    prototype: null',
+      '    design: null',
       '    app: { path: /orders }',
       '  - id: orders-returns',
       '    title: Orders, on the returns tab',
-      '    prototype: null',
+      '    design: null',
       '    app: { path: "/orders?tab=returns" }',
     ]);
   },
@@ -135,11 +135,11 @@ export default {
         'screens:',
         '  - id: pay',
         '    title: Pay for the order',
-        '    prototype: /screens/pay.html',
+        '    design: /screens/pay.html',
         '    anchors: [pay.card-form, pay.card-number, pay.total, pay.submit]',
         '  - id: pay-error',
         '    title: The card was declined',
-        '    prototype: /screens/pay-error.html',
+        '    design: /screens/pay-error.html',
         '    anchors: [pay-error.message, pay-error.retry, pay-error.other-card]',
         '',
       ].join('\n'),
@@ -175,7 +175,7 @@ export default {
     storyboard(m, [
       '  - id: receipt',
       '    title: Receipt',
-      '    prototype: /screens/receipt.html',
+      '    design: /screens/receipt.html',
       '    app: { path: /receipt }',
       '    anchors: [receipt.items, receipt.total]',
     ]);
@@ -309,6 +309,46 @@ export default {
     );
   },
   /*
+   * lint-old-layout: g2-old-prototypes, and a third blueprint, billing, made
+   * on 0.5.0's layout: `design:` keys and a version in designs/invoice/.
+   */
+  'g2-old-layout'(m, h) {
+    h.fixtures['g2-old-prototypes'](m, h);
+    m.ok(['blueprints', 'new', 'billing']);
+    const spec = m.specOf('billing');
+    writeFileSync(
+      join(spec, 'spec.yml'),
+      `${readFileSync(join(spec, 'spec.yml'), 'utf8')}\ndesign:\n  root: designs-billing/\n`,
+    );
+    mkdirSync(join(m.shop, 'designs-billing', 'invoice'), { recursive: true });
+    writeFileSync(
+      join(m.shop, 'designs-billing', 'invoice', '20261001.html'),
+      '<!doctype html><title>Invoice</title>\n',
+    );
+    writeFileSync(
+      join(spec, 'storyboard.yml'),
+      'screens:\n  - id: invoice\n    title: invoice\n    design: /invoice/20261001.html\n    app: { path: /invoice }\n',
+    );
+    writeFileSync(
+      join(spec, 'features', 'billing.yml'),
+      [
+        'feature: billing',
+        'stories:',
+        '  - id: billing.basics',
+        '    title: The basics of billing',
+        '    statement: As a shopper I am billed.',
+        '    rules:',
+        '      - id: billing.basics.invoice',
+        '        statement: The invoice screen shows what it is for.',
+        '        screens: [invoice]',
+        '        steps:',
+        '          then: [It does]',
+        '',
+      ].join('\n'),
+    );
+    m.ok(['hash', '--write', '--blueprint', 'billing']);
+  },
+  /*
    * threads-set-proposes: `checkout` keeps its designs in designs/, with
    * receipt's accepted version /receipt/20260921.html and a new one drawn at
    * /receipt/20261012.html. n-0001 is a note on a rule, n-0002 the open
@@ -366,7 +406,7 @@ export default {
   /*
    * lint-proposes-gone: g2-request-proposes, after the designer drew and
    * moved on. n-0002 on receipt proposes /receipt/20261012.html and is
-   * addressed, and that draft was since moved to designs/drafts/receipt.html.
+   * addressed, and that version was since renamed /receipt/20261014.html.
    * n-0003, open on cart, proposes /cart/20261015.html, since deleted.
    * n-0004 on cart proposed /cart/20261001.html, deleted too, and was
    * waived, so nothing waits on it.
@@ -385,7 +425,7 @@ export default {
       '    app: { path: /receipt }',
       '  - id: cart',
       '    title: Cart',
-      '    prototype: null',
+      '    design: null',
       '    app: { path: /cart }',
     ]);
     const file = join(m.specOf('checkout'), 'features', 'checkout.yml');
@@ -402,8 +442,10 @@ export default {
     set('n-0003', '--proposes', '/cart/20261015.html', '--as-agent');
     set('n-0004', '--proposes', '/cart/20261001.html', '--as-agent');
     set('n-0004', '--status', 'waived', '--reason', 'The list was drawn on n-0003 instead.');
-    mkdirSync(join(designs, 'drafts'));
-    renameSync(join(designs, 'receipt', '20261012.html'), join(designs, 'drafts', 'receipt.html'));
+    renameSync(
+      join(designs, 'receipt', '20261012.html'),
+      join(designs, 'receipt', '20261014.html'),
+    );
     for (const f of ['cart/20261001.html', 'cart/20261015.html']) rmSync(join(designs, f));
   },
   /*

@@ -1,0 +1,29 @@
+id: n-0614
+uuid: f770394b-95be-4e97-9c07-cb77440cff41
+kind: note
+reason: request
+author: agent
+created: 2026-10-20T19:20:54.691Z
+anchor:
+  screen: lint-old-layout
+status: addressed
+body: "Built ahead of its design, at the release's request: lint, run on a
+  project where two blueprints still keep their designs as before 0.5.0 and a
+  third is on the new layout. Each old blueprint gets one [upgrade] warning on
+  its spec.yml naming what is old (storyboard prototype: keys, prototype.root in
+  spec.yml, screens/ and drafts/ under the design root) and saying to run
+  walkdown upgrade --dry-run, then walkdown upgrade. The new-layout blueprint
+  gets none, and lint exits 0. The as-built capture is
+  as-built/cli/lint-old-layout.html; draw what it should look like."
+replies:
+  - author: agent
+    created: 2026-10-20T19:21:49Z
+    body: agent named /drafts/lint-old-layout.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-20T19:21:49Z
+    body: "Drawn: prototype-cli/drafts/lint-old-layout.html. Checkout and search
+      each get one [upgrade] warning on their spec.yml that names what is old
+      and says to run walkdown upgrade --dry-run and then walkdown upgrade,
+      billing gets none, and lint exits 0."
+proposes: /drafts/lint-old-layout.html

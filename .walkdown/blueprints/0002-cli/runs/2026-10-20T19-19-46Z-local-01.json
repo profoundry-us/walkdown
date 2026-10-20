@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-20T19-19-46Z-local-01",
+  "created": "2026-10-20T19:19:46Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b43ec51d-dirty",
+  "tree_hash": "sha256:3d5e0b25f983",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:0e9584c2d6df",
+      "duration_ms": 499,
+      "checks": [
+        "test/lint.test.js:421"
+      ]
+    }
+  ]
+}

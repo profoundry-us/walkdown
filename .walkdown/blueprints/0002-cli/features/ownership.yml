@@ -11,17 +11,17 @@ stories:
         screens: [lint-no-design-request]
         steps:
           given:
-            - "A storyboard screen with no design (`prototype: null`) and no note anchored to it"
+            - "A storyboard screen with no design (`design: null`) and no note anchored to it"
           when:
             - The blueprint is linted
           then:
-            - The screen is named as having no design and no open design request
+            - The screen is named as having no design and no open design request, and the message says a proposed version counts only once a request's `proposes:` names it
             - An open note with the reason "request", anchored to that screen, clears it, because a request is queued for design
             - A note with any other reason does not clear it, because it is queued for the agent, where design will not see it
             - "A note whose thread has ended stops clearing it: a request is open work or it is nothing"
-            - "A proposal sketch is not a request: a drawing nobody asked design for routes nothing"
+            - "A proposed version is not a request: a version nobody asked design for routes nothing"
             - A retired screen is exempt, because it describes something we stopped meaning
-          statement_hash: sha256:418069b7b1f6
+          statement_hash: sha256:0e9584c2d6df
 
   - id: ownership.design
     title: The design is drawn by someone other than the builder
@@ -197,7 +197,7 @@ stories:
         screens: [lint-proposes-gone]
         steps:
           given:
-            - A design request n-0002 on screen receipt, addressed, that proposes /receipt/20261012.html, a draft since moved to /drafts/receipt.html
+            - A design request n-0002 on screen receipt, addressed, that proposes /receipt/20261012.html, a version since renamed /receipt/20261014.html
             - An open request n-0003 on screen cart that proposes /cart/20261015.html, since deleted
             - A waived request n-0004 on cart whose /cart/20261001.html was deleted too
           when:
@@ -205,10 +205,10 @@ stories:
           then:
             - n-0002 and n-0003 are each an error, named in the thread's file and by its id
             - Each error names the version the request proposes and the path lint looked for it at, which is the path the panel opens it from
-            - Each says to put the draft back there, or to name where it is now with `walkdown threads set <id> --proposes <path>`
+            - Each says to put the version back there, or to name where it is now with `walkdown threads set <id> --proposes <path>`
             - The waived request is not named, because nothing waits on it
             - Lint exits 1
-          statement_hash: sha256:7d08a2878a3e
+          statement_hash: sha256:3457d3988f00
 
   - id: ownership.authoring
     title: A rule is written so it can be built from

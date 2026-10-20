@@ -124,19 +124,19 @@ export default {
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'app-search.png'), '');
   },
-  /* `checkout` with a prototype folder beside its spec, and `prototype.root` naming it. */
+  /* `checkout` with a designs folder beside its spec, and `design.root` naming it. */
   'g1-prototype-beside'(m) {
     m.ok(['blueprints', 'new', 'checkout']);
     const spec = m.specOf('checkout');
     const file = join(spec, 'spec.yml');
-    writeFileSync(file, `${readFileSync(file, 'utf8')}\nprototype:\n  root: prototype/\n`);
-    mkdirSync(join(spec, 'prototype', 'screens'), { recursive: true });
+    writeFileSync(file, `${readFileSync(file, 'utf8')}\ndesign:\n  root: designs/\n`);
+    mkdirSync(join(spec, 'designs', 'pay'), { recursive: true });
     writeFileSync(
-      join(spec, 'prototype', 'screens', 'pay.html'),
+      join(spec, 'designs', 'pay', '20261001.html'),
       '<!doctype html><title>Pay</title>\n',
     );
     // The code has one too, as a repository that keeps its design does.
-    mkdirSync(join(m.shop, 'prototype'), { recursive: true });
+    mkdirSync(join(m.shop, 'designs'), { recursive: true });
   },
   /*
    * `checkout` and `search` sharing one suite: it tags a rule of each and

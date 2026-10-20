@@ -116,6 +116,20 @@ const threadsOf = (name) => {
   );
 }
 
+/* The [upgrade] warnings `walkdown lint` prints, one blueprint each. */
+const oldLayoutWarnings = () =>
+  `${m.wd(['lint', '--no-checks']).stdout}`.split('\n').filter((l) => l.includes('⚠ [upgrade]'));
+
+test('before the upgrade, lint warns once on each blueprint on the old layout @rule:locations.keeping.old-layout-warns', () => {
+  const lines = oldLayoutWarnings();
+  assert.deepEqual(
+    lines.map((l) => l.match(/\] (\w+)\/spec\.yml/)?.[1]).sort(),
+    ['checkout', 'gallery', 'search'],
+    lines.join('\n'),
+  );
+  for (const l of lines) assert.match(l, /`walkdown upgrade --dry-run`.*then `walkdown upgrade`/);
+});
+
 test('the dry run moves nothing @rule:locations.keeping.upgrade-moves-prototypes', () => {
   const r = m.wd(['upgrade', '--dry-run']);
   assert.equal(r.status, 0, r.stderr);
@@ -229,4 +243,8 @@ test('run again, the upgrade finds nothing to do @rule:locations.keeping.upgrade
   const r = m.wd(['upgrade']);
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /Nothing to upgrade/);
+});
+
+test('after the upgrade, lint no longer warns of the old layout @rule:locations.keeping.old-layout-warns', () => {
+  assert.deepEqual(oldLayoutWarnings(), []);
 });

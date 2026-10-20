@@ -60,18 +60,21 @@ export function run(args) {
    */
   const only = positionals[0];
   if (only) {
-    // The prototype and proposals rows the full report prints are askable too (n-0494).
+    /*
+     * The design rows the full report prints are askable too (n-0494).
+     * `prototype` is the name the designs row had before 0.5.0, and a script
+     * written then still gets its answer.
+     */
     const design = (l) => Object.fromEntries(designRows(l));
+    const asked = only === 'prototype' ? 'designs' : only;
     const cellOf = (l) =>
-      only === 'spec' || only === 'code' || KINDS.includes(only)
-        ? l[only]
-        : only === 'prototype' || only === 'proposals'
-          ? (design(l)[only] ?? { path: null, why: l.spec?.why ?? 'no blueprint answers here' })
+      asked === 'spec' || asked === 'code' || KINDS.includes(asked)
+        ? l[asked]
+        : asked === 'designs' || asked === 'proposals'
+          ? (design(l)[asked] ?? { path: null, why: l.spec?.why ?? 'no blueprint answers here' })
           : null;
     if (!cellOf(loc)) {
-      console.error(
-        `No such location "${only}". Try: spec, code, ${KINDS.join(', ')}, prototype, proposals.`,
-      );
+      console.error(`No such location "${only}". Try: spec, code, ${KINDS.join(', ')}, designs.`);
       return end(2);
     }
     /*
@@ -177,11 +180,11 @@ function report(loc) {
   for (const kind of KINDS) row(kind, loc[kind]);
   row('code', loc.code);
   /*
-   * The two design folders, which neither the registry nor a default names:
+   * The design folders, which neither the registry nor a default names:
    * each is looked for beside the spec, then in the code (#17), and a person
    * whose design will not load needs to see which of the two answered.
    */
-  for (const [label, cell] of designRows(loc)) row(label, cell);
+  for (const [label, cell] of designRows(loc)) if (!cell.hidden) row(label, cell);
   /*
    * And what git sees of it, asked of git rather than of the ignore file
    * walkdown wrote: a home in `~/.walkdown` is nobody's diff, a `.gitignore`
@@ -210,7 +213,14 @@ function report(loc) {
    */
 }
 
-/** The prototype and proposals rows: where each resolved, and why there. */
+/**
+ * The designs row, and a proposals row only where a `proposals/` folder is
+ * still on disk: the folder retired in 0.5.0 (ADR 0015), and a row for it on
+ * every blueprint would say a place exists that nothing writes to any more.
+ *
+ * @typedef {{ path: string | null, why: string, missing?: boolean, hidden?: boolean }} DesignCell
+ * @returns {Array<[string, DesignCell]>}
+ */
 function designRows(loc) {
   if (!loc.spec?.path) return [];
   let config = {};
@@ -229,24 +239,32 @@ function designRows(loc) {
         ? 'in the code — nothing of that name beside the spec'
         : 'outside both the spec and the code',
   });
-  const proto = prototypeDir(bp);
-  return [
+  const root = prototypeDir(bp);
+  /** @type {Array<[string, DesignCell]>} */
+  const rows = [
     [
-      'prototype',
-      proto
+      'designs',
+      root
         ? {
-            ...cell(proto),
+            ...cell(root),
             why: config?.design?.root
-              ? `\`design.root: ${config.design.root}\`, ${cell(proto).why}`
+              ? `\`design.root: ${config.design.root}\`, ${cell(root).why}`
               : designRoot(config)
-                ? `\`prototype.root: ${designRoot(config)}\`, ${cell(proto).why}`
-                : `a \`designs/\` folder, ${cell(proto).why}`,
+                ? `\`prototype.root: ${designRoot(config)}\` from before 0.5.0, ${cell(root).why}`
+                : `a \`designs/\` folder, ${cell(root).why}`,
           }
         : {
             path: null,
             why: 'spec.yml declares no `design.root`, and there is no `designs/` folder',
           },
     ],
-    ['proposals', cell(proposalsDir(bp))],
   ];
+  const proposals = proposalsDir(bp);
+  rows.push([
+    'proposals',
+    existsSync(proposals)
+      ? { ...cell(proposals), why: `retired in 0.5.0, still read; ${cell(proposals).why}` }
+      : { path: null, why: 'retired in 0.5.0; no `proposals/` folder is left', hidden: true },
+  ]);
+  return rows;
 }

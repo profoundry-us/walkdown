@@ -1,0 +1,12 @@
+# `walkdown lint` where two blueprints keep their designs as before 0.5.0 and a third is on the new layout.
+screen: lint-old-layout
+title: Lint names each blueprint still on the old design layout, once
+rule: locations.keeping.old-layout-warns
+fixture: g2-old-layout
+command: [lint, --no-checks]
+exit: 0
+expect:
+  - '^  ⚠ \[upgrade\] checkout/spec\.yml › design: this blueprint keeps its designs as before 0\.5\.0 \(storyboard `prototype:` keys; `prototype\.root` in spec\.yml; `screens/` and `drafts/` under prototype/\) — `walkdown upgrade --dry-run` shows what would move, then `walkdown upgrade` moves it$'
+  - '^  ⚠ \[upgrade\] search/spec\.yml › design: this blueprint keeps its designs as before 0\.5\.0 \(storyboard `prototype:` keys; `prototype\.root` in spec\.yml; `screens/` and `drafts/` under prototype/\) — `walkdown upgrade --dry-run` shows what would move, then `walkdown upgrade` moves it$'
+anchors:
+  - { id: cli.lint.old-layout, match: '^  ⚠ \[upgrade\]' }

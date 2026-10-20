@@ -6,7 +6,7 @@ default_screen: waitlist-join
 screens:
   - id: waitlist-join
     title: Join the waitlist
-    prototype: /screens/waitlist-join.html
+    design: /waitlist-join/20260820.html
     app: { path: /index.html }
     anchors:
       - waitlist.email
@@ -15,14 +15,14 @@ screens:
 
   - id: waitlist-confirm
     title: Confirmation
-    prototype: /screens/waitlist-confirm.html
+    design: /waitlist-confirm/20260820.html
     app: { path: /confirm.html?email=you@example.com }
     anchors:
       - waitlist.confirmed-email
 
   - id: waitlist-already
     title: Already on the list
-    prototype: /screens/waitlist-already.html   # spec-born (q-0001); design adopted the sketch, q-0002
+    design: /waitlist-already/20260820.html   # spec-born (q-0001); design adopted the sketch, q-0002
     app:
       path: /confirm.html?email=you@example.com&already=1
       # A state, not an address: the query is not identity, so this shares the
@@ -34,7 +34,7 @@ screens:
 
   - id: waitlist-admin
     title: Waitlist admin
-    prototype: /screens/waitlist-admin.html
+    design: /waitlist-admin/20260821.html
     app: { path: /admin.html }
     anchors:
       - waitlist.heading
@@ -49,7 +49,7 @@ screens:
   # and watch it lift. Design has never drawn it — the request is n-0004.
   - id: waitlist-export
     title: Waitlist export (slow on purpose)
-    prototype: null
+    design: null
     app: { path: /export.html }
     anchors:
       - waitlist.export-note
@@ -61,7 +61,7 @@ screens:
   # storyboard writes that the way a URL is written.
   - id: waitlist-invite-batch
     title: Confirm a batch invite
-    prototype: /screens/waitlist-admin.html#invite-batch
+    design: /waitlist-admin/20260821.html#invite-batch
     app: { path: /admin.html#invite-batch }
     anchors:
       - waitlist.confirm-batch

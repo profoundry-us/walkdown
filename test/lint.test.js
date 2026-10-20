@@ -28,7 +28,7 @@ function writeFixture(dir, { goodHash = true, badScreen = false, threads = [] } 
     [
       'screens:',
       '  - id: home',
-      '    prototype: /home.html',
+      '    design: /home/20261001.html',
       '    app: { path: / }',
       '    anchors: [home.cta]',
     ].join('\n'),

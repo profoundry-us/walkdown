@@ -1,15 +1,14 @@
-# `walkdown where` for a home outside the repository that keeps its own design: the prototype row.
+# `walkdown where` for a home outside the repository that keeps its own design: the designs row, and no proposals row.
 screen: where-prototype-beside
-title: The prototype is found beside the spec before the code
+title: The designs are found beside the spec before the code
 rule: locations.default.prototype-beside-the-spec
 fixture: g1-prototype-beside
 command: [where]
 exit: 0
 expect:
-  - '^  prototype ~/\.walkdown/projects/shop/blueprints/checkout/prototype$'
-  - '^            \[`prototype\.root: prototype/`, beside the spec\]$'
-  - '^  proposals ~/shop/proposals  \(does not exist yet\)$'
-  - '^            \[in the code — nothing of that name beside the spec\]$'
+  - '^  designs   ~/\.walkdown/projects/shop/blueprints/checkout/designs$'
+  - '^            \[`design\.root: designs/`, beside the spec\]$'
+  # The row after the designs row is git's: no proposals row, since no `proposals/` folder is left.
+  - '^            \[`design\.root: designs/`, beside the spec\]\n  tracked '
 anchors:
-  - { id: cli.where.prototype, match: '^  prototype |^            \[`prototype\.root' }
-  - { id: cli.where.proposals, match: '^  proposals |^            \[in the code' }
+  - { id: cli.where.prototype, match: '^  designs |^            \[`design\.root' }
