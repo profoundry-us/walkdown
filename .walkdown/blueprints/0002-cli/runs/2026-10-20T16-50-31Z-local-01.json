@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-20T16-50-31Z-local-01",
+  "created": "2026-10-20T16:50:31Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "aec7b490-dirty",
+  "tree_hash": "sha256:49bd34b9e5e3",
+  "spec_hash": "sha256:7c51d51972c1",
+  "results": [
+    {
+      "rule": "status.derived.new-design-stales-older-verdicts",
+      "status": "pass",
+      "statement_hash": "sha256:4304542fca79",
+      "duration_ms": 241,
+      "checks": [
+        "test/status-design-accepted.test.js:87",
+        "test/status-design-accepted.test.js:135",
+        "test/status-design-accepted.test.js:148",
+        "test/status-design-accepted.test.js:160",
+        "test/status-design-accepted.test.js:193"
+      ]
+    }
+  ]
+}

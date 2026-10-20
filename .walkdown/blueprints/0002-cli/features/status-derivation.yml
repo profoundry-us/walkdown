@@ -163,6 +163,30 @@ stories:
               at: 2026-09-14T04:15:34Z
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
 
+      - id: status.derived.new-design-stales-older-verdicts
+        origin: thread:q-0580
+        created_at: 2026-10-20
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Once a new design for a screen is accepted, an agent's or a person's verdict on a rule naming that screen reads stale if it was given against the design it replaced.
+        because: A verdict says the build matches the design it was judged beside. When that design is replaced, the verdict says nothing about the new one.
+        history: Topher, q-0580, 2026-10-10, written into ADR 0015 §8. Until 2026-10-20 only a thread on a rule could stale anything, and a design request sits on a screen.
+        screens: [status-reworded]
+        steps:
+          given:
+            - A screen with a design request, and two rules naming it, each with an agent pass and a person's pass from before the request was filed
+          when:
+            - A person accepts the design request
+          then:
+            - Every one of those verdicts reads stale, not passing
+            - A rule that names another screen is unaffected
+            - A verdict given after the acceptance passes again
+            - A person's verdict given while the request was open stands. Approving every rule on a screen accepts its design, so those approvals are what accepted it
+            - The checks tier is unaffected, because a check tests the behaviour and not the design
+            - A request accepted with no time recorded on it stales nothing
+            - A request still open stales nothing
+          statement_hash: sha256:4304542fca79
+
       - id: status.derived.human-tier-distinct
         origin: prd
         statement: An agent's verdict is evidence, never acceptance. Only a person signing for a role can give that role's signature, and no number of passing checks or agent verdicts supplies it.
