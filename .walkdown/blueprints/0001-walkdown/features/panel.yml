@@ -1424,6 +1424,24 @@ stories:
             - Picking another screen leaves it, as it leaves any screen
             - A thread on a screen with no proposed design offers no such button
           statement_hash: sha256:7a23515241e7
+      - id: panel.threads.open-shows-the-proposal
+        origin: walkdown
+        created_at: 2026-10-19
+        statement: Opening a screen's proposed design from a thread shows the proposal in one step, from either side of the fade.
+        because: From the As-built side, Open chose Proposed but left the build in the frame, so nothing on screen was the proposal until a second click on Design.
+        signoff: [eng, product]
+        screens: [thread-panel]
+        steps:
+          given:
+            - A thread anchored to a screen that has a proposed design
+            - The panel is on the As-built side of the fade
+          when:
+            - Choose to open the screen from the thread
+          then:
+            - The panel moves to the Design side as it switches to that screen, with Proposed chosen
+            - The frame shows the proposal, framed as proposed, with no further click
+            - From the Design side, the same choice lands in the same place
+          statement_hash: sha256:6757e4825062
       - id: panel.threads.own-view
         origin: thread:n-0094
         statement: The panel has a threads view of its own. Its live filters list the threads the walk cannot reach - on no rule, or on a retired one - and All lists every thread on the blueprint, rule conversations and closed ones included.
