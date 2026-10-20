@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-20T19-02-03Z-local-01",
+  "created": "2026-10-20T19:02:03Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "3d814eed-dirty",
+  "tree_hash": "sha256:7434d5b6a3d5",
+  "spec_hash": "sha256:d8690f345fc8",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:8d45dfbf1888",
+      "duration_ms": 793,
+      "checks": [
+        "test/redline-show.test.js:32",
+        "test/redline-show.test.js:41"
+      ]
+    }
+  ]
+}

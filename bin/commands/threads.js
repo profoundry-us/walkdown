@@ -33,9 +33,10 @@ export const VERBS = {
   new: {
     usage:
       'walkdown threads new --rule <id> | --screen <id> --body <text> --blueprint <id> [--kind note|question] [--element <sel>]\n' +
-      '                     [--reason <why>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]] [--json]',
+      '                     [--reason <why>] [--option "<label> :: <why>"]... [--as-agent [--said <text>] [--added <text>]] [--json]\n' +
+      '                     [--reason redline --element <sel> [--design <text>] [--build <text>]]',
     about:
-      'Open a thread on a rule, or on a screen alone (a design request). --body says what was\nseen; with --as-agent, --said carries what the person said and --added what the\nmachine put beside it.',
+      "Open a thread on a rule, or on a screen alone (a design request). --body says what was\nseen; with --as-agent, --said carries what the person said and --added what the\nmachine put beside it. --reason redline files a redline: a person's record that the\nbuild leaves the design at an element on purpose, filed closed. --design and --build\nsay what each shows there, a line each, and either may be left out.",
     run: (args) => thread(['new', ...args]),
   },
   show: {
@@ -87,7 +88,7 @@ export const VERBS = {
       'walkdown threads set <id> --status <s> | --verify | --reopen | --waive | --option "<label> :: <why>"... | --proposes <version> | --written-as <rule>\n' +
       '                     --blueprint <id> [--reason <text>] [--reply <text>] [--as-agent [--said <text>] [--added <text>]] [--json]',
     about:
-      'Change a thread: its status, or the choices a question offers. Transitions are checked\n(a note: open → addressed → verified | reopen | waived; a question: open → answered →\nincorporated | reopen | waived). Verified and waived need a named person; waiving and\nreopening need --reason. --reply lands with the change, or neither lands.',
+      'Change a thread: its status, or the choices a question offers. Transitions are checked\n(a note: open → addressed → verified | reopen | waived; a question: open → answered →\nincorporated | reopen | waived). Verified and waived need a named person; waiving and\nreopening need --reason. --reply lands with the change, or neither lands. A person\ndeclines a design request with --waive --reason "<why>".',
     run: (args) => {
       const [id, ...rest] = args;
       if (!id || id.startsWith('-')) return usage('set');

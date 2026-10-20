@@ -54,6 +54,10 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
   refuses a question left open where it was first asked.
 - **`walkdown threads set <id> --proposes <version>`** names the version a
   design request proposes; a version no file holds is refused.
+- **`walkdown threads new --reason redline --design <text> --build <text>`**
+  files a redline from the terminal with what the design and the build each
+  show, as the pin form does. Either half may be left out, and the flags are
+  refused on anything but a new redline.
 - **A thread's Open button.** A thread on a screen with a proposed design offers
   "Open <screen>", which goes there with the proposal showing, in one click from
   either side of the fade.

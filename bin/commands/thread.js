@@ -37,6 +37,8 @@ export function run(args) {
       'written-as': { type: 'string' },
       'as-is': { type: 'boolean', default: false },
       attach: { type: 'string', multiple: true },
+      design: { type: 'string' },
+      build: { type: 'string' },
     },
     allowPositionals: true,
   });
@@ -122,6 +124,19 @@ export function run(args) {
    * n-0125. An empty body reaches replyToThread and gets its refusal.
    */
   const replying = values.reply !== undefined || (id !== 'new' && values.said !== undefined);
+  /*
+   * What the design and the build show at a redline's element, a line each
+   * (q-0585): the pair the pin form files. It is said when the redline is
+   * filed, so on a thread that exists it changes nothing and is refused.
+   */
+  const pair = values.design !== undefined || values.build !== undefined;
+  if (pair && id !== 'new') {
+    console.error(
+      '--design and --build go on a new redline (`walkdown threads new --reason redline`); a thread that exists keeps the pair it was filed with.',
+    );
+    console.error('Nothing was changed.');
+    process.exit(2);
+  }
 
   /*
    * `threads new` opens a thread from the CLI - the door that was missing.
@@ -193,6 +208,13 @@ export function run(args) {
     // screen alone, which is a design request unless --reason says otherwise.
     // The same flag that carries a waive's sentence carries this one word on `new`.
     const reason = values.reason ?? (!rule && kind === 'note' ? 'request' : null);
+    if (pair && reason !== 'redline') {
+      console.error(
+        "--design and --build say what the design and the build show at a redline's element; they go with --reason redline.",
+      );
+      console.error('Nothing was filed.');
+      return end(2);
+    }
     // The choices a question offers, one flag each: "Retire it :: the other
     // screen asks the same thing". The label is what the answer names.
     const options = values.option?.length
@@ -215,6 +237,8 @@ export function run(args) {
         added: values.added ?? null,
         asIs: values['as-is'],
         attachments: attachFiles(values.attach),
+        design: values.design ?? null,
+        build: values.build ?? null,
       }));
     } catch (err) {
       // A refusal at the door (the voice, a missing body) is words, never a
@@ -256,6 +280,8 @@ export function run(args) {
           by,
           ...(marked ? { via: marked } : {}),
           anchor,
+          ...(thread.design ? { design: thread.design } : {}),
+          ...(thread.build ? { build: thread.build } : {}),
         }),
       );
       return end(0);
@@ -264,6 +290,9 @@ export function run(args) {
       // Filed closed, so it says so, and says what it is for.
       console.log(`✓ ${opened} filed · note · redline · by ${by} · closed`);
       console.log(dim(`  screen ${anchor.screen}, element ${thread.anchor.element}`));
+      // The pair as `threads show` prints it, a dash for a half not given.
+      console.log(dim(`  design  ${thread.design ?? '—'}`));
+      console.log(dim(`  build   ${thread.build ?? '—'}`));
       console.log(dim('  It is closed as filed, and waits on nobody.'));
       console.log(
         dim('  A judge reads this gap as intended, not as a fail, and names it in its reasoning.'),

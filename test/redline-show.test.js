@@ -4,8 +4,6 @@
  * (embed.pin.redline-explains-a-gap, q-0610), on a throwaway machine.
  */
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { after, test } from 'node:test';
 import { FIXTURES, machine } from '../tools/cli-scenarios.mjs';
 
@@ -24,14 +22,12 @@ m.ok([
   'receipt.total',
   '--body',
   'The total sits under the items. It reads better on a phone.',
+  '--design',
+  'the total above the items',
   '--blueprint',
   'checkout',
 ]);
-// The pin form files the pair; the CLI has no flag for it, so it is written
-// the way the form writes it: a design half only.
-const dir = join(m.specOf('checkout'), 'threads');
-const file = join(dir, readdirSync(dir)[0]);
-writeFileSync(file, `${readFileSync(file, 'utf8')}design: the total above the items\n`);
+// A design half only, as the pin form can file it.
 
 test(`threads show prints a redline's pair, a dash for the half not given ${RULE}`, () => {
   const out = m.wd(['threads', 'show', 'n-0001']).stdout;

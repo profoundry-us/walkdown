@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-20T19-11-15Z-local-01",
+  "created": "2026-10-20T19:11:15Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e7468554-dirty",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:1908544195fa",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-04-25Z/01-agent-refused.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/02-person-filed.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/03-halves.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/04-flags-refused.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/05-help.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/06-status.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/07-judge.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/08-reopen.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/09-more-probes.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/10-relayed.txt",
+        "runs/evidence/2026-10-20T19-04-25Z/11-reopen.txt"
+      ],
+      "reasoning": "This rule is headless, so I served nothing and used no port or browser: I drove throwaway machines built by tools/cli-scenarios.mjs (machine() plus the g2-receipt-drawn fixture, blueprint checkout, screen receipt, element receipt.total), each in its own temp home, and snapshotted the threads directory with file hashes before and after every command. An agent's redline is refused with exit 2 in the words of the accepted redline-refused-for-agent design, says Nothing was filed, and hands over the question to ask on the same element; the threads directory never appeared. The same refusal meets --as-agent with --design/--build, --as-agent --said, --as-agent --said --added, and a person-less laptop whose profile names the user claude. A person's redline with --design and --build is filed as note, reason redline, status recorded (printed closed), anchored to screen and element, with design: and build: lines on disk. Its confirmation prints design and build lines exactly as threads show prints them. Filed with only one half, or neither, the YAML carries only what was given, and both the confirmation and threads show print a dash for the missing half. --design or --build is refused in words with Nothing was filed on threads new with no reason, with --reason feedback and with --kind question. On an existing thread, threads set --status open --build and threads reply --design/--build are refused naming the pair as fixed, with Nothing was changed. threads set with --design alone gets the generic set needs a status-change refusal, which is still words and writes nothing. threads new --help names --reason redline as a person's record that the build leaves the design at an element on purpose, filed closed, and names --design and --build. status and threads list nothing waiting on anyone after filing. With a rule whose verify list is agent, which I added on the receipt screen on the throwaway machine, walkdown judge lists every redline under REDLINES and says a gap a redline names is intended, not a fail. An agent's reopen (--status open or --reopen, with a reason) is refused with Nothing was changed. A person's reopen with a reason turns it into an open note, reason feedback, reopened_from: redline (shown as reopened from a redline), and puts address n-0002 in the agent queue. Against the accepted designs, the as-built redline-refused-for-agent page matches line for line. The as-built redline-filed page adds the design and build lines a step names, which is a text change carried by the steps and not a departure. Edges named and not failed: the judge prompt's REDLINES list gives each redline's body but not its design/build pair (about 20%, beyond the steps); threads set --design alone is answered by the generic set message instead of the pair-is-fixed one (about 15%); --as-agent with both --said and --body meets the general relay refusal before the redline one, still refused with nothing written (under 10%).",
+      "threads": []
+    }
+  ]
+}

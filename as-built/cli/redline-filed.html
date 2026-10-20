@@ -2,7 +2,7 @@
 <!--
   AS-BUILT: redline-filed
 
-  What `walkdown threads new --reason redline --screen receipt --element receipt.total --body "The total sits under the items. It reads better on a phone." --blueprint checkout` printed, run by tools/cli-captures.mjs
+  What `walkdown threads new --reason redline --screen receipt --element receipt.total --body "The total sits under the items. It reads better on a phone." --design "the total beside the items" --build "the total under the items" --blueprint checkout` printed, run by tools/cli-captures.mjs
   from test/cli/scenarios/redline-filed.yml - the same run test/cli.test.js
   checks against threads.lifecycle.redline-is-a-persons. Paths, times and hashes are made steady so
   the fade shows what changed and nothing else. Regenerated, never edited: the
@@ -50,11 +50,13 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads new --reason redline --screen receipt --element receipt.total --body "The total sits under the items. It reads better on a phone." --blueprint checkout</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown threads new --reason redline --screen receipt --element receipt.total --body "The total sits under the items. It reads better on a phone." --design "the total beside the items" --build "the total under the items" --blueprint checkout</div>
       <div data-testid="cli.thread.filed">
       <div class="ln">✓ n-0001 filed · note · redline · by topher · closed</div>
       </div>
       <div class="ln">  screen receipt, element receipt.total</div>
+      <div class="ln">  design  the total beside the items</div>
+      <div class="ln">  build   the total under the items</div>
       <div class="ln">  It is closed as filed, and waits on nobody.</div>
       <div class="ln">  A judge reads this gap as intended, not as a fail, and names it in its reasoning.</div>
       <div class="ln">  walkdown threads show n-0001 reads it in full</div>

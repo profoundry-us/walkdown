@@ -3,11 +3,13 @@ screen: redline-filed
 title: A redline a person files is closed as it is filed
 rule: threads.lifecycle.redline-is-a-persons
 fixture: g2-receipt-drawn
-command: [threads, new, --reason, redline, --screen, receipt, --element, receipt.total, --body, 'The total sits under the items. It reads better on a phone.', --blueprint, checkout]
+command: [threads, new, --reason, redline, --screen, receipt, --element, receipt.total, --body, 'The total sits under the items. It reads better on a phone.', --design, 'the total beside the items', --build, 'the total under the items', --blueprint, checkout]
 exit: 0
 expect:
   - '^✓ n-\d+ filed · note · redline · by \S+ · closed$'
   - '^  screen receipt, element receipt\.total$'
+  - '^  design  the total beside the items$'
+  - '^  build   the total under the items$'
   - '^  It is closed as filed, and waits on nobody\.$'
   - '^  A judge reads this gap as intended, not as a fail, and names it in its reasoning\.$'
   - '^  walkdown threads show n-\d+ reads it in full$'
