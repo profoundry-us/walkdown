@@ -3652,6 +3652,17 @@ function wireGlobals() {
    * the side, so from As-built the frame went on showing the build and the
    * proposal was a second click away (Topher, 2026-10-19).
    */
+  /*
+   * "Leave a note on" a redline: pin mode on, then the note form on the
+   * redline's element, on whichever surface took the pin mode. Disagreeing
+   * with a redline is a new note, which waits on someone as any note does.
+   */
+  on('leave-note', ({ element }) => {
+    if (!pinSurface()) return;
+    PIN.set(true);
+    for (const f of [ghostFrame(), D.appFrame])
+      f?.contentWindow?.postMessage({ type: 'walkdown:pin-at', element }, '*');
+  });
   on('open-proposed', ({ screen }) => {
     setDesignVersion('proposed');
     pickScreen(screen);

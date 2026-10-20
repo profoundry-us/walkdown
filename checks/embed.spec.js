@@ -934,6 +934,25 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
   await expect(detail).toContainText('Nothing waits on this');
   await expect(detail.locator('textarea')).toHaveCount(0);
   await expect(detail.getByRole('button', { name: /Reply|Answer/ })).toHaveCount(0);
+
+  // Its link reads Open the redline, and opens the thread view: the same
+  // pair, a dash for each half not given, and nothing waiting on it.
+  await detail.getByRole('button', { name: 'Open the redline' }).click();
+  await expect(detail).toBeHidden();
+  const view = realPanel(page).getByTestId('thread.screen');
+  await expect(view.getByTestId('thread.provenance')).toContainText(/Redline\s*n-\d+/);
+  const pair = view.getByTestId('thread.redline-pair');
+  await expect(pair).toHaveText(/Design\s*—\s*Build\s*—/);
+  await expect(view.getByTestId('thread.turn')).toContainText('Nothing waits on this');
+  // Reply, as on any ended thread, and a way to disagree, which opens the
+  // note form on the redline's element. (Reopen waits on what a reopened
+  // redline becomes: a recorded thread does not move yet.)
+  await expect(view.getByTestId('thread.reply')).toBeVisible();
+  await view.getByTestId('thread.leave-note').click();
+  await expect(app(page).getByTestId('pin.form')).toBeVisible();
+  await expect(app(page).getByTestId('pin.form')).toContainText('host.title');
+  await app(page).getByTestId('pin.cancel').click();
+  await pin.locator('.wd-dot').click();
   await detail.getByRole('button', { name: 'Close' }).click();
 
   // On the design side as well.

@@ -1,0 +1,18 @@
+id: q-0610
+uuid: 673f62c0-e816-4c42-a28c-a6f7cb704170
+kind: question
+author: agent
+created: 2026-10-20T00:59:43.194Z
+anchor:
+  rule: embed.pin.redline-explains-a-gap
+status: open
+body: A redline is filed closed, and today nothing reopens a closed record (a
+  decision or a redline). You said Reopen stays on a redline so a person can ask
+  or add context. Once someone reopens one, what is it, and who is it waiting
+  on?
+options:
+  - label: Still a redline, waiting on whoever filed it
+    why: same mark, pair and why; they close it again or withdraw it
+  - label: An open note, waiting on the agent
+    why: the redline's words stay in its history, and the build is changed to match
+      the design

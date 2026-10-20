@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T00-59-58Z-local-01",
+  "created": "2026-10-20T00:59:58Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "48fb08ca-dirty",
+  "spec_hash": "sha256:0a64058e35eb",
+  "results": [
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "blocked",
+      "statement_hash": "sha256:a1105830fc34",
+      "evidence": [
+        "runs/evidence/2026-10-20T01-20-00Z/redline-thread-view.png"
+      ],
+      "reasoning": "Blocked on a question, not failing. The accepted thread-panel design is built: opened from its popover's new 'Open the redline' link, the redline's thread view shows the Redline mark, the Design and Build pair with a dash for each half not given, the why as the opening message, a line saying who filed it and that nothing waits on it, Reply, and a 'Leave a note on <element>' button that turns pin mode on and opens the note form on that element. The one step that does not hold is Reopen: a redline is stored as recorded, which the lifecycle (and ADR 0015) lets nothing leave, and what a reopened redline becomes and whom it waits on is asked in q-0610. Nothing is judged until that is answered and built.",
+      "threads": [
+        "673f62c0-e816-4c42-a28c-a6f7cb704170"
+      ]
+    }
+  ]
+}

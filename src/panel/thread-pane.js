@@ -24,6 +24,9 @@ import { fire } from './util.js';
  * has none, and a legacy note with none reads as feedback everywhere else,
  * so nothing is drawn for it here either.
  */
+// The redline colour, as the embed's pin and popover wear it.
+const REDLINE = 'oklch(62% 0.17 25)';
+
 const reasonChip = (t) =>
   t.kind === 'note' && t.reason && t.reason !== 'feedback'
     ? html`<span class="badge badge-xs badge-outline opacity-70" data-testid="thread.reason">${t.reason}</span>`
@@ -214,11 +217,22 @@ export function threadPane() {
   // The person on the other side of the table, for the agent's reading of
   // the line: whoever opened the thread, unless a machine did.
   const opener = MSG.displayName(t.author, names());
+  const redline = t.reason === 'redline';
   const turn = turnLine(t, role, {
     person: /^agent$/i.test(t.author ?? '') ? 'the person' : opener,
     endedBy: ended?.author ? MSG.displayName(ended.author, names()) : null,
     endedAt: ended?.created ? MSG.ago(ended.created) : null,
   });
+  /*
+   * A redline is filed closed and waits on nobody, so its line says who
+   * filed it and that nothing waits - not who ended it. Reply and Reopen
+   * stay, as on any ended thread (Topher, 2026-10-19).
+   */
+  if (redline && turn.party === 'closed')
+    turn.text = `Filed closed as a redline by ${opener}${
+      t.created ? `, ${MSG.ago(t.created)}` : ''
+    }. Nothing waits on this. A judge comparing the two sides reads it as an intended gap, not a fail.`;
+  const leaveNote = redline && role === 'human' && t.anchor?.element ? t.anchor.element : null;
   // Enter sends what the box is for: the answer on a question that is
   // yours to answer, and a reply everywhere else.
   const enterAct = acts.some(([, act]) => act === '__answer') ? '__answer' : '__reply';
@@ -242,8 +256,13 @@ export function threadPane() {
              under is chosen once, when a walkdown starts and each role is
              signed for, and is not re-offered at the action (Topher,
              2026-09-18; panel.identity.attribution-visible). -->
-        <b class="opacity-60">${t.id}</b>
-        ${reasonChip(t)}
+        ${
+          redline
+            ? html`<span class="inline-flex size-4 items-center justify-center rounded-full text-[10px] font-extrabold text-white" style="background:${REDLINE}">≠</span><b>Redline</b>`
+            : nothing
+        }
+        <b class="opacity-60 ${redline ? 'font-mono' : ''}">${t.id}</b>
+        ${redline ? nothing : reasonChip(t)}
         <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
       </span>
     </div>
@@ -278,6 +297,21 @@ export function threadPane() {
         : nothing
     }
     <div class="min-h-0 flex-1 overflow-y-auto px-3.5 pb-2" data-testid="thread.body">
+      ${
+        /*
+         * A redline reads as its popover does: what it is, then the Design
+         * and Build pair, both rows always, a dash for a half the filer did
+         * not give - so a missing half shows (embed.pin.redline-explains-a-gap).
+         */
+        redline
+          ? html`<p class="mt-1 text-[11.5px] opacity-60">The build leaves the design here on purpose.</p>
+            <div class="mt-2 mb-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 border-l-[3px] pl-2 text-[12px]"
+              style="border-color:${REDLINE}" data-testid="thread.redline-pair">
+              <span class="opacity-50">Design</span><span>${t.design ?? '—'}</span>
+              <span class="opacity-50">Build</span><span>${t.build ?? '—'}</span>
+            </div>`
+          : nothing
+      }
       ${unsafeHTML(
         MSG.stream(t, {
           seenAt: seenAtOpen[t.id] ?? null,
@@ -350,6 +384,13 @@ export function threadPane() {
         }}></textarea>
       <!-- Waive stands alone at the far left; the rest gather on the right. -->
       <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
+        ${
+          leaveNote
+            ? html`<button class="btn btn-xs btn-ghost mr-auto border-dashed border-base-content/30" data-testid="thread.leave-note"
+                title="Open the note form on this element"
+                @click=${(e) => fire(e.currentTarget, 'leave-note', { element: leaveNote })}>Leave a note on <span class="font-mono">${leaveNote}</span></button>`
+            : nothing
+        }
         ${acts.map(
           ([label, act, tone]) =>
             html`<button class="btn btn-xs ${TONE[tone]}${tone === 'warn' ? ' mr-auto' : ''}"
