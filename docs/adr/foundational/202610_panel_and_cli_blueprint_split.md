@@ -1,7 +1,9 @@
 # ADR 0013 — Panel and CLI blueprint split
 
-- **Status:** accepted 2026-10-02 by Topher. Nothing is built; the rules it adds and
-    rewords are drafted for his approval.
+- **Status:** accepted 2026-10-02 by Topher; built in 0.4.0. The panel's blueprint kept
+    the id `walkdown` (§6), and ADR 0015 later renamed the `prototype` side to `design`
+    and moved designs into `designs/<screen>/`. Where this record says `prototype/`,
+    read the design.
 - **Date:** 2026-10-02
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0011 (multiple blueprints per project), ADR 0007 (as-built drawings),
@@ -141,7 +143,8 @@ applied to blueprints:
   About 112 rules.
 
 The existing blueprint is `0001-walkdown`, and it becomes `panel`. Its id changes with
-ADR 0012's `blueprints rename` when that lands; until then it keeps the id `walkdown`. A
+ADR 0012's `blueprints rename` when that lands. It never did: the blueprint shipped as
+`walkdown`, and keeps that id. A
 story whose rules are split across the two surfaces is decided rule by rule, in the
 move's dry run, for Topher to check.
 

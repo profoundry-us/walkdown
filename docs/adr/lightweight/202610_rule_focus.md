@@ -48,19 +48,26 @@ The panel goes to the rule's screen as it does today, then scrolls `focus` into
 view, centred, and outlines it with the pin-mode ring. On the fade it does this
 on both surfaces, so the design and the build line up at the same element.
 
-With no `focus`, the panel uses the first anchor the steps name. With none of
-those either, it stays at the top of the screen, as it does today. A blueprint
-that never sets `focus` behaves exactly as before.
+With no `focus`, the panel uses the first anchor the steps name that one of
+the rule's screens declares, reading given, then when, then then. With none of
+those either, it goes to the top of the screen. A blueprint that never sets
+`focus` opens each rule at its steps' first anchor, or else at the top.
 
-### 3. Hovering a step's anchor scrolls to it
+The ring opening a rule draws stays until a hover replaces it, and clears when
+no rule is open. A page that finishes loading after the rule opened, on either
+surface, still gets its focus.
 
-Hovering or clicking an anchor in a step scrolls that element into view before
-outlining it. It applies on whichever surface is in front.
+### 3. Hovering a rule's anchor scrolls to it
+
+Hovering an anchor anywhere in a rule (its statement, steps, `because` or
+history) scrolls that element into view before outlining it. It applies on
+both surfaces, so the fade stays lined up.
 
 ### 4. Lint checks it
 
 Lint refuses a `focus` that names no anchor declared on one of the rule's
-screens, the same way it checks the anchors a step mentions.
+screens, and a `focus` on a rule that names no screen. This is stricter than
+the anchors a step mentions, which lint only warns about.
 
 ### 5. It is not part of the wording
 

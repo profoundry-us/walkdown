@@ -87,8 +87,10 @@ group screens (n-0581).
 
 - The first version made on a day has no suffix. A second one that day is
   `-v2`, then `-v3`. The first is never renamed when a second arrives.
-- The storyboard's `design:` (formerly `prototype:`) names the accepted version. That pointer is the
-  only thing that makes a version accepted.
+- A verified design request's version is the accepted one. The storyboard's
+  `design:` (formerly `prototype:`) names it, and lint asks for the pointer to
+  catch up when an acceptance has moved past it, because the server never
+  writes the storyboard.
 - The design request names the version it proposes. A request not yet accepted
   or closed that names a version is the only thing that makes it proposed.
 - A version that is neither is superseded, and stays on disk as history.
@@ -96,8 +98,8 @@ group screens (n-0581).
   review, whether sent back with changes or reworked by its designer, is an
   edit to the same file. A new version is never made for an edit. It is
   named for the day it was first proposed, so it is never renamed.
-- **An accepted version is frozen.** Accepting moves the storyboard pointer, and
-  from then on nothing edits that file. A change to an accepted design starts
+- **An accepted version is frozen.** Once it is accepted, nothing edits that
+  file. This is practice, not something walkdown enforces. A change to an accepted design starts
   the next version, which is proposed until it is accepted in turn. So there
   is one version per accepted design, and an accepted design cannot drift from
   the version a person looked at.
@@ -158,8 +160,9 @@ and why. It becomes a thread reason beside `decision`:
 - **Judges read them:** a judge comparing the two surfaces treats an accepted
   redline as an intended gap, not a fail, and names it in its reasoning.
 - **Migration:** each note in `as-built/redlines.json` becomes a redline thread
-  on its screen, filed closed in Topher's name, since he has read them all. The
-  JSON file retires.
+  on its screen, filed closed in the name of the person running the upgrade (a machine
+  identity is refused). The JSON file retires once every note in it is a
+  thread; `--layout-only` skips this step.
 - **Filed from Pin Mode.** After choosing the spot, the pin form asks what kind
   of pin it is: note, question or redline, in one control. Tabs across the top
   of the form or a single dropdown are both candidates. That control replaces
@@ -264,7 +267,7 @@ with a new design IS the acceptance of the design*.
 3. The person's walkdown steps through the rules, each opening the screen with
    the proposal beside it. Sending a rule back sends the design back too, and
    it is revised in the same file. Once every rule on the screen is approved,
-   the design is accepted: the storyboard points at it and it is frozen.
+   the design is accepted and frozen, and lint asks the storyboard to point at it.
 4. The screen is built to it. Where the build cannot be framed, its as-built is
    captured.
 5. The fade compares the prototype with the build. Where a person decides a
@@ -300,7 +303,9 @@ with a new design IS the acceptance of the design*.
   up to date.
 - **"Design comes first" is unchanged.** It now reads as: no rule on a screen is
   built until the screen has an accepted prototype.
-- **`GUIDE.md` is written** as part of the 0.5.0 release, from what shipped.
+- **`GUIDE.md` is written** from what shipped. (Amended 2026-10-20: deferred
+  past 0.5.0. For 0.5.0 the docs under `docs/` were brought up to date
+  instead, as `RELEASING.md` step 3 allows until `GUIDE.md` exists.)
 - **Amended 2026-10-10 (q-0575, n-0581):** the artifact is called a design on
   screen and on disk: `designs/<screen>/YYYYMMDD.html`, a folder per screen,
   and the storyboard key `design:`. "Prototype" survives in the docs as what a

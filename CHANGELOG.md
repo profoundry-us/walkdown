@@ -38,8 +38,10 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
   an open note waiting on the agent, and keeps its why and its Design and Build
   pair in view. `as-built/redlines.json` retires; its notes become redlines.
 - **Rule focus** ([ADR 0016](docs/adr/lightweight/202610_rule_focus.md)). A
-  rule opens at what it is about: the frame scrolls to and rings the element it
-  names, not the top of a long page.
+  rule opens at what it is about: the frame scrolls to and rings the element its
+  `focus` names, not the top of a long page. A rule with no `focus` opens at the
+  first anchor its steps name. Hovering an anchor in a rule now scrolls to it
+  too, on both sides of the fade.
 - **When the app doesn't answer**, the panel shows the screen's design and says
   why, instead of an empty frame (issue #22).
 - **Questions follow their answers.** When an answer is written up as a new

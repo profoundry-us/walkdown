@@ -86,9 +86,14 @@ A project with one blueprint behaves, and prints, exactly as before.
 
 ### 3. Serving and claiming are unchanged
 
-`walkdown serve` already lists every registered blueprint, and `walkdown claims --url`
-already reports every blueprint that claims a page (ADR 0001). The second blueprint is
-one more row to both.
+`walkdown serve` lists every registered blueprint, and `walkdown claims --url`
+reports every blueprint that claims a page (ADR 0001). The second blueprint is one more
+row to both.
+
+(Amended in 0.5.0: until then `serve` printed only a count. It now prints each blueprint
+by id, with its project and home, and marks the default when it was started inside a
+project with one blueprint or with `--blueprint`. Started anywhere else there is no
+default, and a page that names no blueprint asks which.)
 
 ## Consequences
 
