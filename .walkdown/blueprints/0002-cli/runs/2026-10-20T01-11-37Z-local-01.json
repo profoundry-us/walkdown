@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-10-20T01-11-37Z-local-01",
+  "created": "2026-10-20T01:11:37Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5c593b93-dirty",
+  "spec_hash": "sha256:3f84189056af",
+  "results": [
+    {
+      "rule": "ownership.design.proposed-version-exists",
+      "status": "pass",
+      "statement_hash": "sha256:7d08a2878a3e",
+      "evidence": [
+        "runs/evidence/2026-10-20T01-07-24Z/lint-proposes-gone-probe.txt",
+        "runs/evidence/2026-10-20T01-07-24Z/moved-to-proposals-probe.txt",
+        "runs/evidence/2026-10-20T01-07-24Z/real-lint-screen-no-design.txt",
+        "runs/evidence/2026-10-20T01-07-24Z/probe.mjs.txt"
+      ],
+      "reasoning": "Judged on a throwaway machine from the CLI scenario harness (machine() plus fixture g2-request-proposes-gone), with no network; its blueprint was served in-process on an OS-picked port because 4764 was already held by another serve, and /api/blueprint confirmed the served project was the machine's ~/shop. `walkdown lint --no-checks` exits 1 with exactly two errors: addressed n-0002 and open n-0003, each named by its thread file and id. Each names the version proposed (/receipt/20261012.html, /cart/20261015.html), the path looked for under shop/designs, and both remedies. Waived n-0004, whose file is gone too, is not named, and isLiveRequest is false for verified and settled requests (TERMINAL). The reported path is the file the server opens: prototypeDir(blueprint) is shop/designs, GET /prototype/receipt/20261012.html and /prototype/cart/20261015.html both 404, and the panel's proposed paths are those two. Both remedies work. Putting the cart draft back makes the GET return 200 and drops n-0003 from lint. Running the message's own command with <path> filled in, `threads set n-0002 --proposes /drafts/receipt.html --blueprint 0001-sp-checkout`, succeeds and records a reply; lint then exits 0. A proposes written without a slash resolves the same way in both places. The door refuses to name a missing file, so the door cannot write the error state. The output matches the as-built capture line for line, apart from machine paths and uuids, and the scenario test passes. Edges below 10%: a proposes holding '..', a fragment or a directory can only come from a hand edit, which is out of scope, and the second message wording, with no design root, appears only after the root is deleted. One edge at 10-80% was reported to the dispatching agent and not filed. A draft moved into proposals/ under CLAUDE.md's interim step 3 errors, and `--proposes` cannot name a file outside the design root, so the only fix is to put the draft back. That is what 9f611e18 did. The screen lint-proposes-gone has no accepted design and no design request (real lint warns). That is a process gap, reported and not judged here.",
+      "threads": []
+    }
+  ]
+}
