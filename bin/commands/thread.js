@@ -514,6 +514,16 @@ export function run(args) {
     }`,
   );
   console.log(dim(`  ${anchorText(t.anchor)}`));
+  /*
+   * A redline's Design and Build pair, a dash for a half not given, and on
+   * one a person reopened, what it was: the agent working the reopened note
+   * reads the gap here as the panel shows it (q-0610).
+   */
+  if (t.reason === 'redline' || t.reopened_from === 'redline') {
+    if (t.reopened_from === 'redline') console.log(dim('  reopened from a redline'));
+    console.log(dim(`  design  ${t.design ?? '—'}`));
+    console.log(dim(`  build   ${t.build ?? '—'}`));
+  }
   // Moved onto the rule written from its answer, and answered by approving it.
   if (t.asked_on)
     console.log(
