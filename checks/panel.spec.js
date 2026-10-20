@@ -4907,7 +4907,10 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
  * an as-built drawing for the build - so the check is about the switch and
  * the frame, not about whichever proposal the real blueprint holds.
  */
-async function versionsScreen(page, { accepted = true } = {}) {
+async function versionsScreen(
+  page,
+  { accepted = true, title = 'A screen with two versions' } = {},
+) {
   const page_ = (title, extra = '') =>
     `<!doctype html><body style="margin:0;font:16px sans-serif"><h1 data-testid="v.title">${title}</h1>${extra}<script src="/embed.js" data-walkdown></script></body>`;
   await page.route(/\/prototype\/screens\/versions-accepted\.html/, (r) =>
@@ -4933,7 +4936,7 @@ async function versionsScreen(page, { accepted = true } = {}) {
       ...(data.storyboard ?? []),
       {
         id: 'versions',
-        title: 'A screen with two versions',
+        title,
         prototype: accepted ? '/screens/versions-accepted.html' : null,
         proposed: { path: '/prototype/versions/20261010.html', request: 'n-9042' },
         ...(accepted ? { app: { path: '/as-built/versions.html' } } : {}),
@@ -5052,6 +5055,25 @@ test('Open on a thread shows the proposal in one step, from either side of the f
     await expect(page.locator('[data-walkdown-ghost]')).toHaveCSS('opacity', '1');
     await expect(page.getByTestId('panel.fade')).toHaveValue('0');
   }
+});
+
+test('the screen picker stops short of the Accepted / Proposed switch, however long the title', {
+  tag: '@rule:screens.surfaces.proposed-beside-accepted',
+}, async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await versionsScreen(page, {
+    title: 'A screen with two versions (state — open a thread, or a pin, at length)',
+  });
+  await page.goto(fixtureFor({ frame: `${WD_ORIGIN}/as-built/versions.html` }));
+  const picker = page.getByTestId('panel.screen-picker');
+  const sw = page.getByTestId('panel.design-version');
+  await expect(sw).toBeVisible();
+  await expect(picker).toContainText('two versions');
+  const p = await picker.boundingBox();
+  const v = await sw.boundingBox();
+  expect(p.x + p.width).toBeLessThanOrEqual(v.x);
+  // Shortened, not squeezed out: the title still reads.
+  expect(p.width).toBeGreaterThan(90);
 });
 
 test('a screen with only a proposed version shows it with no switch, and says nothing is built', {

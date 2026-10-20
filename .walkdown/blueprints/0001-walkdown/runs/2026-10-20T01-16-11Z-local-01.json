@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T01-16-11Z-local-01",
+  "created": "2026-10-20T01:16:11Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ca49c7cd-dirty",
+  "tree_hash": "sha256:ac92123316fe",
+  "spec_hash": "sha256:0a64058e35eb",
+  "results": [
+    {
+      "rule": "screens.surfaces.proposed-beside-accepted",
+      "status": "pass",
+      "statement_hash": "sha256:0842937f10e9",
+      "duration_ms": 4489,
+      "checks": [
+        "checks/panel.spec.js:4972",
+        "checks/panel.spec.js:5060",
+        "checks/panel.spec.js:5079"
+      ]
+    }
+  ]
+}

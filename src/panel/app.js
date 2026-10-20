@@ -1839,7 +1839,12 @@ function renderBar() {
          picker. Everything in here that can be shortened truncates; the gear,
          the wordmark and the screen picker keep their size, and the cap
          leaves the centre a clear 8.5rem on this side. -->
-    <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2 overflow-hidden">
+    <!-- Stops short of the centre group, which is wider by the Accepted /
+         Proposed switch on a screen that offers one: the picker ran under
+         it (judges, 2026-10-19). -->
+    <span class="flex min-w-0 ${
+      offersVersions(inHand) ? 'max-w-[calc(50%-13.5rem)]' : 'max-w-[calc(50%-8.5rem)]'
+    } items-center gap-2 overflow-hidden">
     ${GEAR()}
     <span class="shrink-0 font-bold tracking-tight">walk<span class="text-primary">down</span></span>
     <!-- A stale copy sits BESIDE the project name, never instead of it.
@@ -1886,7 +1891,7 @@ function renderBar() {
          so the common case costs no click at all. Outlined once a screen has
          been picked by hand, because a hand-picked screen outranks detection
          and the difference has to be visible from the bar. -->
-    <button class="btn btn-xs shrink-0 gap-1 px-1.5 font-normal ${
+    <button class="btn btn-xs min-w-0 gap-1 px-1.5 font-normal ${
       S.pickedScreen ? 'btn-outline btn-primary' : 'btn-ghost'
     }"
       id="wdp-screen-btn" data-testid="panel.screen-picker"
