@@ -1427,6 +1427,7 @@ stories:
       - id: panel.threads.open-shows-the-proposal
         origin: walkdown
         created_at: 2026-10-19
+        verify: [checks]
         statement: Opening a screen's proposed design from a thread shows the proposal in one step, from either side of the fade.
         because: From the As-built side, Open chose Proposed but left the build in the frame, so nothing on screen was the proposal until a second click on Design.
         signoff: [eng, product]

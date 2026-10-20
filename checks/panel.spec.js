@@ -5022,6 +5022,38 @@ test('the design side shows a proposed version first, with the accepted one a cl
     .toContain('/prototype/versions/20261010.html');
 });
 
+test('Open on a thread shows the proposal in one step, from either side of the fade', {
+  tag: '@rule:panel.threads.open-shows-the-proposal',
+}, async ({ page }) => {
+  // n-9042 is a design request on the screen with a proposed version.
+  await versionsScreen(page);
+  for (const side of ['build', 'design']) {
+    await page.goto(fixtureFor({ build: 'stale', frame: `${WD_ORIGIN}/as-built/review.html` }));
+    await expect(page.getByTestId('panel.bar')).toBeVisible();
+    if (side === 'design') await page.getByTestId('panel.surface-design').click();
+    await page
+      .getByTestId('panel.tabs')
+      .getByText(/Threads/)
+      .click();
+    await page.getByRole('button', { name: /^Active/ }).click();
+    await page
+      .locator('[data-open-thread="n-9042"]')
+      .first()
+      .click({ position: { x: 8, y: 6 } });
+    const open = page.getByTestId('thread.proposal').locator('[data-open-proposed="versions"]');
+    await expect(open).toBeVisible();
+    await open.click();
+    // One click: the screen, Proposed, and the design side, all at once.
+    await expect(page.getByTestId('panel.screen-picker')).toContainText('two versions');
+    await expect(
+      page.getByTestId('panel.design-version').locator('[data-version="proposed"]'),
+    ).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => ghostSrc(page), side).toContain('/prototype/versions/20261010.html');
+    await expect(page.locator('[data-walkdown-ghost]')).toHaveCSS('opacity', '1');
+    await expect(page.getByTestId('panel.fade')).toHaveValue('0');
+  }
+});
+
 test('a screen with only a proposed version shows it with no switch, and says nothing is built', {
   tag: '@rule:screens.surfaces.proposed-beside-accepted',
 }, async ({ page }) => {

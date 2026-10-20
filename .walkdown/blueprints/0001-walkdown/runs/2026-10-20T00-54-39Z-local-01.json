@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-10-20T00-54-39Z-local-01",
+  "created": "2026-10-20T00:54:39Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ce6a3717-dirty",
+  "tree_hash": "sha256:5d1c609503d2",
+  "spec_hash": "sha256:0a64058e35eb",
+  "results": [
+    {
+      "rule": "screens.surfaces.proposed-beside-accepted",
+      "status": "pass",
+      "statement_hash": "sha256:0842937f10e9",
+      "duration_ms": 3172,
+      "checks": [
+        "checks/panel.spec.js:4969"
+      ]
+    },
+    {
+      "rule": "panel.threads.open-shows-the-proposal",
+      "status": "pass",
+      "statement_hash": "sha256:6757e4825062",
+      "duration_ms": 2754,
+      "checks": [
+        "checks/panel.spec.js:5025"
+      ]
+    }
+  ]
+}

@@ -3647,9 +3647,15 @@ function wireGlobals() {
   });
   // The thread's screen, with Proposed chosen, reached as the picker reaches
   // a screen (panel.threads.show-the-sketch, q-0589).
+  /*
+   * Open shows the proposal, whichever side you were on. It used to keep
+   * the side, so from As-built the frame went on showing the build and the
+   * proposal was a second click away (Topher, 2026-10-19).
+   */
   on('open-proposed', ({ screen }) => {
     setDesignVersion('proposed');
     pickScreen(screen);
+    pickSurface('prototype');
   });
   /*
    * Ids written into MESSAGE BODIES are links - thread ids open that thread,
