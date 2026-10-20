@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T19-23-20Z-local-01",
+  "created": "2026-10-20T19:23:20Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e62678b-dirty",
+  "tree_hash": "sha256:11068928dcfa",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "ownership.design.proposed-version-exists",
+      "status": "pass",
+      "statement_hash": "sha256:3457d3988f00",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-23-20Z/lint-fixture.txt",
+        "runs/evidence/2026-10-20T19-23-20Z/lint-break-probes.txt"
+      ],
+      "reasoning": "Driven at the CLI with no server and no port: two throwaway machines from tools/cli-scenarios.mjs (machine() + the g2-request-proposes-gone fixture, own WALKDOWN_HOME), running this tree's bin/walkdown.js; nothing touched the real home or blueprints. On the fixture (n-0002 addressed on receipt proposing /receipt/20261012.html, renamed on disk to 20261014.html; n-0003 open on cart proposing the deleted /cart/20261015.html; n-0004 waived with its version deleted) `lint --no-checks` exits 1 with exactly two errors, n-0002 then n-0003, each under [threads] naming the thread's file and its id, the version it proposes, and the path lint looked at (<shop>/designs/receipt/20261012.html, <shop>/designs/cart/20261015.html). That path is the server's: lint joins prototypeDir(blueprint) with the proposes ref, and serve's /prototype/ route (which blueprint.js readDesigns points a proposed version at as /prototype<proposes>) joins the same root, so the two cannot disagree. Each error says to put the version back or run `walkdown threads set <id> --proposes <path> --blueprint checkout`; n-0004 is not named; --json carries the same two findings. Trying to break it: running the named threads set for n-0002 with /receipt/20261014.html clears its error, and writing cart/20261015.html back clears n-0003, exit 0 - both offered fixes work. threads set refuses a proposes with no file, so a live request reaches this error only by a file going away afterwards, which is the case the rule covers; waiving the last live request drops it from lint. The accepted design still reads \"put the draft back\"; the rule's step now says \"put the version back\" and the build says so, a text change that lives in the rule (as-built agrees). Edge under 10%: a proposes carrying a ?query or #fragment would be looked for literally by lint while the server strips it from the URL - nothing walkdown writes produces one.",
+      "threads": []
+    }
+  ]
+}

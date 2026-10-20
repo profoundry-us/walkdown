@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T19-23-18Z-local-01",
+  "created": "2026-10-20T19:23:18Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e62678b-dirty",
+  "tree_hash": "sha256:11068928dcfa",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:63c4c1304ed6",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-23-18Z/prototype-beside-where-probes.txt",
+        "runs/evidence/2026-10-20T19-23-18Z/prototype-beside-serve-probe.txt"
+      ],
+      "reasoning": "Judged as a CLI screen with no server on port 4700 or 4755: I drove `node bin/walkdown.js` on throwaway machines from tools/cli-scenarios.mjs (fixture g1-prototype-beside, own WALKDOWN_HOME), plus one in-process createWalkdownServer on an ephemeral 127.0.0.1 port inside that machine for the design-page route. With `design.root: designs/` and a designs/ folder both beside the spec and in the code, `where` names the spec's folder on the designs row with `[design.root: designs/, beside the spec]` under it, matching the accepted design (whose `prototype` label predates the rename to `designs`, a label change the steps now carry) and the as-built; removing the folder beside the spec flips the row to the code's designs/ with `in the code - nothing of that name beside the spec`, and with neither present it names the code path marked `(does not exist yet)`. GET /prototype/pay/x.html served the beside-the-spec copy, then the code's copy once the first was removed, and serve's /prototype/, /stand-in/ and /api/screenshot routes and lint all resolve through the one prototypeDir helper, so pages, stand-ins and the storyboard read one directory. A legacy `prototype.root: proto/` is still read and labelled `from before 0.5.0`. With no proposals/ folder there is no proposals row and `where proposals` exits 1 with `retired in 0.5.0; no proposals/ folder is left`; with one beside the spec, or only in the code, the row appears labelled `retired in 0.5.0, still read` with where it was found, and `where proposals` prints its path. `where designs` and the `where prototype` alias print the same path; with two blueprints each section gets its own designs row and `where designs` prints one id-tab-path line each. Edge named, not failing: `where --json` carries no designs or proposals keys (the person-facing rows and `where designs` do), which I put at 10-20% likely to be met by a script author, since `where designs` is the documented one-path form.",
+      "threads": []
+    }
+  ]
+}

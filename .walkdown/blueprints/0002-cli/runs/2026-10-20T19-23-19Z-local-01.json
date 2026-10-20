@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T19-23-19Z-local-01",
+  "created": "2026-10-20T19:23:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e62678b-dirty",
+  "tree_hash": "sha256:11068928dcfa",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:0e9584c2d6df",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-23-19Z/design-requests-required-probe.txt",
+        "runs/evidence/2026-10-20T19-23-19Z/design-requests-required-proposes.txt"
+      ],
+      "reasoning": "Judged with no server, port 4759 unused: I drove the working tree's CLI (node bin/walkdown.js lint --no-checks) on throwaway machines from tools/cli-scenarios.mjs, each a fresh g2-undrawn-screens fixture (cart and receipt both `design: null`, an open request on receipt only), and read the accepted design and as-built from disk. Given/when/then 1: cart, with nothing anchored, is warned `screen has no design and no open design request`, and the parenthesis now reads that a proposed version counts only once a request's `proposes:` names it; the accepted design still shows the older parenthesis, a text change that lives in the step, and the as-built matches the step. Then 2: `threads new --screen cart --reason request` (and the default reason a screen note takes, which is request) clears cart; a request anchored to cart's rule rather than the screen does not. Then 3: finding and feedback notes, and a question, on cart leave the warning (redline cannot be filed by an agent; an unknown reason is refused). Then 4: receipt's request addressed still clears it (open work, awaiting a person), and once waived or verified receipt is warned again; reopened, it clears again; waiving a request that `proposes:` a drawn version also brings the warning back. Then 5: a version can only be proposed on a request (proposes on a feedback note is refused), and a legacy storyboard `proposal:` key, with its file present or missing, leaves the warning standing (missing also gets its own error). Then 6: `retired: true` on cart drops the warning and lint reports the retired screen as not linted. Legacy `prototype: null` warns the same way, plus the upgrade hint; a screen with no design key at all warns; a screen given a design does not. Edge, roughly 30% likely: the hint `walkdown threads new --screen <id> --blueprint ...` omits the required --body, so pasting it as printed is refused with a clear `a thread needs a body`; cost is one retry, so it does not fail the rule.",
+      "threads": []
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { after, test } from 'node:test';
 import { loadBlueprint } from '../lib/blueprint.js';
 import { formatHash, hashMatches } from '../lib/hash.js';
 import { runHashCommand } from '../lib/hash-cmd.js';
-import { lint } from '../lib/lint.js';
+import { lint, oldDesignLayout } from '../lib/lint.js';
 import { declaredHome, register } from '../tools/test-home.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-test-'));
@@ -1025,4 +1025,18 @@ test('the closing counts are of the live; nothing retired, nothing is said of it
   }).summary;
   assert.equal(none.retiredRules, 0);
   assert.equal(none.retiredScreens, 0);
+});
+
+test('a screen named drafts keeps its versions in designs/drafts/, and that is not the old layout @rule:locations.keeping.old-layout-warns', () => {
+  const h = writeFixture(join(root, 'drafts-screen'));
+  writeFileSync(join(h.spec, 'spec.yml'), 'blueprint: fixture\ndesign:\n  root: designs/\n');
+  writeFileSync(
+    join(h.spec, 'storyboard.yml'),
+    'screens:\n  - id: drafts\n    design: /drafts/20261001.html\n',
+  );
+  mkdirSync(join(h.spec, 'designs', 'drafts'), { recursive: true });
+  writeFileSync(join(h.spec, 'designs', 'drafts', '20261001.html'), '<!doctype html>\n');
+  assert.deepEqual(oldDesignLayout(load(h)), []);
+  mkdirSync(join(h.spec, 'designs', 'screens'));
+  assert.deepEqual(oldDesignLayout(load(h)), ['`screens/` under designs/']);
 });

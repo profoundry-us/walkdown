@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-20T19-23-26Z-local-01",
+  "created": "2026-10-20T19:23:26Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e62678b-dirty",
+  "tree_hash": "sha256:11068928dcfa",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "locations.keeping.old-layout-warns",
+      "status": "pass",
+      "statement_hash": "sha256:d575b0345c14",
+      "evidence": [
+        "runs/evidence/2026-10-20T19-23-26Z/lint-old-layout-probes.txt",
+        "runs/evidence/2026-10-20T19-23-26Z/lint-old-layout-drafts-screen.txt"
+      ],
+      "reasoning": "Judged with no server: I drove `node bin/walkdown.js` on throwaway machines from tools/cli-scenarios.mjs (machine(), FIXTURES), never the real home or this repo's blueprints, and judged against the design that is still only proposed on n-0614 (prototype-cli/drafts/lint-old-layout.html, not yet accepted), which the as-built matches line for line. On g2-old-layout `lint --no-checks` exits 0 with exactly one [upgrade] warning each for checkout (four screens) and search, naming storyboard `prototype:` keys, `prototype.root` in spec.yml and `screens/` and `drafts/` under prototype/, and saying `walkdown upgrade --dry-run` then `walkdown upgrade`; billing, on design: keys with a dated version, gets none; `--blueprint checkout` and `--json` agree. A dry run leaves the warnings; after a real `walkdown upgrade` lint reads 0 warnings on all three. Breaking it: `proposal:` keys alone are named as such; a `proposals/` folder under a design.root is named; a blueprint with seven old screens carrying both keys and all three folders still gets one warning listing every kind; a design.root blueprint with no old keys or folders, and a blueprint with neither key nor designs/, get none. One edge stands outside the steps: a 0.5.0 blueprint whose screen id is literally `drafts`, `screens` or `proposals` has that screen's folder read as an old one, gets the warning, and `walkdown upgrade` says nothing to upgrade, so it never clears (estimated 10-15%: a drafts screen is common in mail, blog and CMS apps; it costs a permanent false warning, not a wrong exit), reported to the dispatching agent rather than filed.",
+      "threads": []
+    }
+  ]
+}

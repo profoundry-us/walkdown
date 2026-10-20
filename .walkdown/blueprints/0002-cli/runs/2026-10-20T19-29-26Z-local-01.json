@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-20T19-29-26Z-local-01",
+  "created": "2026-10-20T19:29:26Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "2e62678b-dirty",
+  "tree_hash": "sha256:26db6d14356e",
+  "spec_hash": "sha256:d86521972b40",
+  "results": [
+    {
+      "rule": "locations.keeping.old-layout-warns",
+      "status": "pass",
+      "statement_hash": "sha256:d575b0345c14",
+      "duration_ms": 2312,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/lint.test.js:1030"
+      ]
+    }
+  ]
+}
