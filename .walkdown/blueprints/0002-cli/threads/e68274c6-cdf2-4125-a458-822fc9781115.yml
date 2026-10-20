@@ -1,0 +1,28 @@
+id: n-0611
+uuid: e68274c6-cdf2-4125-a458-822fc9781115
+kind: note
+reason: request
+author: agent
+created: 2026-10-20T01:16:23.914Z
+anchor:
+  screen: lint-proposes-gone
+status: addressed
+body: "Built ahead of its design (my mistake): lint, run on a blueprint where a
+  live design request's proposes: names a file that is not there. It prints one
+  error per such request, naming the thread, the version it proposes, the path
+  it looked for, and the two ways out (put the draft back, or walkdown threads
+  set <id> --proposes <path>). A waived or verified request is not named. The
+  as-built capture is as-built/cli/lint-proposes-gone.html; draw what it should
+  look like."
+replies:
+  - author: agent
+    created: 2026-10-20T01:17:07Z
+    body: agent named /drafts/lint-proposes-gone.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-20T01:17:07Z
+    body: "Drawn: prototype-cli/drafts/lint-proposes-gone.html. Lint names n-0002
+      and n-0003 as errors in id order, each with the version it proposes, the
+      path it looked at and the two ways out, leaves the waived n-0004 unnamed,
+      and exits 1."
+proposes: /drafts/lint-proposes-gone.html

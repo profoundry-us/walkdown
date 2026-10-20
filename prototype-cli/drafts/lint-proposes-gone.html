@@ -1,0 +1,44 @@
+<!doctype html>
+<!-- DESIGN DRAFT: lint-proposes-gone -->
+<!-- Drawn by the design agent for request n-0611. Not yet accepted. -->
+<!-- Intent: name each live design request whose proposed version has no file as an error on that request, saying which version it proposes, where lint looked for it (the path the panel opens it from), and the two ways out; a waived or verified request is not named, and the run fails with exit 1. -->
+<!-- Fixture: 1 rule, 2 screens (cart and receipt), 4 threads. n-0002 on receipt is addressed and proposes /receipt/20261012.html, a draft since moved to /drafts/receipt.html: an error. n-0003 on cart is open and proposes /cart/20261015.html, since deleted: an error. n-0004 on cart is waived and its /cart/20261001.html was deleted too: nothing is said, because nothing waits on it. The fourth thread is a plain note. The errors are listed by request id, so n-0002 comes first. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lint names a design request whose proposed version is gone</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown lint</div>
+      <div class="ln">walkdown lint — ~/.walkdown/projects/shop/blueprints/checkout</div>
+      <div class="ln"></div>
+      <div class="ln">ERRORS</div>
+      <div data-testid="cli.lint.proposes-gone">
+      <div class="ln">  ✗ [threads] checkout/threads/3b8f2d61-9c4e-4a07-b5e2-6f1d0a9c7e33.yml › n-0002: proposes /receipt/20261012.html, and nothing is at ~/shop/designs/receipt/20261012.html, so the walk would show "not found" there — put the draft back, or name where it is now with `walkdown threads set n-0002 --proposes &lt;path&gt; --blueprint checkout`</div>
+      <div class="ln">  ✗ [threads] checkout/threads/a41c7e09-5d2b-4f8a-9e16-c2b70d4f8a51.yml › n-0003: proposes /cart/20261015.html, and nothing is at ~/shop/designs/cart/20261015.html, so the walk would show "not found" there — put the draft back, or name where it is now with `walkdown threads set n-0003 --proposes &lt;path&gt; --blueprint checkout`</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">✗ 1 rules, 2 screens, 0 anchors, 4 threads, 0 runs — 2 error(s), 0 warning(s)</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 1]</div>
+  </div>
+</body>
+</html>
