@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-20T01-05-43Z-local-01",
+  "created": "2026-10-20T01:05:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "e09e564e-dirty",
+  "spec_hash": "sha256:3f84189056af",
+  "results": [
+    {
+      "rule": "locations.answer.serve-starts-anywhere",
+      "status": "pass",
+      "statement_hash": "sha256:07405f98cd04",
+      "evidence": [
+        "runs/evidence/2026-10-20T00-58-37Z/serve-outside.txt",
+        "runs/evidence/2026-10-20T00-58-37Z/serve-blueprint-flag.txt",
+        "runs/evidence/2026-10-20T00-58-37Z/serve-default-cases.txt",
+        "runs/evidence/2026-10-20T00-58-37Z/root-chooser.jpg",
+        "runs/evidence/2026-10-20T00-58-37Z/root-chooser-shop.jpg",
+        "runs/evidence/2026-10-20T00-58-37Z/serve-break.txt",
+        "runs/evidence/2026-10-20T00-58-37Z/serve-subresource.txt"
+      ],
+      "reasoning": "Driven on port 4738 against a throwaway machine (its own HOME and WALKDOWN_HOME under the scratchpad, never the real home), with blueprints made by `walkdown blueprints new`: checkout and search in shop, search in acme_main, only in solo, all served by node bin/walkdown.js from this tree. Started in ~/Downloads, serve started and printed every blueprint by id, project and home, with the no-default line, review address and an embed tag naming <id>, line for line as the accepted design draws it (serve-outside.txt). The root opened the Which project? chooser listing shop, acme_main, solo and late with no rules, and choosing shop asked which of its two blueprints (root-chooser.jpg, root-chooser-shop.jpg). /api/blueprint?bp=0001-sp-checkout from the outside server matched the same call on a server started in ~/shop with --blueprint checkout field for field except the boot time, and an as-built page named by id came back identical. /api/threads, POST /api/threads and /api/storyboard with no bp were refused 404 with 'so name one with ?bp=<id>'; a bare name shared by two projects (?bp=search) was refused 409 with both candidates; an unknown id was a 404. In ~/solo with no flag, in ~/shop with --blueprint checkout, and in ~/Downloads with --blueprint 0003-am-search, the named blueprint carried (default), the dim line said a page naming none opens it, the embed tag named it, and /api/blueprint with no bp answered it. In ~/shop with two blueprints there was no default, and the line said so. A bare --blueprint search from outside, or a typo, exited 2 with a message saying how to name it. While the outside server ran, a storyboard edit in acme_main and a blueprint registered afterward (0005-lt-tardy in a new project) were both claimed by /api/whose from their own app addresses, and ?bp=tardy served, with no restart. Traversal through /as-built/ and /prototype/ is normalised away. One edge beyond the steps, about 15% likely: from an outside server, a design page named by id loads a relative stylesheet that carries no bp, and when another registered project has a different file at that path the stylesheet is refused 409, so the design renders unstyled (serve-subresource.txt). It needs two projects with designs sharing an asset path, and a server started in the project behaves correctly. That refusal is what the unnamed-request step asks for, so it is reported and not failed. Below 10%: the 409 says 'a different file in 0001-sp-checkout and 0002-sp-search and 0003-am-search' when the first two share one file.",
+      "threads": []
+    }
+  ]
+}
