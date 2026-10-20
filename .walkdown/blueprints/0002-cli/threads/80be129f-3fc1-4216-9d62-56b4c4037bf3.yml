@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-12T14:19:34.834Z
 anchor:
   screen: serve-anywhere
-status: open
+status: verified
 body: What `walkdown serve` prints for locations.answer.serve-starts-anywhere,
   started from a directory no registered blueprint holds. It starts, and says it
   serves every blueprint registered on this machine, listing them by id with
@@ -39,4 +39,11 @@ replies:
       serve prints comes with data-bp filled in rather than <id>. That is all it
       does since issue #19. If that is not worth a flag, it can go: the picker
       already asks, and data-bp can be read off `walkdown blueprints`."
+  - author: topher
+    via: verdict
+    created: 2026-10-20T00:49:55Z
+    body: Accepted by topher's approval of every rule on serve-anywhere
+      (2026-10-20T00-49-54Z-local-01).
 proposes: /drafts/serve-anywhere.html
+verified_by: topher
+verified_via: 2026-10-20T00-49-54Z-local-01

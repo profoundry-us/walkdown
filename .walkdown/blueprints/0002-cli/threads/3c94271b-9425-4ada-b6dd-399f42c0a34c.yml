@@ -6,9 +6,17 @@ author: agent
 created: 2026-10-12T22:50:01.828Z
 anchor:
   rule: locations.answer.serve-starts-anywhere
-status: open
+status: verified
 body: "walkdown serve, started outside a registered project, prints only how
   many blueprints it serves ('every blueprint registered on this machine (3)');
   the rule now says it lists each by id with its project, and marks the default
   when one is. Unbuilt until the serve-anywhere design is accepted (n-0592).
   Evidence: runs/evidence/2026-10-12T23-00-00Z/serve-anywhere.txt."
+replies:
+  - author: topher
+    via: verdict
+    created: 2026-10-20T00:49:55Z
+    body: Verified by topher's pass on locations.answer.serve-starts-anywhere
+      (2026-10-20T00-49-54Z-local-01).
+verified_by: topher
+verified_via: 2026-10-20T00-49-54Z-local-01

@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-10-20T00-45-18Z-local-01",
+  "created": "2026-10-20T00:45:18Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "382c12e5-dirty",
+  "tree_hash": "sha256:96cabd2f2068",
+  "spec_hash": "sha256:a2e5a931f854",
+  "results": [
+    {
+      "rule": "panel.threads.open-shows-the-proposal",
+      "status": "approved",
+      "statement_hash": "sha256:6757e4825062"
+    },
+    {
+      "rule": "embed.pin.redline-explains-a-gap",
+      "status": "pass",
+      "statement_hash": "sha256:a1105830fc34"
+    }
+  ]
+}

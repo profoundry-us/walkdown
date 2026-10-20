@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-19T01:16:35.146Z
 anchor:
   screen: thread-panel
-status: addressed
+status: verified
 body: Draw the thread view of a redline, opened from the Threads list, for
   embed.pin.redline-explains-a-gap (Topher, 2026-10-19). Today it shows the why
   and a Reply box. Show the same Design and Build pair the redline-pin popover
@@ -35,3 +35,4 @@ replies:
       nothing waits on it, the Reply box, and Reopen. Beside Reopen, a button
       reading 'Leave a note on waitlist.submit' opens the note form on that
       element."
+verified_by: topher

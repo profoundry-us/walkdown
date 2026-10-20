@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-19T19:16:08.137Z
 anchor:
   screen: redline-pin
-status: addressed
+status: verified
 body: "The redline popover's link to its thread reads 'Open the conversation',
   but a redline is an explanation, not a conversation. Topher (2026-10-19):
   relabel it 'Open the redline' on a redline pin. Nothing else on the popover
@@ -22,3 +22,4 @@ replies:
       request; those are for big changes and new pages. The relabel is in the
       rule embed.pin.redline-explains-a-gap and is built from there. Nothing is
       proposed for redline-pin."
+verified_by: topher
