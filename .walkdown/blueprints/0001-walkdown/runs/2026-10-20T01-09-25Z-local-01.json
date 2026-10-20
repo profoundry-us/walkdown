@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-20T01-09-25Z-local-01",
+  "created": "2026-10-20T01:09:25Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5c593b93-dirty",
+  "spec_hash": "sha256:0a64058e35eb",
+  "results": [
+    {
+      "rule": "panel.threads.open-shows-the-proposal",
+      "status": "pass",
+      "statement_hash": "sha256:6757e4825062",
+      "evidence": [
+        "runs/evidence/2026-10-20T01-02-34Z/01-asbuilt-start.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/02-asbuilt-thread-open.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/03-from-asbuilt-after-open-loading.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/04-from-asbuilt-after-open.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/05-design-thread-open.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/06-from-design-after-open.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/07-asbuilt-accepted-same-screen.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/08-asbuilt-accepted-after-open.jpg",
+        "runs/evidence/2026-10-20T01-02-34Z/09-bar-zoom.png"
+      ],
+      "reasoning": "Driven in the built-in browser at 1280x800 against scratch copy judge-open-1020 served on port 4788 with its own home (GET /api/blueprint named the copy's key). In the copy I filed design request n-0611 on screen thread-panel and set it to propose /screens/design-proposed.html, so the screen carried a proposed design. From the As-built side on The review page (01), I opened n-0611 from Threads > Active; the strip read 'The thread screen ... has a proposed design' with its Open button (02). One click on Open moved the slider to the Design end, switched the picker to The thread screen, pressed Proposed, and framed the proposal in the dashed amber border with the 'PROPOSED - YOURS TO ACCEPT' label (03 at once, 04 once loaded). Measured after the click: panel.fade value 0, design-version proposed aria-pressed true and accepted false, and the ghost iframe at /prototype/screens/design-proposed.html with opacity 1, visible, covering the 860x744 frame. From the Design side on The review page (05), the same Open landed in the same place (06). To try to break it, I chose Accepted and slid to As-built on the thread screen itself (07), then pressed Open; it went back to Design with Proposed chosen and the proposal shown (08). Every step holds from both sides. Edges weighed: the frame is blank white for about 2 to 4 seconds while the proposal page boots its own embed, framed as proposed throughout; every user meets it, but it is load time and not a second click, so it does not fail the rule. In the Design-and-Proposed state the screen picker (x 328 to 504) runs under the Accepted/Proposed switch (x 439 to 587), so a long screen title is overprinted by Accepted (09). That belongs to the bar's layout whenever a proposed screen is shown, however it was reached, so it is not this rule's claim; it is reported to the caller rather than filed here."
+    }
+  ]
+}
