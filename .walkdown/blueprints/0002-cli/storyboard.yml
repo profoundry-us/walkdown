@@ -507,7 +507,7 @@ screens:
 
   - id: serve-anywhere
     title: "walkdown serve, started outside any blueprint, serves them all"
-    prototype: null
+    prototype: /screens/serve-anywhere.html   # accepted 2026-10-19 in Topher's walk
     anchors:
       - cli.prompt
       - cli.serve.serving

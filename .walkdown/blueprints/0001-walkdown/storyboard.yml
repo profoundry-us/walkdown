@@ -84,7 +84,6 @@ screens:
   - id: thread-panel
     title: The thread screen (state — open a thread, or a pin)
     prototype: /screens/thread-panel.html
-    proposal: /thread-panel.html
     app: { path: /as-built/thread-panel.html }
     anchors:
       - thread.panel
