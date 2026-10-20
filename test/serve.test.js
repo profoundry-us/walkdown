@@ -1279,8 +1279,13 @@ test('`walkdown serve` starts outside any project rather than refusing @rule:loc
         reject(new Error(`exited ${code}: ${out}`));
       });
     });
-    assert.match(said, /every blueprint registered on this machine \(2\)/);
-    assert.match(said, /outside a registered project/);
+    // Every blueprint by id under the count, whichever of this file's tests registered it.
+    const count = Number(said.match(/every blueprint registered on this machine \((\d+)\)/)?.[1]);
+    assert.ok(count >= 1, said);
+    assert.equal(said.match(/^  \d{4}-\w+-\S+  /gm)?.length, count, said);
+    assert.match(said, /^  \d{4}-fx-main  /m);
+    assert.match(said, /outside a registered project, so no blueprint is the default/);
+    assert.doesNotMatch(said, /\(default\)/);
     assert.doesNotMatch(said, /No blueprint here/);
   } finally {
     child.removeAllListeners('exit');
@@ -1318,7 +1323,10 @@ test('`walkdown serve` starts outside any project rather than refusing @rule:loc
     const mainId = parse(readFileSync(join(DECLARED_HOME, 'registry.yml'), 'utf8')).blueprints.find(
       (r) => nm(r.id) === 'main',
     ).id;
-    assert.match(await run(['--blueprint', mainId]), /a page naming none opens .*walkdown-serve-/);
+    const named = await run(['--blueprint', mainId]);
+    assert.match(named, new RegExp(`^  A page that names no blueprint opens ${mainId}\\.$`, 'm'));
+    assert.match(named, new RegExp(`^  ${mainId} .*  \\(default\\)$`, 'm'));
+    assert.equal(named.match(/\(default\)/g).length, 1, 'one default, and only the one named');
     assert.match(await run(['--blueprint', 'nobody']), /No blueprint for `nobody`/);
   } finally {
     rmSync(elsewhere, { recursive: true, force: true });

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { listedBlueprints } from '../../lib/blueprint.js';
-import { resolveLocations, SPEC_FILE } from '../../lib/locations.js';
+import { canon, resolveLocations, SPEC_FILE, tilde } from '../../lib/locations.js';
 import { dim } from '../../lib/report/tty.js';
 import { loadOrExit } from './context.js';
 
@@ -27,16 +27,30 @@ export async function run(args) {
   const { port } = await startServe(blueprint?.dir ?? null, {
     port: values.port ? Number(values.port) : undefined,
   });
-  const count = listedBlueprints().length;
-  console.log(`walkdown serve — every blueprint registered on this machine (${count})`);
+  /*
+   * Every blueprint by id, with its project and home, not a count: the
+   * id is what a page or `--blueprint` names, and a count left the person
+   * to go and find them (n-0596).
+   */
+  const listed = listedBlueprints();
+  const mine = blueprint ? canon(blueprint.dir) : null;
+  const idWidth = Math.max(0, ...listed.map((b) => b.id.length)) + 2;
+  const projectWidth = Math.max(0, ...listed.map((b) => (b.label ?? '—').length)) + 2;
+  console.log(`walkdown serve — every blueprint registered on this machine (${listed.length})`);
+  for (const b of listed)
+    console.log(
+      `  ${b.id.padEnd(idWidth)}${(b.label ?? '—').padEnd(projectWidth)}${tilde(b.dir)}${
+        b.key === mine ? '  (default)' : ''
+      }`,
+    );
   console.log(
     dim(
       blueprint
-        ? `  a page naming none opens ${blueprint.dir}`
+        ? `  A page that names no blueprint opens ${here.id}.`
         : here.ambiguous
           ? // Inside a project, just not one with a single blueprint (n-0500).
-            `  started in a project with several blueprints (${here.config.registry.candidates.join(', ')}): the panel finds each page's blueprint, or asks`
-          : "  started outside a registered project: the panel finds each page's blueprint, or asks",
+            `  Started in a project with several blueprints (${here.config.registry.candidates.join(', ')}), so no blueprint is the default. A page that names none asks you to choose one.`
+          : '  Started outside a registered project, so no blueprint is the default. A page that names none asks you to choose one.',
     ),
   );
   console.log(`  review:  http://localhost:${port}/`);

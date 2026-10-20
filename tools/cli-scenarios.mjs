@@ -561,7 +561,10 @@ export function run(scenario) {
       return { status: 0, stdout: text, stderr: '', text: text.replace(/\n+$/, '') };
     }
     // Where the command is typed: ~/shop, or a path under the machine's root.
-    const r = m.wd(scenario.command, scenario.cwd ? join(m.root, scenario.cwd) : m.shop);
+    const cwd = scenario.cwd ? join(m.root, scenario.cwd) : m.shop;
+    const r = scenario.until
+      ? untilThenInterrupt(scenario.command, cwd, m.env, scenario.until)
+      : m.wd(scenario.command, cwd);
     const uuids = new Map();
     const stdout = steady(r.stdout, m, uuids);
     const stderr = steady(r.stderr, m, uuids);
@@ -569,6 +572,42 @@ export function run(scenario) {
   } finally {
     m.done();
   }
+}
+
+/*
+ * A command that runs until stopped, `walkdown serve`: run until a line
+ * matches `until`, then Ctrl-C it, and give back what it printed with the
+ * `^C` a terminal echoes. A child does the waiting so `run` stays as
+ * synchronous as every other scenario's. Its port is whatever was free, so
+ * it reads as serve's own default, 4700.
+ */
+const INTERRUPT = `
+const { spawn } = await import('node:child_process');
+const [cli, until, ...args] = process.argv.slice(1);
+const c = spawn(process.execPath, [cli, ...args], { stdio: ['ignore', 'pipe', 'pipe'] });
+let out = '';
+let err = '';
+const timer = setTimeout(() => c.kill('SIGINT'), 15000);
+c.stdout.on('data', (d) => {
+  out += d;
+  if (new RegExp(until, 'm').test(out)) c.kill('SIGINT');
+});
+c.stderr.on('data', (d) => (err += d));
+c.on('close', (code, signal) => {
+  clearTimeout(timer);
+  process.stdout.write(out + (signal === 'SIGINT' ? '^C\\n' : ''));
+  process.stderr.write(err);
+  process.exit(signal === 'SIGINT' ? 130 : (code ?? 1));
+});
+`;
+
+function untilThenInterrupt(command, cwd, env, until) {
+  const r = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', INTERRUPT, CLI, until, ...command],
+    { cwd, encoding: 'utf8', env },
+  );
+  return { ...r, stdout: r.stdout.replace(/\blocalhost:\d+\b/g, 'localhost:4700') };
 }
 
 /**

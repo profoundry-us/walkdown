@@ -11,4 +11,17 @@ export default {
     mkdirSync(lib, { recursive: true });
     h.git(m, lib, 'init', '-q');
   },
+  /* `shop` with `checkout` and `search`, `acme_main` with a `search` of its own, and ~/Downloads, which holds no blueprint. */
+  'three-blueprints-two-projects'(m) {
+    m.ok(['blueprints', 'new', 'checkout']);
+    m.ok(['blueprints', 'new', 'search']);
+    const other = join(m.root, 'acme_main');
+    mkdirSync(join(other, '.git'), { recursive: true });
+    const r = m.wd(['blueprints', 'new', 'search'], other);
+    if (r.status !== 0)
+      throw new Error(
+        `fixture: blueprints new search in acme_main exited ${r.status}\n${r.stderr}`,
+      );
+    mkdirSync(join(m.root, 'Downloads'));
+  },
 };

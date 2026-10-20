@@ -1,0 +1,19 @@
+# `walkdown serve` started in ~/Downloads, which no blueprint holds, on a machine with three registered.
+screen: serve-anywhere
+title: walkdown serve, started outside any blueprint, serves them all
+rule: locations.answer.serve-starts-anywhere
+fixture: three-blueprints-two-projects
+cwd: Downloads
+command: [serve, --port, '0']
+until: 'Ctrl-C to stop'
+exit: 130
+expect:
+  - '^walkdown serve — every blueprint registered on this machine \(3\)$'
+  - '^  0001-sp-checkout  shop       ~/\.walkdown/projects/shop/blueprints/checkout$'
+  - '^  0002-sp-search    shop       ~/\.walkdown/projects/shop/blueprints/search$'
+  - '^  0003-am-search    acme_main  ~/\.walkdown/projects/acme_main/blueprints/search$'
+  - '^  Started outside a registered project, so no blueprint is the default\. A page that names none asks you to choose one\.$'
+  - '^  review:  http://localhost:4700/$'
+  - '^  in your app:  <script src="http://localhost:4700/embed\.js" data-walkdown data-bp="<id>"></script>$'
+anchors:
+  - { id: cli.serve.serving, match: '^walkdown serve — |^  \d{4}-|^  Started ' }

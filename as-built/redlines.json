@@ -60,5 +60,13 @@
       "The design asked <i>which blueprint is this site?</i> with radio marks and a description per row. Built: the server row above, the folder named, and each blueprint as a row with its description &mdash; the one the page claims first.",
       "Nothing is remembered for the site (ADR 0001 &sect;9); the address carries the pick instead."
     ]
+  },
+  "cli/serve-anywhere": {
+    "title": "walkdown serve, started outside any blueprint, serves them all",
+    "redlines": [
+      "The command as typed carries <code>--port 0</code>, so the capture never collides with a serve already on 4700; the port it printed is shown as 4700, serve's own default.",
+      "The design's second half, the same command inside ~/shop with <code>--blueprint checkout</code>, is one screen per command here and is not drawn. Its lines, the <code>(default)</code> mark and <em>A page that names no blueprint opens &lt;id&gt;.</em>, are checked by test/serve.test.js.",
+      "The design draws no exit code; a server stopped with Ctrl-C ends 130."
+    ]
   }
 }
