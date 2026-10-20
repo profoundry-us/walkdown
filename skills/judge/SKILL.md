@@ -28,8 +28,9 @@ verify requirement).
    `--target <name>` picks another configured target's addresses.
 
 3. **Serve both surfaces.** Start `walkdown serve` (background) — it hosts the
-   prototype at `/prototype/...` and proposals at `/proposals/...`. Make sure
-   the target's `base_url` answers too.
+   designs, accepted and proposed versions alike, at
+   `/prototype/<screen>/<version>.html`. Make sure the target's `base_url`
+   answers too.
 
    The target you judge against — a dev server, a review app, staging — exists
    to absorb what judging does to it; that is what those environments are for.
@@ -63,16 +64,19 @@ verify requirement).
    answer was.** That is a logical key, not a filesystem path: a run says which
    evidence it left, never which disk somebody filed it on, and the server
    resolves the key per machine. Writing an absolute path into a run record
-   would pin the ledger to your laptop. If a screen has only a proposal (no
-   `prototype:`), you may compare against it but say so in your reasoning — a
-   proposal is not design authority.
+   would pin the ledger to your laptop. The prompt names each screen's
+   `accepted` design and any `proposed` version a design request is waiting
+   on. When you judge against a proposed version, say so in your reasoning:
+   nobody has accepted it yet.
 
 5. **Judge each rule.** Read the evidence against the statement and steps.
    Compare structure, hierarchy, spacing intent, and copy verbatim. Dynamic
    data (user emails, dates) is expected to differ; copy is not. Cite
    discrepancies precisely: which anchor/element, expected vs actual. A page
    error is a finding, not noise — say so in the run even if the screenshot
-   looks right.
+   looks right. A gap a redline names is intended, not a fail: the prompt
+   lists the redlines on the rule's screens under REDLINES, and your reasoning
+   names each one you meet.
 
 6. **Record the run.** Append `<ts>-<target>-NN.json` to the runs directory `walkdown where runs` names
    (`ts` = ISO with dashes; `NN` = 01 unless the id collides):
@@ -106,6 +110,6 @@ verify requirement).
    account — take it down before you report; cleaning up is part of finishing,
    not a courtesy, and say plainly if you are leaving something behind and why.
 
-Never write `human` verdicts, never set threads to `verified`/`waived`, and
+Never write a person's verdict, never set threads to `verified`/`waived`, and
 never "re-judge" a fail into a pass without the underlying change actually
 shipping — the ledger is append-only history, not a scoreboard.

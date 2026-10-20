@@ -23,15 +23,19 @@ rule the agent tier has not judged, or judged before it went stale) and
 
 1. **Decide the spec impact.** Does the answer amend an existing rule's
    statement/steps, or create a new rule? New rules: id extends the story
-   (`story.id` + `.slug`), `origin: thread:<id>`, honest `verify` list
-   (`checks` only for what a script can prove; `agent`/`human` for judgment).
+   (`story.id` + `.slug`), `origin: thread:<id>`, honest evidence
+   (`verify: [checks]` only for what a script can prove; the agent tier is
+   assumed, and excused under `unverifiable:` only with a reason), and
+   `signoff:` roles for who accepts it. If the question is still open on
+   another rule while this new rule carries its answer, move it:
+   `walkdown threads set <q> --written-as <rule> --blueprint <bp>`.
 2. **Statement edits** → immediately `walkdown hash --write --blueprint <id>`.
 3. **Screens.** If the change needs a screen or state the storyboard lacks,
    add it — and check design coverage. If design hasn't drawn it: set
-   `prototype: null`, optionally sketch under `proposals/` (**never** touch
-   `prototype/` — design owns it), and file a design-request thread anchored
-   to the new screen explaining what the spec needs and pointing at the
-   proposal. Lint enforces this routing.
+   `design: null` (**never** touch the design root — design owns it), and
+   file a design-request thread anchored to the new screen explaining what
+   the spec needs. Whoever draws it names the version with `--proposes`.
+   Lint enforces this routing.
 4. **Implement** the app change, carrying anchors verbatim
    (`embed.anchor_attribute`, default `data-testid`).
 5. **Check.** Write or extend a test in the project's own framework, tagged

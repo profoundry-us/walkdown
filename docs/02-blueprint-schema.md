@@ -21,6 +21,7 @@ A blueprint's home is one flat folder (ADR 0014; where it lives is
     3f2c9a1e-7b4d-4e0a-9c61-2d8f5b0a7e13.yml    # q-0042
     b81d04c7-52e9-4a3f-8f0e-6c1a9d2e4b75.yml    # n-0017
   evidence/  drafts/    # git-ignored unless the blueprint commits everything
+  designs/              # a folder per screen of dated design versions (or at the repository root)
 ```
 
 The spec is `spec.yml`, `storyboard.yml` and `features/`, and nothing else: the hash a run
@@ -64,7 +65,7 @@ stories:
         statement: A guest must provide a valid email before payment is attempted.
         because: A payment attempt with no way to reach the buyer is one nobody can follow up.
         history: Two orders a week shipped to nobody before the field was required.   # optional
-        verify: [checks]           # required evidence: checks | agent (all listed required)
+        verify: [checks]           # opt-in evidence; the agent tier is assumed
         signoff: [eng, product]    # who accepts it, by role: eng always, with product or design
         screens: [checkout-payment]
         focus: checkout.email      # optional: the anchor opening the rule takes you to (ADR 0016)
@@ -82,9 +83,15 @@ stories:
             - No payment request is issued
 
       - id: checkout.guest.visual-summary
-        statement: The order summary matches the prototype's layout and hierarchy.
-        verify: [agent, human]     # not scriptable; agent pre-screens, human confirms
+        statement: The order summary matches the design's layout and hierarchy.
+        signoff: [eng, design]     # not scriptable: the agent tier judges it, design signs it
         screens: [checkout-payment]
+
+      - id: checkout.guest.receipt-queued
+        statement: A paid order queues its receipt email within a minute.
+        verify: [checks]
+        unverifiable:              # a tier set aside, and why, in a sentence
+          agent: Nothing is drawn; the receipt is a job in a queue, not a screen.
 ```
 
 ### Rules about rules
@@ -119,25 +126,33 @@ stories:
   Lint warns on a statement carrying a "because", on one grown past forty-five
   words, and on a `because` past thirty-five. How a statement reads when it is
   right, with before/after pairs: [ADR 0004](adr/foundational/202609_rule_wording_guidelines.md).
-- **The hash pins the statement and the steps.** Steps carry `statement_hash`, computed
-  over both; `walkdown lint` flags a rule whose hash no longer matches: the wording moved
-  and every verdict on it reads stale. `walkdown hash --write` re-stamps it; add
-  `--reword "<why>"` when only the words changed, and the old hash is kept under
-  `steps.reworded` so the verdicts stand.
-- **`verify`** lists the evidence required to establish "done" — every listed type must
-  have a passing latest result. Three evidence types:
+- **The hash pins the statement, the steps and any excuse.** Steps carry
+  `statement_hash`, computed over all three; `walkdown lint` flags a rule whose hash no
+  longer matches: the wording moved and every verdict on it reads stale. Adding,
+  changing or removing an excuse stales the rule the same way, because an excuse written
+  after approval would set a tier aside that nobody read. `walkdown hash --write`
+  re-stamps it and records the tiers the stamp excused under `steps.excused`. Add
+  `--reword "<why>"` when only the words changed: the old hash is kept under
+  `steps.reworded` so the verdicts stand. A rewording never adds an excuse, and
+  `--reword` refuses one that would.
+- **Every rule has two tiers of evidence, and says why when it cannot.** The verify
+  inversion: a tier that costs only a run is assumed, and a tier somebody has to write
+  is asked for.
+  - `agent` — AI judgment, assumed for every rule: an agent performs a walkdown session
+    against the rule, comparing the build to the design through the storyboard and
+    anchors, and records a verdict with evidence (screenshots, reasoning). Cheap and
+    repeatable, and a screening tier: it never stands in for a person's acceptance.
   - `checks` — deterministic tests in the project's own suite
-    ([03-runner-contract.md](03-runner-contract.md)).
-  - `agent` — AI judgment: an agent performs a walkdown session against this rule,
-    comparing app to prototype via the storyboard and anchors, and records a verdict with
-    evidence (screenshots, reasoning). Cheap and repeatable, but nondeterministic — it is
-    a screening tier, and it never satisfies a `human` requirement.
-  - `human` — a person's verdict from a walkdown session. Authoritative for judgment
-    rules; only a human run can satisfy it.
+    ([03-runner-contract.md](03-runner-contract.md)), asked for with `verify: [checks]`.
 
-  Default is `[checks]`. This is honest about the fact that visual fidelity, copy tone,
-  and feel are not Playwright-testable — such rules declare `[agent]`, `[human]`, or
-  `[agent, human]` (agent pre-screens so humans only walk what already looks right).
+  A rule that cannot honestly have a tier excuses it under **`unverifiable:`**, by tier,
+  in a sentence a person can argue with (`agent: Nothing is drawn; …`). An excuse under
+  twenty characters is refused, and lint warns when both tiers are excused. A rule is
+  verified when every tier it still has shows a current pass.
+- **`signoff`** says who accepts the rule, by role: `eng` always, with `product` or
+  `design` beside it. A person's acceptance is a signature on a walkdown verdict, never a
+  verify tier. `human` was one until the inversion; lint now warns on a `verify` that
+  lists it, because the rule reads as asking for a signature it is not asking for.
 - **`environments`** scopes where checks are expected to pass — a check written against
   seeded local fixtures may legitimately not run against staging's real data. A failure
   outside a rule's environments is reported as `skipped`, not `fail`.
@@ -166,8 +181,13 @@ behavior, CLI contract, background job, or policy. For these, walkdown is delibe
 lint still finds untested requirements, runs still track per-target history and
 staleness, and threads anchor at the rule level. The storyboard, anchors, and embed are
 the *UI extension* of that core, not the core itself; one blueprint freely mixes both
-kinds. `verify: [human]` remains meaningful headless (a person exercising a staging API
-is a walkdown), as does `agent` (judging output quality is judgment work).
+kinds. A person's signoff means as much headless as anywhere: a person exercising a
+staging API is a walkdown.
+
+A headless rule says why there is nothing to look at. The agent tier is what looks, so a
+rule with no screen excuses it under `unverifiable:`, as `checkout.guest.receipt-queued`
+does above. Lint refuses a live rule that names no screen and excuses no agent tier, and
+one that excuses only `checks`, which says nothing about a screen.
 
 The guardrail: **not every test deserves to be a rule.** A rule is a behavior product
 would recognize as a requirement ("repeated joins are rate limited" — yes; "the YAML
@@ -182,7 +202,7 @@ stopped being a spec.
 screens:
   - id: checkout-payment
     title: Payment step
-    prototype: /screens/checkout-payment.html    # relative to prototype root
+    design: /checkout-payment/20261019.html      # the accepted version, relative to the design root
     app:
       path: /checkout/payment                    # relative to target base_url
       setup: cart_with_item      # OPTIONAL fixture/recipe name; v1 may leave empty
@@ -192,7 +212,7 @@ screens:
       - checkout.submit
   - id: checkout-confirm
     title: Order confirmation
-    prototype: /screens/checkout-confirm.html
+    design: /checkout-confirm/20261019.html
     app: { path: /checkout/confirmation }
 ```
 
@@ -208,27 +228,45 @@ screens:
 - **`retired`** withdraws a screen the same way it withdraws a rule, and for the same
   reason: threads anchored to it must keep resolving. A retired screen leaves the picker,
   the matcher, the ghost and the drift report; its id still answers, so a note somebody
-  wrote about it is still a note about something. Retiring a screen means retiring the
-  rules that named it first — a live rule pointing at a screen nobody can reach is a
-  different problem.
+  wrote about it is still a note about something. Retiring a screen means moving or
+  retiring the rules that named it first: lint refuses a live rule that names a retired
+  screen, since no walk reaches it. A screen retired with `replaced_by: <id>` names where
+  its rules belong now, and the error says so.
+- **Every live screen is named by a live rule.** A screen reaches a person only with the
+  rules it must show, because those rules are its design's review (ADR 0015 §8). Lint
+  refuses a screen no live rule names; retired rules and screens are counted apart.
 
 - The storyboard is the *only* place per-surface URLs live. When a route changes, one line
   changes.
-- **Each surface has one owner, and nobody writes into another's.** Design owns
-  `prototype/`; product owns the PRD; engineering owns the app and checks. When the spec
-  gets ahead of a source — a rule incorporated from a thread needs a screen design
-  doesn't have — the screen is declared with **`prototype: null`** (spec'd, not yet
-  designed) and a **design-request thread** is filed, anchored to that screen. Builders
-  may sketch a **`proposal:`** (an HTML file under `proposals/`, shown by the panel
-  with a "proposed — not from design" badge) as a communication artifact — the shop
-  drawing the contractor submits, never a change to the architect's plans. When design
-  ships the real screen, `prototype:` gets its path, the proposal is superseded, and the
-  request thread is incorporated. Lint flags an undesigned screen with no open request
-  (a proposal alone is not a request); `walkdown status` reports all drift — undesigned
-  screens and thread-born rules — until the sources catch up. Engineering may also keep
-  an **as-built** drawing of a build that cannot be framed (an HTML page under
-  `as-built/`, named as a screen's `app.path`) — the drawing revised after construction,
-  never the design ([ADR 0007](adr/lightweight/202609_as_built_drawings.md)).
+- **Each surface has one owner, and nobody writes into another's.** Design owns the
+  design root (`designs/`, or whatever `design.root` in `spec.yml` names); product owns
+  the PRD; engineering owns the app and checks.
+- **Every design of a screen is a dated version** in `designs/<screen>/`:
+  `20261019.html`, then `20261019-v2.html` for a second one that day (ADR 0015). The
+  storyboard's `design:` names the accepted one. A version's state is in the record,
+  never in its filename.
+- **A screen design has not drawn is declared `design: null`**, and a **design request**
+  is filed on it (`walkdown threads new --screen <id> --reason request`). Whoever draws,
+  a designer or a design agent but never the builder (ADR 0009), puts the version in the
+  screen's folder. The request names it with `walkdown threads set <id> --proposes
+  /<screen>/<version>.html`, which refuses a version no file holds. The panel then shows
+  it beside the accepted design, Proposed first, in a dashed frame labelled "Proposed —
+  yours to accept".
+- **Approving a screen's rules accepts its design.** The walkdown is the design review:
+  once a person has approved or signed every live rule on the screen, its design request
+  is accepted in their name and the proposed version becomes the screen's design. Lint
+  then warns until `design:` points at it, because the storyboard is what a person reads.
+- **Drift is routed, never silent.** Lint warns on an undesigned screen with no open
+  design request, and refuses a request whose proposed version is not on disk, since the
+  walk would show "not found" there. `walkdown status` reports all drift — undesigned
+  screens and thread-born rules — until the sources catch up. Before 0.5.0 a builder's
+  sketch was a `proposal:` under `proposals/`; those still load, and `walkdown upgrade`
+  moves them into the screen's folder.
+- Engineering may also keep an **as-built** drawing of a build that cannot be framed (an
+  HTML page under `as-built/`, named as a screen's `app.path`) — the drawing revised
+  after construction, never the design
+  ([ADR 0007](adr/lightweight/202609_as_built_drawings.md)). Where the build leaves the
+  design on purpose, a person files a redline on the element (see Threads).
 
 ## Threads
 
@@ -245,7 +283,10 @@ anchor:
   element: checkout.email      # anchor ID; optional
 status: open                   # questions: open | answered | incorporated | waived
                                # notes:     open | addressed | verified | settled | recorded | waived
-reason: feedback               # notes only: feedback | finding | observation | request | decision
+reason: feedback               # notes only: feedback | finding | observation | request | decision | redline
+# proposes: /checkout-payment/20261019.html   # a design request: the version it proposes
+# design: An inline error under the field     # a redline: what the design shows...
+# build: A toast at the top of the page       # ...and what the build shows
 body: >
   Should email validation fire on blur, or only on submit? The prototype shows an inline
   error but doesn't indicate when it appears.
@@ -279,11 +320,16 @@ replies:
   folded into the rule's statement or steps (here: a new `then` line about submit-time
   validation). The thread stays as provenance. `walkdown lint` lists threads stuck at
   `answered`.
+- **A question is asked once.** When a person's answer is written up as a new rule, the
+  question moves onto that rule: `walkdown threads set <q> --written-as <rule>`. The walk
+  then asks it there, and approving the rule incorporates it. Lint refuses a question
+  still open where it was first asked once a rule carries its answer.
 - Notes use the same shape with lifecycle `open → addressed → verified`, and may carry
   `position` (click coordinates relative to the anchored element) and a screenshot path
   as evidence.
-- **A note says why it exists** (`reason`, set when it is filed and never changed — ADR
-  0005), and the reason says what closes it:
+- **A note says why it exists** (`reason`, set when it is filed — ADR 0005), and the
+  reason says what closes it. It changes only when a person reopens a redline, which
+  turns it into feedback marked `reopened_from: redline`.
 
   | reason        | filed by                              | what closes it                                              |
   |---------------|---------------------------------------|-------------------------------------------------------------|
@@ -292,6 +338,16 @@ replies:
   | `observation` | an agent, in passing (authored `agent`) | the agent marking it `settled`, with the change named        |
   | `request`     | anyone, to design                       | a person, as ever (`verified` or `waived`)                   |
   | `decision`    | a person, or an agent typing one        | nothing — filed `recorded`, terminal, in no queue            |
+  | `redline`     | a person only, on an element            | nothing — filed `recorded`; a person may reopen it           |
+
+  A **redline** says the build leaves the design at this element on purpose, and why,
+  with what the design and the build each show (`design:`, `build:`). It is drawn in red
+  on both sides of the fade, listed apart in the Threads tab, and read by a judge as an
+  intended gap rather than a fail. An agent never files one: an agent that disagrees asks
+  a question on the element. A person who wants to work a redline out with the agent
+  reopens it, and it becomes an open note waiting on the agent, keeping its why and its
+  Design and Build pair in view. Redlines replaced `as-built/redlines.json`, whose notes
+  `walkdown upgrade` files as redlines.
 
   A finding or observation is the machine's own account and is authored `agent`, never
   filed under the person whose machine it is. Attribution follows the words: a machine's
@@ -314,7 +370,8 @@ replies:
   `open → addressed → verified | settled | reopen | waived`, questions
   `open → answered → incorporated | reopen | waived`. Every ending may reopen (back
   to `open`) - a thread that came back is the same thread, and the acceptance it
-  undoes stays on the file - except `recorded`, which is a record, not a task.
+  undoes stays on the file - except a decision, which is a record, not a task. A
+  `recorded` redline reopens only by a person's hand.
   Reopening and waiving require a reason, recorded as a reply; only a person may
   reopen a `verified` or `waived` thread, since that takes their acceptance back;
   only an `observation` may be `settled`. The governance rule that keeps the ledger trustworthy: **agents may set

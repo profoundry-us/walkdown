@@ -117,9 +117,11 @@ remains as provenance; the rule is where the knowledge lives.
 **Every projection has one owner.** Design owns the prototype, product owns the PRD,
 engineering owns the app and its checks — and nobody writes into another's surface.
 When the spec outruns a source, the gap is recorded (drift report), routed (a request
-thread in the owner's queue), and optionally illustrated (a clearly-badged proposal) —
-never silently patched by whoever noticed. This is what keeps the blueprint politically
-viable: it coordinates the owners without overruling them.
+thread in the owner's queue), and drawn by design or a design agent as a proposed version
+beside the accepted one — never silently patched by whoever noticed. A person's walkdown
+of the screen's rules is the design review: approving them accepts the design. This is
+what keeps the blueprint politically viable: it coordinates the owners without
+overruling them.
 
 **Meet the work where it runs.** Agents author, build, and run checks from file edits
 and the CLI — that half never needed a UI. Humans review in **the browser, beside the
@@ -158,8 +160,8 @@ The tool's own surfaces stay web pages precisely so that stays possible.
 4. **Walk down.** An agent walkdown pre-screens judgment rules (comparing app against
    prototype via the storyboard); then a human steps through rules in the panel beside
    the live app, fading the prototype ghost over it to compare, with the embed pinning
-   notes to real elements. Both sessions land as walkdowns in the same ledger; only the
-   human's verdict satisfies a `human` verify requirement.
+   notes to real elements. Both sessions land as walkdowns in the same ledger; only a
+   person's signed verdict is acceptance, for the roles the rule's `signoff:` names.
 5. **Close the loop.** Agents consume notes and questions (anchored to exact elements),
    fix, re-run, and fold answers back into rules.
 

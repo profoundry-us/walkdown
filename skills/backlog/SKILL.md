@@ -37,7 +37,7 @@ final report that you decided it and how to reverse it.
 3. **Brief each agent with the standing constraints.** Every prompt carries:
    run the CLI from the working tree, never `npx`; never set a thread to
    `verified` or `waived`; mutate threads only through `walkdown threads`; never
-   edit `prototype/`; do not commit or push; which files this agent owns and
+   edit the design root (`designs/`, or whatever `design.root` names); do not commit or push; which files this agent owns and
    which belong to another agent right now. Add the traps this repo has already
    paid for — read the last few entries of the log this skill keeps and pass
    on whatever bit someone recently. Finish every prompt with the gates the

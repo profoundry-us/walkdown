@@ -51,11 +51,14 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   have been. For the same reason a screen gets its `app:` path in the
   storyboard when it is built, not before: until then there is nothing there
   to frame, and the panel shows the design alone.
-- **Never edit `prototype/`** — design owns it. If the spec needs a screen that
-  design hasn't drawn: set `prototype: null` on the storyboard screen, put a
-  sketch under `proposals/` if a picture helps, and file a design request
-  on the screen (`walkdown threads new --screen <id> --body <text> --blueprint <id>`). Lint
-  enforces this routing. Design work goes through a request, and a request
+- **Never edit the design root** (`designs/`, or whatever `design.root` in
+  `spec.yml` names) — design owns it. If the spec needs a screen that design
+  hasn't drawn: set `design: null` on the storyboard screen and file a design
+  request on the screen (`walkdown threads new --screen <id> --reason request
+  --body <text> --blueprint <id>`). Whoever draws puts a dated version in
+  `designs/<screen>/` and names it with `walkdown threads set <id> --proposes
+  /<screen>/<version>.html --blueprint <id>`. Lint enforces this routing, and
+  refuses a request whose version is not there. Design work goes through a request, and a request
   is for design, not for you: it waits in the DESIGN QUEUE, never in yours,
   even where the blueprint's `design.by` is `agent` - that is a different
   agent from the one building the app (ADR 0009). An `as-built/`
@@ -75,7 +78,9 @@ notes), and the runs ledger. The blueprint is the single source of truth for
   `data-testid`). Every element the spec references keeps its anchor.
 - Reference screens and anchors by id — never URLs, never CSS selectors.
 - Rules don't require screens: headless rules (API, CLI, jobs, policies) get the
-  full ledger without the UI layer. But not every test deserves a rule — a rule
+  full ledger without the UI layer. A rule with no screen says why there is
+  nothing to look at, by excusing the agent tier: `unverifiable: { agent:
+  "<why, in a sentence>" }`. Lint refuses one that does not. But not every test deserves a rule — a rule
   is a behavior product would recognize as a requirement. Keep checks a small,
   meaningful subset of the test suite.
 
@@ -189,9 +194,12 @@ rather than adding to it.
   live notes on one rule means the rule wants splitting - say so.
 - A note says why it exists (ADR 0005): `feedback` is a person's words;
   `finding` is a judge's fail; `observation` is something you noticed in
-  passing, which you settle yourself; `request` is a rule that has not been
-  written yet; `decision` is a record, filed closed. On a walkable rule all
-  but a decision close on the pass. File yours with `--reason finding` from
+  passing, which you settle yourself; `request` is for design; `decision` is
+  a record, filed closed; `redline` is a person's record that the build leaves
+  the design at an element on purpose, also filed closed. On a walkable rule
+  all but a decision or a redline close on the pass. You never file a redline.
+  A judge reads one as an intended gap, and an agent that disagrees with one
+  asks a question on its element. File yours with `--reason finding` from
   a judge run and `--reason observation` otherwise; a finding or an
   observation is authored `agent`, never under the person whose machine it
   ran on.
@@ -199,6 +207,10 @@ rather than adding to it.
   act the rule already has: draft the rule or edit the wording, say why in
   `because`, and the person approves or sends it back. Ask a `question` only
   for what no rule edit can express, and put the question on its first line.
+- A question is asked once. When a person's answer becomes a new rule, move
+  the open question onto it: `walkdown threads set <q> --written-as <rule>
+  --blueprint <bp>`. Approving the rule answers it, and lint refuses the
+  question left open where it was.
 - Work your queue: `address` open notes; `incorporate` answered questions —
   fold the answer into the rule's statement/steps, then mark the thread;
   `settled` an observation once the change is named.
@@ -232,6 +244,7 @@ rather than adding to it.
     walkdown threads reply|set <id> --blueprint <bp>   reply / transition
     walkdown serve                  panel + embed + pin/walkdown APIs, for every
                                     registered blueprint; start it anywhere, once
+    walkdown upgrade [--dry-run]    move an old layout once, when a person asks
 
 A project can hold several blueprints (`walkdown blueprints new <name>` adds one).
 Then `status`, `lint`, `threads` and `where` report on each, under its id.

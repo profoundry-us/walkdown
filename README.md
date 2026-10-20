@@ -36,7 +36,7 @@ panel riding beside the running app and rendering those same files.
 | [01-glossary.md](docs/01-glossary.md) | The vocabulary — every term, one meaning |
 | [02-blueprint-schema.md](docs/02-blueprint-schema.md) | Entities, file layout, IDs, dual representation |
 | [03-runner-contract.md](docs/03-runner-contract.md) | How any test framework plugs in (linkage, execution, results) |
-| [04-embed-and-anchors.md](docs/04-embed-and-anchors.md) | The anchor convention (test-id reuse), embed script, the docked and framed panel layouts |
+| [04-embed-and-anchors.md](docs/04-embed-and-anchors.md) | The anchor convention (test-id reuse), embed script, and how the panel frames the page |
 | [05-runs-ledger.md](docs/05-runs-ledger.md) | Verification runs, walkdowns, derived status |
 | [06-prototype-contract.md](docs/06-prototype-contract.md) | What a prototype must carry, and who owns it |
 | [07-roadmap.md](docs/07-roadmap.md) | Which problems are solved, what is next, what we decided not to do — a dated snapshot |
@@ -44,6 +44,8 @@ panel riding beside the running app and rendering those same files.
 | [09-delivery.md](docs/09-delivery.md) | How walkdown arrives: the clone, the one dependency, the skills, the extension |
 | [10-house-style.md](docs/10-house-style.md) | How code here is written — what the repo already does, written down |
 | [11-architecture.md](docs/11-architecture.md) | The 5000-foot review: what is healthy, what to refactor, in what order |
+| [12-page-ownership.md](docs/12-page-ownership.md) | Which blueprint a page belongs to: the argument kept beside ADR 0001, which is what was decided |
+| [13-voice.md](docs/13-voice.md) | How prose written into a blueprint sounds, and where lint checks it |
 
 ## Install
 
@@ -85,7 +87,7 @@ lists its verbs ([ADR 0012](docs/adr/foundational/202610_cli_command_structure.m
 walkdown init [--force]
 walkdown blueprints new [<name>] [--dir <project-root>] [--commit none|spec|all]
 walkdown blueprints import <path> [--all|--only <folders>]
-walkdown upgrade [--dry-run]
+walkdown upgrade [--dry-run] [--layout-only]
 walkdown skills [--into <dir>] [--project] [--force]
 walkdown where [<kind>] [--blueprint <id>] [--json]
 walkdown pointer [--dir <project-root>] [--into <file>]
@@ -100,7 +102,7 @@ walkdown threads show <id> [--json]
 `blueprints new` scaffolds a home for a project — one flat folder holding a `spec.yml`
 and storyboard template, a feature template, and **`AGENTS.md`**: the conventions any AI agent working
 in the repo follows (read the blueprint first, carry anchors, tag checks with rule
-ids, work the agent queue, claim-never-accept, never touch `prototype/`);
+ids, work the agent queue, claim-never-accept, never touch the design root);
 `walkdown pointer --into CLAUDE.md` tells agents where the specs are, in a fixed paragraph
 that names no blueprint. `init` links the clone into Claude Code as the
 **`walkdown` plugin** (`~/.claude/skills/walkdown`, one link, so updating the
@@ -119,7 +121,7 @@ body, and replies; `threads reply` and `threads set` answer and move one. The st
 truncates with `+N`; `threads --rule <id>` is the full list.
 
 `status` renders the derived per-rule verification table straight from the runs ledger:
-latest checks per target, latest agent and human walkdown verdicts, open threads, and a
+latest checks per target, the latest agent walkdown, each sign-off role's acceptance, open threads, and a
 per-rule verdict (verified / pending / failing — exit 1 on any failure). A pass recorded
 against an older statement (per-result `statement_hash`) renders as `~ stale`, never as
 passing. The table is followed by an active-threads digest (truncated bodies, capped at
@@ -131,12 +133,17 @@ paths, and every thread anchored to it. `--json` is the agent-facing form.
 screen/anchor references (including anchors mentioned in steps), statement-hash staleness,
 check coverage from the rule tags in your test files (or a `runner.list` command, if
 you name one), stale check comments, thread
-lifecycles (`answered`-but-not-incorporated, `waived` without `waived_by`), and run
-records. Errors exit 1; warnings don't.
+lifecycles (`answered`-but-not-incorporated, `waived` without `waived_by`, a question
+still open where it was asked once a rule carries its answer), design requests whose
+proposed version is not on disk, and run records. Every live screen must be named by a
+live rule, no live rule may name a retired screen, and a rule with no screen must excuse
+the agent tier. Retired rules and screens are counted apart. Errors exit 1; warnings
+don't.
 
 `hash` reports `statement_hash` status per rule; `--write` repairs missing/stale hashes
-in place, preserving YAML formatting. Hashes are sha256 of the whitespace-normalized
-statement, stored truncated (`sha256:` + 12 hex).
+in place, preserving YAML formatting, and `--reword "<why>"` keeps the verdicts when
+only the words changed. Hashes are sha256 of the whitespace-normalized statement, steps
+and any excuses, stored truncated (`sha256:` + 12 hex).
 
 ## walkdown serve — the panel and its APIs
 
@@ -144,15 +151,19 @@ statement, stored truncated (`sha256:` + 12 hex).
 answers for every blueprint registered on this machine, so start it from anywhere: the
 panel finds a page's blueprint from its address, and asks when none or several claim it.
 Started inside a registered project, or with `--blueprint <id>`, that blueprint is also
-what a request naming none opens. A blueprint registered, or a storyboard edited, while it
-runs is picked up without a restart.
+what a request naming none opens. On start it lists every registered blueprint by ID with
+its project, and marks that default. A blueprint registered, or a storyboard edited, while
+it runs is picked up without a restart.
 
 - **The review page** — `/` is walkdown's own page: the panel, with the blueprint's front
   door framed inside it. Put a URL in the fragment (`/#http://localhost:3000/`) to review
   a page the storyboard has never heard of. The browser extension
   ([extension/](extension/)) opens the same page over any tab, loading the same
-  `/panel.js`. The prototype is mounted at `/prototype/`, and picking a rule takes the
-  frame to that rule's screen via the storyboard.
+  `/panel.js`. The design root (`designs/` by default) is mounted at `/prototype/`.
+  Picking a rule takes the frame to that rule's screen via the storyboard, and centres
+  the element the rule is about. A screen with a proposed design gets an Accepted /
+  Proposed switch, Proposed first. When the app does not answer, the panel shows the
+  screen's design and says why.
 - **The stand-in app** — for screens with no running page to point at (the thing being
   built is chrome, or is not built yet), an app path of `/stand-in/<screen-id>` serves
   that screen's own design back as the app — different theme, ringed edge, corner label
@@ -160,7 +171,7 @@ runs is picked up without a restart.
   what it shows is the design.
 - **Pin mode** — with the embed snippet in a page (`<script
   src="http://localhost:4700/embed.js" data-walkdown data-bp="example">`),
-  clicking a real element pins a note or question to its anchor; the thread lands in
+  clicking a real element pins a note, a question or a redline to its anchor; the thread lands in
   the home's `threads/` with rule, screen, element, and author attached. **Escape** leaves
   pin mode (closing an open form first), as does clicking the badge again. Standalone
   pages (opened without the panel) resolve their screen from the URL and post to the
@@ -169,13 +180,14 @@ runs is picked up without a restart.
   serve` was started in, which a server started outside any project does not have.
 - **Human walkdowns** — Start walkdown (your name arrives from git identity), judge
   rules, Finish: the session is appended to the home's `runs/` as a hash-stamped
-  `kind: walkdown` record, satisfying `human` verify requirements. A feedback box rides
+  `kind: walkdown` record, which is each signer's acceptance. A feedback box rides
   above the verdict buttons — anything written is filed as a note thread on the rule
   and linked into the run result, and a **fail is refused until it has a why** (the
   note, or a pin dropped during the session; failing arms pin mode so the note lands
   where the problem is). Rules with no build evidence show **Approve / Refine** instead
   of Pass / Fail — sign-off on the spec, recorded as `approved`/`refining`, never
-  counted as verification. Each verdict is written to the home's `drafts/` the moment it
+  counted as verification. Approving every rule on a screen accepts its design. Each
+  verdict is written to the home's `drafts/` the moment it
   is given, so an unfinished sitting survives a reload or a closed browser and shows up
   in `walkdown status` as in progress; the ledger still gains exactly one record, at
   Finish, which deletes the draft. Drafts are working state — the directory ignores its
@@ -195,6 +207,9 @@ runs is picked up without a restart.
   never an argument — it is the `identity:` in your `~/.walkdown/profile.yml`. An agent
   working for you records under *your* name, because it is your instruction; `--as-agent`
   adds the provenance beside it, and refuses `verified` and `waived` outright.
+- **Redlines** — a person files one where the build leaves the design on purpose. It is
+  filed closed, drawn in red on both sides, and read by judges as an intended gap. Reopen
+  turns it into a note waiting on the agent, with its Design / Build pair kept.
 
 ## Styling — Tailwind CSS + daisyUI
 

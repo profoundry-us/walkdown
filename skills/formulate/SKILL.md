@@ -25,13 +25,15 @@ derives from it.
    (`checkout.submit`) for elements that lack them.
 
 2. **Storyboard first.** One entry per screen/state in
-   the home's `storyboard.yml`: stable id, the `prototype:` path, declared
+   the home's `storyboard.yml`: stable id, `design:` (the accepted version,
+   `/<screen>/YYYYMMDD.html` under the design root), declared
    `anchors`. Leave `app:` out until something is built at that path: a
    screen with only a design is complete, and the panel shows its design side
    alone. The agent that builds the screen adds its `app:` path. A screen the source
-   implies but doesn't show gets `prototype: null` plus a design-request
+   implies but doesn't show gets `design: null` plus a design-request
    thread (see ownership rules). States (modal open, error showing) are
-   screens too if rules need to point at them. **Design comes first:** a rule
+   screens too if rules need to point at them. Lint refuses a screen no rule
+   names. **Design comes first:** a rule
    on a screen with no design is not built until the screen's design has been
    drawn and a person has accepted it. A designer draws it where there is
    one; where there is none, a design agent drafts it (a separate agent,
@@ -91,7 +93,9 @@ derives from it.
    <page>` confirms the page is claimed.
 
 Rules without screens are fine — headless rules (API behavior, CLI contracts,
-jobs, policies) get the full ledger without the UI layer. The guardrail: a
+jobs, policies) get the full ledger without the UI layer. Each one excuses the
+agent tier under `unverifiable:` and says why nothing is drawn; lint refuses a
+rule with no screen and no such excuse. The guardrail: a
 rule is a behavior product would recognize as a requirement, never a mirror
 of the unit-test suite.
 

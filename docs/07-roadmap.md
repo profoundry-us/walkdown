@@ -1,6 +1,6 @@
 # 07 — Roadmap
 
-**Snapshot of 2026-08-26.** Everything here is perishable by design. The nine problems in
+**Snapshot of 2026-10-20, at 0.5.0.** Everything here is perishable by design. The nine problems in
 [00-vision.md](00-vision.md) barely change; which of them are solved changes constantly,
 and mixing the two is what turns a vision document into something nobody opens. When this
 file disagrees with the code, the code is right and this file is out of date.
@@ -13,9 +13,9 @@ file disagrees with the code, the code is right and this file is out of date.
 | 2 | Noticing when the PRD or prototype moves | **weakest** | Threads, `origin`, statement hashing. Nothing watches either source. |
 | 3 | A deterministic spec for agents | **solid** | `status --json`, `AGENTS.md`, the three skills, the attention queues. |
 | 4 | Why a decision was made | **partial** | Threads + `origin: thread:<id>` + the runs ledger. No way to say a source was superseded on purpose. |
-| 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app, and an as-built drawing where the build cannot be framed (ADR 0007). One delivery since 2026-08-26 — the extension, framing the page. |
+| 5 | How closely the build matches the design | **solid** | The panel: fade dial, ghosted design, viewport presets, element-anchored pins, stand-in app, an as-built drawing where the build cannot be framed (ADR 0007), redlines where the build leaves the design on purpose, rule focus, and the design shown when the app does not answer. One delivery since 2026-08-26 — the extension, framing the page. |
 | 6 | Design records changes, an agent makes them | **partial** | ADR 0009: requests queue for design (`design.by` says whether a person or a design agent draws), never for the builder. Not yet: the design blueprint's copy step and the `walkdown-design` skill, which wait on the first design blueprint. |
-| 7 | A QA pass that is more than eyeballing | **solid** | `verify: [checks, agent, human]`, `/walkdown:judge`, an agent may never write `verified`. |
+| 7 | A QA pass that is more than eyeballing | **solid** | The assumed agent tier beside opt-in `verify: [checks]`, `signoff:` roles for acceptance, `/walkdown:judge`, an agent may never write `verified`. |
 | 8 | Feeding tickets and design docs | **not ours** | An agent reads the spec and drafts them. No feature. |
 | 9 | Phases and quarters | **planned** | Separate blueprints, which the server and panel already support. |
 
@@ -56,29 +56,26 @@ file disagrees with the code, the code is right and this file is out of date.
   reworded. The embed still travels by script tag — that is how a prototype page is
   pinnable — and only the panel's second layout is gone.
 
-## Earmarked for 0.5.0
+## Shipped in 0.5.0
 
-### Design versions and states (ADR 0015, accepted)
+- **Design versions (ADR 0015).** Every design of a screen is a dated version in
+  `designs/<screen>/`; the storyboard's `design:` names the accepted one, and a design
+  request's `proposes:` names the one waiting. `walkdown upgrade` moved the old
+  `screens/`, `drafts/` and `proposals/` folders in.
+- **Proposed beside accepted.** The design side gets an Accepted / Proposed switch, and
+  approving every rule on a screen accepts its design.
+- **Redlines.** A pin can be a redline, filed closed by a person; it replaced
+  `as-built/redlines.json`.
+- **#24, rule focus (ADR 0016).** A rule opens at the element it is about.
+- **#22, a dead App side.** When the app does not answer, the panel shows the design and
+  says why.
+- **#21 and #23, formulate's guidance.** No `app:` path until a screen is built, and
+  `signoff:` rather than a `human` tier.
+- **Stricter lint.** A screen no live rule names, a live rule on a retired screen, a rule
+  with no screen and no agent excuse, a question asked twice, and a proposed version not
+  on disk are all errors.
 
-The release's centre: a designs folder with a folder of dated versions per screen, the proposed
-frame and the design side's version switch, redlines as pinned notes filed only by
-a person, the upgrade that clears `screens/`, `drafts/` and `proposals/`, and
-approving a screen's rules accepting its design. Its seven screens are drawn and
-walkable as proposals; its eight rules are written, unbuilt.
-
-### Folded in from the open issues (2026-10-10)
-
-- **#21 and #23, formulate's guidance.** Done in the skill, the scaffolds and
-  `AGENTS.md`: no `app:` path until a screen is built, and `signoff:` rather than
-  a `human` tier. Ships with 0.5.0 whatever else does.
-- **#22, a dead App side.** `panel.dock.app-not-answering`, unbuilt, with its
-  screen `app-not-answering` drawn for review. It sits beside ADR 0015's design
-  side: when the build cannot be reached, the panel shows the design.
-- **#24, rule focus.** ADR 0016, accepted 2026-10-10, with two approved rules. Additive
-  and small; it suits 0.5.0 because the walkdown becomes the design review, and
-  can slip to 0.5.1 without touching ADR 0015.
-- **#20, a second blueprint per project.** Already built (ADR 0011, `blueprints
-  new`); the issue can be closed.
+## Carried past 0.5.0
 
 ### Investigate Claude Code Mods
 

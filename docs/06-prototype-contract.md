@@ -44,13 +44,14 @@ path. A prototype that can only be navigated by clicking through cannot be deep-
 and a walkdown is a sequence of deep links.
 
 ```
-screens/waitlist-join.html
-screens/waitlist-confirm.html
-screens/waitlist-admin.html
+designs/waitlist-join/20260824.html
+designs/waitlist-confirm/20260824.html
+designs/waitlist-admin/20260824.html
 ```
 
 Screen ids are kebab-case, stable across regenerations for the same reason anchors are,
-and match the file name.
+and name the screen's folder. Each file in it is one dated version of that screen; a
+redraw is a new version beside the old, never an edit of it (ADR 0015).
 
 **States that a URL fragment expresses are separate screens.** Modals, drawers, tabs and
 SPA routes are exactly the states worth walking down, and they are addressed by
@@ -91,11 +92,11 @@ generator: claude-design
 screens:
   - id: waitlist-join
     title: Join the waitlist
-    path: /screens/waitlist-join.html
+    path: /waitlist-join/20260824.html
     anchors: [waitlist.email, waitlist.email-error, waitlist.submit]
   - id: waitlist-admin
     title: Waitlist admin
-    path: /screens/waitlist-admin.html
+    path: /waitlist-admin/20260824.html
     anchors: [waitlist.heading, waitlist.count, waitlist.export, waitlist.invite-batch, waitlist.table]
     states:
       - id: waitlist-invite-batch
@@ -112,7 +113,7 @@ its own, written the way a URL is written:
 # <home>/storyboard.yml, after the merge
   - id: waitlist-invite-batch
     title: Confirm a batch invite
-    prototype: /screens/waitlist-admin.html#invite-batch
+    design: /waitlist-admin/20260824.html#invite-batch
     app: { path: /admin.html#invite-batch }
     anchors: [waitlist.confirm-batch]
 ```
@@ -151,13 +152,15 @@ need attention, which is information, not an error.
 
 ## Hosting
 
-Serve the export from a `prototype/` in the blueprint's home and `walkdown serve` mounts it at
-`/prototype/` with working paths and deep links. No second server, no build step.
+Keep the export in a `designs/` folder and `walkdown serve` mounts it at `/prototype/` with
+working paths and deep links. No second server, no build step.
 
-A relative `prototype.root` is looked for beside the spec first, then in the code. So
-`prototype: { root: prototype/ }` names `<home>/prototype/`, beside `spec.yml`, when that exists, which is
-the only place a home kept outside the repository can hold its design, and a
-repository's own `prototype/` otherwise, which is where walkdown keeps its own.
+A relative `design.root` is looked for beside the spec first, then in the code. So
+`design: { root: designs/ }`, or no root at all with a `designs/` folder present, names
+`<home>/designs/`, beside `spec.yml`, when that exists. That is the only place a home kept
+outside the repository can hold its design. Otherwise it names the repository's own
+`designs/`. A `prototype.root` from before 0.5.0 still loads, and `walkdown upgrade`
+renames it.
 
 A prototype hosted somewhere else is fine too, but note what breaks: share URLs that
 wrap the page in a viewer chrome usually intercept history navigation, which takes deep
@@ -176,7 +179,7 @@ the app:
 
 ```yaml
   - id: review
-    prototype: /screens/review.html
+    design: /review/20261019.html
     app: { path: /stand-in/review }    # served from the design, marked as a stand-in
 ```
 
@@ -188,6 +191,14 @@ What it is not is evidence. What you are looking at is the design, so a verdict 
 against a stand-in is a verdict about the design — which is what the sign-off pair
 (Approve / Refine, [05-runs-ledger.md](05-runs-ledger.md)) is for.
 
+## When the app does not answer
+
+Before the frame goes to an application address, the panel asks whether anything answers
+there. When nothing does, the frame shows the screen's design instead of the browser's
+"refused to connect" page, and a strip above it says the app is not answering. A slow
+answer counts as an answer; only a refusal does not. When the app comes back, the frame
+goes back to it.
+
 ## The as-built drawing
 
 A stand-in shows the design twice. When the build exists but cannot be framed — browser
@@ -196,13 +207,15 @@ of what it actually built under `as-built/` and name its pages as app paths:
 
 ```yaml
   - id: review
-    prototype: /screens/review.html
+    design: /review/20261019.html
     app: { path: /as-built/review.html }
 ```
 
-`walkdown serve` serves the folder as written, the way it serves `proposals/`. An as-built
-page is an HTML page carrying the screen's anchors — this contract, nothing more — and it
-is engineering's to edit; `prototype/` stays design's. How the drawing is made, what it
+`walkdown serve` serves the folder as written. An as-built page is an HTML page carrying
+the screen's anchors — this contract, nothing more — and it is engineering's to edit; the
+design root stays design's. Where the build leaves the design on purpose, a person files
+a redline on that element, and it is drawn in red on both sides of the fade
+([02-blueprint-schema.md](02-blueprint-schema.md), Threads). How the drawing is made, what it
 wears, and how often it is brought back in line with the build are the project's own
 business; walkdown neither checks nor enforces any of it. It should say on its face that
 it is a drawing of the build and not the build, because a verdict given against it is a

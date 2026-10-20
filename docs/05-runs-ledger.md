@@ -12,7 +12,8 @@ Four independent truths per rule, each answered by a ledger query:
 1. **Built?** — the builder agent's claim (latest build-time run touching the rule).
 2. **Checked?** — latest automated run per target.
 3. **Judged?** — latest *agent* walkdown covering the rule.
-4. **Walked down?** — latest *human* walkdown covering the rule.
+4. **Accepted?** — the latest signed walkdown verdict from each role the rule's
+   `signoff:` names.
 
 They disagree constantly, and the disagreements are the signal: *"check passes but the
 human rejected it"* means the check is wrong — its own workflow, visible only because the
@@ -88,12 +89,14 @@ Fields of note:
 
 walkdown sessions come in two flavors, producing the same record shape:
 
-- **Human** (`actor: <person>`): stepping through rules in the panel. The only evidence
-  that satisfies a `human` verify requirement.
+- **A person's** (`actor: <person>`): stepping through rules in the panel. A signed
+  verdict is that person's acceptance, for the roles they sign as; it is what the rule's
+  `signoff:` waits on, never a verify tier.
 - **Agent** (`actor: agent`): an AI agent runs the same ritual headlessly — navigates
-  both surfaces via the storyboard, compares app against prototype per rule (screenshots,
-  anchor presence, statement/steps), and records verdicts with evidence and reasoning.
-  Satisfies only an `agent` verify requirement; used to pre-screen judgment rules so
+  both surfaces via the storyboard, compares the build against the design per rule
+  (screenshots, anchor presence, statement/steps), and records verdicts with evidence and
+  reasoning. A gap a redline names is read as intended, not as a fail.
+  Satisfies only the `agent` tier; used to pre-screen judgment rules so
   humans only walk what already looks right. An agent "fail" should spawn a question or
   note thread explaining what looked wrong.
 
@@ -131,8 +134,15 @@ labels, and are never edited; they resolve through the label.
   `approved`, hash-stamped like a pass so it goes stale when the statement is reworded;
   Refine requires the feedback text (that text *is* the refinement) and records
   `refining` with the thread linked. Neither counts as build evidence, neither
-  satisfies any verify requirement, and the rule stays in the human queue for a real
+  satisfies any verify tier, and the rule stays in the person's queue for a real
   walkdown once built.
+- **Approving is also the design review.** An unbuilt rule opens with its screen's
+  proposed design beside it. Once a person has approved or signed every live rule on a
+  screen, that screen's pending design request is accepted in their name, with
+  `verified_via` naming the run, and its proposed version becomes the screen's design. A
+  rule sent back, stale or unsigned leaves the request waiting, and a machine accepts
+  nothing. A question moved onto an approved rule (`--written-as`) is incorporated the
+  same way.
 - A human "fail" usually spawns a **note thread** at the offending element; the run result
   links to it, so the agent fixing the note can see exactly which walkdown rejected what.
 - Partial sessions are fine — un-visited rules simply don't appear in `results`.
@@ -146,24 +156,26 @@ labels, and are never edited; they resolve through the label.
   nothing. The home's own `.gitignore` keeps `drafts/` out unless the blueprint commits
   everything, so half-judged sittings are never committed. (API: `GET`/`POST /api/draft`; the blueprint payload carries the current
   draft so a panel that just booted resumes where it was.)
-- A rule is **verified** only when every evidence type in its `verify` list has a passing,
-  non-stale latest result: `checks` from automated runs, `agent` from agent walkdowns,
-  `human` from human walkdowns. Higher tiers never substitute downward or upward — an
-  agent pass neither satisfies `human` nor replaces a failing check.
+- A rule is **verified** only when every tier it has (the assumed `agent`, and `checks`
+  when it asks for them, less any it excuses) has a passing, non-stale latest result.
+  Tiers never substitute for each other, and none stands in for acceptance: an agent pass
+  neither replaces a failing check nor signs for a person.
 
 ## Derived status (`walkdown status`)
 
 ```
-RULE                              LOCAL      STAGING    AGENT      HUMAN      THREADS
-checkout.guest.email-required     ✓ pass     ✓ pass     —          ✓ topher   —
-checkout.guest.saved-cards        ✓ pass     – skipped  —          ✗ topher   n-0018 open
-checkout.guest.visual-summary     (judged)   (judged)   ✓ agent    ✓ topher   —
-onboarding.invite.resend          ✗ fail     never run  ✗ agent    never      q-0042 answered*
+RULE                              LOCAL      STAGING    AGENT      ACCEPTED          THREADS
+checkout.guest.email-required     ✓ pass     ✓ pass     ✓ pass     ✓ eng ✓ product   —
+checkout.guest.saved-cards        ✓ pass     – skipped  ✓ pass     ✗ eng             n-0018 open
+checkout.guest.visual-summary     ·          ·          ✓ pass     ✓ eng ○ design    —
+checkout.guest.receipt-queued     ✓ pass     ✓ pass     excused    ○ eng             —
+onboarding.invite.resend          ✗ fail     never run  ✗ fail     ○ eng             q-0042 answered*
 ```
 
-Columns map to evidence types: LOCAL/STAGING are `checks` per target; AGENT and HUMAN are
-the latest agent and human walkdown verdicts. A rule renders as fully verified only when
-every type in its `verify` list shows a current pass.
+LOCAL/STAGING are `checks` per target (`·` where a rule asks for none); AGENT is the
+latest agent walkdown, or `excused` where the rule excuses the tier; ACCEPTED is each
+`signoff:` role's latest signed verdict. A rule renders as fully verified only when every
+tier it has shows a current pass.
 
 Query semantics:
 

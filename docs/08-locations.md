@@ -7,7 +7,7 @@ files sit and who is sitting at it. Those are different kinds of fact and they b
 different files:
 
 - **`<home>/spec.yml`** — shared wherever the blueprint is committed, and about the
-  blueprint. What the runner is, which targets exist, where the prototype root is
+  blueprint. What the runner is, which targets exist, where the design root is
   *relative to the blueprint*. It was `blueprint/walkdown.yml` until ADR 0014.
 - **`<home>/records.yml`** — beside it: where this blueprint's runs, threads, evidence and
   drafts *usually* live, relative to the home. It informs; a registry row may say
@@ -47,7 +47,8 @@ blueprints/202610-acme/
 ├── threads/       the conversation about it
 ├── runs/          what a machine or a sitting said about a build
 ├── evidence/      the screenshots those runs point at
-└── drafts/        one person's half-finished sitting
+├── drafts/        one person's half-finished sitting
+└── designs/       the screens' designs, a folder of dated versions each, when kept beside the spec
 ```
 
 One layout, wherever the home sits. That is what lets a home move between
@@ -255,7 +256,8 @@ aside and named on the report with the command that registers it.
 
 A server offers what the registry holds — every blueprint this machine knows about,
 wherever the server was started — and names, as the folder it is serving, the registered
-project containing its working directory. The server and the panel tell blueprints apart
+project containing its working directory. On start it lists every blueprint by ID, with
+its project and home, and marks the one a page naming none opens. The server and the panel tell blueprints apart
 by **where the spec is**, never by id: each blueprint the server offers carries a `key`,
 the canonical spec directory; `?bp=` accepts a key, or an id when exactly one blueprint
 answers to it, and refuses a bare id two answer to with the candidates named rather than
@@ -604,6 +606,19 @@ thread a UUID, renaming its file to it and keeping its label. Folder names are k
 repository's `0001-walkdown` and `0002-cli` are valid names as they stand — and every verdict
 stays current, because moving files changes no rule's wording. `--dry-run` says what it
 would do; run again, it reports nothing to do.
+
+Since 0.5.0 the upgrade also moves the designs (ADR 0015). Each accepted design becomes
+a version in its screen's folder, `designs/<screen>/YYYYMMDD.html`, dated by the file's
+first commit. A draft or proposal that a pending design request names becomes that
+request's proposed version in the same folder, and one no request names is removed; git
+still has it. A file git does not hold, and no screen names, stays where it is, and the
+upgrade says so. The design root is renamed to `designs/`, the storyboard's `prototype:`
+keys become `design:`, `proposal:` keys go, and `spec.yml`'s `prototype.root` becomes
+`design.root`. Each note in `as-built/redlines.json` becomes a closed redline thread, and
+the file goes. A rule whose old stamp excused a tier gets `steps.excused`, so it does not
+read as stale. Old keys still load meanwhile, so nothing breaks before it runs.
+`--layout-only` does everything but move the designs; the hooks that keep a cached home
+current run it that way, because they must never move what a person draws.
 
 ## The pointer
 

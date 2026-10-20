@@ -44,9 +44,11 @@ flag checks written against an older wording.
 ```yaml
 # <home>/spec.yml (it was blueprint/walkdown.yml until ADR 0014)
 blueprint: acme-store
-prototype:
-  root: prototype/          # storyboard `prototype:` paths resolve against this;
-                            # `walkdown serve` mounts it at /prototype/ on its own port
+design:
+  root: designs/            # a folder per screen of dated versions; storyboard `design:`
+                            # paths resolve against it, and `walkdown serve` mounts it at
+                            # /prototype/ on its own port (`prototype.root` before 0.5.0)
+  by: person                # or agent: who draws when a design request is filed (ADR 0009)
 runner:
   run_all:  "bundle exec rspec spec/workflows --format progress --format Walkdown::Formatter --out {results}"
   run_for_rule: "bundle exec rspec spec/workflows --tag 'rule:{id}' --format Walkdown::Formatter --out {results}"

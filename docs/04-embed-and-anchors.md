@@ -70,17 +70,23 @@ doing so; nothing in walkdown runs in production.)
 A small, dependency-free script injected into the prototype and dev/staging builds.
 Responsibilities:
 
-1. **Element picking** — hover-highlight anchored elements; click to attach a note or
-   question to `{screen, element}`, falling back to `{screen, position}` where nothing
+1. **Element picking** — hover-highlight anchored elements; click to attach a note, a
+   question or a redline to `{screen, element}` (only a person files a redline; a
+   recording machine sees its tab greyed), falling back to `{screen, position}` where nothing
    anchored sits under the cursor. Escape leaves pin mode. walkdown's own chrome —
    the badge, an open form, an existing pin, the docked panel — is never a pin target,
    so the way out is never swallowed by the mode you are trying to leave.
 2. **Pin rendering** — draw open threads at their anchors (or their recorded positions) so
-   feedback is seen in place.
+   feedback is seen in place. A redline is drawn on both surfaces, in red with a
+   not-equal sign, wherever its element is: it is about the gap between them.
 3. **Screen reporting** — announce the current screen (URL + anchor fingerprint) so the
    panel can track where the user is.
 4. **Navigation duty** — respond to "go to screen X" commands using the storyboard's
    locator for its surface.
+5. **Focus** — when the panel opens a rule, centre the element the rule is about and
+   ring it, as pin mode does (ADR 0016). The panel names the rule's `focus:`, else the
+   first anchor its steps name on the rule's own screens. A surface without that
+   element draws nothing.
 
 It auto-detects its transport:
 
