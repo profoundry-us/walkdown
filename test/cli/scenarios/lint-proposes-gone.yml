@@ -6,8 +6,8 @@ fixture: g2-request-proposes-gone
 command: [lint, --no-checks]
 exit: 1
 expect:
-  - '^  ✗ \[threads\] checkout/threads/[0-9a-f-]+\.yml › n-0002: proposes /receipt/20261012\.html, and nothing is at ~/shop/designs/receipt/20261012\.html — put the draft back there, or name where it is now with `walkdown threads set n-0002 --proposes <path> --blueprint 0001-sp-checkout`$'
-  - '^  ✗ \[threads\] checkout/threads/[0-9a-f-]+\.yml › n-0003: proposes /cart/20261015\.html, and nothing is at ~/shop/designs/cart/20261015\.html — put the draft back there, or name where it is now with `walkdown threads set n-0003 --proposes <path> --blueprint 0001-sp-checkout`$'
+  # One pattern for both, so n-0002 is checked to come before n-0003: by request id, never by file name.
+  - '^  ✗ \[threads\] checkout/threads/[0-9a-f-]+\.yml › n-0002: proposes /receipt/20261012\.html, and nothing is at ~/shop/designs/receipt/20261012\.html, so the walk would show "not found" there — put the draft back, or name where it is now with `walkdown threads set n-0002 --proposes <path> --blueprint checkout`\n  ✗ \[threads\] checkout/threads/[0-9a-f-]+\.yml › n-0003: proposes /cart/20261015\.html, and nothing is at ~/shop/designs/cart/20261015\.html, so the walk would show "not found" there — put the draft back, or name where it is now with `walkdown threads set n-0003 --proposes <path> --blueprint checkout`$'
   - '^✗ 1 rules, 2 screens, 0 anchors, 4 threads, 0 runs — 2 error\(s\), 0 warning\(s\)$'
 anchors:
   - { id: cli.lint.proposes-gone, match: 'proposes /' }

@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-10-20T02-28-14Z-local-01",
+  "created": "2026-10-20T02:28:14Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "8c68d2db-dirty",
+  "tree_hash": "sha256:2a8e03129d7b",
+  "spec_hash": "sha256:089187c64771",
+  "results": [
+    {
+      "rule": "ownership.design.proposed-version-exists",
+      "status": "pass",
+      "statement_hash": "sha256:7d08a2878a3e",
+      "duration_ms": 2531,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}

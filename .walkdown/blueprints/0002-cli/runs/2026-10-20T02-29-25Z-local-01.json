@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-10-20T02-29-25Z-local-01",
+  "created": "2026-10-20T02:29:25Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b15cd8c1-dirty",
+  "spec_hash": "sha256:089187c64771",
+  "results": [
+    {
+      "rule": "ownership.design.proposed-version-exists",
+      "status": "pass",
+      "statement_hash": "sha256:7d08a2878a3e",
+      "evidence": [
+        "runs/evidence/2026-10-20T02-28-14Z/lint-proposes-gone-probe.txt",
+        "runs/evidence/2026-10-20T02-28-14Z/probe.mjs.txt"
+      ],
+      "reasoning": "Re-judged after the build was brought to the accepted design. On a throwaway machine from the CLI scenario harness (fixture g2-request-proposes-gone), with no network, `walkdown lint --no-checks` in ~/shop exits 1 with exactly two errors: addressed n-0002 and open n-0003, each named by its thread file and id. Each names the version proposed, the path looked for under shop/designs, adds that the walk would show \"not found\" there, and says to put the draft back or run `walkdown threads set <id> --proposes <path> --blueprint checkout`. Waived n-0004, whose file is gone too, is not named. The errors come in request-id order: with the thread files renamed so n-0003's sorts first, n-0002 is still listed first. Both remedies work. The command copied from the message, with <path> filled in, succeeds in ~/shop, and putting the cart draft back clears n-0003; lint then exits 0. With a second project on the machine also holding a blueprint called checkout, the short name in ~/shop still resolves to this one and the command succeeds. Run from outside the project with `--blueprint 0001-sp-checkout`, lint names the blueprint by its ID instead, and that command succeeds from there. The capture matches the design apart from --no-checks, which a redline explains, and made-up UUIDs. Edges below 10%: two blueprints of one checkout sharing a name fall back to the ID by construction, and a hint copied from one directory and run in another unrelated one is outside what a printed hint can know.",
+      "threads": []
+    }
+  ]
+}

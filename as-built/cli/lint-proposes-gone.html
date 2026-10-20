@@ -55,8 +55,8 @@
       <div class="ln"></div>
       <div class="ln">ERRORS</div>
       <div data-testid="cli.lint.proposes-gone">
-      <div class="ln">  ✗ [threads] checkout/threads/00000000-0000-4000-8000-000000000001.yml › n-0003: proposes /cart/20261015.html, and nothing is at ~/shop/designs/cart/20261015.html — put the draft back there, or name where it is now with `walkdown threads set n-0003 --proposes &lt;path&gt; --blueprint 0001-sp-checkout`</div>
-      <div class="ln">  ✗ [threads] checkout/threads/00000000-0000-4000-8000-000000000002.yml › n-0002: proposes /receipt/20261012.html, and nothing is at ~/shop/designs/receipt/20261012.html — put the draft back there, or name where it is now with `walkdown threads set n-0002 --proposes &lt;path&gt; --blueprint 0001-sp-checkout`</div>
+      <div class="ln">  ✗ [threads] checkout/threads/00000000-0000-4000-8000-000000000001.yml › n-0002: proposes /receipt/20261012.html, and nothing is at ~/shop/designs/receipt/20261012.html, so the walk would show "not found" there — put the draft back, or name where it is now with `walkdown threads set n-0002 --proposes &lt;path&gt; --blueprint checkout`</div>
+      <div class="ln">  ✗ [threads] checkout/threads/00000000-0000-4000-8000-000000000002.yml › n-0003: proposes /cart/20261015.html, and nothing is at ~/shop/designs/cart/20261015.html, so the walk would show "not found" there — put the draft back, or name where it is now with `walkdown threads set n-0003 --proposes &lt;path&gt; --blueprint checkout`</div>
       </div>
       <div class="ln"></div>
       <div class="ln">✗ 1 rules, 2 screens, 0 anchors, 4 threads, 0 runs — 2 error(s), 0 warning(s)</div>
@@ -64,5 +64,8 @@
   </div>
   <div class="as-built-ring"></div>
   <div class="as-built-label">As-built</div>
+  <details class="as-built-notes" open><summary>Redlines</summary><ul>
+    <li>The command as typed carries <code>--no-checks</code>, where the design runs a bare <code>walkdown lint</code>. The fixture's one rule asks for checks that this throwaway project has none of, so a bare lint adds a <code>[coverage]</code> warning the design does not draw, and the closing line would read 1 warning where it says 0. With checks skipped, the two errors and the closing counts are the design's.</li>
+  </ul></details>
 </body>
 </html>

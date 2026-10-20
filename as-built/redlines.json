@@ -68,5 +68,11 @@
       "The design's second half, the same command inside ~/shop with <code>--blueprint checkout</code>, is one screen per command here and is not drawn. Its lines, the <code>(default)</code> mark and <em>A page that names no blueprint opens &lt;id&gt;.</em>, are checked by test/serve.test.js.",
       "The design draws no exit code; a server stopped with Ctrl-C ends 130."
     ]
+  },
+  "cli/lint-proposes-gone": {
+    "title": "Lint names a design request whose proposed version is gone",
+    "redlines": [
+      "The command as typed carries <code>--no-checks</code>, where the design runs a bare <code>walkdown lint</code>. The fixture's one rule asks for checks that this throwaway project has none of, so a bare lint adds a <code>[coverage]</code> warning the design does not draw, and the closing line would read 1 warning where it says 0. With checks skipped, the two errors and the closing counts are the design's."
+    ]
   }
 }
