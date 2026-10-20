@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-10-20T16-57-36Z-local-01",
+  "created": "2026-10-20T16:57:36Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c62694ba-dirty",
+  "spec_hash": "sha256:7c51d51972c1",
+  "results": [
+    {
+      "rule": "status.derived.new-design-stales-older-verdicts",
+      "status": "pass",
+      "statement_hash": "sha256:4304542fca79",
+      "evidence": [
+        "runs/evidence/2026-10-20T16-34-04Z/r-a1-seeded.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-a2-request-open.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-a3-agent-while-open.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-a4-accepted-by-walk.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-a5-after-acceptance.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-a6-person-signature-after-agent-rejudge.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-b1-accepted-by-threads-set.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-b2-open-or-declined-second-request.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-b3-stale-person-after-rejudge.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-c1-two-walks-accept.txt",
+        "runs/evidence/2026-10-20T16-34-04Z/r-d1-no-time-recorded.txt"
+      ],
+      "reasoning": "A first look (unprefixed evidence in the same folder) failed this rule: a person's signed pass from before the design request read human: stale, but its per-role acceptance stayed signed, so after an agent re-judge the rule read verified and nobody was asked. lib/status.js now applies the same design floor to the acceptance entry, and this second look re-drove the whole rule through the CLI on throwaway projects with their own WALKDOWN_HOME (person pat, two rules on receipt, one on cart). The request was filed with threads new --reason request and accepted two ways, by pat's walkdown (finishWalkdown) and by threads set --status verified as pat. Every step held: an open request staled nothing; after acceptance the agent verdicts and pat's pre-request verdicts on both receipt rules read stale with designAccepted, in the human cell and in acceptance; cart and checks were untouched; after an agent re-judge the rule read pending and NEEDS A HUMAN asked pat to walk it again; fresh passes after acceptance passed; pat's verdicts given while the request was open stood, including the walk that accepted the design and approvals over three walks; a legacy verified request with no verified_at and no verifier reply staled nothing. Edges weighed and reported, not filed: the per-rule view labels a design-staled signature as signed an older wording (about 50%), and acceptDesigns counts a pre-request signature toward the set (about 60%). Below 10%: an agent verdict in the same second as the acceptance reads current. No server or port was used.",
+      "threads": []
+    }
+  ]
+}
