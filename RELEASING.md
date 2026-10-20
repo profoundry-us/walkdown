@@ -5,10 +5,15 @@ release once went out without it.
 
 ## Before cutting it
 
-1. **Nothing is owed.** `node bin/walkdown.js status` shows nothing waiting on a
-   person or the agent that this release means to ship. `node tools/sitting.mjs
-   owed` reads 0, `node bin/walkdown.js lint` shows no errors, and the working
-   tree is clean.
+1. **Nothing is left to walk down.** `node tools/release-ready.mjs` says
+   "Ready to release". It refuses, naming each thing, while any blueprint has
+   an item waiting on a person, the agent or design, or a rule failing or
+   pending; while the agent tier owes anything; while lint shows an error; or
+   while the tree is not clean. Walk them all down before anything below: a
+   release is never started with something still to walk (Topher, 2026-10-20).
+   The Claude Code hook in `.claude/settings.json` runs the same gate before
+   any version tag, push of one, or GitHub release, and blocks it while the
+   gate refuses.
 2. **What was built matches what was decided.** For every ADR this release
    builds, read it against what shipped. Fix the build where it fell short. If
    the build taught us something, update the ADR instead.
