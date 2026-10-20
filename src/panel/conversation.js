@@ -257,6 +257,8 @@ export async function threadAct(id, status) {
     })
   ) {
     S.threadNote = '';
+    // Whatever the box asked for has been given: the hint goes with it.
+    S.threadSay = '';
     // A thread that ends leaves the active list, so its screen has nothing
     // left to show — slide back to where it came from rather than emptying
     // the pane and stranding the reader on a blank one.

@@ -114,8 +114,12 @@ export function threadCard(t, where = null) {
           <span class="wd-at font-mono">${t.id}</span>
           <span class="ml-auto flex shrink-0 items-center gap-1">
             ${unread ? html`<span class="badge badge-xs badge-error">${unread} new</span>` : nothing}
-            ${reasonChip(t)}
-            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
+            ${t.reason === 'redline' ? nothing : reasonChip(t)}
+            <!-- A redline reads closed in the list too, as everywhere a
+                 reader meets it. -->
+            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${
+              t.reason === 'redline' ? 'closed' : t.status
+            }</span>
           </span>
         </div>
         <div class="wd-text wd-preview">${unsafeHTML(

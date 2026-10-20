@@ -968,6 +968,9 @@ test('a redline pin explains a gap on both sides of the fade, and asks nothing',
     .click();
   await realPanel(page).locator('[data-tfilter="active"]').click();
   await expect(realPanel(page).getByTestId('panel.redlines')).toContainText(id);
+  // It reads closed in the list as well, never the store's "recorded".
+  await expect(realPanel(page).getByTestId('panel.redlines')).toContainText('closed');
+  await expect(realPanel(page).getByTestId('panel.redlines')).not.toContainText('recorded');
 
   // Reopened, with a reason from the box, it is a note waiting on the agent.
   await realPanel(page)

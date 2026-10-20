@@ -5567,6 +5567,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       })
     ) {
       S.threadNote = '';
+      // Whatever the box asked for has been given: the hint goes with it.
+      S.threadSay = '';
       // A thread that ends leaves the active list, so its screen has nothing
       // left to show — slide back to where it came from rather than emptying
       // the pane and stranding the reader on a blank one.
@@ -7026,8 +7028,12 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           <span class="wd-at font-mono">${t.id}</span>
           <span class="ml-auto flex shrink-0 items-center gap-1">
             ${unread ? b`<span class="badge badge-xs badge-error">${unread} new</span>` : A}
-            ${reasonChip(t)}
-            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${t.status}</span>
+            ${t.reason === 'redline' ? A : reasonChip(t)}
+            <!-- A redline reads closed in the list too, as everywhere a
+                 reader meets it. -->
+            <span class="badge badge-xs ${CHIP[t.status] ?? 'badge-ghost'}">${
+              t.reason === 'redline' ? 'closed' : t.status
+            }</span>
           </span>
         </div>
         <div class="wd-text wd-preview">${o$1(
