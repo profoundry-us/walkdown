@@ -925,6 +925,14 @@ screens:
       - cli.status.acceptance
       - cli.exit
 
+  - id: hash-change-says-why
+    title: "hash --write asks why a signed rule changed"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.hash.refused
+      - cli.exit
+
   - id: status-reworded
     title: "A pass on older wording is stale unless the rewording was words only"
     prototype: /screens/status-reworded.html

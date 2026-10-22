@@ -77,6 +77,28 @@ stories:
             - Removing an excuse under --reword is allowed, because it sets nothing aside
           statement_hash: sha256:d031d2757c27
 
+      - id: status.derived.a-change-says-why
+        origin: walkdown
+        created_at: 2026-10-22
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "`walkdown hash --write` refuses to stamp a signed rule whose words changed until it is told why: `--reword` when the meaning held, `--changed` when it moved. Either reason is kept on the rule."
+        because: A person asked to sign a rule again needs to know why it changed, and only whoever changed it can say.
+        history: Topher, 2026-10-22, walking ownership.drift.design-requests-required, which had changed twice since he signed it with nothing saying why.
+        screens: [hash-change-says-why]
+        steps:
+          given:
+            - A rule eng signed whose steps have since gained one, and a rule nobody has signed whose statement has changed
+          when:
+            - "`walkdown hash --write` is run with no reason"
+          then:
+            - The signed rule is refused by name. The refusal says a signed rule's change needs its reason, and gives both commands with the rule's id, `--changed "<why>"` and `--reword "<why>"`
+            - The unsigned rule is stamped, because no signature waits on a reason
+            - Nothing is written for the refused rule, and it exits 2, as other refusals do
+            - "`walkdown hash --write --changed \"<why>\" <rule>` stamps it, and keeps the hash it replaced on the rule under `changed:`, with the date and the why"
+            - Its signatures read stale, as any change of meaning makes them; `--reword` keeps them, as before
+          statement_hash: sha256:f1b3342a0c7c
+
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
         statement: A verdict counts only at the address it was made against. Point a target somewhere new and its evidence empties; point it back and the evidence returns.

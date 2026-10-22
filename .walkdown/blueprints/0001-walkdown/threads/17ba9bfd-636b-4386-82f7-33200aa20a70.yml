@@ -1,0 +1,35 @@
+id: n-0616
+uuid: 17ba9bfd-636b-4386-82f7-33200aa20a70
+kind: note
+reason: request
+author: agent
+created: 2026-10-22T17:11:49.806Z
+anchor:
+  screen: rule-detail-since-signed
+status: addressed
+body: "Rule detail, open on a built rule you signed on Oct 2 that has changed
+  since (panel.walkdown.what-changed-since-you-signed). Above detail.turn sits a
+  new block, detail.since-signed. It says the rule has changed since you signed
+  it on Oct 2. It lists each step added, removed or reworded since then, and a
+  reworded step shows the words that went and the words that came. Beneath the
+  changes stands each reason recorded since your signature, with its date. Also
+  draw the case where the signed wording cannot be found: it says so and still
+  shows the reasons. Use ownership.drift.design-requests-required as the sample.
+  It gained one step, the threads new command that works as printed. Three were
+  reworded: prototype: null to design: null, proposal sketch to proposed
+  version, and the message now saying a proposed version counts once a request's
+  proposes: names it. Two dated reasons go beneath. The block stays quieter than
+  the turn line it sits above, and must not push the conversation box off the
+  first screen."
+replies:
+  - author: agent
+    created: 2026-10-22T17:13:58Z
+    body: agent named /drafts/rule-detail-since-signed.html as the version this
+      request proposes, in place of none.
+  - author: agent
+    created: 2026-10-22T17:14:03Z
+    body: "Drawn: prototype/drafts/rule-detail-since-signed.html. A quiet block
+      above the turn line lists the added step and the three reworded ones, with
+      the two Oct 20 reasons beneath. Beside it are a removed step and the case
+      where the signed wording is lost."
+proposes: /drafts/rule-detail-since-signed.html

@@ -1674,6 +1674,29 @@ stories:
             - After Finish, every one of them reads as verified under the signer
             - After Finish, the confirmation names the run and the threads the passes verified
           statement_hash: sha256:b8cae5781199
+      - id: panel.walkdown.what-changed-since-you-signed
+        origin: walkdown
+        created_at: 2026-10-22
+        statement: A rule you signed on an older wording shows what has changed since your signature, and why, above the line saying whose move it is.
+        because: Asked to sign a rule again, a person should not have to remember the old words to find what is new.
+        history: Topher, 2026-10-22, walking ownership.drift.design-requests-required. It had gained a step and had three reworded since he signed it, and the panel said only that Pass ends the conversation.
+        verify: [checks]
+        signoff: [eng, product, design]
+        screens: [rule-detail-since-signed]
+        steps:
+          given:
+            - A built rule you signed on 2026-10-02, which has since gained a step, lost one and had one reworded, with a reason recorded for each change
+          when:
+            - Open the rule
+          then:
+            - Above anchor `detail.turn`, anchor `detail.since-signed` says the rule has changed since you signed it on Oct 2
+            - It lists each step added, removed or reworded since then. A reworded step shows the words that went and the words that came
+            - Beneath the changes stands each reason recorded since your signature, with its date
+            - The comparison is with the wording you signed, so two signers who signed different wordings each see their own changes
+            - Where the wording you signed cannot be found, it says so and still shows the reasons, rather than showing no changes
+            - A rule you have not signed, or signed on its current wording, shows none of this
+          statement_hash: sha256:5b7eeb8157b0
+
       - id: panel.walkdown.note-with-any-verdict
         origin: thread:n-0050
         statement: One box sits above the verdict buttons, so you write before you judge. Anything written joins the rule's conversation and is linked into the run result; an empty box files nothing.

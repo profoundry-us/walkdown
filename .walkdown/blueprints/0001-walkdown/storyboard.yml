@@ -48,6 +48,13 @@ screens:
       - panel.counts
       - panel.judged
 
+  - id: rule-detail-since-signed
+    title: Rule detail (state — a rule you signed has changed since)
+    prototype: null
+    anchors:
+      - detail.since-signed
+      - detail.turn
+
   - id: rule-detail
     title: Rule detail (state — open a rule on the Rules tab)
     prototype: /screens/rule-detail.html

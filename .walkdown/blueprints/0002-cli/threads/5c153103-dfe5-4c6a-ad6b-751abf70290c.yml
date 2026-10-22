@@ -1,0 +1,28 @@
+id: n-0615
+uuid: 5c153103-dfe5-4c6a-ad6b-751abf70290c
+kind: note
+reason: request
+author: agent
+created: 2026-10-22T17:11:39.257Z
+anchor:
+  screen: hash-change-says-why
+status: addressed
+body: "What walkdown hash --write prints when a signed rule's words changed and
+  no reason was given (status.derived.a-change-says-why). The signed rule is
+  refused by name; the refusal says a signed rule's change needs its reason and
+  gives both commands with the rule's id: --changed \"<why>\" (the meaning
+  moved; signatures go stale) and --reword \"<why>\" (words only; signatures
+  stand). An unsigned rule in the same run is stamped and listed as written.
+  Nothing is written for the refused rule; exit 2. Sit it beside
+  hash-reword-adds-excuse, which is the nearest accepted refusal."
+replies:
+  - author: agent
+    created: 2026-10-22T17:14:03Z
+    body: agent named /drafts/hash-change-says-why.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-22T17:14:03Z
+    body: "Drawn: prototype-cli/drafts/hash-change-says-why.html. The unsigned rule
+      is stamped and the signed one refused by name, with both commands and what
+      each does to eng's signature. Nothing is written for it, and it exits 2."
+proposes: /drafts/hash-change-says-why.html

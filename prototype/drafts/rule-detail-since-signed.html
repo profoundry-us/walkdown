@@ -1,0 +1,176 @@
+<!doctype html>
+<!-- DESIGN DRAFT: rule-detail-since-signed -->
+<!-- Drawn by the design agent for request n-0616. Not yet accepted. -->
+<!-- Intent: on a rule you signed that has changed since, a quiet block above the turn line says so with the date you signed, lists each step added, removed or reworded since then (a reworded step shows the words that went and the words that came), and stands each recorded reason beneath with its date; where your signed wording is lost it says so and still shows the reasons. -->
+<!-- Fixture: ownership.drift.design-requests-required, built, signed by you (Topher) on Oct 2. Since then one step was added and three reworded, with two reasons recorded on Oct 20. Nothing was removed from it, so the right-hand column also draws a removed step, on waitlist.join.confirmation, and the case where the wording you signed cannot be found. -->
+<!-- The comparison is with the wording YOU signed: a signer on another wording sees their own list. A rule you have not signed, or signed on its current wording, shows no block at all: it is the accepted rule-detail screen unchanged. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: Rule detail, a rule you signed has changed since</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  /* The block is quieter than the turn line: a hairline, no colour, no badge. */
+  .since { border-top: 1px dashed color-mix(in oklab, currentColor 20%, transparent);
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 20%, transparent);
+    padding: .4rem 0; font-size: 11px; line-height: 1.4; }
+  .since .head { opacity: .7; }
+  .since ul { margin: .3rem 0 0; padding: 0; list-style: none; }
+  .since li { display: grid; grid-template-columns: 4.3rem 1fr; gap: .35rem; padding: .12rem 0; }
+  .since .kind { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .45; padding-top: .1rem; }
+  .since .went { text-decoration: line-through; opacity: .5; }
+  .since .came { background: color-mix(in oklab, currentColor 9%, transparent); border-radius: 2px; padding: 0 .1rem; }
+  .since .step { opacity: .8; }
+  .since .why { margin-top: .35rem; padding-top: .3rem; border-top: 1px dotted color-mix(in oklab, currentColor 15%, transparent); }
+  .since .why div { display: grid; grid-template-columns: 3rem 1fr; gap: .35rem; padding: .1rem 0; opacity: .75; }
+  .since .why .when { opacity: .55; }
+  .since code { font-size: 10px; }
+  .turn { position: relative; margin-top: .75rem; border: 1px dashed; border-radius: .25rem;
+    padding: .6rem .5rem .4rem; font-size: 11px; line-height: 1.35; }
+  .turn .who { position: absolute; top: -7px; left: .5rem; border-radius: .2rem; padding: 0 .25rem;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; line-height: 14px; }
+  .variant-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; opacity: .4; margin-bottom: .3rem; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+    <button class="btn btn-xs btn-ghost btn-square">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50">walkdown/cli</span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Prototype</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Finish walkdown</button>
+    </span>
+  </header>
+
+  <main class="flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="grid flex-1 place-items-center wire rounded-xl bg-base-100 text-center text-xs opacity-50 shadow-lg">
+      THE APP — opening a rule navigated this frame to the rule's screen
+    </section>
+
+    <!-- The state itself. -->
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="flex items-center px-2 pt-2 text-xs">
+        <button class="btn btn-xs btn-ghost" data-testid="detail.back">← All rules</button>
+        <span class="ml-auto flex gap-0.5" data-testid="detail.stepper">
+          <button class="btn btn-xs btn-ghost">←</button>
+          <button class="btn btn-xs btn-ghost">→</button>
+        </span>
+      </div>
+
+      <div class="flex flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1 text-xs">
+        <div>
+          <div class="font-mono text-[10px] opacity-40" data-testid="detail.rule-id">ownership.drift.design-requests-required</div>
+          <p class="text-sm leading-relaxed" data-testid="detail.statement">Lint flags any screen that has no design and no open
+            design request. Filing one clears the flag.</p>
+        </div>
+
+        <div>
+          <!-- Quiet on purpose: no colour, no badge, a hairline above and below.
+               It is capped in height so the conversation box below the turn
+               line stays on the first screen; a long list scrolls inside it. -->
+          <div class="since max-h-64 overflow-y-auto" data-testid="detail.since-signed">
+            <div class="head">This rule has changed since you signed it on Oct 2.</div>
+            <ul>
+              <li><span class="kind">Added</span>
+                <span class="step"><b>then</b> The message gives a <code>walkdown threads new</code> command that files the
+                  request as printed: the screen's id, <code>--reason request</code>, a <code>--body</code> to fill in, and the blueprint</span></li>
+              <li><span class="kind">Reworded</span>
+                <span class="step"><b>given</b> A storyboard screen with no
+                  <span class="went">prototype (<code>prototype: null</code>)</span>
+                  <span class="came">design (<code>design: null</code>)</span> and no note anchored to it</span></li>
+              <li><span class="kind">Reworded</span>
+                <span class="step"><b>then</b> <span class="went">A proposal sketch</span><span class="came">A proposed version</span>
+                  is not a request: a <span class="went">sketch</span><span class="came">version</span> nobody asked design for routes nothing</span></li>
+              <li><span class="kind">Reworded</span>
+                <span class="step"><b>then</b> The screen is named as having no design and no open design
+                  request<span class="came">, and the message says a proposed version counts only once a request's
+                  <code>proposes:</code> names it</span></span></li>
+            </ul>
+            <div class="why">
+              <div><span class="when">Oct 20</span><span>Reworded for ADR 0015: a design, not a prototype, and a proposed version, not a sketch.</span></div>
+              <div><span class="when">Oct 20</span><span>A step was added: the hint printed <code>threads new --screen &lt;id&gt;</code> with no <code>--reason request</code>, so the note it filed never cleared the flag.</span></div>
+            </div>
+          </div>
+
+          <div class="turn border-warning" data-testid="detail.turn">
+            <span class="who bg-warning text-warning-content">Your move</span>
+            <span class="opacity-75">Pass signs this wording and ends the conversation.</span>
+          </div>
+          <textarea class="textarea textarea-xs mt-1.5 w-full resize-none" rows="2"
+            placeholder="Start a conversation about this rule…" data-testid="detail.feedback"></textarea>
+          <div class="mt-1 flex gap-2" data-testid="detail.verdict">
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Evidence</div>
+          <div data-testid="detail.evidence">
+            <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
+              <span class="w-20 opacity-50">checks/local</span><span>✓ pass</span></div>
+            <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
+              <span class="w-20 opacity-50">human</span><span>stale: signed an older wording</span></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Steps</div>
+          <div class="leading-relaxed opacity-80" data-testid="detail.steps">
+            <b>given</b> a storyboard screen with no design (<code>design: null</code>) and no note anchored to it<br>
+            <b>when</b> the blueprint is linted<br>
+            <b>then</b> the screen is named …
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Not a second pane: two more cases of the same block, drawn side by side. -->
+    <div class="flex w-72 shrink-0 flex-col gap-3 overflow-y-auto">
+      <div class="wire rounded-xl bg-base-100 p-3 text-xs shadow-lg">
+        <div class="variant-label">Also drawn: a step removed</div>
+        <div class="font-mono text-[10px] opacity-40">waitlist.join.confirmation</div>
+        <div class="since mt-1">
+          <div class="head">This rule has changed since you signed it on Oct 2.</div>
+          <ul>
+            <li><span class="kind">Removed</span>
+              <span class="step went"><b>then</b> a toast repeats the email for three seconds</span></li>
+          </ul>
+          <div class="why">
+            <div><span class="when">Oct 9</span><span>The confirmation already shows the email; the toast said it twice.</span></div>
+          </div>
+        </div>
+        <div class="turn border-warning">
+          <span class="who bg-warning text-warning-content">Your move</span>
+          <span class="opacity-75">Pass signs this wording and ends the conversation.</span>
+        </div>
+      </div>
+
+      <div class="wire rounded-xl bg-base-100 p-3 text-xs shadow-lg">
+        <div class="variant-label">Also drawn: the wording you signed is lost</div>
+        <div class="font-mono text-[10px] opacity-40">ownership.drift.design-requests-required</div>
+        <!-- Never "no changes": it cannot compare, so it says so and keeps the reasons. -->
+        <div class="since mt-1">
+          <div class="head">This rule has changed since you signed it on Oct 2.</div>
+          <div class="mt-1 opacity-60">The wording you signed is no longer on record, so the steps cannot be compared. Read them again below.</div>
+          <div class="why">
+            <div><span class="when">Oct 20</span><span>Reworded for ADR 0015: a design, not a prototype, and a proposed version, not a sketch.</span></div>
+            <div><span class="when">Oct 20</span><span>A step was added: the hint printed <code>threads new --screen &lt;id&gt;</code> with no <code>--reason request</code>, so the note it filed never cleared the flag.</span></div>
+          </div>
+        </div>
+        <div class="turn border-warning">
+          <span class="who bg-warning text-warning-content">Your move</span>
+          <span class="opacity-75">Pass signs this wording and ends the conversation.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>
