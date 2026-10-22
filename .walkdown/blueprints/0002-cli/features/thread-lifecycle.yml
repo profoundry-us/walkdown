@@ -87,10 +87,10 @@ stories:
           statement_hash: sha256:c841f42fd28b
           changed:
             - hash: sha256:97912647f98b
-              at: 2026-10-12
+              at: 2026-10-12T14:19:52Z
               why: "Excuses joined the rule hash, so the agent-tier excuse this rule already carried became part of what a signature covers. Its words did not change."
             - hash: sha256:b4f231a94e4c
-              at: 2026-10-20
+              at: 2026-10-20T19:13:31Z
               why: "Nothing told a person how to decline a design request, so `walkdown threads set --help` now names `--waive --reason`."
           excused: [agent]
 
@@ -214,10 +214,10 @@ stories:
           statement_hash: sha256:1908544195fa
           changed:
             - hash: sha256:768e7b46e642
-              at: 2026-10-20
+              at: 2026-10-20T16:39:09Z
               why: "The reopening the build already did was written down as a step."
             - hash: sha256:fa32f0de6fd6
-              at: 2026-10-20
+              at: 2026-10-20T19:13:31Z
               why: "A redline could not say what the design and the build each show, so `threads new` takes `--design` and `--build`, and its `--help` explains a redline."
       - id: threads.lifecycle.question-moves-to-its-rule
         origin: walkdown

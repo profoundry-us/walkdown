@@ -8036,9 +8036,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   }
 
   /*
-   * "Oct 2". A reason dated by its day alone (`at: 2026-10-20`) is that
-   * calendar day, not midnight in London, so it is read in UTC; an instant is
-   * read in the reader's zone.
+   * "Oct 2". A reason's time is a UTC instant, read in the reader's zone. A
+   * day alone (`at: 2026-10-20`), which only an old `reworded` entry carries,
+   * is that calendar day rather than midnight in London, so it is read in UTC.
    */
   function onDay(at) {
     const day = /^\d{4}-\d{2}-\d{2}$/.test(String(at));

@@ -95,9 +95,9 @@ stories:
             - The signed rule is refused by name. The refusal says a signed rule's change needs its reason, and gives both commands with the rule's id, `--changed "<why>"` and `--reword "<why>"`
             - The unsigned rule is stamped, because no signature waits on a reason
             - Nothing is written for the refused rule, and it exits 2, as other refusals do
-            - "`walkdown hash --write --changed \"<why>\" <rule>` stamps it, and keeps the hash it replaced on the rule under `changed:`, with the date and the why"
+            - "`walkdown hash --write --changed \"<why>\" <rule>` stamps it, and keeps the hash it replaced on the rule under `changed:`, with the why and the moment it was written as a UTC instant, as every record stamps its time"
             - Its signatures read stale, as any change of meaning makes them; `--reword` keeps them, as before
-          statement_hash: sha256:f1b3342a0c7c
+          statement_hash: sha256:c749ded84ce8
 
       - id: status.derived.verdict-belongs-to-a-place
         origin: thread:q-0070
