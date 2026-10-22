@@ -50,12 +50,15 @@ const REDLINES = JSON.parse(readFileSync(join(OUT, 'redlines.json'), 'utf8'));
 const args = process.argv.slice(2);
 const portAt = args.indexOf('--port');
 const PORT = portAt >= 0 ? Number(args[portAt + 1]) : 4732;
-const only = args.filter((a, i) => !a.startsWith('--') && i !== portAt + 1);
+const only = args.filter((a, i) => !a.startsWith('--') && (portAt < 0 || i !== portAt + 1));
 
 /* ---- the states --------------------------------------------------------- */
 
 // `sr` runs a function against the panel's shadow root; `fn` waits for one to
-// return something truthy; `wait` is milliseconds.
+// return something truthy; `wait` is milliseconds. `routes` stand in for what
+// the example cannot hold: a URL pattern each, and a function given the
+// server's own JSON answer (null when it had none) that returns the answer
+// the panel gets instead.
 const STATES = {
   review: { steps: [] },
   'rule-detail': {
@@ -63,6 +66,69 @@ const STATES = {
       ['fn', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]')`],
       ['sr', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]').click()`],
       ['wait', 1500],
+    ],
+  },
+  'rule-detail-since-signed': {
+    routes: [
+      [
+        /\/api\/blueprint(\?|$)/,
+        (data) => {
+          for (const r of data.rows)
+            if (r.rule === 'waitlist.join.confirmation')
+              r.acceptance = [
+                {
+                  role: 'eng',
+                  state: 'stale',
+                  status: 'approved',
+                  statementHash: 'sha256:5f0c9e2a7d11',
+                  signer: data.identity.username,
+                  actor: data.identity.username,
+                  created: '2026-10-02T15:00:00Z',
+                  runId: 'as-built',
+                  checks: [],
+                  evidence: [],
+                  threads: [],
+                },
+              ];
+          return data;
+        },
+      ],
+      [
+        /\/api\/since-signed/,
+        () => ({
+          signed: '2026-10-02T15:00:00Z',
+          found: true,
+          changes: [
+            {
+              kind: 'reworded',
+              phase: 'then',
+              runs: [
+                { kind: 'same', text: 'Anchor `waitlist.confirmed-email` shows the ' },
+                { kind: 'went', text: 'email' },
+                { kind: 'came', text: 'submitted email' },
+              ],
+            },
+            { kind: 'removed', phase: 'then', text: 'A toast repeats the email for three seconds' },
+            { kind: 'added', phase: 'then', text: 'The visitor is on screen `waitlist-confirm`' },
+          ],
+          reasons: [
+            {
+              at: '2026-10-09',
+              why: 'The confirmation already shows the email; the toast said it twice.',
+            },
+          ],
+        }),
+      ],
+    ],
+    steps: [
+      ['fn', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]')`],
+      ['sr', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]').click()`],
+      ['fn', `r => r.querySelector('[data-testid="detail.since-signed"] li')`],
+      [
+        'sr',
+        `r => r.querySelector('[data-testid="detail.since-signed"]').scrollIntoView({ block: 'center' })`,
+      ],
+      ['wait', 800],
     ],
   },
   'thread-panel': {
@@ -381,6 +447,17 @@ async function main() {
       // hash navigation, and the pruned panel from the last state would be
       // what this one captures.
       await page.goto('about:blank');
+      await page.unrouteAll({ behavior: 'ignoreErrors' });
+      for (const [pattern, answer] of st.routes ?? [])
+        await page.route(pattern, async (route) => {
+          let json = null;
+          try {
+            json = await (await route.fetch()).json();
+          } catch {
+            /* the answer the example could not give */
+          }
+          await route.fulfill({ json: answer(json) });
+        });
       await page.goto(url);
       await page.waitForTimeout(2500);
       for (const [k, v] of st.steps) {

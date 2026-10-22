@@ -20,6 +20,15 @@
       "The conversation shows only the last thing said; the whole history is one slide to the right, behind <i>History</i> (n-0319). The design showed every thread in place."
     ]
   },
+  "rule-detail-since-signed": {
+    "title": "rule detail, a rule you signed has changed since",
+    "redlines": [
+      "The block sits directly above the turn line, as drawn, but the turn line is in the conversation, which the built rule detail puts after the steps and evidence. The design had the conversation above Evidence and Steps (see <i>rule detail</i>'s own redlines).",
+      "Steps are shown as written: a backtick stays a backtick. The design set <code>prototype: null</code> and its kin as code.",
+      "The turn line keeps the words it already had. The design's <i>Pass signs this wording and ends the conversation</i> was written by the design agent and is not asked for by this rule.",
+      "Drawn over the example blueprint, where nothing is signed on older words: the signature and the answer are stood in by the capture, so the dates and the changes are illustrative."
+    ]
+  },
   "thread-panel": {
     "title": "the thread screen",
     "redlines": [

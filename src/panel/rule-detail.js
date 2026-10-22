@@ -54,6 +54,7 @@ import {
   screenUrl,
   shortName,
   threadsFor,
+  whoAmI,
 } from './vocab.js';
 
 /*
@@ -493,6 +494,107 @@ export function historyPane() {
     </div>`;
 }
 
+/*
+ * What changed since you signed (panel.walkdown.what-changed-since-you-signed).
+ * Asked of the server once per rule and signature: the wording you signed
+ * lives only in git, and finding it again is a walk through a file's
+ * history, so the answer is kept for as long as the panel is open.
+ */
+const sinceAnswers = new Map();
+
+/** Your newest signature on the rule, when it was given on older words. */
+function yourOlderSignature(r) {
+  const you = new Set(S.data?.identity?.handles ?? []);
+  if (whoAmI()) you.add(whoAmI());
+  const yours = (r.acceptance ?? [])
+    .filter((a) => you.has(a.signer ?? a.actor) && a.statementHash)
+    .sort((a, b) => Date.parse(b.created) - Date.parse(a.created));
+  return yours[0]?.state === 'stale' ? yours[0] : null;
+}
+
+function sinceAnswer(r, sig) {
+  const key = `${S.data?.key}|${r.rule}|${sig.statementHash}|${sig.created}`;
+  if (sinceAnswers.has(key)) return sinceAnswers.get(key);
+  sinceAnswers.set(key, null);
+  const q = new URLSearchParams({ rule: r.rule, hash: sig.statementHash, at: sig.created });
+  fetch(api(`/api/since-signed?${q}`))
+    .then((res) => res.json())
+    .then((out) =>
+      sinceAnswers.set(
+        key,
+        out?.error ? { signed: sig.created, found: false, changes: [], reasons: [] } : out,
+      ),
+    )
+    .catch(() =>
+      sinceAnswers.set(key, { signed: sig.created, found: false, changes: [], reasons: [] }),
+    )
+    .finally(requestRender);
+  return null;
+}
+
+/*
+ * "Oct 2". A reason dated by its day alone (`at: 2026-10-20`) is that
+ * calendar day, not midnight in London, so it is read in UTC; an instant is
+ * read in the reader's zone.
+ */
+function onDay(at) {
+  const day = /^\d{4}-\d{2}-\d{2}$/.test(String(at));
+  const t = new Date(day ? `${at}T12:00:00Z` : at);
+  if (!Number.isFinite(t.getTime())) return String(at ?? '');
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      timeZone: day ? 'UTC' : S.data?.identity?.timezone || undefined,
+    }).format(t);
+  } catch {
+    return t.toISOString().slice(0, 10);
+  }
+}
+
+const KIND = { added: 'Added', removed: 'Removed', reworded: 'Reworded' };
+
+function sinceSigned(r) {
+  const sig = yourOlderSignature(r);
+  if (!sig) return nothing;
+  const out = sinceAnswer(r, sig);
+  const step = (c) =>
+    c.kind === 'reworded'
+      ? c.runs.map((run) =>
+          run.kind === 'went'
+            ? html`<span class="line-through opacity-50">${run.text}</span>`
+            : run.kind === 'came'
+              ? html`<span class="rounded-sm bg-base-content/10 px-px">${run.text}</span>`
+              : run.text,
+        )
+      : c.text;
+  return html`<div class="mt-2 max-h-64 overflow-y-auto border-y border-dashed border-base-content/20 py-1.5 text-[11px] leading-snug" data-testid="detail.since-signed">
+    <div class="opacity-70">This rule has changed since you signed it on ${onDay(sig.created)}.</div>
+    ${
+      !out
+        ? html`<div class="mt-1 opacity-50">Finding the wording you signed\u2026</div>`
+        : out.found
+          ? html`<ul class="mt-1">${out.changes.map(
+              (
+                c,
+              ) => html`<li class="grid grid-cols-[4.3rem_1fr] gap-1.5 py-0.5" data-kind="${c.kind}">
+                <span class="pt-px text-[9px] uppercase tracking-wider opacity-45">${KIND[c.kind]}</span>
+                <span class="opacity-80 ${c.kind === 'removed' ? 'line-through opacity-50' : ''}"><b>${c.phase}</b> ${step(c)}</span>
+              </li>`,
+            )}</ul>`
+          : html`<div class="mt-1 opacity-60">The wording you signed is no longer on record, so the steps cannot be compared. Read them again below.</div>`
+    }
+    ${
+      out?.reasons?.length
+        ? html`<div class="mt-1.5 border-t border-dotted border-base-content/15 pt-1" data-testid="detail.since-signed-why">${out.reasons.map(
+            (w) =>
+              html`<div class="grid grid-cols-[3rem_1fr] gap-1.5 py-0.5 opacity-75"><span class="opacity-55">${onDay(w.at)}</span><span>${w.why}</span></div>`,
+          )}</div>`
+        : nothing
+    }
+  </div>`;
+}
+
 function conversation(r, picked) {
   const known = (S.data?.rows ?? []).map((x) => x.rule);
   const { all, messages } = ruleMessages(r);
@@ -549,6 +651,7 @@ function conversation(r, picked) {
           )}</div>`
         : html`<p class="pb-1 text-[12.5px] opacity-50">Nothing said on this rule yet.</p>`
     }
+    ${sinceSigned(r)}
     ${
       asked
         ? askCard(r, asked, open)

@@ -5125,3 +5125,129 @@ test('a proposed version is framed as yours to accept, and an as-built keeps its
     .locator('.as-built-ring');
   await expect(asBuilt).toHaveCSS('border-top-style', 'solid');
 });
+
+test('a rule you signed on older words says what changed since, and why, above whose move it is', {
+  tag: '@rule:panel.walkdown.what-changed-since-you-signed',
+}, async ({ page }) => {
+  // Three built rules nobody is asking a question on: one you signed on older
+  // words (and dana on others since), one only dana signed, one you signed
+  // on the words it has now.
+  const picked = {};
+  await page.route(/\/api\/blueprint(\?|$)/, async (route) => {
+    const res = await route.fetch();
+    const data = await res.json();
+    const me = data.identity.username;
+    const asking = new Set(
+      (data.threads ?? [])
+        .filter((t) => t.kind === 'question' && t.status === 'open')
+        .map((t) => t.anchor?.rule),
+    );
+    const [target, other, current] = data.rows
+      .filter((r) => r.built && !asking.has(r.rule))
+      .map((r) => r.rule);
+    Object.assign(picked, { target, other, current, zone: data.identity.timezone });
+    const sig = (signer, hash, created, state) => ({
+      role: 'eng',
+      state,
+      status: 'approved',
+      statementHash: hash,
+      signer,
+      actor: signer,
+      created,
+      runId: 'fixture',
+      checks: [],
+      evidence: [],
+      threads: [],
+    });
+    for (const r of data.rows) {
+      if (r.rule === target)
+        r.acceptance = [
+          sig(me, 'sha256:aaaaaaaaaaaa', '2026-10-02T15:00:00Z', 'stale'),
+          sig('dana', 'sha256:bbbbbbbbbbbb', '2026-10-05T15:00:00Z', 'stale'),
+        ];
+      if (r.rule === other)
+        r.acceptance = [sig('dana', 'sha256:bbbbbbbbbbbb', '2026-10-05T15:00:00Z', 'stale')];
+      if (r.rule === current)
+        r.acceptance = [sig(me, 'sha256:cccccccccccc', '2026-10-21T15:00:00Z', 'current')];
+    }
+    await route.fulfill({ response: res, json: data });
+  });
+  // The server's half - finding the signed words in git - is the unit test's
+  // (test/since-signed.test.js); here the answer is given, found or lost.
+  const asked = [];
+  let found = true;
+  const reasons = [{ at: '2026-10-20', why: 'ADR 0015 says design, not prototype.' }];
+  await page.route(/\/api\/since-signed/, async (route) => {
+    const q = new URL(route.request().url()).searchParams;
+    asked.push({ rule: q.get('rule'), hash: q.get('hash') });
+    const changes = [
+      {
+        kind: 'reworded',
+        phase: 'given',
+        runs: [
+          { kind: 'same', text: 'A cart with a ' },
+          { kind: 'went', text: 'prototype' },
+          { kind: 'came', text: 'design' },
+          { kind: 'same', text: ' sticker' },
+        ],
+      },
+      { kind: 'removed', phase: 'then', text: 'A toast repeats the email for three seconds' },
+      { kind: 'added', phase: 'then', text: 'The receipt says how to return an item' },
+    ];
+    await route.fulfill({
+      json: { signed: q.get('at'), found, changes: found ? changes : [], reasons },
+    });
+  });
+
+  await review(page);
+  await expect.poll(() => picked.target).toBeTruthy();
+  await openRule(page, picked.target);
+  const block = page.getByTestId('detail.since-signed');
+  // The day you signed, in your own zone: the checks read times in one far
+  // from UTC, and a signature at 15:00Z is already the next day there.
+  const day = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: picked.zone || undefined,
+  }).format(new Date('2026-10-02T15:00:00Z'));
+  await expect(block).toContainText(`This rule has changed since you signed it on ${day}.`);
+  const items = block.locator('li');
+  await expect(items).toHaveCount(3);
+  expect(await items.evaluateAll((li) => li.map((l) => l.dataset.kind))).toEqual([
+    'reworded',
+    'removed',
+    'added',
+  ]);
+  // A reworded step shows the words that went and the words that came.
+  await expect(items.nth(0).locator('.line-through')).toHaveText('prototype');
+  await expect(items.nth(0)).toContainText('given A cart with a prototypedesign sticker');
+  await expect(items.nth(1).locator('.line-through')).toContainText('A toast repeats the email');
+  await expect(items.nth(2)).toContainText('The receipt says how to return an item');
+  const why = page.getByTestId('detail.since-signed-why');
+  await expect(why).toContainText('Oct 20');
+  await expect(why).toContainText('ADR 0015 says design, not prototype.');
+  // Compared with the wording YOU signed, not dana's later one.
+  expect(asked).toEqual([{ rule: picked.target, hash: 'sha256:aaaaaaaaaaaa' }]);
+  // Above the line saying whose move it is.
+  const turn = page.getByTestId('detail.turn');
+  expect((await block.boundingBox()).y).toBeLessThan((await turn.boundingBox()).y);
+
+  // Not yours to read again: only dana signed it, or you signed these words.
+  await page.getByTestId('detail.back').click();
+  await openRule(page, picked.other);
+  await expect(page.getByTestId('detail.turn')).toBeVisible();
+  await expect(block).toHaveCount(0);
+  await page.getByTestId('detail.back').click();
+  await openRule(page, picked.current);
+  await expect(page.getByTestId('detail.turn')).toBeVisible();
+  await expect(block).toHaveCount(0);
+
+  // The words you signed cannot be found: it says so, and keeps the reasons.
+  found = false;
+  await page.reload();
+  await expect(page.getByTestId('panel.bar')).toBeVisible();
+  await openRule(page, picked.target);
+  await expect(block).toContainText('The wording you signed is no longer on record');
+  await expect(block.locator('li')).toHaveCount(0);
+  await expect(why).toContainText('ADR 0015 says design, not prototype.');
+});

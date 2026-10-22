@@ -85,6 +85,13 @@ stories:
             - Reopening a verified or waived thread takes a person's acceptance back, so only a person may do it; a machine is refused and files a new thread instead
             - "A person declines an open design request with `walkdown threads set <id> --waive --reason \"<why>\"`, and `walkdown threads set --help` says so"
           statement_hash: sha256:c841f42fd28b
+          changed:
+            - hash: sha256:97912647f98b
+              at: 2026-10-12
+              why: "Excuses joined the rule hash, so the agent-tier excuse this rule already carried became part of what a signature covers. Its words did not change."
+            - hash: sha256:b4f231a94e4c
+              at: 2026-10-20
+              why: "Nothing told a person how to decline a design request, so `walkdown threads set --help` now names `--waive --reason`."
           excused: [agent]
 
       - id: threads.lifecycle.says-why-it-exists
@@ -205,6 +212,13 @@ stories:
             - It waits on nobody, and a judge reads it as an intended gap
             - A person who reopens it makes it an open note with reason feedback, marked as reopened from a redline and waiting on the agent, and an agent's reopening is refused the same way
           statement_hash: sha256:1908544195fa
+          changed:
+            - hash: sha256:768e7b46e642
+              at: 2026-10-20
+              why: "The reopening the build already did was written down as a step."
+            - hash: sha256:fa32f0de6fd6
+              at: 2026-10-20
+              why: "A redline could not say what the design and the build each show, so `threads new` takes `--design` and `--build`, and its `--help` explains a redline."
       - id: threads.lifecycle.question-moves-to-its-rule
         origin: walkdown
         created_at: 2026-10-14

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-22T17-33-54Z-local-01",
+  "created": "2026-10-22T17:33:54Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e568332-dirty",
+  "tree_hash": "sha256:99416b4abb6b",
+  "spec_hash": "sha256:964aeb95b5c4",
+  "results": [
+    {
+      "rule": "panel.walkdown.what-changed-since-you-signed",
+      "status": "pass",
+      "statement_hash": "sha256:5b7eeb8157b0",
+      "duration_ms": 3557,
+      "checks": [
+        "checks/panel.spec.js:5129"
+      ]
+    }
+  ]
+}

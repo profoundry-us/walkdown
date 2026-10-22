@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-22T17:11:49.806Z
 anchor:
   screen: rule-detail-since-signed
-status: addressed
+status: verified
 body: "Rule detail, open on a built rule you signed on Oct 2 that has changed
   since (panel.walkdown.what-changed-since-you-signed). Above detail.turn sits a
   new block, detail.since-signed. It says the rule has changed since you signed
@@ -33,3 +33,5 @@ replies:
       the two Oct 20 reasons beneath. Beside it are a removed step and the case
       where the signed wording is lost."
 proposes: /drafts/rule-detail-since-signed.html
+verified_by: topher
+verified_at: 2026-10-22T17:22:15Z

@@ -24,6 +24,13 @@ stories:
             - "A proposed version is not a request: a version nobody asked design for routes nothing"
             - A retired screen is exempt, because it describes something we stopped meaning
           statement_hash: sha256:8de33a8e97f5
+          changed:
+            - hash: sha256:418069b7b1f6
+              at: 2026-10-20
+              why: "ADR 0015: `prototype: null` became `design: null`, a proposal sketch became a proposed version, and the message says a proposed version counts only once a request's `proposes:` names it."
+            - hash: sha256:0e9584c2d6df
+              at: 2026-10-20
+              why: "The hint printed `threads new --screen <id>` with no `--reason request`, so the note it filed never cleared the flag."
 
   - id: ownership.design
     title: The design is drawn by someone other than the builder
@@ -165,6 +172,10 @@ stories:
             - A thread that is not a design request is refused the same way
             - An accepted request is refused, because a new version of an accepted design goes on a new request
           statement_hash: sha256:222aa7fa471e
+          changed:
+            - hash: sha256:0680eae68b81
+              at: 2026-10-20
+              why: "Once `walkdown upgrade` dropped the storyboard's `proposal:`, `walkdown judge` gave no design for a screen whose only one was a request's proposed version."
 
       - id: ownership.design.live-rule-names-a-live-screen
         origin: thread:q-0598
@@ -211,6 +222,10 @@ stories:
             - The waived request is not named, because nothing waits on it
             - Lint exits 1
           statement_hash: sha256:3457d3988f00
+          changed:
+            - hash: sha256:7d08a2878a3e
+              at: 2026-10-20
+              why: "ADR 0015's words: a proposed version is a dated file in its screen's folder, so the example became a version since renamed, not a draft since moved."
 
   - id: ownership.authoring
     title: A rule is written so it can be built from

@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-10-22T17-30-41Z-local-01",
+  "created": "2026-10-22T17:30:41Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0e568332-dirty",
+  "tree_hash": "sha256:568bb8ee73cb",
+  "spec_hash": "sha256:964aeb95b5c4",
+  "results": [
+    {
+      "rule": "panel.walkdown.what-changed-since-you-signed",
+      "status": "fail",
+      "statement_hash": "sha256:5b7eeb8157b0",
+      "duration_ms": 30169,
+      "checks": [
+        "checks/panel.spec.js:5129"
+      ],
+      "evidence": [
+        "runs/evidence/2026-10-22T17-30-41Z/panel-a-rule-you-signed-on-20fca--why-above-whose-move-it-is-test-failed-1.png",
+        "runs/evidence/2026-10-22T17-30-41Z/panel-a-rule-you-signed-on-20fca--why-above-whose-move-it-is-error-context.md"
+      ]
+    }
+  ]
+}

@@ -138,6 +138,10 @@ stories:
             - "`walkdown where` names that directory on its designs row, with `design.root` and where it was found in brackets under it"
             - "`walkdown where` prints a proposals row only while a `proposals/` folder from before 0.5.0 is still on disk, and labels it retired in 0.5.0"
           statement_hash: sha256:63c4c1304ed6
+          changed:
+            - hash: sha256:a30a7a594efd
+              at: 2026-10-20
+              why: "ADR 0015 renamed `prototype.root` to `design.root`, and `walkdown where` gained a designs row naming it, so a person can see where designs are read from."
       - origin: walkdown
         created_at: 2026-10-05
         verify:
@@ -537,6 +541,16 @@ stories:
             - "A redlines.json key names its screen by id or by its as-built page, so a CLI screen's `cli/<screen>` note lands on that screen"
             - The dry run lists all of it, grouped by blueprint, and moves nothing
           statement_hash: sha256:6c8969174ce9
+          changed:
+            - hash: sha256:ac77cd6c3b73
+              at: 2026-10-20
+              why: "`walkdown upgrade --dry-run` on this repository dated 58 screens through files git took for their renames, missed redline notes keyed `cli/<screen>`, and removed drafts a request named."
+            - hash: sha256:b64d4e40bf7e
+              at: 2026-10-20
+              why: "Your answer to ADR 0015 §2a: only a prototype* root is renamed designs*, and any other root stays where it is."
+            - hash: sha256:ba28f1d14bfe
+              at: 2026-10-20
+              why: "The same dry run lost screens referred to with a fragment (`#invite-batch`), so such a ref now follows its file to its version and keeps the fragment."
 
       - id: locations.keeping.old-layout-warns
         origin: walkdown
@@ -926,6 +940,10 @@ stories:
             - A destination outside the project, a rule id the destination already has, uncommitted changes in either blueprint's features, and verdicts recorded at an address the destination's target does not point at are each refused, and nothing moves
             - It says how many rules and threads moved, and how many run records were copied
           statement_hash: sha256:7695cc234699
+          changed:
+            - hash: sha256:976ba30819ab
+              at: 2026-10-22
+              why: "GitHub issue #26: moving a whole feature dropped its file's title and the comments above its stories."
   - id: locations.threads
     title: A thread is one conversation, wherever it was filed
     statement: As someone working on branches and with teammates, I can file a thread without it colliding with one somebody else filed at the same time.

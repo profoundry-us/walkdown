@@ -50,7 +50,8 @@ screens:
 
   - id: rule-detail-since-signed
     title: Rule detail (state — a rule you signed has changed since)
-    prototype: null
+    prototype: /screens/rule-detail-since-signed.html   # accepted 2026-10-22 in Topher's walk (n-0616)
+    app: { path: /as-built/rule-detail-since-signed.html }
     anchors:
       - detail.since-signed
       - detail.turn
