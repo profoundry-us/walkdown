@@ -92,11 +92,12 @@ function move(args) {
         lines.push(
           `${there} already has ${h.name}: the stories join it under its own header, and ${h.whole ? `${plan.from.id}'s ${h.name}, emptied, is removed with its header` : `${plan.from.id}'s header stays where it is`}`,
         );
-      else if (h.whole)
+      else if (h.whole) {
+        const header = [...(h.keys.length ? [keys] : []), ...(h.comments ? ['comments'] : [])];
         lines.push(
-          `${h.name} goes to ${there} whole, as it was written: ${h.keys.length ? `${keys}, ` : ''}${h.comments ? 'comments, ' : ''}and every story`,
+          `${h.name} goes to ${there} whole, as it was written: ${header.length ? `${header.join(', ')}, and every story` : 'every story'}`,
         );
-      else
+      } else
         lines.push(
           `${h.name} is new in ${there} and takes ${keys}${h.comments ? `; the comments in its header stay in \`${plan.from.id}\`` : ''}`,
         );

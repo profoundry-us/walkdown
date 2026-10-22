@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-10-22T15-41-13Z-local-01",
+  "created": "2026-10-22T15:41:13Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "f1159595-dirty",
+  "spec_hash": "sha256:4b9c826c876f",
+  "results": [
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:7695cc234699",
+      "evidence": [
+        "runs/evidence/2026-10-22T15-41-13Z/story-into-new-file.txt",
+        "runs/evidence/2026-10-22T15-41-13Z/whole-feature.txt",
+        "runs/evidence/2026-10-22T15-41-13Z/existing-file.txt",
+        "runs/evidence/2026-10-22T15-41-13Z/sweeps.txt",
+        "runs/evidence/2026-10-22T15-41-13Z/refusals.txt",
+        "runs/evidence/2026-10-22T15-41-13Z/dryrun-nochange.txt",
+        "runs/evidence/2026-10-22T15-41-13Z/probe.mjs.txt"
+      ],
+      "reasoning": "I drove the CLI headless at f1159595 (working tree), serving nothing, in fresh throwaway homes and git projects holding blueprints a and b. a's orders.yml had a header with a top comment, title, a two-line description, an owner key with an inline comment and a comment above stories:, and two stories whose rules carried checks (one failing), agent passes citing evidence in a subfolder, two signatures, a checks sweep and three threads (a note with a picture, a question, one on a rule that stays). Dry runs of a feature, a story, a rule, and a story plus a second whole feature left all 26 files under project and home byte-identical; each listed rules and thread ids, counted records, sweeps and evidence, and said per file what becomes of its header. Moving orders.place into b, which had no orders.yml, gave b a file of feature, title, description and owner (inline comment dropped) with no header comments, as the dry run said, and a kept its header whole. Moving the rest then joined b's file, the dry run saying a's emptied file goes with its header. Moving the whole feature, by its name, by naming both stories, or by naming all three rules, left b's orders.yml byte-identical to a's original. Into a b file with its own comment, title and owner, the stories joined under b's header unchanged and the dry run said a's header stays. Rules kept statements, steps and hashes (hash in b reads ok); n-0001 and q-0002 moved with their ids and picture while n-0003 stayed; each copy kept run id, time and actor, held only moved results and named copied_from; a's runs were unchanged; both evidence files were copied; status rows in b matched a's, signatures included. a's checks sweep was copied naming only the moved rules and b's own rule kept its checks pass; b's agent sweep from before the move left the arrivals' passes alone and one declared after covered them. Another project's blueprint on the same machine, an unknown name, a clashing rule id, uncommitted edits in a, an untracked file in b, and a base_url mismatch each exited 2 with nothing moved. Weighed edges: a whole file with no feature-level keys and no header comments makes the dry run read 'goes to b whole, as it was written: and every story' (about 20%: untitled feature files are allowed but uncommon; wording only, the move itself is right). Moving to the same blueprint prints duplicate rule and thread refusals beside the real one (under 5%, a typo, still refused). A whole file arriving with a story id b already uses in another file is not refused (under 5%).",
+      "threads": []
+    }
+  ]
+}
