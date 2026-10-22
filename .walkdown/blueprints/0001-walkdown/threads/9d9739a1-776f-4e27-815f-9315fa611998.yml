@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-22T17:42:47.574Z
 anchor:
   rule: panel.walkdown.what-changed-since-you-signed
-status: addressed
+status: settled
 body: |-
   A reason recorded after your signature, but dated by its day alone, is left out when that day is the signature's own UTC day.
 

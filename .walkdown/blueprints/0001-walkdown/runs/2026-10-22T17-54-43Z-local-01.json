@@ -1,0 +1,35 @@
+{
+  "run_id": "2026-10-22T17-54-43Z-local-01",
+  "created": "2026-10-22T17:54:43Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "04894f81-dirty",
+  "spec_hash": "sha256:964aeb95b5c4",
+  "results": [
+    {
+      "rule": "panel.walkdown.what-changed-since-you-signed",
+      "status": "pass",
+      "statement_hash": "sha256:5b7eeb8157b0",
+      "evidence": [
+        "runs/evidence/2026-10-22T17-54-43Z/01-real-cli-sincesigned.txt",
+        "runs/evidence/2026-10-22T17-54-43Z/02-topher-nogit-commands.shape.noun-then-verb.png",
+        "runs/evidence/2026-10-22T17-54-43Z/02-topher-nogit-ownership.design.proposed-version-exists.png",
+        "runs/evidence/2026-10-22T17-54-43Z/02-topher-nogit-ownership.drift.design-requests-required.png",
+        "runs/evidence/2026-10-22T17-54-43Z/02-topher-nogit.txt",
+        "runs/evidence/2026-10-22T17-54-43Z/03-topher-git-ownership.design.proposed-version-exists.png",
+        "runs/evidence/2026-10-22T17-54-43Z/03-topher-git-ownership.drift.design-requests-required.png",
+        "runs/evidence/2026-10-22T17-54-43Z/03-topher-git.txt",
+        "runs/evidence/2026-10-22T17-54-43Z/04-not-signer-ownership.design.proposed-version-exists.png",
+        "runs/evidence/2026-10-22T17-54-43Z/04-not-signer-ownership.drift.design-requests-required.png",
+        "runs/evidence/2026-10-22T17-54-43Z/04-not-signer.txt",
+        "runs/evidence/2026-10-22T17-54-43Z/05-unit-fixture-and-day-edges.txt"
+      ],
+      "reasoning": "Re-judged after 04894f81 (n-0617). Driven with Playwright on a scratch copy of the cli blueprint served from its own home on port 4766, its run records retargeted to that port so topher signatures count, and by calling sinceSigned() read-only on the eight real cli rules topher signed on older wordings: all eight find the signed wording and every one now carries its reasons, including ownership.design.proposed-version-exists, whose Oct 20 reason after an Oct 19 (Chicago) signature was the one dropped before. Each step holds: the block sits above detail.turn and says the rule changed since you signed it on your signature day in your zone; with the copy given its own git history it lists reworded steps with the words that went struck through and those that came marked, and added steps (removed proven on a fixture through stepChanges); the dated reasons stand beneath; outside git it says the wording you signed is no longer on record and still shows the reasons; a reader who never signed, and a rule signed on its current wording, show nothing; the request carries the reader own signature hash. Edges weighed: a day-only reason still compares in UTC, so one written the same evening as a signature made after 19:00 Chicago and dated by the local day is dropped, and one written earlier on a signature day now shows as since it; both estimated 10-20% and reported to the dispatcher, not filed.",
+      "threads": [
+        "9d9739a1-776f-4e27-815f-9315fa611998"
+      ]
+    }
+  ]
+}
