@@ -122,7 +122,7 @@ stories:
         created_at: 2026-09-24
         statement: A relative `design.root` is looked for beside the spec first and in the code second, so a home kept outside the repository can hold its own design.
         because: A home outside the repository can only keep its design beside the spec, and neither layout should need a path to one person's disk in the shared config.
-        history: "GitHub issue #17. With the home outside the repository, `prototype: { root: prototype/ }` looked in the repository, and every design page and stand-in was a 404."
+        history: "GitHub issue #17. With the home outside the repository, `prototype: { root: prototype/ }` looked in the repository, and every design page and stand-in was a 404. Reworded on 2026-10-20 for ADR 0015: `prototype.root` became `design.root`, and `walkdown where` gained a designs row naming it, so a person can see where designs are read from without opening the spec."
         verify: [checks]
         screens: [where-prototype-beside]
         signoff: [eng]
@@ -517,7 +517,7 @@ stories:
         signoff: [eng, product]
         statement: "`walkdown upgrade` moves every blueprint's designs into a folder per screen of dated versions, and leaves no retired folder behind except to keep a file git does not hold."
         because: A file left in a retired folder reads as part of the design. A file git does not hold has no other copy, so removing it would lose it.
-        history: "Designs lived in screens/, drafts/ and proposals/, sorted by who drew them (ADR 0015). A folder per screen, and the name designs/, came from Topher's refinement n-0581 (2026-10-10)."
+        history: "Designs lived in screens/, drafts/ and proposals/, sorted by who drew them (ADR 0015). A folder per screen, and the name designs/, came from Topher's refinement n-0581 (2026-10-10). Reworded on 2026-10-20 after `walkdown upgrade --dry-run` on this repository: it dated 58 screens through files git took for their renames, lost screens referred to with a fragment, missed redline notes keyed `cli/<screen>`, and removed drafts a request's `proposes:` named. Your answer to ADR 0015 §2a added that only a prototype* root is renamed designs*."
         screens: [upgrade-prototypes]
         steps:
           given:
@@ -899,6 +899,7 @@ stories:
       - id: locations.several.rules-move
         statement: "`walkdown rules move <rule|story|feature> --to <blueprint>` moves rules to another blueprint in the same project, with their threads, and copies the run records and evidence behind their verdicts."
         because: A project that grows a second blueprint should not lose the verdicts and signatures its rules already earned.
+        history: "GitHub issue #26 (2026-10-22): moving a whole feature dropped its file's title and the comments above its stories. Three steps now say what becomes of a feature file's header."
         origin: walkdown
         created_at: 2026-10-02
         verify: [checks]

@@ -7,6 +7,7 @@ stories:
       - id: ownership.drift.design-requests-required
         origin: prd
         statement: Lint flags any screen that has no design and no open design request. Filing one clears the flag.
+        history: "Reworded on 2026-10-20 for ADR 0015: `prototype: null` became `design: null`, a proposal sketch became a proposed version, and the message says a proposed version counts only once a request's `proposes:` names it. The same day a step was added because the hint printed `threads new --screen <id>` with no `--reason request`, so the note it filed never cleared the flag."
         verify: [checks]
         screens: [lint-no-design-request]
         steps:
@@ -149,7 +150,7 @@ stories:
         signoff: [eng, product]
         statement: "`walkdown threads set <id> --proposes <version>` names the design version a request proposes. Anyone may set it, a person or an agent, and nothing else writes it except the upgrade."
         because: The walk shows a proposed design beside its rules only when its request names it, and a designer should not have to edit a thread's file by hand to do that.
-        history: Until 2026-10-12 only `walkdown upgrade` wrote `proposes:`, so new drafts were named by editing the thread's YAML, which AGENTS.md forbids (Topher, q-0587).
+        history: "Until 2026-10-12 only `walkdown upgrade` wrote `proposes:`, so new drafts were named by editing the thread's YAML, which AGENTS.md forbids (Topher, q-0587). On 2026-10-20, once `walkdown upgrade` dropped the storyboard's `proposal:`, `walkdown judge` gave no design for a screen whose only one was a request's proposed version, so a step says it prints that version beside the accepted one."
         screens: [threads-set-proposes]
         steps:
           given:
@@ -194,7 +195,7 @@ stories:
         signoff: [eng, product]
         statement: A live design request whose `proposes:` names a version with no file under the design root is a lint error on that request.
         because: The walk opens a request's proposed version beside the screen's rules, so a version that has gone shows a person "not found" where the design should be.
-        history: On 2026-10-19 n-0592 proposed /drafts/serve-anywhere.html after the draft had been moved. The panel showed "not found", and lint said nothing.
+        history: "On 2026-10-19 n-0592 proposed /drafts/serve-anywhere.html after the draft had been moved. The panel showed \"not found\", and lint said nothing. Reworded on 2026-10-20 for ADR 0015's words: a proposed version is a dated file in its screen's folder, so the example became a version since renamed, not a draft since moved."
         screens: [lint-proposes-gone]
         steps:
           given:

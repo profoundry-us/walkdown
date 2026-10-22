@@ -70,6 +70,7 @@ stories:
       - id: threads.lifecycle.reasoned-endings
         origin: prd
         statement: Waiving a thread records who waived it and why, and reopening one requires a reason. Both reasons are kept as replies on the thread.
+        history: "A step was added on 2026-10-20: nothing told a person how to decline a design request, so `walkdown threads set --help` now names `--waive --reason`."
         verify: [checks]
         screens: [thread-waived]
         unverifiable:
@@ -186,7 +187,7 @@ stories:
         signoff: [eng, product]
         statement: Only a person files a redline, and it is filed closed.
         because: A redline excuses a gap, so a machine that could file one could excuse any work it did not do.
-        history: Decided with ADR 0015 on 2026-10-09.
+        history: "Decided with ADR 0015 on 2026-10-09. Steps were added on 2026-10-20: a redline could not say what the design and the build each show, so `threads new` takes `--design` and `--build` and `--help` explains a redline. The reopening the build already did was written down as a step."
         screens: [redline-refused-for-agent, redline-filed]
         steps:
           given:
