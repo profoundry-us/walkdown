@@ -82,6 +82,25 @@ function move(args) {
     `${plan.evidence.length} piece(s) of evidence copied under the same keys`,
   ];
   if (values['dry-run']) {
+    // What becomes of each feature file's title and comments (#26).
+    const there = `\`${plan.to.id}\``;
+    for (const h of plan.headers ?? []) {
+      const keys = h.keys.length
+        ? `${h.keys.map((k) => `\`${k}\``).join(', ')}`
+        : 'its `feature:` name';
+      if (h.exists)
+        lines.push(
+          `${there} already has ${h.name}: the stories join it under its own header, and ${h.whole ? `${plan.from.id}'s ${h.name}, emptied, is removed with its header` : `${plan.from.id}'s header stays where it is`}`,
+        );
+      else if (h.whole)
+        lines.push(
+          `${h.name} goes to ${there} whole, as it was written: ${h.keys.length ? `${keys}, ` : ''}${h.comments ? 'comments, ' : ''}and every story`,
+        );
+      else
+        lines.push(
+          `${h.name} is new in ${there} and takes ${keys}${h.comments ? `; the comments in its header stay in \`${plan.from.id}\`` : ''}`,
+        );
+    }
     console.log(`Would move ${lines.join('\n  ')}`.replace('Would move ', 'Would move:\n  '));
     console.log(
       dim(

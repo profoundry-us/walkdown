@@ -67,6 +67,8 @@ function fixture({ commit = 'none' } = {}) {
     [
       '# The shop, as a shopper meets it.',
       'feature: shop',
+      'title: The shop',
+      '# Every story a shopper meets.',
       'stories:',
       '  - id: shop.cart',
       '    title: A cart',
@@ -504,4 +506,60 @@ test("a sweep the destination declared before a move leaves the arriving rules' 
   assert.equal(sweep('b again').status, 0);
   assert.equal(f.row('b', 'shop.cart.add').agent, 'stale');
   assert.deepEqual(owed(), ['shop.cart.add']);
+});
+
+test('a whole feature arrives as it was written, its title and comments with it @rule:locations.several.rules-move', () => {
+  const f = fixture();
+  const file = join(f.A.spec.path, 'features', 'shop.yml');
+  const before = readFileSync(file, 'utf8');
+  const dry = f.wd(['rules', 'move', 'shop', '--blueprint', 'a', '--to', 'b', '--dry-run']);
+  assert.equal(dry.status, 0, dry.stderr);
+  assert.match(
+    dry.stdout,
+    /shop\.yml goes to `b` whole, as it was written: `title`, comments, and every story/,
+  );
+  const out = f.wd(['rules', 'move', 'shop', '--blueprint', 'a', '--to', 'b']);
+  assert.equal(out.status, 0, out.stderr);
+  assert.equal(readFileSync(join(f.B.spec.path, 'features', 'shop.yml'), 'utf8'), before);
+  assert.equal(existsSync(file), false, 'the emptied file leaves a');
+  assert.equal(f.row('b', 'shop.cart.add').agent, 'pass');
+});
+
+test('a story moved into a new file takes the feature title, and the dry run says the comments stay @rule:locations.several.rules-move', () => {
+  const f = fixture();
+  const dry = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b', '--dry-run']);
+  assert.equal(dry.status, 0, dry.stderr);
+  assert.match(
+    dry.stdout,
+    /shop\.yml is new in `b` and takes `title`; the comments in its header stay in `a`/,
+  );
+  const out = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b']);
+  assert.equal(out.status, 0, out.stderr);
+  const bYaml = readFileSync(join(f.B.spec.path, 'features', 'shop.yml'), 'utf8');
+  assert.match(bYaml, /^feature: shop\ntitle: The shop\nstories:\n {2}- id: shop\.cart\n/);
+  assert.doesNotMatch(bYaml, /# The shop|# Every story/);
+  const aYaml = readFileSync(join(f.A.spec.path, 'features', 'shop.yml'), 'utf8');
+  assert.match(
+    aYaml,
+    /^# The shop, as a shopper meets it\.\nfeature: shop\ntitle: The shop\n# Every story/,
+  );
+});
+
+test("a move into a file the destination already has keeps that file's header @rule:locations.several.rules-move", () => {
+  const f = fixture();
+  const own =
+    "# b's own.\nfeature: shop\ntitle: The other shop\nstories:\n  - id: shop.browse\n    title: Browsing\n    statement: As a shopper I look around.\n    rules: []\n";
+  writeFileSync(join(f.B.spec.path, 'features', 'shop.yml'), own);
+  const dry = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b', '--dry-run']);
+  assert.equal(dry.status, 0, dry.stderr);
+  assert.match(
+    dry.stdout,
+    /`b` already has shop\.yml: the stories join it under its own header, and a's header stays where it is/,
+  );
+  const out = f.wd(['rules', 'move', 'shop.cart', '--blueprint', 'a', '--to', 'b']);
+  assert.equal(out.status, 0, out.stderr);
+  const bYaml = readFileSync(join(f.B.spec.path, 'features', 'shop.yml'), 'utf8');
+  assert.ok(bYaml.startsWith(own.split('  - id: shop.browse')[0]), bYaml);
+  assert.match(bYaml, /- id: shop\.browse[\s\S]*- id: shop\.cart\n/);
+  assert.doesNotMatch(bYaml, /title: The shop\n/);
 });

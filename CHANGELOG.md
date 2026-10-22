@@ -105,6 +105,11 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
 - `walkdown upgrade` repoints a screen whose design is part of another screen's
   page (`/screens/waitlist-admin.html#invite-batch`) at that page's new version,
   fragment kept, where it left the old path behind.
+- `walkdown rules move` keeps a feature file's header (#26). A whole feature
+  moved where the destination has no file of its name arrives as it was
+  written, title and comments included; a story moved into a new file takes
+  the feature's `title` and other feature-level keys. The dry run says what
+  becomes of the header, and that its comments stay behind on a partial move.
 
 
 ## [0.4.1] - 2026-10-09

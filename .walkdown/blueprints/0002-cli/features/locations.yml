@@ -906,12 +906,15 @@ stories:
         signoff: [eng, product]
         steps:
           given:
-            - A project with blueprints a and b, and a story in a whose rules have threads, checks, agent verdicts, signatures and a sweep
+            - A project with blueprints a and b, and a story in a whose rules have threads, checks, agent verdicts, signatures and a sweep, in a feature file with a title and a comment above its stories
           when:
             - "`walkdown rules move <story> --to b --dry-run` is run, then the same without `--dry-run`"
           then:
             - The dry run lists the rules, threads, run records and evidence it would move or copy, and changes nothing
             - The rules leave a's feature file and arrive in the feature file of the same name in b, with their statements, steps and hashes unchanged
+            - A whole feature moved to b, where no file has its name, arrives as its file was written, with its title and the comments above its stories
+            - A story moved into a new feature file in b takes the feature's title and other feature-level keys, and the dry run says the comments in the header stay in a
+            - Stories moved into a feature file b already has join it under b's own title and comments, and the dry run says so
             - Their threads move to b and keep their ids
             - Each run record holding a result for a moved rule is copied to b, keeping its run id, time and author, holding only the moved rules' results, and saying which blueprint and run it was copied from
             - a's run records are unchanged
@@ -921,7 +924,7 @@ stories:
             - "`walkdown status` in b shows every moved rule with the verdicts and signatures it had in a"
             - A destination outside the project, a rule id the destination already has, uncommitted changes in either blueprint's features, and verdicts recorded at an address the destination's target does not point at are each refused, and nothing moves
             - It says how many rules and threads moved, and how many run records were copied
-          statement_hash: sha256:976ba30819ab
+          statement_hash: sha256:7695cc234699
   - id: locations.threads
     title: A thread is one conversation, wherever it was filed
     statement: As someone working on branches and with teammates, I can file a thread without it colliding with one somebody else filed at the same time.
