@@ -1,0 +1,33 @@
+{
+  "run_id": "2026-10-22T17-37-42Z-local-01",
+  "created": "2026-10-22T17:37:42Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "67164233-dirty",
+  "spec_hash": "sha256:964aeb95b5c4",
+  "results": [
+    {
+      "rule": "panel.walkdown.what-changed-since-you-signed",
+      "status": "fail",
+      "statement_hash": "sha256:5b7eeb8157b0",
+      "evidence": [
+        "runs/evidence/2026-10-22T17-37-42Z/01-real-cli-sincesigned.txt",
+        "runs/evidence/2026-10-22T17-37-42Z/02-api-scratch-notfound.json",
+        "runs/evidence/2026-10-22T17-37-42Z/03-not-signer-commands.shape.noun-then-verb.png",
+        "runs/evidence/2026-10-22T17-37-42Z/03-not-signer-ownership.drift.design-requests-required.png",
+        "runs/evidence/2026-10-22T17-37-42Z/04-topher-nogit-commands.shape.noun-then-verb.png",
+        "runs/evidence/2026-10-22T17-37-42Z/04-topher-nogit-ownership.design.proposed-version-exists.png",
+        "runs/evidence/2026-10-22T17-37-42Z/04-topher-nogit-ownership.drift.design-requests-required.png",
+        "runs/evidence/2026-10-22T17-37-42Z/05-topher-git-ownership.design.proposed-version-exists.png",
+        "runs/evidence/2026-10-22T17-37-42Z/05-topher-git-ownership.drift.design-requests-required.png",
+        "runs/evidence/2026-10-22T17-37-42Z/06-unit-added-removed-reworded-and-same-day.txt"
+      ],
+      "reasoning": "Driven on a scratch copy of the cli blueprint served on port 4766 (its home naming only the copy; the copy run records retargeted to that port so the real signatures by topher count there), with Playwright, and by calling sinceSigned() read-only on the eight real cli rules topher signed on older wordings. Most of it holds: the block sits above detail.turn; it says the rule changed since you signed it on the day of your signature in your zone (Oct 1 for 2026-10-02T03:04Z in Chicago); with the copy given its own git history it lists reworded steps with the words that went struck through and the words that came marked, and added steps (removed steps proven on a fixture through stepChanges); outside git it says the wording you signed is no longer on record and still lists the reasons; a non-signer and a rule signed on its current wording show nothing; the request names the reader own signature hash. One step does not hold: each reason recorded since your signature. reasonsSince compares a day-only at, the usual form of steps.changed and one the panel reads on purpose, as midnight UTC, so a reason dated the signature UTC day is dropped though recorded after it. Real case: ownership.design.proposed-version-exists, signed 2026-10-20T02:16:46Z, reason at 2026-10-20 committed at 14:22 CDT that day; the panel shows the changes and no why, and outside git nothing at all beyond the not-found line. 1 of the 8 real cases; the pattern of signing in a walk and rewording the same day is common here. Finding n-0617.",
+      "threads": [
+        "9d9739a1-776f-4e27-815f-9315fa611998"
+      ]
+    }
+  ]
+}

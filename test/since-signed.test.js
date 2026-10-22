@@ -148,3 +148,13 @@ test('a reworded step joins back into both wordings exactly', () => {
   assert.deepEqual(stepChanges({ statement: 'a' }, { statement: 'a' }), []);
   assert.deepEqual(reasonsSince({ steps: {} }, '2026-10-02'), []);
 });
+
+test('a reason dated by its day alone counts for the whole of that day (n-0617) @rule:panel.walkdown.what-changed-since-you-signed', () => {
+  const rule = {
+    steps: {
+      changed: [{ hash: 'sha256:000000000000', at: '2026-10-20', why: 'Written that afternoon.' }],
+    },
+  };
+  assert.equal(reasonsSince(rule, '2026-10-20T02:16:46Z').length, 1, 'signed that morning');
+  assert.equal(reasonsSince(rule, '2026-10-21T00:00:01Z').length, 0, 'signed the day after');
+});

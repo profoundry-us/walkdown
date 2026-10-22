@@ -1,0 +1,26 @@
+id: n-0617
+uuid: 9d9739a1-776f-4e27-815f-9315fa611998
+kind: note
+reason: finding
+author: agent
+created: 2026-10-22T17:42:47.574Z
+anchor:
+  rule: panel.walkdown.what-changed-since-you-signed
+status: addressed
+body: |-
+  A reason recorded after your signature, but dated by its day alone, is left out when that day is the signature's own UTC day.
+
+  reasonsSince() in lib/since-signed.js keeps a reason only when Date.parse(r.at) >= Date.parse(signature.at). A day-only at (2026-10-20) parses as midnight UTC, so any reason dated the signature's UTC day reads as before it. Day-only is the usual form of steps.changed: every such entry in the cli blueprint is hand-dated by day, and the panel's own onDay() reads day-only dates on purpose.
+
+  Real case (read-only, against the real cli feature file): ownership.design.proposed-version-exists, signed by topher at 2026-10-20T02:16:46Z (Oct 19 in his zone). Its one reason, at: 2026-10-20, was committed in 2e62678b at 2026-10-20T14:22 CDT, after the signature. The panel shows 'This rule has changed since you signed it on Oct 19', two reworded steps, and no reason at all. Same with the git lookup failing: no changes and no reasons, which is the case the rule says must still show the reasons.
+
+  Evidence: runs/evidence/2026-10-22T17-37-42Z/01-real-cli-sincesigned.txt, runs/evidence/2026-10-22T17-37-42Z/05-topher-git-ownership.design.proposed-version-exists.png, runs/evidence/2026-10-22T17-37-42Z/04-topher-nogit-ownership.design.proposed-version-exists.png, runs/evidence/2026-10-22T17-37-42Z/06-unit-added-removed-reworded-and-same-day.txt
+
+  A likely fix: compare a day-only at by day, so a reason dated the signature's day (in UTC, or the signer's zone) counts as since it.
+replies:
+  - author: agent
+    created: 2026-10-22T17:54:29Z
+    body: Fixed in lib/since-signed.js. A reason dated by its day alone now counts
+      until that day ends, so a reason written the afternoon after a morning
+      signature is shown. ownership.design.proposed-version-exists now shows its
+      Oct 20 reason. A unit test covers both sides of the day.

@@ -1,0 +1,24 @@
+{
+  "run_id": "2026-10-22T17-53-54Z-local-01",
+  "created": "2026-10-22T17:53:54Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "520879d5-dirty",
+  "tree_hash": "sha256:9a14bd609b16",
+  "spec_hash": "sha256:964aeb95b5c4",
+  "results": [
+    {
+      "rule": "panel.walkdown.what-changed-since-you-signed",
+      "status": "pass",
+      "statement_hash": "sha256:5b7eeb8157b0",
+      "duration_ms": 392,
+      "checks": [
+        "test/since-signed.test.js:64",
+        "test/since-signed.test.js:95",
+        "test/since-signed.test.js:114",
+        "test/since-signed.test.js:152"
+      ]
+    }
+  ]
+}
