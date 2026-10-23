@@ -1,0 +1,50 @@
+{
+  "run_id": "2026-10-23T20-31-56Z-local-01",
+  "created": "2026-10-23T20:31:56Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "6cf1a60f-dirty",
+  "spec_hash": "sha256:317e051c6ba2",
+  "results": [
+    {
+      "rule": "status.derived.a-change-says-why",
+      "status": "pass",
+      "statement_hash": "sha256:c749ded84ce8",
+      "evidence": [
+        "runs/evidence/2026-10-23T20-31-56Z/a-change-says-why.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/a-change-says-why-edges.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/scenarios.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/probe/t1.mjs",
+        "runs/evidence/2026-10-23T20-31-56Z/probe/t3.mjs"
+      ],
+      "reasoning": "Headless CLI rule, driven on throwaway machines from tools/cli-scenarios.mjs (machine() + FIXTURES, no network, no server; no port needed). On g4-change-says-why a plain `hash --write` printed exactly the accepted design prototype-cli/screens/hash-change-says-why.html (and the as-built matches it line for line): totals stamped as unsigned, receipt refused by name with the reason sentence and both commands carrying its id and --blueprint, exit 2, and the feature file shows receipt's old hash untouched. `--changed \"<why>\" <rule>` then stamped it with `changed: [{hash: <old>, at: 2026-10-23T20:33:06Z, why}]`, a UTC instant, and `status` read eng's signature as an older wording; on a fresh machine `--reword` instead kept it under `reworded:` and eng read as approved. Edges tried on a six-rule blueprint: four signed rules in one run (eng approve, eng+product pass, an eng send-back, a pre-roles walkdown with no roles field) were all refused together and two unsigned ones (one with only an agent pass) stamped; the two-role rule read 'since eng and product signed it' and the advice line 'The eng and product signatures read stale until each is signed again'; `--changed` with two ids stamped only those and left the other two refused on the next plain run; `--changed` with no ids stamped the rest and recorded the why on each; both product and eng read stale after. `--changed` on a rule already current reports `ok`, writes nothing and drops the reason (a reason with no change to attach to; under 10% likely to matter, since a signed rule is never stamped without one). Flag guards hold: --changed without --write, a blank --changed, --changed with --reword, and an unknown rule id all exit 2. `runHashCommand` is the only code that writes statement_hash, so no other door bypasses the refusal. A sent-back signature also counts as signed and is asked for a reason; reported to the caller as a middle-band wording question, not a fail.",
+      "threads": []
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:7ee63630bd2c",
+      "evidence": [
+        "runs/evidence/2026-10-23T20-31-56Z/reword-never-adds-an-excuse.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/scenarios.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/probe/t4.mjs"
+      ],
+      "reasoning": "Driven on a throwaway machine from fixture g4-reword-adds-excuse. `hash --write --reword` refused receipt (gained agent) and refunds (moved checks to agent) in one run, each with the tier and the excuse text, said rewording cannot add an excuse, and gave `walkdown hash --write --changed \"<why>\" checkout.basics.receipt checkout.basics.refunds --blueprint checkout`, exit 2, nothing written (the following `hash` still showed all three stale). Naming one refused rule, or a mix of one refused and one fine, refused just the gainer with singular wording and wrote nothing. Following the advice verbatim stamped exactly those two with a `changed:` record and left totals stale; the rerun of --reword then reworded totals and kept its old hash under `reworded:`, so its verdicts stand. Removing totals' excuse under --reword was allowed and dropped `excused`; adding a checks excuse beside receipt's existing agent one, while rewording the agent one, refused naming only the new checks tier. The as-built matches the rule and the scenario passes. The accepted design prototype-cli/screens/hash-reword-adds-excuse.html still prints the old advice without `--changed \"<why>\"`; the rule's own step requires the new command, the statement wins, and this is a text change the rule carries, so it does not fail the build (reported to the caller). No port was served: a CLI rule needs none.",
+      "threads": []
+    },
+    {
+      "rule": "locations.keeping.old-layout-warns",
+      "status": "pass",
+      "statement_hash": "sha256:d575b0345c14",
+      "evidence": [
+        "runs/evidence/2026-10-23T20-31-56Z/old-layout-warns.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/scenarios.txt",
+        "runs/evidence/2026-10-23T20-31-56Z/probe/t5.mjs"
+      ],
+      "reasoning": "Driven on a throwaway machine from fixture g2-old-layout. `lint --no-checks` printed one [upgrade] warning each for checkout (four old screens) and search, naming storyboard `prototype:` keys, `prototype.root` in spec.yml and `screens/` and `drafts/` under prototype/, with `walkdown upgrade --dry-run` then `walkdown upgrade`; billing on the 0.5.0 layout got none; exit 0. The output matches the design accepted today, prototype-cli/screens/lint-old-layout.html, line for line, including the per-blueprint headers and tallies, and the as-built is the same. Then `upgrade --dry-run` and `upgrade` ran, and a relint showed no warning on any of the three, still exit 0, even with proposals/payment-notes.html kept at the project root, which is outside the design root. A blueprint with only `proposal:` keys and a `proposals/` folder under its design root was named for exactly those two. Under 10%: the folder name is printed as the root's basename, and three folders would read 'a and b and c'.",
+      "threads": []
+    }
+  ]
+}
