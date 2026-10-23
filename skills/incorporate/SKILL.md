@@ -29,7 +29,9 @@ rule the agent tier has not judged, or judged before it went stale) and
    `signoff:` roles for who accepts it. If the question is still open on
    another rule while this new rule carries its answer, move it:
    `walkdown threads set <q> --written-as <rule> --blueprint <bp>`.
-2. **Statement edits** → immediately `walkdown hash --write --blueprint <id>`.
+2. **Statement edits** → immediately `walkdown hash --write --blueprint <id>`. A rule
+   someone has signed needs the reason: `--changed "<why>"`, naming the question the
+   answer came from, or `--reword "<why>"` if only the words moved.
 3. **Screens.** If the change needs a screen or state the storyboard lacks,
    add it — and check design coverage. If design hasn't drawn it: set
    `design: null` (**never** touch the design root — design owns it), and

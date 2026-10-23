@@ -69,6 +69,11 @@ These are new errors, each with the fix in its message:
 | a question is open on a rule while another rule was written from its answer | `walkdown threads set <q> --written-as <rule> --blueprint <bp>` |
 | a design request proposes a version that is not there | put the version back where it names, or `walkdown threads set <id> --proposes <path> --blueprint <bp>` |
 
+A script or an agent that re-stamps after an edit meets one more refusal:
+`walkdown hash --write` on a rule someone has signed asks why it changed. Add
+`--changed "<why>"` when the meaning moved, or `--reword "<why>"` when only
+the words did.
+
 ### 4. Refresh `AGENTS.md`
 
 A blueprint made before 0.5.0 keeps its `AGENTS.md`. Copy

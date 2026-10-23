@@ -360,11 +360,14 @@ it with `walkdown threads set <q> --written-as <rule> --blueprint <id>`.
 
     walkdown hash --write --blueprint <id>                    # after any edit to a statement or a step
     walkdown hash --write --reword "<why>" --blueprint <id>   # when only the words changed
+    walkdown hash --write --changed "<why>" --blueprint <id>  # when a signed rule's meaning moved
     walkdown lint --no-checks                                 # until the structure is clean
 
 The hash pins the statement, the steps and any excuse. A verdict given before
 the wording moved reads as stale. `--reword` keeps the verdicts when the
-meaning did not change.
+meaning did not change. A plain write refuses a rule someone has signed: say
+`--changed` or `--reword`, with why. The reason is kept on the rule, and the
+panel shows it to whoever signs it again, beside the steps that changed.
 
 ## 6. Building, checks and the agent tier
 

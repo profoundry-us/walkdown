@@ -24,8 +24,10 @@ https://github.com/profoundry-us/walkdown/blob/main/GUIDE.md.
   it. If they disagree, the statement wins. The statement is the claim alone;
   the reason lives in `because` and what happened in `history`, and neither
   is hashed. After editing a statement or a step, run `walkdown hash --write
-  --blueprint <id>` so staleness detection keeps working - with `--reword "<why>"` when only
-  the words changed, so the verdicts stay current.
+  --blueprint <id>` so staleness detection keeps working. On a rule someone has signed
+  it asks why: `--changed "<why>"` when the meaning moved, so the signatures go stale and
+  whoever signs again reads the reason, or `--reword "<why>"` when only the words changed,
+  so the verdicts stay current.
 - If a rule is ambiguous, do not guess. File a question thread anchored to the
   rule/screen/element (`walkdown threads new --kind question --rule <id>
   --body <text> --blueprint <id>`, or `POST /api/threads` via `walkdown serve`) and say what
@@ -147,7 +149,8 @@ what the rule wants. (ADR 0004 has the reasoning and the before/after pairs.)
 - **`history` is what happened, with its date or count.** A past tense, a
   thread id, a number. Optional; the `origin:` thread usually carries it.
 - **Rewording is `walkdown hash --write --reword "<why>" --blueprint <id>`.** The old hash is
-  kept and no verdict goes stale. Better English is never a new rule.
+  kept and no verdict goes stale. Better English is never a new rule. A change of meaning on
+  a signed rule is `--changed "<why>"`, and the why is shown to whoever signs it again.
 
 ## The voice
 

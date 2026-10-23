@@ -63,6 +63,13 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
   either side of the fade.
 - **`walkdown serve` lists what it serves:** every registered blueprint by ID
   with its project, marking the one a page that names none opens.
+- **What changed since you signed.** A rule you signed on an older wording
+  opens with the steps added, removed or reworded since your signature, the
+  reworded words struck and shaded, and the reasons recorded since, each with
+  its date. The wording you signed is found in git.
+- **`walkdown hash --write --changed "<why>"`** stamps a rule whose meaning
+  moved and keeps the reason on the rule, with the moment it was written, for
+  whoever signs it again.
 - **Lint warns on a blueprint still on the old design layout**: storyboard
   `prototype:` or `proposal:` keys, `prototype.root` in spec.yml, or a
   `screens/`, `drafts/` or `proposals/` folder under the design root. One
@@ -76,6 +83,12 @@ move into a folder per screen, and `walkdown upgrade` moves them once.
   excuse the agent tier; a question still open on a rule after its answer
   became another rule; and a design request whose proposed version is not on
   disk. Lint counts retired rules and screens apart from the live ones.
+- **`hash --write` asks why a signed rule changed.** A rule someone has signed
+  is refused by name until the write says `--changed "<why>"` (signatures go
+  stale) or `--reword "<why>"` (they stand). A rule nobody has signed is
+  stamped as before.
+- **A design is accepted only by looks given after its request was filed.** A
+  rule signed before there was a design to read beside it is approved again.
 - **Excuses are part of a rule's hash**, so adding, changing or removing one
   makes the rule stale. `hash --write --reword` never adds an excuse.
 - **Every screen has rules before it reaches a person** (ADR 0015 §8): the
