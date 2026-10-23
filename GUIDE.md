@@ -43,7 +43,7 @@ If the clone is older than the latest tag, follow its
 walkdown is not on a package registry. The clone is the install. Ask where it
 should go; `~/.walkdown/walkdown` is a good default.
 
-    git clone --branch v0.4.1 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
+    git clone --branch v0.5.0 https://github.com/profoundry-us/walkdown.git ~/.walkdown/walkdown
     node ~/.walkdown/walkdown/bin/walkdown.js --help
 
 A tag is the stable copy, and `main` moves daily. Git may warn that the tag

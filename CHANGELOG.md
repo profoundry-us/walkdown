@@ -9,7 +9,7 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
-## [0.5.0] - unreleased (draft)
+## [0.5.0] - 2026-10-23
 
 Upgrading from 0.4.1: see [UPGRADING.md](UPGRADING.md#from-041-to-050). Designs
 move into a folder per screen, and `walkdown upgrade` moves them once.
@@ -473,7 +473,8 @@ Upgrading from 0.1.x: see [UPGRADING.md](UPGRADING.md#from-01x-to-020).
   full sitting, incorporating answers and working the backlog, and reporters for
   `node:test`, Playwright and RSpec.
 
-[Unreleased]: https://github.com/profoundry-us/walkdown/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/profoundry-us/walkdown/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/profoundry-us/walkdown/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/profoundry-us/walkdown/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/profoundry-us/walkdown/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/profoundry-us/walkdown/compare/v0.2.0...v0.3.0
