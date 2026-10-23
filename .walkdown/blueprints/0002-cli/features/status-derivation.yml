@@ -68,14 +68,18 @@ stories:
           when:
             - "`walkdown hash --write --reword \"<why>\"` is run"
           then:
-            - The first rule is refused by name, with the tier it now excuses and the excuse itself, so the person reads what would be set aside. The refusal says rewording cannot add an excuse, and gives the command that stamps the refused rules alone without --reword, `walkdown hash --write <rule>...`, so their verdicts read stale until they are judged and approved again
+            - The first rule is refused by name, with the tier it now excuses and the excuse itself, so the person reads what would be set aside. The refusal says rewording cannot add an excuse, and gives the command that stamps the refused rules alone as a change of meaning, `walkdown hash --write --changed "<why>" <rule>...`, so their verdicts read stale until they are judged and approved again
             - Every rule that gained an excuse is refused in the same run, not only the first one found
             - Nothing is written for any rule, and it exits 2, as other refusals do
             - "`walkdown hash --write` given rule ids stamps only those rules, and leaves every other stale rule as it was"
             - Run again once the first rule is stamped on its own, the second rule is reworded and its verdicts stand
             - Moving an excuse to a different tier is adding one, and is refused the same way
             - Removing an excuse under --reword is allowed, because it sets nothing aside
-          statement_hash: sha256:d031d2757c27
+          statement_hash: sha256:7ee63630bd2c
+          changed:
+            - hash: sha256:d031d2757c27
+              at: 2026-10-23T20:29:04Z
+              why: A plain hash --write on a signed rule now asks for a reason (status.derived.a-change-says-why), so the refusal gives the command with --changed.
 
       - id: status.derived.a-change-says-why
         origin: walkdown

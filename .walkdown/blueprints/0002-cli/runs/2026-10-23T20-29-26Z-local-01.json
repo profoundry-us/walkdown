@@ -1,0 +1,46 @@
+{
+  "run_id": "2026-10-23T20-29-26Z-local-01",
+  "created": "2026-10-23T20:29:26Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "23d6a1c6-dirty",
+  "tree_hash": "sha256:83da2ec072d5",
+  "spec_hash": "sha256:317e051c6ba2",
+  "results": [
+    {
+      "rule": "ownership.design.approved-rules-accept-the-design",
+      "status": "pass",
+      "statement_hash": "sha256:c86d5e75cf0a",
+      "duration_ms": 999,
+      "checks": [
+        "test/design-acceptance.test.js:92",
+        "test/design-acceptance.test.js:132",
+        "test/design-acceptance.test.js:140",
+        "test/design-acceptance.test.js:148",
+        "test/design-acceptance.test.js:161"
+      ]
+    },
+    {
+      "rule": "status.derived.a-change-says-why",
+      "status": "pass",
+      "statement_hash": "sha256:c749ded84ce8",
+      "duration_ms": 3004,
+      "checks": [
+        "test/hash-changed.test.js:35",
+        "test/hash-changed.test.js:58",
+        "test/hash-changed.test.js:75"
+      ]
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:7ee63630bd2c",
+      "duration_ms": 427,
+      "checks": [
+        "test/hash-reword.test.js:24",
+        "test/hash-reword.test.js:52"
+      ]
+    }
+  ]
+}

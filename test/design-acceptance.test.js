@@ -157,3 +157,25 @@ test("an agent's verdict never accepts a design @rule:ownership.design.approved-
   assert.deepEqual(out?.accepted ?? [], []);
   assert.equal(p.onDisk(cart).status, 'open');
 });
+
+test('an approval given before the request was filed does not count; the rule is approved again beside the design (q-0613) @rule:ownership.design.approved-rules-accept-the-design', () => {
+  const p = project();
+  // shop.pay.one signed long before anybody asked for a new receipt.
+  const early = p.walk([{ rule: 'shop.pay.one', status: 'approved' }]);
+  const runFile = join(p.load().at.runs.path, `${early.run_id}.json`);
+  const record = JSON.parse(readFileSync(runFile, 'utf8'));
+  record.created = '2026-01-01T00:00:00Z';
+  writeFileSync(runFile, `${JSON.stringify(record, null, 2)}\n`);
+
+  const receipt = p.request('receipt', '/receipt/20261010.html');
+  let out = p.walk([
+    { rule: 'shop.pay.two', status: 'approved' },
+    { rule: 'shop.pay.both', status: 'approved' },
+  ]);
+  assert.deepEqual(out.accepted, [], 'one was signed before there was a design to read');
+  assert.equal(p.onDisk(receipt).status, 'open');
+
+  out = p.walk([{ rule: 'shop.pay.one', status: 'approved' }]);
+  assert.ok(out.accepted.includes(receipt));
+  assert.equal(p.onDisk(receipt).status, 'verified');
+});

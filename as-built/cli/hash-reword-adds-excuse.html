@@ -58,7 +58,7 @@
       <div class="ln">  ✗ checkout.basics.refunds now excuses the agent tier, and it excused only the checks tier when it was last stamped:</div>
       <div class="ln">      agent: A refund is settled by the payment provider, out of sight of the shop.</div>
       <div class="ln">  Rewording cannot add an excuse. A rewording keeps every verdict, so the tier would be set aside with nobody reading the rule again.</div>
-      <div class="ln">  Run `walkdown hash --write checkout.basics.receipt checkout.basics.refunds --blueprint checkout` to stamp only these two. Their verdicts then read stale until each is judged and approved again.</div>
+      <div class="ln">  Run `walkdown hash --write --changed "&lt;why&gt;" checkout.basics.receipt checkout.basics.refunds --blueprint checkout` to stamp only these two. Their verdicts then read stale until each is judged and approved again.</div>
       <div class="ln">  Nothing was written for any rule. Once checkout.basics.receipt and checkout.basics.refunds are stamped on their own, run this again to reword the rest.</div>
     <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
   </div>

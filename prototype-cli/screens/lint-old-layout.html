@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- DESIGN DRAFT: lint-old-layout -->
+<!-- Drawn by the design agent for request n-0614. Not yet accepted. -->
+<!-- Intent: lint gives each blueprint still on the pre-0.5.0 design layout one [upgrade] warning on its spec.yml, naming what is old and saying to run `walkdown upgrade --dry-run` and then `walkdown upgrade`; the blueprint on the new layout gets none, and lint exits 0. -->
+<!-- Fixture: three blueprints in ~/shop. checkout and search keep storyboard `prototype:` keys, a `prototype.root` in spec.yml, and screens/ and drafts/ under prototype/. billing has `design:` keys and a dated version under designs/. checkout has four old screens and still gets a single warning. Nothing else is wrong, so every summary is a tick. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lint names each blueprint still on the old design layout, once</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/shop</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/shop $</b> walkdown lint --no-checks</div>
+      <div class="ln">━━ 0001-sp-checkout ━━</div>
+      <div class="ln"></div>
+      <div class="ln">walkdown lint — ~/.walkdown/projects/shop/blueprints/checkout</div>
+      <div class="ln"></div>
+      <div class="ln">WARNINGS</div>
+      <div data-testid="cli.lint.old-layout">
+      <div class="ln">  ⚠ [upgrade] checkout/spec.yml › design: this blueprint keeps its designs as before 0.5.0 (storyboard `prototype:` keys; `prototype.root` in spec.yml; `screens/` and `drafts/` under prototype/) — `walkdown upgrade --dry-run` shows what would move, then `walkdown upgrade` moves it</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">✓ 4 rules, 4 screens, 0 anchors, 2 threads, 0 runs — 0 errors, 1 warning(s)</div>
+      <div class="ln"></div>
+      <div class="ln">━━ 0002-sp-search ━━</div>
+      <div class="ln"></div>
+      <div class="ln">walkdown lint — ~/.walkdown/projects/shop/blueprints/search</div>
+      <div class="ln"></div>
+      <div class="ln">WARNINGS</div>
+      <div data-testid="cli.lint.old-layout">
+      <div class="ln">  ⚠ [upgrade] search/spec.yml › design: this blueprint keeps its designs as before 0.5.0 (storyboard `prototype:` keys; `prototype.root` in spec.yml; `screens/` and `drafts/` under prototype/) — `walkdown upgrade --dry-run` shows what would move, then `walkdown upgrade` moves it</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">✓ 1 rules, 1 screens, 0 anchors, 0 threads, 0 runs — 0 errors, 1 warning(s)</div>
+      <div class="ln"></div>
+      <div class="ln">━━ 0003-sp-billing ━━</div>
+      <div class="ln"></div>
+      <div class="ln">walkdown lint — ~/.walkdown/projects/shop/blueprints/billing</div>
+      <div class="ln"></div>
+      <div class="ln">✓ 1 rules, 1 screens, 0 anchors, 0 threads, 0 runs — 0 errors, 0 warning(s)</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

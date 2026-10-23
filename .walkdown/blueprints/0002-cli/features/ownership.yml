@@ -112,7 +112,7 @@ stories:
         signoff: [eng, product]
         statement: Once a person has approved every rule on a screen, the screen's pending design request is accepted in their name.
         because: Approving what a screen must do, with its design beside it, is accepting the design. A second click would ask for the same decision twice.
-        history: Topher, 2026-10-09, while walking the 0.5.0 designs.
+        history: Topher, 2026-10-09, while walking the 0.5.0 designs. On 2026-10-23 (q-0613) he chose that only approvals given after the request was filed count, so a design is accepted only once every rule on its screen has been read beside it.
         unverifiable:
           agent: What it changes is a record, the request's status and the name that accepted it. How an accepted design then shows is judged under screens.surfaces.proposed-beside-accepted, so a look here would judge that rule again. The checks read the request on disk after each approval.
         steps:
@@ -126,8 +126,13 @@ stories:
             - Sending any of the rules back leaves the request pending
             - An agent's verdict never accepts a design
             - A rule that names two screens counts toward each
-          statement_hash: sha256:98aad72d33a6
+            - An approval given before the request was filed does not count. A rule signed earlier is approved again, beside the design, before the request is accepted
+          statement_hash: sha256:c86d5e75cf0a
           excused: [agent]
+          changed:
+            - hash: sha256:98aad72d33a6
+              at: 2026-10-23T20:29:04Z
+              why: "Topher answered q-0613: only approvals given after the design request was filed count toward accepting it, so a rule signed earlier is approved again beside the design."
 
       - id: ownership.design.retired-counted-apart
         origin: walkdown

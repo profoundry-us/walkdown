@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-10-23T20-29-28Z-local-01",
+  "created": "2026-10-23T20:29:28Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "23d6a1c6-dirty",
+  "tree_hash": "sha256:83da2ec072d5",
+  "spec_hash": "sha256:317e051c6ba2",
+  "results": [
+    {
+      "rule": "status.derived.a-change-says-why",
+      "status": "pass",
+      "statement_hash": "sha256:c749ded84ce8",
+      "duration_ms": 753,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    },
+    {
+      "rule": "status.derived.reword-never-adds-an-excuse",
+      "status": "pass",
+      "statement_hash": "sha256:7ee63630bd2c",
+      "duration_ms": 705,
+      "checks": [
+        "test/cli/shard.mjs:27"
+      ]
+    }
+  ]
+}

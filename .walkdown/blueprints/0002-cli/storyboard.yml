@@ -551,7 +551,8 @@ screens:
 
   - id: lint-old-layout
     title: "Lint names each blueprint still on the old design layout, once"
-    prototype: null
+    prototype: /screens/lint-old-layout.html   # accepted 2026-10-23 in Topher's walk (n-0614)
+    app: { path: /as-built/cli/lint-old-layout.html }
     anchors:
       - cli.prompt
       - cli.lint.old-layout
@@ -927,7 +928,8 @@ screens:
 
   - id: hash-change-says-why
     title: "hash --write asks why a signed rule changed"
-    prototype: null
+    prototype: /screens/hash-change-says-why.html   # accepted 2026-10-23 in Topher's walk (n-0615)
+    app: { path: /as-built/cli/hash-change-says-why.html }
     anchors:
       - cli.prompt
       - cli.hash.refused

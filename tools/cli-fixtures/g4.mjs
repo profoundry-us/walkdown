@@ -476,6 +476,32 @@ export default {
     writeFileSync(file, String(doc));
   },
 
+  /*
+   * hash-change-says-why: eng approved `receipt`, nobody has signed
+   * `totals`, and both have changed since they were stamped - receipt
+   * gained a step, totals' statement moved.
+   */
+  'g4-change-says-why'(m) {
+    const h = checkout(m, [
+      ['totals', 'The total is the sum of the cart.'],
+      ['receipt', 'A receipt is emailed after payment.'],
+    ]);
+    run(
+      m,
+      '2026-10-01T09-00-00Z-local-01',
+      { ...WALK, signatures: [{ role: 'eng', signer: 'topher' }] },
+      [{ rule: 'checkout.basics.receipt', status: 'approved', statement_hash: h.receipt }],
+    );
+    const file = join(m.specOf('checkout'), 'features', 'checkout.yml');
+    const doc = parseDocument(readFileSync(file, 'utf8'));
+    doc.setIn(
+      ['stories', 0, 'rules', 0, 'statement'],
+      'The total is the sum of the cart, with tax.',
+    );
+    doc.setIn(['stories', 0, 'rules', 1, 'steps', 'then'], ['It does', 'It names each item']);
+    writeFileSync(file, String(doc));
+  },
+
   /* `pays` with no signoff line, `totals` naming only product, `receipt` an empty list. */
   'g4-signoff-product'(m, h) {
     checkout(m, [

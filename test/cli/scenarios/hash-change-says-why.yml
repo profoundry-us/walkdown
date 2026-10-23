@@ -1,0 +1,18 @@
+# `walkdown hash --write` with no reason, when a signed rule and an unsigned one have both changed.
+screen: hash-change-says-why
+title: hash --write asks why a signed rule changed
+rule: status.derived.a-change-says-why
+fixture: g4-change-says-why
+command: [hash, --write, --blueprint, checkout]
+exit: 2
+expect:
+  - '^  ✓ checkout\.basics\.totals stamped\. Nobody has signed it, so no reason is needed\.$'
+  - '^  ✗ checkout\.basics\.receipt changed since eng signed it, and no reason was given\.$'
+  - "^  A signed rule's change needs its reason, so whoever signs it again can read why\\. Say which kind of change it was:$"
+  - '^    walkdown hash \-\-write \-\-changed "<why>" checkout\.basics\.receipt \-\-blueprint checkout$'
+  - "^        the meaning moved\\. eng's signature reads stale until it is signed again\\.$"
+  - '^    walkdown hash \-\-write \-\-reword "<why>" checkout\.basics\.receipt \-\-blueprint checkout$'
+  - "^        only the words changed\\. eng's signature stands\\.$"
+  - '^  Nothing was written for checkout\.basics\.receipt\.$'
+anchors:
+  - { id: cli.hash.refused, match: '^  ✗ ' }

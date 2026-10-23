@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-20T17:00:37.123Z
 anchor:
   rule: ownership.design.approved-rules-accept-the-design
-status: answered
+status: incorporated
 body: A signature given before a design request was filed still counts toward
   'every rule on the screen approved'. So when a screen has two rules and one
   was already signed, a walk that looks at only the other one accepts the new
@@ -24,4 +24,10 @@ replies:
     created: 2026-10-23T20:21:06Z
     body: Only looks after the request count
     answer: true
+  - author: agent
+    created: 2026-10-23T20:29:23Z
+    body: "Folded into ownership.design.approved-rules-accept-the-design: a new step
+      says an approval given before the request was filed does not count, and
+      acceptDesigns now counts only looks given after it, to the second. A unit
+      test covers it."
 chosen: Only looks after the request count
