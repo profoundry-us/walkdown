@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-22T17:11:39.257Z
 anchor:
   screen: hash-change-says-why
-status: addressed
+status: verified
 body: "What walkdown hash --write prints when a signed rule's words changed and
   no reason was given (status.derived.a-change-says-why). The signed rule is
   refused by name; the refusal says a signed rule's change needs its reason and
@@ -26,3 +26,5 @@ replies:
       is stamped and the signed one refused by name, with both commands and what
       each does to eng's signature. Nothing is written for it, and it exits 2."
 proposes: /drafts/hash-change-says-why.html
+verified_by: topher
+verified_at: 2026-10-23T20:21:29Z

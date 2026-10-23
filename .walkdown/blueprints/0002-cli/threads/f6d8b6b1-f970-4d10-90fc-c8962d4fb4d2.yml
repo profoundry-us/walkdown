@@ -5,7 +5,7 @@ author: agent
 created: 2026-10-20T17:00:37.123Z
 anchor:
   rule: ownership.design.approved-rules-accept-the-design
-status: open
+status: answered
 body: A signature given before a design request was filed still counts toward
   'every rule on the screen approved'. So when a screen has two rules and one
   was already signed, a walk that looks at only the other one accepts the new
@@ -19,3 +19,9 @@ options:
       beside it
   - label: Keep it as is
     why: the stale re-ask afterwards is enough
+replies:
+  - author: topher
+    created: 2026-10-23T20:21:06Z
+    body: Only looks after the request count
+    answer: true
+chosen: Only looks after the request count

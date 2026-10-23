@@ -1,0 +1,78 @@
+{
+  "run_id": "2026-10-23T20-21-48Z-local-01",
+  "created": "2026-10-23T20:21:48Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "394bb410-dirty",
+  "tree_hash": "sha256:afdc7ad630c4",
+  "spec_hash": "sha256:19dfe8929702",
+  "results": [
+    {
+      "rule": "ownership.drift.design-requests-required",
+      "status": "pass",
+      "statement_hash": "sha256:8de33a8e97f5"
+    },
+    {
+      "rule": "ownership.design.request-names-its-version",
+      "status": "pass",
+      "statement_hash": "sha256:222aa7fa471e"
+    },
+    {
+      "rule": "ownership.design.proposed-version-exists",
+      "status": "pass",
+      "statement_hash": "sha256:3457d3988f00"
+    },
+    {
+      "rule": "locations.keeping.old-layout-warns",
+      "status": "pass",
+      "statement_hash": "sha256:d575b0345c14"
+    },
+    {
+      "rule": "locations.several.rules-move",
+      "status": "pass",
+      "statement_hash": "sha256:7695cc234699"
+    },
+    {
+      "rule": "status.derived.a-change-says-why",
+      "status": "approved",
+      "statement_hash": "sha256:c749ded84ce8"
+    },
+    {
+      "rule": "status.derived.new-design-stales-older-verdicts",
+      "status": "pass",
+      "statement_hash": "sha256:4304542fca79"
+    },
+    {
+      "rule": "threads.lifecycle.reasoned-endings",
+      "status": "pass",
+      "statement_hash": "sha256:c841f42fd28b"
+    },
+    {
+      "rule": "locations.default.prototype-beside-the-spec",
+      "status": "pass",
+      "statement_hash": "sha256:63c4c1304ed6"
+    },
+    {
+      "rule": "locations.keeping.upgrade-moves-prototypes",
+      "status": "pass",
+      "statement_hash": "sha256:6c8969174ce9"
+    },
+    {
+      "rule": "threads.lifecycle.redline-is-a-persons",
+      "status": "pass",
+      "statement_hash": "sha256:1908544195fa"
+    }
+  ]
+}
