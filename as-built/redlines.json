@@ -83,5 +83,11 @@
     "redlines": [
       "The command as typed carries <code>--no-checks</code>, where the design runs a bare <code>walkdown lint</code>. The fixture's one rule asks for checks that this throwaway project has none of, so a bare lint adds a <code>[coverage]</code> warning the design does not draw, and the closing line would read 1 warning where it says 0. With checks skipped, the two errors and the closing counts are the design's."
     ]
+  },
+  "cli/hash-reword-adds-excuse": {
+    "title": "hash --reword refuses a rule that gained an excuse",
+    "redlines": [
+      "The advice line gives <code>walkdown hash --write --changed \"&lt;why&gt;\" &lt;rules&gt;</code> where the design gives a plain <code>walkdown hash --write &lt;rules&gt;</code>. A plain write on a signed rule is refused since status.derived.a-change-says-why (2026-10-23), so the rule's step was reworded to name <code>--changed</code>; a text change, so the design was not redrawn."
+    ]
   }
 }
