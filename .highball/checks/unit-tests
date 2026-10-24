@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+// The whole unit suite, unless nothing it can read has changed since it last
+// passed (Topher, 2026-10-23: unit tests run on code changes, not docs). An ADR
+// edit used to cost 82s at turn end.
+//
+// "Since it last passed", not HIGHBALL_CHANGED_FILES: that list is the tree
+// against HEAD, so code committed mid-turn would drop out of it and the suite
+// would be skipped over code it never saw. The stamp is the HEAD of the last
+// pass and a hash of every file that was dirty then; what differs from it now
+// is what changed.
+//
+// Skipped only when every changed path is under docs/, which no test reads, or
+// is one of the files this checkout never commits. Anything else runs the
+// suite: the top-level guides are read by voice.test.js, and a new kind of
+// file should run it until somebody decides otherwise.
+import { execSync, spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+
+const STAMP = "tmp/highball/unit-tests-passed.json";
+const NOT_TESTED = [/^docs\//, /^\.playwright-mcp\//, /^\.vscode\//, /^MORNING-[\w-]+\.md$/];
+
+const git = (args) => execSync(`git ${args}`, { encoding: "utf8" }).split("\n").filter(Boolean);
+const hashOf = (path) =>
+  existsSync(path) ? createHash("sha1").update(readFileSync(path)).digest("hex") : null;
+
+function dirtyNow() {
+  const paths = [...git("diff --name-only HEAD"), ...git("ls-files --others --exclude-standard")];
+  return Object.fromEntries(paths.map((p) => [p, hashOf(p)]));
+}
+
+function changedSincePass() {
+  let stamp;
+  try {
+    stamp = JSON.parse(readFileSync(STAMP, "utf8"));
+    git(`cat-file -e ${stamp.head}^{commit}`);
+  } catch {
+    return null;
+  }
+  const changed = new Set(git(`diff --name-only ${stamp.head}`));
+  for (const p of git("ls-files --others --exclude-standard")) changed.add(p);
+  for (const p of Object.keys(stamp.dirty)) changed.add(p);
+  // A file dirty at the last pass and the same now is not a change since it.
+  for (const p of changed) if (p in stamp.dirty && stamp.dirty[p] === hashOf(p)) changed.delete(p);
+  return [...changed];
+}
+
+const changed = changedSincePass();
+if (changed && changed.every((p) => NOT_TESTED.some((re) => re.test(p)))) {
+  console.log(
+    changed.length
+      ? `Skipped: only docs changed since the unit tests last passed (${changed.length} file(s)).`
+      : "Skipped: nothing changed since the unit tests last passed.",
+  );
+  process.exit(0);
+}
+
+const head = git("rev-parse HEAD")[0];
+const dirty = dirtyNow();
+const r = spawnSync("npm", ["test"], { stdio: "inherit" });
+if (r.status === 0) {
+  mkdirSync("tmp/highball", { recursive: true });
+  writeFileSync(STAMP, JSON.stringify({ head, dirty }, null, 2));
+}
+process.exit(r.status ?? 1);
