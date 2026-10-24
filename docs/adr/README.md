@@ -59,6 +59,7 @@ is renamed.
 | 0014 | [File layout and locations](foundational/202610_file_layout_and_locations.md) | foundational | accepted |
 | 0015 | [Design versions and states](foundational/202610_design_versions_and_states.md) | foundational | accepted |
 | 0016 | [Rule focus](lightweight/202610_rule_focus.md) | lightweight | accepted |
+| 0017 | [Screen setup](foundational/202610_screen_setup.md) | foundational | accepted |
 
 A new ADR takes the next number and the current month:
 `docs/adr/foundational/202610_<topic>.md`, with `# ADR NNNN — <Topic>` as its
