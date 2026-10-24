@@ -248,4 +248,4 @@ screens:
   - id: rule-detail-targets
     title: "Rule detail (state — a verdict on each target)"
     anchors:
-      - detail.targets
+      - detail.evidence

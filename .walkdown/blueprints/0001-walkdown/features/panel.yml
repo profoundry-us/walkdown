@@ -2005,17 +2005,18 @@ stories:
         created_at: 2026-10-23
         verify: [checks]
         signoff: [eng, product]
-        statement: A rule's detail shows its latest verdict on each declared target that has a run, with that run's evidence.
+        statement: A rule's Evidence shows its latest verdict from each tier on each declared target that has a run.
         because: A rule that passes locally and fails on a review app reads as passing when only one verdict is shown.
-        history: Issue #25 and ADR 0017 §6 (2026-10-23).
+        history: "Issue #25 and ADR 0017 §6 (2026-10-23). Drawn first as a block of its own above Evidence, which repeated Evidence's own rows; Topher folded it into Evidence the same day."
         screens: [rule-detail-targets]
         steps:
           given:
-            - A rule that passed on local today and failed on review yesterday, and has never run on staging
+            - A rule whose checks passed on local today and failed on review yesterday, and which has never run on staging
           when:
             - Open the rule
           then:
-            - Anchor `detail.targets` holds a line for local and a line for review, each with its verdict, its date and its evidence line
-            - There is no line for staging
-            - Each line agrees with `walkdown status --target` for that target
-          statement_hash: sha256:fe0e631203f3
+            - Anchor `detail.evidence` holds a row for checks on local and a row for checks on review, each named by tier and target, with its verdict, its date and its evidence line
+            - There is no row for staging
+            - Each row agrees with `walkdown status --target` for its target
+            - No other block in the detail repeats these verdicts
+          statement_hash: sha256:48cd3b6f3cb6

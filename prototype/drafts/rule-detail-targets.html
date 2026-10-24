@@ -1,20 +1,16 @@
 <!doctype html>
 <!-- DESIGN DRAFT: rule-detail-targets -->
 <!-- Drawn by the design agent for request n-0622 (ADR 0017 §6, rule panel.targets.verdict-on-each). Not yet accepted. -->
-<!-- Intent: a rule's detail gains one short block, a line for each declared target that has a recorded run, giving its latest verdict, when it was made and its evidence line, so a rule that passes on local and fails on review never reads as simply passing; everything else in the detail is the accepted rule-detail screen. -->
-<!-- Fixture: expenses.view-only.no-approve passed its checks on local today and failed them on review (https://pr-88.review.acme.dev) yesterday. Staging is declared and has never run, so it has no line. -->
+<!-- Intent: the Evidence block keeps its look and gains a row per tier on each declared target that has a run, named like checks/review, with its verdict, its date and its evidence line, so a rule that passes on local and fails on review never reads as simply passing; nothing else in the detail repeats these verdicts. -->
+<!-- Fixture: expenses.view-only.no-approve passed its checks on local today and failed them on review (https://pr-88.review.acme.dev) yesterday. Staging is declared and has never run, so it has no row. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
 <title>Draft: Rule detail, a verdict on each target</title>
 <link rel="stylesheet" href="/walkdown.css">
 <style>
-  .tgt { display: grid; grid-template-columns: 3.4rem 3.6rem 1fr; gap: .1rem .4rem; align-items: baseline;
-    padding: .3rem 0; border-bottom: 1px dashed color-mix(in oklab, currentColor 25%, transparent); font-size: 11.5px; }
-  .tgt .name { font-weight: 600; }
-  .tgt .when { opacity: .5; text-align: right; }
-  .tgt .ev { grid-column: 2 / -1; font-size: 11px; line-height: 1.4; opacity: .7; }
-  .tgt code { font-size: 10.5px; }
+  .ev-line { font-size: 11px; line-height: 1.4; opacity: .7; padding: 0 0 .25rem 5.5rem; margin-top: -.15rem; }
+  .ev-line code { font-size: 10.5px; }
 </style>
 </head>
 <body class="h-screen overflow-hidden bg-base-200 text-sm">
@@ -61,28 +57,24 @@
           <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
         </div>
 
-        <!-- New: one line per target that has a run. The same figures as
-             `walkdown status --target <t>`. A target with no run has no line,
-             rather than a line saying it has none. -->
-        <div>
-          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">On each target</div>
-          <div data-testid="detail.targets">
-            <div class="tgt">
-              <span class="name">local</span><span class="text-success">✓ pass</span><span class="when">today, 9:41 AM</span>
-              <span class="ev">checks: <code>expenses.spec.ts:41</code> found no Approve button and the view-only note</span>
-            </div>
-            <div class="tgt">
-              <span class="name">review</span><span class="text-error">✗ fail</span><span class="when">yesterday, 4:12 PM</span>
-              <span class="ev">checks: <code>expenses.spec.ts:41</code> expected no Approve button, and found one</span>
-            </div>
-          </div>
-        </div>
-
         <div>
           <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Evidence</div>
+          <!-- The accepted rows, with a row per tier per target that has a run.
+               The same figures as `walkdown status --target <t>`. A target with
+               no run has no row, rather than a row saying it has none. -->
           <div data-testid="detail.evidence">
-            <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
-              <span class="w-20 opacity-50">checks/local</span><span>✓ pass</span></div>
+            <div class="border-b border-dashed border-base-content/25">
+              <div class="flex gap-2 py-1">
+                <span class="w-20 opacity-50">checks/local</span><span class="text-success">✓ pass</span>
+                <span class="ml-auto opacity-50">today, 9:41 AM</span></div>
+              <div class="ev-line"><code>expenses.spec.ts:41</code> found no Approve button and the view-only note</div>
+            </div>
+            <div class="border-b border-dashed border-base-content/25">
+              <div class="flex gap-2 py-1">
+                <span class="w-20 opacity-50">checks/review</span><span class="text-error">✗ fail</span>
+                <span class="ml-auto opacity-50">yesterday, 4:12 PM</span></div>
+              <div class="ev-line"><code>expenses.spec.ts:41</code> expected no Approve button, and found one</div>
+            </div>
             <div class="flex gap-2 border-b border-dashed border-base-content/25 py-1">
               <span class="w-20 opacity-50">human</span><span>✓ pass (topher)</span></div>
           </div>

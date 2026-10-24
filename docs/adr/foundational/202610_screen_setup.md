@@ -186,9 +186,11 @@ app becomes one click.
 
 ### 6. A rule shows its latest verdict on each target
 
-A rule's detail shows a line for each declared target that has a recorded run: the
-latest verdict on that target and its evidence line, from the computation
-`walkdown status --target` already does. The rail and its marks are unchanged.
+A rule's Evidence block shows a row for each tier on each declared target that has a
+recorded run: the latest verdict there, its date and its evidence line, from the
+computation `walkdown status --target` already does. Evidence already names each row by
+tier and target (`checks/local`), so this adds rows rather than a block of its own
+(Topher, 2026-10-23). The rail and its marks are unchanged.
 
 ## Not now
 
