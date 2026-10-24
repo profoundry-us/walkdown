@@ -28,7 +28,7 @@
 <body>
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>~/expenses</span></div>
-    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> walkdown seed --target local</div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> walkdown seed --blueprint expenses --target local</div>
       <div data-testid="seed.refused">
       <div class="ln">✗ local's seed ran, but what it printed is not a flat JSON object of keys and values.</div>
       <div class="ln"></div>
@@ -38,7 +38,7 @@
       <div class="ln dim">  Created expense "Team offsite dinner" (id 412), submitted</div>
       <div class="ln dim">  {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22}</div>
       <div class="ln"></div>
-      <div class="ln">walkdown reads the seed's standard output as one JSON object, such as {"expense_submitted": 412}. Each value is a string or a number. Send anything else the seed says to standard error.</div>
+      <div class="ln">walkdown reads the seed's standard output as one JSON object, such as {"expense_submitted": 412}. Each value is a string, a number or a boolean. A null, a list or an object is refused. Send anything else the seed says to standard error.</div>
       </div>
       <div class="ln"></div>
       <div class="ln">Nothing was written. ~/.walkdown/fixtures/0001-ex-expenses/local.yml does not exist yet.</div>

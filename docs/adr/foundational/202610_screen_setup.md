@@ -113,7 +113,9 @@ control to run them again.
 A step that fails stops the setup. That covers a load that returns 4xx or 5xx, a
 `wait_for` that times out, and a fixture that has no value. The panel cannot read a
 cross-origin frame's status, so the embed in the app's page reports it from the
-page's own navigation timing; an app without the embed can only fail a `wait_for`. The App pane then says
+page's own navigation timing. The extension puts the embed in every page it frames,
+so a review there always has it; an app served without the extension or the embed's
+script tag can only fail a `wait_for`. The App pane then says
 which step failed and why, and it does not load the screen's path as if setup had
 worked. Without that, a reviewer would be judging the sign-in page and calling it the
 screen.
@@ -129,9 +131,12 @@ target, and come from two places. The later one wins:
 
 1. **`runner.targets.<t>.fixtures`** in `spec.yml`. These are committed, so they suit
    ids that are the same for everyone, such as a shared staging's.
-2. **What `walkdown seed --target <t>` wrote.** The command runs the target's `seed`
-   in the code root. It is the app's own script, which creates the records the
-   blueprint needs and prints a flat JSON object of keys and values. walkdown stores
+2. **What `walkdown seed --blueprint <b> --target <t>` wrote.** The command runs that
+   blueprint's `seed` for the target, in the code root. Like every command that writes,
+   it names its blueprint. It is the app's own script, which creates the records the
+   blueprint needs and prints a flat JSON object whose values are strings, numbers or
+   booleans. Each fills in a path or a form field, so it must have a text form: `true`
+   suits a field such as `remember`, while null, a list or an object has none. walkdown stores
    that object for this machine only, under `~/.walkdown/fixtures/<blueprint id>/<t>.yml`.
    The home is not the place for it: these values are the machine's, like the registry
    (ADR 0014, "the project declares *what*, the machine declares *where*").
@@ -147,7 +152,8 @@ runner:
       fixtures: { expense_submitted: 30871, view_only_team_manager: 77 }
 ```
 
-A fresh machine is then one command from walkable: `walkdown seed --target local`.
+A fresh machine is then one command from walkable:
+`walkdown seed --blueprint expenses --target local`.
 
 Lint warns about a key that a screen uses and a target lacks, naming the target, the
 key and the screen. A target with a `seed` that has never been run gets one warning
@@ -203,20 +209,21 @@ latest verdict on that target and its evidence line, from the computation
 ## Consequences
 
 - **Cookies.** A session cookie set by a step reaches the next navigation in the frame
-  only where the browser treats the frame as same-site with its parent. The panel at
-  `localhost:4700` and an app at `localhost:3000` are same-site, because ports do not
-  count. A remote target framed from localhost, and any app framed by the extension's
-  own page, is cross-site, so its session cookie needs `SameSite=None; Secure` there.
-  The first build step is a spike that proves each case in the browsers walkdown
-  supports, and the GUIDE says what an app needs for each one.
+  only where the browser lets the frame keep it. A spike in Chromium on 2026-10-23
+  tried three parents framing an app on localhost, setting the cookie by a `visit` and
+  by a form `post`:
 
-  The spike ran in Chromium on 2026-10-23, with a page on one port framing an app on
-  another. Same-site, a cookie with no `SameSite`, with `Lax` or with `None` carried
-  to the next load, after a `visit` and after a form `post` alike. Cross-site (a
-  page on 127.0.0.1 framing localhost), only `SameSite=None; Secure` carried, and
-  `Secure` held over plain http because localhost counts as secure. A browser that
-  blocks third-party cookies may refuse even that, and the GUIDE has to say so for a
-  remote target. Firefox and WebKit are not installed here and were not tried.
+  | The frame's parent | Which cookies carried |
+  |---|---|
+  | The extension's own page, which has host permission for every site | all of them: no `SameSite`, `Lax`, `Strict` and `None` |
+  | A page on another localhost port | no `SameSite`, `Lax` and `None` |
+  | A page on another site (127.0.0.1) | only `SameSite=None; Secure`, which holds over plain http on localhost |
+
+  The extension, where reviews happen, needs nothing of the app: Chromium treats a
+  frame in an extension page that has the host's permission as first-party. Only
+  `walkdown serve`'s own page framing another site is cross-site, and the GUIDE says
+  what an app needs for that. Firefox and WebKit are not installed here and were not
+  tried; the extension is Chromium's alone.
 - **The schema is additive.** Prose setup behaves exactly as before, and no upgrade
   step is needed. An older walkdown shows steps as unrun data.
   [02-blueprint-schema.md](../../02-blueprint-schema.md) and the runner contract gain

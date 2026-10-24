@@ -242,10 +242,10 @@ example apps. **`wireframe`** dresses the prototype screens — a mockup wears
 is exactly the distinction a walkdown is judging. Any element can pin either theme with
 `data-theme`, so a prototype can be previewed in the real skin without editing it.
 
-The docked panel is the one surface that needed care: it is injected into somebody
-else's running application, where Tailwind's preflight would restyle *their* buttons
-and their stylesheet would restyle ours. So the panel renders inside a **shadow root**
-with the stylesheet scoped to it. The single exception is the sheet's `@property`
+The panel renders inside a **shadow root** with its stylesheet scoped to it. That
+began with the docked panel, injected into somebody else's running application, where
+Tailwind's preflight would restyle *their* buttons and their stylesheet would restyle
+ours; docking was withdrawn on 2026-08-26, and the shadow root stayed. The single exception is the sheet's `@property`
 rules, which the CSS Properties API only registers at document level; the panel copies
 just those into the host page, where they declare custom-property types and paint
 nothing. `embed.js` keeps its own dozen lines of scoped CSS — pin markers are

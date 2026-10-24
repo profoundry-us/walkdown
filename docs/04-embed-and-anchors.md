@@ -74,7 +74,7 @@ Responsibilities:
    question or a redline to `{screen, element}` (only a person files a redline; a
    recording machine sees its tab greyed), falling back to `{screen, position}` where nothing
    anchored sits under the cursor. Escape leaves pin mode. walkdown's own chrome —
-   the badge, an open form, an existing pin, the docked panel — is never a pin target,
+   the badge, an open form, an existing pin — is never a pin target,
    so the way out is never swallowed by the mode you are trying to leave.
 2. **Pin rendering** — draw open threads at their anchors (or their recorded positions) so
    feedback is seen in place. A redline is drawn on both surfaces, in red with a
@@ -91,9 +91,9 @@ Responsibilities:
 It auto-detects its transport:
 
 - **Framed** (inside walkdown's own page — the extension's review document, or the ghost
-  overlay in either layout): a `postMessage` handshake with the parent; all traffic flows
-  through the panel.
-- **Standalone** (opened directly, or docked beside the panel in the app's own document):
+  overlay): a `postMessage` handshake with the parent; all traffic flows through the
+  panel.
+- **Standalone** (a page opened directly in a tab of its own, with no panel around it):
   HTTP to the local walkdown server (`http://localhost:4700`), which writes threads
   straight into the blueprint's `threads/`.
 
@@ -144,29 +144,28 @@ Failure mode: if no local server is reachable, the embed queues writes in
 `localStorage` and shows an "offline — start `walkdown serve` and retry" badge, so
 feedback given before the server starts isn't lost.
 
-## Two layouts, one panel
+## One layout: the panel frames the page
 
 A cross-origin iframe seals its DOM off from the parent — a wrapper alone cannot pick
 elements, read the current URL, or render pins. So the embed script is the one true
-mechanism; where the panel stands relative to the page is just layout, and there are two:
+mechanism, and the panel's layout is the frame around it.
 
-**Docked** — the script-tag delivery. The panel is injected into the application's own
-document and pushes it aside: the app keeps its tab, its URL bar, its full width. The
-prototype appears as the **ghost** — the storyboard screen's design rendered in a frame
-over the app and faded with a slider — so comparing never costs the app half the window.
-What the app positions against the viewport (native dialogs, full-screen overlays) is
-beyond this layout's reach, which is why the second layout exists.
-
-**Framed** — the extension delivery. walkdown owns the document: the application renders
-inside an iframe lying as a sheet on walkdown's desk, panel alongside. A frame boundary
+walkdown owns the document: the application renders inside an iframe lying as a sheet
+on walkdown's desk, panel alongside. The prototype appears as the **ghost** — the
+storyboard screen's design rendered in a frame over the app and faded with a slider. A frame boundary
 is real isolation — the app's modals center against the frame, and the `inert` a native
 `<dialog showModal()>` imposes stops at the frame's edge instead of freezing walkdown's
 own chrome. Pages that refuse framing render anyway: the extension strips
 `X-Frame-Options`/`frame-ancestors` from sub-frame responses with session-scoped rules,
-added when a review starts on that tab and removed when it ends. The ghost works the
-same way, fading over the frame.
+added when a review starts on that tab and removed when it ends.
 
-In both layouts:
+> **Superseded: the docked layout.** Until 2026-08-26 there was a second layout, which
+> injected the panel into the application's own document by a script tag and pushed the
+> app aside. It was withdrawn (see "Until 2026-08-26 the panel travelled by script tag
+> too" above, and [00-vision.md](00-vision.md)). Anything that still speaks of a docked
+> panel, or of "both layouts", describes walkdown before that date.
+
+In the framed layout:
 
 - Picking a rule takes the surface under review to that rule's screen via the
   storyboard's locators.
