@@ -160,8 +160,8 @@
           <dt>Target</dt><dd>local</dd>
           <dt>Needed by</dt><dd>the screen's path, <code>/expenses/{fixtures.expense_submitted}</code></dd>
         </dl>
-        <div>The local target has no value for <code>expense_submitted</code>, so nothing was run. Seed it, then run the setup again from the rule.
-          <code class="cmd">walkdown seed --blueprint acme-expenses --target local</code></div>`,
+        <div>The local target has no value for <code>expense_submitted</code>, so nothing was run. Set the local target's fixtures, then run the setup again from the rule.
+          <code class="cmd">walkdown fixtures set --blueprint acme-expenses --target local</code></div>`,
     },
   };
 

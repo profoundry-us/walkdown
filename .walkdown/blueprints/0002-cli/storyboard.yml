@@ -1228,17 +1228,33 @@ screens:
       - cli.exit
 
   - id: seed-local
-    title: "walkdown seed keeps this machine's fixtures"
+    retired: "Option B (Topher, 2026-10-23): walkdown never runs the app's seed, so there is no seed command to draw."
+    replaced_by: fixtures-set
+    title: "walkdown seed keeps this machine's fixtures (withdrawn before it was built)"
     anchors:
       - cli.prompt
-      - seed.values
       - cli.exit
 
   - id: seed-not-json
-    title: "walkdown seed refuses output that is not a JSON object"
+    retired: "Option B (Topher, 2026-10-23): walkdown never runs the app's seed, so there is no seed command to draw."
+    replaced_by: fixtures-set-refused
+    title: "walkdown seed refuses output that is not a JSON object (withdrawn before it was built)"
     anchors:
       - cli.prompt
-      - seed.refused
+      - cli.exit
+
+  - id: fixtures-set
+    title: "walkdown fixtures set keeps this machine's fixtures"
+    anchors:
+      - cli.prompt
+      - fixtures.values
+      - cli.exit
+
+  - id: fixtures-set-refused
+    title: "walkdown fixtures set refuses input that is not a flat JSON object"
+    anchors:
+      - cli.prompt
+      - fixtures.refused
       - cli.exit
 
   - id: lint-fixture-missing

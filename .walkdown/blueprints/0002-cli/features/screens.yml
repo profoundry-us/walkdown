@@ -105,48 +105,49 @@ stories:
             - The undeclared anchor is a warning that names it
           statement_hash: sha256:5c6c941f8039
 
-      - id: screens.setup.seed-keeps-this-machines-values
+      - id: screens.setup.fixtures-set-keeps-this-machines-values
         origin: walkdown
         created_at: 2026-10-23
         verify: [checks]
         signoff: [eng, product]
-        statement: "`walkdown seed --blueprint <b> --target <t>` runs that blueprint's seed command for the target, in the code root, and keeps the values it prints for this machine only."
-        because: The records a screen needs have different ids on every machine, and only the app's own script can make them and say what they are.
+        statement: "`walkdown fixtures set --blueprint <b> --target <t>` keeps the values it is handed, as JSON on standard input or as `key=value` pairs, for this machine only. walkdown never runs the app's code to make them."
+        because: The records a screen needs have different ids on every machine, and making them is the app's job, so walkdown only keeps what it is told.
         history: Issue #25 and ADR 0017 §3 (2026-10-23).
-        screens: [seed-local, seed-not-json]
+        screens: [fixtures-set, fixtures-set-refused]
         steps:
           given:
-            - A blueprint called expenses whose local target has a seed that prints a JSON object of three keys and their ids
+            - A blueprint called expenses, and an app task that prints a JSON object of three keys and their ids
           when:
-            - Run `walkdown seed --blueprint expenses --target local`
+            - Pipe the task's output into `walkdown fixtures set --blueprint expenses --target local`
           then:
-            - The seed runs in the code root, and each key is printed with its value
+            - Each key is printed with its value
             - The values are written under `~/.walkdown/fixtures/`, in a file for this blueprint and target, and nothing is written to the blueprint's home or the repository
-            - Without `--blueprint` nothing runs, and it says to name one, as every command that writes does
-            - A seed whose output is not a flat JSON object of strings, numbers and booleans writes nothing, shows what it printed, and exits 2
-          statement_hash: sha256:b58c49002d41
+            - "`key=value` pairs given as arguments are kept the same way"
+            - Without `--blueprint` nothing is kept, and it says to name one, as every command that writes does
+            - Input that is not a flat JSON object of strings, numbers and booleans keeps nothing, shows what it was given, and exits 2
+          statement_hash: sha256:6e0afbf92524
 
       - id: screens.setup.fixtures-per-target
         origin: walkdown
         created_at: 2026-10-23
         verify: [checks]
         signoff: [eng, product]
-        statement: A screen's setup and path take their fixtures from the target, with the values `walkdown seed` kept winning over those in spec.yml. Lint warns about a key a target lacks.
+        statement: A screen's setup and path take their fixtures from the target, with the values `walkdown fixtures set` kept winning over those in spec.yml. Lint warns about a key a target lacks.
         because: An id that is right on one machine is wrong on the next, so the blueprint names the record and each target says which one it is.
         history: Issue #25 and ADR 0017 §3 (2026-10-23).
         screens: [lint-fixture-missing]
         steps:
           given:
             - A screen whose path and setup use two fixtures
-            - A staging target that gives both in spec.yml, a local target with a seed nobody has run, and a review target that gives one
+            - A staging target that gives both in spec.yml, a local target with no fixtures set, and a review target that gives one
           when:
             - Run `walkdown lint`
           then:
             - "review gets a warning naming the target, the missing key and the screen"
-            - "local gets one warning that says to run `walkdown seed --blueprint expenses --target local`, rather than one per key"
+            - "local gets one warning that says to set its fixtures with `walkdown fixtures set --blueprint expenses --target local`, rather than one per key"
             - "staging gets none"
-            - After the seed has run, a key both the seed and spec.yml give takes the seed's value
-          statement_hash: sha256:a7b235cda457
+            - Once local's fixtures are set, a key both they and spec.yml give takes the value that was set
+          statement_hash: sha256:85fe533de4af
 
       - id: screens.setup.setup-is-identity
         origin: walkdown

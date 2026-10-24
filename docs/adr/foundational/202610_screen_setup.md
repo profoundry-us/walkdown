@@ -131,33 +131,39 @@ target, and come from two places. The later one wins:
 
 1. **`runner.targets.<t>.fixtures`** in `spec.yml`. These are committed, so they suit
    ids that are the same for everyone, such as a shared staging's.
-2. **What `walkdown seed --blueprint <b> --target <t>` wrote.** The command runs that
-   blueprint's `seed` for the target, in the code root. Like every command that writes,
-   it names its blueprint. It is the app's own script, which creates the records the
-   blueprint needs and prints a flat JSON object whose values are strings, numbers or
-   booleans. Each fills in a path or a form field, so it must have a text form: `true`
-   suits a field such as `remember`, while null, a list or an object has none. walkdown stores
-   that object for this machine only, under `~/.walkdown/fixtures/<blueprint id>/<t>.yml`.
-   The home is not the place for it: these values are the machine's, like the registry
-   (ADR 0014, "the project declares *what*, the machine declares *where*").
+2. **What `walkdown fixtures set --blueprint <b> --target <t>` kept.** It reads a
+   flat JSON object on standard input, or `key=value` pairs as arguments, and keeps
+   them for this machine only, under `~/.walkdown/fixtures/<blueprint id>/<t>.yml`.
+   Like every command that writes, it names its blueprint. The home is not the place
+   for these values: they are the machine's, like the registry (ADR 0014, "the
+   project declares *what*, the machine declares *where*").
+
+   Values are strings, numbers or booleans. Each fills in a path or a form field, so
+   it must have a text form: `true` suits a field such as `remember`, while null, a
+   list or an object has none, and is refused.
+
+walkdown never makes the records itself, and never runs the app's code to make them.
+The app's own task does that, run by the agent or by a person, and its output is
+handed over (Topher, 2026-10-23):
+
+```bash
+bin/rake walkdown:seed | walkdown fixtures set --blueprint expenses --target local
+walkdown fixtures set --blueprint expenses --target local expense_submitted=412
+```
 
 ```yaml
 runner:
   targets:
     local:
       base_url: http://localhost:3000
-      seed: bin/rails runner script/walkdown_seed.rb
     staging:
       base_url: https://staging.acme.com
       fixtures: { expense_submitted: 30871, view_only_team_manager: 77 }
 ```
 
-A fresh machine is then one command from walkable:
-`walkdown seed --blueprint expenses --target local`.
-
 Lint warns about a key that a screen uses and a target lacks, naming the target, the
-key and the screen. A target with a `seed` that has never been run gets one warning
-that says to run it, rather than one per key. The panel refuses to run setup with a
+key and the screen. A target with no fixtures at all gets one warning that says to set
+them, rather than one per key. The panel refuses to run setup with a
 missing value and says the same thing (§2).
 
 ### 4. Setup is part of a screen's identity
@@ -194,19 +200,21 @@ tier and target (`checks/local`), so this adds rows rather than a block of its o
 
 ## Not now
 
-- **`script` steps** that run a command on the runner's side. `walkdown seed` runs a
-  command because a person typed it at a terminal. A `script` step would run one
-  because a page asked the local server to, and the server accepts requests from every
-  origin the embed is allowed on. Nothing a browser asks for runs a command. A setup
-  that cannot be done with `visit` and `post` belongs in the app's own dev route, or in
-  `seed`. Putting a record back after a walk changed it, such as an expense somebody
+- **`script` steps** that run a command on the runner's side. A `script` step would
+  run one because a page asked the local server to, and the server accepts requests
+  from every origin the embed is allowed on. Nothing a browser asks for runs a
+  command. A setup that cannot be done with `visit` and `post` belongs in the app's
+  own dev route, or in the app's own seed task. Putting a record back after a walk changed it, such as an expense somebody
   approved, is the job of the agent running the walkdown, when it is needed or asked
   for. walkdown does not build it in (Topher, 2026-10-23).
 - **Recipes with arguments.** Use fixtures until a blueprint needs both.
 - **Setup for the Design pane.** Each state of a design already has a URL of its own.
 - **Tearing down** what setup changed. Setup is meant to be repeatable, such as
-  signing in, rather than additive, such as creating a record. Records belong in
-  `seed`.
+  signing in, rather than additive, such as creating a record. Records belong in the
+  app's own seed task.
+- **A `walkdown seed`** that runs the app's seed task itself, as `walkdown run` runs
+  its tests. Proposed and dropped on 2026-10-23: making the app's data is the app's
+  and the agent's job, not walkdown's (Topher).
 
 ## Consequences
 
@@ -229,7 +237,7 @@ tier and target (`checks/local`), so this adds rows rather than a block of its o
 - **The schema is additive.** Prose setup behaves exactly as before, and no upgrade
   step is needed. An older walkdown shows steps as unrun data.
   [02-blueprint-schema.md](../../02-blueprint-schema.md) and the runner contract gain
-  `recipes:`, `fixtures`, `seed` and the step table. `skills/formulate` learns to
+  `recipes:`, `fixtures` and the step table, and the CLI gains `walkdown fixtures set`. `skills/formulate` learns to
   write steps where a screen's state is not URL-reachable.
 - **Rules.** Lint's warning about two screens on one path has had no rule of its own;
   §4 gives it one. `screens.identity.query-is-not-identity` is about queries and stays

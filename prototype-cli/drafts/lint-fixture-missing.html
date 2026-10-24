@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- DESIGN DRAFT: lint-fixture-missing -->
 <!-- Drawn by the design agent for request n-0626. Not yet accepted. -->
-<!-- Intent: warn that review lacks a key a screen uses, naming the target, the key and the screen and where to add it; warn once that local has a seed nobody has run on this machine, naming the keys it would give and the command to run; say nothing about staging, which gives both; exit 0. -->
-<!-- Fixture: Screen expense-view-only-team uses {fixtures.view_only_team_manager} in its setup and {fixtures.expense_submitted} in its path. In spec.yml, staging gives both, review gives expense_submitted only, and local has a seed that has never been run on this machine. -->
+<!-- Intent: warn that review lacks a key a screen uses, naming the target, the key and the screen and where to add it; warn once that local has no fixtures set on this machine, naming the keys it lacks and the command that sets them; say nothing about staging, which gives both; exit 0. -->
+<!-- Fixture: Screen expense-view-only-team uses {fixtures.view_only_team_manager} in its setup and {fixtures.expense_submitted} in its path. In spec.yml, staging gives both, review gives expense_submitted only, and local has no fixtures set on this machine. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -33,8 +33,8 @@
       <div class="ln"></div>
       <div class="ln">WARNINGS</div>
       <div data-testid="lint.fixture-warning">
-      <div class="ln">  ⚠ [fixtures] expenses/spec.yml › runner.targets.review: target `review` has no `view_only_team_manager`, which screen expense-view-only-team uses in its setup — add it under runner.targets.review.fixtures, or give review a seed</div>
-      <div class="ln">  ⚠ [fixtures] expenses/spec.yml › runner.targets.local: target `local` has a seed that has not been run on this machine, so expense_submitted and view_only_team_manager have no value there — run `walkdown seed --blueprint expenses --target local`</div>
+      <div class="ln">  ⚠ [fixtures] expenses/spec.yml › runner.targets.review: target `review` has no `view_only_team_manager`, which screen expense-view-only-team uses in its setup — add it under runner.targets.review.fixtures</div>
+      <div class="ln">  ⚠ [fixtures] expenses/spec.yml › runner.targets.local: target `local` has no fixtures set on this machine, so expense_submitted and view_only_team_manager have no value there — set them with `walkdown fixtures set --blueprint expenses --target local`</div>
       </div>
       <div class="ln"></div>
       <div class="ln">✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 2 warning(s)</div>

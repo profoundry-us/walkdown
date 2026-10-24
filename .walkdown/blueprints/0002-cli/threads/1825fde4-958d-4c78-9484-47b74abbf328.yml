@@ -1,0 +1,29 @@
+id: n-0628
+uuid: 1825fde4-958d-4c78-9484-47b74abbf328
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:57:48.058Z
+anchor:
+  screen: fixtures-set
+status: addressed
+body: "For screens.setup.fixtures-set-keeps-this-machines-values (ADR 0017 §3,
+  option B). `bin/rake walkdown:seed | walkdown fixtures set --blueprint
+  expenses --target local` succeeding: fixtures.values lists each key with its
+  value (expense_submitted 412, view_only_team_manager 18, view_only_org_manager
+  22), says where they were kept (~/.walkdown/fixtures/<blueprint
+  id>/local.yml), that they are this machine's only, and that on local they now
+  win over spec.yml. Exit 0. Replaces seed-local: walkdown no longer runs the
+  app's seed, it only keeps what it is handed."
+replies:
+  - author: agent
+    created: 2026-10-24T03:59:38Z
+    body: agent named /drafts/fixtures-set.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:59:40Z
+    body: "Drawn: prototype-cli/drafts/fixtures-set.html. It shows the app's task
+      piped into fixtures set, the three keys with their values, the file kept
+      under ~/.walkdown/fixtures/, that the values are this machine's only and
+      win over spec.yml on local, and exit 0."
+proposes: /drafts/fixtures-set.html

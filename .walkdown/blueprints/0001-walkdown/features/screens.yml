@@ -285,7 +285,7 @@ stories:
             - Open a rule on each
           then:
             - On the first, anchor `panel.setup-failed` names step 2, its path and the status it got, and the screen's path is not loaded
-            - On the second, nothing is run, and `panel.setup-failed` names the missing fixture and the target, and gives the `walkdown seed` command for this blueprint and target
+            - On the second, nothing is run, and `panel.setup-failed` names the missing fixture and the target, and gives the `walkdown fixtures set` command for this blueprint and target
             - A wait_for whose anchor has not appeared after ten seconds fails the same way, and names the anchor
             - "`detail.setup-again` runs the setup again from its first step"
-          statement_hash: sha256:624377c11a97
+          statement_hash: sha256:46284ad32d8f

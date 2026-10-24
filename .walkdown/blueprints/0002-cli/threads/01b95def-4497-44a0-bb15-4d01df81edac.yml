@@ -1,0 +1,27 @@
+id: n-0629
+uuid: 01b95def-4497-44a0-bb15-4d01df81edac
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:58:09.283Z
+anchor:
+  screen: fixtures-set-refused
+status: addressed
+body: For screens.setup.fixtures-set-keeps-this-machines-values (ADR 0017 §3,
+  option B). `walkdown fixtures set --blueprint expenses --target local` is
+  handed input that is not a flat JSON object of strings, numbers and booleans,
+  such as log lines before the JSON. fixtures.refused says so and shows the
+  first lines it was given. It says each value is a string, a number or a
+  boolean, and that nothing was kept. Exit 2. Replaces seed-not-json.
+replies:
+  - author: agent
+    created: 2026-10-24T03:59:41Z
+    body: agent named /drafts/fixtures-set-refused.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:59:43Z
+    body: "Drawn: prototype-cli/drafts/fixtures-set-refused.html. It says the piped
+      input was not a flat JSON object, shows the first four of its six lines,
+      says each value is a string, a number or a boolean, says nothing was kept,
+      and exits 2."
+proposes: /drafts/fixtures-set-refused.html
