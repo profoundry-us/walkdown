@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- DESIGN DRAFT: lint-setup-steps -->
+<!-- Drawn by the design agent for request n-0623. Not yet accepted. -->
+<!-- Intent: refuse a setup step of an unknown kind and a recipe nobody declared, one error each naming the screen and the step and saying what would run instead; warn about a wait_for whose anchor the screen does not declare, naming the anchor; say nothing about the three setups that run; exit 1. -->
+<!-- Fixture: expenses/storyboard.yml has six screens. expense-list has prose setup, expense-view-only-team has visit and wait_for steps, expense-view-only-org names the declared recipe as_view_only_org_manager. expense-approve has a click step as its second step, expense-finance names an undeclared recipe as_finance_admin, and expense-receipt waits for receipt.preview, which it does not declare. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lint refuses setup steps the panel cannot run</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/expenses</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> walkdown lint</div>
+      <div class="ln">walkdown lint — ~/.walkdown/projects/expenses/blueprints/expenses</div>
+      <div class="ln"></div>
+      <div class="ln">ERRORS</div>
+      <div data-testid="lint.setup-error">
+      <div class="ln">  ✗ [storyboard] expenses/storyboard.yml › expense-approve: setup step 2 is `click`, which the panel cannot run — a step is `visit`, `post` or `wait_for`. To reach a state a click reaches, give it a dev route and `visit` it, or have the seed make it</div>
+      <div class="ln">  ✗ [storyboard] expenses/storyboard.yml › expense-finance: setup names recipe `as_finance_admin`, which is not under the storyboard's `recipes:` — declare it there, or name one that is: as_view_only_org_manager</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">WARNINGS</div>
+      <div class="ln">  ⚠ [storyboard] expenses/storyboard.yml › expense-receipt: setup step 3 waits for `receipt.preview`, which is not an anchor on this screen — declare it on expense-receipt, or wait for one it declares: receipt.image, receipt.total, receipt.download</div>
+      <div class="ln"></div>
+      <div class="ln">✗ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 2 error(s), 1 warning(s)</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 1]</div>
+  </div>
+</body>
+</html>

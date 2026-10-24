@@ -1,0 +1,27 @@
+id: n-0621
+uuid: a1d3ae24-f6c2-42e4-9bda-6131c6d6a242
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:26.276Z
+anchor:
+  screen: app-target-picker
+status: addressed
+body: For panel.targets.switch-the-app-pane (ADR 0017 §5). panel.target, a
+  picker for the App pane listing the declared targets that have a base URL
+  (local first, then e.g. review), each with its base URL; a target without one
+  is not listed. Choosing one reframes the App pane there and runs the screen's
+  setup. A docked-layout variant where the other target is offered as a link to
+  the same screen there.
+replies:
+  - author: agent
+    created: 2026-10-24T03:23:20Z
+    body: agent named /drafts/app-target-picker.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:23:20Z
+    body: "Drawn: prototype/drafts/app-target-picker.html. A picker beside the App
+      button lists local and review with their base URLs and says choosing one
+      runs the setup there, and in the docked layout review is a link to the
+      same screen."
+proposes: /drafts/app-target-picker.html

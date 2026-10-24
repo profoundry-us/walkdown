@@ -9,7 +9,8 @@
 - **Builds on:** ADR 0001 (page to blueprint routing), ADR 0014 (file layout and
     locations), ADR 0016 (rule focus), the runner contract's `targets`
     ([03-runner-contract.md](../../03-runner-contract.md)), the two layouts in
-    [04-embed-and-anchors.md](../../04-embed-and-anchors.md)
+    [04-embed-and-anchors.md](../../04-embed-and-anchors.md) (whose docked layout was
+    withdrawn on 2026-08-26; that page has not caught up)
 - **Threads:** issue #25
 
 ## Context
@@ -100,10 +101,9 @@ only (ADR 0016, "Not now"). Lint warns when the anchor is not declared on the sc
 ### 2. The panel runs the steps, then loads the screen
 
 When the panel takes the App pane to a screen with steps, it runs them in order and
-then loads the screen's `path`, the same as today. In the framed layout, every step is
-a navigation of the app frame. In the docked layout, every step is a navigation of the
-tab itself. The panel already reloads on every page there and keeps its state through
-the local server, so it picks the walk up again on the page the setup lands on.
+then loads the screen's `path`, the same as today. Every step is a navigation of the
+app frame. (The docked layout, where the panel ran inside the app's own page, was
+withdrawn on 2026-08-26, so the frame is the only place setup runs.)
 
 Setup runs when the screen being shown changes, when the target changes (§5), or when
 the reviewer asks for it. Opening a second rule on the same screen does not run it
@@ -178,10 +178,6 @@ screen's setup there and loads its path. The choice is the viewer's own, kept in
 browser, and it falls back to `local`. Comparing today's build with a branch's review
 app becomes one click.
 
-In the docked layout the panel lives in the app's own page, so it cannot reframe
-another origin. It offers the same screen on the other target as a link instead, which
-works where that target serves the embed too.
-
 ### 6. A rule shows its latest verdict on each target
 
 A rule's detail shows a line for each declared target that has a recorded run: the
@@ -213,6 +209,14 @@ latest verdict on that target and its evidence line, from the computation
   own page, is cross-site, so its session cookie needs `SameSite=None; Secure` there.
   The first build step is a spike that proves each case in the browsers walkdown
   supports, and the GUIDE says what an app needs for each one.
+
+  The spike ran in Chromium on 2026-10-23, with a page on one port framing an app on
+  another. Same-site, a cookie with no `SameSite`, with `Lax` or with `None` carried
+  to the next load, after a `visit` and after a form `post` alike. Cross-site (a
+  page on 127.0.0.1 framing localhost), only `SameSite=None; Secure` carried, and
+  `Secure` held over plain http because localhost counts as secure. A browser that
+  blocks third-party cookies may refuse even that, and the GUIDE has to say so for a
+  remote target. Firefox and WebKit are not installed here and were not tried.
 - **The schema is additive.** Prose setup behaves exactly as before, and no upgrade
   step is needed. An older walkdown shows steps as unrun data.
   [02-blueprint-schema.md](../../02-blueprint-schema.md) and the runner contract gain

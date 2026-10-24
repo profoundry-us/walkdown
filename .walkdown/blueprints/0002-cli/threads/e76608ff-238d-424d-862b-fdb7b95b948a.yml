@@ -1,0 +1,27 @@
+id: n-0624
+uuid: e76608ff-238d-424d-862b-fdb7b95b948a
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:27.120Z
+anchor:
+  screen: seed-local
+status: addressed
+body: "For screens.setup.seed-keeps-this-machines-values (ADR 0017 §3).
+  `walkdown seed --target local` succeeding: says it ran the target's seed
+  command in the code root, lists each key with its value (seed.values, e.g.
+  expense_submitted 412, view_only_team_manager 18, view_only_org_manager 22),
+  and says where it kept them (~/.walkdown/fixtures/<blueprint id>/local.yml)
+  and that they are this machine's only. Exit 0."
+replies:
+  - author: agent
+    created: 2026-10-24T03:19:09Z
+    body: agent named /drafts/seed-local.html as the version this request proposes,
+      in place of none.
+  - author: agent
+    created: 2026-10-24T03:19:10Z
+    body: "Drawn: prototype-cli/drafts/seed-local.html. It shows the seed command
+      run in ~/expenses, the three keys with their values, the file it wrote
+      under ~/.walkdown/fixtures/, and that nothing reached the blueprint or the
+      repository, with exit 0."
+proposes: /drafts/seed-local.html

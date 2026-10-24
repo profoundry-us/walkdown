@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- DESIGN DRAFT: seed-local -->
+<!-- Drawn by the design agent for request n-0624. Not yet accepted. -->
+<!-- Intent: say which seed ran and where, list each key with its value, say the file the values were kept in under ~/.walkdown/fixtures/ and that they are this machine's only, with nothing written to the blueprint or the repository; exit 0. -->
+<!-- Fixture: spec.yml declares runner.targets.local with seed: bin/rails runner script/walkdown_seed.rb. The seed prints {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22}. The blueprint is 0001-ex-expenses. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>walkdown seed keeps this machine's fixtures</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/expenses</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> walkdown seed --target local</div>
+      <div class="ln">Ran local's seed in ~/expenses:</div>
+      <div class="ln dim">  bin/rails runner script/walkdown_seed.rb</div>
+      <div class="ln"></div>
+      <div data-testid="seed.values">
+      <div class="ln">  expense_submitted        412</div>
+      <div class="ln">  view_only_team_manager   18</div>
+      <div class="ln">  view_only_org_manager    22</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">  + wrote  ~/.walkdown/fixtures/0001-ex-expenses/local.yml</div>
+      <div class="ln"></div>
+      <div class="ln">These values are this machine's only. Nothing was written to the blueprint or the repository.</div>
+      <div class="ln">On local, screens now fill in {fixtures.&lt;key&gt;} from them, ahead of any in spec.yml.</div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

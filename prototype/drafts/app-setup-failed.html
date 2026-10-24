@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- DESIGN DRAFT: app-setup-failed -->
+<!-- Drawn by the design agent for request n-0619 (ADR 0017 §2, rule screens.setup.failure-stops-it). Not yet accepted. -->
+<!-- Intent: when a setup step fails, the App pane holds a card in the page's place that says which step stopped it, its path and what went wrong, and what to do next; the screen's path is not loaded, and Run setup again in the rule starts over from step 1. -->
+<!-- Fixture: the expense approval app, with the embed on its pages, on target local (http://localhost:3000), screen expense-view-only-team: visit /sign-in, post /dev/session, wait for nav.signed-in, then /expenses/{fixtures.expense_submitted}. -->
+<!-- The mockup control under the rule moves between three failures: step 2 answered 500, step 3's anchor never appeared within ten seconds, and the local target has no value for a fixture the path needs, so nothing ran. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: a setup step failed, so the screen is not loaded</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  .steps { margin: 0; padding: 0; list-style: none; font-size: 11.5px; line-height: 1.4; }
+  .steps li { display: grid; grid-template-columns: 1.1rem 1fr; gap: .3rem; padding: .18rem 0;
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 15%, transparent); }
+  .steps li:last-child { border-bottom: 0; }
+  .steps .mark { text-align: center; opacity: .55; }
+  .steps .done .mark { color: var(--color-success); opacity: 1; }
+  .steps .failed { font-weight: 600; }
+  .steps .failed .mark { color: var(--color-error); opacity: 1; }
+  .steps .todo { opacity: .45; }
+  .steps .kind { display: inline-block; min-width: 3.1rem; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .steps code { font-size: 10.5px; }
+  .steps .field { display: block; margin-left: 3.4rem; font-weight: 400; opacity: .7; }
+  .steps .then { opacity: .45; }
+
+  /* The failure card: the warning card's shape, in the error colour, where the page would be. */
+  .failed-card { width: 22rem; padding: 1rem 1.1rem; border-radius: .6rem; font-size: 12px; line-height: 1.5;
+    background: color-mix(in oklab, var(--color-error) 8%, var(--color-base-100));
+    border: 1px solid color-mix(in oklab, var(--color-error) 45%, transparent); text-align: left; }
+  .failed-card .head { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+  .failed-card .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-error); flex: none; }
+  .failed-card dl { display: grid; grid-template-columns: 4.2rem 1fr; gap: .15rem .5rem; margin: .6rem 0; font-size: 11.5px; }
+  .failed-card dt { opacity: .55; }
+  .failed-card code { font-size: 11px; }
+  .failed-card .cmd { display: block; margin-top: .35rem; padding: .3rem .5rem; border-radius: .3rem; font-size: 11.5px;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50">acme-expenses</span>
+      <button class="btn btn-xs btn-ghost gap-1 font-normal" data-testid="panel.screen-picker"
+              title="Which screen this page is">Expense, view-only team manager ▾</button>
+    </span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28" data-testid="panel.fade">
+      <button class="btn btn-xs btn-active" data-testid="panel.surface-build">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Finish walkdown</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The frame never shows the sign-in page, or whatever the failed step left behind. -->
+    <section class="relative grid flex-1 place-items-center wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="failed-card" data-testid="panel.setup-failed" role="alert" id="card"></div>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="flex items-center px-2 pt-2 text-xs">
+        <button class="btn btn-xs btn-ghost" data-testid="detail.back">← All rules</button>
+        <span class="ml-auto flex gap-0.5" data-testid="detail.stepper">
+          <button class="btn btn-xs btn-ghost">←</button>
+          <button class="btn btn-xs btn-ghost">→</button>
+        </span>
+      </div>
+
+      <div class="flex flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1 text-xs">
+        <div>
+          <div class="font-mono text-[10px] opacity-40" data-testid="detail.rule-id">expenses.view-only.no-approve</div>
+          <p class="text-sm leading-relaxed" data-testid="detail.statement">A view-only manager opening a submitted expense
+            sees no Approve button, and a note that the expense is view only.</p>
+        </div>
+
+        <div>
+          <textarea class="textarea textarea-xs w-full resize-none border-dashed border-base-content/25" rows="2"
+            placeholder="Why? Filed as a note with your verdict." data-testid="detail.feedback"></textarea>
+          <div class="mt-1 flex gap-2" data-testid="detail.verdict">
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
+          </div>
+        </div>
+
+        <div data-testid="detail.setup">
+          <div class="mb-1 flex items-baseline text-[10px] uppercase tracking-widest opacity-40">
+            <span>Setup</span><span class="ml-auto normal-case tracking-normal" id="setup-state">stopped at step 2</span></div>
+          <ol class="steps" data-testid="detail.setup-steps" id="steps"></ol>
+          <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
+                  data-testid="detail.setup-again" title="Run every step again, from step 1">↻ Run setup again</button>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Steps</div>
+          <div class="leading-relaxed opacity-80" data-testid="detail.steps">
+            <b>given</b> a view-only team manager and a submitted expense<br>
+            <b>when</b> they open the expense<br>
+            <b>then</b> there is no Approve button, and the note says the expense is view only
+          </div>
+        </div>
+      </div>
+
+      <!-- Mockup control, not part of the design. -->
+      <div class="border-t border-dashed border-base-content/25 p-2 text-[10.5px] leading-relaxed opacity-60">
+        Show:
+        <select class="select select-xs w-44 border-dashed" id="case">
+          <option value="status">step 2 answered 500</option>
+          <option value="timeout">step 3 timed out</option>
+          <option value="fixture">a fixture is missing</option>
+        </select>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const CASES = {
+    status: {
+      state: 'stopped at step 2',
+      marks: ['done', 'failed', 'todo'],
+      card: `
+        <div class="head"><i class="dot"></i>Setup stopped at step 2 of 3</div>
+        <dl>
+          <dt>Step</dt><dd>2, post</dd>
+          <dt>Path</dt><dd><code>/dev/session</code></dd>
+          <dt>Got</dt><dd>500 Internal Server Error</dd>
+        </dl>
+        <div><code>/expenses/412</code> was not loaded, so this is not the screen yet.
+          Look at the app's log for <code>/dev/session</code>, then run the setup again from the rule.</div>`,
+    },
+    timeout: {
+      state: 'stopped at step 3',
+      marks: ['done', 'done', 'failed'],
+      card: `
+        <div class="head"><i class="dot"></i>Setup stopped at step 3 of 3</div>
+        <dl>
+          <dt>Step</dt><dd>3, wait for</dd>
+          <dt>Anchor</dt><dd><code>nav.signed-in</code></dd>
+          <dt>Got</dt><dd>Not on the page after ten seconds</dd>
+        </dl>
+        <div><code>/expenses/412</code> was not loaded, so this is not the screen yet.
+          Check that the page <code>/dev/session</code> lands on carries <code>nav.signed-in</code>, then run the setup again from the rule.</div>`,
+    },
+    fixture: {
+      state: 'not run',
+      marks: ['todo', 'todo', 'todo'],
+      card: `
+        <div class="head"><i class="dot"></i>Setup did not run</div>
+        <dl>
+          <dt>Fixture</dt><dd><code>expense_submitted</code></dd>
+          <dt>Target</dt><dd>local</dd>
+          <dt>Needed by</dt><dd>the screen's path, <code>/expenses/{fixtures.expense_submitted}</code></dd>
+        </dl>
+        <div>The local target has no value for <code>expense_submitted</code>, so nothing was run. Seed it, then run the setup again from the rule.
+          <code class="cmd">walkdown seed --target local</code></div>`,
+    },
+  };
+
+  const MARK = { done: '✓', failed: '✗', todo: '' };
+  function steps(marks, missing) {
+    const row = (i, kind, body) => `<li class="${marks[i]}"><span class="mark">${MARK[marks[i]] || i + 1}</span><span>${body.replace('%k', `<span class="kind">${kind}</span>`)}</span></li>`;
+    return row(0, 'Visit', '%k<code>/sign-in</code>') +
+      row(1, 'Post', '%k<code>/dev/session</code><span class="field">user_id <code>14</code></span>') +
+      row(2, 'Wait for', '%k<code>nav.signed-in</code>') +
+      `<li class="then"><span class="mark">→</span><span>Then open <code>${missing ? '/expenses/{fixtures.expense_submitted}' : '/expenses/412'}</code></span></li>`;
+  }
+
+  function render() {
+    const k = $('case').value, c = CASES[k];
+    $('card').innerHTML = c.card;
+    $('setup-state').textContent = c.state;
+    $('steps').innerHTML = steps(c.marks, k === 'fixture');
+  }
+  $('case').onchange = render;
+  render();
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

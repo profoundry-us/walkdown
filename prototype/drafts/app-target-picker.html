@@ -1,0 +1,112 @@
+<!doctype html>
+<!-- DESIGN DRAFT: app-target-picker -->
+<!-- Drawn by the design agent for request n-0621 (ADR 0017 §5, rule panel.targets.switch-the-app-pane). Not yet accepted. -->
+<!-- Intent: beside the App button, a picker names the target the App pane shows and lists every declared target with a base URL, local first, each with its URL; choosing one runs the screen's setup there and loads it. -->
+<!-- Fixture: the expense approval app. Targets local (http://localhost:3000), review (https://pr-88.review.acme.dev) and staging, which has no base URL and so is not listed. Screen expense-view-only-team, whose path is /expenses/{fixtures.expense_submitted}: 412 on local, 57 on review. -->
+<!-- The picker is held open so it can be read without clicking. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: the App pane's target picker</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  .pop { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 30; width: 19rem;
+    border: 1px solid var(--color-base-300); border-radius: .5rem; background: var(--color-base-100);
+    box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: 12px; text-align: left; }
+  .pop .row { display: grid; grid-template-columns: 1rem 1fr; gap: .35rem; width: 100%; padding: .45rem .7rem; text-align: left; }
+  .pop .row:hover { background: var(--color-base-200); }
+  .pop .row + .row { border-top: 1px dashed color-mix(in oklab, currentColor 12%, transparent); }
+  .pop .tick { opacity: .8; }
+  .pop .name { font-weight: 600; }
+  .pop .url { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; opacity: .6; }
+  .pop .foot { padding: .4rem .7rem; font-size: 11px; line-height: 1.4; opacity: .55;
+    border-top: 1px dashed color-mix(in oklab, currentColor 18%, transparent); }
+
+  .page { padding: 1.5rem 2rem; font-size: 12.5px; }
+  .page h1 { font-size: 1.2rem; font-weight: 800; }
+  .page dl { display: grid; grid-template-columns: 7rem 1fr; gap: .3rem .75rem; margin-top: 1rem; }
+  .page dt { opacity: .55; }
+  .page .note-vo { margin-top: 1rem; padding: .5rem .7rem; border: 1px solid var(--color-base-300); border-radius: .4rem; opacity: .8; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50">acme-expenses</span>
+      <button class="btn btn-xs btn-ghost gap-1 font-normal" data-testid="panel.screen-picker"
+              title="Which screen this page is">Expense, view-only team manager ▾</button>
+    </span>
+
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.surface-design">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28" data-testid="panel.fade">
+      <button class="btn btn-xs btn-active" data-testid="panel.surface-build">App</button>
+      <!-- The target sits against the App button it qualifies, as the design
+           switch sits against Design. -->
+      <span class="relative" data-testid="panel.target" id="target"></span>
+    </span>
+
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Start walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="page">
+        <div class="mb-5 flex items-center text-xs opacity-60"><b class="mr-auto">Acme Expenses</b>Priya Shah</div>
+        <h1>Expense 412: Team offsite lunch</h1>
+        <dl>
+          <dt>Amount</dt><dd>$184.20</dd>
+          <dt>Submitted by</dt><dd>Dana Lee, Oct 21</dd>
+          <dt>Status</dt><dd>Submitted</dd>
+        </dl>
+        <div class="note-vo">You can view this expense. Approving it needs an approver.</div>
+      </div>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">💬 Threads</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">expenses.view-only</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">no-approve</span></button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center opacity-30">○</span><span class="truncate">org-wide-note</span></button>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // Choosing a row reframes the App pane on that target and runs the
+  // screen's setup there first. Staging has no base URL, so it has no row.
+  const FRAMED = `
+    <button class="btn btn-xs btn-ghost btn-active gap-1 font-normal" aria-expanded="true"
+            title="Which target the App pane shows">local ▾</button>
+    <div class="pop" role="listbox" aria-label="Which target the App pane shows">
+      <button class="row" role="option" aria-selected="true"><span class="tick">✓</span>
+        <span><div class="name">local</div><div class="url">http://localhost:3000</div></span></button>
+      <button class="row" role="option"><span></span>
+        <span><div class="name">review</div><div class="url">https://pr-88.review.acme.dev</div></span></button>
+      <div class="foot">Choosing a target runs this screen's setup there, then opens it. The choice is yours alone and stays after a reload.</div>
+    </div>`;
+
+
+  $('target').innerHTML = FRAMED;
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

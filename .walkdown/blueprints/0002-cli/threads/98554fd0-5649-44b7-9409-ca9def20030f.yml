@@ -1,0 +1,26 @@
+id: n-0623
+uuid: 98554fd0-5649-44b7-9409-ca9def20030f
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:26.869Z
+anchor:
+  screen: lint-setup-steps
+status: addressed
+body: "For screens.setup.steps-or-prose (ADR 0017 §1). `walkdown lint` output:
+  errors (lint.setup-error) for a setup step of an unknown kind and a recipe
+  nobody declared, each naming the screen and the step; a warning for a wait_for
+  whose anchor the screen does not declare; exit non-zero. Follow lint's
+  existing [storyboard] layout."
+replies:
+  - author: agent
+    created: 2026-10-24T03:19:06Z
+    body: agent named /drafts/lint-setup-steps.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:19:08Z
+    body: "Drawn: prototype-cli/drafts/lint-setup-steps.html. It shows two errors
+      under ERRORS, a click step and an undeclared recipe, each naming its
+      screen and step, then a warning naming the undeclared wait_for anchor, and
+      exit 1."
+proposes: /drafts/lint-setup-steps.html

@@ -1,0 +1,106 @@
+<!doctype html>
+<!-- DESIGN DRAFT: screen-picker-tied -->
+<!-- Drawn by the design agent for request n-0620 (ADR 0017 §4, rule screens.identity.setup-tells-states-apart). Not yet accepted. -->
+<!-- Intent: in a fresh tab whose address two screens share, the screen picker opens by itself, says the two share this address and differ only in how they are set up, and lists both with their setup; until one is picked the bar names no screen and nothing is filed. -->
+<!-- Fixture: the expense approval app on local. Screens expense-view-only-team (visit /dev/impersonate?id=14, wait for nav.signed-in) and expense-view-only-org (recipe as_view_only_org_manager) both open /expenses/412. The panel has set neither up in this tab. -->
+<!-- This is the existing picker with one change: a short note at its top and the setup under each name. Picking a row closes it, runs that screen's setup as opening a rule on it would, and the bar names that screen. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: the address matches two screens that differ in setup</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  .pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; width: 21rem;
+    border: 1px solid var(--color-base-300); border-radius: .5rem; background: var(--color-base-100);
+    box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: 12px; }
+  .pop .note { padding: .55rem .7rem; line-height: 1.45; border-bottom: 1px dashed color-mix(in oklab, currentColor 18%, transparent); }
+  .pop .note code { font-size: 11px; font-weight: 600; }
+  .pop .row { display: block; width: 100%; text-align: left; padding: .45rem .7rem; }
+  .pop .row:hover { background: var(--color-base-200); }
+  .pop .row + .row { border-top: 1px dashed color-mix(in oklab, currentColor 12%, transparent); }
+  .pop .name { font-weight: 600; }
+  .pop .how { font-size: 11px; opacity: .6; margin-top: .1rem; }
+  .pop .how code { font-size: 10.5px; }
+  .pop .foot { padding: .4rem .7rem; font-size: 11px; opacity: .55; border-top: 1px dashed color-mix(in oklab, currentColor 18%, transparent); }
+
+  .page { padding: 1.5rem 2rem; font-size: 12.5px; }
+  .page h1 { font-size: 1.2rem; font-weight: 800; }
+  .page dl { display: grid; grid-template-columns: 7rem 1fr; gap: .3rem .75rem; margin-top: 1rem; }
+  .page dt { opacity: .55; }
+  .page .note-vo { margin-top: 1rem; padding: .5rem .7rem; border: 1px solid var(--color-base-300); border-radius: .4rem; opacity: .8; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50">acme-expenses</span>
+
+      <!-- Opened by itself: the address alone cannot say which screen this is. -->
+      <span class="relative">
+        <button class="btn btn-xs btn-ghost btn-active gap-1 font-normal" aria-expanded="true"
+                title="Which screen this page is">Which screen? ▾</button>
+        <div class="pop" data-testid="panel.screen-picker" role="listbox" aria-label="Which screen this page is">
+          <div class="note">Two screens share <code>/expenses/412</code>. They differ only in how they are set up,
+            so the address cannot say which one this is. Pick the one you are on.</div>
+          <button class="row" role="option">
+            <div class="name">Expense, view-only team manager</div>
+            <div class="how">Visit <code>/dev/impersonate?id=14</code>, then wait for <code>nav.signed-in</code></div>
+          </button>
+          <button class="row" role="option">
+            <div class="name">Expense, view-only org manager</div>
+            <div class="how">Recipe <code>as_view_only_org_manager</code>: post <code>/dev/session</code> with user_id <code>31</code></div>
+          </button>
+          <div class="foot">Picking one runs its setup here. Nothing is filed under either until you do.</div>
+        </div>
+      </span>
+    </span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" disabled
+              title="Pick a screen first, so the pin is filed under the right one">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Start walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The app as this tab found it: signed in as whoever the browser last was. -->
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="page">
+        <div class="mb-5 flex items-center text-xs opacity-60"><b class="mr-auto">Acme Expenses</b>Priya Shah</div>
+        <h1>Expense 412: Team offsite lunch</h1>
+        <dl>
+          <dt>Amount</dt><dd>$184.20</dd>
+          <dt>Submitted by</dt><dd>Dana Lee, Oct 21</dd>
+          <dt>Status</dt><dd>Submitted</dd>
+        </dl>
+        <div class="note-vo">You can view this expense. Approving it needs an approver.</div>
+      </div>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">💬 Threads</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">expenses.view-only</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center opacity-30">○</span><span class="truncate">no-approve</span></button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200">
+          <span class="w-3.5 shrink-0 text-center opacity-30">○</span><span class="truncate">org-wide-note</span></button>
+      </div>
+    </aside>
+  </main>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

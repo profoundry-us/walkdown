@@ -1,0 +1,29 @@
+id: n-0618
+uuid: c05faaf1-4ba5-461a-a38d-18e560177fe4
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:25.520Z
+anchor:
+  screen: rule-detail-setup
+status: addressed
+body: "For screens.setup.runs-before-the-screen and
+  screens.setup.docked-carries-on (ADR 0017 §§1-2). The rule detail of a rule
+  whose screen has setup steps: under the setup heading (detail.setup),
+  detail.setup-steps lists the steps (visit a path, post a form, wait for an
+  anchor) with fixtures shown filled in, and detail.setup-again runs them again.
+  While the steps run, panel.setup-progress says which step of how many it is
+  on, where the App pane would otherwise show the page. Draw it mid-setup, on
+  step 2 of 3. Prose setup keeps its current look."
+replies:
+  - author: agent
+    created: 2026-10-24T03:23:18Z
+    body: agent named /drafts/rule-detail-setup.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:23:18Z
+    body: "Drawn: prototype/drafts/rule-detail-setup.html. The rule's Setup heading
+      lists the three steps with fixtures filled in and a Run setup again
+      button, while the App pane says it is on step 2 of 3, with docked and
+      prose cases behind a mockup control."
+proposes: /drafts/rule-detail-setup.html

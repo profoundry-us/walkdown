@@ -1,0 +1,26 @@
+id: n-0627
+uuid: 433e8d69-3ef2-4a58-a01a-0aa0e2f46531
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:27.922Z
+anchor:
+  screen: lint-screens-tie
+status: addressed
+body: For screens.setup.setup-is-identity (ADR 0017 §4). `walkdown lint`'s tie
+  warning (lint.tie-warning), now only for two screens that share both a path
+  and a setup, naming the screen that loses the tie. Today's wording says a tie
+  is the honest spelling until setup can run; that reason is gone, so the
+  warning should say to give one of them its own setup or path.
+replies:
+  - author: agent
+    created: 2026-10-24T03:19:15Z
+    body: agent named /drafts/lint-screens-tie.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:19:16Z
+    body: "Drawn: prototype-cli/drafts/lint-screens-tie.html. It shows one warning,
+      for the pair with the same path and setup, naming the losing screen and
+      telling the author to give one of them its own setup or path, with exit
+      0."
+proposes: /drafts/lint-screens-tie.html

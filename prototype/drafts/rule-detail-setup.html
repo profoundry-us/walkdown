@@ -1,0 +1,171 @@
+<!doctype html>
+<!-- DESIGN DRAFT: rule-detail-setup -->
+<!-- Drawn by the design agent for request n-0618 (ADR 0017 §§1-2, rule screens.setup.runs-before-the-screen). Not yet accepted. -->
+<!-- Intent: a rule whose screen has setup steps lists them under the Setup heading with fixtures filled in and a button to run them again, and while they run the App pane shows which step of how many it is on instead of a half-set-up page. -->
+<!-- Fixture: the expense approval app at http://localhost:3000 (target local). Screen expense-view-only-team: visit /sign-in, post /dev/session with the view-only team manager's id (14 on local), wait for nav.signed-in, then open /expenses/412. Drawn on step 2 of 3. -->
+<!-- The mockup control under the rule switches between two cases: the steps running (the default), and a screen whose setup is prose, which keeps today's look and runs nothing. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: Rule detail, the screen's setup steps are running</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  .steps { margin: 0; padding: 0; list-style: none; font-size: 11.5px; line-height: 1.4; }
+  .steps li { display: grid; grid-template-columns: 1.1rem 1fr; gap: .3rem; padding: .18rem 0;
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 15%, transparent); }
+  .steps li:last-child { border-bottom: 0; }
+  .steps .mark { text-align: center; opacity: .55; }
+  .steps .done .mark { color: var(--color-success); opacity: 1; }
+  .steps .now { font-weight: 600; }
+  .steps .now .mark { color: var(--color-info); opacity: 1; }
+  .steps .todo { opacity: .55; }
+  .steps .kind { display: inline-block; min-width: 3.1rem; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .steps code { font-size: 10.5px; }
+  .steps .field { display: block; margin-left: 3.4rem; font-weight: 400; opacity: .7; }
+  .steps .then { opacity: .7; }
+
+  /* The progress card stands where the page would be. */
+  .progress-card { width: 19rem; padding: 1rem 1.1rem; border: 1px dashed color-mix(in oklab, currentColor 25%, transparent);
+    border-radius: .6rem; background: var(--color-base-100); font-size: 12px; line-height: 1.45; text-align: left; }
+  .pips { display: flex; gap: 4px; margin: .5rem 0 .4rem; }
+  .pips i { flex: 1; height: 4px; border-radius: 2px; background: color-mix(in oklab, currentColor 15%, transparent); }
+  .pips i.done { background: var(--color-success); }
+  .pips i.now { background: var(--color-info); }
+  .progress-card code { font-size: 11px; }
+
+
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50">acme-expenses</span>
+      <button class="btn btn-xs btn-ghost gap-1 font-normal" data-testid="panel.screen-picker"
+              title="Which screen this page is">Expense, view-only team manager ▾</button>
+    </span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Finish walkdown</button>
+    </span>
+  </header>
+
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The App pane holds the progress, never the half-set-up page. -->
+    <section class="relative grid flex-1 place-items-center wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame" id="frame"></section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="flex items-center px-2 pt-2 text-xs">
+        <button class="btn btn-xs btn-ghost" data-testid="detail.back">← All rules</button>
+        <span class="ml-auto flex gap-0.5" data-testid="detail.stepper">
+          <button class="btn btn-xs btn-ghost">←</button>
+          <button class="btn btn-xs btn-ghost">→</button>
+        </span>
+      </div>
+
+      <div class="flex flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1 text-xs">
+        <div>
+          <div class="font-mono text-[10px] opacity-40" data-testid="detail.rule-id">expenses.view-only.no-approve</div>
+          <p class="text-sm leading-relaxed" data-testid="detail.statement">A view-only manager opening a submitted expense
+            sees no Approve button, and a note that the expense is view only.</p>
+        </div>
+
+        <div>
+          <textarea class="textarea textarea-xs w-full resize-none border-dashed border-base-content/25" rows="2"
+            placeholder="Why? Filed as a note with your verdict." data-testid="detail.feedback"></textarea>
+          <div class="mt-1 flex gap-2" data-testid="detail.verdict">
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
+          </div>
+        </div>
+
+        <!-- The setup sits where prose setup sits today, under the same heading. -->
+        <div id="setup-block"></div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Steps</div>
+          <div class="leading-relaxed opacity-80" data-testid="detail.steps">
+            <b>given</b> a view-only team manager and a submitted expense<br>
+            <b>when</b> they open the expense<br>
+            <b>then</b> there is no Approve button, and the note says the expense is view only
+          </div>
+        </div>
+      </div>
+
+      <!-- Mockup control, not part of the design. -->
+      <div class="border-t border-dashed border-base-content/25 p-2 text-[10.5px] leading-relaxed opacity-60">
+        Show:
+        <select class="select select-xs w-40 border-dashed" id="case">
+          <option value="framed">steps, on step 2 of 3</option>
+          <option value="prose">prose setup</option>
+        </select>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // Each step as the reviewer reads it: what it does, with the fixture filled in.
+  // The fixture's key rides in the title, for whoever wants to know where 14 came from.
+  const STEPS = `
+    <ol class="steps" data-testid="detail.setup-steps">
+      <li class="done"><span class="mark">✓</span>
+        <span><span class="kind">Visit</span><code>/sign-in</code></span></li>
+      <li class="now"><span class="mark">◌</span>
+        <span><span class="kind">Post</span><code>/dev/session</code>
+          <span class="field" title="user_id is {fixtures.view_only_team_manager}, 14 on local">user_id <code>14</code></span></span></li>
+      <li class="todo"><span class="mark">3</span>
+        <span><span class="kind">Wait for</span><code>nav.signed-in</code></span></li>
+      <li class="then"><span class="mark">→</span>
+        <span>Then open <code title="/expenses/{fixtures.expense_submitted}">/expenses/412</code></span></li>
+    </ol>`;
+
+  const SETUP_STEPS = `
+    <div data-testid="detail.setup">
+      <div class="mb-1 flex items-baseline text-[10px] uppercase tracking-widest opacity-40">
+        <span>Setup</span><span class="ml-auto normal-case tracking-normal">on local</span></div>
+      ${STEPS}
+      <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
+              data-testid="detail.setup-again" title="Run every step again, from step 1">↻ Run setup again</button>
+    </div>`;
+
+  // Prose setup, exactly as it looks today: shown, never run.
+  const SETUP_PROSE = `
+    <div>
+      <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Setup</div>
+      <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[12px] leading-relaxed"
+           data-testid="detail.setup">Sign in as a view-only team manager, then open a submitted expense.</div>
+    </div>`;
+
+  const PROGRESS = `
+    <div class="progress-card" data-testid="panel.setup-progress" role="status">
+      <div class="font-semibold">Setting up this screen: step 2 of 3</div>
+      <div class="pips"><i class="done"></i><i class="now"></i><i></i></div>
+      <div>Posting the sign-in form to <code>/dev/session</code>.</div>
+      <div class="mt-1 opacity-60">Then <code>/expenses/412</code> opens here.</div>
+    </div>`;
+
+
+  function render() {
+    const c = $('case').value;
+    $('setup-block').innerHTML = c === 'prose' ? SETUP_PROSE : SETUP_STEPS;
+    $('frame').innerHTML =
+      c === 'framed' ? PROGRESS :
+      '<div class="text-center text-xs opacity-50">THE APP: opening a rule navigated this frame to the screen\'s path.<br>Prose setup is shown in the rule, and nothing is run.</div>';
+  }
+  $('case').onchange = render;
+  render();
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

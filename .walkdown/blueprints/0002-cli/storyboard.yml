@@ -1218,3 +1218,39 @@ screens:
     app: { path: /as-built/cli/lint-focus-undeclared.html }
     anchors:
       - lint.focus-error
+
+  # ADR 0017, issue #25. Not designed yet: each has a design request.
+  - id: lint-setup-steps
+    title: "Lint refuses setup steps the panel cannot run"
+    anchors:
+      - cli.prompt
+      - lint.setup-error
+      - cli.exit
+
+  - id: seed-local
+    title: "walkdown seed keeps this machine's fixtures"
+    anchors:
+      - cli.prompt
+      - seed.values
+      - cli.exit
+
+  - id: seed-not-json
+    title: "walkdown seed refuses output that is not a JSON object"
+    anchors:
+      - cli.prompt
+      - seed.refused
+      - cli.exit
+
+  - id: lint-fixture-missing
+    title: "Lint warns about a fixture a target lacks"
+    anchors:
+      - cli.prompt
+      - lint.fixture-warning
+      - cli.exit
+
+  - id: lint-screens-tie
+    title: "Lint warns only about screens that share a path and a setup"
+    anchors:
+      - cli.prompt
+      - lint.tie-warning
+      - cli.exit

@@ -1974,3 +1974,48 @@ stories:
             - hash: sha256:44f8fc42e6d1
               at: 2026-09-14T04:24:19Z
               why: "ADR 0004 wording pass, second round: the words moved, the meaning did not"
+
+  - id: panel.targets
+    title: The App pane can show any target
+    statement: As a reviewer, I can compare today's build with a branch's review app, and see how a rule fared on each, without leaving the walk.
+    rules:
+
+      - id: panel.targets.switch-the-app-pane
+        origin: walkdown
+        created_at: 2026-10-23
+        verify: [checks]
+        signoff: [eng, product]
+        statement: The App pane can be pointed at any target the blueprint declares with a base URL, and switching runs the screen's setup on that target before loading it.
+        because: Comparing a build with a branch should be one choice, not a second checkout and a second sign-in.
+        history: Issue #25 and ADR 0017 §5 (2026-10-23). The panel read the local target alone.
+        screens: [app-target-picker]
+        steps:
+          given:
+            - Targets local and review with base URLs, a target staging without one, and a screen with setup steps
+          when:
+            - Choose review in anchor `panel.target`
+          then:
+            - "`panel.target` lists local first and then review, and does not list staging"
+            - The App pane runs the screen's setup on review's base URL with review's fixtures, and then loads the screen's path there
+            - The choice is still made after a reload, for this viewer only, and with none made the App pane shows local
+          statement_hash: sha256:15e4d7faad82
+
+      - id: panel.targets.verdict-on-each
+        origin: walkdown
+        created_at: 2026-10-23
+        verify: [checks]
+        signoff: [eng, product]
+        statement: A rule's detail shows its latest verdict on each declared target that has a run, with that run's evidence.
+        because: A rule that passes locally and fails on a review app reads as passing when only one verdict is shown.
+        history: Issue #25 and ADR 0017 §6 (2026-10-23).
+        screens: [rule-detail-targets]
+        steps:
+          given:
+            - A rule that passed on local today and failed on review yesterday, and has never run on staging
+          when:
+            - Open the rule
+          then:
+            - Anchor `detail.targets` holds a line for local and a line for review, each with its verdict, its date and its evidence line
+            - There is no line for staging
+            - Each line agrees with `walkdown status --target` for that target
+          statement_hash: sha256:fe0e631203f3

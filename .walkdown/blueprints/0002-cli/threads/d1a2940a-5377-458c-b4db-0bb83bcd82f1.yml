@@ -1,0 +1,26 @@
+id: n-0626
+uuid: d1a2940a-5377-458c-b4db-0bb83bcd82f1
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:27.652Z
+anchor:
+  screen: lint-fixture-missing
+status: addressed
+body: "For screens.setup.fixtures-per-target (ADR 0017 §3). `walkdown lint`
+  warnings (lint.fixture-warning): the review target lacks a key a screen uses,
+  naming target, key and screen; the local target has a seed nobody has run, one
+  warning saying to run `walkdown seed --target local` rather than one per key.
+  staging, which gives both, gets none."
+replies:
+  - author: agent
+    created: 2026-10-24T03:19:13Z
+    body: agent named /drafts/lint-fixture-missing.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:19:14Z
+    body: "Drawn: prototype-cli/drafts/lint-fixture-missing.html. It shows one
+      warning for review's missing key, naming target, key and screen, and one
+      for local's unrun seed that says to run walkdown seed --target local, with
+      nothing for staging and exit 0."
+proposes: /drafts/lint-fixture-missing.html

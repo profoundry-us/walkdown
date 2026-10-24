@@ -1,0 +1,25 @@
+id: n-0622
+uuid: cf0334e8-70c1-494d-a87f-5b0c7c8cfe90
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:26.537Z
+anchor:
+  screen: rule-detail-targets
+status: addressed
+body: "For panel.targets.verdict-on-each (ADR 0017 §6). In rule detail,
+  detail.targets holds a line per declared target with a recorded run: target
+  name, latest verdict (pass on local today, fail on review yesterday), its
+  date, and its evidence line. No line for a target that never ran. The rail is
+  unchanged."
+replies:
+  - author: agent
+    created: 2026-10-24T03:23:21Z
+    body: agent named /drafts/rule-detail-targets.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:23:21Z
+    body: "Drawn: prototype/drafts/rule-detail-targets.html. The rule detail gains
+      an On each target block with a line for local and for review, each with
+      its verdict, date and evidence line, and no line for staging."
+proposes: /drafts/rule-detail-targets.html

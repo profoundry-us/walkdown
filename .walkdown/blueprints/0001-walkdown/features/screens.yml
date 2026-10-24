@@ -188,7 +188,7 @@ stories:
     title: A screen is a URL, and the URL can change without a reload
     statement: As a reviewer, walkdown knows which screen I am looking at - including the modal, drawer or route the fragment opened - and keeps knowing it as I move around a single-page app.
     rules:
-      
+
       - id: screens.identity.follows-navigation
         origin: thread:n-0020
         statement: When the page's URL changes without a reload, walkdown notices and works out again which screen it is on. A `pushState` navigation raises no event, so walkdown catches it by checking the address on a timer.
@@ -220,3 +220,72 @@ stories:
             - hash: sha256:327979bf4aad
               at: 2026-09-14T16:05:25Z
               why: dropped 'says that is how it knew' - nothing user-facing says it; the statement now says the address is checked on a timer and the step says how often
+
+      - id: screens.identity.setup-tells-states-apart
+        origin: walkdown
+        created_at: 2026-10-23
+        verify: [checks]
+        signoff: [eng, product]
+        statement: When the App pane's address matches two screens that differ only in their setup, the panel takes the one it last set up at that address. When it has set up neither, it asks which one you are on.
+        because: Two states of one page share its address, so only the panel's own setup can say which one the frame is showing.
+        history: "Issue #25 and ADR 0017 §4 (2026-10-23). Before it, the matcher skipped the tie and the second screen could only be picked by hand."
+        screens: [screen-picker-tied]
+        steps:
+          given:
+            - Two screens at `/expenses/412`, one set up as a view-only team manager and one as a view-only org manager
+          when:
+            - Open a rule on the second screen, and then load the same address in a fresh tab
+          then:
+            - After the rule opens, the panel is on the second screen, and a pin placed then is filed under it
+            - In the fresh tab, anchor `panel.screen-picker` opens by itself, lists the two screens and says they share this address, and nothing is filed under either until one is picked
+            - Picking one runs its setup, as opening a rule on it would
+            - Two screens with the same path and the same setup are still a tie, and lint still warns about them
+          statement_hash: sha256:099086f49c0a
+
+  - id: screens.setup
+    title: A screen's setup puts the app in its state
+    statement: As a reviewer, opening a rule shows me its screen as the right person, on the right record, without my signing in or finding the record by hand.
+    rules:
+
+      - id: screens.setup.runs-before-the-screen
+        origin: walkdown
+        created_at: 2026-10-23
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Opening a rule whose screen has setup steps runs them in the App pane, in order, and then loads the screen's path. Setup written as prose is shown and never run.
+        because: A page that depends on who is signed in and which record is open cannot be reached by its path alone, and setting it up by hand on every rule stops a walk.
+        history: "Issue #25 and ADR 0017 §§1-2 (2026-10-23): an expense page meant for a view-only manager opened on the sign-in page."
+        screens: [rule-detail-setup]
+        steps:
+          given:
+            - A screen whose setup visits a sign-in route, posts a form and waits for an anchor, with fixtures for the local target
+          when:
+            - Open a rule on that screen
+          then:
+            - The App pane visits, posts and waits in that order, then loads the screen's path with its fixtures filled in
+            - While the steps run, anchor `panel.setup-progress` names the step it is on
+            - Anchor `detail.setup-steps` lists the steps under the setup heading, and `detail.setup-again` runs them again
+            - Opening another rule on the same screen does not run them again, and opening a rule on another screen does
+            - A screen whose setup is prose shows it in `detail.setup`, as before, and nothing is run
+          statement_hash: sha256:e7e5adf3b438
+
+      - id: screens.setup.failure-stops-it
+        origin: walkdown
+        created_at: 2026-10-23
+        verify: [checks]
+        signoff: [eng, product]
+        statement: A setup step that fails stops the setup, and the App pane says which step failed and why instead of loading the screen.
+        because: A screen loaded after a failed sign-in shows the sign-in page where the screen should be, and the reviewer judges the wrong page.
+        history: ADR 0017 §2 (2026-10-23).
+        screens: [app-setup-failed]
+        steps:
+          given:
+            - An app with the embed on its pages, a screen whose second step posts to a route that answers 500, and a screen whose path needs a fixture the local target lacks
+          when:
+            - Open a rule on each
+          then:
+            - On the first, anchor `panel.setup-failed` names step 2, its path and the status it got, and the screen's path is not loaded
+            - On the second, nothing is run, and `panel.setup-failed` names the missing fixture and the target, and gives `walkdown seed --target local`
+            - A wait_for whose anchor has not appeared after ten seconds fails the same way, and names the anchor
+            - "`detail.setup-again` runs the setup again from its first step"
+          statement_hash: sha256:1ba5d286a637

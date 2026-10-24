@@ -1,0 +1,27 @@
+id: n-0619
+uuid: 6c94b592-cffc-4e1d-b3e4-140b3423b578
+kind: note
+reason: request
+author: agent
+created: 2026-10-24T03:16:25.773Z
+anchor:
+  screen: app-setup-failed
+status: addressed
+body: "For screens.setup.failure-stops-it (ADR 0017 §2). A setup step failed, so
+  the screen's path is not loaded. panel.setup-failed stands in the App pane and
+  names the step (number and kind), its path, and what went wrong (a 500, or an
+  anchor that never appeared within ten seconds). A second state: a fixture the
+  target lacks, naming the key and the target and giving `walkdown seed --target
+  local`. detail.setup-again runs it again from step 1."
+replies:
+  - author: agent
+    created: 2026-10-24T03:23:19Z
+    body: agent named /drafts/app-setup-failed.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-24T03:23:19Z
+    body: "Drawn: prototype/drafts/app-setup-failed.html. The App pane holds a card
+      naming the step that stopped the setup, its path and what went wrong, in
+      three cases: a 500, a wait that timed out, and a missing fixture with the
+      seed command."
+proposes: /drafts/app-setup-failed.html

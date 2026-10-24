@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- DESIGN DRAFT: seed-not-json -->
+<!-- Drawn by the design agent for request n-0625. Not yet accepted. -->
+<!-- Intent: say the seed ran but its output was not a flat JSON object, show the first lines it printed so the author sees what got in the way, say what output is wanted and where anything else should go, say nothing was written; exit 2. -->
+<!-- Fixture: local's seed is bin/rails runner script/walkdown_seed.rb. It made its records, but it logs to standard output before printing its JSON, six lines in all. Nothing has been seeded on this machine before. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>walkdown seed refuses output that is not a JSON object</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/expenses</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> walkdown seed --target local</div>
+      <div data-testid="seed.refused">
+      <div class="ln">✗ local's seed ran, but what it printed is not a flat JSON object of keys and values.</div>
+      <div class="ln"></div>
+      <div class="ln">It printed (the first 4 of 6 lines):</div>
+      <div class="ln dim">  Created user view-only team manager (id 18)</div>
+      <div class="ln dim">  Created user view-only org manager (id 22)</div>
+      <div class="ln dim">  Created expense "Team offsite dinner" (id 412), submitted</div>
+      <div class="ln dim">  {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22}</div>
+      <div class="ln"></div>
+      <div class="ln">walkdown reads the seed's standard output as one JSON object, such as {"expense_submitted": 412}. Each value is a string or a number. Send anything else the seed says to standard error.</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">Nothing was written. ~/.walkdown/fixtures/0001-ex-expenses/local.yml does not exist yet.</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+  </div>
+</body>
+</html>
