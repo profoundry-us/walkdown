@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:27.652Z
 anchor:
   screen: lint-fixture-missing
-status: addressed
+status: verified
 body: "For screens.setup.fixtures-per-target (ADR 0017 §3). `walkdown lint`
   warnings (lint.fixture-warning): the review target lacks a key a screen uses,
   naming target, key and screen; the local target has a seed nobody has run, one
@@ -23,4 +23,12 @@ replies:
       warning for review's missing key, naming target, key and screen, and one
       for local's unrun seed that says to run walkdown seed --target local, with
       nothing for staging and exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:22:54Z
+    body: Accepted by topher's approval of every rule on lint-fixture-missing
+      (2026-10-26T12-22-54Z-local-01).
 proposes: /drafts/lint-fixture-missing.html
+verified_by: topher
+verified_via: 2026-10-26T12-22-54Z-local-01
+verified_at: 2026-10-26T12:22:54Z

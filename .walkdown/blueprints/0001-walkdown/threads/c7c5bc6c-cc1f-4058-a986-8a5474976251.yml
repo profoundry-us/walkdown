@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:26.025Z
 anchor:
   screen: screen-picker-tied
-status: addressed
+status: verified
 body: For screens.identity.setup-tells-states-apart (ADR 0017 §4). A fresh tab
   on an address that two screens share, differing only in setup (view-only team
   manager vs view-only org manager on /expenses/412). panel.screen-picker opens
@@ -23,4 +23,12 @@ replies:
     body: "Drawn: prototype/drafts/screen-picker-tied.html. The screen picker opens
       by itself, says both screens share this address and differ only in setup,
       lists each with its setup, and says nothing is filed until one is picked."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:10:13Z
+    body: Accepted by topher's approval of every rule on screen-picker-tied
+      (2026-10-26T12-10-13Z-local-01).
 proposes: /drafts/screen-picker-tied.html
+verified_by: topher
+verified_via: 2026-10-26T12-10-13Z-local-01
+verified_at: 2026-10-26T12:10:13Z

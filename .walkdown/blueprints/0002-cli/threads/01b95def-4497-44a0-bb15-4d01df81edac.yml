@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:58:09.283Z
 anchor:
   screen: fixtures-set-refused
-status: addressed
+status: verified
 body: For screens.setup.fixtures-set-keeps-this-machines-values (ADR 0017 §3,
   option B). `walkdown fixtures set --blueprint expenses --target local` is
   handed input that is not a flat JSON object of strings, numbers and booleans,
@@ -24,4 +24,12 @@ replies:
       input was not a flat JSON object, shows the first four of its six lines,
       says each value is a string, a number or a boolean, says nothing was kept,
       and exits 2."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:22:54Z
+    body: Accepted by topher's approval of every rule on fixtures-set-refused
+      (2026-10-26T12-22-54Z-local-01).
 proposes: /drafts/fixtures-set-refused.html
+verified_by: topher
+verified_via: 2026-10-26T12-22-54Z-local-01
+verified_at: 2026-10-26T12:22:54Z

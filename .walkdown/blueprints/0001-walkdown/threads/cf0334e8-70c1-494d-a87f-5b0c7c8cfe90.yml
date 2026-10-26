@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:26.537Z
 anchor:
   screen: rule-detail-targets
-status: addressed
+status: verified
 body: "For panel.targets.verdict-on-each (ADR 0017 §6). In rule detail,
   detail.targets holds a line per declared target with a recorded run: target
   name, latest verdict (pass on local today, fail on review yesterday), its
@@ -22,4 +22,12 @@ replies:
     body: "Drawn: prototype/drafts/rule-detail-targets.html. The rule detail gains
       an On each target block with a line for local and for review, each with
       its verdict, date and evidence line, and no line for staging."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:10:13Z
+    body: Accepted by topher's approval of every rule on rule-detail-targets
+      (2026-10-26T12-10-13Z-local-01).
 proposes: /drafts/rule-detail-targets.html
+verified_by: topher
+verified_via: 2026-10-26T12-10-13Z-local-01
+verified_at: 2026-10-26T12:10:13Z

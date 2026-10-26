@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-26T10:53:34.305Z
 anchor:
   screen: fixtures-set-no-blueprint
-status: addressed
+status: verified
 body: Draw walkdown fixtures set run without --blueprint, as in bin/rake
   walkdown:seed | walkdown fixtures set --target local. It keeps nothing and
   exits 2. It says to name the blueprint with --blueprint, as every command that
@@ -24,4 +24,12 @@ replies:
       --blueprint it says it acts on one blueprint and does not choose it, names
       the project's only blueprint, 0001-ex-expenses, says to name it with
       --blueprint expenses, and says nothing was kept; exit 2."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:22:54Z
+    body: Accepted by topher's approval of every rule on fixtures-set-no-blueprint
+      (2026-10-26T12-22-54Z-local-01).
 proposes: /drafts/fixtures-set-no-blueprint.html
+verified_by: topher
+verified_via: 2026-10-26T12-22-54Z-local-01
+verified_at: 2026-10-26T12:22:54Z

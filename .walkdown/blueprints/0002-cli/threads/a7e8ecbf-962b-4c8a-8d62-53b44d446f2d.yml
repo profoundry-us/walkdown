@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-26T10:53:34.083Z
 anchor:
   screen: fixtures-set
-status: addressed
+status: verified
 body: "Add the key=value form to this screen. Below the piped run, show a second
   command: walkdown fixtures set --blueprint expenses --target local
   expense_submitted=412. Its output is the same as the piped run's, for one key:
@@ -23,4 +23,12 @@ replies:
       second run passes expense_submitted=412 as key=value and reads the same
       way for one key: what it kept, the file under ~/.walkdown/fixtures/, and
       exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:22:54Z
+    body: Accepted by topher's approval of every rule on fixtures-set
+      (2026-10-26T12-22-54Z-local-01).
 proposes: /drafts/fixtures-set.html
+verified_by: topher
+verified_via: 2026-10-26T12-22-54Z-local-01
+verified_at: 2026-10-26T12:22:54Z

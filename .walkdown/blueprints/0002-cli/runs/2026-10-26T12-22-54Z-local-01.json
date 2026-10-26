@@ -1,0 +1,43 @@
+{
+  "run_id": "2026-10-26T12-22-54Z-local-01",
+  "created": "2026-10-26T12:22:54Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "c00f3b49-dirty",
+  "tree_hash": "sha256:67e89db7374b",
+  "spec_hash": "sha256:f90d8ca49fc1",
+  "results": [
+    {
+      "rule": "screens.setup.steps-or-prose",
+      "status": "approved",
+      "statement_hash": "sha256:5c6c941f8039"
+    },
+    {
+      "rule": "screens.setup.fixtures-set-keeps-this-machines-values",
+      "status": "approved",
+      "statement_hash": "sha256:6e0afbf92524"
+    },
+    {
+      "rule": "screens.setup.fixtures-per-target",
+      "status": "approved",
+      "statement_hash": "sha256:85fe533de4af"
+    },
+    {
+      "rule": "screens.setup.setup-is-identity",
+      "status": "approved",
+      "statement_hash": "sha256:9a9388488257"
+    }
+  ]
+}

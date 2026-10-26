@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:26.869Z
 anchor:
   screen: lint-setup-steps
-status: addressed
+status: verified
 body: "For screens.setup.steps-or-prose (ADR 0017 §1). `walkdown lint` output:
   errors (lint.setup-error) for a setup step of an unknown kind and a recipe
   nobody declared, each naming the screen and the step; a warning for a wait_for
@@ -23,4 +23,12 @@ replies:
       under ERRORS, a click step and an undeclared recipe, each naming its
       screen and step, then a warning naming the undeclared wait_for anchor, and
       exit 1."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:22:54Z
+    body: Accepted by topher's approval of every rule on lint-setup-steps
+      (2026-10-26T12-22-54Z-local-01).
 proposes: /drafts/lint-setup-steps.html
+verified_by: topher
+verified_via: 2026-10-26T12-22-54Z-local-01
+verified_at: 2026-10-26T12:22:54Z

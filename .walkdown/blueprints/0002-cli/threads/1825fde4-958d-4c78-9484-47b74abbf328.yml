@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:57:48.058Z
 anchor:
   screen: fixtures-set
-status: addressed
+status: verified
 body: "For screens.setup.fixtures-set-keeps-this-machines-values (ADR 0017 §3,
   option B). `bin/rake walkdown:seed | walkdown fixtures set --blueprint
   expenses --target local` succeeding: fixtures.values lists each key with its
@@ -26,4 +26,12 @@ replies:
       piped into fixtures set, the three keys with their values, the file kept
       under ~/.walkdown/fixtures/, that the values are this machine's only and
       win over spec.yml on local, and exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:22:54Z
+    body: Accepted by topher's approval of every rule on fixtures-set
+      (2026-10-26T12-22-54Z-local-01).
 proposes: /drafts/fixtures-set.html
+verified_by: topher
+verified_via: 2026-10-26T12-22-54Z-local-01
+verified_at: 2026-10-26T12:22:54Z

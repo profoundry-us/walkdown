@@ -1,0 +1,23 @@
+id: n-0632
+uuid: 386d46a0-cc82-42b8-9e9e-e6c04dc96e52
+kind: note
+reason: feedback
+author: topher
+created: 2026-10-26T12:08:36.651Z
+anchor:
+  rule: screens.setup.runs-before-the-screen
+status: addressed
+body: The wording looks good, but the design needs some work. The SETUP section
+  on the right is currently shown as a horizontal set of steps; there is not
+  enough room and it's creating a horizontal scrollbar on the sidebar. It should
+  show each step as rows instead of columns.
+replies:
+  - author: agent
+    created: 2026-10-26T14:36:55Z
+    body: "Redrawn: each setup step is now a row of its own (status mark, kind, path
+      or anchor), with the filled-in fixture on the line under it, and nothing
+      scrolls sideways at the sidebar's 288px. The cause was the list's class,
+      steps, which daisyUI also uses for a horizontal stepper. The list is now
+      setup-list. app-setup-failed had the same list and gets the same fix. The
+      rule's wording is unchanged, so this needs your walk again for the design
+      only."

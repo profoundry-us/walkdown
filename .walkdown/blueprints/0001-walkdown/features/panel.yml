@@ -1987,7 +1987,7 @@ stories:
         signoff: [eng, product]
         statement: The App pane can be pointed at any target the blueprint declares with a base URL, and switching runs the screen's setup on that target before loading it.
         because: Comparing a build with a branch should be one choice, not a second checkout and a second sign-in.
-        history: Issue #25 and ADR 0017 §5 (2026-10-23). The panel read the local target alone.
+        history: "Issue #25 and ADR 0017 §5 (2026-10-23). The panel read the local target alone."
         screens: [app-target-picker]
         steps:
           given:

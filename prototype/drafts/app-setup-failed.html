@@ -3,6 +3,7 @@
 <!-- Drawn by the design agent for request n-0619 (ADR 0017 §2, rule screens.setup.failure-stops-it). Not yet accepted. -->
 <!-- Intent: when a setup step fails, the App pane holds a card in the page's place that says which step stopped it, its path and what went wrong, and what to do next; the screen's path is not loaded, and Run setup again in the rule starts over from step 1. -->
 <!-- Fixture: the expense approval app, with the embed on its pages, on target local (http://localhost:3000), screen expense-view-only-team: visit /sign-in, post /dev/session, wait for nav.signed-in, then /expenses/{fixtures.expense_submitted}. -->
+<!-- Relaid for n-0632: each step is a row of its own, stacked down the sidebar, as in rule-detail-setup; nothing scrolls sideways at the sidebar's 18rem. -->
 <!-- The mockup control under the rule moves between three failures: step 2 answered 500, step 3's anchor never appeared within ten seconds, and the local target has no value for a fixture the path needs, so nothing ran. -->
 <html lang="en" data-theme="wireframe">
 <head>
@@ -11,19 +12,21 @@
 <link rel="stylesheet" href="/walkdown.css">
 <style>
   [hidden] { display: none !important; }
-  .steps { margin: 0; padding: 0; list-style: none; font-size: 11.5px; line-height: 1.4; }
-  .steps li { display: grid; grid-template-columns: 1.1rem 1fr; gap: .3rem; padding: .18rem 0;
+  /* "setup-list", never "steps": daisyUI's .steps lays its items out as columns and scrolls sideways (n-0632). */
+  .setup-list { display: block; margin: 0; padding: 0; list-style: none; font-size: 11.5px; line-height: 1.4; min-width: 0; }
+  .setup-list li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); column-gap: .3rem; padding: .25rem 0;
     border-bottom: 1px dashed color-mix(in oklab, currentColor 15%, transparent); }
-  .steps li:last-child { border-bottom: 0; }
-  .steps .mark { text-align: center; opacity: .55; }
-  .steps .done .mark { color: var(--color-success); opacity: 1; }
-  .steps .failed { font-weight: 600; }
-  .steps .failed .mark { color: var(--color-error); opacity: 1; }
-  .steps .todo { opacity: .45; }
-  .steps .kind { display: inline-block; min-width: 3.1rem; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
-  .steps code { font-size: 10.5px; }
-  .steps .field { display: block; margin-left: 3.4rem; font-weight: 400; opacity: .7; }
-  .steps .then { opacity: .45; }
+  .setup-list li:last-child { border-bottom: 0; }
+  .setup-list .mark { text-align: center; opacity: .55; }
+  .setup-list .done .mark { color: var(--color-success); opacity: 1; }
+  .setup-list .failed { font-weight: 600; }
+  .setup-list .failed .mark { color: var(--color-error); opacity: 1; }
+  .setup-list .todo { opacity: .45; }
+  .setup-list .body { min-width: 0; }
+  .setup-list .kind { margin-right: .3rem; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .setup-list code { font-size: 10.5px; overflow-wrap: anywhere; }
+  .setup-list .field { display: block; font-weight: 400; opacity: .7; }
+  .setup-list .then { opacity: .45; }
 
   /* The failure card: the warning card's shape, in the error colour, where the page would be. */
   .failed-card { width: 22rem; padding: 1rem 1.1rem; border-radius: .6rem; font-size: 12px; line-height: 1.5;
@@ -93,7 +96,7 @@
         <div data-testid="detail.setup">
           <div class="mb-1 flex items-baseline text-[10px] uppercase tracking-widest opacity-40">
             <span>Setup</span><span class="ml-auto normal-case tracking-normal" id="setup-state">stopped at step 2</span></div>
-          <ol class="steps" data-testid="detail.setup-steps" id="steps"></ol>
+          <ol class="setup-list" data-testid="detail.setup-steps" id="steps"></ol>
           <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
                   data-testid="detail.setup-again" title="Run every step again, from step 1">↻ Run setup again</button>
         </div>
@@ -167,11 +170,11 @@
 
   const MARK = { done: '✓', failed: '✗', todo: '' };
   function steps(marks, missing) {
-    const row = (i, kind, body) => `<li class="${marks[i]}"><span class="mark">${MARK[marks[i]] || i + 1}</span><span>${body.replace('%k', `<span class="kind">${kind}</span>`)}</span></li>`;
+    const row = (i, kind, body) => `<li class="${marks[i]}"><span class="mark">${MARK[marks[i]] || i + 1}</span><span class="body">${body.replace('%k', `<span class="kind">${kind}</span>`)}</span></li>`;
     return row(0, 'Visit', '%k<code>/sign-in</code>') +
       row(1, 'Post', '%k<code>/dev/session</code><span class="field">user_id <code>14</code></span>') +
       row(2, 'Wait for', '%k<code>nav.signed-in</code>') +
-      `<li class="then"><span class="mark">→</span><span>Then open <code>${missing ? '/expenses/{fixtures.expense_submitted}' : '/expenses/412'}</code></span></li>`;
+      `<li class="then"><span class="mark">→</span><span class="body">Then open <code>${missing ? '/expenses/{fixtures.expense_submitted}' : '/expenses/412'}</code></span></li>`;
   }
 
   function render() {

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:26.276Z
 anchor:
   screen: app-target-picker
-status: addressed
+status: verified
 body: For panel.targets.switch-the-app-pane (ADR 0017 §5). panel.target, a
   picker for the App pane listing the declared targets that have a base URL
   (local first, then e.g. review), each with its base URL; a target without one
@@ -24,4 +24,12 @@ replies:
       button lists local and review with their base URLs and says choosing one
       runs the setup there, and in the docked layout review is a link to the
       same screen."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:10:13Z
+    body: Accepted by topher's approval of every rule on app-target-picker
+      (2026-10-26T12-10-13Z-local-01).
 proposes: /drafts/app-target-picker.html
+verified_by: topher
+verified_via: 2026-10-26T12-10-13Z-local-01
+verified_at: 2026-10-26T12:10:13Z

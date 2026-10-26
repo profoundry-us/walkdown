@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:25.773Z
 anchor:
   screen: app-setup-failed
-status: addressed
+status: verified
 body: "For screens.setup.failure-stops-it (ADR 0017 §2). A setup step failed, so
   the screen's path is not loaded. panel.setup-failed stands in the App pane and
   names the step (number and kind), its path, and what went wrong (a 500, or an
@@ -24,4 +24,12 @@ replies:
       naming the step that stopped the setup, its path and what went wrong, in
       three cases: a 500, a wait that timed out, and a missing fixture with the
       seed command."
+  - author: topher
+    via: verdict
+    created: 2026-10-26T12:10:13Z
+    body: Accepted by topher's approval of every rule on app-setup-failed
+      (2026-10-26T12-10-13Z-local-01).
 proposes: /drafts/app-setup-failed.html
+verified_by: topher
+verified_via: 2026-10-26T12-10-13Z-local-01
+verified_at: 2026-10-26T12:10:13Z
