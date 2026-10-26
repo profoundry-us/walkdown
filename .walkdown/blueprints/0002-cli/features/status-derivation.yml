@@ -436,8 +436,8 @@ stories:
               why: "ADR 0004 wording pass: the words moved, the meaning did not"
       - id: status.acceptance.sent-back-is-a-fail
         origin: walkdown
-        statement: When a signer sends a rule back, its verdict reads as a fail, not as pending. The rule returns to that signer's queue only once a fix is claimed and the agent tier has judged it.
-        history: Two rules sent back on 2026-09-08 were fixed and re-judged the same day and then waited six days, because nothing asked the signer to look again (n-0239, n-0240).
+        statement: When a signer sends a rule back, its verdict reads as a fail, not as pending. The rule returns to that signer's queue once a fix is claimed and the agent tier has judged it, or, while the rule is unbuilt, as soon as the fix is claimed.
+        history: Two rules sent back on 2026-09-08 were fixed and re-judged the same day and then waited six days, because nothing asked the signer to look again (n-0239, n-0240). On 2026-10-26 an unbuilt rule sent back for its design was redrawn and never came back, because no agent can judge a rule with no build (n-0632).
         because: What the rule owes them is a fix, not another look.
         verify: [checks]
         screens: [status-sent-back]
@@ -450,8 +450,9 @@ stories:
             - The rule's verdict is fail rather than pending - somebody looked and said not yet
             - "It is not queued back to the signer while nothing has changed: what it owes them is a fix, not another look"
             - Once a thread on the rule is addressed after the send-back and the agent tier has passed the fix, the signer is asked to look again, and the item names the thread that claimed the fix
+            - A rule sent back while unbuilt, such as for its design or its wording, is asked of the signer again as soon as a thread on it is addressed after the send-back, since there is no build for the agent tier to judge
             - Their fresh verdict is what clears it
-          statement_hash: sha256:1aef4eaeadde
+          statement_hash: sha256:519f1271017a
       - id: status.acceptance.fix-on-their-thread-comes-back
         origin: thread:q-0517
         created_at: 2026-10-08

@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-10-26T15-09-29Z-local-01",
+  "created": "2026-10-26T15:09:29Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "5549726e-dirty",
+  "note": "Reworded for n-0632; the build waits on Topher approving the new wording.",
+  "spec_hash": "sha256:d79c6b756bdf",
+  "results": [
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "blocked",
+      "statement_hash": "sha256:519f1271017a",
+      "evidence": [
+        "lib/status.js:559-571"
+      ],
+      "reasoning": "Blocked, not judged: the rule was reworded on 2026-10-26 (n-0632) so that an unbuilt rule sent back returns to its signer as soon as a fix is claimed. lib/status.js still waits for an agent pass in that case, so the build does not do this yet, and per Design comes first it is changed only after Topher approves the new wording."
+    }
+  ]
+}
