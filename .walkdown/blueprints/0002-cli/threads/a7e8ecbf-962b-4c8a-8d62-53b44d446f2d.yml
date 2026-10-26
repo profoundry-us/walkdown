@@ -1,0 +1,26 @@
+id: n-0630
+uuid: a7e8ecbf-962b-4c8a-8d62-53b44d446f2d
+kind: note
+reason: request
+author: agent
+created: 2026-10-26T10:53:34.083Z
+anchor:
+  screen: fixtures-set
+status: addressed
+body: "Add the key=value form to this screen. Below the piped run, show a second
+  command: walkdown fixtures set --blueprint expenses --target local
+  expense_submitted=412. Its output is the same as the piped run's, for one key:
+  what it kept, the file it kept it in, and exit 0. The rule says key=value
+  pairs are kept the same way, so the two runs should read alike."
+replies:
+  - author: agent
+    created: 2026-10-26T10:55:21Z
+    body: agent named /drafts/fixtures-set.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-10-26T10:55:22Z
+    body: "Drawn: prototype-cli/drafts/fixtures-set.html. Below the piped run, a
+      second run passes expense_submitted=412 as key=value and reads the same
+      way for one key: what it kept, the file under ~/.walkdown/fixtures/, and
+      exit 0."
+proposes: /drafts/fixtures-set.html

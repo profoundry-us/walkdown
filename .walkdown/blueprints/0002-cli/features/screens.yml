@@ -113,7 +113,7 @@ stories:
         statement: "`walkdown fixtures set --blueprint <b> --target <t>` keeps the values it is handed, as JSON on standard input or as `key=value` pairs, for this machine only. walkdown never runs the app's code to make them."
         because: The records a screen needs have different ids on every machine, and making them is the app's job, so walkdown only keeps what it is told.
         history: Issue #25 and ADR 0017 §3 (2026-10-23).
-        screens: [fixtures-set, fixtures-set-refused]
+        screens: [fixtures-set, fixtures-set-refused, fixtures-set-no-blueprint]
         steps:
           given:
             - A blueprint called expenses, and an app task that prints a JSON object of three keys and their ids

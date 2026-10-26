@@ -1257,6 +1257,13 @@ screens:
       - fixtures.refused
       - cli.exit
 
+  - id: fixtures-set-no-blueprint
+    title: "walkdown fixtures set refuses to keep values without --blueprint"
+    anchors:
+      - cli.prompt
+      - fixtures.refused
+      - cli.exit
+
   - id: lint-fixture-missing
     title: "Lint warns about a fixture a target lacks"
     anchors:

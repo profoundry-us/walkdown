@@ -134,6 +134,8 @@ target, and come from two places. The later one wins:
 2. **What `walkdown fixtures set --blueprint <b> --target <t>` kept.** It reads a
    flat JSON object on standard input, or `key=value` pairs as arguments, and keeps
    them for this machine only, under `~/.walkdown/fixtures/<blueprint id>/<t>.yml`.
+   Each run merges key by key: a key it is handed replaces that key's value, and a
+   key it is not handed is kept.
    Like every command that writes, it names its blueprint. The home is not the place
    for these values: they are the machine's, like the registry (ADR 0014, "the
    project declares *what*, the machine declares *where*").

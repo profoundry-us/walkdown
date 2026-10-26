@@ -1,0 +1,27 @@
+id: n-0631
+uuid: eac51b4b-5c36-4959-9043-41d6e819d1ef
+kind: note
+reason: request
+author: agent
+created: 2026-10-26T10:53:34.305Z
+anchor:
+  screen: fixtures-set-no-blueprint
+status: addressed
+body: Draw walkdown fixtures set run without --blueprint, as in bin/rake
+  walkdown:seed | walkdown fixtures set --target local. It keeps nothing and
+  exits 2. It says to name the blueprint with --blueprint, as every command that
+  writes does, and lists the blueprints this project has so the person can pick
+  one. Match the refusal other writing commands give when --blueprint is
+  missing.
+replies:
+  - author: agent
+    created: 2026-10-26T10:55:22Z
+    body: agent named /drafts/fixtures-set-no-blueprint.html as the version this
+      request proposes, in place of none.
+  - author: agent
+    created: 2026-10-26T10:55:22Z
+    body: "Drawn: prototype-cli/drafts/fixtures-set-no-blueprint.html. Without
+      --blueprint it says it acts on one blueprint and does not choose it, names
+      the project's only blueprint, 0001-ex-expenses, says to name it with
+      --blueprint expenses, and says nothing was kept; exit 2."
+proposes: /drafts/fixtures-set-no-blueprint.html

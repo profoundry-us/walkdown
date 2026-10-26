@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- DESIGN DRAFT: fixtures-set-no-blueprint -->
+<!-- Drawn by the design agent for request n-0631. Not yet accepted. -->
+<!-- Intent: say that walkdown fixtures set acts on one blueprint and does not choose it, even when the project has only one, name that blueprint, say to choose one with --blueprint, and say nothing was kept; exit 2. Worded as every writing command refuses a missing --blueprint (writes-refused-among-several). -->
+<!-- Fixture: ~/expenses has one blueprint, 0001-ex-expenses, called expenses. bin/rake walkdown:seed prints {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22} and is piped in. No fixtures have been set for local on this machine. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>walkdown fixtures set refuses to keep values without --blueprint</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/expenses</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> bin/rake walkdown:seed | walkdown fixtures set --target local</div>
+      <div data-testid="fixtures.refused">
+      <div class="ln">`walkdown fixtures set` acts on one blueprint, and does not choose it for you. This project's blueprint is 0001-ex-expenses.</div>
+      <div class="ln">Choose one with `--blueprint &lt;id&gt;` (e.g. `--blueprint expenses`).</div>
+      </div>
+      <div class="ln"></div>
+      <div class="ln">Nothing was kept. ~/.walkdown/fixtures/0001-ex-expenses/local.yml does not exist yet.</div>
+    <div class="ln exit bad" data-testid="cli.exit">[exit 2]</div>
+  </div>
+</body>
+</html>

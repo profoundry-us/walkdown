@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- DESIGN DRAFT: fixtures-set -->
-<!-- Drawn by the design agent for request n-0628. Not yet accepted. -->
-<!-- Intent: list each key it was handed with its value, say the file it kept them in under ~/.walkdown/fixtures/ and that they are this machine's only, with nothing written to the blueprint or the repository, and that on local they now win over spec.yml; exit 0. Nothing says walkdown ran the app's task: the pipe on the prompt shows who did. -->
-<!-- Fixture: The app's own task, bin/rake walkdown:seed, prints {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22} and is piped in. The blueprint is 0001-ex-expenses. -->
+<!-- Drawn by the design agent for request n-0628, revised for request n-0630. Not yet accepted. -->
+<!-- Intent: list each key it was handed with its value, say the file it kept them in under ~/.walkdown/fixtures/ and that they are this machine's only, with nothing written to the blueprint or the repository, and that on local they now win over spec.yml; exit 0. Nothing says walkdown ran the app's task: the pipe on the prompt shows who did. A second run below passes one key as key=value and reads the same way, for one key. -->
+<!-- Fixture: The app's own task, bin/rake walkdown:seed, prints {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22} and is piped in. The blueprint is 0001-ex-expenses. The second run follows the first, in the same terminal. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -41,6 +41,16 @@
       <div class="ln">These values are this machine's only. Nothing was written to the blueprint or the repository.</div>
       <div class="ln">On local, screens now fill in {fixtures.&lt;key&gt;} from them, and they win over any in spec.yml.</div>
     <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+    <div class="ln"></div>
+    <div class="ln prompt"><b>~/expenses $</b> walkdown fixtures set --blueprint expenses --target local expense_submitted=412</div>
+      <div class="ln">Kept 1 fixture for local:</div>
+      <div class="ln">  expense_submitted        412</div>
+      <div class="ln"></div>
+      <div class="ln">  + kept  ~/.walkdown/fixtures/0001-ex-expenses/local.yml</div>
+      <div class="ln"></div>
+      <div class="ln">These values are this machine's only. Nothing was written to the blueprint or the repository.</div>
+      <div class="ln">On local, screens now fill in {fixtures.&lt;key&gt;} from them, and they win over any in spec.yml.</div>
+    <div class="ln exit">[exit 0]</div>
   </div>
 </body>
 </html>
