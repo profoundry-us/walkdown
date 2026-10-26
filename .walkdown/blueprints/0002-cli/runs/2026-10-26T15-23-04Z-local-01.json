@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-10-26T15-23-04Z-local-01",
+  "created": "2026-10-26T15:23:04Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "0fddbc2e-dirty",
+  "spec_hash": "sha256:d79c6b756bdf",
+  "results": [
+    {
+      "rule": "status.acceptance.sent-back-is-a-fail",
+      "status": "pass",
+      "statement_hash": "sha256:519f1271017a",
+      "evidence": [
+        "runs/evidence/2026-10-26T15-23-04Z/00-fixture.txt",
+        "runs/evidence/2026-10-26T15-23-04Z/00-fixture-threads.txt",
+        "runs/evidence/2026-10-26T15-23-04Z/01-after-send-back.txt",
+        "runs/evidence/2026-10-26T15-23-04Z/02-after-claims.txt",
+        "runs/evidence/2026-10-26T15-23-04Z/03-after-judging.txt",
+        "runs/evidence/2026-10-26T15-23-04Z/04-status.json",
+        "runs/evidence/2026-10-26T15-23-04Z/05-design-request-addressed.txt",
+        "runs/evidence/2026-10-26T15-23-04Z/06-after-fresh-verdicts.txt"
+      ],
+      "reasoning": "Earned against a fresh throwaway project in its own WALKDOWN_HOME, served on port 4770 (GET /api/blueprint named only that project), with eng send-backs filed through the panel door POST /api/walkdowns as refining and fixes claimed with threads new, reply and set addressed. Right after the send-back all seven rules read failing, not pending, and none was queued to eng (01). A fix claimed after the send-back on a built rule left it failing and out of eng's queue while the agent pass was older than the claim, and the agent queue asked for the re-judge instead (02, unjudged). Once the agent passed that fix, eng got \"walk down checkout.basics.judged again — eng sent it back, and the fix n-0004 claims is judged\" (03), naming the thread. An unbuilt rule with a fix claimed after the send-back went straight back to eng with \"the fix n-0005 claims is ready to look at; nothing is built yet\" (02), with no agent item in between. A fix claimed before the send-back returned nothing, whether unbuilt (before) or built and since re-judged (builtbefore), and an unbuilt rule with no claim stayed failing and unqueued (04, fixedSince null on each). Eng's fresh pass on judged and approval of unbuilt cleared both items (06). Edges weighed: a claim stamped in the same second as the send-back compares as not after it, so the rule would not return; under 5%, since a fix takes minutes. A rule sent back for its design whose only fix is the designer addressing the screen's request, never a thread on the rule, is not asked of eng as a walk-down, though eng is still asked to verify the request (05); about 15-20%, reported to the caller rather than filed. Aside, not this rule: status <rule> crashes when a rule's given or when is a scalar rather than a list, which lint accepts.",
+      "threads": []
+    }
+  ]
+}
