@@ -264,6 +264,33 @@ test('a sent-back rule returns to its signer once the fix is claimed and judged 
   assert.deepEqual(judge(stale), []);
 });
 
+test('an unbuilt rule sent back returns to its signer as soon as the fix is claimed @rule:status.acceptance.sent-back-is-a-fail', () => {
+  const sentBack = signed('2026-01-03', 'topher', 'refining', ['product']);
+  const judge = (bp) =>
+    bp.attention
+      .filter((i) => i.action === 'judge' && i.role === 'product')
+      .map((i) => i.after ?? true);
+  const unbuilt = (threads) =>
+    deriveStatus(
+      blueprint({ signoff: ['product'], verify: ['checks', 'agent'], runs: [sentBack], threads }),
+    );
+
+  // Nothing claimed yet: what it owes the signer is still a fix.
+  assert.deepEqual(judge(unbuilt([])), []);
+
+  // A redrawn design is claimed. There is no build for the agent to judge,
+  // so the signer is asked straight away, and nobody is asked to re-judge
+  // (n-0632).
+  const claimed = unbuilt([addressedNote('n-0001', '2026-01-04T00:00:00Z')]);
+  assert.equal(states(claimed.rows[0]).product, 'sent-back');
+  assert.equal(claimed.rows[0].verdict, 'fail');
+  assert.deepEqual(judge(claimed), ['n-0001']);
+  assert.equal(
+    claimed.attention.some((i) => ['rejudge', 'judge-first'].includes(i.action)),
+    false,
+  );
+});
+
 test('a fix the agent settled, by a pass or by hand, still returns a sent-back rule to its signer, and a settled observation claims nothing @rule:status.acceptance.sent-back-is-a-fail', () => {
   const sentBack = signed('2026-01-03', 'topher', 'refining', ['product']);
   const judge = (bp) =>

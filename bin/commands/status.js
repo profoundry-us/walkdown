@@ -330,7 +330,7 @@ function report(blueprint, values, ruleId, emit) {
       i.after && i.signed
         ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} signed it, and the fix ${i.after} claims on your thread is judged; the signature stands meanwhile`
         : i.after
-          ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} sent it back, and the fix ${i.after} claims is judged`
+          ? `walk down ${i.rule} again — ${i.role ?? 'nobody'} sent it back, and the fix ${i.after} claims is ${i.unbuilt ? 'ready to look at; nothing is built yet' : 'judged'}`
           : i.unbuilt
             ? `approve the wording of ${i.rule} — not built yet, and ${i.role ?? 'nobody'} has not approved it`
             : `walk down ${i.rule} — ${i.role ?? 'nobody'} has not accepted it yet`,
