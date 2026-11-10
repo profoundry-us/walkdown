@@ -59,6 +59,94 @@ const only = args.filter((a, i) => !a.startsWith('--') && (portAt < 0 || i !== p
 // the example cannot hold: a URL pattern each, and a function given the
 // server's own JSON answer (null when it had none) that returns the answer
 // the panel gets instead.
+// The example's local target, which nothing here starts: every request to
+// it is answered by this tool (see `app` on a state).
+const APP = 'http://localhost:4310';
+const OPEN_ALREADY = [
+  ['fn', `r => r.querySelector('[data-rule="waitlist.join.already-joined"]')`],
+  ['sr', `r => r.querySelector('[data-rule="waitlist.join.already-joined"]').click()`],
+  ['fn', `r => r.querySelector('[data-testid="detail.setup-again"]')`],
+];
+const RUN_SETUP = [['sr', `r => r.querySelector('[data-testid="detail.setup-again"]').click()`]];
+
+/* The example's payload, given a second target and a run on it. */
+function withTargets(data) {
+  if (!data) return data;
+  data.targets = ['local', 'review'];
+  data.appTargets = [
+    { name: 'local', base: APP },
+    { name: 'review', base: 'https://review.example.com' },
+  ];
+  for (const r of data.rows)
+    if (r.rule === 'waitlist.join.confirmation') {
+      r.cells.local = { ...r.cells.local, detail: 'found the email and the confirmation heading' };
+      r.cells.review = {
+        state: 'fail',
+        actor: 'ci',
+        runId: 'as-built-review',
+        created: '2026-11-09T15:00:00Z',
+        checks: ['spec/waitlist.spec.ts:27'],
+        evidence: [],
+        detail: 'expected the submitted email, and found none',
+      };
+    }
+  return data;
+}
+
+/* A screen of the payload, given setup steps on every target. */
+function setUp(data, id, steps) {
+  const screen = data?.storyboard.find((s) => s.id === id);
+  if (!screen) return;
+  screen.app.setup = steps.map((st) => ({
+    [st.kind]: st.value,
+    ...(st.fields && { fields: st.fields }),
+  }));
+  screen.app.written = screen.app.path;
+  screen.runs = Object.fromEntries(
+    data.targets.map((t) => [
+      t,
+      {
+        kind: 'steps',
+        prose: null,
+        recipe: null,
+        steps,
+        path: screen.app.path,
+        missing: [],
+        set: `walkdown fixtures set --blueprint example --target ${t}`,
+      },
+    ]),
+  );
+  screen.setupKey = JSON.stringify(steps);
+}
+
+/* And the "already on the list" state reached by signing in and joining twice. */
+function withSetup(data) {
+  withTargets(data);
+  setUp(data, 'waitlist-already', [
+    { kind: 'visit', value: '/dev/sign-in?as=returning' },
+    { kind: 'post', value: '/dev/join', fields: { email: 'you@example.com' } },
+    { kind: 'wait_for', value: 'waitlist.already-message' },
+  ]);
+  return data;
+}
+
+/*
+ * Two states of one page: in the example a query tells the two confirmation
+ * pages apart for the matcher, so here they are given one address, and only
+ * their setup differs.
+ */
+function withTie(data) {
+  withSetup(data);
+  setUp(data, 'waitlist-confirm', [{ kind: 'visit', value: '/dev/sign-in?as=new' }]);
+  const at = (id) => data?.storyboard.find((s) => s.id === id);
+  const [confirm, already] = [at('waitlist-confirm'), at('waitlist-already')];
+  if (confirm && already) {
+    already.app.path = confirm.app.path;
+    for (const run of Object.values(already.runs)) run.path = confirm.app.path;
+  }
+  return data;
+}
+
 const STATES = {
   review: { steps: [] },
   'rule-detail': {
@@ -162,6 +250,68 @@ const STATES = {
   start: { host: { srv: 'http://localhost:1' }, steps: [['wait', 3000]] },
   // And a page no blueprint claims: which project?
   'project-modal': { host: { frame: '/nothing-declares-this' }, steps: [['wait', 3000]] },
+
+  /*
+   * ADR 0017. The example's screens have no setup steps and one target, so
+   * the payload is given them here: the "already on the list" state is
+   * reached by signing in and joining twice, and a review app stands beside
+   * the local one. `app` stands in for the example's own app, which is not
+   * running while this draws: a pattern each, and what that address answers
+   * (a status, or 'hang' for a step still on its way).
+   */
+  'rule-detail-setup': {
+    routes: [[/\/api\/blueprint(\?|$)/, withSetup]],
+    app: [
+      ['**/dev/sign-in*', 200],
+      ['**/dev/join', 'hang'],
+    ],
+    steps: [...OPEN_ALREADY, ...RUN_SETUP, ['wait', 2500]],
+  },
+  'app-setup-failed': {
+    routes: [[/\/api\/blueprint(\?|$)/, withSetup]],
+    app: [
+      ['**/dev/sign-in*', 200],
+      ['**/dev/join', 500],
+    ],
+    steps: [
+      ...OPEN_ALREADY,
+      ...RUN_SETUP,
+      ['fn', `r => r.querySelector('[data-testid="panel.setup-failed"]')`],
+      ['wait', 400],
+    ],
+  },
+  'screen-picker-tied': {
+    routes: [[/\/api\/blueprint(\?|$)/, withTie]],
+    frame: `${APP}/confirm.html?email=you@example.com`,
+    app: [],
+    steps: [
+      ['fn', `r => r.querySelector('[data-testid="panel.screen-tied"]')`],
+      ['wait', 400],
+    ],
+  },
+  'app-target-picker': {
+    routes: [[/\/api\/blueprint(\?|$)/, withTargets]],
+    app: [],
+    steps: [
+      ['fn', `r => r.querySelector('[data-testid="panel.target"] button')`],
+      ['sr', `r => r.querySelector('[data-testid="panel.target"] button').click()`],
+      ['wait', 600],
+    ],
+  },
+  'rule-detail-targets': {
+    routes: [[/\/api\/blueprint(\?|$)/, withTargets]],
+    app: [],
+    steps: [
+      ['fn', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]')`],
+      ['sr', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]').click()`],
+      ['fn', `r => r.querySelector('[data-testid="detail.evidence-line"]')`],
+      [
+        'sr',
+        `r => r.querySelector('[data-testid="detail.evidence"]').scrollIntoView({ block: 'center' })`,
+      ],
+      ['wait', 800],
+    ],
+  },
 };
 
 /* ---- the capture, in the page --------------------------------------------- */
@@ -326,8 +476,9 @@ function wrap(id, raw, streamCss) {
     .replace(/z-index: 2147483000;/g, 'z-index: 1;')
     .replace(/<head>[\s\S]*?<\/head>/, '')
     .replace(/<body[^>]*>/, '<body>')
-    // Whatever port this ran against, the drawing names the declared one.
-    .replace(/localhost:\d+/g, 'localhost:4700');
+    // Whatever port this ran against, the drawing names the declared one. The
+    // example app's own address is not this run's, and stays what it is.
+    .replace(/localhost:(?!4310\b)\d+/g, 'localhost:4700');
   // The frame: a box, not a page.
   const frame = html.match(/<iframe\b[^>]*style="([^"]*)"[^>]*>\s*<\/iframe>/);
   if (frame)
@@ -430,6 +581,18 @@ async function main() {
   });
   await new Promise((r) => host.listen(0, r));
   const hostAt = `http://localhost:${host.address().port}`;
+  // The stand-in for the example's app: the first path segment is how to
+  // answer (a status, or `hang`), and every page carries the embed.
+  const app = createServer((req, res) => {
+    const how = req.url.split('/')[1];
+    if (how === 'hang') return;
+    res.writeHead(Number(how) || 200, { 'content-type': 'text/html' });
+    res.end(
+      `<!doctype html><title>the app</title><script src="${wd}/embed.js" data-walkdown data-bp="${BP}"></script>`,
+    );
+  });
+  await new Promise((r) => app.listen(0, r));
+  const appAt = `http://localhost:${app.address().port}`;
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
@@ -442,12 +605,23 @@ async function main() {
       process.stdout.write(`${id} `);
       const url = st.host
         ? `${hostAt}/?${new URLSearchParams(st.host)}`
-        : `${wd}/?bp=${encodeURIComponent(BP)}#${encodeURIComponent(FRAME(wd))}`;
+        : `${wd}/?bp=${encodeURIComponent(BP)}#${encodeURIComponent(st.frame ?? FRAME(wd))}`;
       // Through blank first: the same address with a different hash is a
       // hash navigation, and the pruned panel from the last state would be
       // what this one captures.
       await page.goto('about:blank');
       await page.unrouteAll({ behavior: 'ignoreErrors' });
+      // The app's own pages, where a state navigates the frame. Sent on to a
+      // server of this tool's, never answered in the browser: a page the
+      // browser was handed reports no status, and a 500 would read as loaded.
+      if (st.app) {
+        const send = (how) => (route) => {
+          const u = new URL(route.request().url());
+          return route.continue({ url: `${appAt}/${how}${u.pathname}${u.search}` });
+        };
+        await page.route(`${APP}/**`, send(200));
+        for (const [pattern, how] of st.app) await page.route(pattern, send(how));
+      }
       for (const [pattern, answer] of st.routes ?? [])
         await page.route(pattern, async (route) => {
           let json = null;
@@ -473,6 +647,8 @@ async function main() {
   } finally {
     await browser.close();
     host.close();
+    app.closeAllConnections();
+    app.close();
     serve?.kill();
   }
 }

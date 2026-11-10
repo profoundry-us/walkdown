@@ -70,6 +70,49 @@
       "Nothing is remembered for the site (ADR 0001 &sect;9); the address carries the pick instead."
     ]
   },
+  "rule-detail-setup": {
+    "title": "rule detail, the screen's setup steps are running",
+    "redlines": [
+      "Drawn over the example's waitlist, as every as-built is: the steps sign a returning visitor in and join twice, where the design signs a manager in to an expense.",
+      "Setup sits directly under the statement and above Screen and Steps, where the built rule detail keeps what happens before the steps. The design had the feedback box and the verdict pair between the statement and Setup; the built detail puts those in the conversation, at the foot.",
+      "The target's name stands beside the App button on every bar once a blueprint declares two targets. This design drew the bar without it; <i>the App pane's target picker</i> drew it.",
+      "The progress card's line for a post reads <i>Posting the form to</i> and the path. The design said <i>Posting the sign-in form to</i>: the panel cannot know what a form is for."
+    ]
+  },
+  "app-setup-failed": {
+    "title": "a setup step failed, so the screen is not loaded",
+    "redlines": [
+      "As drawn: the step, its path and what it got, then what was not loaded and what to do. The rows and the words are the design's.",
+      "Setup sits under the statement, above Screen and Steps, with the feedback box and the verdict pair at the foot in the conversation (see <i>rule detail</i>'s redlines).",
+      "The App pane behind the card is the as-built's stand-in box. In the panel the card covers the frame, which is left on the step that failed."
+    ]
+  },
+  "screen-picker-tied": {
+    "title": "the address matches two screens that differ in setup",
+    "redlines": [
+      "The note is the design's, word for word, with each state's setup in a sentence under its title.",
+      "The ordinary picker stays under the note: the List and Storyboard tabs, <i>Detect from the page</i> and every screen. The design drew the note alone. A person who is on neither state can still pick another screen.",
+      "Design and App are dimmed while the question stands, and the bar reads <i>Which screen?</i>, as drawn."
+    ]
+  },
+  "app-target-picker": {
+    "title": "the App pane's target picker",
+    "redlines": [
+      "As drawn: the target's name against the App button, a row for each target that has a base URL with its address under it, a tick on the one in use, and the foot note.",
+      "A target with no base URL is not listed, and a blueprint with one target shows no picker at all. The design drew two targets and did not say.",
+      "The bar reads <i>No screen</i> here because the as-built frames the example's design page, not its app."
+    ]
+  },
+  "rule-detail-targets": {
+    "title": "rule detail, a verdict on each target",
+    "redlines": [
+      "A row for each tier on each target that has a run, and what the check said under its row, as drawn.",
+      "Each row keeps the built detail's own shape: verdict, who, and how long ago on one line (<i>pass · agent · 75d ago</i>). The design set the time at the right edge as a clock time.",
+      "The check's file is given with its folder (<code>spec/waitlist.spec.ts:27</code>), as the ledger records it. The design showed the file name alone.",
+      "The first target keeps its row when it has no run, so <i>never run</i> is still said; any other target gets a row only once it has one.",
+      "Evidence sits after Steps, where the built rule detail has always had it. The design had it above them."
+    ]
+  },
   "cli/serve-anywhere": {
     "title": "walkdown serve, started outside any blueprint, serves them all",
     "redlines": [

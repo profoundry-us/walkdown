@@ -3,7 +3,8 @@
 - **Status:** accepted 2026-10-23 by Topher. Proposed the same day by the agent
     from [issue #25](https://github.com/profoundry-us/walkdown/issues/25). Its rules
     and screens are written first and walked before anything with a screen is
-    built (ADR 0015 §8).
+    built (ADR 0015 §8). Built 2026-11-10, after Topher walked the rules and
+    their designs.
 - **Date:** 2026-10-23
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0001 (page to blueprint routing), ADR 0014 (file layout and

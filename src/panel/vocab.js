@@ -211,6 +211,10 @@ export function pageSurface() {
   return matchScreen([sc], hereLocation())?.surface ?? 'app';
 }
 
+// The screen whose setup is running, or stopped part-way: the person chose it
+// by opening its rule, so the address has already been told which state it is.
+const beingSetUp = (sc) => Boolean(S.setup) && S.setup.screen === sc.id;
+
 /** Which storyboard screen this page is, by URL — same trick the embed uses. */
 export function currentScreen() {
   const screens = S.data?.storyboard ?? [];
@@ -218,8 +222,9 @@ export function currentScreen() {
   const hit = matchScreen(screens, hereLocation());
   if (!hit) return null;
   const tied = statesAt(hit, screens);
-  // Two states of one page: the one the panel last set up here, or neither.
-  return tied.length > 1 ? (tied.find(isSetUp) ?? null) : hit.screen;
+  // Two states of one page: the one the panel last set up here, the one it
+  // is setting up now, or neither.
+  return tied.length > 1 ? (tied.find(isSetUp) ?? tied.find(beingSetUp) ?? null) : hit.screen;
 }
 
 /*
@@ -253,7 +258,7 @@ export function tiedScreens() {
   const hit = matchScreen(screens, hereLocation());
   if (!hit) return [];
   const tied = statesAt(hit, screens);
-  return tied.length > 1 && !tied.some(isSetUp) ? tied : [];
+  return tied.length > 1 && !tied.some((sc) => isSetUp(sc) || beingSetUp(sc)) ? tied : [];
 }
 
 /** Where a screen lives on one surface, as a URL walkdown can navigate to. */

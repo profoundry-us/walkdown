@@ -1,0 +1,95 @@
+{
+  "run_id": "2026-11-10T22-44-07Z-local-01",
+  "created": "2026-11-10T22:44:07Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b8693262-dirty",
+  "note": "ADR 0017 panel rules, judged on the checks rig (walkdown 4701, panel 4713, expenses app 4737/4738) at b8693262, before the fix for n-0633.",
+  "spec_hash": "sha256:a89a5d0970e7",
+  "results": [
+    {
+      "rule": "screens.setup.runs-before-the-screen",
+      "status": "pass",
+      "statement_hash": "sha256:e7e5adf3b438",
+      "evidence": [
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-running-step2.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-done.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-recipe-done.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-waiting-for-anchor.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-prose.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-rule-detail-setup.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-rule-detail-setup-prose.png"
+      ],
+      "reasoning": "Drove the panel on port 4713 over the throwaway expenses rig (serve on 4701, app on 4737/4738) with my own Playwright scripts, reading the app's /__log for order. Opening team-no-approve asked the app, in order, GET /dev/impersonate?id=1, POST /dev/session with user_id 14, then GET /expenses/412 as uid 14, and the pane showed Expense 412 signed in as 14. With the POST held 2.5s, panel.setup-progress read 'Setting up this screen: step 2 of 3 / Posting the form to /dev/session. / Then /expenses/412 opens here.' and detail.setup-steps showed step 1 done, 2 now, 3 todo under the SETUP heading; unheld, the slow screen showed 'step 2 of 2, Waiting for nav.signed-in' by itself. Opening team-note, and going back to team-no-approve, added no requests; org-note ran its recipe (POST user_id 31, then the path); returning to the team screen ran its three steps again. detail.setup-again reran from step 1; three fast clicks and fast hopping between rules still ended on the right screen and user. The prose screen showed 'Sign in as any manager first.' in detail.setup with no steps list, no run-again control, and only GET /expenses/7 in the log. Edges: while a tied screen's setup runs the bar's picker reads 'Which screen?' where the design names the screen (about 100% on tied screens, cosmetic, a second or two); the header reads 'step 2 of 3' while running where the design reads 'on local'; progress copy is 'Posting the form' where the design says 'Posting the sign-in form'. The picker menu left open after setup on a tied address is filed under screens.identity.setup-tells-states-apart, since it needs a tie and not setup alone.",
+      "threads": []
+    },
+    {
+      "rule": "screens.setup.failure-stops-it",
+      "status": "pass",
+      "statement_hash": "sha256:46284ad32d8f",
+      "evidence": [
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-setup-failed-step2-500.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-setup-failed-missing-fixture.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-setup-failed-missing-fixture-review.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-setup-failed-wait-for-timeout.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-app-setup-failed.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-app-setup-failed-fixture.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-app-setup-failed-timeout.png"
+      ],
+      "reasoning": "Drove port 4713 over the expenses rig. Opening 'broken': panel.setup-failed read 'Setup stopped at step 2 of 3 / Step 2, post / Path /dev/broken / Got 500 Internal Server Error / /expenses/500 was not loaded, so this is not the screen yet...', the app log held only GET /dev/impersonate?id=14 and POST /dev/broken (no /expenses/500, not even the panel's probe), and the steps list showed 1 done, 2 failed, 3 todo with 'stopped at step 2'. detail.setup-again asked for /dev/impersonate and /dev/broken again, from step 1, and stopped the same way. Opening 'unseeded': 'Setup did not run', Fixture expense_draft, Target local, the command 'walkdown fixtures set --blueprint expenses --target local' (a form the CLI's own help accepts), and the app log stayed empty, probes included; with review chosen the same message named review and '--target review'. Opening 'slow': progress showed step 2 of 2 waiting, and 10.8s after the click it failed with 'Step 2, wait for / Anchor nav.signed-in / Got Not on the page after ten seconds', with only GET /dev/slow asked. Opening a good rule afterwards cleared the failure. On review, 'broken' stopped the same way against port 4738. Edges under 10%: none met. Design departures, none failing a step: the timeout advice says 'the page the step before lands on' where the design names that step's path; in the missing-fixture state the bar's picker reads 'No screen' where the design names the screen.",
+      "threads": []
+    },
+    {
+      "rule": "screens.identity.setup-tells-states-apart",
+      "status": "fail",
+      "statement_hash": "sha256:099086f49c0a",
+      "evidence": [
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-after-open-org-note.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-after-open-team-no-approve.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-review-chosen.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-opened-by-rule-org-pin-form.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-fresh-tab.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-picked-org.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-same-setup-only.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-twin-plus-org.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-screen-picker-tied.png"
+      ],
+      "reasoning": "Drove port 4713 over the expenses rig. The written steps hold: opening org-note left the panel on 'Expense, view-only org manager' signed in as 31, and a pin placed then was filed with anchor.screen expense-org and rule expenses.view.org-note (read from the rig's thread file, since removed). A fresh tab on /expenses/412 opened the picker by itself with 'Two screens share /expenses/412. They differ only in how they are set up...', both screens with their setups, and 'Nothing is filed under either until you do.'; picking the org row ran POST /dev/session user_id 31 then GET /expenses/412. On a throwaway copy of the blueprint with a twin of expense-team (same path, same setup), lint warned 'a tie is never matched', and served on port 4760 the panel took the first screen without asking. It fails on an edge beyond the steps: on 4 of 4 fresh panels, opening a rule on either tied screen ended with the picker's ordinary List menu left open over the left third of the App pane, though the picker named the right screen and panel.screen-tied was gone; it happened again after switching the target to review. Anyone opening a rule on a tied screen meets it once per address per page load, which I put above 80% for a person using tied screens, the case this rule exists for. Not counted in the verdict but departing from the accepted design: in the tied state Pin mode stays enabled where the design disables it, and a pin placed then is filed with no screen and no rule; the tied note sits above the full screen list instead of standing alone. Under 10%: a reload of the panel forgets which screen it set up and asks again.",
+      "threads": [
+        "facc87c2-efbf-460d-8ec8-91b23597a2c3"
+      ]
+    },
+    {
+      "rule": "panel.targets.switch-the-app-pane",
+      "status": "pass",
+      "statement_hash": "sha256:15e4d7faad82",
+      "evidence": [
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-open.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-review-chosen.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-after-reload.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-serve-page-after-reload.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-mid-setup.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-after-mid-setup-switch.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-switch-no-rule.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-app-target-picker.png"
+      ],
+      "reasoning": "Drove port 4713 over the expenses rig, and the serve's own page on 4701 for the reload. With no choice made panel.target read local and the pane showed port 4737. Opened, it listed local (ticked, http://localhost:4737) then review (http://localhost:4738), no staging, and the design's footnote word for word. Choosing review with team-no-approve open asked port 4738 for GET /dev/impersonate?id=1, POST /dev/session with user_id 77 (review's fixture), then GET /expenses/9 (review's fixture) as uid 77; the pane showed 'Expense 9 on :4738' and the setup header read 'on review'. The choice is kept in localStorage under walkdown:target:<blueprint>, so a second browser context still read local. After a reload the picker read review; on the serve's own page the pane came back on review's /expenses/9 with the rule open, and on the 4713 harness the next rule opened ran on 4738. Switching to review while local's setup was held mid-POST ended on review with review's steps done and no failure. Edges between 10% and 80%: on the 4713 harness a reload returns the pane to the page's own frame address on 4737 while the picker reads review, until a rule or screen is opened (I take the fixed frame= address to be the harness's, since the serve page does not do it); switching target with no rule open on a prose screen loads the same path on the other target with no setup, as prose never runs. The picker menu left open after the switch on a tied address is the defect filed under screens.identity.setup-tells-states-apart.",
+      "threads": []
+    },
+    {
+      "rule": "panel.targets.verdict-on-each",
+      "status": "pass",
+      "statement_hash": "sha256:48cd3b6f3cb6",
+      "evidence": [
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-targets.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-targets-evidence-block.png",
+        "runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-targets-review-chosen.png",
+        "runs/evidence/2026-11-10T22-30-00Z/design-rule-detail-targets.png"
+      ],
+      "reasoning": "Drove port 4713 over the expenses rig and opened expenses.view.team-no-approve. detail.evidence showed 'checks/local  pass · checks-person · 12m ago' with the line 'spec/expenses.spec.ts:41 found no Approve button and the view-only note', then 'checks/review  fail · checks-person · 1d ago' with 'spec/expenses.spec.ts:41 expected no Approve button, and found one', then 'agent  never run'. No row and no word for staging anywhere in the detail. I ran walkdown status --blueprint expenses --target local, review and staging against the rig's home: pass (run 2026-11-10T22-20-36Z-local-01), fail (2026-11-09T22-20-36Z-review-01) and never, matching each row and the run id in its tooltip. 'checks/local' and 'checks/review' each occur once in the whole detail, and the words pass and fail once each. The rows did not change when the App pane was pointed at review. A rule with no runs shows a single 'checks/local never run' row. Departures from the accepted design, which I did not count as a failed step: the date is a relative age in the verdict's colour ('12m ago', '1d ago') where the design draws 'today, 9:41 AM' and 'yesterday, 4:12 PM' right-aligned in neutral ink, and the build adds the actor's name; the design's dashed rule between rows is absent. Edge between 10% and 80%: the small glyph row beside the rule id reads checks failed (from review) whichever target is chosen, while status --target local reads pass.",
+      "threads": []
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "run_id": "2026-11-10T22-21-17Z-local-01",
+  "created": "2026-11-10T22:21:17Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "b8693262-dirty",
+  "spec_hash": "sha256:212ae54cd746",
+  "results": [
+    {
+      "rule": "screens.identity.setup-tells-states-apart",
+      "status": "pass",
+      "statement_hash": "sha256:099086f49c0a",
+      "duration_ms": 30,
+      "checks": [
+        "test/setup.test.js:128"
+      ]
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:9876aeacfd14",
+      "duration_ms": 491,
+      "checks": [
+        "test/thread-ask.test.js:45",
+        "test/thread-ask.test.js:70",
+        "test/thread-ask.test.js:92",
+        "test/thread-ask.test.js:105"
+      ]
+    }
+  ]
+}

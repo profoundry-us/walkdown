@@ -1,0 +1,31 @@
+id: n-0633
+uuid: facc87c2-efbf-460d-8ec8-91b23597a2c3
+kind: note
+reason: finding
+author: agent
+created: 2026-11-10T22:33:21.920Z
+anchor:
+  rule: screens.identity.setup-tells-states-apart
+status: open
+body: "Opening a rule on one of two screens that share an address leaves the
+  screen picker's menu open over the App pane. Expected: the panel is on that
+  screen and the picker stays closed. The accepted screen-picker-tied design
+  opens it by itself only when neither screen has been set up. Actual: seen on 4
+  of 4 fresh panels on port 4713 over the expenses rig, with rules
+  team-no-approve and org-note. Setup runs and /expenses/412 loads.
+  panel.screen-picker names the right screen and panel.screen-tied is absent.
+  Yet the ordinary List menu, with Detect from the page and all six screens, is
+  open and covers the left third of the app until Escape. It opens once per
+  address per page load. It opens again after panel.target is switched to
+  review. Likely cause: askWhichScreen in src/panel/app.js sets S.screensOpen
+  when the frame lands on the tied address before the setup is marked done.
+  Nothing closes it once the setup is done. Evidence:
+  runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-after-open-org-note.\
+  png, runs/evidence/2026-11-10T22-30-00Z/app-rule-detail-setup-done.png,
+  runs/evidence/2026-11-10T22-30-00Z/app-app-target-picker-review-chosen.png.
+  Two departures from the accepted design in the tied state, not counted in the
+  verdict: Pin mode stays enabled where the design disables it, and a pin placed
+  then is filed with no screen and no rule. The tied note also sits above the
+  full List menu instead of standing alone. See
+  runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-fresh-tab.png beside
+  design-screen-picker-tied.png."

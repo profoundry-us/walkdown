@@ -184,6 +184,10 @@ test('two states of one page: the panel takes the one it set up, and asks when i
   await expect(app.getByTestId('nav.user')).toHaveText('31');
   await expect(picker).toContainText('Expense, view-only org manager');
   await expect(page.getByTestId('panel.screen-tied')).toHaveCount(0);
+  // And nothing was asked on the way: the picker is shut, not left open over
+  // the App pane once the setup had answered for it (n-0633).
+  await expect(page.getByTestId('panel.screens-list')).toBeHidden();
+  await expect(page.getByTestId('panel.pin-mode')).toBeEnabled();
 
   // The same address in a fresh tab: nothing says which, so it asks.
   await start(page, `${EXPENSES_ORIGIN}/expenses/412`);
@@ -199,14 +203,17 @@ test('two states of one page: the panel takes the one it set up, and asks when i
     'Recipe as_view_only_org_manager: post /dev/session with user_id 31',
   );
   await expect(tied).toContainText('Nothing is filed under either until you do.');
-  // Neither, until one is picked.
+  // Neither, until one is picked: and no pin, which would be filed under no screen.
   await expect(picker).toContainText('Which screen?');
+  await expect(page.getByTestId('panel.screens-list')).toBeVisible();
+  await expect(page.getByTestId('panel.pin-mode')).toBeDisabled();
 
   // Picking one runs its setup, as opening a rule on it would.
   await rows.nth(1).click();
   await expect.poll(async () => (await asked(page)).length).toBe(2);
   await expect(app.getByTestId('nav.user')).toHaveText('31');
   await expect(picker).toContainText('Expense, view-only org manager');
+  await expect(page.getByTestId('panel.screens-list')).toBeHidden();
   expect(await asked(page)).toEqual(['POST /dev/session', 'GET /expenses/412']);
 });
 

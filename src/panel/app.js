@@ -1262,8 +1262,20 @@ export function setUpAgain(screenId) {
  * picked (ADR 0017 §4, screens.identity.setup-tells-states-apart).
  */
 function askWhichScreen() {
-  if (!D.screenPanel || !tiedScreens().length || S.askedAt === S.frameUrl) return;
+  if (!D.screenPanel) return;
+  if (!tiedScreens().length) {
+    // Answered, by a pick or by a setup: a picker this opened is closed
+    // again, or it sat over the App pane with nothing left to ask (n-0633).
+    if (S.askedOpen) {
+      S.askedOpen = false;
+      S.screensOpen = false;
+      syncScreenPanel();
+    }
+    return;
+  }
+  if (S.askedAt === S.frameUrl) return;
   S.askedAt = S.frameUrl;
+  S.askedOpen = true;
   S.screensOpen = true;
   syncScreenPanel();
 }
@@ -1773,9 +1785,10 @@ const PIN_MID =
   'Slide fully to the prototype or the app first — half-faded, a pin has no surface to belong to';
 const PIN_UNREACHABLE =
   'walkdown is not running inside this surface, so a pin here would land on the page underneath it';
+const PIN_TIED = 'Pick a screen first, so the pin is filed under the right one';
 const pinHint = () => {
   const where = pinSurface();
-  if (!where) return midFade() ? PIN_MID : PIN_UNREACHABLE;
+  if (!where) return midFade() ? PIN_MID : tiedScreens().length ? PIN_TIED : PIN_UNREACHABLE;
   return `Click anything to attach a note — it lands on the ${where}`;
 };
 
@@ -1804,6 +1817,9 @@ const ghostSurface = () => (pageSurface() === 'prototype' ? 'app' : 'prototype')
  */
 function pinSurface() {
   if (midFade()) return null;
+  // Two states of one page and neither picked: a pin would be filed under no
+  // screen at all (screens.identity.setup-tells-states-apart).
+  if (tiedScreens().length) return null;
   if (S.ghost && S.ghostOpacity === 1) return S.ghostReady ? ghostSurface() : null;
   return pageSurface();
 }

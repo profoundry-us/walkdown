@@ -9,6 +9,31 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ## [Unreleased]
 
+### Added
+
+- **Screen setup** ([ADR 0017](docs/adr/foundational/202610_screen_setup.md)).
+  A screen the address alone cannot reach (a page one role sees, a record that
+  has to exist) says how to get there in `app.setup`: steps the panel runs in
+  the App pane before it opens the screen (`visit`, `post` with `fields`,
+  `wait_for` an anchor), or a `recipe` several screens share. A step that fails
+  stops the setup, and the pane says which step and why. Prose setup is shown
+  and never run, as before. walkdown never runs the app's code: a step only
+  reaches a route the app serves.
+- **Fixtures.** `{fixtures.<key>}` in a step or a path is filled in per target,
+  from `runner.targets.<target>.fixtures` and from the values a machine keeps
+  for itself with `walkdown fixtures set` (key=value arguments, or a JSON
+  object on standard input).
+- **A target picker** on the App pane, where a blueprint declares more than
+  one target with a base URL. Choosing a target sets the screen up there.
+- **A verdict per target.** A rule's evidence has a row for each tier on each
+  target that has a run, so "passes locally, fails on the review app" is said.
+- Two screens on one path with different setup steps are two screens. The
+  panel takes the one it set up, and asks when it set up neither.
+
+### Fixed
+
+- Two asks put off with Later inside one second no longer tie.
+
 ## [0.5.0] - 2026-10-23
 
 Upgrading from 0.4.1: see [UPGRADING.md](UPGRADING.md#from-041-to-050). Designs
