@@ -1,0 +1,37 @@
+{
+  "run_id": "2026-11-10T23-30-32Z-local-01",
+  "created": "2026-11-10T23:30:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "271f087a-dirty",
+  "note": "Judged again after n-0634 and n-0635, by the building agent with its own Playwright probe on the checks rig (walkdown 4701, panel 4713, expenses app 4737/4738), tree 271f087a.",
+  "spec_hash": "sha256:a89a5d0970e7",
+  "results": [
+    {
+      "rule": "screens.setup.failure-stops-it",
+      "status": "pass",
+      "statement_hash": "sha256:46284ad32d8f",
+      "evidence": [
+        "runs/evidence/2026-11-10T23-40-00Z/app-app-setup-failed-step2-500-1920.png",
+        "runs/evidence/2026-11-10T23-40-00Z/app-app-setup-failed-after-resize.png",
+        "runs/evidence/2026-11-10T23-40-00Z/app-app-setup-failed-missing-fixture.png",
+        "runs/evidence/2026-11-10T23-40-00Z/app-app-setup-failed-wait-for-timeout.png",
+        "runs/evidence/2026-11-10T23-40-00Z/as-built-app-setup-failed-1920.png"
+      ],
+      "reasoning": "Judged again because n-0634 claimed a fix. Driven on port 4713 over the expenses rig in a 1920 by 900 window. Opening the rule on the screen whose second step answers 500 showed 'Setup stopped at step 2 of 3 / Step 2, post / Path /dev/broken / Got 500 Internal Server Error / /expenses/500 was not loaded, so this is not the screen yet', and the framed app had been asked for two things only, a GET then a POST, never the screen's path. The cover's box equalled the App frame's exactly (12, 44, 1500 by 844). Before 271f087a, narrowing the window to 1280 left the cover at its old width, lying over the rule detail, and my click on detail.setup-again was refused for thirty seconds because the cover took it; that is the defect behind n-0634's 'the container doesn't take up the full space', and it was in the panel as well as the drawing. After the fix the cover measured 12, 44, 860 by 744 against a frame of the same box, and detail.setup-again was clickable and asked the app for the GET and the POST again, from step 1. The screen with a fixture nobody set showed 'Setup did not run', the fixture expense_draft, the target local and the command 'walkdown fixtures set --blueprint expenses --target local', with nothing asked of the app. The wait_for screen failed 10.3 seconds after the click with 'Step 2, wait for / Anchor nav.signed-in / Got Not on the page after ten seconds'. The as-built drawing at 1920 wide now has its cover on the frame's own box. Edge under 10 percent: the cover follows the frame's size, so a frame that moved without changing size would not be followed; nothing in the panel moves it that way.",
+      "threads": []
+    },
+    {
+      "rule": "panel.targets.verdict-on-each",
+      "status": "pass",
+      "statement_hash": "sha256:48cd3b6f3cb6",
+      "evidence": [
+        "runs/evidence/2026-11-10T23-40-00Z/app-rule-detail-targets.png"
+      ],
+      "reasoning": "Judged again because n-0635 was answered as addressed; nothing in the build changed for it, and the note was a question about where a checks verdict on another target can come from. Driven on port 4713 over the expenses rig: opening expenses.view.team-no-approve, detail.evidence read 'checks/local, pass, checks-person, 1m ago' with the line 'spec/expenses.spec.ts:41 found no Approve button and the view-only note', then 'checks/review, fail, checks-person, 1d ago' with 'spec/expenses.spec.ts:41 expected no Approve button, and found one', then 'agent, never run'. The words checks/local and checks/review each occur once in the whole detail and staging not at all. walkdown status --blueprint expenses --target local, review and staging, run against the rig's home, gave pass (run 2026-11-10T23-28-32Z-local-01), fail (2026-11-09T23-28-32Z-review-01) and never. Each row is a recorded run read back: the review row exists because a checks run was recorded with target review, and staging has no row because nothing was. Departures from the accepted design, redlined and not counted: the date is a relative age beside the actor, where the design sets a clock time at the right edge.",
+      "threads": []
+    }
+  ]
+}
