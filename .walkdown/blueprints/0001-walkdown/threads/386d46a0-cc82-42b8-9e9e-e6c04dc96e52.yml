@@ -6,7 +6,7 @@ author: topher
 created: 2026-10-26T12:08:36.651Z
 anchor:
   rule: screens.setup.runs-before-the-screen
-status: addressed
+status: verified
 body: The wording looks good, but the design needs some work. The SETUP section
   on the right is currently shown as a horizontal set of steps; there is not
   enough room and it's creating a horizontal scrollbar on the sidebar. It should
@@ -21,3 +21,10 @@ replies:
       setup-list. app-setup-failed had the same list and gets the same fix. The
       rule's wording is unchanged, so this needs your walk again for the design
       only."
+  - author: topher
+    via: verdict
+    created: 2026-11-10T23:24:29Z
+    body: Verified by topher's pass on screens.setup.runs-before-the-screen
+      (2026-11-10T23-24-29Z-local-01).
+verified_by: topher
+verified_via: 2026-11-10T23-24-29Z-local-01

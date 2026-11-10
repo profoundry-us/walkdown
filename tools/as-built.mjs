@@ -488,6 +488,16 @@ function wrap(id, raw, streamCss) {
         frame[1].replace('background: rgb(255, 255, 255)', 'background: oklch(97% 0.01 40)'),
       ),
     );
+  // The setup's cover is measured against the frame as it stood when this
+  // was captured. A drawing has nothing to measure again, so it is given the
+  // frame's own box, which follows the window (n-0634).
+  if (frame) {
+    const box = ['top', 'left', 'width', 'height']
+      .map((k) => frame[1].match(new RegExp(`(?:^|;\\s*)${k}:\\s*[^;]+`))?.[0].replace(/^;\s*/, ''))
+      .filter(Boolean)
+      .join('; ');
+    html = html.replace(/(class="wdp-setup-cover" style=")[^"]*(")/, `$1${box};$2`);
+  }
   const stream = html.includes('wd-msg')
     ? `\n<!-- The conversation's own rules, as the panel carries them (lib/message-stream.js MSG.css). -->\n<style>${streamCss.trim()}</style>`
     : '';

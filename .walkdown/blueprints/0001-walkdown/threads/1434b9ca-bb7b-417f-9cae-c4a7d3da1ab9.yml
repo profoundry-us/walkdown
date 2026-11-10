@@ -1,0 +1,22 @@
+id: n-0634
+uuid: 1434b9ca-bb7b-417f-9cae-c4a7d3da1ab9
+kind: note
+reason: feedback
+author: topher
+created: 2026-11-10T23:22:34.080Z
+anchor:
+  rule: screens.setup.failure-stops-it
+status: addressed
+body: I think this is working properly, but the as-built looks a little funny;
+  seems like the container doesn't take up the full space?
+attachments:
+  - file: attachments/1434b9ca-bb7b-417f-9cae-c4a7d3da1ab9-1.png
+    name: Screenshot 2026-11-10 at 5.21.58_PM.png
+replies:
+  - author: agent
+    created: 2026-11-10T23:25:43Z
+    body: The panel is right; the drawing was not. The cover is measured against the
+      App frame, and the as-built froze the measurements from the window it was
+      captured in, so in a wider window it stopped short of the frame. The
+      drawing now gives the cover the frame's own box, which follows the window.
+      Both setup drawings are redrawn.

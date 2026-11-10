@@ -1,0 +1,50 @@
+{
+  "run_id": "2026-11-10T23-24-29Z-local-01",
+  "created": "2026-11-10T23:24:29Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "4b90ee8f-dirty",
+  "tree_hash": "sha256:049ce5095a7e",
+  "spec_hash": "sha256:a89a5d0970e7",
+  "results": [
+    {
+      "rule": "screens.setup.runs-before-the-screen",
+      "status": "pass",
+      "statement_hash": "sha256:e7e5adf3b438"
+    },
+    {
+      "rule": "screens.setup.failure-stops-it",
+      "status": "fail",
+      "statement_hash": "sha256:46284ad32d8f",
+      "threads": [
+        "1434b9ca-bb7b-417f-9cae-c4a7d3da1ab9"
+      ]
+    },
+    {
+      "rule": "screens.identity.setup-tells-states-apart",
+      "status": "pass",
+      "statement_hash": "sha256:099086f49c0a"
+    },
+    {
+      "rule": "panel.targets.switch-the-app-pane",
+      "status": "pass",
+      "statement_hash": "sha256:15e4d7faad82"
+    }
+  ]
+}
