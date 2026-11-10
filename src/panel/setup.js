@@ -278,6 +278,13 @@ export function leaveSetup() {
 /* ---- what stands where the page would be -------------------------------- */
 
 let cover = null;
+/*
+ * The frame eases to a new size over a fifth of a second, so a measurement
+ * taken when the window changed is of the size it is leaving: the cover kept
+ * the old box, and after a narrower window it lay over the rule's own
+ * controls (n-0634). It is measured again whenever the frame's box changes.
+ */
+let watching = null;
 
 /** The cover follows the frame's box, as the loading veil does. */
 export function placeCover() {
@@ -291,6 +298,8 @@ export function placeCover() {
 export const coverIsUp = () => Boolean(cover);
 
 export function hideCover() {
+  watching?.disconnect();
+  watching = null;
   cover?.remove();
   cover = null;
 }
@@ -312,6 +321,10 @@ function paintCover() {
     cover.dataset.theme = 'blueprint';
     cover.className = 'wdp-setup-cover';
     D.sr.appendChild(cover);
+    if (typeof ResizeObserver === 'function') {
+      watching = new ResizeObserver(placeCover);
+      watching.observe(D.appFrame);
+    }
   }
   const n = run.steps.length;
   const path = `<code>${esc(run.path ?? '')}</code>`;

@@ -144,6 +144,27 @@ test('a setup step that fails stops the setup, and the App pane says which and w
   await expect(steps.nth(2)).toHaveAttribute('data-state', 'todo');
   await expect(page.getByTestId('detail.setup-state')).toHaveText('stopped at step 2');
 
+  // The cover stands over the App pane and nothing else, in a window of any
+  // size: it kept the box it was first given, and after a narrower window it
+  // lay over the rule's own controls (n-0634).
+  const boxes = async () => {
+    const box = async (loc) => {
+      const b = await loc.boundingBox();
+      return [b.x, b.y, b.width, b.height].map(Math.round);
+    };
+    return [await box(page.locator('.wdp-setup-cover')), await box(page.locator(APP))];
+  };
+  const size = page.viewportSize();
+  for (const width of [size.width - 300, size.width]) {
+    await page.setViewportSize({ width, height: size.height });
+    await expect
+      .poll(async () => {
+        const [cover, frame] = await boxes();
+        return cover.join() === frame.join();
+      })
+      .toBe(true);
+  }
+
   // Again, from its first step.
   await page.getByTestId('detail.setup-again').click();
   await expect.poll(async () => (await asked(page)).length).toBe(4);
