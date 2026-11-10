@@ -1,0 +1,16 @@
+# `walkdown lint` where one screen uses two fixtures: staging gives both in
+# spec.yml, review gives one, and local has none set on this machine.
+screen: lint-fixture-missing
+title: Lint warns about a fixture a target lacks
+rule: screens.setup.fixtures-per-target
+fixture: fixture-missing
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[fixtures\] expenses/spec\.yml › runner\.targets\.review: target `review` has no `view_only_team_manager`, which screen expense-view-only-team uses in its setup — add it under runner\.targets\.review\.fixtures$'
+  - '^  ⚠ \[fixtures\] expenses/spec\.yml › runner\.targets\.local: target `local` has no fixtures set on this machine, so expense_submitted and view_only_team_manager have no value there — set them with `walkdown fixtures set --blueprint expenses --target local`$'
+  # One for review, one for local, none for staging.
+  - '— 0 errors, 2 warning\(s\)'
+anchors:
+  - { id: lint.fixture-warning, match: '^(WARNINGS|  ⚠ \[fixtures\])' }

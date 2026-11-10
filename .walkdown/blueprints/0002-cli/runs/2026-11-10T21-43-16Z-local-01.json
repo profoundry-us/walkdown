@@ -1,0 +1,53 @@
+{
+  "run_id": "2026-11-10T21-43-16Z-local-01",
+  "created": "2026-11-10T21:43:16Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "c89083a7-dirty",
+  "tree_hash": "sha256:abfae9e2c7fa",
+  "spec_hash": "sha256:b6246a6f2b6f",
+  "results": [
+    {
+      "rule": "screens.setup.fixtures-set-keeps-this-machines-values",
+      "status": "pass",
+      "statement_hash": "sha256:6e0afbf92524",
+      "duration_ms": 1793,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/setup.test.js:47"
+      ]
+    },
+    {
+      "rule": "screens.setup.fixtures-per-target",
+      "status": "pass",
+      "statement_hash": "sha256:85fe533de4af",
+      "duration_ms": 491,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/setup.test.js:47"
+      ]
+    },
+    {
+      "rule": "screens.setup.setup-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9a9388488257",
+      "duration_ms": 591,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/setup.test.js:78",
+        "test/setup.test.js:108"
+      ]
+    },
+    {
+      "rule": "screens.setup.steps-or-prose",
+      "status": "pass",
+      "statement_hash": "sha256:5c6c941f8039",
+      "duration_ms": 481,
+      "checks": [
+        "test/cli/shard.mjs:27",
+        "test/setup.test.js:31"
+      ]
+    }
+  ]
+}

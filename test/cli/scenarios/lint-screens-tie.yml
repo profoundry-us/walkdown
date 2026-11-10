@@ -1,0 +1,15 @@
+# `walkdown lint` over three pairs of screens: two states of one page, two
+# screens sharing a path and a setup, and two paths that only look alike.
+screen: lint-screens-tie
+title: Lint warns only about screens that share a path and a setup
+rule: screens.setup.setup-is-identity
+fixture: screens-tie
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[storyboard\] expenses/storyboard\.yml › expense-approve-confirm: app path /expenses/\{fixtures\.expense_submitted\} \(/expenses/412 on local\) and setup \{ recipe: as_finance_admin \} are both screen `expense-approve`''s — a tie is never matched, so this screen can only be reached by picking it by hand\. Give one of them its own setup or its own path$'
+  # The two states of one page, and the two paths that fill in apart, say nothing.
+  - '— 0 errors, 1 warning\(s\)'
+anchors:
+  - { id: lint.tie-warning, match: '^(WARNINGS|  ⚠ \[storyboard\])' }

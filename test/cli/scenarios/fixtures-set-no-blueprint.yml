@@ -1,0 +1,16 @@
+# `walkdown fixtures set` without --blueprint, in a project with one blueprint.
+screen: fixtures-set-no-blueprint
+title: walkdown fixtures set refuses to keep values without --blueprint
+rule: screens.setup.fixtures-set-keeps-this-machines-values
+fixture: expenses-local
+cwd: expenses
+piped: bin/rake walkdown:seed
+stdin: '{"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22}'
+command: [fixtures, set, --target, local]
+exit: 2
+expect:
+  - '^`walkdown fixtures set` acts on one blueprint, and does not choose it for you\. This project''s blueprint is \S+expenses\.$'
+  - '^Choose one with `--blueprint <id>` \(e\.g\. `--blueprint expenses`\)\.$'
+  - '^Nothing was kept\. ~/\.walkdown/fixtures/\S+expenses/local\.yml does not exist yet\.$'
+anchors:
+  - { id: fixtures.refused, match: '^(`walkdown fixtures set` acts|Choose one with)' }

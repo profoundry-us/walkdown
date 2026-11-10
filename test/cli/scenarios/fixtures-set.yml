@@ -1,0 +1,26 @@
+# The app's own task piped into `walkdown fixtures set`, and then one key
+# handed over as key=value in the same terminal.
+screen: fixtures-set
+title: walkdown fixtures set keeps this machine's fixtures
+rule: screens.setup.fixtures-set-keeps-this-machines-values
+fixture: expenses-local
+cwd: expenses
+piped: bin/rake walkdown:seed
+stdin: '{"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22}'
+command: [fixtures, set, --blueprint, expenses, --target, local]
+then:
+  - command: [fixtures, set, --blueprint, expenses, --target, local, expense_submitted=412]
+exit: 0
+expect:
+  - '^Kept 3 fixtures for local:$'
+  - '^  expense_submitted        412$'
+  - '^  view_only_team_manager   18$'
+  - '^  view_only_org_manager    22$'
+  - '^  \+ kept  ~/\.walkdown/fixtures/\S+expenses/local\.yml$'
+  - '^These values are this machine''s only\. Nothing was written to the blueprint or the repository\.$'
+  - '^On local, screens now fill in \{fixtures\.<key>\} from them, and they win over any in spec\.yml\.$'
+  # key=value pairs are kept the same way.
+  - '^~/expenses \$ walkdown fixtures set --blueprint expenses --target local expense_submitted=412$'
+  - '^Kept 1 fixture for local:$'
+anchors:
+  - { id: fixtures.values, match: '^(Kept \d+ fixtures? for |  [a-z_]+ +\S+$)' }

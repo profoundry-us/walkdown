@@ -1,0 +1,26 @@
+# The app's task says what it made on standard output as well as the JSON, so
+# what is piped in is not one JSON object.
+screen: fixtures-set-refused
+title: walkdown fixtures set refuses input that is not a flat JSON object
+rule: screens.setup.fixtures-set-keeps-this-machines-values
+fixture: expenses-local
+cwd: expenses
+piped: bin/rake walkdown:seed
+stdin: |
+  Created user view-only team manager (id 18)
+  Created user view-only org manager (id 22)
+  Created expense "Team offsite dinner" (id 412), submitted
+  {"expense_submitted": 412, "view_only_team_manager": 18, "view_only_org_manager": 22}
+  Seeded 3 records in 0.4s
+  Done.
+command: [fixtures, set, --blueprint, expenses, --target, local]
+exit: 2
+expect:
+  - '^✗ What was handed in on standard input is not a flat JSON object of keys and values\.$'
+  - '^It was given \(the first 4 of 6 lines\):$'
+  - '^  Created user view-only team manager \(id 18\)$'
+  - 'Each value is a string, a number or a boolean\. A null, a list or an object is refused\.'
+  - 'or pass the values as key=value arguments instead\.$'
+  - '^Nothing was kept\. ~/\.walkdown/fixtures/\S+expenses/local\.yml does not exist yet\.$'
+anchors:
+  - { id: fixtures.refused, match: '^(✗ What was handed in|It was given|  \S|walkdown fixtures set reads|$)' }

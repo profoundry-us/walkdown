@@ -409,12 +409,12 @@ test('two screens claiming one address on a surface: the loser of the tie is nam
   );
   const { findings } = lint(load(h), { checks: false });
   const tie = findings.filter(
-    (f) => f.category === 'storyboard' && /already claimed/.test(f.message),
+    (f) => f.category === 'storyboard' && /a tie is never matched/.test(f.message),
   );
   // The app path collides; the prototype refs differ by fragment, so they do not.
   assert.equal(tie.length, 1);
   assert.equal(tie[0].subject, 'home-empty');
-  assert.match(tie[0].message, /app ref "\/" is already claimed by screen `home`/);
+  assert.match(tie[0].message, /app path \/ is already screen `home`'s, and neither has a setup/);
   assert.equal(tie[0].level, 'warn');
 });
 
@@ -490,7 +490,7 @@ test('the in-repo example blueprint lints clean (without runner)', () => {
    * (issue #1). Everything else must stay clean.
    */
   const known = (f) =>
-    f.category === 'storyboard' && /already claimed by screen `waitlist-confirm`/.test(f.message);
+    f.category === 'storyboard' && /is already screen `waitlist-confirm`'s/.test(f.message);
   assert.deepEqual(
     findings.filter((f) => !known(f)),
     [],

@@ -31,6 +31,7 @@ Records
   walkdown records [list] [--blueprint <id>] [--json]
   walkdown records move <kind> --to <path> --blueprint <id>
   walkdown where [<kind>] [--blueprint <id>] [--json]
+  walkdown fixtures set [<key>=<value>...] --blueprint <id> --target <name>
 
 Threads
   walkdown threads [list] [--rule <id>] [--all] [--blueprint <id>] [--json]
@@ -83,7 +84,7 @@ const ABOUT = {
 };
 
 /* The nouns, each a table of verbs (bin/commands/noun.js). */
-const NOUNS = ['blueprints', 'records', 'threads', 'rules'];
+const NOUNS = ['blueprints', 'records', 'fixtures', 'threads', 'rules'];
 
 /* Forms ADR 0012 retired: refused with the form that replaced them. */
 const OLD = new Set(['thread', 'import', 'move', 'blueprint']);

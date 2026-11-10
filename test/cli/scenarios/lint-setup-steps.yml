@@ -1,0 +1,17 @@
+# `walkdown lint` over six screens: three setups that run, a step of an
+# unknown kind, a recipe nobody declared, and a wait for an undeclared anchor.
+screen: lint-setup-steps
+title: Lint refuses setup steps the panel cannot run
+rule: screens.setup.steps-or-prose
+fixture: setup-steps
+cwd: expenses
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[storyboard\] expenses/storyboard\.yml › expense-approve: setup step 2 is `click`, which the panel cannot run — a step is `visit`, `post` or `wait_for`\.'
+  - '^  ✗ \[storyboard\] expenses/storyboard\.yml › expense-finance: setup names recipe `as_finance_admin`, which is not under the storyboard''s `recipes:` — declare it there, or name one that is: as_view_only_org_manager$'
+  - '^  ⚠ \[storyboard\] expenses/storyboard\.yml › expense-receipt: setup step 3 waits for `receipt\.preview`, which is not an anchor on this screen — declare it on expense-receipt, or wait for one it declares: receipt\.image, receipt\.total, receipt\.download$'
+  # The prose setup, the three steps and the declared recipe say nothing.
+  - '— 2 error\(s\), 1 warning\(s\)'
+anchors:
+  - { id: lint.setup-error, match: '^(ERRORS|  ✗ \[storyboard\])' }

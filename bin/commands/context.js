@@ -68,9 +68,10 @@ export function upgradeOrExit() {
  *
  * @param {string | undefined | null} value what --blueprint said
  * @param {string} command what the person typed after `walkdown`
+ * @param {(ids: string[]) => void} [after] says what the refusal left undone
  * @returns {string}
  */
-export function namedOrExit(value, command) {
+export function namedOrExit(value, command, after) {
   if (value) return value;
   upgradeOrExit();
   const ids = projectIdsAt();
@@ -83,6 +84,7 @@ export function namedOrExit(value, command) {
     `\`walkdown ${command}\` acts on one blueprint, and does not choose it for you. ${which}.`,
   );
   console.error(`Choose one with \`--blueprint <id>\` (e.g. \`--blueprint ${nameOf(ids[0])}\`).`);
+  after?.(ids);
   process.exit(2);
 }
 

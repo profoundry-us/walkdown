@@ -95,8 +95,9 @@ export function machine({ path } = {}) {
   ])
     delete env[k];
   if (path === 'node-only') env.PATH = dirname(process.execPath);
-  const wd = (args, cwd = shop) =>
-    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env });
+  // `input` is what a pipe hands the command on standard input.
+  const wd = (args, cwd = shop, input) =>
+    spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8', env, input });
   const ok = (args) => {
     const r = wd(args);
     if (r.status !== 0)
@@ -534,6 +535,28 @@ function tree(dir, label = dir) {
   return `${out.join('\n')}\n\n${dirs} directories, ${files} files\n`;
 }
 
+const shellWord = (w) => (/^[\w./:@=+-]+$/.test(w) ? w : `"${w.replaceAll('"', '\\"')}"`);
+
+/**
+ * What is typed at the prompt: the walkdown command, with whatever is piped
+ * into it in front, or `tree` or `cat` for a screen that shows a folder or a file.
+ */
+export const typed = (scenario) =>
+  scenario.cat
+    ? `cat ${scenario.cat.replace(/^shop\//, '')}`
+    : scenario.tree
+      ? `tree -a ${scenario.tree.replace(/^shop\//, '')}`
+      : `${scenario.piped ? `${scenario.piped} | ` : ''}walkdown ${scenario.command.map(String).map(shellWord).join(' ')}`;
+
+/** The folder a scenario's commands are typed in, as a prompt shows it (default ~/shop). */
+export const folderOf = (scenario) =>
+  scenario.cwd === '.'
+    ? '~'
+    : scenario.cwd
+      ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}`
+      : '~/shop';
+export const promptOf = (scenario) => `${folderOf(scenario)} $`;
+
 /**
  * Run one scenario on a machine of its own, and give back what it printed,
  * steadied: stdout then stderr, as a terminal shows them.
@@ -564,11 +587,20 @@ export function run(scenario) {
     const cwd = scenario.cwd ? join(m.root, scenario.cwd) : m.shop;
     const r = scenario.until
       ? untilThenInterrupt(scenario.command, cwd, m.env, scenario.until)
-      : m.wd(scenario.command, cwd);
+      : m.wd(scenario.command, cwd, scenario.stdin);
     const uuids = new Map();
     const stdout = steady(r.stdout, m, uuids);
     const stderr = steady(r.stderr, m, uuids);
-    return { status: r.status, stdout, stderr, text: `${stdout}${stderr}`.replace(/\n+$/, '') };
+    let status = r.status;
+    let text = `${stdout}${stderr}`.replace(/\n+$/, '');
+    // Commands typed afterwards in the same terminal, each under its own prompt.
+    for (const next of scenario.then ?? []) {
+      const n = m.wd(next.command.map(String), cwd, next.stdin);
+      const said = `${steady(n.stdout, m, uuids)}${steady(n.stderr, m, uuids)}`.replace(/\n+$/, '');
+      text += `\n[exit ${status}]\n${promptOf(scenario)} ${typed(next)}\n${said}`;
+      status = n.status;
+    }
+    return { status, stdout, stderr, text };
   } finally {
     m.done();
   }

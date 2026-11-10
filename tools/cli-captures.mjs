@@ -23,7 +23,7 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { placeAnchors, run, scenarios } from './cli-scenarios.mjs';
+import { folderOf, placeAnchors, promptOf, run, scenarios, typed } from './cli-scenarios.mjs';
 
 const ROOT = join(dirname(new URL(import.meta.url).pathname), '..');
 const OUT = join(ROOT, 'as-built', 'cli');
@@ -67,16 +67,6 @@ const AS_BUILT_CSS = `
 `;
 
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-const shellWord = (w) => (/^[\w./:@=+-]+$/.test(w) ? w : `"${w.replaceAll('"', '\\"')}"`);
-
-/* What is typed at the prompt: the walkdown command, or `tree` or `cat` for a screen that shows a folder or a file. */
-const typed = (scenario) =>
-  scenario.cat
-    ? `cat ${scenario.cat.replace(/^shop\//, '')}`
-    : scenario.tree
-      ? `tree -a ${scenario.tree.replace(/^shop\//, '')}`
-      : `walkdown ${scenario.command.map(shellWord).join(' ')}`;
-
 /** The terminal's body: prompt, the output with its anchors, the exit code. */
 function terminal(scenario, out) {
   const lines = out.text ? out.text.split('\n') : [];
@@ -86,16 +76,19 @@ function terminal(scenario, out) {
   const body = [];
   lines.forEach((line, i) => {
     if (opens.has(i)) body.push(`      <div data-testid="${opens.get(i)}">`);
-    body.push(`      <div class="ln">${esc(line)}</div>`);
+    // A second command typed in the same terminal: its prompt, and the exit before it.
+    if (line.startsWith(`${promptOf(scenario)} `))
+      body.push(
+        `      <div class="ln prompt"><b>${esc(promptOf(scenario))}</b>${esc(line.slice(promptOf(scenario).length))}</div>`,
+      );
+    else if (/^\[exit \d+\]$/.test(line))
+      body.push(
+        `      <div class="ln exit${line === '[exit 0]' ? '' : ' bad'}">${esc(line)}</div>`,
+      );
+    else body.push(`      <div class="ln">${esc(line)}</div>`);
     if (closes.has(i)) body.push('      </div>');
   });
-  // The folder the command ran in, as the scenario's cwd says (default ~/shop).
-  const at =
-    scenario.cwd === '.'
-      ? '~'
-      : scenario.cwd
-        ? `~/${scenario.cwd.replace(/^home(?=\/|$)/, '.walkdown')}`
-        : '~/shop';
+  const at = folderOf(scenario);
   return [
     `    <div class="term-bar"><i></i><i></i><i></i><span>${esc(at)}</span></div>`,
     `    <div class="ln prompt" data-testid="cli.prompt"><b>${esc(at)} $</b> ${esc(typed(scenario))}</div>`,
