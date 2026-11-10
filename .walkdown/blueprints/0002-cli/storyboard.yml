@@ -1219,9 +1219,10 @@ screens:
     anchors:
       - lint.focus-error
 
-  # ADR 0017, issue #25. Not designed yet: each has a design request.
+  # ADR 0017, issue #25.
   - id: lint-setup-steps
     title: "Lint refuses setup steps the panel cannot run"
+    prototype: /screens/lint-setup-steps.html
     anchors:
       - cli.prompt
       - lint.setup-error
@@ -1245,6 +1246,7 @@ screens:
 
   - id: fixtures-set
     title: "walkdown fixtures set keeps this machine's fixtures"
+    prototype: /screens/fixtures-set.html
     anchors:
       - cli.prompt
       - fixtures.values
@@ -1252,6 +1254,7 @@ screens:
 
   - id: fixtures-set-refused
     title: "walkdown fixtures set refuses input that is not a flat JSON object"
+    prototype: /screens/fixtures-set-refused.html
     anchors:
       - cli.prompt
       - fixtures.refused
@@ -1259,6 +1262,7 @@ screens:
 
   - id: fixtures-set-no-blueprint
     title: "walkdown fixtures set refuses to keep values without --blueprint"
+    prototype: /screens/fixtures-set-no-blueprint.html
     anchors:
       - cli.prompt
       - fixtures.refused
@@ -1266,6 +1270,7 @@ screens:
 
   - id: lint-fixture-missing
     title: "Lint warns about a fixture a target lacks"
+    prototype: /screens/lint-fixture-missing.html
     anchors:
       - cli.prompt
       - lint.fixture-warning
@@ -1273,6 +1278,7 @@ screens:
 
   - id: lint-screens-tie
     title: "Lint warns only about screens that share a path and a setup"
+    prototype: /screens/lint-screens-tie.html
     anchors:
       - cli.prompt
       - lint.tie-warning

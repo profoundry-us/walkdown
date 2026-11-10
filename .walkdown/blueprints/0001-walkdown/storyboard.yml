@@ -220,9 +220,10 @@ screens:
       - panel.app-down
       - panel.fade
 
-  # ADR 0017, issue #25. Not designed yet: each has a design request.
+  # ADR 0017, issue #25.
   - id: rule-detail-setup
     title: "Rule detail (state — the screen's setup steps are running)"
+    prototype: /screens/rule-detail-setup.html
     anchors:
       - detail.setup
       - detail.setup-steps
@@ -231,21 +232,25 @@ screens:
 
   - id: app-setup-failed
     title: "A setup step failed, so the screen is not loaded"
+    prototype: /screens/app-setup-failed.html
     anchors:
       - panel.setup-failed
       - detail.setup-again
 
   - id: screen-picker-tied
     title: "The address matches two screens that differ in setup"
+    prototype: /screens/screen-picker-tied.html
     anchors:
       - panel.screen-picker
 
   - id: app-target-picker
     title: "The App pane's target picker"
+    prototype: /screens/app-target-picker.html
     anchors:
       - panel.target
 
   - id: rule-detail-targets
     title: "Rule detail (state — a verdict on each target)"
+    prototype: /screens/rule-detail-targets.html
     anchors:
       - detail.evidence
