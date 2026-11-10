@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-10T22:33:21.920Z
 anchor:
   rule: screens.identity.setup-tells-states-apart
-status: open
+status: settled
 body: "Opening a rule on one of two screens that share an address leaves the
   screen picker's menu open over the App pane. Expected: the panel is on that
   screen and the picker stays closed. The accepted screen-picker-tied design
@@ -29,3 +29,17 @@ body: "Opening a rule on one of two screens that share an address leaves the
   full List menu instead of standing alone. See
   runs/evidence/2026-11-10T22-30-00Z/app-screen-picker-tied-fresh-tab.png beside
   design-screen-picker-tied.png."
+replies:
+  - author: agent
+    created: 2026-11-10T22:45:34Z
+    body: Fixed in 7bf1cfdc. The panel asks which screen only while nothing says
+      which state the page is. A setup running or done for one of the tied
+      screens answers it. A picker the panel opened by itself closes once it is
+      answered. Pin mode is held while two states tie, as the accepted design
+      draws it. The check now asserts the menu is hidden after a rule is opened
+      on a tied screen, and after a state is picked.
+  - author: agent
+    via: verdict
+    created: 2026-11-10T22:59:54Z
+    body: Settled by the agent's pass on screens.identity.setup-tells-states-apart
+      (2026-11-10T22-59-54Z-local-01).
