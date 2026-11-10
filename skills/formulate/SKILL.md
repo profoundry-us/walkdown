@@ -32,7 +32,14 @@ derives from it.
    alone. The agent that builds the screen adds its `app:` path. A screen the source
    implies but doesn't show gets `design: null` plus a design-request
    thread (see ownership rules). States (modal open, error showing) are
-   screens too if rules need to point at them. Lint refuses a screen no rule
+   screens too if rules need to point at them. A state the address alone
+   cannot reach (a page only an approver sees, a record that has to exist)
+   gets `app.setup` once it is built: steps the panel runs first (`visit`,
+   `post` with `fields`, `wait_for` an anchor), or a `recipe` when several
+   screens share them, with `{fixtures.<key>}` for any id that differs per
+   target (docs/02-blueprint-schema.md, "Storyboard"). The steps only reach
+   routes the app already serves; a route a setup needs is the app's to add,
+   and a rule of its own if the PRD does not name it. Lint refuses a screen no rule
    names. **Design comes first:** a rule
    on a screen with no design is not built until the screen's design has been
    drawn and a person has accepted it. A designer draws it where there is

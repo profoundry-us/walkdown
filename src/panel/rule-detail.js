@@ -36,6 +36,7 @@ const ruleZone = dropZone(
 
 import { askOptions } from './ask.js';
 import { openEvidence } from './evidence.js';
+import { isSetUp, runOf, setupState, targetNow } from './setup.js';
 import { openSource } from './source.js';
 import { S } from './state.js';
 import { toast } from './toast.js';
@@ -210,17 +211,89 @@ export function evidenceRows(row) {
   const excuse = (label, why) => html`<div class="evrow" data-testid="detail.excuse">
     <span class="src">${label}</span>
     <span class="opacity-70">— not checkable here: ${why}</span></div>`;
+  /*
+   * One row for each tier on each declared target that has a run (ADR 0017
+   * §6): a rule that passes locally and fails on a review app reads as
+   * passing when only one verdict is shown. The first target keeps its row
+   * with nothing recorded, so "never run" is still said; any other target
+   * gets a row once it has a run. What a check said hangs under its row.
+   */
+  const targets = S.data?.targets ?? [];
+  const ran = (cell) => cell && !['never', 'na'].includes(cell.state);
+  const said = (cell) =>
+    cell?.detail
+      ? html`<div class="evrow evline" data-testid="detail.evidence-line">
+          <span class="src"></span>
+          <span class="opacity-70">${
+            cell.checks?.[0] ? html`<code>${cell.checks[0]}</code> ` : nothing
+          }${cell.detail}</span></div>`
+      : '';
   const rows = [
     ...(row.verify.includes('checks')
-      ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
+      ? targets
+          .filter((t, i) => i === 0 || ran(row.cells?.[t]))
+          .flatMap((t) => [line(`checks/${t}`, row.cells?.[t]), said(row.cells?.[t])])
       : []),
     row.excuses?.checks ? excuse('checks', row.excuses.checks) : '',
     ...(row.verify.includes('agent') ? [line('agent', row.agent), attached(row.agent)] : []),
+    // The agent's verdicts on the other targets, each named by its target.
+    ...(row.verify.includes('agent')
+      ? Object.entries(row.agents ?? {}).flatMap(([t, cell]) => [
+          line(`agent/${t}`, cell),
+          attached(cell),
+        ])
+      : []),
     row.excuses?.agent ? excuse('agent', row.excuses.agent) : '',
     ...(row.verify.includes('human') ? [line('human', row.human)] : []),
   ].filter(Boolean);
   // A rule with nothing recorded says so, rather than showing an empty box.
   return rows.length ? rows : html`<div class="text-[13px] opacity-50">Nothing recorded yet.</div>`;
+}
+
+/*
+ * A screen's setup steps, where its prose setup would be: what the panel runs
+ * in the App pane before it loads the screen, how far it got, and a control
+ * to run them again (screens.setup.runs-before-the-screen). Each step is a
+ * row of its own - the sidebar has no room for them side by side (n-0632).
+ */
+const STEP_KIND = { visit: 'Visit', post: 'Post', wait_for: 'Wait for' };
+function setupSteps(screen, run) {
+  const st = setupState(screen);
+  const done = isSetUp(screen);
+  const failedAt = st?.state === 'failed' ? (st.failure.step ?? -1) : null;
+  const state =
+    st?.state === 'failed'
+      ? st.failure.kind === 'fixture'
+        ? 'not run'
+        : `stopped at step ${st.failure.step + 1}`
+      : st?.state === 'running'
+        ? `step ${st.at + 1} of ${run.steps.length}`
+        : `on ${targetNow()}`;
+  const markOf = (i) => {
+    if (failedAt !== null) return i < failedAt ? 'done' : i === failedAt ? 'failed' : 'todo';
+    if (st?.state === 'running') return i < st.at ? 'done' : i === st.at ? 'now' : 'todo';
+    return done || st?.state === 'done' ? 'done' : 'todo';
+  };
+  const GLYPH = { done: '✓', failed: '✗', now: '◌' };
+  return html`<div data-testid="detail.setup">
+    <div class="${LBL} mb-1.5 flex items-baseline">
+      <span>Setup</span><span class="ml-auto normal-case tracking-normal" data-testid="detail.setup-state">${state}</span></div>
+    <ol class="setup-list" data-testid="detail.setup-steps">
+      ${run.steps.map((step, i) => {
+        const mark = markOf(i);
+        return html`<li class="${mark}" data-step="${i + 1}" data-state="${mark}"><span class="mark">${GLYPH[mark] ?? i + 1}</span>
+          <span class="body"><span class="kind">${STEP_KIND[step.kind] ?? step.kind}</span><code>${step.value}</code>
+            ${Object.entries(step.fields ?? {}).map(
+              ([k, v]) => html`<span class="field">${k} <code>${v}</code></span>`,
+            )}</span></li>`;
+      })}
+      <li class="then"><span class="mark">→</span>
+        <span class="body">Then open <code title="${screen.app?.written ?? ''}">${run.path}</code></span></li>
+    </ol>
+    <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
+      data-testid="detail.setup-again" title="Run every step again, from step 1"
+      @click=${(e) => fire(e.currentTarget, 'run-setup', { screen: screen.id })}>↻ Run setup again</button>
+  </div>`;
 }
 
 function backToList() {
@@ -824,7 +897,10 @@ export function detailPane() {
    * the storyboard's setup is the rest of the sentence: it says what to do on
    * arrival. Above the steps, because it happens before them.
    */
-  const setup = ruleScreen(r)?.app?.setup;
+  const setupScreen = ruleScreen(r);
+  const setupRun = runOf(setupScreen);
+  // Steps the panel runs (ADR 0017 §2), or prose it shows and never runs.
+  const setup = setupRun?.steps.length ? null : (setupRun?.prose ?? setupScreen?.app?.setup);
   /*
    * Which screen this rule is about, said plainly and above the steps.
    *
@@ -905,8 +981,9 @@ export function detailPane() {
         }
         ${elsewhere(r)}
       </div>
+      ${setupRun?.steps.length ? setupSteps(setupScreen, setupRun) : nothing}
       ${
-        setup
+        typeof setup === 'string' && setup
           ? html`<div>
           <!-- "Setup" is the storyboard's own word for this field, and the
                panel calling it something else made a reviewer translate

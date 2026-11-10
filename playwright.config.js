@@ -36,6 +36,13 @@ const WD_PORT = Number(process.env.WALKDOWN_CHECK_PORT ?? (RECORD ? 4701 : 4713)
 const FIXTURE_PORT = WD_PORT + 12;
 const EXAMPLE_PORT = WD_PORT + 24;
 /*
+ * An app with sign-in, for the checks of ADR 0017's setup steps: one process
+ * on two ports, the `local` target and the `review` target of a throwaway
+ * blueprint called `expenses` (checks/fixtures/expenses-app.mjs).
+ */
+const EXPENSES_PORT = WD_PORT + 36;
+const EXPENSES_REVIEW_PORT = WD_PORT + 37;
+/*
  * Where this run actually serves the example project's app. Its blueprint
  * declares 4310, and that address matters to the checks — a pin filed on a page
  * carrying no walkdown tag is routed to a project BY ITS ADDRESS, so the
@@ -49,6 +56,8 @@ const EXAMPLE_PORT = WD_PORT + 24;
  */
 export const EXAMPLE_ORIGIN = `http://localhost:${EXAMPLE_PORT}`;
 export const WD_ORIGIN = `http://localhost:${WD_PORT}`;
+export const EXPENSES_ORIGIN = `http://localhost:${EXPENSES_PORT}`;
+export const EXPENSES_REVIEW_ORIGIN = `http://localhost:${EXPENSES_REVIEW_PORT}`;
 
 /*
  * Where failure evidence is filed for good, resolved BEFORE the pin two
@@ -120,7 +129,11 @@ export const EXAMPLE_DECLARED = parse(
  * The disposable copy, built now - before the servers below are launched over
  * it. See checks/checkspace.mjs for why it cannot wait for globalSetup.
  */
-prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAMPLE_ORIGIN });
+prepare({
+  exampleDeclared: EXAMPLE_DECLARED,
+  exampleOrigin: EXAMPLE_ORIGIN,
+  expenses: { local: EXPENSES_ORIGIN, review: EXPENSES_REVIEW_ORIGIN },
+});
 
 export default defineConfig({
   testDir: './checks',
@@ -200,6 +213,11 @@ export default defineConfig({
     {
       command: `python3 -m http.server ${EXAMPLE_PORT} --directory example/app`,
       url: `${EXAMPLE_ORIGIN}/index.html`,
+      reuseExistingServer: false,
+    },
+    {
+      command: `node checks/fixtures/expenses-app.mjs ${WD_ORIGIN} ${EXPENSES_PORT} ${EXPENSES_REVIEW_PORT}`,
+      url: `${EXPENSES_ORIGIN}/__log`,
       reuseExistingServer: false,
     },
   ],

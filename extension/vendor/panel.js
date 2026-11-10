@@ -4799,6 +4799,365 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   }
 
   /*
+   * A screen's setup, run in the App pane (ADR 0017 §§2, 5).
+   *
+   * A page that depends on who is signed in and which record is open cannot be
+   * reached by its path alone. Where the storyboard writes the way there as
+   * steps, the panel runs them before it loads the screen: each step is a
+   * navigation of the app's own frame, so any session it sets is the app's.
+   *
+   * The server hands every screen its steps and path per target with that
+   * target's fixtures already filled in (`screen.runs`). This module chooses
+   * the target, runs the steps, and covers the frame while they run or after
+   * one fails - a reviewer who sees the sign-in page where the screen should be
+   * judges the wrong page.
+   */
+
+  /** The app frame's name, which a posted form targets. */
+  const APP_FRAME_NAME = 'walkdown-app';
+
+  const WAIT_FOR_MS = 10000;
+  const LOAD_MS = 20000;
+  /* A page with walkdown in it says how it loaded just after it loads; one without says nothing. */
+  const SETTLE_MS = 900;
+
+  const TARGET_KEY = () => `walkdown:target:${S.data?.key ?? ''}`;
+
+  /** The targets the App pane can be pointed at, `local` first. */
+  const appTargets = () => S.data?.appTargets ?? [];
+
+  /** The target in hand: the viewer's own choice while it is still declared, else the first. */
+  const targetNow = () =>
+    (appTargets().find((t) => t.name === S.target) ?? appTargets()[0])?.name ?? 'local';
+
+  /** Read the viewer's choice once, before the first blueprint is drawn. */
+  async function restoreTarget() {
+    S.target = (await store.get(TARGET_KEY()).catch(() => null)) ?? null;
+  }
+
+  /*
+   * Point the storyboard at the target in hand: its base URL, and each screen's
+   * path as that target's fixtures fill it in. Done to the data once, so every
+   * reader of a screen's address - the matcher, the picker, the ghost - agrees.
+   */
+  function applyTarget() {
+    if (!S.data) return;
+    const t = appTargets().find((x) => x.name === targetNow());
+    if (t) S.data.appBase = t.base;
+    for (const sc of S.data.storyboard ?? []) {
+      const run = sc.runs?.[targetNow()];
+      if (run?.path) sc.app = { ...sc.app, path: run.path };
+    }
+  }
+
+  /** Choose a target. The choice is this viewer's, kept in the browser. */
+  function chooseTarget(name) {
+    S.target = name;
+    store.set(TARGET_KEY(), name);
+    S.setupFor = null;
+    applyTarget();
+  }
+
+  /** A screen's steps and path on the target in hand, or null where it has neither steps nor fixtures. */
+  const runOf = (screen) => screen?.runs?.[targetNow()] ?? null;
+
+  const keyOf = (screen) => `${targetNow()}\0${screen?.id ?? ''}`;
+
+  /** Whether going to this screen runs anything first: steps not yet run here, or a fixture with no value. */
+  function needsSetup(screen) {
+    const run = runOf(screen);
+    if (!run) return false;
+    if (run.missing.length) return true;
+    return run.steps.length > 0 && S.setupFor !== keyOf(screen);
+  }
+
+  /** Whether the panel last set this screen up on the target in hand. */
+  const isSetUp = (screen) => S.setupFor === keyOf(screen);
+
+  /** The setup in progress or just ended, when it is this screen's on this target. */
+  const setupState = (screen) =>
+    S.setup && S.setup.screen === screen?.id && S.setup.target === targetNow() ? S.setup : null;
+
+  /* ---- the frame's answers ------------------------------------------------- */
+
+  let gen = 0;
+  let arrival = null; // the navigation a step is waiting on
+  let waiting = null; // the wait_for a step is waiting on
+
+  /**
+   * The app frame saying it has loaded. While a setup runs, or after one
+   * stopped part-way, every such word is the setup's: the frame is on a step,
+   * not on a screen.
+   *
+   * @returns {boolean} whether the setup took it
+   */
+  function setupHeard(msg) {
+    if (!S.setup || S.setup.state === 'done') return false;
+    arrival?.heard(msg);
+    return true;
+  }
+
+  /** The embed's answer to "how did this page load?", and to a wait_for. */
+  function setupAnswered(msg) {
+    if (msg.type === 'walkdown:loaded') arrival?.answered(msg);
+    else if (waiting && msg.id === waiting.id) waiting.done(Boolean(msg.found));
+  }
+
+  /*
+   * One navigation of the frame: how it was answered, or that nothing answered.
+   *
+   * The frame's own `load` is what says the new page is in. Only then is the
+   * page asked how it loaded - a word heard before that may be the page being
+   * left, still announcing itself, and taking it for the answer let a step
+   * finish before its form had even been posted. A page with no walkdown in it
+   * says nothing, and is taken as answered.
+   */
+  function navigate(start) {
+    return new Promise((resolve) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      let settled = false;
+      let settle = null;
+      let landed = false;
+      const finish = (r) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(settle);
+        clearTimeout(limit);
+        arrival = null;
+        D.appFrame?.removeEventListener('load', loaded);
+        resolve(r);
+      };
+      const loaded = () => {
+        landed = true;
+        D.appFrame?.contentWindow?.postMessage({ type: 'walkdown:how-loaded', id }, '*');
+        settle = setTimeout(() => finish({ status: 0 }), SETTLE_MS);
+      };
+      const limit = setTimeout(() => finish({ status: 0, silent: true }), LOAD_MS);
+      arrival = {
+        answered: (msg) => msg.id === id && finish({ status: Number(msg.status) || 0 }),
+        // A page whose walkdown arrived after it loaded announces itself late.
+        heard: (msg) => landed && finish({ status: Number(msg.status) || 0 }),
+      };
+      D.appFrame?.addEventListener('load', loaded);
+      start();
+    });
+  }
+
+  /* A form submitted into the app's frame: a navigation, so the cookie it sets is the app's. */
+  function submit(url, fields) {
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = url;
+    form.target = APP_FRAME_NAME;
+    form.style.display = 'none';
+    for (const [name, value] of Object.entries(fields ?? {})) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = String(value);
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+  }
+
+  function waitFor(anchor) {
+    return new Promise((resolve) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const limit = setTimeout(() => done(false), WAIT_FOR_MS + 1500);
+      const done = (found) => {
+        clearTimeout(limit);
+        waiting = null;
+        resolve(found);
+      };
+      waiting = { id, done };
+      D.appFrame?.contentWindow?.postMessage(
+        { type: 'walkdown:wait-for', id, anchor, timeout: WAIT_FOR_MS },
+        '*',
+      );
+    });
+  }
+
+  const STATUS = {
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    405: 'Method Not Allowed',
+    422: 'Unprocessable Content',
+    500: 'Internal Server Error',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+  };
+
+  /**
+   * Run a screen's setup on the target in hand.
+   *
+   * @param {object} screen
+   * @param {{ answers: (url: string) => Promise<boolean>, paint: () => void }} with
+   * @returns {Promise<'done' | 'failed' | 'down' | 'left'>} `down` when nothing
+   *   answers at the target, `left` when the person moved on while it ran
+   */
+  async function runSetup(screen, { answers, paint }) {
+    const mine = ++gen;
+    const run = runOf(screen);
+    const target = targetNow();
+    const base = S.data?.appBase;
+    S.setup = { screen: screen.id, target, at: -1, state: 'running', failure: null };
+    S.setupFor = null;
+    const fail = (failure) => {
+      S.setup = { ...S.setup, state: 'failed', failure };
+      paintCover();
+      paint();
+      return 'failed';
+    };
+    if (run.missing.length) {
+      const key = run.missing[0];
+      const inPath = String(screen.app?.written ?? '').includes(`{fixtures.${key}}`);
+      return fail({
+        kind: 'fixture',
+        key,
+        target,
+        inPath,
+        written: screen.app?.written,
+        set: run.set,
+      });
+    }
+    if (!base || !(await answers(appUrlOf('/', base)))) {
+      if (mine === gen) S.setup = null;
+      return mine === gen ? 'down' : 'left';
+    }
+    for (let i = 0; i < run.steps.length; i++) {
+      if (mine !== gen) return 'left';
+      const step = run.steps[i];
+      S.setup = { ...S.setup, at: i };
+      paintCover();
+      paint();
+      if (step.kind === 'wait_for') {
+        const found = await waitFor(step.value);
+        if (mine !== gen) return 'left';
+        if (!found) return fail({ kind: 'wait', step: i, anchor: step.value });
+        continue;
+      }
+      const url = appUrlOf(step.value, base);
+      const r = await navigate(() => {
+        if (step.kind === 'post') submit(url, step.fields);
+        else D.appFrame.src = url;
+      });
+      if (mine !== gen) return 'left';
+      if (r.silent)
+        return fail({ kind: 'status', step: i, got: `No answer after ${LOAD_MS / 1000} seconds` });
+      if (r.status >= 400)
+        return fail({
+          kind: 'status',
+          step: i,
+          got: `${r.status}${STATUS[r.status] ? ` ${STATUS[r.status]}` : ''}`,
+        });
+    }
+    if (mine !== gen) return 'left';
+    S.setup = { ...S.setup, at: run.steps.length, state: 'done' };
+    S.setupFor = keyOf(screen);
+    hideCover();
+    paint();
+    return 'done';
+  }
+
+  /** Whatever was running is not this trip's any more. */
+  function leaveSetup() {
+    gen++;
+    arrival = null;
+    waiting = null;
+    S.setup = null;
+    hideCover();
+  }
+
+  /* ---- what stands where the page would be -------------------------------- */
+
+  let cover = null;
+
+  /** The cover follows the frame's box, as the loading veil does. */
+  function placeCover() {
+    if (!cover || !D.appFrame) return;
+    const r = D.appFrame.getBoundingClientRect();
+    cover.style.top = `${r.top}px`;
+    cover.style.left = `${r.left}px`;
+    cover.style.width = `${r.width}px`;
+    cover.style.height = `${r.height}px`;
+  }
+  const coverIsUp = () => Boolean(cover);
+
+  function hideCover() {
+    cover?.remove();
+    cover = null;
+  }
+
+  const KIND$1 = { visit: 'visit', post: 'post', wait_for: 'wait for' };
+  const DOING = {
+    visit: (s) => `Visiting <code>${esc(s.value)}</code>.`,
+    post: (s) => `Posting the form to <code>${esc(s.value)}</code>.`,
+    wait_for: (s) => `Waiting for <code>${esc(s.value)}</code> on the page.`,
+  };
+
+  function paintCover() {
+    const st = S.setup;
+    const screen = (S.data?.storyboard ?? []).find((s) => s.id === st?.screen);
+    const run = screen?.runs?.[st?.target];
+    if (!st || !run || !D.appFrame || !D.sr) return hideCover();
+    if (!cover) {
+      cover = document.createElement('div');
+      cover.dataset.theme = 'blueprint';
+      cover.className = 'wdp-setup-cover';
+      D.sr.appendChild(cover);
+    }
+    const n = run.steps.length;
+    const path = `<code>${esc(run.path ?? '')}</code>`;
+    if (st.state === 'running') {
+      const step = run.steps[st.at];
+      cover.innerHTML = `
+      <div class="progress-card" data-testid="panel.setup-progress" role="status">
+        <div class="font-semibold">Setting up this screen: step ${st.at + 1} of ${n}</div>
+        <div class="pips">${run.steps
+          .map((_, i) => `<i class="${i < st.at ? 'done' : i === st.at ? 'now' : ''}"></i>`)
+          .join('')}</div>
+        <div>${step ? DOING[step.kind](step) : ''}</div>
+        <div class="mt-1 opacity-60">Then ${path} opens here.</div>
+      </div>`;
+    } else if (st.state === 'failed') {
+      const f = st.failure;
+      const step = run.steps[f.step];
+      const not = `${path} was not loaded, so this is not the screen yet.`;
+      const body =
+        f.kind === 'fixture'
+          ? `<div class="head"><i class="dot"></i>Setup did not run</div>
+           <dl>
+             <dt>Fixture</dt><dd><code>${esc(f.key)}</code></dd>
+             <dt>Target</dt><dd>${esc(f.target)}</dd>
+             <dt>Needed by</dt><dd>${f.inPath ? `the screen's path, <code>${esc(f.written ?? '')}</code>` : "the screen's setup"}</dd>
+           </dl>
+           <div>The ${esc(f.target)} target has no value for <code>${esc(f.key)}</code>, so nothing was run. Set the ${esc(f.target)} target's fixtures, then run the setup again from the rule.
+             <code class="cmd">${esc(f.set)}</code></div>`
+          : f.kind === 'wait'
+            ? `<div class="head"><i class="dot"></i>Setup stopped at step ${f.step + 1} of ${n}</div>
+             <dl>
+               <dt>Step</dt><dd>${f.step + 1}, wait for</dd>
+               <dt>Anchor</dt><dd><code>${esc(f.anchor)}</code></dd>
+               <dt>Got</dt><dd>Not on the page after ten seconds</dd>
+             </dl>
+             <div>${not} Check that the page the step before lands on carries <code>${esc(f.anchor)}</code>, then run the setup again from the rule.</div>`
+            : `<div class="head"><i class="dot"></i>Setup stopped at step ${f.step + 1} of ${n}</div>
+             <dl>
+               <dt>Step</dt><dd>${f.step + 1}, ${KIND$1[step.kind]}</dd>
+               <dt>Path</dt><dd><code>${esc(step.value)}</code></dd>
+               <dt>Got</dt><dd>${esc(f.got)}</dd>
+             </dl>
+             <div>${not} Look at the app's log for <code>${esc(step.value)}</code>, then run the setup again from the rule.</div>`;
+      cover.innerHTML = `<div class="failed-card" data-testid="panel.setup-failed" role="alert">${body}</div>`;
+    } else return hideCover();
+    placeCover();
+  }
+
+  /*
    * The panel's shared vocabulary: the small questions every pane asks of the
    * data, and the two class strings they all label with.
    *
@@ -5002,7 +5361,45 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   function currentScreen() {
     const screens = S.data?.storyboard ?? [];
     if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
-    return matchScreen(screens, hereLocation())?.screen ?? null;
+    const hit = matchScreen(screens, hereLocation());
+    if (!hit) return null;
+    const tied = statesAt(hit, screens);
+    // Two states of one page: the one the panel last set up here, or neither.
+    return tied.length > 1 ? (tied.find(isSetUp) ?? null) : hit.screen;
+  }
+
+  /*
+   * The screens an app address ties between that differ only in their setup
+   * (ADR 0017 §4): one per setup, in storyboard order. The address cannot say
+   * which of them the frame is showing; only the panel's own setup can. Two
+   * screens with the same path and the same setup are still an ordinary tie,
+   * and the first is taken as before.
+   */
+  function statesAt(hit, screens) {
+    if (hit.surface !== 'app') return [hit.screen];
+    const loc = hereLocation();
+    const seen = new Set();
+    return screens.filter((sc) => {
+      const m = matchScreen([sc], loc);
+      if (!m || m.surface !== 'app' || m.score !== hit.score) return false;
+      const key = sc.setupKey ?? '';
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  /**
+   * The states this page could be, when nothing says which: no screen picked,
+   * none of them set up here. Empty otherwise.
+   */
+  function tiedScreens() {
+    if (S.pickedScreen) return [];
+    const screens = S.data?.storyboard ?? [];
+    const hit = matchScreen(screens, hereLocation());
+    if (!hit) return [];
+    const tied = statesAt(hit, screens);
+    return tied.length > 1 && !tied.some(isSetUp) ? tied : [];
   }
 
   /** Where a screen lives on one surface, as a URL walkdown can navigate to. */
@@ -7713,17 +8110,89 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const excuse = (label, why) => b`<div class="evrow" data-testid="detail.excuse">
     <span class="src">${label}</span>
     <span class="opacity-70">— not checkable here: ${why}</span></div>`;
+    /*
+     * One row for each tier on each declared target that has a run (ADR 0017
+     * §6): a rule that passes locally and fails on a review app reads as
+     * passing when only one verdict is shown. The first target keeps its row
+     * with nothing recorded, so "never run" is still said; any other target
+     * gets a row once it has a run. What a check said hangs under its row.
+     */
+    const targets = S.data?.targets ?? [];
+    const ran = (cell) => cell && !['never', 'na'].includes(cell.state);
+    const said = (cell) =>
+      cell?.detail
+        ? b`<div class="evrow evline" data-testid="detail.evidence-line">
+          <span class="src"></span>
+          <span class="opacity-70">${
+            cell.checks?.[0] ? b`<code>${cell.checks[0]}</code> ` : A
+          }${cell.detail}</span></div>`
+        : '';
     const rows = [
       ...(row.verify.includes('checks')
-        ? (S.data?.targets ?? []).map((t) => line(`checks/${t}`, row.cells?.[t]))
+        ? targets
+            .filter((t, i) => i === 0 || ran(row.cells?.[t]))
+            .flatMap((t) => [line(`checks/${t}`, row.cells?.[t]), said(row.cells?.[t])])
         : []),
       row.excuses?.checks ? excuse('checks', row.excuses.checks) : '',
       ...(row.verify.includes('agent') ? [line('agent', row.agent), attached(row.agent)] : []),
+      // The agent's verdicts on the other targets, each named by its target.
+      ...(row.verify.includes('agent')
+        ? Object.entries(row.agents ?? {}).flatMap(([t, cell]) => [
+            line(`agent/${t}`, cell),
+            attached(cell),
+          ])
+        : []),
       row.excuses?.agent ? excuse('agent', row.excuses.agent) : '',
       ...(row.verify.includes('human') ? [line('human', row.human)] : []),
     ].filter(Boolean);
     // A rule with nothing recorded says so, rather than showing an empty box.
     return rows.length ? rows : b`<div class="text-[13px] opacity-50">Nothing recorded yet.</div>`;
+  }
+
+  /*
+   * A screen's setup steps, where its prose setup would be: what the panel runs
+   * in the App pane before it loads the screen, how far it got, and a control
+   * to run them again (screens.setup.runs-before-the-screen). Each step is a
+   * row of its own - the sidebar has no room for them side by side (n-0632).
+   */
+  const STEP_KIND = { visit: 'Visit', post: 'Post', wait_for: 'Wait for' };
+  function setupSteps(screen, run) {
+    const st = setupState(screen);
+    const done = isSetUp(screen);
+    const failedAt = st?.state === 'failed' ? (st.failure.step ?? -1) : null;
+    const state =
+      st?.state === 'failed'
+        ? st.failure.kind === 'fixture'
+          ? 'not run'
+          : `stopped at step ${st.failure.step + 1}`
+        : st?.state === 'running'
+          ? `step ${st.at + 1} of ${run.steps.length}`
+          : `on ${targetNow()}`;
+    const markOf = (i) => {
+      if (failedAt !== null) return i < failedAt ? 'done' : i === failedAt ? 'failed' : 'todo';
+      if (st?.state === 'running') return i < st.at ? 'done' : i === st.at ? 'now' : 'todo';
+      return done || st?.state === 'done' ? 'done' : 'todo';
+    };
+    const GLYPH = { done: '✓', failed: '✗', now: '◌' };
+    return b`<div data-testid="detail.setup">
+    <div class="${LBL} mb-1.5 flex items-baseline">
+      <span>Setup</span><span class="ml-auto normal-case tracking-normal" data-testid="detail.setup-state">${state}</span></div>
+    <ol class="setup-list" data-testid="detail.setup-steps">
+      ${run.steps.map((step, i) => {
+        const mark = markOf(i);
+        return b`<li class="${mark}" data-step="${i + 1}" data-state="${mark}"><span class="mark">${GLYPH[mark] ?? i + 1}</span>
+          <span class="body"><span class="kind">${STEP_KIND[step.kind] ?? step.kind}</span><code>${step.value}</code>
+            ${Object.entries(step.fields ?? {}).map(
+              ([k, v]) => b`<span class="field">${k} <code>${v}</code></span>`,
+            )}</span></li>`;
+      })}
+      <li class="then"><span class="mark">→</span>
+        <span class="body">Then open <code title="${screen.app?.written ?? ''}">${run.path}</code></span></li>
+    </ol>
+    <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
+      data-testid="detail.setup-again" title="Run every step again, from step 1"
+      @click=${(e) => fire(e.currentTarget, 'run-setup', { screen: screen.id })}>↻ Run setup again</button>
+  </div>`;
   }
 
   function backToList() {
@@ -8327,7 +8796,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      * the storyboard's setup is the rest of the sentence: it says what to do on
      * arrival. Above the steps, because it happens before them.
      */
-    const setup = ruleScreen(r)?.app?.setup;
+    const setupScreen = ruleScreen(r);
+    const setupRun = runOf(setupScreen);
+    // Steps the panel runs (ADR 0017 §2), or prose it shows and never runs.
+    const setup = setupRun?.steps.length ? null : (setupRun?.prose ?? setupScreen?.app?.setup);
     /*
      * Which screen this rule is about, said plainly and above the steps.
      *
@@ -8408,8 +8880,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         }
         ${elsewhere$1(r)}
       </div>
+      ${setupRun?.steps.length ? setupSteps(setupScreen, setupRun) : A}
       ${
-        setup
+        typeof setup === 'string' && setup
           ? b`<div>
           <!-- "Setup" is the storyboard's own word for this field, and the
                panel calling it something else made a reviewer translate
@@ -8618,6 +9091,48 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * just took you to would be covering its own result.
    */
 
+  /* How a screen is set up, in a line: its recipe if it names one, then each step. */
+  function howSetUp(sc) {
+    const run = runOf(sc);
+    if (!run?.steps.length) return b`No setup`;
+    const said = run.steps.map((st, i) => {
+      const lead = i ? ', then ' : '';
+      const verb = st.kind === 'wait_for' ? 'wait for' : st.kind;
+      const fields = Object.entries(st.fields ?? {});
+      return b`${lead}${i || run.recipe ? verb : verb[0].toUpperCase() + verb.slice(1)} <code>${st.value}</code>${
+      fields.length
+        ? b` with ${fields.map(([k, v], j) => b`${j ? ', ' : ''}${k} <code>${v}</code>`)}`
+        : A
+    }`;
+    });
+    return run.recipe ? b`Recipe <code>${run.recipe}</code>: ${said}` : said;
+  }
+
+  /*
+   * Two states of one page, and nothing to say which this is (ADR 0017 §4).
+   * The picker opens by itself on this, above its ordinary list: the address
+   * alone cannot answer, so the person does.
+   */
+  function tiedNote() {
+    const tied = tiedScreens();
+    if (!tied.length) return A;
+    const count = ['Two', 'Three', 'Four'][tied.length - 2] ?? String(tied.length);
+    return b`<div class="tied" data-testid="panel.screen-tied">
+    <div class="note">${count} screens share <code>${tied[0].app?.path ?? ''}</code>. They differ only in how they are set up,
+      so the address cannot say which one this is. Pick the one you are on.</div>
+    ${tied.map(
+      (
+        sc,
+      ) => b`<button class="row" role="option" data-screen="${sc.id}" data-testid="panel.screen-tied-row"
+        @click=${(e) => fire(e.currentTarget, 'pick-screen', { id: sc.id })}>
+        <div class="name">${sc.title ?? sc.id}</div>
+        <div class="how">${howSetUp(sc)}</div>
+      </button>`,
+    )}
+    <div class="foot">Picking one runs its setup here. Nothing is filed under either until you do.</div>
+  </div>`;
+  }
+
   function screensPane() {
     const screens = S.data.storyboard ?? [];
     if (!screens.length)
@@ -8625,6 +9140,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const here = currentScreen();
     const auto = !S.pickedScreen;
     return b`
+    ${tiedNote()}
     ${viewTabs()}
     <button class="flex w-full items-center gap-2 px-3.5 py-2 text-left text-[12.5px] hover:bg-base-200"
       data-screen="" @click=${(e) => fire(e.currentTarget, 'pick-screen', { id: null })}>
@@ -9454,6 +9970,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     D.appFrame = document.createElement('iframe');
     D.appFrame.dataset.testid = 'panel.app-frame';
     D.appFrame.setAttribute('title', 'the application under review');
+    // Named from the start, so a setup step's form can be posted into it
+    // (ADR 0017 §1): a name given after the frame has loaded is not found, and
+    // the form opens a tab of its own.
+    D.appFrame.name = APP_FRAME_NAME;
     // Whatever the frame lands on - our navigation or the app's own - the wait
     // is over. Errors never fire load, and a frame that never arrives is still
     // loading, which is what the veil should keep saying.
@@ -9639,6 +10159,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     }
     // The veil is pinned to the frame's box, so it follows every move of it.
     if (veilIsUp()) requestAnimationFrame(placeVeil);
+    if (coverIsUp()) requestAnimationFrame(placeCover);
     const { availW, availH, scale } = frameSpace();
     // An iframe is a replaced element: four insets alone leave it at its
     // intrinsic 300x150, so the size has to be said outright. A viewport
@@ -9949,6 +10470,72 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * is that screen", "show me that screen's art". Carrying them across a
    * navigation would have the panel describing somewhere you have left.
    */
+  /*
+   * Which target the App pane shows (ADR 0017 §5), set against the App button
+   * it qualifies. Only where the blueprint declares more than one target with
+   * a base URL: with one there is nothing to choose, and every other
+   * blueprint's bar is as it was.
+   */
+  function targetPicker() {
+    const targets = appTargets();
+    if (targets.length < 2) return A;
+    const now = targetNow();
+    return b`<span class="relative" data-testid="panel.target">
+    <button class="btn btn-xs btn-ghost gap-1 font-normal ${S.targetsOpen ? 'btn-active' : ''}"
+      aria-expanded=${String(Boolean(S.targetsOpen))} title="Which target the App pane shows"
+      @click=${() => {
+        S.targetsOpen = !S.targetsOpen;
+        renderBar();
+      }}>${now}${icon('caret-down', 'size-3')}</button>
+    ${
+      S.targetsOpen
+        ? b`<div class="target-pop" role="listbox" aria-label="Which target the App pane shows">
+            ${targets.map(
+              (t) => b`<button class="row" role="option" data-target="${t.name}"
+                aria-selected=${String(t.name === now)} @click=${() => pickTarget(t.name)}>
+                <span class="tick">${t.name === now ? '✓' : ''}</span>
+                <span><div class="name">${t.name}</div><div class="url">${t.base}</div></span></button>`,
+            )}
+            <div class="foot">Choosing a target runs this screen's setup there, then opens it. The choice is yours alone and stays after a reload.</div>
+          </div>`
+        : A
+    }
+  </span>`;
+  }
+
+  /* Point the App pane at a target: the screen in hand is set up there, then opened. */
+  function pickTarget(name) {
+    S.targetsOpen = false;
+    const screen = screenInHand();
+    if (name !== targetNow()) {
+      chooseTarget(name);
+      // Wherever the frame was, it was the other target's.
+      if (screen && goTo(screenById(screen.id), 'app', S.pickedScreen)) return;
+    }
+    render();
+  }
+
+  /**
+   * Run a screen's setup again from its first step, as the rule's own control
+   * asks (screens.setup.runs-before-the-screen).
+   */
+  function setUpAgain(screenId) {
+    const screen = screenById(screenId);
+    if (screen) goTo(screen, 'app', S.pickedScreen, { again: true });
+  }
+
+  /*
+   * Two states of one page, and nothing to say which this is: the picker opens
+   * by itself, once per address, and nothing is filed under either until one is
+   * picked (ADR 0017 §4, screens.identity.setup-tells-states-apart).
+   */
+  function askWhichScreen() {
+    if (!D.screenPanel || !tiedScreens().length || S.askedAt === S.frameUrl) return;
+    S.askedAt = S.frameUrl;
+    S.screensOpen = true;
+    syncScreenPanel();
+  }
+
   function hereChanged() {
     /*
      * Arriving at the screen someone picked is not leaving it. The frame
@@ -10003,6 +10590,10 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const data = await res.json();
     if (gen !== loadGen) return;
     S.data = data;
+    // The App pane's target is the viewer's own choice (ADR 0017 §5): read
+    // once, then every answer is pointed at it before anything reads a screen.
+    if (S.target === undefined) await restoreTarget();
+    applyTarget();
     /*
      * The blueprint this panel opened is the only one it records against (q-0301).
      * The key is the blueprint's home on disk, so a server restarted on the
@@ -10079,6 +10670,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     syncProjectModal();
     syncBareRoot();
     syncAppDownStrip();
+    // The storyboard may arrive after the page has said where it is, so the
+    // question of which state this is gets asked here as well.
+    askWhichScreen();
     // While the app is out, the design takes the frame's place at full
     // strength. Asked on every render, because the frame can be found out
     // before the storyboard has said which screen this is.
@@ -10674,7 +11268,11 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
           : 'Which screen this page is, detected from its address — open to pick one by hand'
       }">
       ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
-        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen'
+        atScreen
+          ? (atScreen.title ?? atScreen.id)
+          : tiedScreens().length
+            ? 'Which screen?'
+            : 'No screen'
       }</span>${icon('caret-down', 'size-3')}</button>
     </span>
 
@@ -10731,6 +11329,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
         data-testid="panel.surface-build" title="${buildTip}"
         ?disabled=${!sides.build}
         @click=${() => pickSurface('app')}>${buildLabel}</button>
+      ${targetPicker()}
     </span>
 
     <span class="ml-auto flex items-center gap-2">
@@ -11286,10 +11885,44 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
    * or the radio list snaps back to "Detect from the page" the moment the
    * frame lands (n-0098).
    */
-  function goTo(screen, surface = pageSurface(), pick = null) {
+  function goTo(screen, surface = pageSurface(), pick = null, { again = false } = {}) {
     const url =
       screenUrl(screen, surface) ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
     if (!url) return false;
+    /*
+     * A screen with setup steps is set up before it is loaded (ADR 0017 §2):
+     * when the frame is going to its app side and the panel has not already
+     * set it up on this target, or when the person asks for it again. A trip
+     * anywhere else leaves whatever setup was running, and forgets the last
+     * one, because setup runs again whenever the screen being shown changes.
+     */
+    const toApp = url === screenUrl(screen, 'app');
+    const run = toApp ? runOf(screen) : null;
+    const setUpFirst =
+      Boolean(run) && (again ? run.steps.length + run.missing.length > 0 : needsSetup(screen));
+    // A setup that stopped part-way left the frame on a step, not on a screen.
+    const astray = Boolean(S.setup && S.setup.state !== 'done');
+    if (setUpFirst || !toApp || !run) {
+      leaveSetup();
+      if (!setUpFirst) S.setupFor = null;
+    }
+    if (setUpFirst) {
+      S.frameUrl = url;
+      sayAddress();
+      hideVeil();
+      runSetup(screen, { answers, paint: render }).then((how) => {
+        // Stopped, or the person moved on: the cover says why, or nothing is owed.
+        if (how === 'failed' || how === 'left' || S.frameUrl !== url) return;
+        frameLoading(url, `Loading ${screenLabel(screen)}…`);
+        loadFrame(url);
+      });
+      S.pickedScreen = pick;
+      S.ghostOverride = null;
+      if (S.protoShare === null) setGhost(false);
+      else setFade(S.protoShare);
+      render();
+      return true;
+    }
     /*
      * Already there. Assigning the same address is still a navigation - the
      * page reloads, scroll position and form state go, and on a slow app you
@@ -11301,9 +11934,9 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      * page look like a different one the first time we asked for it - so the
      * frame reloaded for a screen it was already showing.
      */
-    if (!sameAddress(S.frameUrl, url)) {
+    if (astray || !sameAddress(S.frameUrl, url)) {
       const first = !S.frameUrl;
-      const scrollOnly = withinPage(S.frameUrl, url);
+      const scrollOnly = !astray && withinPage(S.frameUrl, url);
       S.frameUrl = url;
       sayAddress();
       if (!scrollOnly) frameLoading(url, `Loading ${screenLabel(screen)}…`);
@@ -12115,6 +12748,8 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     }
     S.phase = 'ready';
     S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
+    if (S.target === undefined) await restoreTarget();
+    applyTarget();
     // Every clock in the panel reads in the zone the person declared (n-0290).
     MSG.zone = S.data?.identity?.timezone ?? null;
     await loadSeen();
@@ -12356,6 +12991,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
      */
     const on = (verb, handle) => D.host.addEventListener(`wd-${verb}`, (e) => handle(e.detail));
     on('open-rule', ({ rule }) => open(rule));
+    on('run-setup', ({ screen }) => setUpAgain(screen));
     on('go-screen', ({ screen }) => goTo(screenById(screen)));
     // A step's anchor under the pointer: brought into view, then ringed.
     on('highlight', ({ anchor }) => {
@@ -12595,13 +13231,18 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
          * Arriving where we asked is the end of the wait, whether or not a load
          * event says so - the page reporting its address is the surer word.
          */
+        // A setup is running, or stopped part-way: the frame is on a step,
+        // not on a screen, and where it is is the setup's to read.
+        if (setupHeard(msg)) return;
         if (msg.href && sameAddress(msg.href, S.frameUrl)) hideVeil();
         const moved = msg.href && msg.href !== S.frameUrl;
         S.frameUrl = msg.href ?? S.frameUrl;
         if (moved) sayAddress();
         pushContexts();
+        askWhichScreen();
         return moved ? hereChanged() : render();
       }
+      if (msg.type === 'walkdown:waited' || msg.type === 'walkdown:loaded') return setupAnswered(msg);
       // The ghosted surface can leave pin mode too (Escape). Pin mode has one
       // owner, so it is told rather than each side keeping its own answer.
       if (msg.type === 'walkdown:pin-mode' && msg.on === false) return PIN.set(false);

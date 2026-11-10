@@ -132,6 +132,14 @@ One server answers for every blueprint on this machine, on
 start nothing: it picks up a new blueprint without a restart. Run it in the
 background and give the person the address.
 
+A screen whose setup signs somebody in (`app.setup` steps,
+[docs/02-blueprint-schema.md](docs/02-blueprint-schema.md)) relies on the app's
+session cookie reaching the next page in the frame. In the extension it always
+does. On `walkdown serve`'s own page the app is framed from another address:
+an app on `localhost` keeps a cookie that is `SameSite=Lax` or unset, and an
+app on any other site keeps only `SameSite=None; Secure`. If a setup ends on
+the sign-in page there, use the extension, or relax the cookie in development.
+
 The browser extension is the one step only the person can do. Give them these
 steps:
 

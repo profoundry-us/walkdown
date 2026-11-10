@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-11-10T21-44-11Z-local-01",
+  "created": "2026-11-10T21:44:11Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a0270dd8-dirty",
+  "spec_hash": "sha256:b6246a6f2b6f",
+  "results": [
+    {
+      "rule": "screens.setup.setup-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9a9388488257",
+      "evidence": [
+        "runs/evidence/2026-11-10T21-44-11Z/lint-screens-tie.txt"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's `node bin/walkdown.js` on throwaway machines, each a temp directory with its own HOME and WALKDOWN_HOME, so no port was driven and nothing was served. On six screens in three pairs, lint gave one warning and exited 0: expense-approve-confirm, the later of the two screens sharing `/expenses/{fixtures.expense_submitted}` and the recipe `as_finance_admin`, is named as the one that loses to expense-approve, with the path shown filled in as /expenses/412 on local. The pair at one path with two different recipes and the pair whose paths fill in to /expenses/418 and /expenses/415 said nothing. The output matches the accepted lint-screens-tie design apart from its invented counts. Adding a staging target where both fixtures are 9001 produced a second warning that begins \"on `staging`\" and names expense-team, with local still silent for that pair; a value kept on this machine that made them equal on local too changed it to \"on `local` and `staging`\". Giving expense-team the design ref of expense-mine brought the design-ref warning, worded as before, under both `design:` and the older `prototype:`. Also tried: a recipe and the same steps written out tie; post fields in another order tie; prose setups never tell two screens apart; three screens at one path warn the second and the third; two paths whose fixtures are both missing on a target do not tie there; a literal path equal to another's filled-in one ties on that target. Edges under 10%, named and not filed: two setups that differ only in a fixture key whose values are equal on a target are not called a tie (about 2%); a literal path in a per-target tie is said to \"fill in to\" itself (about 3%, wording). One edge between 10% and 80% was reported to the dispatching agent and not filed: a retired screen still counts, so a live screen at its retired predecessor's path and setup is told it loses a tie the matcher will never see, though lib/api.js hands the matcher no retired screen; the previous lint did the same.",
+      "threads": []
+    }
+  ]
+}

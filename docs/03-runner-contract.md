@@ -58,9 +58,11 @@ runner:
     local:
       base_url: http://localhost:3000
       env: { APP_HOST: "http://localhost:3000" }
+      fixtures: { approver_id: 2, expense_id: 7 }   # fills {fixtures.<key>} in a screen's setup and path
     staging:
       base_url: https://staging.acme.com
       env: { APP_HOST: "https://staging.acme.com" }
+      fixtures: { approver_id: 4411 }
 
 # Instructions the builder agent follows when authoring checks:
 authoring:
@@ -92,6 +94,18 @@ governance:
 - **Targets** reuse whatever base-URL mechanism the project already has (Capybara
   `APP_HOST`, Playwright `baseURL` env). The target name flows into the run record, which
   is what powers multi-environment status ("passes locally, never passed on staging").
+- **`fixtures`** are the values that differ from one target to the next: the id of the
+  approver the seeds made locally, the one staging happens to have. A screen's setup and
+  path name them as `{fixtures.<key>}` ([02](02-blueprint-schema.md), "Storyboard"). The
+  ones in `spec.yml` are shared; a value only one machine knows is kept on that machine,
+  outside the blueprint, and wins key by key over the shared one:
+
+      walkdown fixtures set approver_id=2 --blueprint expenses          # the local target
+      walkdown fixtures set approver_id=4411 --target staging --blueprint expenses
+      echo '{"approver_id": 2, "expense_id": 7}' | walkdown fixtures set --blueprint expenses
+
+  It writes `~/.walkdown/fixtures/<blueprint id>/<target>.yml` and nothing else, so a
+  seed script can end by piping the ids it made. Values are strings, numbers or booleans.
 - `list` is optional. Without it, coverage linting reads the rule tags written in the
   files under `authoring.location`, which is cheap and works for any framework. Name a
   `list` only when tags are built at run time and the files cannot show them: RSpec's
@@ -140,6 +154,11 @@ Either tier ends the same way: walkdown appends a run record to the home's `runs
 6. Threads stuck at `answered` (knowledge not yet incorporated); `waived` threads are
    exempt.
 7. A test tagged with multiple rules → warn (split it).
+8. A setup the panel cannot run → error: a step of a kind it does not know, a `post`
+   or `visit` naming a whole address, a recipe nobody declared. A `{fixtures.<key>}`
+   with no value on a target → warn, naming the target and the command that sets it.
+9. Two live screens with the same path and the same setup → warn (one of them can never
+   be matched).
 
 ## CLI surface (v1)
 
@@ -149,6 +168,7 @@ walkdown status [--target X]       # derived per-rule status table (see 05)
 walkdown lint                      # the checks above
 walkdown run [--target X] [--rule ID]
 walkdown serve                     # panel + embed + blueprint API + feedback receiver
+walkdown fixtures set k=v --blueprint X [--target T]   # this machine's fixture values
 walkdown extract [--source prd|prototype]   # propose a merge diff
 ```
 

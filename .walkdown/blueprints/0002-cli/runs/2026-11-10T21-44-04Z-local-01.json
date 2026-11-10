@@ -1,0 +1,22 @@
+{
+  "run_id": "2026-11-10T21-44-04Z-local-01",
+  "created": "2026-11-10T21:44:04Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a0270dd8-dirty",
+  "spec_hash": "sha256:b6246a6f2b6f",
+  "results": [
+    {
+      "rule": "screens.setup.fixtures-set-keeps-this-machines-values",
+      "status": "pass",
+      "statement_hash": "sha256:6e0afbf92524",
+      "evidence": [
+        "runs/evidence/2026-11-10T21-44-04Z/fixtures-set.txt"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's `node bin/walkdown.js` on throwaway machines, each a temp directory with its own HOME and WALKDOWN_HOME, so no port was driven and nothing was served. For the evidence run the machine had no WALKDOWN_HOME, so the home was HOME's own ~/.walkdown. A JSON object of three keys piped into `walkdown fixtures set --blueprint expenses --target local` printed each key with its value and wrote ~/.walkdown/fixtures/0001-en-expenses/local.yml; a hash of every other file on the machine, the blueprint's home and the repository included, was the same before and after. `key=value` arguments were kept the same way and merged key by key (413 replaced 412, the other keys stayed). Without `--blueprint` it exited 2, said to choose one with `--blueprint <id>`, and wrote nothing. Six lines of chatter around the JSON exited 2, showed the first 4 of 6 lines, and wrote nothing; so did empty input, `{}`, a nested object, a list, a null, an empty string and a bare number, each leaving the file byte for byte as it was. `novalue=`, `=v`, a bare word, a key with a space, an undeclared target, no target, a target of `../../../escape` and a terminal with nothing piped were all refused with exit 2. The three accepted designs match the build apart from the project code (`ex` drawn, `en` derived, accepted) and the padding of the one-key block, which the design drew at the three-key width (taste, not filed). Edges under 10%, named and not filed: JSON with a byte-order mark is refused (about 3%, a Windows pipe; it says so and keeps nothing); when both a pipe and arguments are given the arguments win and the pipe is never read (about 5%); a repeated key takes the last value. Two edges at roughly 10% were reported to the dispatching agent and not filed: `key=value` reads any run of digits as a number, so `code=007` is kept as 7 and a 20-digit id loses its last digits, and JSON keys are not held to the letters a placeholder can name, so `a.b` or `a b` is kept though no `{fixtures.<key>}` can ever ask for it.",
+      "threads": []
+    }
+  ]
+}

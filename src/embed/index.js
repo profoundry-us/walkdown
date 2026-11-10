@@ -1180,6 +1180,46 @@ import { icon } from './icons.js';
       if (msg.scroll) highlighted?.scrollIntoView({ block: 'nearest' });
       return;
     }
+    /*
+     * The panel asking how this document's own load was answered (ADR 0017
+     * §2), once the frame says it has loaded: it cannot read a cross-origin
+     * frame's status, and a setup step that answered 500 must not read as
+     * having worked.
+     */
+    if (msg.type === 'walkdown:how-loaded') {
+      let status = 0;
+      try {
+        status = performance.getEntriesByType('navigation')[0]?.responseStatus ?? 0;
+      } catch {
+        // A browser that does not say is taken as answered.
+      }
+      e.source?.postMessage(
+        { type: 'walkdown:loaded', id: msg.id, status, href: location.href },
+        '*',
+      );
+      return;
+    }
+    /*
+     * A setup step waiting for an anchor (ADR 0017 §1): answered the moment
+     * the element is on the page, or when the wait runs out. The page may
+     * still be rendering, so it is looked for until then.
+     */
+    if (msg.type === 'walkdown:wait-for') {
+      const until = Date.now() + (Number(msg.timeout) || 10000);
+      const answer = (found) =>
+        e.source?.postMessage(
+          { type: 'walkdown:waited', id: msg.id, anchor: msg.anchor, found },
+          '*',
+        );
+      const look = () => {
+        if (document.querySelector(`[${ANCHOR_ATTR}="${CSS.escape(String(msg.anchor))}"]`))
+          return answer(true);
+        if (Date.now() >= until) return answer(false);
+        setTimeout(look, 100);
+      };
+      look();
+      return;
+    }
     // A rule opened: centre the element it is about, and ring it (ADR 0016).
     if (msg.type === 'walkdown:focus') {
       setHighlight(msg.element ?? null);
@@ -1231,9 +1271,27 @@ import { icon } from './icons.js';
    * besides, which is two controls for a thing that must have exactly one.
    */
   if (framed) {
+    /*
+     * How this document's own load was answered, from its navigation timing
+     * (ADR 0017 §2). The panel cannot read a cross-origin frame's status, and
+     * a setup step that answered 500 must not read as having worked. Zero
+     * where the browser does not say.
+     */
+    const loadStatus = () => {
+      try {
+        return performance.getEntriesByType('navigation')[0]?.responseStatus ?? 0;
+      } catch {
+        return 0;
+      }
+    };
     const announce = () =>
       window.parent.postMessage(
-        { type: 'walkdown:ready', anchors: $anchors().map(anchorId), href: location.href },
+        {
+          type: 'walkdown:ready',
+          anchors: $anchors().map(anchorId),
+          href: location.href,
+          status: loadStatus(),
+        },
         '*',
       );
     announce();

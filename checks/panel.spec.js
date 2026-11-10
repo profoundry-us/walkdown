@@ -2859,8 +2859,11 @@ test('two blueprints claiming one page is a question, asked with both named', {
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    // Two of the project's blueprints claim it; the checkspace holds three.
-    keys = (body.blueprints ?? []).filter((p) => !/0002-cli$/.test(p.key)).map((p) => p.key);
+    // Two of the project's blueprints claim it; the checkspace holds three, and
+    // the expenses project beside it is another project altogether.
+    keys = (body.blueprints ?? [])
+      .filter((p) => !/0002-cli$|expenses-app/.test(p.key))
+      .map((p) => p.key);
     await route.fulfill({ response: res, json: body });
   });
   await page.route(/\/api\/whose(\?|$)/, async (route) => {
@@ -3123,8 +3126,11 @@ test('crossing to a project that claims nothing here does not keep the old count
   await page.route('**/api/blueprint*', async (route) => {
     const res = await route.fetch();
     const body = await res.json();
-    // Two of the project's blueprints claim it; the checkspace holds three.
-    keys = (body.blueprints ?? []).filter((p) => !/0002-cli$/.test(p.key)).map((p) => p.key);
+    // Two of the project's blueprints claim it; the checkspace holds three, and
+    // the expenses project beside it is another project altogether.
+    keys = (body.blueprints ?? [])
+      .filter((p) => !/0002-cli$|expenses-app/.test(p.key))
+      .map((p) => p.key);
     // A second project this machine holds, whose blueprints claim nothing on
     // this page. Two of them, so picking it asks rather than opening one.
     const other = { id: 'other', root: '~/elsewhere' };
@@ -3168,10 +3174,7 @@ test('crossing to a project that claims nothing here does not keep the old count
   // was set the answer was dropped, and the modal named the address it had
   // just been asked about and said nothing claimed it (n-0282).
   await page.getByTestId('panel.project').click();
-  await page
-    .getByTestId('project.list')
-    .locator('[data-project]:not([data-project="other"])')
-    .click();
+  await page.getByTestId('project.list').locator('[data-project="checkspace"]').click();
   await page.getByTestId('start.options').locator('[data-pick]').first().click();
   await expect(page.getByTestId('panel.rules-list')).toBeVisible();
   await page.getByTestId('panel.project').click();

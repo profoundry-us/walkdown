@@ -9,6 +9,7 @@
  */
 import { appUrlOf, locationOfUrl, matchScreen } from '../../lib/screen-match.js';
 import { canTransition, isMachineName, TERMINAL, whoseMove } from '../../lib/vocab.js';
+import { isSetUp } from './setup.js';
 import { identityOverride, S } from './state.js';
 import { api } from './util.js';
 
@@ -214,7 +215,45 @@ export function pageSurface() {
 export function currentScreen() {
   const screens = S.data?.storyboard ?? [];
   if (S.pickedScreen) return screens.find((s) => s.id === S.pickedScreen) ?? null;
-  return matchScreen(screens, hereLocation())?.screen ?? null;
+  const hit = matchScreen(screens, hereLocation());
+  if (!hit) return null;
+  const tied = statesAt(hit, screens);
+  // Two states of one page: the one the panel last set up here, or neither.
+  return tied.length > 1 ? (tied.find(isSetUp) ?? null) : hit.screen;
+}
+
+/*
+ * The screens an app address ties between that differ only in their setup
+ * (ADR 0017 §4): one per setup, in storyboard order. The address cannot say
+ * which of them the frame is showing; only the panel's own setup can. Two
+ * screens with the same path and the same setup are still an ordinary tie,
+ * and the first is taken as before.
+ */
+function statesAt(hit, screens) {
+  if (hit.surface !== 'app') return [hit.screen];
+  const loc = hereLocation();
+  const seen = new Set();
+  return screens.filter((sc) => {
+    const m = matchScreen([sc], loc);
+    if (!m || m.surface !== 'app' || m.score !== hit.score) return false;
+    const key = sc.setupKey ?? '';
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/**
+ * The states this page could be, when nothing says which: no screen picked,
+ * none of them set up here. Empty otherwise.
+ */
+export function tiedScreens() {
+  if (S.pickedScreen) return [];
+  const screens = S.data?.storyboard ?? [];
+  const hit = matchScreen(screens, hereLocation());
+  if (!hit) return [];
+  const tied = statesAt(hit, screens);
+  return tied.length > 1 && !tied.some(isSetUp) ? tied : [];
 }
 
 /** Where a screen lives on one surface, as a URL walkdown can navigate to. */

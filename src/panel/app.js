@@ -83,6 +83,22 @@ import { backFromThread, dragFiles, threadCard, threadPane } from './thread-pane
 /** Set once the shell is up: the frame's word that a file is in the air over the application (n-0333). */
 let fileDragFromFrame = null;
 
+import {
+  APP_FRAME_NAME,
+  applyTarget,
+  appTargets,
+  chooseTarget,
+  coverIsUp,
+  leaveSetup,
+  needsSetup,
+  placeCover,
+  restoreTarget,
+  runOf,
+  runSetup,
+  setupAnswered,
+  setupHeard,
+  targetNow,
+} from './setup.js';
 import { threadFilterBar, threadsMatching, threadsPane } from './threads-list.js';
 import { toast } from './toast.js';
 import { api, esc } from './util.js';
@@ -109,6 +125,7 @@ import {
   screenUrl,
   surfaceSides,
   TERMINAL,
+  tiedScreens,
   whereIdentityLives,
   whoAmI,
 } from './vocab.js';
@@ -685,6 +702,10 @@ function buildAppFrame() {
   D.appFrame = document.createElement('iframe');
   D.appFrame.dataset.testid = 'panel.app-frame';
   D.appFrame.setAttribute('title', 'the application under review');
+  // Named from the start, so a setup step's form can be posted into it
+  // (ADR 0017 §1): a name given after the frame has loaded is not found, and
+  // the form opens a tab of its own.
+  D.appFrame.name = APP_FRAME_NAME;
   // Whatever the frame lands on - our navigation or the app's own - the wait
   // is over. Errors never fire load, and a frame that never arrives is still
   // loading, which is what the veil should keep saying.
@@ -870,6 +891,7 @@ function placeAppFrame(on) {
   }
   // The veil is pinned to the frame's box, so it follows every move of it.
   if (veilIsUp()) requestAnimationFrame(placeVeil);
+  if (coverIsUp()) requestAnimationFrame(placeCover);
   const { availW, availH, scale } = frameSpace();
   // An iframe is a replaced element: four insets alone leave it at its
   // intrinsic 300x150, so the size has to be said outright. A viewport
@@ -1180,6 +1202,72 @@ function setDocked(on) {
  * is that screen", "show me that screen's art". Carrying them across a
  * navigation would have the panel describing somewhere you have left.
  */
+/*
+ * Which target the App pane shows (ADR 0017 §5), set against the App button
+ * it qualifies. Only where the blueprint declares more than one target with
+ * a base URL: with one there is nothing to choose, and every other
+ * blueprint's bar is as it was.
+ */
+function targetPicker() {
+  const targets = appTargets();
+  if (targets.length < 2) return nothing;
+  const now = targetNow();
+  return html`<span class="relative" data-testid="panel.target">
+    <button class="btn btn-xs btn-ghost gap-1 font-normal ${S.targetsOpen ? 'btn-active' : ''}"
+      aria-expanded=${String(Boolean(S.targetsOpen))} title="Which target the App pane shows"
+      @click=${() => {
+        S.targetsOpen = !S.targetsOpen;
+        renderBar();
+      }}>${now}${icon('caret-down', 'size-3')}</button>
+    ${
+      S.targetsOpen
+        ? html`<div class="target-pop" role="listbox" aria-label="Which target the App pane shows">
+            ${targets.map(
+              (t) => html`<button class="row" role="option" data-target="${t.name}"
+                aria-selected=${String(t.name === now)} @click=${() => pickTarget(t.name)}>
+                <span class="tick">${t.name === now ? '✓' : ''}</span>
+                <span><div class="name">${t.name}</div><div class="url">${t.base}</div></span></button>`,
+            )}
+            <div class="foot">Choosing a target runs this screen's setup there, then opens it. The choice is yours alone and stays after a reload.</div>
+          </div>`
+        : nothing
+    }
+  </span>`;
+}
+
+/* Point the App pane at a target: the screen in hand is set up there, then opened. */
+function pickTarget(name) {
+  S.targetsOpen = false;
+  const screen = screenInHand();
+  if (name !== targetNow()) {
+    chooseTarget(name);
+    // Wherever the frame was, it was the other target's.
+    if (screen && goTo(screenById(screen.id), 'app', S.pickedScreen)) return;
+  }
+  render();
+}
+
+/**
+ * Run a screen's setup again from its first step, as the rule's own control
+ * asks (screens.setup.runs-before-the-screen).
+ */
+export function setUpAgain(screenId) {
+  const screen = screenById(screenId);
+  if (screen) goTo(screen, 'app', S.pickedScreen, { again: true });
+}
+
+/*
+ * Two states of one page, and nothing to say which this is: the picker opens
+ * by itself, once per address, and nothing is filed under either until one is
+ * picked (ADR 0017 §4, screens.identity.setup-tells-states-apart).
+ */
+function askWhichScreen() {
+  if (!D.screenPanel || !tiedScreens().length || S.askedAt === S.frameUrl) return;
+  S.askedAt = S.frameUrl;
+  S.screensOpen = true;
+  syncScreenPanel();
+}
+
 function hereChanged() {
   /*
    * Arriving at the screen someone picked is not leaving it. The frame
@@ -1234,6 +1322,10 @@ async function load() {
   const data = await res.json();
   if (gen !== loadGen) return;
   S.data = data;
+  // The App pane's target is the viewer's own choice (ADR 0017 §5): read
+  // once, then every answer is pointed at it before anything reads a screen.
+  if (S.target === undefined) await restoreTarget();
+  applyTarget();
   /*
    * The blueprint this panel opened is the only one it records against (q-0301).
    * The key is the blueprint's home on disk, so a server restarted on the
@@ -1310,6 +1402,9 @@ export function render() {
   syncProjectModal();
   syncBareRoot();
   syncAppDownStrip();
+  // The storyboard may arrive after the page has said where it is, so the
+  // question of which state this is gets asked here as well.
+  askWhichScreen();
   // While the app is out, the design takes the frame's place at full
   // strength. Asked on every render, because the frame can be found out
   // before the storyboard has said which screen this is.
@@ -1905,7 +2000,11 @@ function renderBar() {
           : 'Which screen this page is, detected from its address — open to pick one by hand'
       }">
       ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
-        atScreen ? (atScreen.title ?? atScreen.id) : 'No screen'
+        atScreen
+          ? (atScreen.title ?? atScreen.id)
+          : tiedScreens().length
+            ? 'Which screen?'
+            : 'No screen'
       }</span>${icon('caret-down', 'size-3')}</button>
     </span>
 
@@ -1962,6 +2061,7 @@ function renderBar() {
         data-testid="panel.surface-build" title="${buildTip}"
         ?disabled=${!sides.build}
         @click=${() => pickSurface('app')}>${buildLabel}</button>
+      ${targetPicker()}
     </span>
 
     <span class="ml-auto flex items-center gap-2">
@@ -2517,10 +2617,44 @@ const STALE_SERVER = () => Boolean(S.data?.server?.stale);
  * or the radio list snaps back to "Detect from the page" the moment the
  * frame lands (n-0098).
  */
-export function goTo(screen, surface = pageSurface(), pick = null) {
+export function goTo(screen, surface = pageSurface(), pick = null, { again = false } = {}) {
   const url =
     screenUrl(screen, surface) ?? screenUrl(screen, surface === 'app' ? 'prototype' : 'app');
   if (!url) return false;
+  /*
+   * A screen with setup steps is set up before it is loaded (ADR 0017 §2):
+   * when the frame is going to its app side and the panel has not already
+   * set it up on this target, or when the person asks for it again. A trip
+   * anywhere else leaves whatever setup was running, and forgets the last
+   * one, because setup runs again whenever the screen being shown changes.
+   */
+  const toApp = url === screenUrl(screen, 'app');
+  const run = toApp ? runOf(screen) : null;
+  const setUpFirst =
+    Boolean(run) && (again ? run.steps.length + run.missing.length > 0 : needsSetup(screen));
+  // A setup that stopped part-way left the frame on a step, not on a screen.
+  const astray = Boolean(S.setup && S.setup.state !== 'done');
+  if (setUpFirst || !toApp || !run) {
+    leaveSetup();
+    if (!setUpFirst) S.setupFor = null;
+  }
+  if (setUpFirst) {
+    S.frameUrl = url;
+    sayAddress();
+    hideVeil();
+    runSetup(screen, { answers, paint: render }).then((how) => {
+      // Stopped, or the person moved on: the cover says why, or nothing is owed.
+      if (how === 'failed' || how === 'left' || S.frameUrl !== url) return;
+      frameLoading(url, `Loading ${screenLabel(screen)}…`);
+      loadFrame(url);
+    });
+    S.pickedScreen = pick;
+    S.ghostOverride = null;
+    if (S.protoShare === null) setGhost(false);
+    else setFade(S.protoShare);
+    render();
+    return true;
+  }
   /*
    * Already there. Assigning the same address is still a navigation - the
    * page reloads, scroll position and form state go, and on a slow app you
@@ -2532,9 +2666,9 @@ export function goTo(screen, surface = pageSurface(), pick = null) {
    * page look like a different one the first time we asked for it - so the
    * frame reloaded for a screen it was already showing.
    */
-  if (!sameAddress(S.frameUrl, url)) {
+  if (astray || !sameAddress(S.frameUrl, url)) {
     const first = !S.frameUrl;
-    const scrollOnly = withinPage(S.frameUrl, url);
+    const scrollOnly = !astray && withinPage(S.frameUrl, url);
     S.frameUrl = url;
     sayAddress();
     if (!scrollOnly) frameLoading(url, `Loading ${screenLabel(screen)}…`);
@@ -3346,6 +3480,8 @@ export async function start() {
   }
   S.phase = 'ready';
   S.data = S.BP ? await (await fetch(api('/api/blueprint'))).json() : payload;
+  if (S.target === undefined) await restoreTarget();
+  applyTarget();
   // Every clock in the panel reads in the zone the person declared (n-0290).
   MSG.zone = S.data?.identity?.timezone ?? null;
   await loadSeen();
@@ -3587,6 +3723,7 @@ function wireGlobals() {
    */
   const on = (verb, handle) => D.host.addEventListener(`wd-${verb}`, (e) => handle(e.detail));
   on('open-rule', ({ rule }) => open(rule));
+  on('run-setup', ({ screen }) => setUpAgain(screen));
   on('go-screen', ({ screen }) => goTo(screenById(screen)));
   // A step's anchor under the pointer: brought into view, then ringed.
   on('highlight', ({ anchor }) => {
@@ -3826,13 +3963,18 @@ function wireGlobals() {
        * Arriving where we asked is the end of the wait, whether or not a load
        * event says so - the page reporting its address is the surer word.
        */
+      // A setup is running, or stopped part-way: the frame is on a step,
+      // not on a screen, and where it is is the setup's to read.
+      if (setupHeard(msg)) return;
       if (msg.href && sameAddress(msg.href, S.frameUrl)) hideVeil();
       const moved = msg.href && msg.href !== S.frameUrl;
       S.frameUrl = msg.href ?? S.frameUrl;
       if (moved) sayAddress();
       pushContexts();
+      askWhichScreen();
       return moved ? hereChanged() : render();
     }
+    if (msg.type === 'walkdown:waited' || msg.type === 'walkdown:loaded') return setupAnswered(msg);
     // The ghosted surface can leave pin mode too (Escape). Pin mode has one
     // owner, so it is told rather than each side keeping its own answer.
     if (msg.type === 'walkdown:pin-mode' && msg.on === false) return PIN.set(false);

@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-11-10T21-44-10Z-local-01",
+  "created": "2026-11-10T21:44:10Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a0270dd8-dirty",
+  "spec_hash": "sha256:b6246a6f2b6f",
+  "results": [
+    {
+      "rule": "screens.setup.fixtures-per-target",
+      "status": "pass",
+      "statement_hash": "sha256:85fe533de4af",
+      "evidence": [
+        "runs/evidence/2026-11-10T21-44-10Z/lint-fixtures-per-target.txt",
+        "runs/evidence/2026-11-10T21-44-10Z/lint-placeholder-edges.txt"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's `node bin/walkdown.js` on throwaway machines, each a temp directory with its own HOME and WALKDOWN_HOME, so no port was driven and nothing was served. With one screen using two fixtures, staging giving both in spec.yml, review giving one and local none, lint gave exactly two warnings and exited 0: review's names the target, `view_only_team_manager` and the screen expense-view-only-team; local's is a single line naming both keys and `walkdown fixtures set --blueprint expenses --target local`; staging got none. The output matches the accepted lint-fixture-missing design apart from its invented counts. Setting local's keys one at a time turned the one warning into a per-key one and then into none. Lint prints a filled-in path only in its tie warning, so the last step was earned there: spec.yml gave local `other_expense: 500`, the kept value was set to 412, and lint then said the path \"fills in to /expenses/412\" on local while spec.yml still read 500; the same held on staging. A key used only in a post field, in a recipe a screen names, or in the path was each attributed correctly; a recipe nobody uses and a retired screen asked for nothing. Edges under 10%, named and not filed: a spec.yml fixture that is null, a list, an object or an empty string is dropped without a word and the target reads as having none set (about 3%); a target with no `base_url`, which the App pane never lists, is still warned about (about 5%); a blueprint that declares targets but no `local` gets no warning for local and `fixtures set --target local` refuses it (about 3%); `{fixtures.x}` inside prose setup is not counted, as prose is never run. One edge between 10% and 80% was reported to the dispatching agent and not filed: a placeholder misspelled as `{fixture.x}`, `{ fixtures.x }` or `{fixtures.a.b}` is not a fixture to lint, so nothing warns and the literal braces go into the path (lint-placeholder-edges.txt).",
+      "threads": []
+    }
+  ]
+}

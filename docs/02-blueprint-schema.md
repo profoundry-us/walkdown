@@ -205,7 +205,7 @@ screens:
     design: /checkout-payment/20261019.html      # the accepted version, relative to the design root
     app:
       path: /checkout/payment                    # relative to target base_url
-      setup: cart_with_item      # OPTIONAL fixture/recipe name; v1 may leave empty
+      setup: { recipe: cart_with_item }          # OPTIONAL: prose, steps, or a recipe (below)
     anchors:                     # optional: declared anchors for lint & the panel
       - checkout.email
       - checkout.email-error
@@ -216,15 +216,50 @@ screens:
     app: { path: /checkout/confirmation }
 ```
 
-- Screens may be **states**, not just pages (a modal, wizard step 3). The `setup` field
-  says "how to get the app into this state". v1 only guarantees deep-linking to
-  URL-reachable screens and does not *execute* `setup` — but the panel shows it with any
-  rule whose screen carries one, above the steps, so a walk that can only reach the page
-  tells the reviewer the rest. Write it for a person to read.
+- Screens may be **states**, not just pages (a modal, wizard step 3, a page only one
+  role can open). `app.setup` says how the app gets into that state, and takes one of
+  three shapes (ADR 0017):
+
+  ```yaml
+  recipes:                        # top of storyboard.yml: steps with a name
+    as_approver:
+      - post: /dev/impersonate
+        fields: { user_id: "{fixtures.approver_id}" }
+      - wait_for: nav.signed-in
+
+  screens:
+    - id: approval-queue
+      app: { path: /approvals, setup: { recipe: as_approver } }
+    - id: expense-detail
+      app:
+        path: /expenses/{fixtures.expense_id}
+        setup:                    # or the steps written out
+          - visit: /dev/session?role=submitter
+    - id: expense-rejected
+      app: { path: /expenses/7, setup: Reject expense 7 as an approver first. }   # prose
+  ```
+
+  **Prose** is shown with any rule whose screen carries it, above the steps, and is never
+  run: write it for a person to read. **Steps** are run by the panel before it opens the
+  screen, each one a navigation of the app's own frame: `visit` opens a path, `post`
+  submits a form to a path with `fields`, and `wait_for` waits for an anchor to appear.
+  A step that answers with an error, or an anchor that never appears, stops the setup
+  and the panel says which step and why. walkdown never runs the app's code: whatever a
+  step reaches is a route the app itself serves, so a `/dev/impersonate` exists only
+  where the app chose to mount it. A step names a path, never a whole address; lint
+  refuses one that names a host, a kind it does not know, or a recipe nobody declared.
+- `{fixtures.<key>}` in a step or in `app.path` is filled in per target, from
+  `runner.targets.<target>.fixtures` in `spec.yml` and from the values a machine keeps
+  for itself (`walkdown fixtures set`, [03](03-runner-contract.md)). A screen whose
+  fixture has no value on a target is not opened there; the panel names the key and the
+  command that sets it, and lint warns.
 - Two screens that are states of one page share that page's `app.path`, and a query does
-  not tell them apart (`screens.identity.query-is-not-identity`). Matching skips a tie, so
-  the second screen can only be reached by picking it by hand; lint warns and names which
-  one loses. A `setup` is what makes that spelling honest rather than merely tolerated.
+  not tell them apart (`screens.identity.query-is-not-identity`). Steps do: a screen is
+  its path *and* its setup, so two screens on one path with different steps are two
+  screens, and the panel asks which one it is looking at until one of them has been set
+  up. Two with the same path and the same steps (a recipe and its steps written out are
+  the same) still tie; matching skips a tie, lint warns and names which one loses.
+  Prose is not run, so it tells nothing apart.
 - **`retired`** withdraws a screen the same way it withdraws a rule, and for the same
   reason: threads anchored to it must keep resolving. A retired screen leaves the picker,
   the matcher, the ghost and the drift report; its id still answers, so a note somebody

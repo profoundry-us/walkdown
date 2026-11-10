@@ -4,9 +4,10 @@
  */
 
 import { html, nothing } from '../../vendor/lit.js';
+import { runOf } from './setup.js';
 import { S, store } from './state.js';
 import { api, fire } from './util.js';
-import { currentScreen, ghostSource } from './vocab.js';
+import { currentScreen, ghostSource, tiedScreens } from './vocab.js';
 
 /** Where the picker's view is remembered - this browser's, like a collapsed section. */
 export const SCREENS_VIEW_KEY = 'walkdown:screens-view';
@@ -142,6 +143,48 @@ function board(screens, here) {
  * just took you to would be covering its own result.
  */
 
+/* How a screen is set up, in a line: its recipe if it names one, then each step. */
+function howSetUp(sc) {
+  const run = runOf(sc);
+  if (!run?.steps.length) return html`No setup`;
+  const said = run.steps.map((st, i) => {
+    const lead = i ? ', then ' : '';
+    const verb = st.kind === 'wait_for' ? 'wait for' : st.kind;
+    const fields = Object.entries(st.fields ?? {});
+    return html`${lead}${i || run.recipe ? verb : verb[0].toUpperCase() + verb.slice(1)} <code>${st.value}</code>${
+      fields.length
+        ? html` with ${fields.map(([k, v], j) => html`${j ? ', ' : ''}${k} <code>${v}</code>`)}`
+        : nothing
+    }`;
+  });
+  return run.recipe ? html`Recipe <code>${run.recipe}</code>: ${said}` : said;
+}
+
+/*
+ * Two states of one page, and nothing to say which this is (ADR 0017 §4).
+ * The picker opens by itself on this, above its ordinary list: the address
+ * alone cannot answer, so the person does.
+ */
+function tiedNote() {
+  const tied = tiedScreens();
+  if (!tied.length) return nothing;
+  const count = ['Two', 'Three', 'Four'][tied.length - 2] ?? String(tied.length);
+  return html`<div class="tied" data-testid="panel.screen-tied">
+    <div class="note">${count} screens share <code>${tied[0].app?.path ?? ''}</code>. They differ only in how they are set up,
+      so the address cannot say which one this is. Pick the one you are on.</div>
+    ${tied.map(
+      (
+        sc,
+      ) => html`<button class="row" role="option" data-screen="${sc.id}" data-testid="panel.screen-tied-row"
+        @click=${(e) => fire(e.currentTarget, 'pick-screen', { id: sc.id })}>
+        <div class="name">${sc.title ?? sc.id}</div>
+        <div class="how">${howSetUp(sc)}</div>
+      </button>`,
+    )}
+    <div class="foot">Picking one runs its setup here. Nothing is filed under either until you do.</div>
+  </div>`;
+}
+
 export function screensPane() {
   const screens = S.data.storyboard ?? [];
   if (!screens.length)
@@ -149,6 +192,7 @@ export function screensPane() {
   const here = currentScreen();
   const auto = !S.pickedScreen;
   return html`
+    ${tiedNote()}
     ${viewTabs()}
     <button class="flex w-full items-center gap-2 px-3.5 py-2 text-left text-[12.5px] hover:bg-base-200"
       data-screen="" @click=${(e) => fire(e.currentTarget, 'pick-screen', { id: null })}>

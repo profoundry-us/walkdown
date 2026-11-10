@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-11-10T21-43-59Z-local-01",
+  "created": "2026-11-10T21:43:59Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a0270dd8-dirty",
+  "spec_hash": "sha256:b6246a6f2b6f",
+  "results": [
+    {
+      "rule": "screens.setup.steps-or-prose",
+      "status": "pass",
+      "statement_hash": "sha256:5c6c941f8039",
+      "evidence": [
+        "runs/evidence/2026-11-10T21-43-59Z/lint-setup-steps.txt",
+        "runs/evidence/2026-11-10T21-43-59Z/lint-odd-setups.txt"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's `node bin/walkdown.js` on throwaway machines, each a temp directory with its own HOME and WALKDOWN_HOME, so no port was driven and nothing was served. On an expenses project of six screens, lint said nothing about the prose setup, the visit/post/wait_for steps or the declared recipe; it gave one error for the `click` step naming expense-approve and \"setup step 2\", one for the undeclared recipe `as_finance_admin` naming expense-finance, and exited 1; and it gave one warning naming `receipt.preview` and its screen. The output matches the accepted lint-setup-steps design line for line, apart from the design's invented counts. Trying to break it: a string in a step list, `setup: 42`, `Visit` capitalised, an empty `visit` or `wait_for`, a post whose fields are nested, a list or a string, a recipe that is not a list, and a recipe step inside a list or inside another recipe were all refused as errors naming the screen and the step; a retired screen's setup was left alone. Edges under 10%, named and not filed: a step with two kinds (`{ visit, post }`) is read as its first kind with no word about the second (about 2%, a slip of indentation); `{ recipe: x, visit: /y }` drops the extra key silently (about 2%); a whitespace-only visit path passes (under 1%); a recipe that is declared but not a list is said to be \"not under recipes\" while being offered as one that is (about 2%); a recipe no screen names is not checked (about 5%, and harmless until used). Two edges between 10% and 80% were reported to the dispatching agent and not filed: an absolute URL in `visit` passes though ADR 0017 calls the path relative to the target, and a recipe that names a recipe is refused with advice about dev routes that does not say recipes cannot nest.",
+      "threads": []
+    }
+  ]
+}

@@ -40,12 +40,18 @@ export const HOME = join('.walkdown', 'blueprints', '0001-walkdown');
 export const EXAMPLE_HOME = join('.walkdown', 'blueprints', '0001-example');
 /* The cli blueprint (ADR 0013), for the panel checks whose rules moved there. */
 export const CLI_HOME = join('.walkdown', 'blueprints', '0002-cli');
+/** Where the expenses blueprint's project is checked out (ADR 0017's checks). */
+export const EXPENSES_CHECKOUT = join(CHECKSPACE, 'expenses-app');
 
 /**
- * @param {{ exampleDeclared: string, exampleOrigin: string }} addresses
+ * @param {{ exampleDeclared: string, exampleOrigin: string, expenses: { local: string, review: string } }} addresses
  *   the example blueprint's declared address and the one this run serves it on
  */
-export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAMPLE_ORIGIN }) {
+export function prepare({
+  exampleDeclared: EXAMPLE_DECLARED,
+  exampleOrigin: EXAMPLE_ORIGIN,
+  expenses: EXPENSES,
+}) {
   if (process.env.WALKDOWN_CHECKSPACE === CHECKSPACE) return;
   process.env.WALKDOWN_CHECKSPACE = CHECKSPACE;
 
@@ -188,7 +194,7 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'registry.yml'),
     [
-      'next: 4',
+      'next: 5',
       'blueprints:',
       '  - id: 0001-cs-blueprint',
       '    project: checkspace',
@@ -208,9 +214,18 @@ export function prepare({ exampleDeclared: EXAMPLE_DECLARED, exampleOrigin: EXAM
       `    checkout: ${CHECKSPACE}`,
       `    home: ${join(CHECKSPACE, CLI_HOME)}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
+      // A project of its own: a fourth blueprint in the checkspace's project
+      // would be one more to choose between on every page that project claims.
+      '  - id: 0004-ex-expenses',
+      '    project: expenses',
+      '    code: ex',
+      `    checkout: ${EXPENSES_CHECKOUT}`,
+      `    home: ${join(EXPENSES_CHECKOUT, 'blueprint')}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),
   );
+  expensesBlueprint(join(EXPENSES_CHECKOUT, 'blueprint'), EXPENSES);
 
   /*
    * A rule nothing has ever verified, so the checks that read an UNBUILT
@@ -316,4 +331,167 @@ function placeholderEvidence(dir) {
         writeFileSync(file, ONE_PIXEL);
       }
   }
+}
+
+/*
+ * A blueprint of the checkspace's own, for ADR 0017: an app with sign-in
+ * (checks/fixtures/expenses-app.mjs), whose screens are states of one page
+ * reached by setup steps. A throwaway home rather than rules added to the
+ * copy of walkdown's own, so nothing here is ever mistaken for a rule of the
+ * panel's. `local` and `review` are the app's two ports; `staging` declares
+ * no base URL, so the App pane cannot be pointed at it.
+ */
+function expensesBlueprint(home, { local, review }) {
+  mkdirSync(join(home, 'features'), { recursive: true });
+  for (const kind of ['threads', 'runs']) mkdirSync(join(home, kind), { recursive: true });
+  writeFileSync(
+    join(home, 'spec.yml'),
+    [
+      'blueprint: expenses',
+      'description: An app with sign-in, for the checks of screen setup.',
+      'runner:',
+      '  targets:',
+      '    local:',
+      `      base_url: ${local}`,
+      '      fixtures: { expense_submitted: 412, view_only_team_manager: 14, view_only_org_manager: 31 }',
+      '    review:',
+      `      base_url: ${review}`,
+      '      fixtures: { expense_submitted: 9, view_only_team_manager: 77, view_only_org_manager: 31 }',
+      '    staging:',
+      '      fixtures: { expense_submitted: 30871 }',
+      '',
+    ].join('\n'),
+  );
+  const screen = (id, title, app, anchors) => [
+    `  - id: ${id}`,
+    `    title: ${title}`,
+    '    app:',
+    ...app.map((l) => `      ${l}`),
+    `    anchors: [${anchors.join(', ')}]`,
+  ];
+  const PATH = 'path: /expenses/{fixtures.expense_submitted}';
+  writeFileSync(
+    join(home, 'storyboard.yml'),
+    [
+      'screens:',
+      ...screen(
+        'expense-team',
+        'Expense, view-only team manager',
+        [
+          'setup:',
+          '  - visit: /dev/impersonate?id=1',
+          '  - post: /dev/session',
+          '    fields: { user_id: "{fixtures.view_only_team_manager}" }',
+          '  - wait_for: nav.signed-in',
+          PATH,
+        ],
+        ['nav.signed-in', 'expense.title', 'expense.note'],
+      ),
+      ...screen(
+        'expense-org',
+        'Expense, view-only org manager',
+        ['setup: { recipe: as_view_only_org_manager }', PATH],
+        ['nav.signed-in', 'expense.title', 'expense.note'],
+      ),
+      ...screen(
+        'expense-prose',
+        'Expense, signed in by hand',
+        ['setup: Sign in as any manager first.', 'path: /expenses/7'],
+        ['expense.title'],
+      ),
+      ...screen(
+        'expense-broken',
+        'Expense, behind a sign-in that fails',
+        [
+          'setup:',
+          '  - visit: /dev/impersonate?id=14',
+          '  - post: /dev/broken',
+          '  - wait_for: nav.signed-in',
+          'path: /expenses/500',
+        ],
+        ['nav.signed-in', 'expense.title'],
+      ),
+      ...screen(
+        'expense-slow',
+        'Expense, behind a sign-in that never lands',
+        ['setup:', '  - visit: /dev/slow', '  - wait_for: nav.signed-in', 'path: /expenses/408'],
+        ['nav.signed-in', 'expense.title'],
+      ),
+      ...screen(
+        'expense-unseeded',
+        'Expense, whose record nobody made',
+        ['setup:', '  - visit: /dev/impersonate?id=14', 'path: /expenses/{fixtures.expense_draft}'],
+        ['expense.title'],
+      ),
+      'recipes:',
+      '  as_view_only_org_manager:',
+      '    - post: /dev/session',
+      '      fields: { user_id: "{fixtures.view_only_org_manager}" }',
+      '',
+    ].join('\n'),
+  );
+  /*
+   * Verdicts on two targets and none on the third (panel.targets.verdict-on-
+   * each): the checks passed on local today and failed on review yesterday.
+   */
+  const run = (target, created, status, message) => {
+    const id = `${created.replace(/:/g, '-')}-${target}-01`;
+    writeFileSync(
+      join(home, 'runs', `${id}.json`),
+      JSON.stringify(
+        {
+          run_id: id,
+          created,
+          actor: 'checks-person',
+          kind: 'checks',
+          target,
+          results: [
+            {
+              rule: 'expenses.view.team-no-approve',
+              status,
+              checks: ['spec/expenses.spec.ts:41'],
+              ...(message && { message }),
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+  };
+  const at = (daysAgo) => `${new Date(Date.now() - daysAgo * 864e5).toISOString().slice(0, 19)}Z`;
+  run('local', at(0), 'pass', 'found no Approve button and the view-only note');
+  run('review', at(1), 'fail', 'expected no Approve button, and found one');
+
+  const rule = (id, statement, screenId) => [
+    `      - id: expenses.view.${id}`,
+    `        statement: ${statement}`,
+    '        verify: [checks]',
+    `        screens: [${screenId}]`,
+    '        steps:',
+    '          then: [It does]',
+  ];
+  writeFileSync(
+    join(home, 'features', 'expenses.yml'),
+    [
+      'feature: expenses',
+      'stories:',
+      '  - id: expenses.view',
+      '    title: Viewing an expense',
+      '    statement: As a manager I open an expense.',
+      '    rules:',
+      ...rule(
+        'team-no-approve',
+        'A view-only team manager sees no Approve button.',
+        'expense-team',
+      ),
+      ...rule('team-note', 'A view-only team manager sees the view-only note.', 'expense-team'),
+      ...rule('org-note', 'A view-only org manager sees the organisation note.', 'expense-org'),
+      ...rule('by-hand', 'A manager signed in by hand sees the expense.', 'expense-prose'),
+      ...rule('broken', 'An expense behind a failing sign-in is not shown.', 'expense-broken'),
+      ...rule('slow', 'An expense behind a sign-in that never lands is not shown.', 'expense-slow'),
+      ...rule('unseeded', 'An expense nobody made is not shown.', 'expense-unseeded'),
+      '',
+    ].join('\n'),
+  );
 }

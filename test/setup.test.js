@@ -105,6 +105,40 @@ test('a pair that ties on one target is warned about there, by name; two states 
   );
 });
 
+test('a setup step naming a whole address is refused, and a retired screen ties with nothing @rule:screens.setup.steps-or-prose @rule:screens.setup.setup-is-identity', () => {
+  const h = home('edges', {
+    screens: [
+      SCREEN('away', '{ setup: [{ visit: "https://elsewhere.example/in" }], path: /a }'),
+      `  - id: old\n    retired: Replaced by new.\n    app: { setup: [{ visit: /in }], path: /b }`,
+      SCREEN('new', '{ setup: [{ visit: /in }], path: /b }'),
+    ].join('\n'),
+    targets: '    local:\n      base_url: http://localhost:3000',
+  });
+  const found = about(h, 'storyboard');
+  const refused = found.filter((f) => f.level === 'error' && /^setup /.test(f.message));
+  assert.equal(refused.length, 1, JSON.stringify(found, null, 2));
+  assert.equal(refused[0].subject, 'away');
+  assert.match(
+    refused[0].message,
+    /^setup step 1 visits `https:\/\/elsewhere\.example\/in`, a whole address/,
+  );
+  assert.equal(found.filter((f) => /a tie is never matched/.test(f.message)).length, 0);
+});
+
+test('two screens with one path and one setup still tie, and lint says so @rule:screens.identity.setup-tells-states-apart', () => {
+  const h = home('same', {
+    screens: [
+      SCREEN('one', '{ setup: [{ visit: /in }], path: /x }'),
+      SCREEN('two', '{ setup: [{ visit: /in }], path: /x }'),
+    ].join('\n'),
+    targets: '    local:\n      base_url: http://localhost:3000',
+  });
+  const ties = about(h, 'storyboard').filter((f) => /a tie is never matched/.test(f.message));
+  assert.equal(ties.length, 1);
+  assert.equal(ties[0].subject, 'two');
+  assert.match(ties[0].message, /^app path \/x and setup of 1 step are both screen `one`'s/);
+});
+
 test('two screens sharing a design ref are warned about as before, whatever their setups @rule:screens.setup.setup-is-identity', () => {
   const h = home('designs', {
     screens: [
