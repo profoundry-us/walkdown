@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:25.520Z
 anchor:
   screen: rule-detail-setup
-status: addressed
+status: verified
 body: "For screens.setup.runs-before-the-screen and
   screens.setup.docked-carries-on (ADR 0017 §§1-2). The rule detail of a rule
   whose screen has setup steps: under the setup heading (detail.setup),
@@ -26,4 +26,12 @@ replies:
       lists the three steps with fixtures filled in and a Run setup again
       button, while the App pane says it is on step 2 of 3, with docked and
       prose cases behind a mockup control."
+  - author: topher
+    via: verdict
+    created: 2026-11-10T21:32:49Z
+    body: Accepted by topher's approval of every rule on rule-detail-setup
+      (2026-11-10T21-32-49Z-local-01).
 proposes: /drafts/rule-detail-setup.html
+verified_by: topher
+verified_via: 2026-11-10T21-32-49Z-local-01
+verified_at: 2026-11-10T21:32:49Z

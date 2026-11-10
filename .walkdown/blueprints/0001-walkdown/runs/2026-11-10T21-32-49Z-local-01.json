@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-11-10T21-32-49Z-local-01",
+  "created": "2026-11-10T21:32:49Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "78c285f8-dirty",
+  "spec_hash": "sha256:9a822f975639",
+  "results": [
+    {
+      "rule": "screens.setup.runs-before-the-screen",
+      "status": "approved",
+      "statement_hash": "sha256:e7e5adf3b438"
+    }
+  ]
+}
