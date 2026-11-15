@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:27.120Z
 anchor:
   screen: seed-local
-status: addressed
+status: verified
 body: "For screens.setup.seed-keeps-this-machines-values (ADR 0017 §3).
   `walkdown seed --target local` succeeding: says it ran the target's seed
   command in the code root, lists each key with its value (seed.values, e.g.
@@ -25,3 +25,5 @@ replies:
       under ~/.walkdown/fixtures/, and that nothing reached the blueprint or the
       repository, with exit 0."
 proposes: /drafts/seed-local.html
+verified_by: topher
+verified_at: 2026-11-13T21:59:52Z

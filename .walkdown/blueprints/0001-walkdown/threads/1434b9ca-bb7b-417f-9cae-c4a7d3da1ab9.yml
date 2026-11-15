@@ -6,7 +6,7 @@ author: topher
 created: 2026-11-10T23:22:34.080Z
 anchor:
   rule: screens.setup.failure-stops-it
-status: addressed
+status: verified
 body: I think this is working properly, but the as-built looks a little funny;
   seems like the container doesn't take up the full space?
 attachments:
@@ -20,3 +20,10 @@ replies:
       captured in, so in a wider window it stopped short of the frame. The
       drawing now gives the cover the frame's own box, which follows the window.
       Both setup drawings are redrawn.
+  - author: topher
+    via: verdict
+    created: 2026-11-13T21:59:37Z
+    body: Verified by topher's pass on screens.setup.failure-stops-it
+      (2026-11-13T21-59-36Z-local-01).
+verified_by: topher
+verified_via: 2026-11-13T21-59-36Z-local-01

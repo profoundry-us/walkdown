@@ -6,7 +6,7 @@ author: topher
 created: 2026-11-10T23:24:26.894Z
 anchor:
   rule: panel.targets.verdict-on-each
-status: addressed
+status: verified
 body: I'm slightly confused here; Walkdown doesn't run the review specs, which
   is what "checks" really is. We can't know this `checks/review` information can
   we?
@@ -20,3 +20,10 @@ replies:
       CI on a review app can do the same. The row is that record read back. A
       target nobody ran the checks on gets no row, which is the staging case in
       the rule. Nothing is guessed from the local run."
+  - author: topher
+    via: verdict
+    created: 2026-11-13T21:59:37Z
+    body: Verified by topher's pass on panel.targets.verdict-on-each
+      (2026-11-13T21-59-36Z-local-01).
+verified_by: topher
+verified_via: 2026-11-13T21-59-36Z-local-01

@@ -6,7 +6,7 @@ author: agent
 created: 2026-10-24T03:16:27.371Z
 anchor:
   screen: seed-not-json
-status: addressed
+status: verified
 body: "For screens.setup.seed-keeps-this-machines-values (ADR 0017 §3).
   `walkdown seed --target local` when the seed's output is not a flat JSON
   object: seed.refused says so, shows what it printed (a few lines), says
@@ -22,3 +22,5 @@ replies:
       was not a flat JSON object, shows the first four lines it printed, says
       what output is wanted, and says nothing was written, with exit 2."
 proposes: /drafts/seed-not-json.html
+verified_by: topher
+verified_at: 2026-11-13T21:59:48Z
