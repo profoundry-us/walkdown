@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch D — Workflow board</title>
+<!--
+  A sketch, not a design: what a "workflows" mode of walkdown might look like.
+  One board is one workflow. Lanes are the people and systems in it, cards are
+  stories, and a card's picture is the first screen of that story. Opening a
+  card walks its steps in a drawer. All data below is made up for the sketch.
+  Kept in its own folder so the Tailwind scan of sketches/*.html never sees it.
+-->
+<style>
+  :root {
+    --b100: oklch(30% 0.048 245);
+    --b200: oklch(26% 0.050 245);
+    --b300: oklch(41% 0.055 242);
+    --deep: oklch(23% 0.048 245);
+    --ink: oklch(93% 0.020 230);
+    --dim: oklch(93% 0.020 230 / .55);
+    --primary: oklch(78% 0.125 215);
+    --ok: oklch(78% 0.140 160);
+    --warn: oklch(84% 0.150 85);
+    --err: oklch(72% 0.170 22);
+    --col: 184px;
+    --lanew: 148px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--deep); color: var(--ink);
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  /* ── top bar ─────────────────────────────── */
+  header {
+    display: flex; align-items: center; gap: 14px; flex: 0 0 auto;
+    padding: 8px 14px; background: var(--b100); border-bottom: 1px solid var(--b300);
+  }
+  .mark { font-weight: 700; letter-spacing: .02em; }
+  .mark i { font-style: normal; color: var(--primary); }
+  .modes { display: flex; border: 1px solid var(--b300); border-radius: 4px; overflow: hidden; }
+  .modes button { padding: 3px 10px; font-size: 12px; opacity: .6; }
+  .modes button.on { background: var(--primary); color: var(--deep); opacity: 1; font-weight: 600; }
+  .picker { padding: 3px 10px; border: 1px solid var(--b300); border-radius: 4px; font-size: 12px; }
+  .picker b { font-weight: 600; }
+  .tally { display: flex; gap: 12px; font-size: 12px; margin-left: auto; }
+  .tally span::before { content: attr(data-g); margin-right: 4px; }
+  .sketch-tag { font-size: 11px; color: var(--dim); border: 1px dashed var(--b300); border-radius: 4px; padding: 2px 7px; }
+  .pass { color: var(--ok); } .fail { color: var(--err); } .mine { color: var(--warn); } .unbuilt { color: var(--dim); }
+
+  main { display: flex; flex: 1 1 auto; min-height: 0; }
+
+  /* ── board ───────────────────────────────── */
+  #scroll { flex: 1 1 auto; min-width: 0; overflow: auto; }
+  #board {
+    position: relative; display: grid; width: max-content;
+    grid-template-columns: var(--lanew) repeat(16, var(--col));
+    column-gap: 18px; padding: 0 24px 28px 0;
+  }
+  #wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  #wires path { fill: none; stroke: var(--b300); stroke-width: 1.5; stroke-linejoin: round; }
+  #wires path.on { stroke: var(--primary); stroke-width: 2; }
+
+  .phase {
+    grid-row: 1; position: sticky; top: 0; z-index: 4;
+    margin: 0 -9px; padding: 9px 9px 7px; background: var(--deep);
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
+    border-bottom: 1px solid var(--b300); border-left: 1px solid var(--b300);
+  }
+  .corner { grid-row: 1; grid-column: 1; position: sticky; top: 0; left: 0; z-index: 6; background: var(--deep); border-bottom: 1px solid var(--b300); margin-right: -9px; }
+
+  .stripe { grid-column: 1 / -1; margin-right: -24px; }
+  .stripe.back { background: color-mix(in oklab, var(--b200) 55%, transparent); }
+  .stripe.line { border-top: 1.5px dashed var(--b300); }
+  .stripe.line.solid { border-top: 1.5px solid var(--dim); }
+
+  .lane {
+    grid-column: 1; position: sticky; left: 0; z-index: 3;
+    margin-right: -9px; padding: 14px 10px 14px 14px; text-align: left;
+    background: var(--deep); border-right: 1px solid var(--b300);
+    display: flex; flex-direction: column; gap: 2px; justify-content: center;
+  }
+  .lane.back { background: color-mix(in oklab, var(--b200) 55%, var(--deep)); }
+  .lane b { font-size: 12.5px; font-weight: 600; }
+  .lane small { font-size: 11px; color: var(--dim); }
+  .lane .dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 4px; }
+  .lane .cut {
+    position: absolute; top: -8px; left: 14px; padding: 0 5px; background: var(--deep);
+    font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
+    white-space: nowrap;
+  }
+  .lane:hover b { color: var(--primary); }
+
+  .card {
+    position: relative; z-index: 2; align-self: center; margin: 14px 0; text-align: left;
+    background: var(--b100); border: 1px solid var(--b300); border-radius: 6px; overflow: hidden;
+    display: flex; flex-direction: column; transition: opacity .15s;
+  }
+  .card:hover { border-color: var(--primary); }
+  .card.sel { outline: 2px solid var(--primary); outline-offset: 1px; border-color: var(--primary); }
+  .card .shot { display: block; background: #f6f7f9; border-bottom: 1px solid var(--b300); position: relative; }
+  .card .shot svg { display: block; width: 100%; height: auto; }
+  .card .count {
+    position: absolute; right: 5px; bottom: 5px; padding: 1px 6px; border-radius: 3px;
+    background: oklch(23% 0.048 245 / .82); color: var(--ink); font-size: 10.5px;
+  }
+  .card .txt { padding: 7px 9px 8px; display: flex; flex-direction: column; gap: 3px; }
+  .card .ttl { font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+  .card .meta { display: flex; gap: 6px; font-size: 11px; color: var(--dim); }
+  .card .meta .st { font-weight: 700; }
+  .card.is-unbuilt { border-style: dashed; }
+  .card.is-unbuilt .shot svg { opacity: .55; }
+  .card.is-fail { border-color: var(--err); }
+  .card.headless { background: transparent; border-style: dashed; }
+  .card.headless .kind { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--primary); }
+  body[data-focus] .card:not(.in-focus) { opacity: .25; }
+
+  /* ── drawer ──────────────────────────────── */
+  #drawer {
+    flex: 0 0 440px; display: none; flex-direction: column; min-height: 0;
+    background: var(--b100); border-left: 1px solid var(--b300);
+  }
+  body.open #drawer { display: flex; }
+  .dhead { padding: 12px 14px 10px; border-bottom: 1px solid var(--b300); display: flex; gap: 10px; align-items: flex-start; }
+  .dhead .who { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+  .dhead .who i { width: 8px; height: 8px; border-radius: 50%; }
+  .dhead h2 { font-size: 16px; font-weight: 650; margin: 2px 0; line-height: 1.25; }
+  .dhead .id { font-size: 11px; color: var(--dim); }
+  .dhead .x { margin-left: auto; font-size: 18px; line-height: 1; opacity: .6; padding: 2px 6px; }
+  .dhead .x:hover { opacity: 1; }
+  .dbody { overflow-y: auto; padding: 12px 14px 20px; }
+  .sect { margin: 16px 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .sect:first-child { margin-top: 0; }
+
+  .stage { border: 1px solid var(--b300); border-radius: 6px; overflow: hidden; background: #f6f7f9; }
+  .stage svg { display: block; width: 100%; height: auto; }
+  .trace { border: 1px dashed var(--b300); border-radius: 6px; padding: 14px; background: var(--b200); }
+  .trace .none { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
+  .trace code { display: block; font-size: 12px; white-space: pre-wrap; color: var(--primary); }
+  .walk { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
+  .walk .n { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .walk button { border: 1px solid var(--b300); border-radius: 4px; padding: 2px 9px; }
+  .walk button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .walk button:disabled { opacity: .3; cursor: default; }
+  .walk .sp { flex: 1; }
+  .say { font-size: 14px; line-height: 1.45; }
+  .film { display: flex; gap: 6px; margin-top: 10px; }
+  .film button { flex: 1 1 0; max-width: 96px; border: 1px solid var(--b300); border-radius: 4px; overflow: hidden; background: #f6f7f9; opacity: .6; }
+  .film button.on { opacity: 1; outline: 2px solid var(--primary); outline-offset: 1px; }
+  .film button svg { display: block; width: 100%; height: auto; }
+  .film button.t { background: var(--b200); color: var(--primary); font-size: 11px; padding: 10px 0; }
+
+  .rule { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--b300); font-size: 13px; }
+  .rule:last-child { border-bottom: 0; }
+  .rule .g { width: 14px; flex: 0 0 auto; text-align: center; font-weight: 700; }
+  .rule small { display: block; font-size: 11px; color: var(--dim); }
+  .hop { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 6px 8px; margin-top: 4px; border: 1px solid var(--b300); border-radius: 4px; font-size: 12.5px; }
+  .hop:hover { border-color: var(--primary); }
+  .hop .dir { font-size: 11px; color: var(--dim); width: 78px; flex: 0 0 auto; white-space: nowrap; }
+  .hop i { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+  .hint { margin-top: 14px; font-size: 11px; color: var(--dim); }
+  kbd { border: 1px solid var(--b300); border-radius: 3px; padding: 0 4px; font: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <div class="mark">walk<i>down</i></div>
+  <div class="modes" title="A sketch: only Workflows is drawn">
+    <button>Rules</button><button class="on">Workflows</button>
+  </div>
+  <div class="picker"><b>Contractor onboarding</b> &nbsp;▾</div>
+  <span class="sketch-tag">sketch · made-up data</span>
+  <div class="tally" id="tally"></div>
+</header>
+<main>
+  <div id="scroll"><div id="board"><svg id="wires"><defs>
+    <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(41% 0.055 242);stroke:none"/></marker>
+    <marker id="ah-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(78% 0.125 215);stroke:none"/></marker>
+  </defs><g id="paths"></g></svg></div></div>
+  <aside id="drawer"></aside>
+</main>
+
+<script>
+/* ── the workflow, as data ─────────────────────────────────────────── */
+const LANES = [
+  { id: 'client', name: 'Hiring manager',        sub: 'Client company',       color: '#8b8bf0', app: 'Client portal',  ac: '#5b5bd6' },
+  { id: 'worker', name: 'Contractor',            sub: 'Joining from abroad',  color: '#3fc7b2', app: 'Contractor app', ac: '#0f9d8a' },
+  { id: 'ops',    name: 'Onboarding specialist', sub: 'Our staff',            color: '#e6b455', app: 'Ops console',    ac: '#475569', cut: 'Line of interaction' },
+  { id: 'sys',    name: 'Platform',              sub: 'Jobs, rules, webhooks', color: '#7fb6e6', back: true, cut: 'Line of visibility', solid: true },
+  { id: 'vendor', name: 'Outside services',      sub: 'Checks, e-sign, benefits', color: '#a9b4c4', back: true, cut: 'Line of internal interaction' },
+];
+const PHASES = [['Request', 1, 3], ['Account', 4, 6], ['Contract', 7, 7], ['Screening', 8, 11], ['Benefits', 12, 12], ['Placement', 13, 15], ['Day one', 16, 16]];
+
+const STORIES = [
+  { id: 'requests.request-contractor', lane: 'client', col: 1, title: 'Request a contractor', status: 'pass', steps: [
+    { say: 'Opens a new request and says who they need, where, and when.', shot: { k: 'form', title: 'Request a contractor', fields: [['Role', 'Senior data analyst'], ['Team', 'Growth analytics'], ['Country', 'Brazil'], ['Start date', '12 Jan']], cta: 'Continue', hl: 2 } },
+    { say: 'Sets the rate and term, then submits.', shot: { k: 'form', title: 'Rate and term', fields: [['Hourly rate', '$62'], ['Term', '12 months'], ['Cost centre', 'GA-410']], cta: 'Submit request', hl: 'cta' } },
+    { say: 'Sees the request as Submitted, with what happens next.', shot: { k: 'detail', title: 'Request R-2041', badge: 'Submitted', kv: [['Role', 'Senior data analyst'], ['Country', 'Brazil'], ['Next', 'Review by onboarding team']], actions: ['Edit', 'Done'], hl: 'badge' } },
+  ], rules: [['A request needs a role, a team, a country and a start date.', 'pass'], ['The client sees the request as Submitted straight away.', 'pass'], ['A start date under 10 working days out warns that screening may not finish.', 'pass']] },
+
+  { id: 'requests.review-request', lane: 'ops', col: 2, title: 'Review and approve the request', status: 'pass', steps: [
+    { say: 'Picks the oldest request from the queue.', shot: { k: 'table', title: 'Requests queue', cols: ['Client', 'Role', 'Country', 'Status'], rows: [['Larkspur Labs', 'Sr data analyst', 'Brazil', 'New'], ['Pell & Co', 'QA engineer', 'Poland', 'New'], ['Tamsin', 'Designer', 'Kenya', 'Sent back']], hl: 0 } },
+    { say: 'Checks the terms and approves, naming the hiring entity for that country.', shot: { k: 'detail', title: 'R-2041 · Senior data analyst', badge: 'Needs review', kv: [['Client', 'Larkspur Labs'], ['Country', 'Brazil'], ['Rate', '$62 / hr'], ['Hiring entity', 'Brazil partner']], actions: ['Send back', 'Approve'], hl: 1 } },
+  ], rules: [['Requests appear oldest first.', 'pass'], ['Approving names the hiring entity for the contractor\'s country.', 'pass'], ['Sending back requires a reason the client can read.', 'pass']] },
+
+  { id: 'engagements.create-and-invite', lane: 'sys', col: 3, title: 'Create engagement, send invite', kind: 'job', status: 'pass', steps: [
+    { say: 'The approval creates one engagement for this contractor.', trace: 'event  request.approved    R-2041\nPOST   /engagements        201  E-7731' },
+    { say: 'Picks the invite in the contractor\'s language and sends it. The link lasts 7 days.', trace: 'job    SendInvite  locale=pt-BR\nmail   queued → delivered\nlink   expires in 7d' },
+  ], rules: [['An approved request creates exactly one engagement.', 'pass'], ['The invite link expires after 7 days.', 'pass']] },
+
+  { id: 'accounts.accept-invite', lane: 'worker', col: 4, title: 'Accept invite, create account', status: 'pass', steps: [
+    { say: 'Gets the invite email and follows the link.', shot: { k: 'email', subject: 'You\'re invited to join Larkspur Labs', cta: 'Accept invite' } },
+    { say: 'Creates an account with a password and phone number.', shot: { k: 'form', title: 'Create your account', fields: [['Email', 'ana@example.com'], ['Password', '••••••••••'], ['Mobile', '+55 11 5550 0142']], cta: 'Create account', hl: 'cta' } },
+    { say: 'Lands on a checklist of only the steps their country needs.', shot: { k: 'list', title: 'Welcome, Ana', items: [['Create account', 1], ['Profile and tax details', 0], ['Sign your contract', 0], ['Background check', 0], ['Healthcare', 0]], hl: 1 } },
+  ], rules: [['An expired invite link offers to send a new one.', 'pass'], ['The checklist shows only the steps for the contractor\'s country.', 'pass']] },
+
+  { id: 'accounts.profile-and-tax', lane: 'worker', col: 5, title: 'Complete profile and tax details', status: 'mine', steps: [
+    { say: 'Enters legal name and address. Choosing the country sets what comes next.', shot: { k: 'form', title: 'Your details', fields: [['Legal name', 'Ana Souza'], ['Date of birth', '4 Mar 1991'], ['Address', 'Rua Harmonia 88'], ['Country', 'Brazil']], cta: 'Continue', hl: 3 } },
+    { say: 'Gives the tax ID and bank details that country asks for.', shot: { k: 'form', title: 'Tax and payment', fields: [['Tax ID (CPF)', '•••.•••.•••-42'], ['Bank country', 'Brazil'], ['Account', '•••• 7710']], cta: 'Save', hl: 0 } },
+  ], rules: [['Tax fields change with the country chosen.', 'pass'], ['A tax ID in the wrong format is refused, showing the format expected.', 'mine'], ['Bank details are masked once saved.', 'pass']] },
+
+  { id: 'paperwork.pick-pack', lane: 'sys', col: 6, title: 'Pick the country paperwork pack', kind: 'rule', status: 'pass', steps: [
+    { say: 'A finished profile triggers the choice of contract pack for that country.', trace: 'event  profile.completed   E-7731\nrule   country=BR → pack br-contractor-v4' },
+    { say: 'Asks the e-sign service for an envelope with the pack filled in.', trace: 'POST   esign/envelopes     201  env_91f2' },
+  ], rules: [['Each supported country maps to exactly one current pack.', 'pass'], ['An unsupported country stops here and tells the specialist.', 'pass']] },
+
+  { id: 'paperwork.sign-contract', lane: 'worker', col: 7, title: 'Sign the contract', status: 'pass', steps: [
+    { say: 'Reads the agreement, in their own language.', shot: { k: 'doc', title: 'Independent contractor agreement' } },
+    { say: 'Signs at the bottom.', shot: { k: 'doc', title: 'Independent contractor agreement', sign: 1 } },
+    { say: 'Gets confirmation and a copy to download.', shot: { k: 'detail', title: 'Contract signed', badge: 'Signed', kv: [['Signed', '18 Dec, 14:02'], ['Copy sent to', 'ana@example.com']], actions: ['Download PDF', 'Continue'], hl: 'badge' } },
+  ], rules: [['The contract is shown in the contractor\'s language.', 'pass'], ['The next step unlocks only after the signature is recorded.', 'pass']] },
+
+  { id: 'paperwork.esign-envelope', lane: 'vendor', col: 7, title: 'E-sign envelope', kind: 'vendor', status: 'pass', steps: [
+    { say: 'The e-sign service hosts the signing and reports back when it is done.', trace: 'hook   envelope.completed  env_91f2\nstore  signed.pdf → engagement E-7731' },
+  ], rules: [['A signed copy is stored against the engagement.', 'pass']] },
+
+  { id: 'screening.consent', lane: 'worker', col: 8, title: 'Consent to background check', status: 'pass', steps: [
+    { say: 'Confirms the identity details the check will use.', shot: { k: 'form', title: 'Background check', fields: [['Legal name', 'Ana Souza'], ['Previous names', '—'], ['National ID', '•••••• 318']], cta: 'Continue', hl: 2 } },
+    { say: 'Sees exactly what will be checked and by whom, then consents.', shot: { k: 'detail', title: 'Your consent', badge: '4 checks', kv: [['Checks', 'Identity, criminal, right to work, education'], ['Run by', 'Screening provider'], ['Kept for', '12 months']], actions: ['Decline', 'I consent'], hl: 1 } },
+  ], rules: [['The checks listed match the client\'s screening package.', 'pass'], ['Declining pauses onboarding and tells the specialist.', 'pass']] },
+
+  { id: 'screening.run-check', lane: 'vendor', col: 9, title: 'Run the background check', kind: 'vendor', status: 'pass', steps: [
+    { say: 'The screening provider takes the order. It usually takes 2 to 5 days.', trace: 'POST   screening/checks    201  chk_55a0\nstate  pending' },
+    { say: 'The provider reports a result.', trace: 'hook   check.completed     chk_55a0\nresult consider  (education)' },
+  ], rules: [['An order is placed once per consent.', 'pass']] },
+
+  { id: 'screening.receive-result', lane: 'sys', col: 10, title: 'Receive the result', kind: 'webhook', status: 'pass', steps: [
+    { say: 'Verifies the message really came from the provider.', trace: 'hook   signature ok' },
+    { say: 'A clear result moves on by itself. Anything else opens a task for a person.', trace: 'result consider → task adjudicate  T-3310\nnotify onboarding specialist' },
+  ], rules: [['A clear result moves the contractor on with nobody touching it.', 'pass'], ['Any other result opens an adjudication task.', 'pass']] },
+
+  { id: 'screening.adjudicate', lane: 'ops', col: 11, title: 'Adjudicate a flagged result', status: 'fail', steps: [
+    { say: 'Opens the flagged check from the screening list.', shot: { k: 'table', title: 'Screening', cols: ['Contractor', 'Client', 'Package', 'Result'], rows: [['Ana Souza', 'Larkspur Labs', 'Standard', 'Flagged'], ['Marek Nowak', 'Pell & Co', 'Standard', 'Clear'], ['Joy Wanjiru', 'Tamsin', 'Basic', 'Pending']], hl: 0 } },
+    { say: 'Reads the finding summary and decides: clear it, or escalate to the client.', shot: { k: 'detail', title: 'Ana Souza · background check', badge: 'Flagged', kv: [['Finding', 'Education: degree date mismatch'], ['Package', 'Standard'], ['Report', 'Provider summary']], actions: ['Escalate', 'Clear'], hl: 1 } },
+    { say: 'Records the decision with a written reason.', shot: { k: 'form', title: 'Record decision', fields: [['Decision', 'Clear'], ['Reason', ''], ['Evidence', 'degree-certificate.pdf']], cta: 'Save decision', hl: 1 } },
+  ], rules: [['A flagged result cannot be cleared without a written reason.', 'fail', 'Saved with an empty reason on staging, run 412'], ['The contractor never sees the provider\'s raw report.', 'pass'], ['Escalating shares only the finding summary with the client.', 'pass']] },
+
+  { id: 'benefits.choose-plan', lane: 'worker', col: 12, title: 'Choose a healthcare plan', status: 'pass', steps: [
+    { say: 'Compares the plans offered in their country and picks one.', shot: { k: 'plans', title: 'Choose your healthcare', plans: [['Essential', '$0'], ['Standard', '$48 / mo'], ['Family', '$131 / mo']], hl: 1 } },
+    { say: 'Adds anyone else the plan should cover.', shot: { k: 'form', title: 'Dependants', fields: [['Name', 'Luca Souza'], ['Relationship', 'Child'], ['Date of birth', '9 Aug 2019']], cta: 'Add', hl: 'cta' } },
+    { say: 'Sees when cover starts and what it costs.', shot: { k: 'detail', title: 'Standard plan', badge: 'Enrolment pending', kv: [['Starts', '12 Jan'], ['Covers', 'You + 1 dependant'], ['Cost', '$48 / month']], actions: ['Change', 'Done'], hl: 'badge' } },
+  ], rules: [['Only plans offered in the contractor\'s country are shown.', 'pass'], ['Cover starts on the engagement start date.', 'pass']] },
+
+  { id: 'benefits.enrol', lane: 'vendor', col: 12, title: 'Enrol with the benefits provider', kind: 'vendor', status: 'unbuilt', steps: [
+    { say: 'Sends the chosen plan and dependants to the benefits provider.', trace: 'POST   benefits/enrolments  (not built)' },
+    { say: 'Stores the member number that comes back.', trace: 'hook   enrolment.confirmed  member id' },
+  ], rules: [['The contractor is enrolled before their start date.', 'pending'], ['A rejected enrolment tells the specialist why.', 'pending']] },
+
+  { id: 'placement.assign-team', lane: 'ops', col: 13, title: 'Assign to the client team', status: 'pass', steps: [
+    { say: 'Opens the cleared contractor.', shot: { k: 'detail', title: 'Ana Souza', badge: 'Cleared', kv: [['Client', 'Larkspur Labs'], ['Role', 'Senior data analyst'], ['Start', '12 Jan']], actions: ['Message', 'Assign team'], hl: 1 } },
+    { say: 'Sets the team, the manager, and who approves timesheets.', shot: { k: 'form', title: 'Assign to team', fields: [['Team', 'Growth analytics'], ['Manager', 'Dee Okafor'], ['Timesheet approver', 'Dee Okafor']], cta: 'Assign', hl: 1 } },
+  ], rules: [['Only a cleared contractor can be assigned.', 'pass'], ['The manager must belong to the client company.', 'pass']] },
+
+  { id: 'placement.confirm-start', lane: 'client', col: 14, title: 'Confirm the start date', status: 'pass', steps: [
+    { say: 'Hears that the contractor is ready.', shot: { k: 'email', subject: 'Ana Souza is ready to start', cta: 'Confirm start' } },
+    { say: 'Confirms the date and who meets them on day one.', shot: { k: 'form', title: 'Confirm start', fields: [['Start date', '12 Jan'], ['Manager', 'Dee Okafor'], ['First-day contact', 'Dee Okafor']], cta: 'Confirm', hl: 'cta' } },
+  ], rules: [['The start date cannot be earlier than the day cover begins.', 'pass'], ['Confirming tells the contractor straight away.', 'pass']] },
+
+  { id: 'placement.provision', lane: 'sys', col: 15, title: 'Set up payroll and timesheets', kind: 'job', status: 'pass', steps: [
+    { say: 'A confirmed start creates the contractor in payroll.', trace: 'event  start.confirmed     E-7731\nPOST   payroll/workers     201' },
+    { say: 'Opens the first timesheet period and schedules the welcome email.', trace: 'job    OpenTimesheet  from 12 Jan\njob    DayOneMail     at 08:00 local' },
+  ], rules: [['The first timesheet period starts on the start date.', 'pass'], ['The welcome email goes out at 8am in the contractor\'s time zone.', 'pass']] },
+
+  { id: 'dayone.first-day', lane: 'worker', col: 16, title: 'First-day checklist', status: 'unbuilt', steps: [
+    { say: 'Gets a welcome on the morning of day one.', shot: { k: 'email', subject: 'Welcome to Larkspur Labs — day one', cta: 'Open checklist' } },
+    { say: 'Works through the first-day list.', shot: { k: 'list', title: 'Day one', items: [['Meet your manager', 1], ['Set up your timesheet', 0], ['Read the handbook', 0], ['Confirm your equipment', 0]], hl: 1 } },
+    { say: 'Logs the first hours.', shot: { k: 'table', title: 'Timesheet · week of 12 Jan', cols: ['Day', 'Hours', 'Note', 'Status'], rows: [['Mon', '8.0', 'Onboarding', 'Draft'], ['Tue', '', '', ''], ['Wed', '', '', '']], hl: 0 } },
+  ], rules: [['The list shows the client\'s own first-day items.', 'pending'], ['Hours can be logged from the start date, never before.', 'pending']] },
+];
+
+const EDGES = [
+  ['requests.request-contractor', 'requests.review-request'], ['requests.review-request', 'engagements.create-and-invite'],
+  ['engagements.create-and-invite', 'accounts.accept-invite'], ['accounts.accept-invite', 'accounts.profile-and-tax'],
+  ['accounts.profile-and-tax', 'paperwork.pick-pack'], ['paperwork.pick-pack', 'paperwork.sign-contract'],
+  ['paperwork.sign-contract', 'paperwork.esign-envelope'], ['paperwork.sign-contract', 'screening.consent'],
+  ['screening.consent', 'screening.run-check'], ['screening.run-check', 'screening.receive-result'],
+  ['screening.receive-result', 'screening.adjudicate'], ['screening.adjudicate', 'benefits.choose-plan'],
+  ['benefits.choose-plan', 'benefits.enrol'], ['benefits.choose-plan', 'placement.assign-team'],
+  ['placement.assign-team', 'placement.confirm-start'], ['placement.confirm-start', 'placement.provision'],
+  ['placement.provision', 'dayone.first-day'],
+];
+
+/* ── drawing a screen. Stands in for a real capture. ───────────────── */
+const W = 320, H = 200, INK = '#2a3140', MUTE = '#8a93a3', LINE = '#d5d9e0', RINGC = '#f59e0b';
+const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const R = (x, y, w, h, f, rx = 2, more = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${f}" ${more}/>`;
+const T = (x, y, s, size = 8, f = INK, wt = 400, a = 'start') => `<text x="${x}" y="${y}" font-size="${size}" fill="${f}" font-weight="${wt}" text-anchor="${a}">${esc(s)}</text>`;
+const RING = (x, y, w, h) => `<rect x="${x - 3}" y="${y - 3}" width="${w + 6}" height="${h + 6}" rx="4" fill="none" stroke="${RINGC}" stroke-width="2"/>`;
+const PILL = { New: '#3b82f6', Flagged: '#dc2626', Clear: '#16a34a', Pending: '#d97706', 'Sent back': '#64748b', Draft: '#64748b' };
+
+const KINDS = {
+  form(s, ac) {
+    let o = T(16, 46, s.title, 11, INK, 700);
+    s.fields.forEach(([l, v], i) => {
+      const y = 56 + i * 28;
+      o += T(16, y + 6, l, 6.5, MUTE) + R(16, y + 9, 190, 14, '#fff', 2, `stroke="${LINE}"`) + (v ? T(21, y + 19, v, 7.5) : '');
+      if (s.hl === i) o += RING(16, y + 9, 190, 14);
+    });
+    o += R(224, 36, 80, 74, '#eceef2', 3) + R(232, 46, 50, 4, LINE) + R(232, 56, 62, 3, LINE) + R(232, 64, 56, 3, LINE) + R(232, 72, 40, 3, LINE);
+    o += R(224, 170, 80, 17, ac, 3) + T(264, 181.5, s.cta, 7.5, '#fff', 600, 'middle');
+    if (s.hl === 'cta') o += RING(224, 170, 80, 17);
+    return o;
+  },
+  table(s) {
+    const cw = 288 / s.cols.length;
+    let o = T(16, 46, s.title, 11, INK, 700) + R(16, 56, 288, 16, '#eceef2', 2);
+    s.cols.forEach((c, i) => { o += T(22 + i * cw, 67, c, 6.5, MUTE, 600); });
+    s.rows.forEach((r, ri) => {
+      const y = 76 + ri * 24;
+      o += R(16, y, 288, 20, '#fff', 2, `stroke="${LINE}"`);
+      r.forEach((c, i) => {
+        if (i === r.length - 1 && PILL[c]) o += R(20 + i * cw, y + 4, 44, 12, PILL[c], 6) + T(42 + i * cw, y + 12.5, c, 6.5, '#fff', 600, 'middle');
+        else o += T(22 + i * cw, y + 13, c, 7.5);
+      });
+      if (s.hl === ri) o += RING(16, y, 288, 20);
+    });
+    return o;
+  },
+  email(s, ac) {
+    let o = R(40, 36, 240, 152, '#fff', 4, `stroke="${LINE}"`) + T(54, 54, 'From: Onboarding team', 6.5, MUTE) + T(54, 70, s.subject, 9.5, INK, 700);
+    [84, 93, 102, 111].forEach((y, i) => { o += R(54, y, [200, 212, 180, 120][i], 4, LINE); });
+    o += R(110, 134, 100, 20, ac, 4) + T(160, 147.5, s.cta, 8, '#fff', 600, 'middle') + RING(110, 134, 100, 20);
+    return o;
+  },
+  doc(s, ac) {
+    let o = R(60, 32, 200, 168, '#fff', 2, `stroke="${LINE}"`) + T(160, 50, s.title, 7.5, INK, 700, 'middle');
+    for (let i = 0; i < 9; i++) o += R(76, 62 + i * 9, i % 4 === 3 ? 110 : 168, 3.5, LINE);
+    o += R(76, 152, 110, 26, s.sign ? '#fffbeb' : '#f6f7f9', 2, `stroke="${LINE}" stroke-dasharray="3 2"`) + T(80, 160, 'Signature', 5.5, MUTE);
+    if (s.sign) o += `<path d="M84,172 c8,-14 12,6 18,-6 s8,10 16,-2 s10,6 22,-2" fill="none" stroke="${ac}" stroke-width="1.6"/>` + RING(76, 152, 110, 26);
+    return o;
+  },
+  plans(s, ac) {
+    let o = T(16, 46, s.title, 11, INK, 700);
+    s.plans.forEach(([n, p], i) => {
+      const x = 16 + i * 98;
+      o += R(x, 58, 90, 118, '#fff', 4, `stroke="${s.hl === i ? ac : LINE}"`) + T(x + 10, 76, n, 9, INK, 700) + T(x + 10, 92, p, 9, ac, 700);
+      [104, 113, 122].forEach((y, k) => { o += R(x + 10, y, [64, 54, 60][k], 3.5, LINE); });
+      o += R(x + 10, 150, 70, 16, s.hl === i ? ac : '#eceef2', 3) + T(x + 45, 161, s.hl === i ? 'Selected' : 'Choose', 7, s.hl === i ? '#fff' : INK, 600, 'middle');
+      if (s.hl === i) o += RING(x, 58, 90, 118);
+    });
+    return o;
+  },
+  list(s, ac) {
+    let o = T(16, 46, s.title, 11, INK, 700);
+    s.items.forEach(([t, done], i) => {
+      const y = 56 + i * 25;
+      o += R(16, y, 288, 21, '#fff', 3, `stroke="${LINE}"`) + `<circle cx="29" cy="${y + 10.5}" r="5" fill="${done ? ac : '#fff'}" stroke="${done ? ac : MUTE}"/>` + T(42, y + 13.5, t, 8, done ? MUTE : INK, done ? 400 : 600);
+      if (s.hl === i) o += RING(16, y, 288, 21);
+    });
+    return o;
+  },
+  detail(s, ac) {
+    const bw = s.badge.length * 4.2 + 14;
+    let o = T(16, 48, s.title, 11, INK, 700) + R(304 - bw, 38, bw, 14, PILL[s.badge] || '#64748b', 7) + T(304 - bw / 2, 48, s.badge, 6.5, '#fff', 600, 'middle');
+    if (s.hl === 'badge') o += RING(304 - bw, 38, bw, 14);
+    s.kv.forEach(([k, v], i) => { const y = 64 + i * 24; o += R(16, y, 288, 20, '#fff', 2, `stroke="${LINE}"`) + T(22, y + 13, k, 7, MUTE) + T(98, y + 13, v, 7.5); });
+    s.actions.forEach((a, i) => {
+      const x = 136 + i * 86, prim = i === s.actions.length - 1;
+      o += R(x, 170, 80, 17, prim ? ac : '#fff', 3, prim ? '' : `stroke="${LINE}"`) + T(x + 40, 181.5, a, 7.5, prim ? '#fff' : INK, 600, 'middle');
+      if (s.hl === i) o += RING(x, 170, 80, 17);
+    });
+    return o;
+  },
+};
+function shot(story, step) {
+  const lane = LANES.find(l => l.id === story.lane), s = step.shot, mail = s.k === 'email';
+  const ac = lane.ac, head = mail ? '#3b4252' : ac;
+  return `<svg viewBox="0 0 ${W} ${H}" font-family="system-ui, sans-serif" role="img" aria-label="${esc(step.say)}">`
+    + R(0, 0, W, H, mail ? '#e9ebef' : '#f6f7f9', 0) + R(0, 0, W, 24, head, 0)
+    + T(12, 15.5, mail ? 'Mail' : lane.app, 8, '#fff', 700) + `<circle cx="304" cy="12" r="6" fill="#ffffff55"/>`
+    + KINDS[s.k](s, ac) + '</svg>';
+}
+
+/* ── the board ──────────────────────────────────────────────────────── */
+const $ = (q, el = document) => el.querySelector(q);
+const board = $('#board'), drawer = $('#drawer');
+const byId = Object.fromEntries(STORIES.map(s => [s.id, s]));
+const laneOf = s => LANES.find(l => l.id === s.lane);
+const GLYPH = { pass: '✓', fail: '✕', mine: '●', unbuilt: '○', pending: '○' };
+const WORD = { pass: 'passing', fail: 'failing', mine: 'waiting on you', unbuilt: 'not built' };
+let sel = null, at = 0;
+
+function build() {
+  let h = '<div class="corner"></div>';
+  PHASES.forEach(([n, a, b]) => { h += `<div class="phase" style="grid-column:${a + 1} / ${b + 2}">${n}</div>`; });
+  LANES.forEach((l, i) => {
+    const row = i + 2;
+    h += `<div class="stripe ${l.back ? 'back' : ''} ${l.cut ? 'line' : ''} ${l.solid ? 'solid' : ''}" style="grid-row:${row}"></div>`;
+    h += `<button class="lane ${l.back ? 'back' : ''}" data-lane="${l.id}" style="grid-row:${row}" title="Follow only this lane">
+      ${l.cut ? `<span class="cut">${l.cut}</span>` : ''}<span class="dot" style="background:${l.color}"></span><b>${l.name}</b><small>${l.sub}</small></button>`;
+  });
+  STORIES.forEach(s => {
+    const row = LANES.findIndex(l => l.id === s.lane) + 2, n = s.steps.length;
+    const st = `<span class="st ${s.status}">${GLYPH[s.status]}</span><span>${s.rules.length} rules</span>`;
+    h += s.steps[0].shot
+      ? `<button class="card is-${s.status}" data-id="${s.id}" style="grid-row:${row};grid-column:${s.col + 1}">
+          <span class="shot">${shot(s, s.steps[0])}<span class="count">${n} screens</span></span>
+          <span class="txt"><span class="ttl">${s.title}</span><span class="meta">${st}</span></span></button>`
+      : `<button class="card headless is-${s.status}" data-id="${s.id}" style="grid-row:${row};grid-column:${s.col + 1}">
+          <span class="txt"><span class="kind mono">${s.kind} · no screen</span><span class="ttl">${s.title}</span><span class="meta">${st}<span>${n} steps</span></span></span></button>`;
+  });
+  board.insertAdjacentHTML('beforeend', h);
+  const c = { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
+  STORIES.forEach(s => c[s.status]++);
+  $('#tally').innerHTML = Object.keys(c).map(k => `<span class="${k}" data-g="${GLYPH[k]}">${c[k]} ${WORD[k]}</span>`).join('');
+}
+
+function wires() {
+  const o = board.getBoundingClientRect();
+  const box = id => { const r = $(`.card[data-id="${id}"]`).getBoundingClientRect(); return { l: r.left - o.left, r: r.right - o.left, t: r.top - o.top, b: r.bottom - o.top, cx: r.left - o.left + r.width / 2, cy: r.top - o.top + r.height / 2 }; };
+  $('#paths').innerHTML = EDGES.map(([a, b]) => {
+    const s = box(a), t = box(b), on = sel && (a === sel.id || b === sel.id);
+    const d = byId[a].col === byId[b].col
+      ? (t.t > s.b ? `M${s.cx},${s.b} V${t.t - 2}` : `M${s.cx},${s.t} V${t.b + 2}`)
+      : `M${s.r},${s.cy} H${t.l - 9} V${t.cy} H${t.l - 2}`;
+    return `<path d="${d}" class="${on ? 'on' : ''}" marker-end="url(#${on ? 'ah-on' : 'ah'})"/>`;
+  }).join('');
+}
+
+/* ── the drawer: one story, walked step by step ─────────────────────── */
+function open(id, step = 0) {
+  sel = byId[id]; at = step;
+  document.body.classList.add('open');
+  document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', c.dataset.id === id));
+  draw(); wires();
+  $(`.card[data-id="${id}"]`).scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+}
+function shut() {
+  sel = null; document.body.classList.remove('open');
+  document.querySelectorAll('.card.sel').forEach(c => c.classList.remove('sel'));
+  wires();
+}
+function draw() {
+  const s = sel, l = laneOf(s), step = s.steps[at], n = s.steps.length, noun = step.shot ? 'Screen' : 'Step';
+  const hops = EDGES.filter(e => e.includes(s.id)).map(([a, b]) => {
+    const o = byId[a === s.id ? b : a], ol = laneOf(o);
+    return `<button class="hop" data-go="${o.id}"><span class="dir">${a === s.id ? 'hands off to' : 'comes from'}</span><i style="background:${ol.color}"></i><span>${ol.name}: ${o.title}</span></button>`;
+  }).join('');
+  drawer.innerHTML = `
+    <div class="dhead"><div>
+      <div class="who"><i style="background:${l.color}"></i>${l.name} · ${l.sub}</div>
+      <h2>${s.title}</h2>
+      <div class="id mono">${s.id} · <span class="${s.status}">${GLYPH[s.status]} ${WORD[s.status]}</span></div>
+    </div><button class="x" data-shut title="Close (Esc)">×</button></div>
+    <div class="dbody">
+      <div class="sect">Walk the story</div>
+      ${step.shot ? `<div class="stage">${shot(s, step)}</div>` : `<div class="trace"><div class="none">Nothing on screen. This is what the system does.</div><code>${esc(step.trace)}</code></div>`}
+      <div class="walk"><span class="n">${noun} ${at + 1} of ${n}</span><span class="sp"></span>
+        <button data-step="-1" ${at === 0 ? 'disabled' : ''}>← Back</button><button data-step="1" ${at === n - 1 ? 'disabled' : ''}>Next →</button></div>
+      <p class="say">${esc(step.say)}</p>
+      <div class="film">${s.steps.map((x, i) => `<button class="${i === at ? 'on' : ''} ${x.shot ? '' : 't mono'}" data-at="${i}" title="${esc(x.say)}">${x.shot ? shot(s, x) : i + 1}</button>`).join('')}</div>
+      <div class="sect">Rules on this story</div>
+      ${s.rules.map(([t, v, why]) => `<div class="rule"><span class="g ${v}">${GLYPH[v]}</span><span>${esc(t)}${why ? `<small class="fail">${esc(why)}</small>` : ''}</span></div>`).join('')}
+      <div class="sect">Before and after</div>${hops}
+      <p class="hint"><kbd>←</kbd> <kbd>→</kbd> step through · <kbd>Esc</kbd> close · the amber ring marks what the person acts on</p>
+    </div>`;
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-id],[data-go],[data-step],[data-at],[data-shut],[data-lane]');
+  if (!t) return;
+  if (t.dataset.id) open(t.dataset.id);
+  else if (t.dataset.go) open(t.dataset.go);
+  else if (t.dataset.step) { at += +t.dataset.step; draw(); }
+  else if (t.dataset.at) { at = +t.dataset.at; draw(); }
+  else if ('shut' in t.dataset) shut();
+  else if (t.dataset.lane) {
+    const on = document.body.dataset.focus === t.dataset.lane;
+    if (on) delete document.body.dataset.focus; else document.body.dataset.focus = t.dataset.lane;
+    document.querySelectorAll('.card').forEach(c => c.classList.toggle('in-focus', byId[c.dataset.id].lane === t.dataset.lane));
+  }
+});
+document.addEventListener('keydown', e => {
+  if (!sel) return;
+  if (e.key === 'Escape') shut();
+  if (e.key === 'ArrowRight' && at < sel.steps.length - 1) { at++; draw(); }
+  if (e.key === 'ArrowLeft' && at > 0) { at--; draw(); }
+});
+
+build(); wires();
+new ResizeObserver(wires).observe(board);
+</script>
+</body>
+</html>
