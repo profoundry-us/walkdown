@@ -4828,6 +4828,13 @@ test('a picture dropped while failing a rule goes with the why', {
 test('the screen picker offers a storyboard of kept pictures, and remembers the view', {
   tag: '@rule:panel.dock.storyboard',
 }, async ({ page }) => {
+  /*
+   * The server photographs every screen one at a time, and on a machine that
+   * has never drawn them nothing is in the cache. That took 28s of the default
+   * 30 here and more on a CI runner, which starts cold every time: this check
+   * failed on every push from 0.5.0 on while passing locally (2026-11-17).
+   */
+  test.setTimeout(120_000);
   await review(page);
   const { storyboard } = await (
     await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)
@@ -4858,7 +4865,7 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
     const pic = board.locator(`[data-screen="${sc.id}"] img`);
     await expect(pic).toHaveCount(1);
     await expect
-      .poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 30000 })
+      .poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 60000 })
       .toBe(true);
   }
   const again = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&bp=blueprint`);
