@@ -263,18 +263,15 @@ screens:
   as a recipe and its steps are today. Main's `setupSignature` (`lib/setup.js`) reads
   only the screen's own `setup`, so today such screens still tie; it has to take the
   user's steps first.
-- **Fixtures in a path or a query are URL-encoded.** A value filled into a `visit:`
-  or an `app.path` is encoded as one path segment or one query value. An email in
-  `?email={fixtures.manager_email}` needs it. A value filled into a `post` field is
-  sent as it is, because the form encodes it. Main's `fill` encodes nothing, for any
-  screen.
 - **Nothing else changes.** A screen with no `as` behaves exactly as ADR 0017 built it.
 
 *What the real-system trial changed.* An earlier draft's example made the record in
 setup (`/dev/seed/expense`), which ADR 0017 rules out. Eight of the trial's screens
-signed in by `as:` and then carried prose, which the draft left undefined. Its
-sign-ins name accounts by email, which a query cannot carry unencoded. And
-main's lint still called two screens that differ only by user a tie.
+signed in by `as:` and then carried prose, which the draft left undefined. And
+main's lint still called two screens that differ only by user a tie. Its sign-ins
+also name accounts by email, which a query cannot carry unencoded; that is ADR
+0017's to settle, for every screen, and is asked on its own rules rather than
+decided here.
 
 A story says who acts in it:
 
@@ -574,18 +571,22 @@ on purpose earns its place back.
 
 ### 7. Three modes: Rules, Boards, Personas
 
-walkdown's top bar chooses between three modes. **Rules** is the panel as it is today.
-**Boards** and **Personas** are full pages served by `walkdown serve`. They frame no
-app and need no extension: everything on them is a record or a picture. Someone who
-has never run the app can read them.
+walkdown's top bar chooses between three modes. **Rules** is the panel as it is today,
+beside the app. **Boards** and **Personas** are pages of records and pictures, and
+frame no app.
 
-**A board can be read by people who will never run walkdown.** In the trial, most of
-the people who read the process (the staff who run it day to day, and those who
-answer customers about it) would never install walkdown, and needed the board from
-the first day. So a board, with its drawer and its pictures on one target, can be
-written out as one page that reads with no server. It is a copy, and says the date it
-was made and its target. How it is made (a command, a button on the page) and where
-it goes (a file, a hosted link) are open.
+- **Boards and Personas take the whole window.** The panel and the app beside it are
+  hidden, never closed: the app keeps running underneath, and choosing Rules brings
+  both back where they were, on the same rule and the same screen.
+- **Each mode keeps its place.** Leaving a board hides it. Choosing Boards again
+  returns to the same board, at the same position and zoom, with the same card open.
+  Personas keeps where it was scrolled to.
+- **The address says the mode and the board**, so a link to a board can be sent and
+  opens on that board. A link does not carry a reader's position or zoom, which are
+  kept for the browser (below).
+- **Everyone reads them in the extension** (Topher, 2026-11-17). walkdown is deployed
+  as one, so there is no reader without it to draw for, and nothing here is a page
+  for someone who has not installed it.
 
 **Personas** lists every persona in the project (§2) under its group's title, groups
 and personas both in the storyboard's order. Each entry shows:
@@ -681,13 +682,14 @@ larger, changing only where the detail could no longer be read:
 1. The persona, the story's title and id, and its mark.
 2. The card's rules (the story's, its `rules:`, or those its other cards leave),
    walked in the order they are written, starting on the user the card names when it
-   names one. The current rule shows its picture with its focus ringed (ADR 0016), or what the system did as text;
-   then its statement and its mark; then who is signed in, when that is not the
-   story's own persona's default user; then Back and Next, and every picture as a
-   strip.
+   names one. The current rule shows its picture with its focus ringed (ADR 0016), or
+   what the system did as text; then its statement and its mark; then who is signed
+   in, when that is not the story's own persona's default user; then Back and Next,
+   and every picture as a strip.
 3. A control for which pictures are shown: the app on a target, or the design.
 4. Every rule of the card as a list, each with its mark, and then any of the story's
-   rules that are on its other cards. Choosing one opens it in Rules, on its screen.
+   rules that are on its other cards. Choosing one opens it in Rules, on its screen;
+   the board keeps its place for the way back.
 5. The cards this one follows and the cards that follow it, each a link, with each
    arrow's `when:`; or that its branch ends here.
 
@@ -783,6 +785,10 @@ had no screen whose anchors it could be checked against.
 - **Editing a board in the page.** The file is written by a person or an agent, as
   feature files are.
 - **A minimap.** Zoomed out, the board is its own.
+- **A static export** of a board, for someone with no walkdown. The trial asked for
+  one, because most of the people who read its process would not install walkdown.
+  Everyone who reads a board uses the extension (§7), so it waits until that stops
+  being true.
 - **Pictures taken on purpose.** A card shows evidence that already exists and falls
   back to the design. A step that photographs every screen for the board, by an agent
   or by the panel as a person walks, waits until real boards show how much is missing.
@@ -803,8 +809,10 @@ the draft is said where it applies. The rest held: `when:` on an arrow covered e
 branch, `returns_to` covered work sent back, free-text `takes:` was enough for every
 wait, and a step off our screens (an alert, a reminder, another company's document)
 read well enough as a card with text or no picture. Every state the trial could not
-reach from seeds needed the app's seed task extended, never a setup step. The
-questions stay for the next real system.
+reach from seeds needed the app's seed task extended, never a setup step. Its answer
+to the last question, that most readers of its board would not install walkdown, was
+not taken up: walkdown is deployed as an extension, and everyone reads a board in it
+(§7). The questions stay for the next real system.
 
 **Stories and lanes**
 
@@ -878,9 +886,8 @@ questions stay for the next real system.
 - **It reaches back into screen setup.** `app.as` is an addition to what ADR 0017
   built and Topher walked. It gets rules of its own under `screens.setup`, and a
   design for how a rule's detail and the App pane name the user, before it is built.
-  Two changes reach every screen, `as:` or not: `setupSignature` takes the user's
-  steps into a screen's identity, and `fill` URL-encodes a fixture in a path or a
-  query (§3).
+  One change reaches every screen, `as:` or not: `setupSignature` takes the user's
+  steps into a screen's identity (§3).
 - **It reaches into the runs ledger.** An evidence entry may be an object. Every
   reader of a run has to take both forms, and the ledger stays append-only: no old
   run is rewritten. Today each assumes a string:

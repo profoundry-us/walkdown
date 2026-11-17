@@ -1,0 +1,30 @@
+id: q-0636
+uuid: 3bb5fa79-d0b5-4a23-b292-537f01f1da7c
+kind: question
+author: agent
+created: 2026-11-17T21:11:05.099Z
+anchor:
+  rule: screens.setup.runs-before-the-screen
+status: open
+body: "Should a fixture filled into a path or a query be URL-encoded? Today a
+  value is put in exactly as it is written, for every screen. A real system's
+  trial of ADR 0018 had sign-ins that name an account by email in a query, as in
+  ?email={fixtures.manager_email}, and an email with a plus sign in it does not
+  arrive as the address it was. Encoding every filled value would fix that, and
+  would break any fixture that is already encoded or that holds a slash on
+  purpose, as a path of several segments. A post field is not affected: the form
+  encodes it. Topher asked on 2026-11-17 for this to be decided here rather than
+  in ADR 0018."
+options:
+  - label: Encode each value
+    why: A value filled into a visit or an app path is encoded as one path segment
+      or one query value. Fixtures are written plainly, and one holding a slash
+      or already encoded has to change.
+  - label: Leave values as written
+    why: Nothing changes. A fixture that needs encoding is written encoded in
+      spec.yml, and lint could warn about a value with a character a URL cannot
+      carry.
+  - label: Encode only where asked
+    why: A fixture is encoded only when the step says so, for example
+      {fixtures.manager_email|url}. Nothing existing changes, and the author has
+      one more thing to know.
