@@ -29,6 +29,7 @@ import { after, before, test } from 'node:test';
 import { readDraft } from '../lib/draft.js';
 import { formatHash } from '../lib/hash.js';
 import { resolveLocations } from '../lib/locations.js';
+import { closeBrowser } from '../lib/screenshots.js';
 import { createWalkdownServer } from '../lib/serve.js';
 import { SITTING_FIELDS } from '../lib/sitting.js';
 import { register, threadAt } from '../tools/test-home.mjs';
@@ -146,7 +147,8 @@ before(async () => {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   base = `http://127.0.0.1:${server.address().port}`;
 });
-after(() => {
+after(async () => {
+  await closeBrowser();
   server.closeAllConnections();
   server.close();
   rmSync(root, { recursive: true, force: true });
@@ -168,6 +170,34 @@ test('the review page, embed.js, and prototype static files are served', async (
   assert.doesNotMatch(embed, /__ANCHOR_ATTR__/);
   assert.match(await (await fetch(`${base}/prototype/home.html`)).text(), /home\.cta/);
   assert.equal((await fetch(`${base}/prototype/../walkdown.yml`)).status, 404);
+});
+
+/*
+ * The storyboard's pictures, end to end on one real page: taken by the
+ * server's own browser, kept, taken again when asked, and named for the page
+ * they are of. The panel's check stands the pictures in (checks/panel.spec.js),
+ * so this is the only place a picture travels the whole way.
+ */
+test('a screen is photographed once and kept, and taken again when asked', async () => {
+  const shot = (q) => fetch(`${base}/api/screenshot?screen=${q}`);
+  const first = await shot('home');
+  assert.equal(first.status, 200);
+  assert.match(first.headers.get('content-type'), /image\/png/);
+  assert.equal(first.headers.get('x-walkdown-cache'), 'miss');
+  // No target has a base_url here, so the picture is of the design.
+  assert.equal(first.headers.get('x-walkdown-page'), `${base}/prototype/home.html`);
+  const png = Buffer.from(await first.arrayBuffer());
+  assert.equal(png.subarray(1, 4).toString(), 'PNG');
+  assert.ok(png.length > 1000, 'a picture of a page, not an empty file');
+
+  const again = await shot('home');
+  assert.equal(again.headers.get('x-walkdown-cache'), 'hit');
+  assert.equal(again.headers.get('x-walkdown-page'), `${base}/prototype/home.html`);
+  assert.equal((await shot('home&refresh=1')).headers.get('x-walkdown-cache'), 'miss');
+
+  const meta = await (await shot('home&meta=1')).json();
+  assert.deepEqual(meta, { page: `${base}/prototype/home.html`, landed: null, hit: true });
+  assert.equal((await shot('no-such')).status, 404);
 });
 
 test('the panel and the embed are served as two files, neither carrying the other', async () => {

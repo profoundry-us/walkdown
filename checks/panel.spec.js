@@ -33,6 +33,11 @@ import { CHECKSPACE, HOME } from './checkspace.mjs';
  * address that really served it and can be asserted.
  */
 const DECLARED_ORIGIN = new URL(DECLARED).origin;
+// A one-pixel PNG, for a check that needs a picture and not what is in it.
+const PICTURE = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
 async function declaredResolvesHere(page) {
   if (DECLARED_ORIGIN === WD_ORIGIN) return;
   await page.route(`${DECLARED_ORIGIN}/**`, (route) => {
@@ -4829,12 +4834,21 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
   tag: '@rule:panel.dock.storyboard',
 }, async ({ page }) => {
   /*
-   * The server photographs every screen one at a time, and on a machine that
-   * has never drawn them nothing is in the cache. That took 28s of the default
-   * 30 here and more on a CI runner, which starts cold every time: this check
-   * failed on every push from 0.5.0 on while passing locally (2026-11-17).
+   * The pictures are stood in for. This check is the board's: its cards, their
+   * order and what each asks the server for. Taking a picture and keeping it
+   * is the server's, checked on one real page in test/serve.test.js and in
+   * test/screenshots.test.js. Photographing every screen here took 28s with
+   * nothing in the cache, against a limit of 30, so the check failed on every
+   * CI push from 0.5.0 on while passing locally (Topher, 2026-11-17).
    */
-  test.setTimeout(120_000);
+  const asked = [];
+  await page.route(/\/api\/screenshot(\?|$)/, (route) => {
+    const u = new URL(route.request().url());
+    if (u.searchParams.has('meta'))
+      return route.fulfill({ json: { page: null, landed: null, hit: true } });
+    asked.push(u.searchParams.get('screen'));
+    return route.fulfill({ contentType: 'image/png', body: PICTURE });
+  });
   await review(page);
   const { storyboard } = await (
     await page.request.get(`${WD_ORIGIN}/api/blueprint?bp=blueprint`)
@@ -4855,33 +4869,19 @@ test('the screen picker offers a storyboard of kept pictures, and remembers the 
     storyboard.map((s) => s.id),
   );
   /*
-   * Each card is a PICTURE, photographed by the server and kept: not a live
+   * Each card is a PICTURE the server is asked for by screen: not a live
    * frame, which is what the first cut drew and what wreaked havoc on the
-   * host's CSS (Topher, 2026-09-21). Asked twice, the second answer comes
-   * from the cache.
+   * host's CSS (Topher, 2026-09-21).
    */
   await expect(board.locator('iframe')).toHaveCount(0);
-  for (const sc of storyboard.filter((s) => s.app?.path)) {
+  const drawn = storyboard.filter((s) => s.app?.path);
+  for (const sc of drawn) {
     const pic = board.locator(`[data-screen="${sc.id}"] img`);
     await expect(pic).toHaveCount(1);
-    await expect
-      .poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 60000 })
-      .toBe(true);
+    await pic.scrollIntoViewIfNeeded();
+    await expect.poll(() => pic.evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true);
   }
-  const again = await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=review&bp=blueprint`);
-  expect(again.ok()).toBeTruthy();
-  expect(again.headers()['content-type']).toMatch(/image\/png/);
-  expect(again.headers()['x-walkdown-cache']).toBe('hit');
-  expect(again.headers()['x-walkdown-page']).toBe(
-    `${DECLARED_ORIGIN}${storyboard.find((s) => s.id === 'review').app.path}`,
-  );
-  const fresh = await page.request.get(
-    `${WD_ORIGIN}/api/screenshot?screen=review&refresh=1&bp=blueprint`,
-  );
-  expect(fresh.headers()['x-walkdown-cache']).toBe('miss');
-  expect(
-    (await page.request.get(`${WD_ORIGIN}/api/screenshot?screen=no-such&bp=blueprint`)).status(),
-  ).toBe(404);
+  for (const sc of drawn) expect(asked).toContain(sc.id);
   // The board is wider than the list - three cards a page can be read at -
   // and still on the stage.
   const wide = (await list.boundingBox()).width;
