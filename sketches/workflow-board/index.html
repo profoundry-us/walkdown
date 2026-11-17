@@ -3,12 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sketch D — Workflow board</title>
+<title>Journey Board Sketch</title>
 <!--
-  A sketch, not a design: what a "workflows" mode of walkdown might look like.
-  One board is one workflow. Lanes are the people and systems in it, cards are
-  stories, and a card's picture is the first screen of that story. Opening a
-  card walks its steps in a drawer. All data below is made up for the sketch.
+  A sketch, not a design: what the boards mode of walkdown might look like
+  (ADR 0018). One board is one process. Lanes are the people and systems in
+  it, cards are stories, and a card's pictures are its story's, the first
+  that has a screen. Moving across a card scrubs its pictures; opening it walks them in a drawer. A persona is
+  a kind of user, declared once for the whole blueprint and listed under
+  Personas; a board's lanes come from the personas of its stories. Following
+  one shows their journey and where they wait. All data is made up.
   Kept in its own folder so the Tailwind scan of sketches/*.html never sees it.
 -->
 <style>
@@ -24,7 +27,7 @@
     --warn: oklch(84% 0.150 85);
     --err: oklch(72% 0.170 22);
     --col: 184px;
-    --lanew: 148px;
+    --lanew: 196px;
   }
   * { box-sizing: border-box; margin: 0; }
   html, body { height: 100%; }
@@ -38,14 +41,17 @@
 
   /* ── top bar ─────────────────────────────── */
   header {
-    display: flex; align-items: center; gap: 14px; flex: 0 0 auto;
+    display: flex; align-items: center; gap: 10px 14px; flex: 0 0 auto; flex-wrap: wrap;
     padding: 8px 14px; background: var(--b100); border-bottom: 1px solid var(--b300);
   }
   .mark { font-weight: 700; letter-spacing: .02em; }
   .mark i { font-style: normal; color: var(--primary); }
-  .modes { display: flex; border: 1px solid var(--b300); border-radius: 4px; overflow: hidden; }
-  .modes button { padding: 3px 10px; font-size: 12px; opacity: .6; }
-  .modes button.on { background: var(--primary); color: var(--deep); opacity: 1; font-weight: 600; }
+  .modes, .seg { display: flex; border: 1px solid var(--b300); border-radius: 4px; overflow: hidden; }
+  .modes button, .seg button { padding: 3px 10px; font-size: 12px; opacity: .6; }
+  .modes button:hover, .seg button:hover { opacity: 1; }
+  .modes button.on, .seg button.on { background: var(--primary); color: var(--deep); opacity: 1; font-weight: 600; }
+  .flow { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--dim); }
+  body[data-mode="personas"] .flow { display: none; }
   .picker { padding: 3px 10px; border: 1px solid var(--b300); border-radius: 4px; font-size: 12px; }
   .picker b { font-weight: 600; }
   .tally { display: flex; gap: 12px; font-size: 12px; margin-left: auto; }
@@ -53,26 +59,209 @@
   .sketch-tag { font-size: 11px; color: var(--dim); border: 1px dashed var(--b300); border-radius: 4px; padding: 2px 7px; }
   .pass { color: var(--ok); } .fail { color: var(--err); } .mine { color: var(--warn); } .unbuilt { color: var(--dim); }
 
-  main { display: flex; flex: 1 1 auto; min-height: 0; }
+
+  /* ── who: an avatar for a person, a square for a system ─── */
+  .av {
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; display: inline-grid; place-items: center;
+    font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--deep); font-style: normal;
+  }
+  .av.sys { border-radius: 6px; background: transparent; border: 1.5px dashed; font-size: 13px; }
+  .av.sm { width: 18px; height: 18px; font-size: 8px; }
+  .av.sm.sys { font-size: 9.5px; border-width: 1px; border-radius: 4px; }
+  .av.lg { width: 44px; height: 44px; font-size: 15px; }
+
+  /* Follow floats over the canvas's top-left, where the board's empty corner sits at rest. */
+  .followbox {
+    position: absolute; left: 12px; top: 9px; z-index: 8; display: flex; align-items: center; gap: 8px;
+    padding: 4px 5px 4px 10px; background: var(--b100); border: 1px solid var(--b300); border-radius: 6px;
+    box-shadow: 0 2px 10px oklch(15% 0.04 245 / .5);
+  }
+  .followbox label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .followbox select {
+    font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink); max-width: 170px;
+    background: var(--b200); border: 1px solid var(--b300); border-radius: 4px; padding: 3px 5px;
+  }
+  .followbox select:hover, .followbox select:focus { border-color: var(--primary); outline: none; }
+
+  /* ── following someone: one line saying who, and how much is theirs ─── */
+  #lens {
+    flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+    padding: 6px 14px; background: var(--b200); border-bottom: 1px solid var(--b300); font-size: 12.5px;
+  }
+  #lens[hidden] { display: none; }
+  #lens b { font-weight: 650; }
+  #lens .dimmed { color: var(--dim); }
+  #lens .to { color: var(--primary); }
+  #lens .to:hover { text-decoration: underline; }
+  #lens .x { margin-left: auto; font-size: 17px; line-height: 1; opacity: .6; padding: 0 6px; }
+  #lens .x:hover { opacity: 1; }
+
+  /* ── personas: everyone who uses the system ─── */
+  #people { display: none; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 22px 24px 40px; }
+  body[data-mode="personas"] #people { display: block; }
+  body[data-mode="personas"] main, body[data-mode="personas"] #lens,
+  body[data-mode="personas"] .picker, body[data-mode="personas"] .tally { display: none; }
+  #people .wrap { max-width: 1120px; margin: 0 auto; }
+  #people h1 { font-size: 20px; font-weight: 650; }
+  #people .lede { margin: 4px 0 0; max-width: 62ch; color: var(--dim); font-size: 13px; }
+  #people h2 { margin: 26px 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  #people h2 span { font-weight: 400; letter-spacing: 0; text-transform: none; margin-left: 6px; }
+  #people .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .pcard { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--b100); border: 1px solid var(--b300); border-radius: 6px; }
+  .pcard:target, .pcard.lit { border-color: var(--primary); }
+  .pcard .top { display: flex; align-items: center; gap: 11px; }
+  .pcard .top b { display: block; font-size: 15px; font-weight: 650; line-height: 1.2; }
+  .pcard .top small { font-size: 11.5px; color: var(--dim); }
+  .pcard .blurb { font-size: 13.5px; line-height: 1.45; }
+  .pcard dl { display: grid; grid-template-columns: 82px 1fr; gap: 7px 10px; margin: 0; padding-top: 10px; border-top: 1px dashed var(--b300); font-size: 12.5px; }
+  .pcard dt { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); padding-top: 2px; }
+  .pcard dd { margin: 0; min-width: 0; }
+  .pcard code { color: var(--primary); font-size: 11.5px; }
+  .pcard .tg { display: flex; gap: 8px; font-size: 12px; }
+  .pcard .tg span:first-child { width: 52px; flex: 0 0 auto; color: var(--dim); }
+  .pcard .tg.none { color: var(--warn); }
+  .pcard .bd { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pcard .bd button, .pcard .bd span { padding: 1px 9px; border: 1px solid var(--b300); border-radius: 999px; font-size: 11.5px; }
+  .pcard .bd button { color: var(--primary); border-color: color-mix(in oklab, var(--primary) 50%, transparent); }
+  .pcard .bd button:hover { background: color-mix(in oklab, var(--primary) 16%, transparent); }
+  .pcard .bd span { color: var(--dim); border-style: dashed; }
+  #people .foot { margin-top: 22px; font-size: 12px; color: var(--dim); max-width: 70ch; }
+
+  main { position: relative; display: flex; flex: 1 1 auto; min-height: 0; }
+
+  /* ── zoom: smooth, and a card sheds detail once that detail is too small to read ─── */
+  .card { zoom: var(--cz, 1); }
+  #board:not([data-zoom="near"]) .card .shot { display: none; }
+  #board[data-zoom="mid"] .card { margin: 10px 0; }
+  #board[data-zoom="far"] .card { margin: calc(26px * var(--z)) 0; height: clamp(7px, calc(70px * var(--z)), 26px); border-radius: 4px; }
+  #board[data-zoom="far"] .card.headless { height: clamp(5px, calc(40px * var(--z)), 15px); }
+  #board[data-zoom="far"] .card > * { display: none; }
+  #board[data-zoom="far"] .card.is-pass { background: color-mix(in oklab, var(--ok) 55%, var(--b100)); border-color: var(--ok); }
+  #board[data-zoom="far"] .card.is-mine { background: color-mix(in oklab, var(--warn) 60%, var(--b100)); border-color: var(--warn); }
+  #board[data-zoom="far"] .card.is-fail { background: color-mix(in oklab, var(--err) 70%, var(--b100)); border-color: var(--err); }
+  #board[data-zoom="far"] .card.is-unbuilt { background: transparent; border-color: var(--dim); }
+  .gap.tight span { display: none; }
+  /* The first phase starts at the lane names' edge, so the heading's divider and the column's are one line. */
+  .phase.first { margin-left: calc(var(--hg, 9px) * -2); padding-left: calc(9px + var(--hg, 9px)); border-left: 0; }
+
+  /* ── time running down: lanes are columns, phases are bands down the left ─── */
+  #board[data-flow="down"] { padding: 0 0 24px 0; }
+  #board[data-flow="down"] .corner { min-height: 0; margin-right: calc(var(--g) / -2); }
+  #board[data-flow="down"] .stripe { margin: 0 calc(var(--g) / -2); }
+  #board[data-flow="down"] .stripe.line { border-top: 0; border-left: 1.5px dashed var(--b300); }
+  #board[data-flow="down"] .stripe.line.solid { border-left: 1.5px solid var(--dim); }
+  #board[data-flow="down"] .lane {
+    text-align: center; padding: 16px 8px 12px;
+    margin: 0 calc(var(--g) / -2 / var(--lz, 1)); border-right: 0; border-bottom: 1px solid var(--b300);
+  }
+  #board[data-flow="down"][data-lane="av"] .lane { padding: 5px 0; }
+  #board[data-flow="down"] .lane .in { flex-direction: column; align-items: center; justify-content: center; }
+  #board[data-flow="down"] .lane .av { margin: 0 auto; }
+  #board[data-flow="down"] .lane .who { align-items: center; width: 100%; }
+  #board[data-flow="down"] .lane .cut { top: 2px; left: 4px; font-size: 8px; background: transparent; }
+  #board[data-flow="down"] .phase {
+    display: flex; justify-content: center; align-items: flex-start;
+    margin: 0 calc(var(--g) / -2 / var(--pz, 1)) 0 0; padding: 10px 0 0;
+    border-left: 0; border-bottom: 0; border-right: 1px solid var(--b300); border-top: 1px solid var(--b300);
+  }
+  #board[data-flow="down"] .phase.first { border-top: 0; }
+  /* The name reads up the band, starting at its top. */
+  #board[data-flow="down"] .phase span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+  #board[data-flow="down"] .gap { height: auto; align-self: stretch; margin: 4px 0; border-top: 0; align-items: center; }
+  #board[data-flow="down"] .gap::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1.5px dotted var(--warn); }
+  #board[data-flow="down"] .gap span { top: 0; z-index: 1; max-width: 88%; white-space: normal; text-align: center; border-radius: 8px; }
+
+  /* ── who the lanes belong to: a heading outside the board, over each group of lanes ─── */
+  .grp {
+    position: absolute; z-index: 5; display: flex; align-items: flex-end; justify-content: center; overflow: hidden;
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); white-space: nowrap;
+  }
+  .grp span { padding: 0 6px 4px; overflow: hidden; text-overflow: ellipsis; }
+  .grp::after { content: ''; position: absolute; left: 5px; right: 5px; bottom: 0; height: 5px; border: 1.5px solid var(--b300); border-bottom: 0; border-radius: 3px 3px 0 0; }
+  #board[data-flow="across"] .grp { align-items: center; justify-content: flex-end; }
+  #board[data-flow="across"] .grp span { writing-mode: vertical-rl; transform: rotate(180deg); padding: 6px 4px 6px 0; }
+  #board[data-flow="across"] .grp::after { left: auto; right: 0; top: 5px; bottom: 5px; width: 5px; height: auto; border: 1.5px solid var(--b300); border-right: 0; border-radius: 3px 0 0 3px; }
+  .lane .cut { display: none; }
+
+  /* ── a card's pictures, scrubbed by moving the pointer across it (a hover gallery) ─── */
+  .gal .sl { display: none; }
+  .gal .sl.on { display: block; }
+  .bars { position: absolute; left: 6px; right: 6px; bottom: 5px; display: flex; gap: 3px; opacity: 0; transition: opacity .12s; pointer-events: none; }
+  .bars i { flex: 1 1 0; height: 3px; border-radius: 2px; background: oklch(23% 0.048 245 / .28); }
+  .bars i.on { background: var(--primary); }
+  .card:hover .bars, #tip .bars { opacity: 1; }
+  .card .gal .count { bottom: 12px; }
+  #tip .pic { position: relative; background: #f6f7f9; border-bottom: 1px solid var(--b300); }
+  #tip .pic svg { border-bottom: 0; }
+  #tip .pic.trace { background: var(--b200); padding: 12px 12px 16px; }
+  #tip .pic.trace code { display: block; font-size: 11px; white-space: pre-wrap; color: var(--primary); }
+  #tip .pic.trace .bars i { background: oklch(93% 0.02 230 / .22); }
+  #tip .pic.trace .bars i.on { background: var(--primary); }
+  #tip .n { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  /* ── hovering a card that has shed its detail brings the detail back ─── */
+  #tip {
+    position: fixed; z-index: 30; width: 250px; pointer-events: none; overflow: hidden;
+    background: var(--b100); border: 1px solid var(--primary); border-radius: 6px;
+    box-shadow: 0 6px 22px oklch(12% 0.04 245 / .7);
+  }
+  #tip[hidden] { display: none; }
+  #tip svg { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--b300); }
+  #tip .in { padding: 9px 11px 10px; display: flex; flex-direction: column; gap: 4px; }
+  #tip .who { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
+  #tip b { font-size: 13.5px; font-weight: 650; line-height: 1.3; }
+  #tip .meta { display: flex; flex-wrap: wrap; gap: 3px 9px; font-size: 11.5px; color: var(--dim); }
+  #tip .say { font-size: 12px; line-height: 1.4; color: var(--dim); }
+  /* a lane's name does the same: more about the persona when large, only the avatar when small */
+  .lane .more { display: none; font-size: 10.5px; line-height: 1.35; color: var(--dim); margin-top: 3px; }
+  #board[data-lane="more"] .lane .in { align-items: flex-start; }
+  #board[data-lane="more"] .lane .more { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  #board[data-lane="more"] .lane .more.seed { display: block; color: var(--ink); opacity: .8; }
+  #board[data-lane="name"] .lane small, #board[data-lane="name"] .lane .cut { display: none; }
+  #board[data-lane="av"] .lane { padding: 0; }
+  #board[data-lane="av"] .lane .in { justify-content: center; }
+  #board[data-lane="av"] .lane .av { margin: 0 auto; }
+  #board[data-lane="av"] .lane .who, #board[data-lane="av"] .lane .cut { display: none; }
+  #board[data-lane="av"] .lane .av { width: 28px; height: 28px; }
+  .phase { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .zoom {
+    position: absolute; right: 14px; bottom: 14px; z-index: 8; display: flex; align-items: center;
+    background: var(--b100); border: 1px solid var(--b300); border-radius: 6px; overflow: hidden;
+    box-shadow: 0 2px 10px oklch(15% 0.04 245 / .5); font-size: 12px;
+  }
+  body.open .zoom { right: 454px; }
+  .zoom button { padding: 5px 10px; min-width: 30px; }
+  .zoom button:hover:not(:disabled) { background: color-mix(in oklab, var(--primary) 18%, transparent); color: var(--primary); }
+  .zoom button:disabled { opacity: .3; cursor: default; }
+  .zoom .lvl { padding: 5px 4px; min-width: 46px; text-align: center; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .zoom .fit { border-left: 1px solid var(--b300); }
 
   /* ── board ───────────────────────────────── */
-  #scroll { flex: 1 1 auto; min-width: 0; overflow: auto; }
+  #scroll {
+    position: relative; flex: 1 1 auto; min-width: 0; overflow: hidden;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+    background-image: radial-gradient(oklch(41% 0.055 242 / .55) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  #scroll.panning, #scroll.panning * { cursor: grabbing; }
   #board {
-    position: relative; display: grid; width: max-content;
-    grid-template-columns: var(--lanew) repeat(16, var(--col));
-    column-gap: 18px; padding: 0 24px 28px 0;
+    position: absolute; top: 0; left: 0; display: grid; width: max-content;
+    background: var(--deep); border: 1px solid var(--b300);
+    will-change: transform; --z: 1;
+    grid-template-columns: max(calc(var(--lanew) * var(--z)), 24px) repeat(16, calc(184px * var(--z)));
+    column-gap: var(--g, 18px); padding: 0 24px 28px 0;
   }
   #wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
   #wires path { fill: none; stroke: var(--b300); stroke-width: 1.5; stroke-linejoin: round; }
   #wires path.on { stroke: var(--primary); stroke-width: 2; }
 
   .phase {
-    grid-row: 1; position: sticky; top: 0; z-index: 4;
-    margin: 0 -9px; padding: 9px 9px 7px; background: var(--deep);
+    grid-row: 1; position: relative; z-index: 4; zoom: var(--pz, 1);
+    margin: 0 calc(var(--hg, 9px) * -1); padding: 9px 9px 7px; background: var(--deep);
     font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
     border-bottom: 1px solid var(--b300); border-left: 1px solid var(--b300);
   }
-  .corner { grid-row: 1; grid-column: 1; position: sticky; top: 0; left: 0; z-index: 6; background: var(--deep); border-bottom: 1px solid var(--b300); margin-right: -9px; }
+  .corner { grid-row: 1; grid-column: 1; position: relative; z-index: 4; min-height: calc(46px * var(--z)); background: var(--deep); border-bottom: 1px solid var(--b300); border-right: 1px solid var(--b300); }
 
   .stripe { grid-column: 1 / -1; margin-right: -24px; }
   .stripe.back { background: color-mix(in oklab, var(--b200) 55%, transparent); }
@@ -80,15 +269,19 @@
   .stripe.line.solid { border-top: 1.5px solid var(--dim); }
 
   .lane {
-    grid-column: 1; position: sticky; left: 0; z-index: 3;
-    margin-right: -9px; padding: 14px 10px 14px 14px; text-align: left;
+    grid-column: 1; position: relative; z-index: 3; zoom: var(--lz, 1);
+    padding: 14px 10px 14px 14px; text-align: left;
     background: var(--deep); border-right: 1px solid var(--b300);
-    display: flex; flex-direction: column; gap: 2px; justify-content: center;
   }
+  /* The layout is on a span inside the button: a button is not a dependable flex container in every browser. */
+  .lane .in { display: flex; align-items: center; gap: 10px; width: 100%; }
+  .lane .who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .lane .uses { font-size: 10.5px; color: var(--primary); opacity: .85; }
+  .lane.on { box-shadow: inset 3px 0 0 var(--primary); }
+  .lane.on b { color: var(--primary); }
   .lane.back { background: color-mix(in oklab, var(--b200) 55%, var(--deep)); }
   .lane b { font-size: 12.5px; font-weight: 600; }
   .lane small { font-size: 11px; color: var(--dim); }
-  .lane .dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 4px; }
   .lane .cut {
     position: absolute; top: -8px; left: 14px; padding: 0 5px; background: var(--deep);
     font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim);
@@ -118,7 +311,20 @@
   .card.is-fail { border-color: var(--err); }
   .card.headless { background: transparent; border-style: dashed; }
   .card.headless .kind { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--primary); }
-  body[data-focus] .card:not(.in-focus) { opacity: .25; }
+  .card .takes { color: var(--warn); }
+  /* following one persona: theirs stay lit, the cards they hand to and from stay readable */
+  body[data-focus] .card:not(.in-focus) { opacity: .16; }
+  body[data-focus] .card.near:not(.in-focus) { opacity: .62; }
+  body[data-focus] #wires path:not(.on) { opacity: .25; }
+  .gap {
+    position: relative; z-index: 1; align-self: center; height: 0; margin: 0 4px;
+    border-top: 1.5px dotted var(--warn); display: flex; justify-content: center;
+  }
+  .gap span {
+    position: relative; top: -10px; padding: 1px 8px; border-radius: 999px; white-space: nowrap;
+    background: var(--deep); border: 1px solid color-mix(in oklab, var(--warn) 55%, transparent);
+    font-size: 10.5px; color: var(--warn);
+  }
 
   /* ── drawer ──────────────────────────────── */
   #drawer {
@@ -127,8 +333,8 @@
   }
   body.open #drawer { display: flex; }
   .dhead { padding: 12px 14px 10px; border-bottom: 1px solid var(--b300); display: flex; gap: 10px; align-items: flex-start; }
-  .dhead .who { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
-  .dhead .who i { width: 8px; height: 8px; border-radius: 50%; }
+  .dhead .who { font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px; text-align: left; }
+  .dhead .who:hover { color: var(--primary); }
   .dhead h2 { font-size: 16px; font-weight: 650; margin: 2px 0; line-height: 1.25; }
   .dhead .id { font-size: 11px; color: var(--dim); }
   .dhead .x { margin-left: auto; font-size: 18px; line-height: 1; opacity: .6; padding: 2px 6px; }
@@ -162,38 +368,101 @@
   .hop { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 6px 8px; margin-top: 4px; border: 1px solid var(--b300); border-radius: 4px; font-size: 12.5px; }
   .hop:hover { border-color: var(--primary); }
   .hop .dir { font-size: 11px; color: var(--dim); width: 78px; flex: 0 0 auto; white-space: nowrap; }
-  .hop i { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+
   .hint { margin-top: 14px; font-size: 11px; color: var(--dim); }
   kbd { border: 1px solid var(--b300); border-radius: 3px; padding: 0 4px; font: inherit; }
+  @media (max-width: 760px) {
+    :root { --lanew: 132px; }
+    .lane { padding-left: 10px; }
+    .lane .in { flex-direction: column; align-items: flex-start; gap: 4px; }
+    #drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); z-index: 20; }
+    body.open .zoom { right: 14px; }
+    .tally { margin-left: 0; }
+  }
 </style>
 </head>
-<body>
+<body data-mode="boards">
 <header>
   <div class="mark">walk<i>down</i></div>
-  <div class="modes" title="A sketch: only Workflows is drawn">
-    <button>Rules</button><button class="on">Workflows</button>
+  <div class="modes">
+    <button title="Not drawn in this sketch: the panel as it is today" disabled>Rules</button><button class="on" data-mode="boards">Boards</button><button data-mode="personas">Personas</button>
   </div>
   <div class="picker"><b>Contractor onboarding</b> &nbsp;▾</div>
   <span class="sketch-tag">sketch · made-up data</span>
   <div class="tally" id="tally"></div>
+  <div class="flow" title="Which way time runs on the board">Time runs
+    <div class="seg"><button class="on" data-flow="across">Across →</button><button data-flow="down">Down ↓</button></div>
+  </div>
 </header>
+<section id="lens" hidden></section>
 <main>
   <div id="scroll"><div id="board"><svg id="wires"><defs>
     <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(41% 0.055 242);stroke:none"/></marker>
     <marker id="ah-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(78% 0.125 215);stroke:none"/></marker>
   </defs><g id="paths"></g></svg></div></div>
+  <div class="followbox"><label for="who">Follow</label><select id="who"></select></div>
+  <div class="zoom" role="group" aria-label="Zoom">
+    <button data-zoom="out" title="Zoom out (−)">−</button><button class="lvl" id="lvl" data-zoom="one" title="Back to 100%">100%</button><button data-zoom="in" title="Zoom in (+)">+</button><button class="fit" data-zoom="fit" title="Fit the whole board in the window (0)">Fit</button>
+  </div>
   <aside id="drawer"></aside>
 </main>
+<div id="people"></div>
+<div id="tip" hidden></div>
 
 <script>
-/* ── the workflow, as data ─────────────────────────────────────────── */
-const LANES = [
-  { id: 'client', name: 'Hiring manager',        sub: 'Client company',       color: '#8b8bf0', app: 'Client portal',  ac: '#5b5bd6' },
-  { id: 'worker', name: 'Contractor',            sub: 'Joining from abroad',  color: '#3fc7b2', app: 'Contractor app', ac: '#0f9d8a' },
-  { id: 'ops',    name: 'Onboarding specialist', sub: 'Our staff',            color: '#e6b455', app: 'Ops console',    ac: '#475569', cut: 'Line of interaction' },
-  { id: 'sys',    name: 'Platform',              sub: 'Jobs, rules, webhooks', color: '#7fb6e6', back: true, cut: 'Line of visibility', solid: true },
-  { id: 'vendor', name: 'Outside services',      sub: 'Checks, e-sign, benefits', color: '#a9b4c4', back: true, cut: 'Line of internal interaction' },
+/* ── the process, as data ─────────────────────────────────────────── */
+/*
+ * Every persona in the system, as the storyboard would declare them (ADR 0018
+ * §2): who they are, what they use, and the seeded user they are signed in as
+ * on each target. Only three of them have a part in this board.
+ */
+const TARGETS = ['local', 'staging'];
+const PERSONAS = [
+  { id: 'client', group: 'customers', ini: 'HM', name: 'Hiring manager', sub: 'Client company', color: '#8b8bf0', app: 'Client portal', ac: '#5b5bd6',
+    blurb: 'Runs a team at a client company and needs people on it. Asks for contractors, confirms when they start, and has no interest in another country\'s hiring law.',
+    uses: 'Client portal', as: 'hiring_manager', seed: 'Dee Okafor', sini: 'DO', on: { local: 'Dee Okafor, Larkspur Labs', staging: 'Dee Okafor, Larkspur Labs' },
+    boards: ['Timesheets and pay'] },
+  { id: 'worker', group: 'customers', ini: 'C', name: 'Contractor', sub: 'Joining from abroad', color: '#3fc7b2', app: 'Contractor app', ac: '#0f9d8a',
+    blurb: 'Hired by a client to work from their own country. Sets everything up once, mostly on a phone, in their own language, then logs hours each week.',
+    uses: 'Contractor app', as: 'contractor', seed: 'Ana Souza', sini: 'AS', on: { local: 'Ana Souza, Brazil', staging: 'Ana Souza, Brazil' },
+    boards: ['Timesheets and pay', 'Offboarding'] },
+  { id: 'admin', group: 'customers', ini: 'CA', name: 'Client administrator', sub: 'Client company', color: '#c08bf0',
+    blurb: 'Looks after the client\'s account: who may ask for contractors, which cost centres exist, and where invoices go.',
+    uses: 'Client portal', as: 'client_admin', on: { local: 'Noor Haddad, Larkspur Labs', staging: 'Noor Haddad, Larkspur Labs' },
+    count: { pass: 6, unbuilt: 1 }, boards: ['Client setup'] },
+  { id: 'approver', group: 'customers', ini: 'TA', name: 'Timesheet approver', sub: 'Client company', color: '#f08bb4',
+    blurb: 'Signs off a contractor\'s hours each week. Often the hiring manager, sometimes a team lead who sees nothing else.',
+    uses: 'Client portal', as: 'timesheet_approver', on: { local: 'Dee Okafor, Larkspur Labs', staging: null },
+    count: { pass: 3, mine: 1 }, boards: ['Timesheets and pay'] },
+  { id: 'ops', group: 'staff', ini: 'OS', name: 'Onboarding specialist', sub: 'Our staff', color: '#e6b455', app: 'Ops console', ac: '#475569',
+    blurb: 'Moves contractors through onboarding and decides what the platform cannot: a flagged check, a request that needs sending back.',
+    uses: 'Ops console', as: 'onboarding_specialist', seed: 'Sam Reyes', sini: 'SR', on: { local: 'Sam Reyes, onboarding team', staging: 'Sam Reyes, onboarding team' },
+    boards: ['Offboarding'] },
+  { id: 'finance', group: 'staff', ini: 'FA', name: 'Finance analyst', sub: 'Our staff', color: '#9bd36a',
+    blurb: 'Runs payroll for contractors and invoices their clients. Works from approved timesheets and chases the ones that are late.',
+    uses: 'Ops console', as: 'finance_analyst', on: { local: 'Idris Bello, finance', staging: 'Idris Bello, finance' },
+    count: { pass: 9, fail: 1, unbuilt: 3 }, boards: ['Timesheets and pay'] },
+  { id: 'compliance', group: 'staff', ini: 'CL', name: 'Compliance lead', sub: 'Our staff', color: '#e68a6a',
+    blurb: 'Owns which paperwork and checks each country requires. Changes a country\'s pack and reviews anything an onboarding specialist escalates.',
+    uses: 'Ops console', as: 'compliance_lead', on: { local: 'Mei Tanaka, compliance', staging: 'Mei Tanaka, compliance' },
+    count: { pass: 4, unbuilt: 2 }, boards: [] },
 ];
+/*
+ * Systems: what has a part in a process and nobody signs in as. And groups: which personas and systems belong
+ * together, in the order they are drawn. Both are the blueprint's own (storyboard.yml), as every name on this
+ * board is. walkdown has no "customer", "staff" or "platform" of its own.
+ */
+const SYSTEMS = [
+  { id: 'sys', group: 'hidden', ini: '⚙', name: 'Platform', sub: 'Jobs, rules, webhooks', blurb: 'Runs with nobody watching. Its cards have steps and no pictures.', color: '#7fb6e6' },
+  { id: 'vendor', group: 'hidden', ini: '↗', name: 'Outside services', sub: 'Checks, e-sign, benefits', blurb: 'Other companies\' systems. Only our side of each step is ours to verify.', color: '#a9b4c4' },
+];
+const GROUPS = [
+  { id: 'customers', title: 'Customers' },
+  { id: 'staff', title: 'Staff' },
+  { id: 'hidden', title: 'Out of sight', line: 'heavy' },
+];
+PERSONAS.forEach(p => { p.person = true; });
+const BOARD = 'Contractor onboarding';
 const PHASES = [['Request', 1, 3], ['Account', 4, 6], ['Contract', 7, 7], ['Screening', 8, 11], ['Benefits', 12, 12], ['Placement', 13, 15], ['Day one', 16, 16]];
 
 const STORIES = [
@@ -244,7 +513,7 @@ const STORIES = [
     { say: 'Sees exactly what will be checked and by whom, then consents.', shot: { k: 'detail', title: 'Your consent', badge: '4 checks', kv: [['Checks', 'Identity, criminal, right to work, education'], ['Run by', 'Screening provider'], ['Kept for', '12 months']], actions: ['Decline', 'I consent'], hl: 1 } },
   ], rules: [['The checks listed match the client\'s screening package.', 'pass'], ['Declining pauses onboarding and tells the specialist.', 'pass']] },
 
-  { id: 'screening.run-check', lane: 'vendor', col: 9, title: 'Run the background check', kind: 'vendor', status: 'pass', steps: [
+  { id: 'screening.run-check', lane: 'vendor', col: 9, title: 'Run the background check', kind: 'vendor', status: 'pass', takes: '2 to 5 days', steps: [
     { say: 'The screening provider takes the order. It usually takes 2 to 5 days.', trace: 'POST   screening/checks    201  chk_55a0\nstate  pending' },
     { say: 'The provider reports a result.', trace: 'hook   check.completed     chk_55a0\nresult consider  (education)' },
   ], rules: [['An order is placed once per consent.', 'pass']] },
@@ -304,6 +573,13 @@ const EDGES = [
   ['placement.assign-team', 'placement.confirm-start'], ['placement.confirm-start', 'placement.provision'],
   ['placement.provision', 'dayone.first-day'],
 ];
+
+/* A board's lanes come from its cards: the personas of its stories, customers first, then the two that are not people. */
+const HERE = [...PERSONAS, ...SYSTEMS].filter(a => STORIES.some(s => s.lane === a.id));
+const LANES = GROUPS.flatMap((g, gi) => HERE.filter(a => a.group === g.id)
+  .map((a, i) => ({ ...a, back: !a.person, cut: gi && !i ? g.title : '', solid: gi && !i && g.line === 'heavy' })))
+  .filter((l, i, all) => { if (l.cut && !all.slice(0, i).length) l.cut = ''; return true; });
+const GROUP = l => GROUPS.find(g => g.id === l.group).title;
 
 /* ── drawing a screen. Stands in for a real capture. ───────────────── */
 const W = 320, H = 200, INK = '#2a3140', MUTE = '#8a93a3', LINE = '#d5d9e0', RINGC = '#f59e0b';
@@ -392,7 +668,7 @@ function shot(story, step) {
   const ac = lane.ac, head = mail ? '#3b4252' : ac;
   return `<svg viewBox="0 0 ${W} ${H}" font-family="system-ui, sans-serif" role="img" aria-label="${esc(step.say)}">`
     + R(0, 0, W, H, mail ? '#e9ebef' : '#f6f7f9', 0) + R(0, 0, W, 24, head, 0)
-    + T(12, 15.5, mail ? 'Mail' : lane.app, 8, '#fff', 700) + `<circle cx="304" cy="12" r="6" fill="#ffffff55"/>`
+    + T(12, 15.5, mail ? 'Mail' : lane.app, 8, '#fff', 700) + `<circle cx="304" cy="12" r="7" fill="#ffffff55"/>` + (mail ? '' : T(304, 14.2, lane.sini, 5.5, '#fff', 700, 'middle'))
     + KINDS[s.k](s, ac) + '</svg>';
 }
 
@@ -403,41 +679,119 @@ const byId = Object.fromEntries(STORIES.map(s => [s.id, s]));
 const laneOf = s => LANES.find(l => l.id === s.lane);
 const GLYPH = { pass: '✓', fail: '✕', mine: '●', unbuilt: '○', pending: '○' };
 const WORD = { pass: 'passing', fail: 'failing', mine: 'waiting on you', unbuilt: 'not built' };
-let sel = null, at = 0;
+const lanesOf = ids => [...new Set(ids.map(id => byId[id].lane))].map(id => LANES.find(l => l.id === id));
+const av = (l, size = '') => l.person
+  ? `<i class="av ${size}" style="background:${l.color}">${l.ini}</i>`
+  : `<i class="av sys ${size}" style="border-color:${l.color};color:${l.color}">${l.ini}</i>`;
+const bars = (n, on) => n > 1 ? `<span class="bars">${Array.from({ length: n }, (_, i) => `<i class="${i === on ? 'on' : ''}"></i>`).join('')}</span>` : '';
+let sel = null, at = 0, focus = null, flow = 'across';
+try { if (localStorage.getItem('board-flow') === 'down') flow = 'down'; } catch {}
 
 function build() {
+  const down = flow === 'down', steps = Math.max(...STORIES.map(s => s.col));
+  /* Where a lane (0, 1, 2…) and a stretch of time (first to last step) fall on the grid, whichever way time runs. */
+  const cell = (lane, a, b = a) => down
+    ? `grid-column:${lane === null ? `2 / ${LANES.length + 2}` : lane + 2};grid-row:${a === null ? `1 / ${steps + 2}` : a === 0 ? 1 : `${a + 1} / ${b + 2}`}`
+    : `grid-row:${lane === null ? `2 / ${LANES.length + 2}` : lane + 2};grid-column:${a === null ? '1 / -1' : a === 0 ? 1 : `${a + 1} / ${b + 2}`}`;
+  [...board.children].forEach(c => c.id !== 'wires' && c.remove());
+  board.dataset.flow = flow;
+  board.style.gridTemplateColumns = down ? `calc(34px * var(--pz)) repeat(${LANES.length}, calc(184px * var(--z)))` : '';
+  document.querySelectorAll('[data-flow]').forEach(b => b.tagName === 'BUTTON' && b.classList.toggle('on', b.dataset.flow === flow));
   let h = '<div class="corner"></div>';
-  PHASES.forEach(([n, a, b]) => { h += `<div class="phase" style="grid-column:${a + 1} / ${b + 2}">${n}</div>`; });
+  $('#who').innerHTML = `<option value="">Everyone</option>${LANES.filter(l => l.person).map(l => `<option value="${l.id}">${l.name}</option>`).join('')}`;
+  PHASES.forEach(([n, a, b], i) => { h += `<div class="phase ${i ? '' : 'first'}" title="${n}" style="${down ? `grid-column:1;grid-row:${a + 1} / ${b + 2}` : `grid-row:1;grid-column:${a + 1} / ${b + 2}`}"><span>${n}</span></div>`; });
   LANES.forEach((l, i) => {
-    const row = i + 2;
-    h += `<div class="stripe ${l.back ? 'back' : ''} ${l.cut ? 'line' : ''} ${l.solid ? 'solid' : ''}" style="grid-row:${row}"></div>`;
-    h += `<button class="lane ${l.back ? 'back' : ''}" data-lane="${l.id}" style="grid-row:${row}" title="Follow only this lane">
-      ${l.cut ? `<span class="cut">${l.cut}</span>` : ''}<span class="dot" style="background:${l.color}"></span><b>${l.name}</b><small>${l.sub}</small></button>`;
+    h += `<div class="stripe ${l.back ? 'back' : ''} ${l.cut ? 'line' : ''} ${l.solid ? 'solid' : ''}" ${l.cut ? `title="Where ${l.cut} begins"` : ''} style="${cell(i, null)}"></div>`;
+    h += `<button class="lane ${l.back ? 'back' : ''}" data-lane="${l.id}" style="${cell(i, 0)}" title="Follow only this lane">
+      ${l.cut ? `<span class="cut">${l.cut}</span>` : ''}<span class="in">${av(l)}<span class="who"><b>${l.name}</b><small>${l.sub}</small>${l.person ? `<small class="uses">${l.uses}</small>` : ''}<small class="more">${esc(l.blurb)}</small>${l.person ? `<small class="more seed">Signed in as ${l.seed}</small>` : ''}</span></span></button>`;
   });
   STORIES.forEach(s => {
-    const row = LANES.findIndex(l => l.id === s.lane) + 2, n = s.steps.length;
+    const where = cell(LANES.findIndex(l => l.id === s.lane), s.col), n = s.steps.length;
     const st = `<span class="st ${s.status}">${GLYPH[s.status]}</span><span>${s.rules.length} rules</span>`;
     h += s.steps[0].shot
-      ? `<button class="card is-${s.status}" data-id="${s.id}" style="grid-row:${row};grid-column:${s.col + 1}">
-          <span class="shot">${shot(s, s.steps[0])}<span class="count">${n} screens</span></span>
+      ? `<button class="card is-${s.status}" data-id="${s.id}" aria-label="${esc(s.title)}, ${WORD[s.status]}" style="${where}">
+          <span class="shot gal">${s.steps.map((x, i) => `<span class="sl ${i ? '' : 'on'}">${shot(s, x)}</span>`).join('')}${bars(n, 0)}<span class="count">${n} pictures</span></span>
           <span class="txt"><span class="ttl">${s.title}</span><span class="meta">${st}</span></span></button>`
-      : `<button class="card headless is-${s.status}" data-id="${s.id}" style="grid-row:${row};grid-column:${s.col + 1}">
-          <span class="txt"><span class="kind mono">${s.kind} · no screen</span><span class="ttl">${s.title}</span><span class="meta">${st}<span>${n} steps</span></span></span></button>`;
+      : `<button class="card headless is-${s.status}" data-id="${s.id}" aria-label="${esc(s.title)}, ${WORD[s.status]}" style="${where}">
+          <span class="txt"><span class="kind mono">${s.kind} · no screen</span><span class="ttl">${s.title}</span><span class="meta">${st}<span>${n} steps</span>${s.takes ? `<span class="takes">${s.takes}</span>` : ''}</span></span></button>`;
   });
+  LANES.forEach((l, i) => { if (GROUP(l) !== (LANES[i - 1] && GROUP(LANES[i - 1]))) h += `<div class="grp" data-from="${l.id}" title="${GROUP(l)}"><span>${GROUP(l)}</span></div>`; });
   board.insertAdjacentHTML('beforeend', h);
   const c = { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
   STORIES.forEach(s => c[s.status]++);
   $('#tally').innerHTML = Object.keys(c).map(k => `<span class="${k}" data-g="${GLYPH[k]}">${c[k]} ${WORD[k]}</span>`).join('');
 }
 
+/* ── following one persona: the dimming, the waits, and one line saying who ── */
+function follow(id) {
+  focus = id || null;
+  const lane = LANES.find(l => l.id === focus);
+  if (lane) document.body.dataset.focus = focus; else delete document.body.dataset.focus;
+  const mine = STORIES.filter(s => s.lane === focus).sort((a, b) => a.col - b.col);
+  const from = EDGES.filter(([a, b]) => byId[b].lane === focus && byId[a].lane !== focus).map(e => e[0]);
+  const to = EDGES.filter(([a, b]) => byId[a].lane === focus && byId[b].lane !== focus).map(e => e[1]);
+  document.querySelectorAll('.card').forEach(c => {
+    c.classList.toggle('in-focus', byId[c.dataset.id].lane === focus);
+    c.classList.toggle('near', from.includes(c.dataset.id) || to.includes(c.dataset.id));
+  });
+  document.querySelectorAll('.lane').forEach(b => b.classList.toggle('on', b.dataset.lane === focus));
+  $('#who').value = lane && lane.person ? focus : '';
+
+  // Where this actor waits: every stretch between two of their cards that others fill.
+  document.querySelectorAll('.gap').forEach(g => g.remove());
+  const row = LANES.indexOf(lane) + 2;
+  let gaps = '';
+  mine.forEach((a, i) => {
+    const b = mine[i + 1];
+    if (!b || b.col - a.col < 2) return;
+    const between = STORIES.filter(s => s.col > a.col && s.col < b.col && s.lane !== focus);
+    const takes = between.map(s => s.takes).filter(Boolean)[0];
+    const says = `waits on ${lanesOf(between.map(s => s.id)).map(l => l.name).join(', ')}${takes ? ` · ${takes}` : ''}`;
+    gaps += `<div class="gap" data-says title="${says}" style="${flow === 'down' ? `grid-column:${row};grid-row:${a.col + 2} / ${b.col + 1}` : `grid-row:${row};grid-column:${a.col + 2} / ${b.col + 1}`}"><span>waits on ${lanesOf(between.map(s => s.id)).map(l => l.name).join(', ')}${takes ? ` · ${takes}` : ''}</span></div>`;
+  });
+  board.insertAdjacentHTML('beforeend', gaps);
+
+  const lens = $('#lens');
+  lens.hidden = !lane;
+  if (lane) {
+    const c = { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
+    mine.forEach(s => c[s.status]++);
+    const marks = Object.keys(c).filter(k => c[k]).map(k => `<span class="${k}">${GLYPH[k]} ${c[k]} ${WORD[k]}</span>`).join(' · ');
+    const beats = mine.reduce((n, s) => n + s.steps.length, 0);
+    lens.innerHTML = `${av(lane, 'sm')}<span>Following <b>${lane.name}</b></span>
+      <span class="dimmed">${mine.length} of ${STORIES.length} cards</span><span>${marks}</span>
+      ${lane.person ? `<button class="to" data-persona="${lane.id}">Who is this? →</button>` : `<span class="dimmed">Not a persona: nobody signs in as this.</span>`}
+      <button class="x" data-lane="" title="Back to everyone">×</button>`;
+  }
+  tighten();
+  wires();
+}
+
+/* Puts each group's heading outside the board, centred on the lanes it covers: above them, or beside them. */
+function heads() {
+  const o = board.getBoundingClientRect(), down = flow === 'down', all = [...document.querySelectorAll('.grp')];
+  all.forEach((g, i) => {
+    const from = LANES.findIndex(l => l.id === g.dataset.from), to = all[i + 1] ? LANES.findIndex(l => l.id === all[i + 1].dataset.from) - 1 : LANES.length - 1;
+    const a = $(`.lane[data-lane="${LANES[from].id}"]`).getBoundingClientRect(), b = $(`.lane[data-lane="${LANES[to].id}"]`).getBoundingClientRect();
+    g.style.cssText = down
+      ? `left:${a.left - o.left}px;width:${b.right - a.left}px;top:-24px;height:22px`
+      : `top:${a.top - o.top}px;height:${b.bottom - a.top}px;left:-26px;width:24px`;
+  });
+}
 function wires() {
-  const o = board.getBoundingClientRect();
+  heads();
+  const o = board.getBoundingClientRect(), half = parseFloat(getComputedStyle(board).columnGap) / 2;
+  const any = $('.card'), rise = Math.max(3, parseFloat(getComputedStyle(any).marginTop) * (parseFloat(getComputedStyle(any).zoom) || 1));
   const box = id => { const r = $(`.card[data-id="${id}"]`).getBoundingClientRect(); return { l: r.left - o.left, r: r.right - o.left, t: r.top - o.top, b: r.bottom - o.top, cx: r.left - o.left + r.width / 2, cy: r.top - o.top + r.height / 2 }; };
   $('#paths').innerHTML = EDGES.map(([a, b]) => {
-    const s = box(a), t = box(b), on = sel && (a === sel.id || b === sel.id);
-    const d = byId[a].col === byId[b].col
-      ? (t.t > s.b ? `M${s.cx},${s.b} V${t.t - 2}` : `M${s.cx},${s.t} V${t.b + 2}`)
-      : `M${s.r},${s.cy} H${t.l - 9} V${t.cy} H${t.l - 2}`;
+    const s = box(a), t = box(b);
+    const on = sel ? (a === sel.id || b === sel.id) : focus ? (byId[a].lane === focus || byId[b].lane === focus) : false;
+    const same = byId[a].col === byId[b].col;
+    const d = flow === 'down'
+      ? (same ? (t.l > s.r ? `M${s.r},${s.cy} H${t.l - 2}` : `M${s.l},${s.cy} H${t.r + 2}`)
+        : `M${s.cx},${s.b} V${t.t - rise} H${t.cx} V${t.t - 2}`)
+      : (same ? (t.t > s.b ? `M${s.cx},${s.b} V${t.t - 2}` : `M${s.cx},${s.t} V${t.b + 2}`)
+        : `M${s.r},${s.cy} H${t.l - half} V${t.cy} H${t.l - 2}`);
     return `<path d="${d}" class="${on ? 'on' : ''}" marker-end="url(#${on ? 'ah-on' : 'ah'})"/>`;
   }).join('');
 }
@@ -448,7 +802,7 @@ function open(id, step = 0) {
   document.body.classList.add('open');
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', c.dataset.id === id));
   draw(); wires();
-  $(`.card[data-id="${id}"]`).scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  reveal($(`.card[data-id="${id}"]`));
 }
 function shut() {
   sel = null; document.body.classList.remove('open');
@@ -456,14 +810,14 @@ function shut() {
   wires();
 }
 function draw() {
-  const s = sel, l = laneOf(s), step = s.steps[at], n = s.steps.length, noun = step.shot ? 'Screen' : 'Step';
+  const s = sel, l = laneOf(s), step = s.steps[at], n = s.steps.length, noun = step.shot ? 'Picture' : 'Step';
   const hops = EDGES.filter(e => e.includes(s.id)).map(([a, b]) => {
     const o = byId[a === s.id ? b : a], ol = laneOf(o);
-    return `<button class="hop" data-go="${o.id}"><span class="dir">${a === s.id ? 'hands off to' : 'comes from'}</span><i style="background:${ol.color}"></i><span>${ol.name}: ${o.title}</span></button>`;
+    return `<button class="hop" data-go="${o.id}"><span class="dir">${a === s.id ? 'hands off to' : 'comes from'}</span>${av(ol, 'sm')}<span>${ol.name}: ${o.title}</span></button>`;
   }).join('');
   drawer.innerHTML = `
     <div class="dhead"><div>
-      <div class="who"><i style="background:${l.color}"></i>${l.name} · ${l.sub}</div>
+      <button class="who" data-lane="${l.id}" title="Follow ${l.name}">${av(l, 'sm')}${l.name} · ${l.sub}${l.person ? ` · signed in as ${l.seed}` : ''}</button>
       <h2>${s.title}</h2>
       <div class="id mono">${s.id} · <span class="${s.status}">${GLYPH[s.status]} ${WORD[s.status]}</span></div>
     </div><button class="x" data-shut title="Close (Esc)">×</button></div>
@@ -477,33 +831,278 @@ function draw() {
       <div class="sect">Rules on this story</div>
       ${s.rules.map(([t, v, why]) => `<div class="rule"><span class="g ${v}">${GLYPH[v]}</span><span>${esc(t)}${why ? `<small class="fail">${esc(why)}</small>` : ''}</span></div>`).join('')}
       <div class="sect">Before and after</div>${hops}
-      <p class="hint"><kbd>←</kbd> <kbd>→</kbd> step through · <kbd>Esc</kbd> close · the amber ring marks what the person acts on</p>
+      <p class="hint"><kbd>←</kbd> <kbd>→</kbd> step through · <kbd>Esc</kbd> close · <kbd>−</kbd> <kbd>+</kbd> <kbd>0</kbd> zoom · drag to pan · the amber ring marks what the person acts on</p>
     </div>`;
 }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-id],[data-go],[data-step],[data-at],[data-shut],[data-lane]');
+  const t = e.target.closest('button[data-flow],[data-zoom],[data-id],[data-go],[data-step],[data-at],[data-shut],[data-lane],[data-mode],[data-persona],[data-journey]');
   if (!t) return;
-  if (t.dataset.id) open(t.dataset.id);
+  if (t.dataset.flow && t.tagName === 'BUTTON') { if (t.dataset.flow !== flow) turn(t.dataset.flow); }
+  else if (t.dataset.zoom && t.tagName === 'BUTTON') t.dataset.zoom === 'fit' ? fit() : glide({ in: z * 1.3, out: z / 1.3, one: 1 }[t.dataset.zoom]);
+  else if (t.dataset.id) open(t.dataset.id);
   else if (t.dataset.go) open(t.dataset.go);
   else if (t.dataset.step) { at += +t.dataset.step; draw(); }
   else if (t.dataset.at) { at = +t.dataset.at; draw(); }
   else if ('shut' in t.dataset) shut();
-  else if (t.dataset.lane) {
-    const on = document.body.dataset.focus === t.dataset.lane;
-    if (on) delete document.body.dataset.focus; else document.body.dataset.focus = t.dataset.lane;
-    document.querySelectorAll('.card').forEach(c => c.classList.toggle('in-focus', byId[c.dataset.id].lane === t.dataset.lane));
-  }
+  else if ('lane' in t.dataset) follow(t.dataset.lane === focus ? '' : t.dataset.lane);
+  else if (t.dataset.mode) mode(t.dataset.mode);
+  else if (t.dataset.persona) mode('personas', t.dataset.persona);
+  else if (t.dataset.journey) { mode('boards'); shut(); follow(t.dataset.journey); }
 });
 document.addEventListener('keydown', e => {
+  if (document.body.dataset.mode === 'boards' && !e.metaKey && !e.ctrlKey && e.target.tagName !== 'SELECT') {
+    if (e.key === '-' || e.key === '_') glide(z / 1.3);
+    if (e.key === '+' || e.key === '=') glide(z * 1.3);
+    if (e.key === '0') fit();
+  }
+  if (!sel && document.body.dataset.mode === 'boards' && e.key.startsWith('Arrow') && e.target.tagName !== 'SELECT') {
+    e.preventDefault();
+    pan({ ArrowLeft: 90, ArrowRight: -90 }[e.key] || 0, { ArrowUp: 90, ArrowDown: -90 }[e.key] || 0);
+  }
   if (!sel) return;
   if (e.key === 'Escape') shut();
   if (e.key === 'ArrowRight' && at < sel.steps.length - 1) { at++; draw(); }
   if (e.key === 'ArrowLeft' && at > 0) { at--; draw(); }
 });
 
-build(); wires();
-new ResizeObserver(wires).observe(board);
+/* ── personas: everyone in the system, on this board or not ─────────── */
+function people() {
+  const card = p => {
+    const own = STORIES.filter(s => s.lane === p.id), c = p.count || { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
+    if (!p.count) own.forEach(s => c[s.status]++);
+    const n = Object.values(c).reduce((a, b) => a + b, 0);
+    const marks = Object.keys(c).filter(k => c[k]).map(k => `<span class="${k}">${GLYPH[k]} ${c[k]}</span>`).join(' ');
+    return `<article class="pcard" id="p-${p.id}">
+      <div class="top">${av(p, 'lg')}<div><b>${p.name}</b><small>${p.sub}</small></div></div>
+      <p class="blurb">${esc(p.blurb)}</p>
+      <dl>
+        <dt>Uses</dt><dd>${p.uses}</dd>
+        <dt>Signed in as</dt><dd><code>{fixtures.${p.as}}</code>${TARGETS.map(t => p.on[t]
+          ? `<div class="tg"><span>${t}</span><span>${p.on[t]}</span></div>`
+          : `<div class="tg none"><span>${t}</span><span>no seeded user set, so nothing of theirs can be walked there</span></div>`).join('')}</dd>
+        <dt>Stories</dt><dd>${n} ${n === 1 ? 'story' : 'stories'} &nbsp;${marks}</dd>
+        <dt>On boards</dt><dd class="bd">${own.length ? `<button data-journey="${p.id}" title="Open the board, following ${p.name}">${BOARD} →</button>` : ''}${p.boards.map(b => `<span title="Not drawn in this sketch">${b}</span>`).join('')}${own.length || p.boards.length ? '' : '<span>none yet</span>'}</dd>
+      </dl></article>`;
+  };
+  const group = g => { const ps = PERSONAS.filter(p => p.group === g.id); return ps.length ? `<h2>${g.title}</h2><div class="grid">${ps.map(card).join('')}</div>` : ''; };
+  $('#people').innerHTML = `<div class="wrap">
+    <h1>Personas</h1>
+    <p class="lede">Everyone who uses the system. A story is one persona's, a screen is signed in as one, and a board's lanes are the personas of its stories.</p>
+    ${GROUPS.map(group).join('')}
+    <p class="foot">${SYSTEMS.map(x => x.name).join(' and ')} have lanes on a board and are not personas: nobody signs in as them. Every name and heading here is this blueprint's own.</p></div>`;
+}
+function mode(m, lit) {
+  document.body.dataset.mode = m;
+  document.querySelectorAll('.modes button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  document.querySelectorAll('.pcard').forEach(c => c.classList.toggle('lit', c.id === `p-${lit}`));
+  if (lit) $(`#p-${lit}`).scrollIntoView({ block: 'center' });
+  if (m === 'boards') wires();
+}
+document.addEventListener('change', e => { if (e.target.id === 'who') follow(e.target.value); });
+
+/* ── the canvas: pan anywhere, zoom anywhere ─────────────────────────
+ * The whole board, lane names and phase headings included, is one object
+ * on a canvas. tx/ty move it; z scales it smoothly. What a card or a lane
+ * name DRAWS changes at a few sizes, because past them the detail cannot
+ * be read anyway. Each kind is drawn on a base width of its own and scaled
+ * to its column, so a card that has just lost its picture comes back at a
+ * readable size and shrinks from there.
+ */
+const MINZ = 0.12, MAXZ = 2, COLW = 184, LANEW = 196, KEY = 'board-view:contractor-onboarding';
+const DETAIL = [['near', 0.66, 184], ['mid', 0.42, 116], ['far', 0, 0]];                 // cards: name, drawn from this z up, base width
+const LANE = [['more', 1.25, 196], ['full', 0.7, 196], ['name', 0.4, 128], ['av', 0, 0]];  // lane names, the same way
+const scroller = $('#scroll');
+let z = 1, tx = 0, ty = 0, gliding = 0;
+const cols = Math.max(...STORIES.map(s => s.col));
+const bound = v => Math.min(MAXZ, Math.max(MINZ, v));
+const view = () => ({ vw: scroller.clientWidth, vh: scroller.clientHeight, W: board.offsetWidth, H: board.offsetHeight });
+
+/* The board may leave the window almost entirely, in any direction; a corner of it always stays. */
+function place() {
+  const { vw, vh, W, H } = view(), keep = 120;
+  tx = Math.min(vw - keep, Math.max(keep - W, tx));
+  ty = Math.min(vh - keep, Math.max(keep - H, ty));
+  board.style.transform = `translate3d(${Math.round(tx)}px, ${Math.round(ty)}px, 0)`;
+  try { localStorage.setItem(KEY, JSON.stringify([z, tx, ty])); } catch {}
+}
+function pan(dx, dy) { cancelAnimationFrame(gliding); hush(); tx += dx; ty += dy; place(); }
+
+/* A waits label that no longer fits its stretch is dropped; the dotted line and its tooltip stay. */
+function tighten() {
+  document.querySelectorAll('.gap').forEach(g => {
+    g.classList.remove('tight');
+    g.classList.toggle('tight', board.dataset.zoom === 'far' || (flow === 'across' && g.firstElementChild.offsetWidth > g.offsetWidth));
+  });
+}
+/* Sets z, keeping whatever was under the point (x, y) under it: the pointer, or the middle of the window. */
+function zoom(to, x = scroller.clientWidth / 2, y = scroller.clientHeight / 2) {
+  to = bound(to);
+  const a = view(), fx = (x - tx) / a.W, fy = (y - ty) / a.H;
+  const [card, , cardBase] = DETAIL.find(d => to >= d[1]), [lane, , laneBase] = LANE.find(d => to >= d[1]);
+  z = to;
+  board.dataset.zoom = card; board.dataset.lane = lane;
+  board.style.setProperty('--z', z);
+  board.style.setProperty('--cz', cardBase ? COLW * z / cardBase : 1);
+  const pz = Math.min(1.5, Math.max(0.6, z)), g = Math.max(18 * z, 10);   // the gap never closes: a card keeps clear of the lane names
+  board.style.setProperty('--lz', laneBase ? (flow === 'down' ? COLW : LANEW) * z / laneBase : Math.max(0.45, Math.min(1, z / 0.4)));
+  board.style.setProperty('--pz', pz);
+  board.style.setProperty('--g', `${g}px`);
+  board.style.setProperty('--hg', `${g / 2 / pz}px`);
+  hush();
+  const b = view();
+  tx = x - fx * b.W; ty = y - fy * b.H;
+  $('#lvl').textContent = `${Math.round(z * 100)}%`;
+  $('[data-zoom="out"]').disabled = z <= MINZ;
+  $('[data-zoom="in"]').disabled = z >= MAXZ;
+  place(); tighten(); wires();
+}
+/* A button or a key glides there; the wheel, a pinch and a drag set things directly, so they are already smooth. */
+function glide(to, each, done) {
+  to = bound(to);
+  cancelAnimationFrame(gliding);
+  const from = z, t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / 220), e = 1 - (1 - k) ** 3;
+    zoom(from * (to / from) ** e);
+    each?.();
+    if (k < 1) gliding = requestAnimationFrame(step); else done?.();
+  };
+  gliding = requestAnimationFrame(step);
+}
+/* Fit: across, the largest zoom at which the whole board is in the window. Down, the board is as wide as the
+   window allows and starts at the top: it is meant to be scrolled. Either way it sits under the Follow box. */
+function fit(tries = 3) {
+  const top = 52, down = flow === 'down';
+  const centre = () => { const { vw, vh, W, H } = view(); tx = (vw - W) / 2; ty = down ? top : Math.max(top, (vh + top - 12 - H) / 2); place(); };
+  const want = () => { const { vw, vh, W, H } = view(); return Math.min((vw - 40) / W, down ? Infinity : (vh - top - 12) / H); };
+  glide(Math.min(down ? 1.15 : 1, z * want()), centre, () => { if (tries > 1 && want() < 0.99) fit(tries - 1); });
+}
+/* Which way time runs. The board is redrawn; who is followed and what is open stay as they were. */
+function turn(to) {
+  flow = to;
+  try { localStorage.setItem('board-flow', to); } catch {}
+  build();
+  const f = focus; focus = null; follow(f);
+  if (sel) $(`.card[data-id="${sel.id}"]`).classList.add('sel');
+  zoom(z); fit();
+}
+/* The hover card: what a card would say if it were big enough to say it. */
+const tip = $('#tip');
+let tipFor = null;
+let tipAt = -1, galFor = null;
+function hush() { tip.hidden = true; tipFor = null; tipAt = -1; scrub(null); }
+/* Which of n pictures the pointer is over, when a width is split into n equal parts. */
+const part = (e, el, n) => { const r = el.getBoundingClientRect(); return Math.min(n - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * n))); };
+/* The gallery on a full-size card: shows picture i; a card the pointer has left goes back to its first. */
+function scrub(card, i = 0) {
+  if (galFor && galFor !== card) show(galFor, 0);
+  galFor = card;
+  if (card) show(card, i);
+}
+function show(card, i) {
+  const n = byId[card.dataset.id].steps.length;
+  card.querySelectorAll('.sl').forEach((x, k) => x.classList.toggle('on', k === i));
+  card.querySelectorAll('.bars i').forEach((x, k) => x.classList.toggle('on', k === i));
+  const c = card.querySelector('.count');
+  if (c) c.textContent = card.matches(':hover') && n > 1 ? `${i + 1} / ${n}` : `${n} pictures`;
+}
+function tell(card, i = 0) {
+  if (card === tipFor && i === tipAt) return;
+  const moved = card !== tipFor;
+  tipFor = card; tipAt = i;
+  const s = byId[card.dataset.id], l = laneOf(s), n = s.steps.length, step = s.steps[i], r = card.getBoundingClientRect();
+  tip.innerHTML = `${step.shot
+      ? `<div class="pic">${shot(s, step)}${bars(n, i)}</div>`
+      : `<div class="pic trace"><code>${esc(step.trace)}</code>${bars(n, i)}</div>`}<div class="in">
+    <div class="who">${av(l, 'sm')}${l.name}${s.kind ? ` · ${s.kind}, no screen` : ''}${n > 1 ? `<span class="n">${i + 1} / ${n}</span>` : ''}</div>
+    <b>${esc(s.title)}</b>
+    <div class="meta"><span class="${s.status}">${GLYPH[s.status]} ${WORD[s.status]}</span><span>${s.rules.length} rules</span>${s.takes ? `<span class="takes">${s.takes}</span>` : ''}</div>
+    <div class="say">${esc(step.say)}</div></div>`;
+  tip.hidden = false;
+  if (!moved) return;                     // scrubbing: the card stays where it is while its picture changes
+  const h = Math.max(tip.offsetHeight, 300), below = r.bottom + 8 + h < innerHeight;
+  tip.style.left = `${Math.min(innerWidth - 258, Math.max(8, r.left + r.width / 2 - 125))}px`;
+  tip.style.top = below ? `${r.bottom + 8}px` : '';
+  tip.style.bottom = below ? '' : `${Math.max(8, innerHeight - r.top + 8)}px`;
+}
+/* Brings a card into the window if any of it is outside. */
+function reveal(el) {
+  const r = el.getBoundingClientRect(), v = scroller.getBoundingClientRect(), m = 40;
+  let dx = 0, dy = 0;
+  if (r.left < v.left + m) dx = v.left + m - r.left; else if (r.right > v.right - m) dx = v.right - m - r.right;
+  if (r.top < v.top + m) dy = v.top + m - r.top; else if (r.bottom > v.bottom - m) dy = v.bottom - m - r.bottom;
+  if (!dx && !dy) return;
+  cancelAnimationFrame(gliding);
+  const x0 = tx, y0 = ty, t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / 240), e = 1 - (1 - k) ** 3;
+    tx = x0 + dx * e; ty = y0 + dy * e; place();
+    if (k < 1) gliding = requestAnimationFrame(step);
+  };
+  gliding = requestAnimationFrame(step);
+}
+
+/* Wheel: two fingers pan; with Ctrl or Cmd, or as a pinch, it zooms about the pointer. */
+scroller.addEventListener('wheel', e => {
+  e.preventDefault();
+  cancelAnimationFrame(gliding);
+  const r = scroller.getBoundingClientRect();
+  if (e.ctrlKey || e.metaKey) zoom(z * Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+  else pan(-e.deltaX, -e.deltaY);
+}, { passive: false });
+
+/* Drag anywhere, cards included, to pan; two touches pinch. A drag that moved is not a click. */
+const ptrs = new Map();
+let drag = null, pinch = null, moved = false;
+const spread = () => { const [a, b] = [...ptrs.values()]; return { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 }; };
+scroller.addEventListener('pointerdown', e => {
+  if (e.button) return;
+  ptrs.set(e.pointerId, e);
+  cancelAnimationFrame(gliding); hush();
+  if (ptrs.size === 1) { drag = { x: e.clientX, y: e.clientY, tx, ty }; moved = false; }
+  if (ptrs.size === 2) { pinch = { d: spread().d, z }; drag = null; }
+});
+scroller.addEventListener('pointermove', e => {
+  const card = e.target.closest?.('.card');
+  if (!card || ptrs.size) return hush();
+  const n = byId[card.dataset.id].steps.length;
+  if (board.dataset.zoom === 'near') {
+    // Full size: the picture on the card is the gallery. Only the picture scrubs; the words below it do not.
+    tip.hidden = true; tipFor = null;
+    const pic = card.querySelector('.gal');
+    scrub(pic ? card : null, pic && e.target.closest('.gal') ? part(e, pic, n) : 0);
+  } else { scrub(null); tell(card, part(e, card, n)); }  // smaller: the card is the scrubber, the pictures show beside it
+});
+scroller.addEventListener('pointerleave', hush);
+addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.set(e.pointerId, e);
+  if (pinch && ptrs.size === 2) {
+    const s = spread(), r = scroller.getBoundingClientRect();
+    moved = true; zoom(pinch.z * s.d / pinch.d, s.x - r.left, s.y - r.top);
+  } else if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!moved && Math.hypot(dx, dy) < 5) return;
+    moved = true; scroller.classList.add('panning');
+    tx = drag.tx + dx; ty = drag.ty + dy; place();
+  }
+});
+const lift = e => {
+  if (!ptrs.delete(e.pointerId)) return;
+  pinch = null;
+  const left = [...ptrs.values()][0];
+  drag = left ? { x: left.clientX, y: left.clientY, tx, ty } : null;
+  if (!left) scroller.classList.remove('panning');
+};
+addEventListener('pointerup', lift); addEventListener('pointercancel', lift);
+scroller.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+
+build(); people();
+let kept = [1, 0, 0];
+try { const k = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(k) && k.every(Number.isFinite)) kept = k; } catch {}
+zoom(kept[0]); tx = kept[1]; ty = kept[2]; place();
+new ResizeObserver(() => { tighten(); wires(); }).observe(board);
 </script>
 </body>
 </html>
