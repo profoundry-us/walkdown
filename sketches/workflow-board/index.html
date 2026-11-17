@@ -6,12 +6,14 @@
 <title>Journey Board Sketch</title>
 <!--
   A sketch, not a design: what the boards mode of walkdown might look like
-  (ADR 0018). One board is one process. Lanes are the people and systems in
-  it, cards are stories, and a card's pictures are its story's, the first
-  that has a screen. Moving across a card scrubs its pictures; opening it walks them in a drawer. A persona is
-  a kind of user, declared once for the whole blueprint and listed under
-  Personas; a board's lanes come from the personas of its stories. Following
-  one shows their journey and where they wait. All data is made up.
+  (ADR 0018). One board is one process. Its data is written in the ADR's own
+  fields (storyboard personas, users, systems and groups; stories with as: or
+  by:; a board of cards with after, after_all, when, takes and returns_to), and
+  everything else is derived as the ADR says: lanes from the cards' stories,
+  columns from the hand-offs, a card's mark from its rules, and its pictures
+  from its rules' screens. Cards that derive to one cell stack as alternatives.
+  An outside step and a hole are drawn differently. Moving across a card scrubs
+  its pictures; opening it walks its rules in a drawer. All data is made up.
   Kept in its own folder so the Tailwind scan of sketches/*.html never sees it.
 -->
 <style>
@@ -57,7 +59,7 @@
   .tally { display: flex; gap: 12px; font-size: 12px; margin-left: auto; }
   .tally span::before { content: attr(data-g); margin-right: 4px; }
   .sketch-tag { font-size: 11px; color: var(--dim); border: 1px dashed var(--b300); border-radius: 4px; padding: 2px 7px; }
-  .pass { color: var(--ok); } .fail { color: var(--err); } .mine { color: var(--warn); } .unbuilt { color: var(--dim); }
+  .pass { color: var(--ok); } .fail { color: var(--err); } .unbuilt { color: var(--dim); }
 
 
   /* ── who: an avatar for a person, a square for a system ─── */
@@ -137,7 +139,7 @@
   #board[data-zoom="far"] .card.headless { height: clamp(5px, calc(40px * var(--z)), 15px); }
   #board[data-zoom="far"] .card > * { display: none; }
   #board[data-zoom="far"] .card.is-pass { background: color-mix(in oklab, var(--ok) 55%, var(--b100)); border-color: var(--ok); }
-  #board[data-zoom="far"] .card.is-mine { background: color-mix(in oklab, var(--warn) 60%, var(--b100)); border-color: var(--warn); }
+  #board[data-zoom="far"] .card.is-you { background: color-mix(in oklab, var(--warn) 60%, var(--b100)); border-color: var(--warn); }
   #board[data-zoom="far"] .card.is-fail { background: color-mix(in oklab, var(--err) 70%, var(--b100)); border-color: var(--err); }
   #board[data-zoom="far"] .card.is-unbuilt { background: transparent; border-color: var(--dim); }
   .gap.tight span { display: none; }
@@ -379,6 +381,76 @@
     body.open .zoom { right: 14px; }
     .tally { margin-left: 0; }
   }
+
+  /* ── five marks (§5), and the two cards that have none ─── */
+  :root { --agent: oklch(78% 0.10 290); }
+  .you { color: var(--warn); } .agent { color: var(--agent); } .nostory { color: var(--warn); } .outside { color: var(--dim); }
+  .target { font-size: 12px; color: var(--dim); }
+  .target b { color: var(--ink); font-weight: 600; }
+  .share { padding: 3px 10px; border: 1px dashed var(--b300); border-radius: 4px; font-size: 12px; opacity: .55; cursor: not-allowed; }
+
+  /* wider, shorter cards: a real title reads in at most three lines, and a card is wider than it is tall */
+  #board { --colw: 320px; }
+  .card .shot { height: 144px; background: #e3e7ed; }
+  .card .shot .sl.on { height: 100%; }
+  .card .shot svg { width: 100%; height: 100%; }
+  .card .txt { padding: 6px 10px 7px; gap: 2px; }
+  .card .ttl { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .meta { flex-wrap: nowrap; gap: 8px; align-items: baseline; min-width: 0; white-space: nowrap; }
+  .card .meta > * { flex: 0 0 auto; }
+  .card .meta .user, .card .meta .takes { flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; }
+  .card .meta .user { margin-left: auto; color: var(--dim); }
+  .card .takes { font-size: 10.5px; }
+  .card .count { bottom: 5px; }
+  .card.is-agent { border-color: color-mix(in oklab, var(--agent) 60%, var(--b300)); }
+
+  /* a when: on the hand-off into this card, written across its top */
+  .card .when {
+    display: block; padding: 3px 9px; font-size: 10.5px; line-height: 1.3; color: var(--primary);
+    background: color-mix(in oklab, var(--primary) 12%, var(--b100)); border-bottom: 1px solid var(--b300);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card .when i { font-style: normal; opacity: .6; margin-right: 4px; }
+  .card .end { color: var(--dim); border: 1px solid var(--b300); border-radius: 3px; padding: 0 4px; font-size: 10px; }
+
+  /* a hole (no story, ours to write) and an outside step (another company's) look different */
+  .card.hole { background: color-mix(in oklab, var(--warn) 6%, transparent); border: 1.5px dashed color-mix(in oklab, var(--warn) 70%, transparent); }
+  .card.hole .kind { color: var(--warn); }
+  .card.outside { background: color-mix(in oklab, var(--b200) 70%, transparent); border: 1px solid var(--b300); }
+  .card.outside .ttl { font-weight: 500; color: color-mix(in oklab, var(--ink) 80%, transparent); }
+  .card.outside .kind { color: var(--dim); }
+
+  /* alternatives at one step: cards that derive to one cell, each reached by a when: */
+  .stack {
+    position: relative; z-index: 2; align-self: center; display: flex; flex-direction: column; gap: 8px;
+    margin: 10px -6px; padding: 16px 5px 6px; border: 1.5px dashed oklch(80% 0.11 300 / .6); border-radius: 9px;
+  }
+  .stack.all { border-style: solid; border-color: var(--b300); }
+  .stack > .card { align-self: stretch; margin: 0; }
+  .stack > .alt {
+    position: absolute; top: -9px; left: 8px; padding: 0 6px; background: var(--deep); white-space: nowrap;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: oklch(80% 0.11 300);
+  }
+  #board[data-zoom="far"] .stack { gap: 4px; padding: 6px 3px; }
+  #board[data-zoom="far"] .stack > .alt { display: none; }
+  #board[data-zoom="far"] .stack > .card { margin: 0; }
+  #board[data-zoom="far"] .card.is-you { background: color-mix(in oklab, var(--warn) 60%, var(--b100)); border-color: var(--warn); }
+  #board[data-zoom="far"] .card.is-agent { background: color-mix(in oklab, var(--agent) 55%, var(--b100)); border-color: var(--agent); }
+  #board[data-zoom="far"] .card.hole { background: transparent; border-color: var(--warn); }
+  #board[data-zoom="far"] .card.outside { background: var(--b200); border-color: var(--b300); }
+  #wires path.back { stroke-dasharray: 5 4; stroke: oklch(80% 0.11 300 / .8); }
+
+  /* drawer extras */
+  .rule.off { opacity: .45; }
+  .rule .why { color: var(--dim); }
+  .asw { font-size: 11.5px; color: var(--dim); margin-top: 6px; }
+  .asw b { color: var(--ink); font-weight: 600; }
+  .pics-seg { display: inline-flex; margin-left: 8px; vertical-align: middle; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .pics-seg button:disabled { opacity: .3; cursor: default; }
+  .stage + .stage { margin-top: 6px; }
+  .holebox { border: 1.5px dashed var(--warn); border-radius: 6px; padding: 12px; font-size: 13px; line-height: 1.45; }
+  .holebox.outside { border: 1px solid var(--b300); color: var(--ink); }
+  @media (max-width: 760px) { .sketch-tag { order: 9; } }
 </style>
 </head>
 <body data-mode="boards">
@@ -389,16 +461,19 @@
   </div>
   <div class="picker"><b>Contractor onboarding</b> &nbsp;▾</div>
   <span class="sketch-tag">sketch · made-up data</span>
+  <span class="target">target <b>local</b></span>
   <div class="tally" id="tally"></div>
   <div class="flow" title="Which way time runs on the board">Time runs
     <div class="seg"><button class="on" data-flow="across">Across →</button><button data-flow="down">Down ↓</button></div>
   </div>
+  <button class="share" title="Not drawn in this sketch: the board written out as one page for people who cannot run walkdown (ADR 0018 §7)" disabled>Share ▾</button>
 </header>
 <section id="lens" hidden></section>
 <main>
   <div id="scroll"><div id="board"><svg id="wires"><defs>
     <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(41% 0.055 242);stroke:none"/></marker>
     <marker id="ah-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(78% 0.125 215);stroke:none"/></marker>
+    <marker id="ah-back" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" style="fill:oklch(80% 0.11 300);stroke:none"/></marker>
   </defs><g id="paths"></g></svg></div></div>
   <div class="followbox"><label for="who">Follow</label><select id="who"></select></div>
   <div class="zoom" role="group" aria-label="Zoom">
@@ -410,184 +485,333 @@
 <div id="tip" hidden></div>
 
 <script>
-/* ── the process, as data ─────────────────────────────────────────── */
-/*
- * Every persona in the system, as the storyboard would declare them (ADR 0018
- * §2): who they are, what they use, and the seeded user they are signed in as
- * on each target. Only three of them have a part in this board.
+/* ══ The blueprint, as its files would say it ═══════════════════════════════
+ * storyboard.yml (§2, §3), the feature files and boards/contractor-onboarding.yml
+ * (§4), in the ADR's field names. Each rule's `v` stands in for what
+ * `walkdown status` would derive from the ledger on `local` (§5), and `app` says
+ * an agent judged it there and labelled its evidence (§6). LOOK is the only thing
+ * the sketch adds: an avatar's initials and colour. All data is made up.
  */
 const TARGETS = ['local', 'staging'];
-const PERSONAS = [
-  { id: 'client', group: 'customers', ini: 'HM', name: 'Hiring manager', sub: 'Client company', color: '#8b8bf0', app: 'Client portal', ac: '#5b5bd6',
-    blurb: 'Runs a team at a client company and needs people on it. Asks for contractors, confirms when they start, and has no interest in another country\'s hiring law.',
-    uses: 'Client portal', as: 'hiring_manager', seed: 'Dee Okafor', sini: 'DO', on: { local: 'Dee Okafor, Larkspur Labs', staging: 'Dee Okafor, Larkspur Labs' },
-    boards: ['Timesheets and pay'] },
-  { id: 'worker', group: 'customers', ini: 'C', name: 'Contractor', sub: 'Joining from abroad', color: '#3fc7b2', app: 'Contractor app', ac: '#0f9d8a',
-    blurb: 'Hired by a client to work from their own country. Sets everything up once, mostly on a phone, in their own language, then logs hours each week.',
-    uses: 'Contractor app', as: 'contractor', seed: 'Ana Souza', sini: 'AS', on: { local: 'Ana Souza, Brazil', staging: 'Ana Souza, Brazil' },
-    boards: ['Timesheets and pay', 'Offboarding'] },
-  { id: 'admin', group: 'customers', ini: 'CA', name: 'Client administrator', sub: 'Client company', color: '#c08bf0',
-    blurb: 'Looks after the client\'s account: who may ask for contractors, which cost centres exist, and where invoices go.',
-    uses: 'Client portal', as: 'client_admin', on: { local: 'Noor Haddad, Larkspur Labs', staging: 'Noor Haddad, Larkspur Labs' },
-    count: { pass: 6, unbuilt: 1 }, boards: ['Client setup'] },
-  { id: 'approver', group: 'customers', ini: 'TA', name: 'Timesheet approver', sub: 'Client company', color: '#f08bb4',
-    blurb: 'Signs off a contractor\'s hours each week. Often the hiring manager, sometimes a team lead who sees nothing else.',
-    uses: 'Client portal', as: 'timesheet_approver', on: { local: 'Dee Okafor, Larkspur Labs', staging: null },
-    count: { pass: 3, mine: 1 }, boards: ['Timesheets and pay'] },
-  { id: 'ops', group: 'staff', ini: 'OS', name: 'Onboarding specialist', sub: 'Our staff', color: '#e6b455', app: 'Ops console', ac: '#475569',
-    blurb: 'Moves contractors through onboarding and decides what the platform cannot: a flagged check, a request that needs sending back.',
-    uses: 'Ops console', as: 'onboarding_specialist', seed: 'Sam Reyes', sini: 'SR', on: { local: 'Sam Reyes, onboarding team', staging: 'Sam Reyes, onboarding team' },
-    boards: ['Offboarding'] },
-  { id: 'finance', group: 'staff', ini: 'FA', name: 'Finance analyst', sub: 'Our staff', color: '#9bd36a',
-    blurb: 'Runs payroll for contractors and invoices their clients. Works from approved timesheets and chases the ones that are late.',
-    uses: 'Ops console', as: 'finance_analyst', on: { local: 'Idris Bello, finance', staging: 'Idris Bello, finance' },
-    count: { pass: 9, fail: 1, unbuilt: 3 }, boards: ['Timesheets and pay'] },
-  { id: 'compliance', group: 'staff', ini: 'CL', name: 'Compliance lead', sub: 'Our staff', color: '#e68a6a',
-    blurb: 'Owns which paperwork and checks each country requires. Changes a country\'s pack and reviews anything an onboarding specialist escalates.',
-    uses: 'Ops console', as: 'compliance_lead', on: { local: 'Mei Tanaka, compliance', staging: 'Mei Tanaka, compliance' },
-    count: { pass: 4, unbuilt: 2 }, boards: [] },
-];
-/*
- * Systems: what has a part in a process and nobody signs in as. And groups: which personas and systems belong
- * together, in the order they are drawn. Both are the blueprint's own (storyboard.yml), as every name on this
- * board is. walkdown has no "customer", "staff" or "platform" of its own.
- */
-const SYSTEMS = [
-  { id: 'sys', group: 'hidden', ini: '⚙', name: 'Platform', sub: 'Jobs, rules, webhooks', blurb: 'Runs with nobody watching. Its cards have steps and no pictures.', color: '#7fb6e6' },
-  { id: 'vendor', group: 'hidden', ini: '↗', name: 'Outside services', sub: 'Checks, e-sign, benefits', blurb: 'Other companies\' systems. Only our side of each step is ours to verify.', color: '#a9b4c4' },
-];
-const GROUPS = [
-  { id: 'customers', title: 'Customers' },
-  { id: 'staff', title: 'Staff' },
-  { id: 'hidden', title: 'Out of sight', line: 'heavy' },
-];
-PERSONAS.forEach(p => { p.person = true; });
-const BOARD = 'Contractor onboarding';
-const PHASES = [['Request', 1, 3], ['Account', 4, 6], ['Contract', 7, 7], ['Screening', 8, 11], ['Benefits', 12, 12], ['Placement', 13, 15], ['Day one', 16, 16]];
+const STORYBOARD = {
+  groups: [
+    { id: 'customers', title: 'Customers' },
+    { id: 'staff', title: 'Staff' },
+    { id: 'hidden', title: 'Out of sight', line: 'heavy' },
+    { id: 'partners', title: 'Outside services' },
+  ],
+  personas: [
+    { id: 'hiring-manager', title: 'Hiring manager', of: 'Client company', group: 'customers', uses: 'Client portal',
+      blurb: 'Runs a team at a client company and needs people on it. Asks for contractors, confirms when they start, and has no interest in another country\'s hiring law.',
+      users: [{ id: 'dee', title: 'Hiring manager at Larkspur Labs', ini: 'DO', fixture: 'hiring_manager' }] },
+    { id: 'contractor', title: 'Contractor', of: 'Joining from abroad', group: 'customers', uses: 'Contractor app',
+      blurb: 'Hired by a client to work from their own country. Sets everything up once, mostly on a phone, in their own language, then logs hours each week.',
+      users: [{ id: 'ana', title: 'Contractor in Brazil', ini: 'AS', fixture: 'contractor_br' }] },
+    { id: 'client-admin', title: 'Client administrator', of: 'Client company', group: 'customers', uses: 'Client portal',
+      blurb: 'Looks after the client\'s account: who may ask for contractors, which cost centres exist, and where invoices go.',
+      users: [{ id: 'noor', title: 'Administrator at Larkspur Labs', ini: 'NH', fixture: 'client_admin' }] },
+    { id: 'timesheet-approver', title: 'Timesheet approver', of: 'Client company', group: 'customers', uses: 'Client portal',
+      blurb: 'Signs off a contractor\'s hours each week. Often the hiring manager, sometimes a team lead who sees nothing else.',
+      users: [{ id: 'lead', title: 'Team lead who approves hours', ini: 'TL', fixture: 'timesheet_approver' }] },
+    { id: 'onboarding-specialist', title: 'Onboarding specialist', of: 'Our staff', group: 'staff', uses: 'Ops console',
+      blurb: 'Moves contractors through onboarding and decides what the platform cannot: a flagged check, a request that needs sending back. Some may only look.',
+      users: [
+        { id: 'lead', title: 'Specialist who can clear a check', ini: 'SR', fixture: 'specialist_lead' },
+        { id: 'trainee', title: 'Specialist in training, who may only view', ini: 'JK', fixture: 'specialist_trainee' },
+      ] },
+    { id: 'finance-analyst', title: 'Finance analyst', of: 'Our staff', group: 'staff', uses: 'Ops console',
+      blurb: 'Runs payroll for contractors and invoices their clients. Works from approved timesheets and chases the ones that are late.',
+      users: [{ id: 'idris', title: 'Analyst on the finance team', ini: 'IB', fixture: 'finance_analyst' }] },
+    { id: 'compliance-lead', title: 'Compliance lead', of: 'Our staff', group: 'staff', uses: 'Ops console',
+      blurb: 'Owns which paperwork and checks each country requires. Changes a country\'s pack and reviews anything an onboarding specialist escalates.',
+      users: [{ id: 'mei', title: 'Lead on the compliance team', ini: 'MT', fixture: 'compliance_lead' }] },
+  ],
+  systems: [
+    { id: 'platform', title: 'Platform', of: 'Jobs, rules, webhooks', group: 'hidden',
+      blurb: 'Runs with nobody watching. Its stories have rules and no pictures of their own.' },
+    { id: 'screening', title: 'Screening provider', of: 'Outside service', group: 'partners', outside: true },
+    { id: 'benefits', title: 'Benefits provider', of: 'Outside service', group: 'partners', outside: true },
+    { id: 'esign', title: 'E-sign service', of: 'Outside service', group: 'partners', outside: true },
+  ],
+  /* Screens a story's rules name, each signed in as one user (§3). `design` says whether it has an accepted
+     design; `look` is what the sketch draws for it, standing in for a picture. */
+  screens: {
+    'request-new': { title: 'New request', as: 'hiring-manager', design: true,
+      look: { k: 'form', title: 'Request a contractor', fields: [['Role', 'Senior data analyst'], ['Team', 'Growth analytics'], ['Country', 'Brazil'], ['Start date', '12 Jan']], cta: 'Continue', hl: 2 } },
+    'request-detail': { title: 'Request, submitted', as: 'hiring-manager', design: true,
+      look: { k: 'detail', title: 'Request R-2041', badge: 'Submitted', kv: [['Role', 'Senior data analyst'], ['Country', 'Brazil'], ['Next', 'Review by onboarding team']], actions: ['Edit', 'Done'], hl: 'badge' } },
+    'requests-queue': { title: 'Requests queue', as: 'onboarding-specialist', design: true,
+      look: { k: 'table', title: 'Requests queue', cols: ['Client', 'Role', 'Country', 'Status'], rows: [['Larkspur Labs', 'Sr data analyst', 'Brazil', 'New'], ['Pell & Co', 'QA engineer', 'Poland', 'New'], ['Tamsin', 'Designer', 'Kenya', 'Sent back']], hl: 0 } },
+    'request-review': { title: 'Request, needs review', as: 'onboarding-specialist', design: true,
+      look: { k: 'detail', title: 'R-2041 · Senior data analyst', badge: 'Needs review', kv: [['Client', 'Larkspur Labs'], ['Country', 'Brazil'], ['Rate', '$62 / hr'], ['Hiring entity', 'Brazil partner']], actions: ['Send back', 'Approve'], hl: 1 } },
+    'invite-email': { title: 'Invite email', as: 'contractor', design: true,
+      look: { k: 'email', subject: 'You\'re invited to join Larkspur Labs', cta: 'Accept invite' } },
+    'welcome-checklist': { title: 'Welcome checklist', as: 'contractor', design: true,
+      look: { k: 'list', title: 'Welcome, Ana', items: [['Create account', 1], ['Profile and tax details', 0], ['Sign your contract', 0], ['Background check', 0], ['Healthcare', 0]], hl: 1 } },
+    'profile-details': { title: 'Your details', as: 'contractor', design: true,
+      look: { k: 'form', title: 'Your details', fields: [['Legal name', 'Ana Souza'], ['Date of birth', '4 Mar 1991'], ['Address', 'Rua Harmonia 88'], ['Country', 'Brazil']], cta: 'Continue', hl: 3 } },
+    'profile-tax': { title: 'Tax and payment', as: 'contractor', design: true,
+      look: { k: 'form', title: 'Tax and payment', fields: [['Tax ID (CPF)', '•••.•••.•••-42'], ['Bank country', 'Brazil'], ['Account', '•••• 7710']], cta: 'Save', hl: 0 } },
+    'contract-read': { title: 'Contract', as: 'contractor', design: true,
+      look: { k: 'doc', title: 'Independent contractor agreement' } },
+    'contract-signed': { title: 'Contract, signed', as: 'contractor', design: true,
+      look: { k: 'doc', title: 'Independent contractor agreement', sign: 1 } },
+    'consent': { title: 'Background check consent', as: 'contractor', design: true,
+      look: { k: 'detail', title: 'Your consent', badge: '4 checks', kv: [['Checks', 'Identity, criminal, right to work, education'], ['Run by', 'Screening provider'], ['Kept for', '12 months']], actions: ['Decline', 'I consent'], hl: 1 } },
+    'check-flagged': { title: 'Flagged check', as: 'onboarding-specialist.lead', design: true,
+      look: { k: 'detail', title: 'Ana Souza · background check', badge: 'Flagged', kv: [['Finding', 'Education: degree date mismatch'], ['Package', 'Standard'], ['Report', 'Provider summary']], actions: ['Escalate', 'Clear'], hl: 1 } },
+    'check-decision': { title: 'Record a decision', as: 'onboarding-specialist.lead', design: true,
+      look: { k: 'form', title: 'Record decision', fields: [['Decision', 'Clear'], ['Reason', ''], ['Evidence', 'degree-certificate.pdf']], cta: 'Save decision', hl: 1 } },
+    'check-flagged-view': { title: 'Flagged check, view only', as: 'onboarding-specialist.trainee', design: false },
+    'plans': { title: 'Healthcare plans', as: 'contractor', design: true,
+      look: { k: 'plans', title: 'Choose your healthcare', plans: [['Essential', '$0'], ['Standard', '$48 / mo'], ['Family', '$131 / mo']], hl: 1 } },
+    'plan-chosen': { title: 'Plan chosen', as: 'contractor', design: true,
+      look: { k: 'detail', title: 'Standard plan', badge: 'Enrolment pending', kv: [['Starts', '12 Jan'], ['Covers', 'You + 1 dependant'], ['Cost', '$48 / month']], actions: ['Change', 'Done'], hl: 'badge' } },
+    'contractor-cleared': { title: 'Cleared contractor', as: 'onboarding-specialist', design: true,
+      look: { k: 'detail', title: 'Ana Souza', badge: 'Cleared', kv: [['Client', 'Larkspur Labs'], ['Role', 'Senior data analyst'], ['Start', '12 Jan']], actions: ['Message', 'Assign team'], hl: 1 } },
+    'assign-team': { title: 'Assign to a team', as: 'onboarding-specialist', design: true,
+      look: { k: 'form', title: 'Assign to team', fields: [['Team', 'Growth analytics'], ['Manager', 'Dee Okafor'], ['Timesheet approver', 'Dee Okafor']], cta: 'Assign', hl: 1 } },
+    'ready-email': { title: 'Ready to start email', as: 'hiring-manager', design: true,
+      look: { k: 'email', subject: 'Ana Souza is ready to start', cta: 'Confirm start' } },
+    'confirm-start': { title: 'Confirm the start', as: 'hiring-manager', design: true,
+      look: { k: 'form', title: 'Confirm start', fields: [['Start date', '12 Jan'], ['Manager', 'Dee Okafor'], ['First-day contact', 'Dee Okafor']], cta: 'Confirm', hl: 'cta' } },
+    'day-one-list': { title: 'Day one checklist', as: 'contractor', design: false },
+    'timesheet': { title: 'First timesheet', as: 'contractor', design: false },
+  },
+};
+const FIXTURES = {
+  local: new Set(['hiring_manager', 'contractor_br', 'client_admin', 'timesheet_approver', 'specialist_lead', 'specialist_trainee', 'finance_analyst', 'compliance_lead']),
+  staging: new Set(['hiring_manager', 'contractor_br', 'client_admin', 'specialist_lead', 'finance_analyst', 'compliance_lead']),
+};
 
+/* Stories, from the feature files. A rule is pass, fail, unbuilt, you (waiting on a person) or agent (waiting on
+   the agent tier), as walkdown status would say on local. */
 const STORIES = [
-  { id: 'requests.request-contractor', lane: 'client', col: 1, title: 'Request a contractor', status: 'pass', steps: [
-    { say: 'Opens a new request and says who they need, where, and when.', shot: { k: 'form', title: 'Request a contractor', fields: [['Role', 'Senior data analyst'], ['Team', 'Growth analytics'], ['Country', 'Brazil'], ['Start date', '12 Jan']], cta: 'Continue', hl: 2 } },
-    { say: 'Sets the rate and term, then submits.', shot: { k: 'form', title: 'Rate and term', fields: [['Hourly rate', '$62'], ['Term', '12 months'], ['Cost centre', 'GA-410']], cta: 'Submit request', hl: 'cta' } },
-    { say: 'Sees the request as Submitted, with what happens next.', shot: { k: 'detail', title: 'Request R-2041', badge: 'Submitted', kv: [['Role', 'Senior data analyst'], ['Country', 'Brazil'], ['Next', 'Review by onboarding team']], actions: ['Edit', 'Done'], hl: 'badge' } },
-  ], rules: [['A request needs a role, a team, a country and a start date.', 'pass'], ['The client sees the request as Submitted straight away.', 'pass'], ['A start date under 10 working days out warns that screening may not finish.', 'pass']] },
-
-  { id: 'requests.review-request', lane: 'ops', col: 2, title: 'Review and approve the request', status: 'pass', steps: [
-    { say: 'Picks the oldest request from the queue.', shot: { k: 'table', title: 'Requests queue', cols: ['Client', 'Role', 'Country', 'Status'], rows: [['Larkspur Labs', 'Sr data analyst', 'Brazil', 'New'], ['Pell & Co', 'QA engineer', 'Poland', 'New'], ['Tamsin', 'Designer', 'Kenya', 'Sent back']], hl: 0 } },
-    { say: 'Checks the terms and approves, naming the hiring entity for that country.', shot: { k: 'detail', title: 'R-2041 · Senior data analyst', badge: 'Needs review', kv: [['Client', 'Larkspur Labs'], ['Country', 'Brazil'], ['Rate', '$62 / hr'], ['Hiring entity', 'Brazil partner']], actions: ['Send back', 'Approve'], hl: 1 } },
-  ], rules: [['Requests appear oldest first.', 'pass'], ['Approving names the hiring entity for the contractor\'s country.', 'pass'], ['Sending back requires a reason the client can read.', 'pass']] },
-
-  { id: 'engagements.create-and-invite', lane: 'sys', col: 3, title: 'Create engagement, send invite', kind: 'job', status: 'pass', steps: [
-    { say: 'The approval creates one engagement for this contractor.', trace: 'event  request.approved    R-2041\nPOST   /engagements        201  E-7731' },
-    { say: 'Picks the invite in the contractor\'s language and sends it. The link lasts 7 days.', trace: 'job    SendInvite  locale=pt-BR\nmail   queued → delivered\nlink   expires in 7d' },
-  ], rules: [['An approved request creates exactly one engagement.', 'pass'], ['The invite link expires after 7 days.', 'pass']] },
-
-  { id: 'accounts.accept-invite', lane: 'worker', col: 4, title: 'Accept invite, create account', status: 'pass', steps: [
-    { say: 'Gets the invite email and follows the link.', shot: { k: 'email', subject: 'You\'re invited to join Larkspur Labs', cta: 'Accept invite' } },
-    { say: 'Creates an account with a password and phone number.', shot: { k: 'form', title: 'Create your account', fields: [['Email', 'ana@example.com'], ['Password', '••••••••••'], ['Mobile', '+55 11 5550 0142']], cta: 'Create account', hl: 'cta' } },
-    { say: 'Lands on a checklist of only the steps their country needs.', shot: { k: 'list', title: 'Welcome, Ana', items: [['Create account', 1], ['Profile and tax details', 0], ['Sign your contract', 0], ['Background check', 0], ['Healthcare', 0]], hl: 1 } },
-  ], rules: [['An expired invite link offers to send a new one.', 'pass'], ['The checklist shows only the steps for the contractor\'s country.', 'pass']] },
-
-  { id: 'accounts.profile-and-tax', lane: 'worker', col: 5, title: 'Complete profile and tax details', status: 'mine', steps: [
-    { say: 'Enters legal name and address. Choosing the country sets what comes next.', shot: { k: 'form', title: 'Your details', fields: [['Legal name', 'Ana Souza'], ['Date of birth', '4 Mar 1991'], ['Address', 'Rua Harmonia 88'], ['Country', 'Brazil']], cta: 'Continue', hl: 3 } },
-    { say: 'Gives the tax ID and bank details that country asks for.', shot: { k: 'form', title: 'Tax and payment', fields: [['Tax ID (CPF)', '•••.•••.•••-42'], ['Bank country', 'Brazil'], ['Account', '•••• 7710']], cta: 'Save', hl: 0 } },
-  ], rules: [['Tax fields change with the country chosen.', 'pass'], ['A tax ID in the wrong format is refused, showing the format expected.', 'mine'], ['Bank details are masked once saved.', 'pass']] },
-
-  { id: 'paperwork.pick-pack', lane: 'sys', col: 6, title: 'Pick the country paperwork pack', kind: 'rule', status: 'pass', steps: [
-    { say: 'A finished profile triggers the choice of contract pack for that country.', trace: 'event  profile.completed   E-7731\nrule   country=BR → pack br-contractor-v4' },
-    { say: 'Asks the e-sign service for an envelope with the pack filled in.', trace: 'POST   esign/envelopes     201  env_91f2' },
-  ], rules: [['Each supported country maps to exactly one current pack.', 'pass'], ['An unsupported country stops here and tells the specialist.', 'pass']] },
-
-  { id: 'paperwork.sign-contract', lane: 'worker', col: 7, title: 'Sign the contract', status: 'pass', steps: [
-    { say: 'Reads the agreement, in their own language.', shot: { k: 'doc', title: 'Independent contractor agreement' } },
-    { say: 'Signs at the bottom.', shot: { k: 'doc', title: 'Independent contractor agreement', sign: 1 } },
-    { say: 'Gets confirmation and a copy to download.', shot: { k: 'detail', title: 'Contract signed', badge: 'Signed', kv: [['Signed', '18 Dec, 14:02'], ['Copy sent to', 'ana@example.com']], actions: ['Download PDF', 'Continue'], hl: 'badge' } },
-  ], rules: [['The contract is shown in the contractor\'s language.', 'pass'], ['The next step unlocks only after the signature is recorded.', 'pass']] },
-
-  { id: 'paperwork.esign-envelope', lane: 'vendor', col: 7, title: 'E-sign envelope', kind: 'vendor', status: 'pass', steps: [
-    { say: 'The e-sign service hosts the signing and reports back when it is done.', trace: 'hook   envelope.completed  env_91f2\nstore  signed.pdf → engagement E-7731' },
-  ], rules: [['A signed copy is stored against the engagement.', 'pass']] },
-
-  { id: 'screening.consent', lane: 'worker', col: 8, title: 'Consent to background check', status: 'pass', steps: [
-    { say: 'Confirms the identity details the check will use.', shot: { k: 'form', title: 'Background check', fields: [['Legal name', 'Ana Souza'], ['Previous names', '—'], ['National ID', '•••••• 318']], cta: 'Continue', hl: 2 } },
-    { say: 'Sees exactly what will be checked and by whom, then consents.', shot: { k: 'detail', title: 'Your consent', badge: '4 checks', kv: [['Checks', 'Identity, criminal, right to work, education'], ['Run by', 'Screening provider'], ['Kept for', '12 months']], actions: ['Decline', 'I consent'], hl: 1 } },
-  ], rules: [['The checks listed match the client\'s screening package.', 'pass'], ['Declining pauses onboarding and tells the specialist.', 'pass']] },
-
-  { id: 'screening.run-check', lane: 'vendor', col: 9, title: 'Run the background check', kind: 'vendor', status: 'pass', takes: '2 to 5 days', steps: [
-    { say: 'The screening provider takes the order. It usually takes 2 to 5 days.', trace: 'POST   screening/checks    201  chk_55a0\nstate  pending' },
-    { say: 'The provider reports a result.', trace: 'hook   check.completed     chk_55a0\nresult consider  (education)' },
-  ], rules: [['An order is placed once per consent.', 'pass']] },
-
-  { id: 'screening.receive-result', lane: 'sys', col: 10, title: 'Receive the result', kind: 'webhook', status: 'pass', steps: [
-    { say: 'Verifies the message really came from the provider.', trace: 'hook   signature ok' },
-    { say: 'A clear result moves on by itself. Anything else opens a task for a person.', trace: 'result consider → task adjudicate  T-3310\nnotify onboarding specialist' },
-  ], rules: [['A clear result moves the contractor on with nobody touching it.', 'pass'], ['Any other result opens an adjudication task.', 'pass']] },
-
-  { id: 'screening.adjudicate', lane: 'ops', col: 11, title: 'Adjudicate a flagged result', status: 'fail', steps: [
-    { say: 'Opens the flagged check from the screening list.', shot: { k: 'table', title: 'Screening', cols: ['Contractor', 'Client', 'Package', 'Result'], rows: [['Ana Souza', 'Larkspur Labs', 'Standard', 'Flagged'], ['Marek Nowak', 'Pell & Co', 'Standard', 'Clear'], ['Joy Wanjiru', 'Tamsin', 'Basic', 'Pending']], hl: 0 } },
-    { say: 'Reads the finding summary and decides: clear it, or escalate to the client.', shot: { k: 'detail', title: 'Ana Souza · background check', badge: 'Flagged', kv: [['Finding', 'Education: degree date mismatch'], ['Package', 'Standard'], ['Report', 'Provider summary']], actions: ['Escalate', 'Clear'], hl: 1 } },
-    { say: 'Records the decision with a written reason.', shot: { k: 'form', title: 'Record decision', fields: [['Decision', 'Clear'], ['Reason', ''], ['Evidence', 'degree-certificate.pdf']], cta: 'Save decision', hl: 1 } },
-  ], rules: [['A flagged result cannot be cleared without a written reason.', 'fail', 'Saved with an empty reason on staging, run 412'], ['The contractor never sees the provider\'s raw report.', 'pass'], ['Escalating shares only the finding summary with the client.', 'pass']] },
-
-  { id: 'benefits.choose-plan', lane: 'worker', col: 12, title: 'Choose a healthcare plan', status: 'pass', steps: [
-    { say: 'Compares the plans offered in their country and picks one.', shot: { k: 'plans', title: 'Choose your healthcare', plans: [['Essential', '$0'], ['Standard', '$48 / mo'], ['Family', '$131 / mo']], hl: 1 } },
-    { say: 'Adds anyone else the plan should cover.', shot: { k: 'form', title: 'Dependants', fields: [['Name', 'Luca Souza'], ['Relationship', 'Child'], ['Date of birth', '9 Aug 2019']], cta: 'Add', hl: 'cta' } },
-    { say: 'Sees when cover starts and what it costs.', shot: { k: 'detail', title: 'Standard plan', badge: 'Enrolment pending', kv: [['Starts', '12 Jan'], ['Covers', 'You + 1 dependant'], ['Cost', '$48 / month']], actions: ['Change', 'Done'], hl: 'badge' } },
-  ], rules: [['Only plans offered in the contractor\'s country are shown.', 'pass'], ['Cover starts on the engagement start date.', 'pass']] },
-
-  { id: 'benefits.enrol', lane: 'vendor', col: 12, title: 'Enrol with the benefits provider', kind: 'vendor', status: 'unbuilt', steps: [
-    { say: 'Sends the chosen plan and dependants to the benefits provider.', trace: 'POST   benefits/enrolments  (not built)' },
-    { say: 'Stores the member number that comes back.', trace: 'hook   enrolment.confirmed  member id' },
-  ], rules: [['The contractor is enrolled before their start date.', 'pending'], ['A rejected enrolment tells the specialist why.', 'pending']] },
-
-  { id: 'placement.assign-team', lane: 'ops', col: 13, title: 'Assign to the client team', status: 'pass', steps: [
-    { say: 'Opens the cleared contractor.', shot: { k: 'detail', title: 'Ana Souza', badge: 'Cleared', kv: [['Client', 'Larkspur Labs'], ['Role', 'Senior data analyst'], ['Start', '12 Jan']], actions: ['Message', 'Assign team'], hl: 1 } },
-    { say: 'Sets the team, the manager, and who approves timesheets.', shot: { k: 'form', title: 'Assign to team', fields: [['Team', 'Growth analytics'], ['Manager', 'Dee Okafor'], ['Timesheet approver', 'Dee Okafor']], cta: 'Assign', hl: 1 } },
-  ], rules: [['Only a cleared contractor can be assigned.', 'pass'], ['The manager must belong to the client company.', 'pass']] },
-
-  { id: 'placement.confirm-start', lane: 'client', col: 14, title: 'Confirm the start date', status: 'pass', steps: [
-    { say: 'Hears that the contractor is ready.', shot: { k: 'email', subject: 'Ana Souza is ready to start', cta: 'Confirm start' } },
-    { say: 'Confirms the date and who meets them on day one.', shot: { k: 'form', title: 'Confirm start', fields: [['Start date', '12 Jan'], ['Manager', 'Dee Okafor'], ['First-day contact', 'Dee Okafor']], cta: 'Confirm', hl: 'cta' } },
-  ], rules: [['The start date cannot be earlier than the day cover begins.', 'pass'], ['Confirming tells the contractor straight away.', 'pass']] },
-
-  { id: 'placement.provision', lane: 'sys', col: 15, title: 'Set up payroll and timesheets', kind: 'job', status: 'pass', steps: [
-    { say: 'A confirmed start creates the contractor in payroll.', trace: 'event  start.confirmed     E-7731\nPOST   payroll/workers     201' },
-    { say: 'Opens the first timesheet period and schedules the welcome email.', trace: 'job    OpenTimesheet  from 12 Jan\njob    DayOneMail     at 08:00 local' },
-  ], rules: [['The first timesheet period starts on the start date.', 'pass'], ['The welcome email goes out at 8am in the contractor\'s time zone.', 'pass']] },
-
-  { id: 'dayone.first-day', lane: 'worker', col: 16, title: 'First-day checklist', status: 'unbuilt', steps: [
-    { say: 'Gets a welcome on the morning of day one.', shot: { k: 'email', subject: 'Welcome to Larkspur Labs — day one', cta: 'Open checklist' } },
-    { say: 'Works through the first-day list.', shot: { k: 'list', title: 'Day one', items: [['Meet your manager', 1], ['Set up your timesheet', 0], ['Read the handbook', 0], ['Confirm your equipment', 0]], hl: 1 } },
-    { say: 'Logs the first hours.', shot: { k: 'table', title: 'Timesheet · week of 12 Jan', cols: ['Day', 'Hours', 'Note', 'Status'], rows: [['Mon', '8.0', 'Onboarding', 'Draft'], ['Tue', '', '', ''], ['Wed', '', '', '']], hl: 0 } },
-  ], rules: [['The list shows the client\'s own first-day items.', 'pending'], ['Hours can be logged from the start date, never before.', 'pending']] },
+  { id: 'requests.request-contractor', title: 'Request a contractor', as: 'hiring-manager', rules: [
+    { id: 'required-fields', statement: 'A request needs a role, a team, a country and a start date.', screens: ['request-new'], v: 'pass', app: true },
+    { id: 'submitted-at-once', statement: 'The client sees the request as Submitted straight away.', screens: ['request-detail'], v: 'pass', app: true },
+    { id: 'short-notice', statement: 'A start date under 10 working days out warns that screening may not finish.', screens: ['request-new'], v: 'pass' },
+  ] },
+  { id: 'requests.review-request', title: 'Review the request, and approve it or send it back', as: 'onboarding-specialist', rules: [
+    { id: 'oldest-first', statement: 'Requests appear oldest first.', screens: ['requests-queue'], v: 'pass', app: true },
+    { id: 'names-entity', statement: 'Approving names the hiring entity for the contractor\'s country.', screens: ['request-review'], v: 'pass', app: true },
+    { id: 'reason-to-send-back', statement: 'Sending back requires a reason the client can read.', screens: ['request-review'], v: 'pass' },
+  ] },
+  { id: 'engagements.create-and-invite', title: 'Create the engagement and send the invite', by: 'platform', rules: [
+    { id: 'one-engagement', statement: 'An approved request creates exactly one engagement.', screens: [], v: 'pass', trace: 'event  request.approved    R-2041\nPOST   /engagements        201  E-7731' },
+    { id: 'invite-expires', statement: 'The invite link expires after 7 days.', screens: [], v: 'pass', trace: 'job    SendInvite  locale=pt-BR\nmail   queued → delivered\nlink   expires in 7d' },
+  ] },
+  { id: 'accounts.accept-invite', title: 'Accept the invite and create an account', as: 'contractor', rules: [
+    { id: 'expired-link', statement: 'An expired invite link offers to send a new one.', screens: ['invite-email'], v: 'pass', app: true },
+    { id: 'country-checklist', statement: 'The checklist shows only the steps for the contractor\'s country.', screens: ['welcome-checklist'], v: 'pass', app: true },
+  ] },
+  { id: 'accounts.profile-and-tax', title: 'Complete the profile and the tax details the country asks for', as: 'contractor', rules: [
+    { id: 'fields-follow-country', statement: 'Tax fields change with the country chosen.', screens: ['profile-details'], v: 'pass', app: true },
+    { id: 'tax-id-format', statement: 'A tax ID in the wrong format is refused, showing the format expected.', screens: ['profile-tax'], v: 'you' },
+    { id: 'bank-masked', statement: 'Bank details are masked once saved.', screens: ['profile-tax'], v: 'pass' },
+  ] },
+  { id: 'paperwork.pick-pack', title: 'Pick the country paperwork pack', by: 'platform', rules: [
+    { id: 'one-pack', statement: 'Each supported country maps to exactly one current pack.', screens: [], v: 'pass', trace: 'event  profile.completed   E-7731\nrule   country=BR → pack br-contractor-v4' },
+    { id: 'unsupported-country', statement: 'An unsupported country stops here and tells the specialist.', screens: [], v: 'pass', trace: 'rule   country=XX → no pack\ntask   unsupported-country  T-3302' },
+  ] },
+  { id: 'paperwork.sign-contract', title: 'Read and sign the contract in their own language', as: 'contractor', rules: [
+    { id: 'own-language', statement: 'The contract is shown in the contractor\'s language.', screens: ['contract-read'], v: 'pass', app: true },
+    { id: 'unlock-after-signature', statement: 'The next step unlocks only after the signature is recorded.', screens: ['contract-signed'], v: 'pass', app: true },
+  ] },
+  { id: 'screening.consent', title: 'Consent to the background check', as: 'contractor', rules: [
+    { id: 'package-match', statement: 'The checks listed match the client\'s screening package.', screens: ['consent'], v: 'pass', app: true },
+    { id: 'decline-pauses', statement: 'Declining pauses onboarding and tells the specialist.', screens: ['consent'], v: 'pass' },
+  ] },
+  { id: 'screening.receive-result', title: 'Receive the check\'s result', by: 'platform', rules: [
+    { id: 'clear-moves-on', statement: 'A clear result moves the contractor on with nobody touching it.', screens: [], v: 'pass', trace: 'hook   check.completed     chk_55a0\nresult clear → next step' },
+    { id: 'other-opens-task', statement: 'Any other result opens an adjudication task.', screens: [], v: 'pass', trace: 'result consider → task adjudicate  T-3310\nnotify onboarding specialist' },
+  ] },
+  { id: 'screening.adjudicate', title: 'Adjudicate a flagged check', as: 'onboarding-specialist', rules: [
+    { id: 'reason-required', statement: 'A flagged result cannot be cleared without a written reason.', screens: ['check-decision'], v: 'fail', app: true, why: 'Saved with an empty reason on local, run 412' },
+    { id: 'report-kept', statement: 'The contractor never sees the provider\'s raw report.', screens: ['check-flagged'], v: 'pass', app: true },
+    { id: 'view-only', statement: 'A specialist who may only view sees the finding, with no Clear and no Escalate.', screens: ['check-flagged-view'], v: 'unbuilt' },
+  ] },
+  { id: 'benefits.choose-plan', title: 'Choose a healthcare plan', as: 'contractor', rules: [
+    { id: 'country-plans', statement: 'Only plans offered in the contractor\'s country are shown.', screens: ['plans'], v: 'pass', app: true },
+    { id: 'cover-starts', statement: 'Cover starts on the engagement start date.', screens: ['plan-chosen'], v: 'pass' },
+  ] },
+  { id: 'benefits.enrol', title: 'Send the enrolment to the benefits provider', by: 'platform', rules: [
+    { id: 'before-start', statement: 'The contractor is enrolled before their start date.', screens: [], v: 'unbuilt', trace: 'POST   benefits/enrolments  (not built)' },
+    { id: 'rejected-tells-why', statement: 'A rejected enrolment tells the specialist why.', screens: [], v: 'unbuilt', trace: 'hook   enrolment.rejected  (not built)' },
+  ] },
+  { id: 'placement.assign-team', title: 'Assign the contractor to the client team', as: 'onboarding-specialist', rules: [
+    { id: 'only-cleared', statement: 'Only a cleared contractor can be assigned.', screens: ['contractor-cleared'], v: 'pass', app: true },
+    { id: 'manager-belongs', statement: 'The manager must belong to the client company.', screens: ['assign-team'], v: 'pass' },
+  ] },
+  { id: 'placement.confirm-start', title: 'Confirm the start date', as: 'hiring-manager', rules: [
+    { id: 'not-before-cover', statement: 'The start date cannot be earlier than the day cover begins.', screens: ['confirm-start'], v: 'agent', app: true, why: 'Passed, then the screen changed: an agent has not judged it since' },
+    { id: 'tells-contractor', statement: 'Confirming tells the contractor straight away.', screens: ['ready-email'], v: 'pass', app: true },
+  ] },
+  { id: 'placement.provision', title: 'Set up payroll and timesheets', by: 'platform', rules: [
+    { id: 'first-period', statement: 'The first timesheet period starts on the start date.', screens: [], v: 'pass', trace: 'event  start.confirmed     E-7731\njob    OpenTimesheet  from 12 Jan' },
+    { id: 'welcome-8am', statement: 'The welcome email goes out at 8am in the contractor\'s time zone.', screens: [], v: 'pass', trace: 'job    DayOneMail     at 08:00 local' },
+  ] },
+  { id: 'dayone.first-day', title: 'Work through the first-day checklist', as: 'contractor', rules: [
+    { id: 'client-items', statement: 'The list shows the client\'s own first-day items.', screens: ['day-one-list'], v: 'unbuilt' },
+    { id: 'hours-from-start', statement: 'Hours can be logged from the start date, never before.', screens: ['timesheet'], v: 'unbuilt' },
+  ] },
 ];
+STORIES.forEach(s => s.rules.forEach(r => { r.id = `${s.id}.${r.id}`; }));
 
-const EDGES = [
-  ['requests.request-contractor', 'requests.review-request'], ['requests.review-request', 'engagements.create-and-invite'],
-  ['engagements.create-and-invite', 'accounts.accept-invite'], ['accounts.accept-invite', 'accounts.profile-and-tax'],
-  ['accounts.profile-and-tax', 'paperwork.pick-pack'], ['paperwork.pick-pack', 'paperwork.sign-contract'],
-  ['paperwork.sign-contract', 'paperwork.esign-envelope'], ['paperwork.sign-contract', 'screening.consent'],
-  ['screening.consent', 'screening.run-check'], ['screening.run-check', 'screening.receive-result'],
-  ['screening.receive-result', 'screening.adjudicate'], ['screening.adjudicate', 'benefits.choose-plan'],
-  ['benefits.choose-plan', 'benefits.enrol'], ['benefits.choose-plan', 'placement.assign-team'],
-  ['placement.assign-team', 'placement.confirm-start'], ['placement.confirm-start', 'placement.provision'],
-  ['placement.provision', 'dayone.first-day'],
-];
+const BOARD = {
+  board: 'contractor-onboarding',
+  title: 'Contractor onboarding',
+  phases: ['Request', 'Account', 'Contract', 'Screening', 'Benefits', 'Placement', 'Day one'],
+  cards: [
+    { story: 'requests.request-contractor', phase: 'Request' },
+    { story: 'requests.review-request', phase: 'Request', after: ['requests.request-contractor'], returns_to: 'requests.request-contractor' },
+    { story: 'engagements.create-and-invite', phase: 'Account', after: ['requests.review-request'] },
+    { story: 'accounts.accept-invite', phase: 'Account', after: ['engagements.create-and-invite'], takes: 'The link lasts 7 days' },
+    { story: 'accounts.profile-and-tax', phase: 'Account', after: ['accounts.accept-invite'] },
+    { story: 'paperwork.pick-pack', phase: 'Contract', after: ['accounts.profile-and-tax'] },
+    { story: 'paperwork.sign-contract', phase: 'Contract', after: ['paperwork.pick-pack'] },
+    // A hole: the process needs it, and nobody has written its story. `by:` one of our own systems.
+    { id: 'reissue-contract', title: 'Issue a new contract when the terms change', by: 'platform', phase: 'Contract',
+      after: [{ card: 'paperwork.pick-pack', when: 'The terms change before signing' }], returns_to: 'paperwork.sign-contract' },
+    { story: 'screening.consent', phase: 'Screening', after: ['paperwork.sign-contract'] },
+    // An outside step: `by:` a system marked outside. No rules, no mark.
+    { id: 'run-check', title: 'Run the background check', by: 'screening', phase: 'Screening', after: ['screening.consent'], takes: '2 to 5 days' },
+    { story: 'screening.receive-result', phase: 'Screening', after: ['run-check'] },
+    // One story, two cards: a permission variant at one step, each card with its own rules and user.
+    { id: 'adjudicate-clear', story: 'screening.adjudicate', as: 'onboarding-specialist.lead', phase: 'Screening',
+      rules: ['screening.adjudicate.reason-required', 'screening.adjudicate.report-kept'],
+      after: [{ card: 'screening.receive-result', when: 'Flagged for a specialist who may clear it' }] },
+    { id: 'adjudicate-view', story: 'screening.adjudicate', as: 'onboarding-specialist.trainee', phase: 'Screening',
+      rules: ['screening.adjudicate.view-only'],
+      after: [{ card: 'screening.receive-result', when: 'Flagged for a specialist who may only view' }] },
+    { story: 'benefits.choose-plan', phase: 'Benefits', after: ['adjudicate-clear', { card: 'screening.receive-result', when: 'The result is clear' }] },
+    { story: 'benefits.enrol', phase: 'Benefits', after: ['benefits.choose-plan'] },
+    { id: 'provider-enrols', title: 'The benefits provider enrols the contractor', by: 'benefits', phase: 'Benefits', after: ['benefits.enrol'], takes: 'Up to a week' },
+    { story: 'placement.assign-team', phase: 'Placement', after: ['benefits.choose-plan'] },
+    { story: 'placement.confirm-start', phase: 'Placement', after: ['placement.assign-team'] },
+    { story: 'placement.provision', phase: 'Placement', after: ['placement.confirm-start'] },
+    // A join: day one waits for payroll and for the enrolment, both.
+    { story: 'dayone.first-day', phase: 'Day one', after_all: ['placement.provision', 'provider-enrols'] },
+  ],
+};
+const OTHER_BOARDS = { 'client-admin': ['Client setup'], 'timesheet-approver': ['Timesheets and pay'], 'finance-analyst': ['Timesheets and pay'],
+  contractor: ['Timesheets and pay', 'Offboarding'], 'hiring-manager': ['Timesheets and pay'], 'onboarding-specialist': ['Offboarding'] };
 
-/* A board's lanes come from its cards: the personas of its stories, customers first, then the two that are not people. */
-const HERE = [...PERSONAS, ...SYSTEMS].filter(a => STORIES.some(s => s.lane === a.id));
-const LANES = GROUPS.flatMap((g, gi) => HERE.filter(a => a.group === g.id)
-  .map((a, i) => ({ ...a, back: !a.person, cut: gi && !i ? g.title : '', solid: gi && !i && g.line === 'heavy' })))
-  .filter((l, i, all) => { if (l.cut && !all.slice(0, i).length) l.cut = ''; return true; });
-const GROUP = l => GROUPS.find(g => g.id === l.group).title;
+const LOOK = {
+  'hiring-manager': { ini: 'HM', color: '#8b8bf0', app: 'Client portal', ac: '#5b5bd6' },
+  contractor: { ini: 'C', color: '#3fc7b2', app: 'Contractor app', ac: '#0f9d8a' },
+  'client-admin': { ini: 'CA', color: '#c08bf0', app: 'Client portal', ac: '#5b5bd6' },
+  'timesheet-approver': { ini: 'TA', color: '#f08bb4', app: 'Client portal', ac: '#5b5bd6' },
+  'onboarding-specialist': { ini: 'OS', color: '#e6b455', app: 'Ops console', ac: '#475569' },
+  'finance-analyst': { ini: 'FA', color: '#9bd36a', app: 'Ops console', ac: '#475569' },
+  'compliance-lead': { ini: 'CL', color: '#e68a6a', app: 'Ops console', ac: '#475569' },
+  platform: { ini: '⚙', color: '#7fb6e6' },
+  screening: { ini: '↗', color: '#a9b4c4' },
+  benefits: { ini: '↗', color: '#c9b49a' },
+  esign: { ini: '↗', color: '#a9b4c4' },
+};
+</script>
+<script>
+/* ══ Deriving the board, by ADR 0018 §4 ═══════════════════════════════════════
+ * Nothing below is placed by hand: lanes come from the cards' stories, columns
+ * from the hand-offs, and cards that land in one cell are stacked.
+ */
+const SB = STORYBOARD, SC = SB.screens;
+const STORY = new Map(STORIES.map(s => [s.id, s]));
+const ACTORS = [...SB.personas.map(p => ({ ...p, person: true })), ...SB.systems.map(s => ({ ...s, person: false, users: [] }))]
+  .map(a => ({ ...a, ...LOOK[a.id] }));
+const ACTOR = Object.fromEntries(ACTORS.map(a => [a.id, a]));
 
-/* ── drawing a screen. Stands in for a real capture. ───────────────── */
+/* A user named `<persona>.<user>`, or a persona alone meaning its first user. */
+const userOf = as => {
+  const [pid, uid] = String(as).split('.'), p = ACTOR[pid];
+  const u = (uid && p.users.find(x => x.id === uid)) || p.users[0];
+  return { persona: p, user: u, isDefault: u === p.users[0] };
+};
+
+const CARDS = BOARD.cards.map(c => {
+  const st = c.story ? STORY.get(c.story) : null;
+  const rules = st ? (c.rules ? st.rules.filter(r => c.rules.includes(r.id)) : st.rules) : [];
+  const actor = st ? (st.as ?? st.by) : (c.as ?? c.by);
+  const lane = String(c.as ?? actor).split('.')[0];
+  const kind = st ? 'story' : ACTOR[lane].outside ? 'outside' : 'hole';
+  return { ...c, id: c.id ?? c.story, st, title: st ? st.title : c.title, rules, lane, kind,
+    user: c.as && c.as.includes('.') ? userOf(c.as) : null };
+});
+const byId = Object.fromEntries(CARDS.map(c => [c.id, c]));
+// after: any one of these. after_all: every one of these (a join). Both are hand-offs, drawn the same.
+const EDGES = CARDS.flatMap(c => [
+  ...(c.after ?? []).map(a => typeof a === 'string' ? [a, c.id, null, false] : [a.card, c.id, a.when ?? null, false]),
+  ...(c.after_all ?? []).map(a => [a, c.id, null, true]),
+]);
+const RETURNS = CARDS.filter(c => c.returns_to).map(c => [c.id, c.returns_to]);
+const outOf = id => EDGES.filter(([a]) => a === id);
+
+// A card's column is the longest chain of hand-offs that leads to it, within its phase.
+const pcol = new Map();
+const colOf = id => {
+  if (pcol.has(id)) return pcol.get(id);
+  const ins = EDGES.filter(([f, t]) => t === id && byId[f].phase === byId[id].phase).map(([f]) => colOf(f) + 1);
+  pcol.set(id, Math.max(0, ...ins));
+  return pcol.get(id);
+};
+CARDS.forEach(c => { c.pcol = colOf(c.id); });
+const WIDTHS = BOARD.phases.map(p => Math.max(1, ...CARDS.filter(c => c.phase === p).map(c => c.pcol + 1)));
+const START = BOARD.phases.map((p, i) => 1 + WIDTHS.slice(0, i).reduce((a, b) => a + b, 0));
+CARDS.forEach(c => { c.col = START[BOARD.phases.indexOf(c.phase)] + c.pcol; });
+const PHASES = BOARD.phases.map((p, i) => [p, START[i], START[i] + WIDTHS[i] - 1]);
+const STEPS = PHASES.at(-1)[2];
+
+// Lanes: group by group, in the storyboard's order (or the board's own), personas then systems, only those with a card.
+const used = new Set(CARDS.map(c => c.lane));
+const ORDER = (BOARD.groups ?? SB.groups.map(g => g.id)).map(id => SB.groups.find(g => g.id === id));
+const HEAVY = BOARD.line ?? SB.groups.find(g => g.line === 'heavy')?.id;
+const LANES = ORDER.flatMap(g => ACTORS.filter(a => used.has(a.id) && a.group === g.id)
+  .map((a, i) => ({ ...a, back: !a.person, cut: i ? '' : g.title, solid: !i && g.id === HEAVY })));
+LANES[0].cut = ''; LANES[0].solid = false;
+const GROUP = l => SB.groups.find(g => g.id === l.group).title;
+
+// Cells: cards that derive to one lane and one column are stacked there.
+const CELLS = new Map();
+CARDS.forEach(c => { const k = `${c.lane}|${c.col}`; CELLS.set(k, [...(CELLS.get(k) ?? []), c.id]); });
+
+/* ══ Marks, by §5: the first that holds is the card's ═════════════════════════ */
+const ORDER5 = ['fail', 'unbuilt', 'you', 'agent', 'pass'];
+const cardMark = c => c.kind !== 'story' ? c.kind : ORDER5.find(m => c.rules.some(r => r.v === m)) ?? 'pass';
+CARDS.forEach(c => { c.status = cardMark(c); });
+const GLYPH = { pass: '✓', fail: '✕', you: '●', agent: '◐', unbuilt: '○', hole: '–', outside: '↗' };
+const WORD = { pass: 'passing', fail: 'failing', you: 'waiting on you', agent: 'waiting on an agent', unbuilt: 'not built', hole: 'no story', outside: 'outside' };
+
+/* ══ Pictures, by §6 ════════════════════════════════════════════════════════════
+ * Each rule gives one picture per screen: the app where an agent judged it on local and labelled the
+ * evidence, else the accepted design drawn small, else a frame naming the screen. A rule with no
+ * screen gives what the system did, as text. Rules that would give the same picture give it once.
+ */
+const ruleKeys = (r, surface = 'app') => r.screens.length
+  ? r.screens.map(s => `${r.app && surface === 'app' ? 'app' : SC[s].design ? 'design' : 'frame'}:${s}${r.app && surface === 'app' ? `@${r.id}` : ''}`)
+  : [`text:${r.id}`];
+function picsOf(card) {
+  const out = [];
+  card.rules.forEach(r => ruleKeys(r).forEach(k => {
+    let p = out.find(x => x.key === k);
+    if (!p) out.push(p = { key: k, rules: [] });
+    p.rules.push(r);
+  }));
+  return out;
+}
+CARDS.forEach(c => { c.pics = picsOf(c); });
+
+/* ── drawing a screen. Stands in for a real picture. ───────────────── */
 const W = 320, H = 200, INK = '#2a3140', MUTE = '#8a93a3', LINE = '#d5d9e0', RINGC = '#f59e0b';
-const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const R = (x, y, w, h, f, rx = 2, more = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${f}" ${more}/>`;
-const T = (x, y, s, size = 8, f = INK, wt = 400, a = 'start') => `<text x="${x}" y="${y}" font-size="${size}" fill="${f}" font-weight="${wt}" text-anchor="${a}">${esc(s)}</text>`;
+const T = (x, y, s, size = 8, f = INK, wt = 400, a = 'start', fam = '') => `<text x="${x}" y="${y}" font-size="${size}" fill="${f}" font-weight="${wt}" text-anchor="${a}"${fam ? ` font-family="${fam}"` : ''}>${esc(s)}</text>`;
+const MONO = 'ui-monospace, Menlo, monospace';
 const RING = (x, y, w, h) => `<rect x="${x - 3}" y="${y - 3}" width="${w + 6}" height="${h + 6}" rx="4" fill="none" stroke="${RINGC}" stroke-width="2"/>`;
 const PILL = { New: '#3b82f6', Flagged: '#dc2626', Clear: '#16a34a', Pending: '#d97706', 'Sent back': '#64748b', Draft: '#64748b' };
+const TAG = (txt, fill) => R(4, H - 15, txt.length * 3.6 + 12, 11, fill, 5.5) + T(10, H - 7, txt, 6.5, '#fff', 700);
+const wrap = (s, n) => String(s).split(' ').reduce((ls, w) => { const l = ls.at(-1); if (l && `${l} ${w}`.length <= n) ls[ls.length - 1] = `${l} ${w}`; else ls.push(w); return ls; }, []);
+const svg = (o, label) => `<svg viewBox="0 0 ${W} ${H}" font-family="system-ui, sans-serif" role="img" aria-label="${esc(label)}">${o}</svg>`;
 
 const KINDS = {
   form(s, ac) {
@@ -598,8 +822,8 @@ const KINDS = {
       if (s.hl === i) o += RING(16, y + 9, 190, 14);
     });
     o += R(224, 36, 80, 74, '#eceef2', 3) + R(232, 46, 50, 4, LINE) + R(232, 56, 62, 3, LINE) + R(232, 64, 56, 3, LINE) + R(232, 72, 40, 3, LINE);
-    o += R(224, 170, 80, 17, ac, 3) + T(264, 181.5, s.cta, 7.5, '#fff', 600, 'middle');
-    if (s.hl === 'cta') o += RING(224, 170, 80, 17);
+    o += R(224, 166, 80, 17, ac, 3) + T(264, 177.5, s.cta, 7.5, '#fff', 600, 'middle');
+    if (s.hl === 'cta') o += RING(224, 166, 80, 17);
     return o;
   },
   table(s) {
@@ -618,35 +842,35 @@ const KINDS = {
     return o;
   },
   email(s, ac) {
-    let o = R(40, 36, 240, 152, '#fff', 4, `stroke="${LINE}"`) + T(54, 54, 'From: Onboarding team', 6.5, MUTE) + T(54, 70, s.subject, 9.5, INK, 700);
-    [84, 93, 102, 111].forEach((y, i) => { o += R(54, y, [200, 212, 180, 120][i], 4, LINE); });
-    o += R(110, 134, 100, 20, ac, 4) + T(160, 147.5, s.cta, 8, '#fff', 600, 'middle') + RING(110, 134, 100, 20);
+    let o = R(40, 34, 240, 140, '#fff', 4, `stroke="${LINE}"`) + T(54, 52, 'From: Onboarding team', 6.5, MUTE) + T(54, 68, s.subject, 9.5, INK, 700);
+    [82, 91, 100, 109].forEach((y, i) => { o += R(54, y, [200, 212, 180, 120][i], 4, LINE); });
+    o += R(110, 128, 100, 20, ac, 4) + T(160, 141.5, s.cta, 8, '#fff', 600, 'middle') + RING(110, 128, 100, 20);
     return o;
   },
   doc(s, ac) {
-    let o = R(60, 32, 200, 168, '#fff', 2, `stroke="${LINE}"`) + T(160, 50, s.title, 7.5, INK, 700, 'middle');
-    for (let i = 0; i < 9; i++) o += R(76, 62 + i * 9, i % 4 === 3 ? 110 : 168, 3.5, LINE);
-    o += R(76, 152, 110, 26, s.sign ? '#fffbeb' : '#f6f7f9', 2, `stroke="${LINE}" stroke-dasharray="3 2"`) + T(80, 160, 'Signature', 5.5, MUTE);
-    if (s.sign) o += `<path d="M84,172 c8,-14 12,6 18,-6 s8,10 16,-2 s10,6 22,-2" fill="none" stroke="${ac}" stroke-width="1.6"/>` + RING(76, 152, 110, 26);
+    let o = R(60, 30, 200, 152, '#fff', 2, `stroke="${LINE}"`) + T(160, 48, s.title, 7.5, INK, 700, 'middle');
+    for (let i = 0; i < 9; i++) o += R(76, 60 + i * 9, i % 4 === 3 ? 110 : 168, 3.5, LINE);
+    o += R(76, 146, 110, 26, s.sign ? '#fffbeb' : '#f6f7f9', 2, `stroke="${LINE}" stroke-dasharray="3 2"`) + T(80, 154, 'Signature', 5.5, MUTE);
+    if (s.sign) o += `<path d="M84,166 c8,-14 12,6 18,-6 s8,10 16,-2 s10,6 22,-2" fill="none" stroke="${ac}" stroke-width="1.6"/>` + RING(76, 146, 110, 26);
     return o;
   },
   plans(s, ac) {
     let o = T(16, 46, s.title, 11, INK, 700);
     s.plans.forEach(([n, p], i) => {
       const x = 16 + i * 98;
-      o += R(x, 58, 90, 118, '#fff', 4, `stroke="${s.hl === i ? ac : LINE}"`) + T(x + 10, 76, n, 9, INK, 700) + T(x + 10, 92, p, 9, ac, 700);
-      [104, 113, 122].forEach((y, k) => { o += R(x + 10, y, [64, 54, 60][k], 3.5, LINE); });
-      o += R(x + 10, 150, 70, 16, s.hl === i ? ac : '#eceef2', 3) + T(x + 45, 161, s.hl === i ? 'Selected' : 'Choose', 7, s.hl === i ? '#fff' : INK, 600, 'middle');
-      if (s.hl === i) o += RING(x, 58, 90, 118);
+      o += R(x, 56, 90, 118, '#fff', 4, `stroke="${s.hl === i ? ac : LINE}"`) + T(x + 10, 74, n, 9, INK, 700) + T(x + 10, 90, p, 9, ac, 700);
+      [102, 111, 120].forEach((y, k) => { o += R(x + 10, y, [64, 54, 60][k], 3.5, LINE); });
+      o += R(x + 10, 148, 70, 16, s.hl === i ? ac : '#eceef2', 3) + T(x + 45, 159, s.hl === i ? 'Selected' : 'Choose', 7, s.hl === i ? '#fff' : INK, 600, 'middle');
+      if (s.hl === i) o += RING(x, 56, 90, 118);
     });
     return o;
   },
   list(s, ac) {
     let o = T(16, 46, s.title, 11, INK, 700);
     s.items.forEach(([t, done], i) => {
-      const y = 56 + i * 25;
-      o += R(16, y, 288, 21, '#fff', 3, `stroke="${LINE}"`) + `<circle cx="29" cy="${y + 10.5}" r="5" fill="${done ? ac : '#fff'}" stroke="${done ? ac : MUTE}"/>` + T(42, y + 13.5, t, 8, done ? MUTE : INK, done ? 400 : 600);
-      if (s.hl === i) o += RING(16, y, 288, 21);
+      const y = 54 + i * 24;
+      o += R(16, y, 288, 20, '#fff', 3, `stroke="${LINE}"`) + `<circle cx="29" cy="${y + 10}" r="5" fill="${done ? ac : '#fff'}" stroke="${done ? ac : MUTE}"/>` + T(42, y + 13, t, 8, done ? MUTE : INK, done ? 400 : 600);
+      if (s.hl === i) o += RING(16, y, 288, 20);
     });
     return o;
   },
@@ -654,72 +878,112 @@ const KINDS = {
     const bw = s.badge.length * 4.2 + 14;
     let o = T(16, 48, s.title, 11, INK, 700) + R(304 - bw, 38, bw, 14, PILL[s.badge] || '#64748b', 7) + T(304 - bw / 2, 48, s.badge, 6.5, '#fff', 600, 'middle');
     if (s.hl === 'badge') o += RING(304 - bw, 38, bw, 14);
-    s.kv.forEach(([k, v], i) => { const y = 64 + i * 24; o += R(16, y, 288, 20, '#fff', 2, `stroke="${LINE}"`) + T(22, y + 13, k, 7, MUTE) + T(98, y + 13, v, 7.5); });
+    s.kv.forEach(([k, v], i) => { const y = 60 + i * 23; o += R(16, y, 288, 19, '#fff', 2, `stroke="${LINE}"`) + T(22, y + 12.5, k, 7, MUTE) + T(98, y + 12.5, v, 7.5); });
     s.actions.forEach((a, i) => {
-      const x = 136 + i * 86, prim = i === s.actions.length - 1;
-      o += R(x, 170, 80, 17, prim ? ac : '#fff', 3, prim ? '' : `stroke="${LINE}"`) + T(x + 40, 181.5, a, 7.5, prim ? '#fff' : INK, 600, 'middle');
-      if (s.hl === i) o += RING(x, 170, 80, 17);
+      const x = 304 - (s.actions.length - i) * 86 + 6, prim = i === s.actions.length - 1;
+      o += R(x, 166, 80, 17, prim ? ac : '#fff', 3, prim ? '' : `stroke="${LINE}"`) + T(x + 40, 177.5, a, 7.5, prim ? '#fff' : INK, 600, 'middle');
+      if (s.hl === i) o += RING(x, 166, 80, 17);
     });
     return o;
   },
 };
-function shot(story, step) {
-  const lane = LANES.find(l => l.id === story.lane), s = step.shot, mail = s.k === 'email';
-  const ac = lane.ac, head = mail ? '#3b4252' : ac;
-  return `<svg viewBox="0 0 ${W} ${H}" font-family="system-ui, sans-serif" role="img" aria-label="${esc(step.say)}">`
-    + R(0, 0, W, H, mail ? '#e9ebef' : '#f6f7f9', 0) + R(0, 0, W, 24, head, 0)
-    + T(12, 15.5, mail ? 'Mail' : lane.app, 8, '#fff', 700) + `<circle cx="304" cy="12" r="7" fill="#ffffff55"/>` + (mail ? '' : T(304, 14.2, lane.sini, 5.5, '#fff', 700, 'middle'))
-    + KINDS[s.k](s, ac) + '</svg>';
+/* The app's own chrome, signed in as the screen's user. */
+function chrome(as, mail) {
+  const { persona, user } = userOf(as);
+  return R(0, 0, W, H, mail ? '#e9ebef' : '#f6f7f9', 0) + R(0, 0, W, 24, mail ? '#3b4252' : persona.ac, 0)
+    + T(12, 15.5, mail ? 'Mail' : persona.app, 8, '#fff', 700)
+    + (mail ? '' : `<circle cx="304" cy="12" r="7" fill="#ffffff55"/>` + T(304, 14.2, user.ini, 5.5, '#fff', 700, 'middle'));
 }
+function screenSvg(id, surface) {
+  const s = SC[id], { persona } = userOf(s.as);
+  const o = chrome(s.as, s.look.k === 'email') + KINDS[s.look.k](s.look, persona.ac);
+  return svg(o + (surface === 'app' ? TAG('app · local', '#0f766e') : TAG('designed', '#6d28d9')), `${s.title} (${surface === 'app' ? 'the app on local' : 'designed'})`);
+}
+function frameSvg(id) {
+  const s = SC[id], { user } = userOf(s.as);
+  let o = chrome(s.as) + R(16, 34, 288, 140, 'none', 5, 'stroke="#b6bdc9" stroke-dasharray="4 3"');
+  const ls = wrap(s.title, 40);
+  ls.forEach((l, i) => { o += T(160, 86 + i * 13 - (ls.length - 1) * 6, l, 10, INK, 700, 'middle'); });
+  o += T(160, 112, `screen ${id}`, 6.6, MUTE, 400, 'middle', MONO) + T(160, 128, `signed in as ${user.title}`, 6.6, MUTE, 400, 'middle');
+  return svg(o + TAG('no design yet', '#64748b'), `${s.title} (a frame naming the screen)`);
+}
+function textSvg(ruleId) {
+  const r = STORIES.flatMap(s => s.rules).find(x => x.id === ruleId);
+  let o = R(0, 0, W, H, '#16263a', 0) + T(12, 18, 'Nothing on screen · what the system did', 7.5, '#7fb6e6', 700);
+  String(r.trace ?? '').split('\n').forEach((l, i) => { o += T(12, 38 + i * 13, l, 7.6, '#a5e3f5', 400, 'start', MONO); });
+  wrap(r.statement, 54).forEach((l, i) => { o += T(12, 140 + i * 11, l, 7.2, '#7fb6e6aa', 400); });
+  return svg(o, r.statement);
+}
+const picOfKey = k => {
+  const [kind, rest] = [k.slice(0, k.indexOf(':')), k.slice(k.indexOf(':') + 1).split('@')[0]];
+  return kind === 'app' || kind === 'design' ? screenSvg(rest, kind) : kind === 'frame' ? frameSvg(rest) : textSvg(rest);
+};
 
-/* ── the board ──────────────────────────────────────────────────────── */
+/* ══ The board ═══════════════════════════════════════════════════════════════ */
 const $ = (q, el = document) => el.querySelector(q);
 const board = $('#board'), drawer = $('#drawer');
-const byId = Object.fromEntries(STORIES.map(s => [s.id, s]));
-const laneOf = s => LANES.find(l => l.id === s.lane);
-const GLYPH = { pass: '✓', fail: '✕', mine: '●', unbuilt: '○', pending: '○' };
-const WORD = { pass: 'passing', fail: 'failing', mine: 'waiting on you', unbuilt: 'not built' };
+const laneOf = c => LANES.find(l => l.id === c.lane);
 const lanesOf = ids => [...new Set(ids.map(id => byId[id].lane))].map(id => LANES.find(l => l.id === id));
 const av = (l, size = '') => l.person
   ? `<i class="av ${size}" style="background:${l.color}">${l.ini}</i>`
   : `<i class="av sys ${size}" style="border-color:${l.color};color:${l.color}">${l.ini}</i>`;
 const bars = (n, on) => n > 1 ? `<span class="bars">${Array.from({ length: n }, (_, i) => `<i class="${i === on ? 'on' : ''}"></i>`).join('')}</span>` : '';
-let sel = null, at = 0, focus = null, flow = 'across';
+const whens = c => EDGES.filter(([, t, w]) => t === c.id && w).map(([f, , w]) => [f, w]);
+let sel = null, at = 0, focus = null, flow = 'across', surface = 'app';
 try { if (localStorage.getItem('board-flow') === 'down') flow = 'down'; } catch {}
 
+function cardHtml(c) {
+  const n = c.pics.length, w = whens(c), all = c.after_all;
+  const label = `${esc(c.title)}, ${WORD[c.status]}`;
+  const when = all
+    ? `<span class="when" title="${esc(`After all of: ${all.map(id => byId[id].title).join('; ')}`)}"><i>after all of</i>${esc(all.map(id => byId[id].title).join(' + '))}</span>`
+    : w.length ? `<span class="when" title="${esc(w.map(([f, x]) => `when ${x} (from ${byId[f].title})`).join('\n'))}"><i>when</i>${esc([...new Set(w.map(x => x[1]))].join(' · '))}</span>` : '';
+  const ends = !outOf(c.id).length && !c.returns_to ? '<span class="end" title="Nothing follows this card">ends here</span>' : '';
+  const tk = c.takes ? `<span class="meta"><span class="takes" title="takes: ${esc(c.takes)}">⏱ ${esc(c.takes)}</span></span>` : '';
+  const user = c.user ? `<span class="user" title="${esc(`Signed in as ${c.user.user.title}`)}">${esc(c.user.user.title)}</span>` : '';
+  if (c.kind !== 'story') {
+    const by = ACTOR[c.lane].title;
+    return `<button class="card headless ${c.kind}" data-id="${c.id}" aria-label="${label}">${when}
+      <span class="txt"><span class="kind mono">${c.kind === 'hole' ? `no story · ${esc(by)}` : `outside · ${esc(by)}`}</span><span class="ttl" title="${esc(c.title)}">${esc(c.title)}</span>
+      <span class="meta">${c.kind === 'hole' ? `<span class="nostory">${GLYPH.hole} no story</span>` : ''}${ends}</span>${tk}</span></button>`;
+  }
+  const st = `<span class="st ${c.status}" title="${WORD[c.status]}">${GLYPH[c.status]}</span><span>${c.rules.length} ${c.rules.length === 1 ? 'rule' : 'rules'}</span>`;
+  return `<button class="card is-${c.status}" data-id="${c.id}" aria-label="${label}">${when}
+      <span class="shot gal">${c.pics.map((p, i) => `<span class="sl ${i ? '' : 'on'}">${picOfKey(p.key)}</span>`).join('')}${bars(n, 0)}<span class="count">${n} ${n === 1 ? 'picture' : 'pictures'}</span></span>
+      <span class="txt"><span class="ttl" title="${esc(c.title)}">${esc(c.title)}</span><span class="meta">${st}${ends}${user}</span>${tk}</span></button>`;
+}
+
 function build() {
-  const down = flow === 'down', steps = Math.max(...STORIES.map(s => s.col));
-  /* Where a lane (0, 1, 2…) and a stretch of time (first to last step) fall on the grid, whichever way time runs. */
+  const down = flow === 'down';
   const cell = (lane, a, b = a) => down
-    ? `grid-column:${lane === null ? `2 / ${LANES.length + 2}` : lane + 2};grid-row:${a === null ? `1 / ${steps + 2}` : a === 0 ? 1 : `${a + 1} / ${b + 2}`}`
+    ? `grid-column:${lane === null ? `2 / ${LANES.length + 2}` : lane + 2};grid-row:${a === null ? `1 / ${STEPS + 2}` : a === 0 ? 1 : `${a + 1} / ${b + 2}`}`
     : `grid-row:${lane === null ? `2 / ${LANES.length + 2}` : lane + 2};grid-column:${a === null ? '1 / -1' : a === 0 ? 1 : `${a + 1} / ${b + 2}`}`;
   [...board.children].forEach(c => c.id !== 'wires' && c.remove());
   board.dataset.flow = flow;
-  board.style.gridTemplateColumns = down ? `calc(34px * var(--pz)) repeat(${LANES.length}, calc(184px * var(--z)))` : '';
+  board.style.gridTemplateColumns = down ? `calc(34px * var(--pz)) repeat(${LANES.length}, calc(var(--colw) * var(--z)))`
+    : `max(calc(var(--lanew) * var(--z)), 24px) repeat(${STEPS}, calc(var(--colw) * var(--z)))`;
   document.querySelectorAll('[data-flow]').forEach(b => b.tagName === 'BUTTON' && b.classList.toggle('on', b.dataset.flow === flow));
   let h = '<div class="corner"></div>';
-  $('#who').innerHTML = `<option value="">Everyone</option>${LANES.filter(l => l.person).map(l => `<option value="${l.id}">${l.name}</option>`).join('')}`;
+  $('#who').innerHTML = `<option value="">Everyone</option>${LANES.filter(l => l.person).map(l => `<option value="${l.id}">${l.title}</option>`).join('')}`;
   PHASES.forEach(([n, a, b], i) => { h += `<div class="phase ${i ? '' : 'first'}" title="${n}" style="${down ? `grid-column:1;grid-row:${a + 1} / ${b + 2}` : `grid-row:1;grid-column:${a + 1} / ${b + 2}`}"><span>${n}</span></div>`; });
   LANES.forEach((l, i) => {
-    h += `<div class="stripe ${l.back ? 'back' : ''} ${l.cut ? 'line' : ''} ${l.solid ? 'solid' : ''}" ${l.cut ? `title="Where ${l.cut} begins"` : ''} style="${cell(i, null)}"></div>`;
+    h += `<div class="stripe ${l.back ? 'back' : ''} ${l.cut ? 'line' : ''} ${l.solid ? 'solid' : ''}" style="${cell(i, null)}"></div>`;
     h += `<button class="lane ${l.back ? 'back' : ''}" data-lane="${l.id}" style="${cell(i, 0)}" title="Follow only this lane">
-      ${l.cut ? `<span class="cut">${l.cut}</span>` : ''}<span class="in">${av(l)}<span class="who"><b>${l.name}</b><small>${l.sub}</small>${l.person ? `<small class="uses">${l.uses}</small>` : ''}<small class="more">${esc(l.blurb)}</small>${l.person ? `<small class="more seed">Signed in as ${l.seed}</small>` : ''}</span></span></button>`;
+      ${l.cut ? `<span class="cut">${l.cut}</span>` : ''}<span class="in">${av(l)}<span class="who"><b>${l.title}</b><small>${l.of}</small>${l.person ? `<small class="uses">${l.uses}</small>` : ''}${l.blurb ? `<small class="more">${esc(l.blurb)}</small>` : ''}${l.person ? `<small class="more seed">Signed in as ${esc(l.users[0].title)}</small>` : ''}</span></span></button>`;
   });
-  STORIES.forEach(s => {
-    const where = cell(LANES.findIndex(l => l.id === s.lane), s.col), n = s.steps.length;
-    const st = `<span class="st ${s.status}">${GLYPH[s.status]}</span><span>${s.rules.length} rules</span>`;
-    h += s.steps[0].shot
-      ? `<button class="card is-${s.status}" data-id="${s.id}" aria-label="${esc(s.title)}, ${WORD[s.status]}" style="${where}">
-          <span class="shot gal">${s.steps.map((x, i) => `<span class="sl ${i ? '' : 'on'}">${shot(s, x)}</span>`).join('')}${bars(n, 0)}<span class="count">${n} pictures</span></span>
-          <span class="txt"><span class="ttl">${s.title}</span><span class="meta">${st}</span></span></button>`
-      : `<button class="card headless is-${s.status}" data-id="${s.id}" aria-label="${esc(s.title)}, ${WORD[s.status]}" style="${where}">
-          <span class="txt"><span class="kind mono">${s.kind} · no screen</span><span class="ttl">${s.title}</span><span class="meta">${st}<span>${n} steps</span>${s.takes ? `<span class="takes">${s.takes}</span>` : ''}</span></span></button>`;
+  CELLS.forEach(ids => {
+    const c0 = byId[ids[0]], where = cell(LANES.findIndex(l => l.id === c0.lane), c0.col);
+    const alts = ids.length > 1 && ids.every(id => whens(byId[id]).length);
+    h += ids.length === 1
+      ? cardHtml(c0).replace('<button class="card', `<button style="${where}" class="card`)
+      : `<div class="stack ${alts ? '' : 'all'}" style="${where}"><span class="alt">${alts ? `One of these · ${ids.length} alternatives` : `${ids.length} cards at this step`}</span>${ids.map(id => cardHtml(byId[id])).join('')}</div>`;
   });
-  LANES.forEach((l, i) => { if (GROUP(l) !== (LANES[i - 1] && GROUP(LANES[i - 1]))) h += `<div class="grp" data-from="${l.id}" title="${GROUP(l)}"><span>${GROUP(l)}</span></div>`; });
+  // A group's heading sits outside the board. Neither it nor the line has a hover tooltip.
+  LANES.forEach((l, i) => { if (GROUP(l) !== (LANES[i - 1] && GROUP(LANES[i - 1]))) h += `<div class="grp" data-from="${l.id}"><span>${GROUP(l)}</span></div>`; });
   board.insertAdjacentHTML('beforeend', h);
-  const c = { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
-  STORIES.forEach(s => c[s.status]++);
-  $('#tally').innerHTML = Object.keys(c).map(k => `<span class="${k}" data-g="${GLYPH[k]}">${c[k]} ${WORD[k]}</span>`).join('');
+  const c = Object.fromEntries([...ORDER5, 'hole'].map(k => [k, 0]));
+  CARDS.forEach(x => { if (x.status in c) c[x.status]++; });
+  $('#tally').innerHTML = [...ORDER5, 'hole'].map(k => `<span class="${k === 'hole' ? 'nostory' : k}" data-g="${GLYPH[k]}">${c[k]} ${WORD[k]}</span>`).join('');
 }
 
 /* ── following one persona: the dimming, the waits, and one line saying who ── */
@@ -727,7 +991,7 @@ function follow(id) {
   focus = id || null;
   const lane = LANES.find(l => l.id === focus);
   if (lane) document.body.dataset.focus = focus; else delete document.body.dataset.focus;
-  const mine = STORIES.filter(s => s.lane === focus).sort((a, b) => a.col - b.col);
+  const mine = CARDS.filter(c => c.lane === focus).sort((a, b) => a.col - b.col);
   const from = EDGES.filter(([a, b]) => byId[b].lane === focus && byId[a].lane !== focus).map(e => e[0]);
   const to = EDGES.filter(([a, b]) => byId[a].lane === focus && byId[b].lane !== focus).map(e => e[1]);
   document.querySelectorAll('.card').forEach(c => {
@@ -736,31 +1000,27 @@ function follow(id) {
   });
   document.querySelectorAll('.lane').forEach(b => b.classList.toggle('on', b.dataset.lane === focus));
   $('#who').value = lane && lane.person ? focus : '';
-
-  // Where this actor waits: every stretch between two of their cards that others fill.
   document.querySelectorAll('.gap').forEach(g => g.remove());
   const row = LANES.indexOf(lane) + 2;
   let gaps = '';
   mine.forEach((a, i) => {
     const b = mine[i + 1];
     if (!b || b.col - a.col < 2) return;
-    const between = STORIES.filter(s => s.col > a.col && s.col < b.col && s.lane !== focus);
+    const between = CARDS.filter(s => s.col > a.col && s.col < b.col && s.lane !== focus);
     const takes = between.map(s => s.takes).filter(Boolean)[0];
-    const says = `waits on ${lanesOf(between.map(s => s.id)).map(l => l.name).join(', ')}${takes ? ` · ${takes}` : ''}`;
-    gaps += `<div class="gap" data-says title="${says}" style="${flow === 'down' ? `grid-column:${row};grid-row:${a.col + 2} / ${b.col + 1}` : `grid-row:${row};grid-column:${a.col + 2} / ${b.col + 1}`}"><span>waits on ${lanesOf(between.map(s => s.id)).map(l => l.name).join(', ')}${takes ? ` · ${takes}` : ''}</span></div>`;
+    const says = `waits on ${lanesOf(between.map(s => s.id)).map(l => l.title).join(', ')}${takes ? ` · ${takes}` : ''}`;
+    gaps += `<div class="gap" title="${esc(says)}" style="${flow === 'down' ? `grid-column:${row};grid-row:${a.col + 2} / ${b.col + 1}` : `grid-row:${row};grid-column:${a.col + 2} / ${b.col + 1}`}"><span>${esc(says)}</span></div>`;
   });
   board.insertAdjacentHTML('beforeend', gaps);
-
   const lens = $('#lens');
   lens.hidden = !lane;
   if (lane) {
-    const c = { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
-    mine.forEach(s => c[s.status]++);
-    const marks = Object.keys(c).filter(k => c[k]).map(k => `<span class="${k}">${GLYPH[k]} ${c[k]} ${WORD[k]}</span>`).join(' · ');
-    const beats = mine.reduce((n, s) => n + s.steps.length, 0);
-    lens.innerHTML = `${av(lane, 'sm')}<span>Following <b>${lane.name}</b></span>
-      <span class="dimmed">${mine.length} of ${STORIES.length} cards</span><span>${marks}</span>
-      ${lane.person ? `<button class="to" data-persona="${lane.id}">Who is this? →</button>` : `<span class="dimmed">Not a persona: nobody signs in as this.</span>`}
+    const c = {};
+    mine.forEach(s => { c[s.status] = (c[s.status] ?? 0) + 1; });
+    const marks = Object.keys(c).map(k => `<span class="${k === 'hole' ? 'nostory' : k}">${GLYPH[k]} ${c[k]} ${WORD[k]}</span>`).join(' · ');
+    lens.innerHTML = `${av(lane, 'sm')}<span>Following <b>${lane.title}</b></span>
+      <span class="dimmed">${mine.length} of ${CARDS.length} cards</span><span>${marks}</span>
+      ${lane.person ? `<button class="to" data-persona="${lane.id}">Who is this? →</button>` : '<span class="dimmed">Not a persona: nobody signs in as this.</span>'}
       <button class="x" data-lane="" title="Back to everyone">×</button>`;
   }
   tighten();
@@ -783,22 +1043,29 @@ function wires() {
   const o = board.getBoundingClientRect(), half = parseFloat(getComputedStyle(board).columnGap) / 2;
   const any = $('.card'), rise = Math.max(3, parseFloat(getComputedStyle(any).marginTop) * (parseFloat(getComputedStyle(any).zoom) || 1));
   const box = id => { const r = $(`.card[data-id="${id}"]`).getBoundingClientRect(); return { l: r.left - o.left, r: r.right - o.left, t: r.top - o.top, b: r.bottom - o.top, cx: r.left - o.left + r.width / 2, cy: r.top - o.top + r.height / 2 }; };
-  $('#paths').innerHTML = EDGES.map(([a, b]) => {
-    const s = box(a), t = box(b);
-    const on = sel ? (a === sel.id || b === sel.id) : focus ? (byId[a].lane === focus || byId[b].lane === focus) : false;
+  const lit = (a, b) => sel ? (a === sel.id || b === sel.id) : focus ? (byId[a].lane === focus || byId[b].lane === focus) : false;
+  const fwd = EDGES.map(([a, b]) => {
+    const s = box(a), t = box(b), on = lit(a, b);
     const same = byId[a].col === byId[b].col;
     const d = flow === 'down'
       ? (same ? (t.l > s.r ? `M${s.r},${s.cy} H${t.l - 2}` : `M${s.l},${s.cy} H${t.r + 2}`)
-        : `M${s.cx},${s.b} V${t.t - rise} H${t.cx} V${t.t - 2}`)
+        : `M${s.cx},${s.b} V${t.t - Math.max(rise, 8)} H${t.cx} V${t.t - 2}`)
       : (same ? (t.t > s.b ? `M${s.cx},${s.b} V${t.t - 2}` : `M${s.cx},${s.t} V${t.b + 2}`)
         : `M${s.r},${s.cy} H${t.l - half} V${t.cy} H${t.l - 2}`);
     return `<path d="${d}" class="${on ? 'on' : ''}" marker-end="url(#${on ? 'ah-on' : 'ah'})"/>`;
-  }).join('');
+  });
+  // returns_to: dashed, back to an earlier card, round the right of both, ignored by layout
+  const back = RETURNS.map(([a, b]) => {
+    const s = box(a), t = box(b), x = Math.max(s.r, t.r) + Math.max(8, half);
+    return `<path d="M${s.r},${s.cy + 6} H${x} V${t.cy + 6} H${t.r + 2}" class="back" marker-end="url(#ah-back)"><title>returns_to: ${b}</title></path>`;
+  });
+  $('#paths').innerHTML = fwd.join('') + back.join('');
 }
 
-/* ── the drawer: one story, walked step by step ─────────────────────── */
-function open(id, step = 0) {
-  sel = byId[id]; at = step;
+/* ── the drawer: one card, walked rule by rule (§7) ── */
+function open(id, step) {
+  sel = byId[id];
+  at = step ?? 0;
   document.body.classList.add('open');
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', c.dataset.id === id));
   draw(); wires();
@@ -809,34 +1076,59 @@ function shut() {
   document.querySelectorAll('.card.sel').forEach(c => c.classList.remove('sel'));
   wires();
 }
+const hopsOf = c => {
+  const h = EDGES.filter(([a, b]) => a === c.id || b === c.id).map(([a, b, w, all]) => {
+    const o = byId[a === c.id ? b : a], ol = laneOf(o);
+    return `<button class="hop" data-go="${o.id}"><span class="dir">${a === c.id ? 'hands off to' : all ? 'waits for' : 'comes from'}</span>${av(ol, 'sm')}<span>${ol.title}: ${esc(o.title)}${w ? ` <span class="takes">· when ${esc(w)}</span>` : ''}</span></button>`;
+  });
+  RETURNS.filter(([a, b]) => a === c.id || b === c.id).forEach(([a, b]) => {
+    const o = byId[a === c.id ? b : a];
+    h.push(`<button class="hop" data-go="${o.id}"><span class="dir">${a === c.id ? 'returns to' : 'returned to by'}</span>${av(laneOf(o), 'sm')}<span>${esc(o.title)} <span class="outside">(dashed)</span></span></button>`);
+  });
+  if (!outOf(c.id).length && !c.returns_to) h.push('<div class="hint" style="margin-top:6px">Nothing follows this card: its branch ends here.</div>');
+  return h.join('');
+};
+
 function draw() {
-  const s = sel, l = laneOf(s), step = s.steps[at], n = s.steps.length, noun = step.shot ? 'Picture' : 'Step';
-  const hops = EDGES.filter(e => e.includes(s.id)).map(([a, b]) => {
-    const o = byId[a === s.id ? b : a], ol = laneOf(o);
-    return `<button class="hop" data-go="${o.id}"><span class="dir">${a === s.id ? 'hands off to' : 'comes from'}</span>${av(ol, 'sm')}<span>${ol.name}: ${o.title}</span></button>`;
-  }).join('');
-  drawer.innerHTML = `
-    <div class="dhead"><div>
-      <button class="who" data-lane="${l.id}" title="Follow ${l.name}">${av(l, 'sm')}${l.name} · ${l.sub}${l.person ? ` · signed in as ${l.seed}` : ''}</button>
-      <h2>${s.title}</h2>
-      <div class="id mono">${s.id} · <span class="${s.status}">${GLYPH[s.status]} ${WORD[s.status]}</span></div>
-    </div><button class="x" data-shut title="Close (Esc)">×</button></div>
-    <div class="dbody">
-      <div class="sect">Walk the story</div>
-      ${step.shot ? `<div class="stage">${shot(s, step)}</div>` : `<div class="trace"><div class="none">Nothing on screen. This is what the system does.</div><code>${esc(step.trace)}</code></div>`}
-      <div class="walk"><span class="n">${noun} ${at + 1} of ${n}</span><span class="sp"></span>
-        <button data-step="-1" ${at === 0 ? 'disabled' : ''}>← Back</button><button data-step="1" ${at === n - 1 ? 'disabled' : ''}>Next →</button></div>
-      <p class="say">${esc(step.say)}</p>
-      <div class="film">${s.steps.map((x, i) => `<button class="${i === at ? 'on' : ''} ${x.shot ? '' : 't mono'}" data-at="${i}" title="${esc(x.say)}">${x.shot ? shot(s, x) : i + 1}</button>`).join('')}</div>
-      <div class="sect">Rules on this story</div>
-      ${s.rules.map(([t, v, why]) => `<div class="rule"><span class="g ${v}">${GLYPH[v]}</span><span>${esc(t)}${why ? `<small class="fail">${esc(why)}</small>` : ''}</span></div>`).join('')}
-      <div class="sect">Before and after</div>${hops}
-      <p class="hint"><kbd>←</kbd> <kbd>→</kbd> step through · <kbd>Esc</kbd> close · <kbd>−</kbd> <kbd>+</kbd> <kbd>0</kbd> zoom · drag to pan · the amber ring marks what the person acts on</p>
-    </div>`;
+  const c = sel, l = laneOf(c);
+  const who = c.user ? c.user.user.title : l.person ? l.users[0].title : '';
+  const head = `<div class="dhead"><div>
+      <button class="who" data-lane="${l.id}" title="Follow ${esc(l.title)}">${av(l, 'sm')}${l.title} · ${l.of}${who ? ` · signed in as ${esc(who)}` : ''}</button>
+      <h2>${esc(c.title)}</h2>
+      <div class="id mono">${c.st ? `${c.st.id}${c.id !== c.st.id ? ` · card ${c.id}` : ''}` : `card ${c.id}`} · <span class="${c.status === 'hole' ? 'nostory' : c.status}">${GLYPH[c.status]} ${WORD[c.status]}</span></div>
+    </div><button class="x" data-shut title="Close (Esc)">×</button></div>`;
+  if (!c.st) {
+    drawer.innerHTML = `${head}<div class="dbody">
+      <div class="holebox ${c.kind}">${c.kind === 'hole'
+        ? `<b>A hole in the process.</b> The process needs this step, and nobody has written its story yet. It is <code>by: ${c.by ?? c.as}</code>, one of our own, so it is ours to write.`
+        : `<b>An outside step.</b> ${esc(ACTOR[c.lane].title)} does this, and it is nobody's here to verify: the system is marked <code>outside: true</code>. It has no rules and no mark, and is here so the hand-offs around it read truthfully.`}</div>
+      ${c.takes ? `<div class="sect">Takes</div><p class="say">${esc(c.takes)}</p>` : ''}
+      <div class="sect">Before and after</div>${hopsOf(c)}</div>`;
+    return;
+  }
+  const r = c.rules[at], n = c.rules.length, keys = ruleKeys(r, surface);
+  const u = r.screens.length ? userOf(SC[r.screens[0]].as) : null;
+  const others = c.st.rules.filter(x => !c.rules.includes(x));
+  const anyApp = c.rules.some(x => x.app);
+  drawer.innerHTML = `${head}<div class="dbody">
+    <div class="sect">Walk the card <span class="seg pics-seg"><button data-surface="app" class="${surface === 'app' ? 'on' : ''}" ${anyApp ? '' : 'disabled title="No agent has judged these rules on local, so there is no picture of the app"'}>App on local</button><button data-surface="design" class="${surface === 'design' ? 'on' : ''}">Design</button></span></div>
+    ${keys.map(k => `<div class="stage">${picOfKey(k)}</div>`).join('')}
+    <div class="walk"><span class="n">Rule ${at + 1} of ${n}</span><span class="sp"></span>
+      <button data-step="-1" ${at === 0 ? 'disabled' : ''}>← Back</button><button data-step="1" ${at === n - 1 ? 'disabled' : ''}>Next →</button></div>
+    <p class="say">${esc(r.statement)}</p>
+    <div class="asw"><span class="${r.v}">${GLYPH[r.v]} ${WORD[r.v]}</span>${r.why ? ` <span class="why">· ${esc(r.why)}</span>` : ''}</div>
+    ${u && !u.isDefault ? `<div class="asw">Signed in as <b>${esc(u.user.title)}</b>, not ${esc(u.persona.title)}'s default user</div>` : ''}
+    <div class="film">${c.rules.map((x, i) => `<button class="${i === at ? 'on' : ''} ${x.screens.length ? '' : 't mono'}" data-at="${i}" title="${esc(x.statement)}">${x.screens.length ? picOfKey(ruleKeys(x, surface)[0]) : i + 1}</button>`).join('')}</div>
+    <div class="sect">Rules on this card</div>
+    ${c.rules.map(x => `<div class="rule"><span class="g ${x.v}">${GLYPH[x.v]}</span><span>${esc(x.statement)}<small class="mono">${x.id}</small></span></div>`).join('')}
+    ${others.length ? `<div class="sect">The story's rules on its other card</div>${others.map(x => `<div class="rule off"><span class="g ${x.v}">${GLYPH[x.v]}</span><span>${esc(x.statement)}<small class="mono">${x.id}</small></span></div>`).join('')}` : ''}
+    <div class="sect">Before and after</div>${hopsOf(c)}
+    <p class="hint"><kbd>←</kbd> <kbd>→</kbd> step through rules · <kbd>Esc</kbd> close · <kbd>−</kbd> <kbd>+</kbd> <kbd>0</kbd> zoom · drag to pan · the amber ring marks what the person acts on</p>
+  </div>`;
 }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('button[data-flow],[data-zoom],[data-id],[data-go],[data-step],[data-at],[data-shut],[data-lane],[data-mode],[data-persona],[data-journey]');
+  const t = e.target.closest('button[data-flow],[data-zoom],[data-id],[data-go],[data-step],[data-at],[data-shut],[data-lane],[data-mode],[data-persona],[data-journey],[data-surface]');
   if (!t) return;
   if (t.dataset.flow && t.tagName === 'BUTTON') { if (t.dataset.flow !== flow) turn(t.dataset.flow); }
   else if (t.dataset.zoom && t.tagName === 'BUTTON') t.dataset.zoom === 'fit' ? fit() : glide({ in: z * 1.3, out: z / 1.3, one: 1 }[t.dataset.zoom]);
@@ -844,6 +1136,7 @@ document.addEventListener('click', e => {
   else if (t.dataset.go) open(t.dataset.go);
   else if (t.dataset.step) { at += +t.dataset.step; draw(); }
   else if (t.dataset.at) { at = +t.dataset.at; draw(); }
+  else if (t.dataset.surface) { surface = t.dataset.surface; draw(); }
   else if ('shut' in t.dataset) shut();
   else if ('lane' in t.dataset) follow(t.dataset.lane === focus ? '' : t.dataset.lane);
   else if (t.dataset.mode) mode(t.dataset.mode);
@@ -862,35 +1155,39 @@ document.addEventListener('keydown', e => {
   }
   if (!sel) return;
   if (e.key === 'Escape') shut();
-  if (e.key === 'ArrowRight' && at < sel.steps.length - 1) { at++; draw(); }
+  if (!sel || !sel.st) return;
+  if (e.key === 'ArrowRight' && at < sel.rules.length - 1) { at++; draw(); }
   if (e.key === 'ArrowLeft' && at > 0) { at--; draw(); }
 });
+document.addEventListener('change', e => { if (e.target.id === 'who') follow(e.target.value); });
 
-/* ── personas: everyone in the system, on this board or not ─────────── */
+/* ── personas: everyone in the blueprint, on this board or not (§7) ── */
 function people() {
   const card = p => {
-    const own = STORIES.filter(s => s.lane === p.id), c = p.count || { pass: 0, fail: 0, mine: 0, unbuilt: 0 };
-    if (!p.count) own.forEach(s => c[s.status]++);
-    const n = Object.values(c).reduce((a, b) => a + b, 0);
-    const marks = Object.keys(c).filter(k => c[k]).map(k => `<span class="${k}">${GLYPH[k]} ${c[k]}</span>`).join(' ');
+    const own = STORIES.filter(s => s.as === p.id), c = {};
+    own.forEach(s => { const m = cardMark({ kind: 'story', rules: s.rules }); c[m] = (c[m] ?? 0) + 1; });
+    const marks = Object.keys(c).map(k => `<span class="${k}">${GLYPH[k]} ${c[k]}</span>`).join(' ');
+    const onBoard = CARDS.some(x => x.lane === p.id), others = OTHER_BOARDS[p.id] ?? [];
     return `<article class="pcard" id="p-${p.id}">
-      <div class="top">${av(p, 'lg')}<div><b>${p.name}</b><small>${p.sub}</small></div></div>
+      <div class="top">${av(p, 'lg')}<div><b>${p.title}</b><small>${p.of}</small></div></div>
       <p class="blurb">${esc(p.blurb)}</p>
       <dl>
         <dt>Uses</dt><dd>${p.uses}</dd>
-        <dt>Signed in as</dt><dd><code>{fixtures.${p.as}}</code>${TARGETS.map(t => p.on[t]
-          ? `<div class="tg"><span>${t}</span><span>${p.on[t]}</span></div>`
-          : `<div class="tg none"><span>${t}</span><span>no seeded user set, so nothing of theirs can be walked there</span></div>`).join('')}</dd>
-        <dt>Stories</dt><dd>${n} ${n === 1 ? 'story' : 'stories'} &nbsp;${marks}</dd>
-        <dt>On boards</dt><dd class="bd">${own.length ? `<button data-journey="${p.id}" title="Open the board, following ${p.name}">${BOARD} →</button>` : ''}${p.boards.map(b => `<span title="Not drawn in this sketch">${b}</span>`).join('')}${own.length || p.boards.length ? '' : '<span>none yet</span>'}</dd>
+        <dt>Users</dt><dd>${p.users.map((u, i) => `<div style="margin-bottom:5px"><b style="font-weight:600">${esc(u.title)}</b>${i ? '' : ' <span class="outside">· default</span>'}<br><code>{fixtures.${u.fixture}}</code>${TARGETS.map(t => FIXTURES[t].has(u.fixture)
+          ? `<div class="tg"><span>${t}</span><span>has a value</span></div>`
+          : `<div class="tg none"><span>${t}</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div>`).join('')}</div>`).join('')}</dd>
+        <dt>Stories</dt><dd>${own.length ? `${own.length} ${own.length === 1 ? 'story' : 'stories'} &nbsp;${marks}` : 'none drawn in this sketch'}</dd>
+        <dt>On boards</dt><dd class="bd">${onBoard ? `<button data-journey="${p.id}" title="Open the board, following ${esc(p.title)}">${BOARD.title} →</button>` : ''}${others.map(b => `<span title="Not drawn in this sketch">${b}</span>`).join('')}${onBoard || others.length ? '' : '<span>none yet</span>'}</dd>
       </dl></article>`;
   };
-  const group = g => { const ps = PERSONAS.filter(p => p.group === g.id); return ps.length ? `<h2>${g.title}</h2><div class="grid">${ps.map(card).join('')}</div>` : ''; };
+  const group = g => { const ps = ACTORS.filter(p => p.person && p.group === g.id); return ps.length ? `<h2>${g.title}</h2><div class="grid">${ps.map(card).join('')}</div>` : ''; };
+  const sys = SB.systems.map(x => x.title + (x.outside ? ' (outside)' : '')).join(', ').replace(/, ([^,]*)$/, ' and $1');
+  const laneless = SB.systems.filter(x => !used.has(x.id)).map(x => x.title);
   $('#people').innerHTML = `<div class="wrap">
     <h1>Personas</h1>
-    <p class="lede">Everyone who uses the system. A story is one persona's, a screen is signed in as one, and a board's lanes are the personas of its stories.</p>
-    ${GROUPS.map(group).join('')}
-    <p class="foot">${SYSTEMS.map(x => x.name).join(' and ')} have lanes on a board and are not personas: nobody signs in as them. Every name and heading here is this blueprint's own.</p></div>`;
+    <p class="lede">Everyone who uses the system. A story is one persona's, a screen is signed in as one of its users, and a board's lanes are the personas of its stories.</p>
+    ${SB.groups.map(group).join('')}
+    <p class="foot">${sys} have lanes on a board and are not personas: nobody signs in as them. ${laneless.length ? `${laneless.join(' and ')} has no card on this board, so no lane. ` : ''}Every name and heading here is this blueprint's own.</p></div>`;
 }
 function mode(m, lit) {
   document.body.dataset.mode = m;
@@ -899,7 +1196,6 @@ function mode(m, lit) {
   if (lit) $(`#p-${lit}`).scrollIntoView({ block: 'center' });
   if (m === 'boards') wires();
 }
-document.addEventListener('change', e => { if (e.target.id === 'who') follow(e.target.value); });
 
 /* ── the canvas: pan anywhere, zoom anywhere ─────────────────────────
  * The whole board, lane names and phase headings included, is one object
@@ -909,12 +1205,11 @@ document.addEventListener('change', e => { if (e.target.id === 'who') follow(e.t
  * to its column, so a card that has just lost its picture comes back at a
  * readable size and shrinks from there.
  */
-const MINZ = 0.12, MAXZ = 2, COLW = 184, LANEW = 196, KEY = 'board-view:contractor-onboarding';
-const DETAIL = [['near', 0.66, 184], ['mid', 0.42, 116], ['far', 0, 0]];                 // cards: name, drawn from this z up, base width
+const MINZ = 0.1, MAXZ = 2, COLW = 320, LANEW = 196, KEY = 'board-view:contractor-onboarding:2';
+const DETAIL = [['near', 0.6, 320], ['mid', 0.4, 200], ['far', 0, 0]];                    // cards: name, drawn from this z up, base width
 const LANE = [['more', 1.25, 196], ['full', 0.7, 196], ['name', 0.4, 128], ['av', 0, 0]];  // lane names, the same way
 const scroller = $('#scroll');
 let z = 1, tx = 0, ty = 0, gliding = 0;
-const cols = Math.max(...STORIES.map(s => s.col));
 const bound = v => Math.min(MAXZ, Math.max(MINZ, v));
 const view = () => ({ vw: scroller.clientWidth, vh: scroller.clientHeight, W: board.offsetWidth, H: board.offsetHeight });
 
@@ -927,7 +1222,6 @@ function place() {
   try { localStorage.setItem(KEY, JSON.stringify([z, tx, ty])); } catch {}
 }
 function pan(dx, dy) { cancelAnimationFrame(gliding); hush(); tx += dx; ty += dy; place(); }
-
 /* A waits label that no longer fits its stretch is dropped; the dotted line and its tooltip stay. */
 function tighten() {
   document.querySelectorAll('.gap').forEach(g => {
@@ -945,7 +1239,7 @@ function zoom(to, x = scroller.clientWidth / 2, y = scroller.clientHeight / 2) {
   board.style.setProperty('--z', z);
   board.style.setProperty('--cz', cardBase ? COLW * z / cardBase : 1);
   const pz = Math.min(1.5, Math.max(0.6, z)), g = Math.max(18 * z, 10);   // the gap never closes: a card keeps clear of the lane names
-  board.style.setProperty('--lz', laneBase ? (flow === 'down' ? COLW : LANEW) * z / laneBase : Math.max(0.45, Math.min(1, z / 0.4)));
+  board.style.setProperty('--lz', laneBase ? LANEW * z / laneBase : Math.max(0.45, Math.min(1, z / 0.4)));
   board.style.setProperty('--pz', pz);
   board.style.setProperty('--g', `${g}px`);
   board.style.setProperty('--hg', `${g / 2 / pz}px`);
@@ -970,13 +1264,17 @@ function glide(to, each, done) {
   };
   gliding = requestAnimationFrame(step);
 }
-/* Fit: across, the largest zoom at which the whole board is in the window. Down, the board is as wide as the
-   window allows and starts at the top: it is meant to be scrolled. Either way it sits under the Follow box. */
-function fit(tries = 3) {
-  const top = 52, down = flow === 'down';
+/* Fit: across, the largest zoom at which the whole board is in the window. Down, as wide as the window allows,
+   from the top: it is meant to be scrolled. Found by measuring, since a card's height changes with the detail it
+   shows and a stack of alternatives makes that change large. */
+function fit() {
+  const top = 52, down = flow === 'down', z0 = z, tx0 = tx, ty0 = ty;
+  const fits = v => { zoom(v); const { vw, vh, W, H } = view(); return W <= vw - 40 && (down || H <= vh - top - 12); };
+  let lo = MINZ, hi = down ? 1.15 : 1;
+  if (fits(hi)) lo = hi; else for (let i = 0; i < 12; i++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
+  zoom(z0); tx = tx0; ty = ty0; place();
   const centre = () => { const { vw, vh, W, H } = view(); tx = (vw - W) / 2; ty = down ? top : Math.max(top, (vh + top - 12 - H) / 2); place(); };
-  const want = () => { const { vw, vh, W, H } = view(); return Math.min((vw - 40) / W, down ? Infinity : (vh - top - 12) / H); };
-  glide(Math.min(down ? 1.15 : 1, z * want()), centre, () => { if (tries > 1 && want() < 0.99) fit(tries - 1); });
+  glide(lo, centre, centre);
 }
 /* Which way time runs. The board is redrawn; who is followed and what is open stay as they were. */
 function turn(to) {
@@ -989,8 +1287,7 @@ function turn(to) {
 }
 /* The hover card: what a card would say if it were big enough to say it. */
 const tip = $('#tip');
-let tipFor = null;
-let tipAt = -1, galFor = null;
+let tipFor = null, tipAt = -1, galFor = null;
 function hush() { tip.hidden = true; tipFor = null; tipAt = -1; scrub(null); }
 /* Which of n pictures the pointer is over, when a width is split into n equal parts. */
 const part = (e, el, n) => { const r = el.getBoundingClientRect(); return Math.min(n - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * n))); };
@@ -1001,24 +1298,23 @@ function scrub(card, i = 0) {
   if (card) show(card, i);
 }
 function show(card, i) {
-  const n = byId[card.dataset.id].steps.length;
+  const n = byId[card.dataset.id].pics.length;
   card.querySelectorAll('.sl').forEach((x, k) => x.classList.toggle('on', k === i));
   card.querySelectorAll('.bars i').forEach((x, k) => x.classList.toggle('on', k === i));
   const c = card.querySelector('.count');
-  if (c) c.textContent = card.matches(':hover') && n > 1 ? `${i + 1} / ${n}` : `${n} pictures`;
+  if (c) c.textContent = card.matches(':hover') && n > 1 ? `${i + 1} / ${n}` : `${n} ${n === 1 ? 'picture' : 'pictures'}`;
 }
+/* Under each picture, the statement of the rule it is evidence for. A card with no story says which kind it is. */
 function tell(card, i = 0) {
   if (card === tipFor && i === tipAt) return;
   const moved = card !== tipFor;
   tipFor = card; tipAt = i;
-  const s = byId[card.dataset.id], l = laneOf(s), n = s.steps.length, step = s.steps[i], r = card.getBoundingClientRect();
-  tip.innerHTML = `${step.shot
-      ? `<div class="pic">${shot(s, step)}${bars(n, i)}</div>`
-      : `<div class="pic trace"><code>${esc(step.trace)}</code>${bars(n, i)}</div>`}<div class="in">
-    <div class="who">${av(l, 'sm')}${l.name}${s.kind ? ` · ${s.kind}, no screen` : ''}${n > 1 ? `<span class="n">${i + 1} / ${n}</span>` : ''}</div>
-    <b>${esc(s.title)}</b>
-    <div class="meta"><span class="${s.status}">${GLYPH[s.status]} ${WORD[s.status]}</span><span>${s.rules.length} rules</span>${s.takes ? `<span class="takes">${s.takes}</span>` : ''}</div>
-    <div class="say">${esc(step.say)}</div></div>`;
+  const c = byId[card.dataset.id], l = laneOf(c), n = c.pics.length, p = c.pics[i], r = card.getBoundingClientRect();
+  tip.innerHTML = `${p ? `<div class="pic">${picOfKey(p.key)}${bars(n, i)}</div>` : ''}<div class="in">
+    <div class="who">${av(l, 'sm')}${l.title}${c.user ? ` · ${esc(c.user.user.title)}` : ''}${n > 1 ? `<span class="n">${i + 1} / ${n}</span>` : ''}</div>
+    <b>${esc(c.title)}</b>
+    <div class="meta"><span class="${c.status === 'hole' ? 'nostory' : c.status}">${GLYPH[c.status]} ${WORD[c.status]}</span>${c.st ? `<span>${c.rules.length} rules</span>` : ''}${c.takes ? `<span class="takes">${esc(c.takes)}</span>` : ''}</div>
+    ${p ? `<div class="say">${esc(p.rules[0].statement)}</div>` : ''}</div>`;
   tip.hidden = false;
   if (!moved) return;                     // scrubbing: the card stays where it is while its picture changes
   const h = Math.max(tip.offsetHeight, 300), below = r.bottom + 8 + h < innerHeight;
@@ -1066,13 +1362,13 @@ scroller.addEventListener('pointerdown', e => {
 scroller.addEventListener('pointermove', e => {
   const card = e.target.closest?.('.card');
   if (!card || ptrs.size) return hush();
-  const n = byId[card.dataset.id].steps.length;
+  const n = byId[card.dataset.id].pics.length;
   if (board.dataset.zoom === 'near') {
     // Full size: the picture on the card is the gallery. Only the picture scrubs; the words below it do not.
     tip.hidden = true; tipFor = null;
-    const pic = card.querySelector('.gal');
-    scrub(pic ? card : null, pic && e.target.closest('.gal') ? part(e, pic, n) : 0);
-  } else { scrub(null); tell(card, part(e, card, n)); }  // smaller: the card is the scrubber, the pictures show beside it
+    const g = card.querySelector('.gal');
+    scrub(g ? card : null, g && e.target.closest('.gal') ? part(e, g, n) : 0);
+  } else { scrub(null); tell(card, n ? part(e, card, n) : 0); }  // smaller: the card is the scrubber, the pictures show beside it
 });
 scroller.addEventListener('pointerleave', hush);
 addEventListener('pointermove', e => {
@@ -1099,10 +1395,11 @@ addEventListener('pointerup', lift); addEventListener('pointercancel', lift);
 scroller.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
 
 build(); people();
-let kept = [1, 0, 0];
+let kept = null;
 try { const k = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(k) && k.every(Number.isFinite)) kept = k; } catch {}
-zoom(kept[0]); tx = kept[1]; ty = kept[2]; place();
+if (kept) { zoom(kept[0]); tx = kept[1]; ty = kept[2]; place(); } else { zoom(0.72); tx = 40; ty = 56; place(); }   // first visit: readable, from the start; Fit shows the whole board
 new ResizeObserver(() => { tighten(); wires(); }).observe(board);
+new ResizeObserver(() => wires()).observe(scroller);
 </script>
 </body>
 </html>
