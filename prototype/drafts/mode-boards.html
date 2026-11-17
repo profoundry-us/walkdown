@@ -1,0 +1,282 @@
+<!doctype html>
+<!-- DESIGN DRAFT: mode-boards -->
+<!-- Drawn for design request n-0638 (ADR 0018 section 7). Not yet accepted. -->
+<!-- Intent: Boards takes the whole window under the same top bar, with the switch where it was on Rules, the open board named beside it, and the rule list and the app out of sight. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — Boards, taking the whole window</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  /* The mode switch, unchanged from the mode-switch draft. */
+  .modes { display: inline-flex; flex: none; border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent);
+    border-radius: .4rem; padding: 1px; gap: 1px; }
+  .modes button { font-size: 11px; font-weight: 600; line-height: 1; padding: 4px 8px; border-radius: .3rem; cursor: pointer; }
+  .modes button[aria-pressed="true"] { background: var(--color-base-content); color: var(--color-base-100); }
+  .modes button[aria-pressed="false"]:hover { background: var(--color-base-200); }
+
+  /* The canvas: the page under the bar, edge to edge. The board is one object
+     on it and can be moved and zoomed. There is no desk here, because no app
+     is lying on it. */
+  .canvas { position: relative; overflow: hidden; background-color: var(--color-base-200);
+    background-image: radial-gradient(color-mix(in oklab, currentColor 14%, transparent) 1px, transparent 1px);
+    background-size: 22px 22px; }
+  .float { position: absolute; z-index: 5; background: var(--color-base-100); border-radius: .5rem;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); }
+
+  /* The board, drawn only far enough to show that a board is here. Its cards,
+     its hand-offs and its drawer belong to other screens. */
+  .board { position: relative; width: 1170px; height: 426px; background: var(--color-base-100);
+    border: 1px solid var(--color-base-300); border-radius: .6rem;
+    display: grid; grid-template-columns: 150px repeat(6, 170px); grid-template-rows: 30px repeat(3, 132px); }
+  .board svg { position: absolute; inset: 0; pointer-events: none; }
+  .phase { grid-row: 1; padding: 8px 10px 0; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    opacity: .5; border-left: 1px solid var(--color-base-300); }
+  .lane { grid-column: 1; padding: 12px 10px; border-top: 1px solid var(--color-base-300); font-size: 12px; line-height: 1.3; }
+  .lane b { display: block; }
+  .lane span { font-size: 10.5px; opacity: .55; }
+  .lane.split, .cell.split { border-top: 2px solid color-mix(in oklab, currentColor 45%, transparent); }
+  .cell { border-top: 1px solid var(--color-base-300); border-left: 1px solid var(--color-base-200); padding: 10px; }
+  .card { position: relative; z-index: 1; width: 150px; height: 112px; background: var(--color-base-100);
+    border: 1px solid color-mix(in oklab, currentColor 30%, transparent); border-radius: .4rem; overflow: hidden;
+    display: flex; flex-direction: column; }
+  .card .pic { height: 44px; flex: none; background: repeating-linear-gradient(135deg, var(--color-base-200) 0 6px, var(--color-base-100) 6px 12px);
+    border-bottom: 1px solid var(--color-base-300); }
+  .card .t { padding: 5px 7px 0; font-size: 11.5px; font-weight: 600; line-height: 1.25;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .m { margin-top: auto; padding: 0 7px 5px; font-size: 10px; opacity: .6; }
+  .card.outside { border-style: dashed; justify-content: center; }
+  .groups { position: absolute; right: 100%; top: 30px; bottom: 0; margin-right: 10px; width: 16px; }
+  .groups span { position: absolute; left: 0; width: 16px; display: grid; place-items: center;
+    writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; opacity: .45; }
+
+  /* The small states under the main one: the same window, drawn small. */
+  .mini { display: flex; flex-direction: column; height: 15.5rem; background: var(--color-base-200);
+    border: 1px solid var(--color-base-300); border-radius: .6rem; overflow: hidden; }
+  .mini .addr { font: 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 4px 10px; opacity: .6;
+    background: var(--color-base-100); border-bottom: 1px solid var(--color-base-300); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini .addr b { opacity: 1; font-weight: 700; }
+  .say { margin: auto; max-width: 25rem; padding: 1rem; text-align: center; }
+  .say h2 { font-size: 15px; font-weight: 700; }
+  .say p { margin-top: .4rem; font-size: 12px; line-height: 1.5; opacity: .7; }
+  code { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--color-base-200); padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body class="bg-base-200 text-sm">
+
+  <!-- ── The main state: one whole window ─────────────────────────────── -->
+  <div class="flex h-screen flex-col">
+    <!-- The same bar as on Rules. Up to and including the switch, nothing has
+         moved. What is gone is what acts on the app, which is hidden: the
+         screen picker, the fade, the viewport buttons and Pin mode. -->
+    <header class="navbar relative z-10 min-h-0 flex-none gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+            data-testid="panel.bar">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+
+      <span class="modes" data-testid="panel.modes" role="group" aria-label="Mode">
+        <button type="button" aria-pressed="false"
+                title="The rules, beside the app. They come back on the rule and the screen you left.">Rules</button>
+        <button type="button" aria-pressed="true"
+                title="A board of the process. You are here.">Boards</button>
+        <button type="button" aria-pressed="false"
+                title="Everyone who uses the app. It takes the whole window, as this does.">Personas</button>
+      </span>
+
+      <!-- Which board is open, in the place where Rules names its screen. It
+           opens a list of the blueprint's boards; that list is drawn open in
+           the small states below. -->
+      <button class="btn btn-xs btn-ghost min-w-0 max-w-56 shrink gap-1 font-normal" data-testid="modes.board-picker"
+              title="Which board this is. Choose another."><span class="truncate">Getting a spot</span> ▾</button>
+
+      <span class="ml-auto flex items-center gap-2">
+        <span class="flex items-center gap-1.5 text-xs" title="Which way time runs on the board">
+          <span class="opacity-50">Time runs</span>
+          <span class="join border-[1.5px] border-dashed border-base-content/25">
+            <button class="btn btn-xs join-item btn-active">Across →</button>
+            <button class="btn btn-xs join-item btn-ghost">Down ↓</button>
+          </span>
+        </span>
+        <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+        <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+      </span>
+    </header>
+
+    <!-- The page fills the window under the bar. No rule list and no App pane
+         can be seen; both are hidden and still running underneath. -->
+    <main class="canvas grid flex-1 place-items-center" data-testid="modes.page">
+      <!-- Who to follow: the one control that floats over the board. -->
+      <div class="float flex items-center text-xs" style="left:.75rem;top:.75rem;gap:.375rem;padding:.25rem .5rem">
+        <span class="opacity-50">Follow</span>
+        <button class="btn btn-xs btn-ghost gap-1 font-semibold">Everyone ▾</button>
+      </div>
+
+      <div class="board" aria-label="The board Getting a spot">
+        <div class="groups" aria-hidden="true">
+          <span style="top:0;height:264px">People</span>
+          <span style="top:264px;height:132px">Systems</span>
+        </div>
+
+        <svg viewBox="0 0 1170 426" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.5" aria-hidden="true">
+          <defs><marker id="tip" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 8 4 0 8z" fill="currentColor" fill-opacity=".45" stroke="none"/></marker></defs>
+          <path d="M310 96 C322 96 318 360 330 360" marker-end="url(#tip)"/>
+          <path d="M480 360 C492 360 488 96 500 96" marker-end="url(#tip)"/>
+          <path d="M650 96 C662 96 658 228 670 228" marker-end="url(#tip)"/>
+          <path d="M820 228 H840" marker-end="url(#tip)"/>
+          <path d="M990 228 C1002 228 998 96 1010 96" marker-end="url(#tip)"/>
+        </svg>
+
+        <div style="grid-row:1;grid-column:1"></div>
+        <div class="phase" style="grid-column:2">Join</div>
+        <div class="phase" style="grid-column:3 / 5">Confirm</div>
+        <div class="phase" style="grid-column:5 / 8">Invite</div>
+
+        <!-- Visitor -->
+        <div class="lane" style="grid-row:2"><b>Visitor</b><span>of the public site</span></div>
+        <div class="cell" style="grid-row:2;grid-column:2">
+          <div class="card"><div class="pic"></div><div class="t">Join the waitlist</div><div class="m">✓ · 3 rules</div></div></div>
+        <div class="cell" style="grid-row:2;grid-column:3"></div>
+        <div class="cell" style="grid-row:2;grid-column:4">
+          <div class="card"><div class="pic"></div><div class="t">Confirm the email address</div><div class="m">○ · 2 rules</div></div></div>
+        <div class="cell" style="grid-row:2;grid-column:5"></div>
+        <div class="cell" style="grid-row:2;grid-column:6"></div>
+        <div class="cell" style="grid-row:2;grid-column:7">
+          <div class="card"><div class="pic"></div><div class="t">Accept the invite and take the spot</div><div class="m">✍︎ · 2 rules · ends here</div></div></div>
+
+        <!-- Waitlist admin -->
+        <div class="lane" style="grid-row:3"><b>Waitlist admin</b><span>of the back office</span></div>
+        <div class="cell" style="grid-row:3;grid-column:2"></div>
+        <div class="cell" style="grid-row:3;grid-column:3"></div>
+        <div class="cell" style="grid-row:3;grid-column:4"></div>
+        <div class="cell" style="grid-row:3;grid-column:5">
+          <div class="card"><div class="pic"></div><div class="t">Review who is waiting</div><div class="m">✓ · 2 rules</div></div></div>
+        <div class="cell" style="grid-row:3;grid-column:6">
+          <div class="card"><div class="pic"></div><div class="t">Invite the next people in line</div><div class="m">□ · 1 rule</div></div></div>
+        <div class="cell" style="grid-row:3;grid-column:7"></div>
+
+        <!-- Email service: a system, under the line between the groups -->
+        <div class="lane split" style="grid-row:4"><b>Email service</b><span>a system</span></div>
+        <div class="cell split" style="grid-row:4;grid-column:2"></div>
+        <div class="cell split" style="grid-row:4;grid-column:3">
+          <div class="card outside"><div class="t">Send the confirmation email</div><div class="m" style="margin-top:6px">outside step · a few seconds</div></div></div>
+        <div class="cell split" style="grid-row:4;grid-column:4"></div>
+        <div class="cell split" style="grid-row:4;grid-column:5"></div>
+        <div class="cell split" style="grid-row:4;grid-column:6"></div>
+        <div class="cell split" style="grid-row:4;grid-column:7"></div>
+      </div>
+
+      <!-- The address, written here because a design page has no address bar of
+           its own. It names the mode and the board, and nothing else: where the
+           board sits and how far it is zoomed are kept in the browser. -->
+      <div class="float" style="left:.75rem;bottom:.75rem;padding:.25rem .625rem;font-size:11px" data-testid="modes.address">
+        <span class="opacity-50">The address ends</span>
+        <span class="font-mono font-semibold">?mode=boards&amp;board=getting-a-spot</span>
+        <span class="opacity-50">, so a link opens here.</span>
+      </div>
+
+      <div class="float flex items-center text-xs" style="right:.75rem;bottom:.75rem;gap:2px;padding:2px">
+        <button class="btn btn-xs btn-ghost btn-square" title="Zoom out">−</button>
+        <span class="text-center opacity-60" style="width:2.5rem">100%</span>
+        <button class="btn btn-xs btn-ghost btn-square" title="Zoom in">+</button>
+        <button class="btn btn-xs btn-ghost" title="Show the whole board in the window">Fit</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Small states of the same screen ──────────────────────────────── -->
+  <section class="border-t border-dashed border-base-content/25 bg-base-100" style="padding:1.5rem 1.5rem 2.5rem">
+    <h2 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Other states of this screen</h2>
+    <p class="text-xs opacity-60" style="margin-top:.25rem">Each is the same window, drawn small. The bar and the switch are as above;
+      only the left of the bar is drawn.</p>
+
+    <div class="grid" style="margin-top:1rem;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(30rem,1fr))">
+
+      <!-- 1. A blueprint with no board. Boards is still offered. -->
+      <figure data-state="no-boards">
+        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">A blueprint with no board</figcaption>
+        <div class="mini">
+          <div class="addr">…<b>?mode=boards</b></div>
+          <div class="flex flex-none items-center gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+            <span class="font-extrabold tracking-tight">walkdown</span>
+            <span class="text-xs opacity-50" style="white-space:nowrap">walkdown-example</span>
+            <span class="modes" role="group" aria-label="Mode">
+              <button type="button" aria-pressed="false">Rules</button>
+              <button type="button" aria-pressed="true">Boards</button>
+              <button type="button" aria-pressed="false">Personas</button>
+            </span>
+            <!-- No board picker: there is nothing to choose between. -->
+          </div>
+          <div class="canvas flex flex-1">
+            <div class="say">
+              <h2>This blueprint has no boards.</h2>
+              <p>A board puts the blueprint's stories in the order people meet them.
+                Add one as a file in the blueprint's <code>boards/</code> folder and it opens here.</p>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 2. The address names a board the blueprint does not have. -->
+      <figure data-state="no-such-board">
+        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">An address naming a board the blueprint does not have</figcaption>
+        <div class="mini">
+          <div class="addr">…<b>?mode=boards&amp;board=refunds</b></div>
+          <div class="flex flex-none items-center gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+            <span class="font-extrabold tracking-tight">walkdown</span>
+            <span class="text-xs opacity-50" style="white-space:nowrap">walkdown-example</span>
+            <span class="modes" role="group" aria-label="Mode">
+              <button type="button" aria-pressed="false">Rules</button>
+              <button type="button" aria-pressed="true">Boards</button>
+              <button type="button" aria-pressed="false">Personas</button>
+            </span>
+            <button class="btn btn-xs btn-ghost gap-1 font-normal opacity-70">Choose a board ▾</button>
+          </div>
+          <div class="canvas flex flex-1">
+            <div class="say">
+              <h2>There is no board called <code style="font-size:13px">refunds</code> here.</h2>
+              <p>It may have been renamed or removed since the link was made. Choose one of this blueprint's boards.</p>
+              <div class="flex flex-wrap justify-center" style="margin-top:.75rem;gap:.5rem">
+                <button class="btn btn-xs border-[1.5px] border-dashed border-base-content/25">Getting a spot</button>
+                <button class="btn btn-xs border-[1.5px] border-dashed border-base-content/25">Exporting the list</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <!-- 3. Choosing another board: the picker, open. -->
+      <figure data-state="picker-open">
+        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">Choosing another board</figcaption>
+        <div class="mini">
+          <div class="addr">…<b>?mode=boards&amp;board=getting-a-spot</b></div>
+          <div class="flex flex-none items-center gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5">
+            <span class="font-extrabold tracking-tight">walkdown</span>
+            <span class="text-xs opacity-50" style="white-space:nowrap">walkdown-example</span>
+            <span class="modes" role="group" aria-label="Mode">
+              <button type="button" aria-pressed="false">Rules</button>
+              <button type="button" aria-pressed="true">Boards</button>
+              <button type="button" aria-pressed="false">Personas</button>
+            </span>
+            <button class="btn btn-xs btn-active gap-1 font-normal">Getting a spot ▴</button>
+          </div>
+          <div class="canvas relative flex-1">
+            <div class="float text-xs shadow-lg" style="left:24rem;top:.25rem;width:15rem;border-style:solid;border-width:1px;padding:.25rem">
+              <div class="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">Boards in walkdown-example</div>
+              <div class="flex items-center gap-2 rounded bg-base-200 px-2 py-1.5">
+                <span style="width:.75rem">✓</span><span class="font-semibold">Getting a spot</span><span class="ml-auto opacity-50">6 cards</span></div>
+              <div class="flex items-center gap-2 rounded px-2 py-1.5">
+                <span style="width:.75rem"></span><span>Exporting the list</span><span class="ml-auto opacity-50">4 cards</span></div>
+              <p class="mt-1 border-t border-dashed border-base-content/25 px-2 pb-1 pt-1.5 text-[10.5px] leading-snug opacity-55">
+                Each board opens where you left it. The address changes to name it.</p>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

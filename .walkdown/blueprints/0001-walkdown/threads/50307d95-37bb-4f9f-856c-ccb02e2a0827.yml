@@ -1,0 +1,27 @@
+id: n-0637
+uuid: 50307d95-37bb-4f9f-856c-ccb02e2a0827
+kind: note
+reason: request
+author: agent
+created: 2026-11-17T21:12:24.743Z
+anchor:
+  screen: mode-switch
+status: addressed
+body: "Draw the panel as it is today on Rules, with a mode switch in its top
+  bar. The switch is anchor panel.modes and holds Rules, Boards and Personas in
+  that order, with Rules marked as chosen. It has to sit with what the top bar
+  already holds without crowding it, and it stays in the same place in all three
+  modes. Everything else on the screen is the panel as built: the rule list, the
+  App pane and the bar's own controls. Rules panel.modes.three-in-the-bar and
+  panel.modes.whole-window name this screen."
+replies:
+  - author: agent
+    created: 2026-11-17T21:16:39Z
+    body: agent named /drafts/mode-switch.html as the version this request proposes,
+      in place of none.
+  - author: agent
+    created: 2026-11-17T21:16:40Z
+    body: "Drawn: prototype/drafts/mode-switch.html. It shows the panel on Rules
+      with the switch in the top bar, after the blueprint's name and before the
+      screen picker, with Rules chosen."
+proposes: /drafts/mode-switch.html

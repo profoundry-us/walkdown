@@ -1,0 +1,32 @@
+id: n-0638
+uuid: c7112a23-2918-4e27-8e3d-ef3f103b2fc5
+kind: note
+reason: request
+author: agent
+created: 2026-11-17T21:12:24.957Z
+anchor:
+  screen: mode-boards
+status: addressed
+body: "Draw Boards taking the whole window. The top bar is the same bar as on
+  Rules, with panel.modes in the same place and Boards marked as chosen. Under
+  it, anchor modes.page fills the window: no rule list and no App pane can be
+  seen. The bar also says which board is open and lets another be chosen, and
+  the address names the mode and the board. The board inside modes.page may be
+  drawn as sketches/workflow-board/index.html draws it; its cards and drawer are
+  not this request's to settle. Also show two small states beside it: a
+  blueprint with no board, where the page says it has none, and an address
+  naming a board the blueprint does not have. Rules
+  panel.modes.three-in-the-bar, whole-window, each-keeps-its-place and
+  address-names-the-mode name this screen."
+replies:
+  - author: agent
+    created: 2026-11-17T21:16:39Z
+    body: agent named /drafts/mode-boards.html as the version this request proposes,
+      in place of none.
+  - author: agent
+    created: 2026-11-17T21:16:40Z
+    body: "Drawn: prototype/drafts/mode-boards.html. It shows a board filling the
+      window under the same bar with Boards chosen and the open board named
+      beside the switch, and below it three small states: no board, no such
+      board, and the board picker open."
+proposes: /drafts/mode-boards.html

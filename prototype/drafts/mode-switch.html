@@ -1,0 +1,141 @@
+<!doctype html>
+<!-- DESIGN DRAFT: mode-switch -->
+<!-- Drawn for design request n-0637 (ADR 0018 section 7). Not yet accepted. -->
+<!-- Intent: the panel as it is today, with one new thing in its top bar: a switch between Rules, Boards and Personas, sitting after the blueprint's name with Rules chosen. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — the mode switch, on Rules</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  .desk {
+    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
+      repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
+    opacity: .08; transform: rotate(35deg);
+  }
+  /* The mode switch: three segments in one dashed box, the chosen one filled.
+     It is the same shape as the bar's other small switches, so it reads as
+     part of this bar. It sits after the blueprint's name because it chooses
+     between three views of that blueprint. Nothing to its left changes with
+     the mode, so it is in the same place in all three. The same block is in
+     the mode-boards draft, unchanged. */
+  .modes { display: inline-flex; flex: none; border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent);
+    border-radius: .4rem; padding: 1px; gap: 1px; }
+  .modes button { font-size: 11px; font-weight: 600; line-height: 1; padding: 4px 8px; border-radius: .3rem; cursor: pointer; }
+  .modes button[aria-pressed="true"] { background: var(--color-base-content); color: var(--color-base-100); }
+  .modes button[aria-pressed="false"]:hover { background: var(--color-base-200); }
+
+  /* The example waitlist page, as the app serves it. */
+  .wl { height: 100%; display: grid; place-items: center; }
+  .wl-card { width: 22rem; padding: 1.75rem; border: 1px solid var(--color-base-300); border-radius: .75rem; }
+  .wl h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; }
+  .wl p { font-size: 12.5px; opacity: .65; margin-top: .25rem; }
+  .wl input { width: 100%; margin-top: 1rem; padding: .5rem .65rem; border: 1px solid var(--color-base-300); border-radius: .4rem; font-size: 13px; }
+  .wl .go { margin-top: .6rem; width: 100%; padding: .5rem; border-radius: .4rem; font-weight: 700; font-size: 13px;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <div class="desk" data-testid="panel.desk"></div>
+
+  <header class="navbar relative z-10 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+    <span class="font-extrabold tracking-tight">walkdown</span>
+    <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+
+    <!-- New. Rules is chosen whenever the address names no mode. Boards is
+         offered even when the blueprint has no board; its page then says so. -->
+    <span class="modes" data-testid="panel.modes" role="group" aria-label="Mode">
+      <button type="button" aria-pressed="true"
+              title="The rules, beside the app. You are here.">Rules</button>
+      <button type="button" aria-pressed="false"
+              title="A board of the process. It takes the whole window, and the app keeps running underneath.">Boards</button>
+      <button type="button" aria-pressed="false"
+              title="Everyone who uses the app. It takes the whole window, and the app keeps running underneath.">Personas</button>
+    </span>
+
+    <!-- The screen picker gives way first when the bar is narrow: its title is
+         cut with an ellipsis before the switch and the fade can meet. -->
+    <button class="btn btn-xs btn-ghost min-w-0 max-w-40 shrink gap-1 font-normal" data-testid="panel.screen-picker"
+            title="Which screen this page is: Join the waitlist"><span class="truncate">Join the waitlist</span> ▾</button>
+
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" data-testid="panel.fade">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28"
+             aria-label="Fade between the design and the app">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+
+    <span class="ml-auto flex items-center gap-2">
+      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
+        <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
+        <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
+        <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
+      </span>
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+    </span>
+  </header>
+
+  <!-- Everything under the bar is the panel as it is today. Choosing Boards or
+       Personas hides all of it without closing it: the page in the frame is
+       not loaded again, and what was typed into it is still there on the way
+       back, with the same rule open. -->
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="wl"><div class="wl-card">
+        <h1>Join the waitlist</h1>
+        <p>We'll email you when a spot opens.</p>
+        <input placeholder="you@example.com" value="ada@example.com">
+        <div class="go">Join the waitlist</div>
+      </div></div>
+      <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 border-dashed"
+            data-testid="panel.zoom" title="Wider than the space? Scaled down whole, never reflowed">fit 74%</span>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+           data-testid="panel.tabs">
+        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+        <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
+      </div>
+      <div class="flex items-center gap-2 border-b border-dashed border-base-content/25 px-3 py-1.5 text-xs"
+           data-testid="panel.actor">
+        <span>Recording as <b title="change in Settings (the gear)">Topher Fangio</b></span>
+        <span class="ml-auto opacity-60">3 judged</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.join</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="verified">
+          <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">email-required</span></button>
+        <button class="flex w-full items-center gap-2 rounded bg-base-200 px-2 py-1 text-left" title="built — awaiting your walkdown">
+          <span class="w-3.5 shrink-0 text-center text-warning">○</span><span class="truncate">confirmation</span>
+          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">walk</span></button>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="approved — spec signed off, awaiting build">
+          <span class="w-3.5 shrink-0 text-center opacity-60">✍︎</span><span class="truncate">shows-place-in-line</span></button>
+
+        <div class="px-2 pb-0.5 pt-2.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.export</div>
+        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="designed — awaiting your sign-off">
+          <span class="w-3.5 shrink-0 text-center text-warning">□</span><span class="truncate">says-why-it-waits</span>
+          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">sign</span></button>
+      </div>
+
+      <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
+              data-testid="panel.counts">
+        <span><b>1 of 4</b> rules verified</span>
+        <span class="ml-auto flex gap-1">
+          <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your sign-off">1 to sign</span>
+          <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your walkdown">1 to walk</span>
+        </span>
+      </footer>
+    </aside>
+  </main>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

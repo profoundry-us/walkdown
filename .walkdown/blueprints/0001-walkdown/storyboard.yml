@@ -259,3 +259,17 @@ screens:
     app: { path: /as-built/rule-detail-targets.html }
     anchors:
       - detail.evidence
+
+  - id: mode-switch
+    title: "The mode switch, on Rules"
+    prototype: null
+    anchors:
+      - panel.modes
+
+  - id: mode-boards
+    title: "Boards, taking the whole window"
+    prototype: null
+    anchors:
+      - panel.modes
+      - modes.page
+      - modes.board-picker
