@@ -2123,7 +2123,7 @@ stories:
         signoff: [eng, product]
         statement: Finish walkdown is offered only in the Walkdown mode. A sitting that is under way stays open while Boards or Personas is shown.
         because: A board judges nothing, so a button that ends the sitting has no business on it, and looking at one must not end the sitting.
-        history: "Topher, 2026-11-18: the Finish walkdown button shows only on the first mode."
+        history: "Topher, 2026-11-18: the Finish walkdown button shows only on the first mode, and the button that puts walkdown away goes from the other two as well."
         screens: [mode-switch, mode-boards, mode-personas]
         steps:
           given:
@@ -2133,5 +2133,6 @@ stories:
           then:
             - On Walkdown, anchor `panel.walk` offers Finish walkdown
             - On Boards and on Personas there is no `panel.walk`
+            - On Boards and on Personas the bar has no button that puts walkdown away, and the switcher is the way back
             - Back on Walkdown the sitting is the same one, with both rules still judged
-          statement_hash: sha256:c6267753d8ea
+          statement_hash: sha256:962563de1c59
