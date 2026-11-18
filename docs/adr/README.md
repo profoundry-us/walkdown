@@ -60,7 +60,7 @@ is renamed.
 | 0015 | [Design versions and states](foundational/202610_design_versions_and_states.md) | foundational | accepted |
 | 0016 | [Rule focus](lightweight/202610_rule_focus.md) | lightweight | accepted |
 | 0017 | [Screen setup](foundational/202610_screen_setup.md) | foundational | accepted |
-| 0018 | [Journey boards](foundational/202611_journey_boards.md) | foundational | proposed |
+| 0018 | [Journey boards](foundational/202611_journey_boards.md) | foundational | accepted |
 
 A new ADR takes the next number and the current month:
 `docs/adr/foundational/202610_<topic>.md`, with `# ADR NNNN — <Topic>` as its
