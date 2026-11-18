@@ -1,0 +1,117 @@
+{
+  "run_id": "2026-11-18T16-26-05Z-local-01",
+  "created": "2026-11-18T16:26:05Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e2ebf5d-dirty",
+  "spec_hash": "sha256:dd9dae9e4d1a",
+  "results": [
+    {
+      "rule": "panel.modes.one-switcher",
+      "status": "pass",
+      "statement_hash": "sha256:7163b2c9ed8a",
+      "evidence": [
+        "runs/evidence/2026-11-18T16-26-05Z/proto-mode-switch.png",
+        "runs/evidence/2026-11-18T16-26-05Z/app-mode-switch.png",
+        "runs/evidence/2026-11-18T16-26-05Z/wide-walkdown-menu.png",
+        "runs/evidence/2026-11-18T16-26-05Z/wide-boards-menu.png",
+        "runs/evidence/2026-11-18T16-26-05Z/wide-personas-menu.png",
+        "runs/evidence/2026-11-18T16-26-05Z/narrow-walkdown-menu.png",
+        "runs/evidence/2026-11-18T16-26-05Z/wide-boards-gear.png",
+        "runs/evidence/2026-11-18T16-26-05Z/wide-walkdown-gear.png",
+        "runs/evidence/2026-11-18T16-26-05Z/noboard-boards.png",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-one-switcher.json"
+      ],
+      "reasoning": "Driven with a Playwright script on the disposable copy at port 4741 (the checkspace example, two boards and two personas), at 1440, 1024 and 760 wide; the screenshots are that script's. The bar holds one panel.modes, after the gear and before the project button, at x=52 y=10 in all three modes and at all three widths. Closed it reads its icon then Walkdown, Boards or Personas, and the icon differs per mode. With no mode in the address Walkdown is the checked row. modes.menu lists Walkdown, Boards, Personas in that order, each with a 16px icon and its line, the lines word for word the accepted design's. I measured whether the list can be seen and not only that it exists: all 25 sample points of its box hit-test to the list in each of the three modes and at each width, and each row's centre hits the row, so the clipping fixed today does not show. Choosing Boards closes the list, and opened again Boards is checked and Walkdown is not. The gear stays at x=12 beside it in all three modes: on Walkdown it opens the settings panel, on Boards and Personas a pop-over that names the mode and says it has no settings yet, which is a declared redline. On the copy's blueprint with no board, Boards is still offered and its page reads 'This blueprint has no boards.' No page error. Against the design: the project button between the switcher and the blueprint's name is a declared redline. Edge named and left, under 10%: at 760 wide the fade overlaps the viewport buttons in the middle of the bar, which is the bar's own narrow layout and leaves the switcher whole.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.whole-window",
+      "status": "pass",
+      "statement_hash": "sha256:4ca141e23bb8",
+      "evidence": [
+        "runs/evidence/2026-11-18T16-26-05Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-18T16-26-05Z/app-mode-boards.png",
+        "runs/evidence/2026-11-18T16-26-05Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-18T16-26-05Z/app-mode-personas.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-1-walkdown-before.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-2-boards.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-3-walkdown-back.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-4-personas.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-5-design-surface.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-6-boards-from-design.png",
+        "runs/evidence/2026-11-18T16-26-05Z/ww-7-design-back.png",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-whole-window.json"
+      ],
+      "reasoning": "Driven on port 4741 with the example's waitlist page (port 4725) in the App pane. I opened waitlist.join.email-required, typed judge+kept@example.com into the page's email field and set a marker on the frame's window. On Boards modes.page measures 0,44 to 1440,900 under a bar 44 high, its background is opaque, and every point of a 24px grid under the bar hit-tests to it; the rule list and the frame both compute visibility hidden, and the screenshot shows neither. Back on Walkdown the field still holds the text, the marker is the same object, and no frame navigation or document request to the app happened in between, so the page was not loaded again. The same rule was open on the same screen (Join the waitlist). Personas covers the window in the same way with the same results on the way back. For 'the same surface' I moved to the Design surface, went to Boards and Personas and came back: the fade was still at Design and the app frame was still unloaded-again. The design page itself answers 'not found' on this copy, which is the copy's missing prototype and nothing of this rule. Pin mode left on does not reach the board: a click on the canvas opens no composer, and pin mode is still on afterwards. No page error. The board drawn only as phases and cards, and the short persona cards, are declared redlines.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.each-keeps-its-place",
+      "status": "pass",
+      "statement_hash": "sha256:f62f58d1bc90",
+      "evidence": [
+        "runs/evidence/2026-11-18T16-26-05Z/place-1-second-board-moved.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-2-walkdown-between.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-3-boards-again.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-4-after-reload.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-5-personas-scrolled.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-6-personas-again.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-7-personas-small-scrolled.png",
+        "runs/evidence/2026-11-18T16-26-05Z/place-8-personas-small-again.png",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-each-keeps-its-place.json"
+      ],
+      "reasoning": "Driven on port 4741. On Boards I chose the second board (Running the list), dragged it, pressed Zoom in three times and wheeled it, leaving it at x=202 y=147 zoom 130%, its sheet measured at 202,191 and 460 wide. After Walkdown and back, and after Personas and back, the same board is drawn with the same numbers and the same measured rectangle, so it is the picture that is kept and not only the data attributes. After a reload of the window it is still the second board at 202, 147 and 130%. Trying to break it: the first board opened at its own home position and did not take the second's, and the second was still where it was left afterwards. Personas, in a window 420 by 260 so that it scrolls 272px, was scrolled to 137 of 272, left for Walkdown and for Boards, and came back at 137 both times; at 700 by 300 it also came back at its place after a reload and after Back. No page error. The place is kept per tab, so a link opened in a new window shows the board where it opens, which the rule does not ask otherwise.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.address-names-the-mode",
+      "status": "pass",
+      "statement_hash": "sha256:b1186283c00e",
+      "evidence": [
+        "runs/evidence/2026-11-18T16-26-05Z/addr-1-picker-open.png",
+        "runs/evidence/2026-11-18T16-26-05Z/addr-2-second-board.png",
+        "runs/evidence/2026-11-18T16-26-05Z/addr-3-new-window.png",
+        "runs/evidence/2026-11-18T16-26-05Z/addr-4-no-such-board.png",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-address-names-the-mode.json"
+      ],
+      "reasoning": "Driven on port 4741. From Walkdown the address named no mode. Choosing Boards made it mode=boards&board=getting-a-spot, and choosing the second board in modes.board-picker made it mode=boards&board=running-the-list; Personas made it mode=personas with no board, and Walkdown removed both. That address, opened in a fresh browser context with nothing kept, came up on Boards with the picker reading Running the list and that board's two cards drawn, with no choice made. Back four times went Personas, second board, first board, Walkdown, each with the switcher and the page agreeing with the address, and Forward four times went the other way. An address naming no-such-board opens Boards and reads 'There is no board called no-such-board here.' with a button per board, and choosing one corrects the address. A board name written as markup is shown as text. An unknown mode opens Walkdown. An address carrying a rule and Boards kept the rule, and it was open on return to Walkdown. No page error. One edge, reported and not filed, about 25%: when a rule on another screen is opened between two mode choices, the App pane's own navigation is a step in the same history, so one press of Back moves the app's page and not the mode, and the next press moves the mode. Its basis is that a walk often crosses screens; its cost is one more press, and the frame stepping back under an open rule is how the panel behaved before the modes.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.finish-only-on-walkdown",
+      "status": "pass",
+      "statement_hash": "sha256:962563de1c59",
+      "evidence": [
+        "runs/evidence/2026-11-18T16-26-05Z/fin-1-walkdown-sitting.png",
+        "runs/evidence/2026-11-18T16-26-05Z/fin-2-boards.png",
+        "runs/evidence/2026-11-18T16-26-05Z/fin-3-personas.png",
+        "runs/evidence/2026-11-18T16-26-05Z/fin-4-walkdown-back.png",
+        "runs/evidence/2026-11-18T16-26-05Z/fin-5-walkdown-list.png",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-finish-only-on-walkdown.json"
+      ],
+      "reasoning": "Driven on port 4741, where I started a sitting on the example blueprint and approved two rules (invites.batch.confirm-count and cancel-sends-nothing); the count read +2/9. On Walkdown panel.walk reads Finish walkdown and can be seen. On Boards and on Personas there is no panel.walk in the panel at all, and the buttons that can be seen in the bar are the gear, the switcher, the project button and, on Boards, the board picker: nothing titled 'Put walkdown away', no close mark, nothing reading Finish. The switcher was the way back and worked. While away the panel made no write to the server. Back on Walkdown the button reads Finish walkdown again, the count is still +2/9, the actor line is the same, and both rules read 'judged this session' in the list. Trying to break it: Escape on Personas ended nothing, and a reload of the window on Boards still showed no panel.walk and came back to the same sitting at +2/9. No page error. I then finished the sitting so the copy was left with none open. The project button staying in the bar on Boards and Personas is a declared redline and does not put walkdown away.",
+      "threads": []
+    },
+    {
+      "rule": "screens.setup.runs-before-the-screen",
+      "status": "pass",
+      "statement_hash": "sha256:8cd7148f06fd",
+      "evidence": [
+        "runs/evidence/2026-11-18T16-26-05Z/proto-rule-detail-setup.png",
+        "runs/evidence/2026-11-18T16-26-05Z/app-rule-detail-setup.png",
+        "runs/evidence/2026-11-18T16-26-05Z/setup-std-1-running.png",
+        "runs/evidence/2026-11-18T16-26-05Z/setup-std-2-done.png",
+        "runs/evidence/2026-11-18T16-26-05Z/setup-std-3-prose.png",
+        "runs/evidence/2026-11-18T16-26-05Z/setup-odd-1-running.png",
+        "runs/evidence/2026-11-18T16-26-05Z/setup-odd-2-done.png",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-setup-std.json",
+        "runs/evidence/2026-11-18T16-26-05Z/probe-setup-odd.json"
+      ],
+      "reasoning": "Driven on port 4741 over the copy's expenses blueprint, with checks/fixtures/expenses-app.mjs started on the ports its spec names (4737, 4738) and read through the app's own request log. Opening team-no-approve, with the post held, the App pane had made only GET /dev/impersonate?id=1; panel.setup-progress could be seen and read 'Setting up this screen: step 2 of 3', 'Posting the form to /dev/session.' and 'Then /expenses/412 opens here.'; detail.setup-steps listed visit done, post now, wait to do, then 'Then open /expenses/412'. Released, the log read GET /dev/impersonate?id=1, POST /dev/session with user_id 14, GET /expenses/412, in that order, and the pane showed Expense 412 signed in as 14. Another rule on the same screen asked the app nothing. A rule on the org screen ran its post as 31 and loaded the path, and going back to the first screen ran its three steps again. detail.setup-again ran all three from the first. The prose screen showed 'Sign in as any manager first.' in detail.setup with no step list, no run-again and no progress, and only its path was loaded. For the step added today I kept fixtures in the copy's home with walkdown fixtures set (expense_submitted 412/x+y@z:w%2Fq and view_only_team_manager 14+a/b%2Fc) and wrote the second into the visit's query in the copy's storyboard. The app received GET /dev/impersonate?id=14+a/b%2Fc&next=/a+b and GET /expenses/412/x+y@z:w%2Fq: the plus, slash, at and colon went as written and the %2F was not encoded a second time, in the path and in the query. The form field arrived as the same text, form-encoded on the wire as a form must be. The copy's storyboard and fixtures were put back and the app stopped. No page error. Against the design: 'Posting the form to' and the target name beside App are declared redlines. Named and left, under 10%: a value holding a space or a quote would be percent-written by the browser itself as it parses any address, which I did not drive.",
+      "threads": []
+    }
+  ]
+}

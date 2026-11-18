@@ -1,0 +1,77 @@
+{
+  "run_id": "2026-11-18T16-24-50Z-local-01",
+  "created": "2026-11-18T16:24:50Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "2e2ebf5d-dirty",
+  "spec_hash": "sha256:dd9dae9e4d1a",
+  "results": [
+    {
+      "rule": "panel.modes.one-switcher",
+      "status": "pass",
+      "statement_hash": "sha256:7163b2c9ed8a",
+      "duration_ms": 1648,
+      "checks": [
+        "checks/modes.spec.js:38"
+      ]
+    },
+    {
+      "rule": "panel.modes.whole-window",
+      "status": "pass",
+      "statement_hash": "sha256:4ca141e23bb8",
+      "duration_ms": 682,
+      "checks": [
+        "checks/modes.spec.js:116"
+      ]
+    },
+    {
+      "rule": "panel.modes.each-keeps-its-place",
+      "status": "pass",
+      "statement_hash": "sha256:f62f58d1bc90",
+      "duration_ms": 1152,
+      "checks": [
+        "checks/modes.spec.js:164"
+      ]
+    },
+    {
+      "rule": "panel.modes.address-names-the-mode",
+      "status": "pass",
+      "statement_hash": "sha256:b1186283c00e",
+      "duration_ms": 1214,
+      "checks": [
+        "checks/modes.spec.js:205"
+      ]
+    },
+    {
+      "rule": "panel.modes.finish-only-on-walkdown",
+      "status": "pass",
+      "statement_hash": "sha256:962563de1c59",
+      "duration_ms": 2268,
+      "checks": [
+        "checks/modes.spec.js:250"
+      ]
+    },
+    {
+      "rule": "screens.surfaces.proposed-beside-accepted",
+      "status": "pass",
+      "statement_hash": "sha256:0842937f10e9",
+      "duration_ms": 5217,
+      "checks": [
+        "checks/panel.spec.js:4982",
+        "checks/panel.spec.js:5070",
+        "checks/panel.spec.js:5089"
+      ]
+    },
+    {
+      "rule": "screens.setup.runs-before-the-screen",
+      "status": "pass",
+      "statement_hash": "sha256:8cd7148f06fd",
+      "duration_ms": 3773,
+      "checks": [
+        "checks/setup.spec.js:51"
+      ]
+    }
+  ]
+}

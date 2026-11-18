@@ -1,0 +1,50 @@
+{
+  "run_id": "2026-11-18T16-24-52Z-local-01",
+  "created": "2026-11-18T16:24:52Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "2e2ebf5d-dirty",
+  "spec_hash": "sha256:b6246a6f2b6f",
+  "results": [
+    {
+      "rule": "screens.setup.steps-or-prose",
+      "status": "pass",
+      "statement_hash": "sha256:5c6c941f8039",
+      "duration_ms": 36,
+      "checks": [
+        "test/setup.test.js:31",
+        "test/setup.test.js:108"
+      ]
+    },
+    {
+      "rule": "screens.setup.fixtures-set-keeps-this-machines-values",
+      "status": "pass",
+      "statement_hash": "sha256:6e0afbf92524",
+      "duration_ms": 9,
+      "checks": [
+        "test/setup.test.js:47"
+      ]
+    },
+    {
+      "rule": "screens.setup.fixtures-per-target",
+      "status": "pass",
+      "statement_hash": "sha256:85fe533de4af",
+      "duration_ms": 9,
+      "checks": [
+        "test/setup.test.js:47"
+      ]
+    },
+    {
+      "rule": "screens.setup.setup-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9a9388488257",
+      "duration_ms": 144,
+      "checks": [
+        "test/setup.test.js:78",
+        "test/setup.test.js:108",
+        "test/setup.test.js:142"
+      ]
+    }
+  ]
+}
