@@ -146,7 +146,7 @@
     "redlines": [
       "The board is drawn as its phases and its cards in file order, each card with its story's title. Lanes, groups, hand-offs, marks and pictures wait for the board's own rules.",
       "There is no Follow control: following a persona needs lanes.",
-      "Time runs Across and Down, the zoom buttons and Reset float at the bottom right as designed. Across and Down turn the phases from columns to rows.",
+      "Time runs Across and Down and the zoom buttons float at the bottom right as designed. Across and Down turn the phases from columns to rows. The design's Fit button is built as Reset, which goes back to where the board opens.",
       "The gear opens a pop-over that says Boards has no settings yet. The design's four settings were placeholders.",
       "The bar keeps the project button, as on Walkdown."
     ]
