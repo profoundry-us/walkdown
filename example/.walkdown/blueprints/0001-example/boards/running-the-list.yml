@@ -1,0 +1,6 @@
+board: running-the-list
+title: Running the list
+phases: [Review, Export]
+cards:
+  - { story: invites.list, phase: Review }
+  - { story: waitlist.export, phase: Export, after: [invites.list] }

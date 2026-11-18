@@ -254,7 +254,7 @@ stories:
         signoff: [eng, product]
         statement: Opening a rule whose screen has setup steps runs them in the App pane, in order, and then loads the screen's path. Setup written as prose is shown and never run.
         because: A page that depends on who is signed in and which record is open cannot be reached by its path alone, and setting it up by hand on every rule stops a walk.
-        history: "Issue #25 and ADR 0017 §§1-2 (2026-10-23): an expense page meant for a view-only manager opened on the sign-in page."
+        history: "Issue #25 and ADR 0017 §§1-2 (2026-10-23): an expense page meant for a view-only manager opened on the sign-in page. Topher, 2026-11-18 (q-0636): a value is left as written, so one that needs encoding is written encoded."
         screens: [rule-detail-setup]
         steps:
           given:
@@ -263,11 +263,16 @@ stories:
             - Open a rule on that screen
           then:
             - The App pane visits, posts and waits in that order, then loads the screen's path with its fixtures filled in
+            - A fixture's value goes into a path or a query exactly as it is written, with nothing encoded
             - While the steps run, anchor `panel.setup-progress` names the step it is on
             - Anchor `detail.setup-steps` lists the steps under the setup heading, and `detail.setup-again` runs them again
             - Opening another rule on the same screen does not run them again, and opening a rule on another screen does
             - A screen whose setup is prose shows it in `detail.setup`, as before, and nothing is run
-          statement_hash: sha256:e7e5adf3b438
+          statement_hash: sha256:8cd7148f06fd
+          changed:
+            - hash: sha256:e7e5adf3b438
+              at: 2026-11-18T16:19:10Z
+              why: "q-0636: a fixture's value is left as written, and the rule now says so"
 
       - id: screens.setup.failure-stops-it
         origin: walkdown

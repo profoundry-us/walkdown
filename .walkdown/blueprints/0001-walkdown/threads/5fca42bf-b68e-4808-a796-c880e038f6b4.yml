@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T15:01:37.887Z
 anchor:
   screen: mode-personas
-status: addressed
+status: verified
 body: Draw Personas taking the whole window. The top bar is the one on
   mode-boards, with the switcher (anchor panel.modes) showing Personas chosen,
   nothing after the blueprint's name, and no Finish walkdown. Under the bar,
@@ -58,4 +58,12 @@ replies:
       Personas, caret, where the walkdown name stood. It works in the draft, and
       choosing a mode opens that mode's draft. Below the window the gear is
       drawn pressed, with four placeholder settings for Personas."
+  - author: topher
+    via: verdict
+    created: 2026-11-18T16:09:06Z
+    body: Accepted by topher's approval of every rule on mode-personas
+      (2026-11-18T16-09-06Z-local-01).
 proposes: /drafts/mode-personas.html
+verified_by: topher
+verified_via: 2026-11-18T16-09-06Z-local-01
+verified_at: 2026-11-18T16:09:06Z

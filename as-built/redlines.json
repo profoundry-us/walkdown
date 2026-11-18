@@ -132,5 +132,32 @@
     "redlines": [
       "The advice line gives <code>walkdown hash --write --changed \"&lt;why&gt;\" &lt;rules&gt;</code> where the design gives a plain <code>walkdown hash --write &lt;rules&gt;</code>. A plain write on a signed rule is refused since status.derived.a-change-says-why (2026-10-23), so the rule's step was reworded to name <code>--changed</code>; a text change, so the design was not redrawn."
     ]
+  },
+  "mode-switch": {
+    "title": "the mode switcher, on Walkdown",
+    "redlines": [
+      "Captured with the switcher's list open. The design shows the bar closed and the list as a small state beside it.",
+      "The bar keeps the project button between the switcher and the blueprint's name, as it was before the switcher. The design drew the blueprint's name alone.",
+      "The fade is still centred over the bar and not in the row, as the design drew it for a narrow window. On a screen with two design versions the screen picker's title is cut shorter to make room for the switcher."
+    ]
+  },
+  "mode-boards": {
+    "title": "Boards, taking the whole window",
+    "redlines": [
+      "The board is drawn as its phases and its cards in file order, each card with its story's title. Lanes, groups, hand-offs, marks and pictures wait for the board's own rules.",
+      "There is no Follow control: following a persona needs lanes.",
+      "Time runs Across and Down, the zoom buttons and Reset float at the bottom right as designed. Across and Down turn the phases from columns to rows.",
+      "The gear opens a pop-over that says Boards has no settings yet. The design's four settings were placeholders.",
+      "The bar keeps the project button, as on Walkdown."
+    ]
+  },
+  "mode-personas": {
+    "title": "Personas, taking the whole window",
+    "redlines": [
+      "A card holds the persona's title, what they are a persona of, a line about them, what they use and their users. The avatar, the fixtures and targets of each user, the stories by mark and the boards wait for the personas' own rules.",
+      "Personas are listed in the storyboard's order, with no group headings and no key to the marks.",
+      "The line under the grid naming the systems is not drawn.",
+      "The gear opens a pop-over that says Personas has no settings yet."
+    ]
   }
 }

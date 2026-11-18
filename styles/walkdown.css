@@ -241,6 +241,68 @@
     border-top: 1px dashed color-mix(in oklab, currentColor 18%, transparent);
   }
 
+  /* The mode switcher's list, and the settings of a mode (panel.modes). */
+  .modes-pop {
+    @apply absolute left-0 z-30 rounded-lg border border-base-300 bg-base-100 text-left text-[12px] font-normal tracking-normal;
+    top: calc(100% + 6px); width: 19rem; box-shadow: 0 8px 24px rgb(0 0 0 / .16);
+  }
+  /* Under the switcher, which stands after the gear in every mode. */
+  .modes-pop.modes-menu { left: 2.75rem; top: calc(100% - 2px); }
+  .modes-pop .row { @apply grid w-full items-start gap-2 text-left; grid-template-columns: 1rem 1fr 1rem; padding: .5rem .7rem; }
+  .modes-pop .row:hover, .modes-pop .row[aria-checked="true"] { @apply bg-base-200; }
+  .modes-pop .row svg { margin-top: 1px; }
+  .modes-pop .name { @apply block font-semibold; }
+  .modes-pop .line { @apply block text-[11px] leading-snug opacity-60; }
+  .modes-pop p {
+    @apply text-[11px] leading-snug opacity-55; padding: .45rem .7rem;
+    border-top: 1px dashed color-mix(in oklab, currentColor 18%, transparent);
+  }
+  .modes-pop p.head { @apply font-semibold opacity-100; border-top: 0; padding-bottom: 0; }
+
+  /* The page Boards and Personas fill, under the bar. */
+  .modes-page { @apply overflow-hidden bg-base-200; }
+  .modes-page.scrolls { @apply overflow-y-auto; }
+  .modes-say { @apply mx-auto max-w-[25rem] text-center text-[12.5px] leading-snug; padding: 18vh 1rem 1rem; }
+  .modes-say h2 { @apply mb-1 text-[15px] font-bold; }
+  .modes-say p { @apply mt-1 opacity-70; }
+  .modes-say code { @apply font-mono text-[11.5px]; }
+  .modes-canvas {
+    @apply relative h-full w-full overflow-hidden; cursor: grab; touch-action: none;
+    background-image: radial-gradient(color-mix(in oklab, currentColor 14%, transparent) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .modes-canvas:active { cursor: grabbing; }
+  .modes-board {
+    @apply absolute left-0 top-0 flex rounded-lg border border-base-300 bg-base-100;
+    transform-origin: 0 0; user-select: none;
+  }
+  .modes-board.down { @apply flex-col; }
+  .modes-board section { @apply flex flex-col gap-2; padding: .6rem; min-width: 11rem; }
+  .modes-board section + section { border-left: 1px solid var(--color-base-300); }
+  .modes-board.down section { @apply flex-row items-start; }
+  .modes-board.down section + section { border-left: 0; border-top: 1px solid var(--color-base-300); }
+  .modes-board h3 { @apply text-[10px] font-bold uppercase opacity-50; letter-spacing: .1em; min-width: 5rem; }
+  .modes-board article {
+    @apply rounded-md bg-base-100 text-[11.5px] font-semibold leading-tight;
+    width: 9.5rem; padding: .5rem .6rem; border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+  }
+  .modes-board article.outside { @apply font-normal; border-style: dashed; }
+  .modes-float { @apply absolute flex items-center gap-2 text-[12px]; right: .75rem; bottom: .75rem; cursor: default; }
+  .modes-float .pill {
+    @apply flex items-center gap-1 rounded-lg bg-base-100; padding: 2px 2px 2px .5rem;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent);
+  }
+  .modes-people { @apply mx-auto max-w-[62rem]; padding: 1.5rem 1.25rem 3rem; }
+  .modes-people h1 { @apply text-[20px] font-bold; }
+  .modes-people .lede { @apply mb-4 mt-1 text-[12.5px] opacity-70; }
+  .modes-people .grid { @apply grid gap-3; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+  .modes-people article { @apply rounded-lg border border-base-300 bg-base-100 text-[12.5px] leading-snug; padding: .9rem 1rem; }
+  .modes-people article h2 { @apply text-[14px] font-bold; }
+  .modes-people article small { @apply text-[11px] opacity-60; }
+  .modes-people article p { @apply mt-2; }
+  .modes-people dl { @apply mt-3 grid gap-x-3 gap-y-1; grid-template-columns: 3.5rem 1fr; }
+  .modes-people dt { @apply text-[10px] font-bold uppercase opacity-50; letter-spacing: .08em; padding-top: 2px; }
+
   /* Two states of one page, at the top of the screen picker (ADR 0017 §4). */
   .tied { @apply mb-1 border-b border-base-300 text-[12px]; }
   .tied .note { padding: .55rem .875rem; line-height: 1.45; border-bottom: 1px dashed color-mix(in oklab, currentColor 18%, transparent); }

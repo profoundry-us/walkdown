@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-17T21:12:24.957Z
 anchor:
   screen: mode-boards
-status: addressed
+status: verified
 body: "Draw Boards taking the whole window. The top bar is the same bar as on
   Rules, with panel.modes in the same place and Boards marked as chosen. Under
   it, anchor modes.page fills the window: no rule list and no App pane can be
@@ -81,4 +81,12 @@ replies:
       choosing a mode opens that mode's draft. The static open list is gone. A
       new small state shows the gear pressed, with four placeholder settings for
       Boards."
+  - author: topher
+    via: verdict
+    created: 2026-11-18T16:09:06Z
+    body: Accepted by topher's approval of every rule on mode-boards
+      (2026-11-18T16-09-06Z-local-01).
 proposes: /drafts/mode-boards.html
+verified_by: topher
+verified_via: 2026-11-18T16-09-06Z-local-01
+verified_at: 2026-11-18T16:09:06Z

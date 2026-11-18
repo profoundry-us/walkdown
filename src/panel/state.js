@@ -43,6 +43,11 @@ export const S = {
   frameUrl: cfg.frame?.url ?? null, // where the app frame actually is
 
   data: null,
+  mode: 'walkdown', // which of the three modes is chosen (modes.js)
+  board: null, // the board the address names, on Boards
+  modesOpen: false,
+  boardsOpen: false,
+  modeSettingsOpen: false,
   view: 'list',
   selected: null,
   session: null,
@@ -212,6 +217,7 @@ export const D = {
   tab: null, // the WALKDOWN pull tab, shown when the chrome is put away
   swap: null, // the prototype/app cross beside it
   appFrame: null, // the application under review
+  modePage: null, // the page Boards and Personas fill, under the bar
 };
 /*
  * Whether this delivery comes back after a real page load. The extension

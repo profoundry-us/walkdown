@@ -149,6 +149,33 @@ function withTie(data) {
 
 const STATES = {
   review: { steps: [] },
+  // The three modes of one window (panel.modes). The example has two boards
+  // and two personas, so each mode has something to show.
+  'mode-switch': {
+    steps: [
+      ['fn', `r => r.querySelector('[data-testid="panel.modes"]')`],
+      ['sr', `r => r.querySelector('[data-testid="panel.modes"]').click()`],
+      ['fn', `r => r.querySelector('[data-testid="modes.menu"]')`],
+    ],
+  },
+  'mode-boards': {
+    steps: [
+      ['fn', `r => r.querySelector('[data-testid="panel.modes"]')`],
+      ['sr', `r => r.querySelector('[data-testid="panel.modes"]').click()`],
+      ['fn', `r => r.querySelector('[data-testid="modes.menu"] [data-mode="boards"]')`],
+      ['sr', `r => r.querySelector('[data-testid="modes.menu"] [data-mode="boards"]').click()`],
+      ['wait', 600],
+    ],
+  },
+  'mode-personas': {
+    steps: [
+      ['fn', `r => r.querySelector('[data-testid="panel.modes"]')`],
+      ['sr', `r => r.querySelector('[data-testid="panel.modes"]').click()`],
+      ['fn', `r => r.querySelector('[data-testid="modes.menu"] [data-mode="personas"]')`],
+      ['sr', `r => r.querySelector('[data-testid="modes.menu"] [data-mode="personas"]').click()`],
+      ['wait', 600],
+    ],
+  },
   'rule-detail': {
     steps: [
       ['fn', `r => r.querySelector('[data-rule="waitlist.join.confirmation"]')`],

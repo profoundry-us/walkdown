@@ -5,7 +5,7 @@ author: agent
 created: 2026-11-17T21:11:05.099Z
 anchor:
   rule: screens.setup.runs-before-the-screen
-status: open
+status: incorporated
 body: "Should a fixture filled into a path or a query be URL-encoded? Today a
   value is put in exactly as it is written, for every screen. A real system's
   trial of ADR 0018 had sign-ins that name an account by email in a query, as in
@@ -28,3 +28,14 @@ options:
     why: A fixture is encoded only when the step says so, for example
       {fixtures.manager_email|url}. Nothing existing changes, and the author has
       one more thing to know.
+replies:
+  - author: topher
+    created: 2026-11-18T16:06:42Z
+    body: Leave values as written
+    answer: true
+  - author: agent
+    created: 2026-11-18T16:19:10Z
+    body: "Folded into this rule as a step: a fixture's value goes into a path or a
+      query exactly as it is written. Nothing in the code changed, and a test
+      now holds it."
+chosen: Leave values as written

@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-17T21:12:24.743Z
 anchor:
   screen: mode-switch
-status: addressed
+status: verified
 body: "Draw the panel as it is today on Rules, with a mode switch in its top
   bar. The switch is anchor panel.modes and holds Rules, Boards and Personas in
   that order, with Rules marked as chosen. It has to sit with what the top bar
@@ -76,4 +76,12 @@ replies:
       choosing a mode opens that mode's draft. Below the window the gear is
       drawn pressed, with four placeholder settings for Walkdown. The bar fits
       down to a window 906 pixels wide."
+  - author: topher
+    via: verdict
+    created: 2026-11-18T16:09:06Z
+    body: Accepted by topher's approval of every rule on mode-switch
+      (2026-11-18T16-09-06Z-local-01).
 proposes: /drafts/mode-switch.html
+verified_by: topher
+verified_via: 2026-11-18T16-09-06Z-local-01
+verified_at: 2026-11-18T16:09:06Z

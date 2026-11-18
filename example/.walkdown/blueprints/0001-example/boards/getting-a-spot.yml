@@ -1,0 +1,9 @@
+# A board is existing stories in the order they happen (ADR 0018 §4).
+board: getting-a-spot
+title: Getting a spot
+phases: [Join, Invite]
+cards:
+  - { story: waitlist.join, phase: Join }
+  - { story: invites.batch, phase: Invite, after: [waitlist.join] }
+  - { id: send-invite, title: Send the invitation email, by: email-service,
+      phase: Invite, after: [invites.batch] }

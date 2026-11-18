@@ -262,7 +262,8 @@ screens:
 
   - id: mode-switch
     title: "The mode switcher, on Walkdown"
-    prototype: null
+    prototype: /screens/mode-switch.html
+    app: { path: /as-built/mode-switch.html }
     anchors:
       - panel.modes
       - modes.menu
@@ -270,7 +271,8 @@ screens:
 
   - id: mode-boards
     title: "Boards, taking the whole window"
-    prototype: null
+    prototype: /screens/mode-boards.html
+    app: { path: /as-built/mode-boards.html }
     anchors:
       - panel.modes
       - modes.page
@@ -279,7 +281,8 @@ screens:
 
   - id: mode-personas
     title: "Personas, taking the whole window"
-    prototype: null
+    prototype: /screens/mode-personas.html
+    app: { path: /as-built/mode-personas.html }
     anchors:
       - panel.modes
       - modes.page

@@ -11,6 +11,16 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Added
 
+- **Three modes of one window** ([ADR 0018](docs/adr/foundational/202611_journey_boards.md) §7).
+  A switcher at the left of the top bar, named for the mode that is chosen,
+  moves between Walkdown (the rules beside the app, as before), Boards and
+  Personas. Boards and Personas take the whole window; the side panel and the
+  app are hidden and keep running, and each mode comes back where it was left.
+  The address names the mode and the board, so a link opens on that board.
+  Boards lists the files in the blueprint's `boards/` folder and draws each
+  as its phases and cards; Personas lists the storyboard's `personas:`. A
+  board's lanes, hand-offs, marks and pictures, and the rest of a persona's
+  card, are not built yet.
 - **Screen setup** ([ADR 0017](docs/adr/foundational/202610_screen_setup.md)).
   A screen the address alone cannot reach (a page one role sees, a record that
   has to exist) says how to get there in `app.setup`: steps the panel runs in

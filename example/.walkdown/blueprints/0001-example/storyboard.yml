@@ -65,3 +65,23 @@ screens:
     app: { path: /admin.html#invite-batch }
     anchors:
       - waitlist.confirm-batch
+
+# Who uses the product (ADR 0018 §2). A story is one persona's, and a board's
+# lanes are the personas of its stories. Nobody signs in here, so no persona
+# has users.
+personas:
+  - id: visitor
+    title: Visitor
+    of: The public
+    blurb: Has heard of the product and wants in. Leaves an email address and waits to be asked.
+    uses: The public site
+  - id: operator
+    title: Operator
+    of: The team
+    blurb: Runs the waitlist. Invites people in batches and exports the list.
+    uses: The admin page
+
+systems:
+  - id: email-service
+    title: Email service
+    outside: true

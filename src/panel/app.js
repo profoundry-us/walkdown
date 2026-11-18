@@ -48,6 +48,20 @@ import {
 import { DESK_DEFAULTS, DESK_KEY, drawDesk } from './desk.js';
 import { closeEvidence, evidenceOpen, openEvidence } from './evidence.js';
 import { icon } from './icons.js';
+import {
+  boardPicker,
+  buildModePage,
+  closeModeMenus,
+  forgetBoard,
+  modeFromHistory,
+  modeGear,
+  modeMenu,
+  modeParams,
+  modeSwitcher,
+  paintModePage,
+  readModeAddress,
+  wholeWindow,
+} from './modes.js';
 import { blueprintsOf, projectIdOf, projectModal } from './projects.js';
 import {
   checkRefs,
@@ -209,6 +223,9 @@ function buildChrome() {
   D.bar.style.cssText = `position:absolute; top:0; left:0; right:0; height:${TOP}px;
     pointer-events:auto; transition:transform .2s ease; background:transparent;`;
   D.bar.className = 'flex items-center gap-2 px-3 text-base-content';
+  // Above the page Boards and Personas fill, so a list opened from the bar
+  // hangs over that page and not under it.
+  D.bar.style.zIndex = '4';
 
   // The panel is a card lying on the same desk as the page, inset by the same
   // margin — two sheets side by side rather than a sheet and a wall.
@@ -220,6 +237,7 @@ function buildChrome() {
   D.side.className =
     'flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content';
   D.host.append(D.bar, D.side);
+  buildModePage(TOP);
 
   /*
    * The desk tuner. A separate element rather than part of the bar's innerHTML
@@ -1088,6 +1106,8 @@ function sayAddress() {
     else url.searchParams.delete('thread');
     if (S.designVersion === 'accepted') url.searchParams.set('design', 'accepted');
     else url.searchParams.delete('design');
+    // Which mode, and on Boards which board (panel.modes.address-names-the-mode).
+    if (S.phase === 'ready') modeParams(url);
     if (S.frameUrl) url.hash = encodeURIComponent(S.frameUrl);
     if (url.href !== location.href) history.replaceState(history.state, '', url.href);
   } catch {
@@ -1105,6 +1125,7 @@ function crossTo(nextBp) {
    * an error (Topher, 2026-10-10, filing a refinement after crossing to cli).
    */
   S.openedBlueprint = null;
+  forgetBoard();
   sayAddress();
   // The blueprint carries its project with it: picking one from another
   // project's list is how you cross, and the bar must say where you landed.
@@ -1430,6 +1451,16 @@ export function render() {
   if (S.view === 'thread' && !S.openThread) S.view = S.selected ? 'detail' : 'list';
   // The address follows the view, so a reload lands where you are.
   if (S.phase === 'ready') sayAddress();
+  /*
+   * Boards and Personas take the whole window. What Walkdown had open over
+   * the app (the screen picker, Settings) is put away with it, and the side
+   * panel and the frame are hidden, never closed (panel.modes.whole-window).
+   */
+  if (wholeWindow()) {
+    if (S.screensOpen) closeScreenPanel();
+    if (S.deskOpen) closeDeskPanel();
+  }
+  paintModePage();
   /*
    * Two ceremonies used to open this function: noting every pane's scrollTop
    * to put back after the repaint, and saving the focused composer's caret to
@@ -1855,6 +1886,24 @@ const GEAR = () =>
       syncDeskPanel();
     }}>${icon('gear', 'size-3.5')}</button>`;
 
+/* The two stale warnings, for the bar Boards and Personas share. They never give way. */
+const staleBadges = () =>
+  html`${
+    STALE_COPY()
+      ? html`<span class="badge badge-sm badge-error badge-dash shrink-0 gap-1 whitespace-nowrap font-semibold"
+        data-testid="panel.stale"
+        title="walkdown was updated — reload the extension at chrome://extensions, then reload this page, to run the current build.">
+        ${icon('warning-fill', 'size-3.5')}Stale — reload the extension</span>`
+      : nothing
+  }${
+    STALE_SERVER()
+      ? html`<span class="badge badge-sm badge-error badge-dash shrink-0 gap-1 whitespace-nowrap font-semibold"
+        data-testid="panel.stale-server"
+        title="The server is running code older than this tree — restart it (npm run dev, or stop and re-run walkdown serve). Until then a verdict may be recorded against yesterday's rules.">
+        ${icon('warning-fill', 'size-3.5')}Stale server — restart it</span>`
+      : nothing
+  }`;
+
 /*
  * The project, as a control rather than a label (ADR 0001 §11). It opens the
  * modal, which is the only way to reach another project without changing the
@@ -1898,6 +1947,23 @@ function renderBar() {
    * there is nothing to compare, so all three are, and none of them opens
    * another page.
    */
+  /*
+   * On Boards and Personas the bar holds what is true of every mode and no
+   * more: the settings, the switcher, where you are working, and on Boards
+   * which board. What acts on the app, and what ends the sitting, stay with
+   * Walkdown (panel.modes.finish-only-on-walkdown).
+   */
+  if (wholeWindow()) {
+    put(
+      html`<span class="flex min-w-0 items-center gap-2">
+        ${modeGear()}${modeSwitcher()}${staleBadges()}${projectButton()}
+        <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">${S.data.blueprint}</span>
+        ${boardPicker()}
+      </span>${modeMenu()}`,
+      D.bar,
+    );
+    return;
+  }
   const inHand = screenInHand();
   const sides = surfaceSides(inHand);
   const canGhost = Boolean(ghostSource(inHand)) && Boolean(sides.design && sides.build);
@@ -1957,7 +2023,7 @@ function renderBar() {
       offersVersions(inHand) ? 'max-w-[calc(50%-13.5rem)]' : 'max-w-[calc(50%-8.5rem)]'
     } items-center gap-2 overflow-hidden">
     ${GEAR()}
-    <span class="shrink-0 font-bold tracking-tight">walk<span class="text-primary">down</span></span>
+    ${modeSwitcher()}
     <!-- A stale copy sits BESIDE the project name, never instead of it.
          It belongs beside the logo because it is about walkdown itself, not
          about the project - and the sidebar could be put away, while a stale
@@ -2015,7 +2081,11 @@ function renderBar() {
           ? 'Screen picked by hand — open to change it, or go back to detecting from the page'
           : 'Which screen this page is, detected from its address — open to pick one by hand'
       }">
-      ${icon('frame-corners', 'size-3.5')}<span class="max-w-32 truncate">${
+      ${icon('frame-corners', 'size-3.5')}<span class="${
+        // The switcher is wider than the name it replaced, and on a screen
+        // with two design versions the title gives that width back.
+        offersVersions(inHand) ? 'max-w-24' : 'max-w-32'
+      } truncate">${
         atScreen
           ? (atScreen.title ?? atScreen.id)
           : tiedScreens().length
@@ -2131,7 +2201,7 @@ function renderBar() {
               : 'Begin a sitting on this blueprint'
         }">${S.session ? 'Finish walkdown' : 'Start walkdown'}</button>
       <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away" @click=${() => setDocked(false)}>\u00d7</button>
-    </span>`;
+    </span>${modeMenu()}`;
   put(bar, D.bar);
 
   /*
@@ -3738,6 +3808,18 @@ function wireGlobals() {
    * stop importing app.js back, and the rollup cycle whitelist go.
    */
   const on = (verb, handle) => D.host.addEventListener(`wd-${verb}`, (e) => handle(e.detail));
+  // A press anywhere but on the switcher, the board picker or their lists
+  // closes them.
+  D.host.addEventListener('pointerdown', (e) => {
+    if (!e.composedPath().some((n) => n instanceof Element && n.hasAttribute('data-mode-menu')))
+      closeModeMenus();
+  });
+  // Back and Forward move between the modes chosen.
+  addEventListener('popstate', () => {
+    const q = new URLSearchParams(location.search);
+    const mode = q.get('mode') ?? 'walkdown';
+    if (mode !== S.mode || (q.get('board') ?? null) !== (S.board ?? null)) modeFromHistory();
+  });
   on('open-rule', ({ rule }) => open(rule));
   on('run-setup', ({ screen }) => setUpAgain(screen));
   on('go-screen', ({ screen }) => goTo(screenById(screen)));
@@ -3883,6 +3965,7 @@ function wireGlobals() {
    */
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if (closeModeMenus()) return;
     // The switcher covers everything else, so it answers first - and only
     // when it is a switcher; at the root or on an unclaimed page it is the
     // whole screen and Escape leaves it standing (n-0279).
@@ -4126,6 +4209,7 @@ function boot() {
    * module back.
    */
   provideShell({ render, reload: load, settings: openActorSettings });
+  readModeAddress();
   /*
    * Boot, in the one order that works: the chrome exists, then the stylesheet
    * is asked for (it lands in the shadow root whenever it arrives), then the

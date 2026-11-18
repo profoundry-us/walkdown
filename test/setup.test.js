@@ -7,7 +7,7 @@ import { loadBlueprint } from '../lib/blueprint.js';
 import { fixturesFor, keepFixtures, keptFixturesPath } from '../lib/fixtures.js';
 import { lint } from '../lib/lint.js';
 import { walkdownHome } from '../lib/locations.js';
-import { resolveSetup, setupOf, setupSignature } from '../lib/setup.js';
+import { fill, resolveSetup, setupOf, setupSignature } from '../lib/setup.js';
 import { declaredHome } from '../tools/test-home.mjs';
 
 const root = mkdtempSync(join(tmpdir(), 'walkdown-setup-'));
@@ -153,4 +153,30 @@ test('two screens sharing a design ref are warned about as before, whatever thei
     ties[0].message,
     /^design ref "\/screens\/same\.html" is already claimed by screen `one`/,
   );
+});
+
+test('a fixture goes into a path or a query as it is written, with nothing encoded @rule:screens.setup.runs-before-the-screen', () => {
+  // q-0636: an address with a plus sign, a value holding a slash, and one
+  // already encoded all arrive as their author wrote them.
+  const values = { email: 'sam+team@example.com', folder: 'reports/2026', id: 'a%20b' };
+  assert.equal(
+    fill('/dev/as?email={fixtures.email}', values).text,
+    '/dev/as?email=sam+team@example.com',
+  );
+  assert.equal(
+    fill('/files/{fixtures.folder}/{fixtures.id}', values).text,
+    '/files/reports/2026/a%20b',
+  );
+  const run = resolveSetup(
+    {
+      app: {
+        setup: [{ visit: '/dev/as?email={fixtures.email}' }],
+        path: '/files/{fixtures.folder}',
+      },
+    },
+    {},
+    values,
+  );
+  assert.equal(run.steps[0].value, '/dev/as?email=sam+team@example.com');
+  assert.equal(run.path, '/files/reports/2026');
 });
