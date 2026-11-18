@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- DESIGN DRAFT: lint-persona-unused -->
+<!-- Drawn by the design agent for request n-0645. Not yet accepted. -->
+<!-- Intent: warn about the persona no story and no screen names, and about the user whose fixture the review target has no value for, naming the user, the fixture and the target and where to add it; exit 0. -->
+<!-- Fixture: The storyboard declares persona manager with users view-only-team and view-only-org, persona visitor with no users, system platform, and groups customers, staff and hidden. No story and no screen is as visitor. User manager.view-only-org signs in with recipe as_view_only_org_manager, which uses {fixtures.view_only_org_manager}. Target local gives that key and target review does not. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lint warns about a persona nothing names and a user with no account on a target</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #14161a; }
+  .term { box-sizing: border-box; min-height: 100%; padding: 18px 22px 28px;
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #d7dae0; tab-size: 12; }
+  .term-bar { display: flex; align-items: center; gap: 7px; margin: 0 0 14px; color: #7d8590; font-size: 11.5px; }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a3f47; display: inline-block; }
+  .term-bar span { margin-left: 8px; }
+  .ln { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+  .prompt { color: #8fbcff; }
+  .prompt b { color: #7d8590; font-weight: 400; }
+  .dim { color: #7d8590; }
+  .exit { margin-top: 10px; color: #7d8590; }
+  .exit.bad { color: #f0a36b; }
+  [data-testid] { border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>~/expenses</span></div>
+    <div class="ln prompt" data-testid="cli.prompt"><b>~/expenses $</b> walkdown lint</div>
+      <div class="ln">walkdown lint — ~/.walkdown/projects/expenses/blueprints/expenses</div>
+      <div class="ln"></div>
+      <div data-testid="cli.lint.warnings">
+      <div class="ln">WARNINGS</div>
+      <div class="ln">  ⚠ [personas] expenses/storyboard.yml › visitor: no story and no screen names this persona in its `as:`, so its lane has nothing in it — name it on a story it acts in, or remove it</div>
+      <div class="ln">  ⚠ [fixtures] expenses/spec.yml › runner.targets.review: target `review` has no `view_only_org_manager`, which user manager.view-only-org uses in its setup, so no screen can be signed in as it there — add it under runner.targets.review.fixtures</div>
+      </div>
+      <div class="ln"></div>
+      <div data-testid="cli.lint.summary">
+      <div class="ln">✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 2 warning(s)</div>
+      </div>
+    <div class="ln exit" data-testid="cli.exit">[exit 0]</div>
+  </div>
+</body>
+</html>

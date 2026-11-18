@@ -286,3 +286,26 @@ screens:
     anchors:
       - panel.modes
       - modes.page
+      - personas.group
+      - personas.card
+      - personas.users
+      - personas.stories
+      - personas.boards
+
+  - id: rule-detail-signed-in
+    title: "Rule detail (state — the screen is signed in as a user)"
+    prototype: null
+    anchors:
+      - detail.signed-in
+      - detail.setup
+      - detail.setup-steps
+      - detail.setup-again
+      - panel.setup-progress
+
+  - id: app-sign-in-failed
+    title: "A user's sign-in step failed, so the screen is not loaded"
+    prototype: null
+    anchors:
+      - panel.setup-failed
+      - detail.signed-in
+      - detail.setup-again

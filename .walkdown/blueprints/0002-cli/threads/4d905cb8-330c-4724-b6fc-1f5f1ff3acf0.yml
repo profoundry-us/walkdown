@@ -1,0 +1,24 @@
+id: n-0646
+uuid: 4d905cb8-330c-4724-b6fc-1f5f1ff3acf0
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:14.613Z
+anchor:
+  screen: lint-story-as
+status: addressed
+body: One run of walkdown lint on four stories. One has an as that names no
+  persona. One has a by that names no system. One has both as and by. One is by
+  a system marked outside. Show one error for each, naming the story and what it
+  names, then the summary and a non-zero exit. Rule
+  personas.acting.story-names-who-acts.
+replies:
+  - author: agent
+    created: 2026-11-18T17:05:59Z
+    body: agent named /drafts/lint-story-as.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-11-18T17:06:02Z
+    body: "Drawn: prototype-cli/drafts/lint-story-as.html. It shows four errors, one
+      for each story, then the summary and exit 1."
+proposes: /drafts/lint-story-as.html

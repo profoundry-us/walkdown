@@ -1,0 +1,24 @@
+id: n-0643
+uuid: 12cecf2e-aa90-4d79-a2e4-c0e7a5eb7604
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:13.924Z
+anchor:
+  screen: lint-personas-from
+status: addressed
+body: One run of walkdown lint over three blueprints of one project whose
+  personas_from is wrong. One names a blueprint of another project. One names a
+  blueprint that itself has personas_from. One has personas_from and declares
+  personas of its own. Show one error for each, naming the blueprint, then the
+  summary and a non-zero exit. Rule personas.declared.shared-by-siblings.
+replies:
+  - author: agent
+    created: 2026-11-18T17:05:59Z
+    body: agent named /drafts/lint-personas-from.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-11-18T17:06:01Z
+    body: "Drawn: prototype-cli/drafts/lint-personas-from.html. It shows four
+      blueprints. One passes and three have one error each, then exit 1."
+proposes: /drafts/lint-personas-from.html

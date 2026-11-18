@@ -1,0 +1,27 @@
+id: n-0641
+uuid: c1562575-b881-47b5-be17-560087e1f28d
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:13.465Z
+anchor:
+  screen: app-sign-in-failed
+status: addressed
+body: Draw the accepted app-setup-failed design for the case where the step that
+  failed is the user's and not the screen's. The App pane, anchor
+  panel.setup-failed, says which step failed, why, and that it was a step of
+  signing in as that user, by the user's title. The rule detail still shows
+  detail.signed-in and offers detail.setup-again. Rule
+  screens.setup.signs-in-as-the-user names this screen.
+replies:
+  - author: agent
+    created: 2026-11-18T17:05:51Z
+    body: "Drawn: prototype/drafts/app-sign-in-failed.html. The failure card says
+      which step stopped and why. It says the step was one of signing in as
+      View-only team manager. The rule keeps the signed-in line and Run setup
+      again."
+  - author: agent
+    created: 2026-11-18T17:05:52Z
+    body: agent named /drafts/app-sign-in-failed.html as the version this request
+      proposes, in place of none.
+proposes: /drafts/app-sign-in-failed.html

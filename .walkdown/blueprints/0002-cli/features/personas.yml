@@ -1,0 +1,118 @@
+feature: personas
+title: Who uses the product
+stories:
+  - id: personas.declared
+    title: Personas, users, systems and groups are declared once
+    statement: As an author, I can say once who uses the product and which accounts play them, and lint tells me what does not hold together.
+    rules:
+
+      - id: personas.declared.named-and-distinct
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "The storyboard declares personas, each with its users, and systems and groups beside them. Lint refuses one that cannot be named or told apart."
+        because: A lane, a sign-in and a story each name one of these by its id, so an id that means two things, or a name that is missing, is wrong everywhere it is used.
+        history: "ADR 0018 §§2, 8 (accepted 2026-11-18)."
+        screens: [lint-personas-declared]
+        steps:
+          given:
+            - A storyboard with two personas, one of them with two users, one system and two groups, all titled
+            - A second storyboard where a persona has no title, a persona and a system share an id, a system has users, and a persona names a group nobody declared
+          when:
+            - Run `walkdown lint` on each
+          then:
+            - The first passes, and a persona with no users is accepted
+            - Each of the four faults in the second is an error naming the persona, user or system, and lint exits non-zero
+            - A storyboard that declares no groups is not asked for one
+          statement_hash: sha256:386baa71e0bd
+
+      - id: personas.declared.shared-by-siblings
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "A storyboard with `personas_from:` takes its personas, users, systems and groups from the blueprint it names, which is one of the same project and declares them itself."
+        because: The people in a process do not change with the blueprint a story is filed in, and declaring them twice lets the two copies drift.
+        history: "ADR 0018 §2. The real-system trial took stories from two blueprints of one project, and its managers would have been declared twice."
+        screens: [lint-personas-from, lint-personas-from-unread]
+        steps:
+          given:
+            - Two blueprints of one project, where the second names the first in `personas_from:`
+            - A third that names a blueprint of another project, a fourth that names one which itself has `personas_from:`, and a fifth that has `personas_from:` and personas of its own
+          when:
+            - Run `walkdown lint`
+            - Run it again on a machine where the first blueprint is not registered
+          then:
+            - A story or screen in the second may name a persona or user the first declares
+            - The third, fourth and fifth are each an error that names the blueprint, and lint exits non-zero
+            - Where the first is not registered, lint warns that the personas could not be read and names the blueprint
+            - It then refuses nothing that depends on them, and exits zero
+          statement_hash: sha256:e9ab0bb34483
+
+      - id: personas.declared.unused-is-warned
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Lint warns about a persona nothing names, and about a user whose fixture has no value on a target.
+        because: A persona no story or screen names is a lane with nothing in it, and a user with no account on a target cannot be signed in as there.
+        history: "ADR 0018 §8."
+        screens: [lint-persona-unused]
+        steps:
+          given:
+            - A persona that no story's `as:` and no screen's `as:` names
+            - A user whose setup needs a fixture that the review target has no value for
+          when:
+            - Run `walkdown lint`
+          then:
+            - Each is a warning, naming the persona, or the user, the fixture and the target
+            - Lint exits zero
+          statement_hash: sha256:18cef79cedca
+
+  - id: personas.acting
+    title: A story says who acts in it
+    statement: As an author, I can say which persona or system acts in each story, so a board can put the story in a lane.
+    rules:
+
+      - id: personas.acting.story-names-who-acts
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "A story's `as:` names one persona or several, and its `by:` names a system. It may have neither, and never both."
+        because: A board puts a story in the lane of whoever acts in it, and the story's sentence often names who it is for and not who does it.
+        history: "ADR 0018 §3. Thirteen stories in this repository begin As a team, and a system does what they describe."
+        screens: [lint-story-as]
+        steps:
+          given:
+            - Stories with `as:` one persona, `as:` a list of two, `by:` a system, and neither
+            - "Stories whose `as:` names no persona, whose `by:` names no system, with both `as:` and `by:`, and `by:` a system marked `outside: true`"
+          when:
+            - Run `walkdown lint`
+          then:
+            - The first four pass
+            - Each of the other four is an error naming the story and what it names, and lint exits non-zero
+            - Nothing is read from a story's As a sentence
+          statement_hash: sha256:3b49252f6a6a
+
+      - id: personas.acting.another-personas-screen-is-warned
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Lint warns once about a rule on a screen signed in as a persona its story does not name.
+        because: Such a rule is often right, and sometimes a sign that it wants a story of its own, so the author is told and decides.
+        history: "ADR 0018 §§3, 8. The trial's alert story is a system's and was checked on a manager's screen, and an earlier draft warned on it every time."
+        screens: [lint-rule-on-anothers-screen]
+        steps:
+          given:
+            - A story `as:` one persona with a rule on a screen signed in as another
+            - A story `by:` a system with a rule on a screen signed in as a persona
+          when:
+            - Run `walkdown lint`
+          then:
+            - The first is one warning naming the rule, the screen and both personas
+            - The second is not warned about
+            - Lint exits zero
+          statement_hash: sha256:dda19b1d6061

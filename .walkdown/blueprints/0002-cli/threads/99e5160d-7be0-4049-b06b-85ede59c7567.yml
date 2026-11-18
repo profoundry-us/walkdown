@@ -1,0 +1,26 @@
+id: n-0647
+uuid: 99e5160d-7be0-4049-b06b-85ede59c7567
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:14.840Z
+anchor:
+  screen: lint-rule-on-anothers-screen
+status: addressed
+body: One run of walkdown lint with one warning. A story is as one persona, and
+  one of its rules is on a screen signed in as another. The warning names the
+  rule, the screen and both personas, and says the rule may want a story of its
+  own. A story by a system with a rule on a persona's screen is in the same
+  blueprint and is not warned about. Lint exits zero. Rule
+  personas.acting.another-personas-screen-is-warned.
+replies:
+  - author: agent
+    created: 2026-11-18T17:06:00Z
+    body: agent named /drafts/lint-rule-on-anothers-screen.html as the version this
+      request proposes, in place of none.
+  - author: agent
+    created: 2026-11-18T17:06:02Z
+    body: "Drawn: prototype-cli/drafts/lint-rule-on-anothers-screen.html. It shows
+      one warning that names the rule, the screen and both personas, and exit
+      0."
+proposes: /drafts/lint-rule-on-anothers-screen.html

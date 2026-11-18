@@ -294,3 +294,46 @@ stories:
             - A wait_for whose anchor has not appeared after ten seconds fails the same way, and names the anchor
             - "`detail.setup-again` runs the setup again from its first step"
           statement_hash: sha256:46284ad32d8f
+
+      - id: screens.setup.signs-in-as-the-user
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks, agent]
+        signoff: [eng, product]
+        statement: "Opening a rule on a screen signed in `as:` a user runs that user's steps, then the screen's own, then loads its path. The rule's detail says who is signed in."
+        because: A reviewer judging what a manager sees has to know it is the manager's page in front of them, and should not have to sign in by hand to get there.
+        history: "ADR 0018 §3, building on ADR 0017."
+        screens: [rule-detail-signed-in, app-sign-in-failed]
+        steps:
+          given:
+            - A persona with two users, each with setup steps, and screens signed in as the second user, as the persona alone, and as a persona with no users
+          when:
+            - Open a rule on each screen in turn
+          then:
+            - On the first, the App pane runs the second user's steps, then the screen's steps, then loads the path
+            - Anchor `detail.signed-in` names the user and its persona, and `detail.setup-steps` lists the user's steps before the screen's
+            - On the second, the persona's first user is signed in
+            - On the third nothing signs in, and `detail.signed-in` says nobody signs in as this persona
+            - A user's step that fails stops the setup, and anchor `panel.setup-failed` says it was that user's step
+            - A screen with `as:` and prose setup runs the user's steps and shows the prose, which is never run
+          statement_hash: sha256:6c51a09911d8
+
+      - id: screens.setup.unread-personas-run-no-sign-in
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks, agent]
+        signoff: [eng, product]
+        statement: "A screen whose `as:` names a user of a blueprint that is not registered on this machine runs no sign-in, and the rule's detail says so."
+        because: Part of a project can be on a machine without the rest, and a screen that quietly loads signed in as nobody is judged as the wrong page.
+        history: "ADR 0018 §2."
+        screens: [rule-detail-signed-in]
+        steps:
+          given:
+            - A blueprint whose storyboard has `personas_from:` a sibling that is not registered on this machine, and a screen signed in `as:` one of its users
+          when:
+            - Open a rule on that screen
+          then:
+            - The screen's own steps and its path still run
+            - No sign-in step runs
+            - Anchor `detail.signed-in` names the user as written, says it could not be read, and names the blueprint to register
+          statement_hash: sha256:a0292f681821

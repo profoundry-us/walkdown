@@ -1289,3 +1289,76 @@ screens:
       - cli.prompt
       - lint.tie-warning
       - cli.exit
+
+  - id: lint-personas-declared
+    title: "Lint refuses a persona, user or system that cannot be named or told apart"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.errors
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-personas-from
+    title: "Lint refuses a personas_from that names the wrong blueprint"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.errors
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-personas-from-unread
+    title: "Lint warns that a sibling blueprint's personas could not be read"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-persona-unused
+    title: "Lint warns about a persona nothing names and a user with no account on a target"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-story-as
+    title: "Lint refuses a story whose as or by names nobody"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.errors
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-rule-on-anothers-screen
+    title: "Lint warns about a rule on another persona's screen"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-screen-as
+    title: "Lint refuses a screen signed in as nobody declared, and checks a user's setup"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.errors
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
+  - id: lint-users-not-a-tie
+    title: "Lint tells two screens on one path apart by who is signed in"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit

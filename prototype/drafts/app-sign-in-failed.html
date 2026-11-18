@@ -1,0 +1,227 @@
+<!doctype html>
+<!-- DESIGN DRAFT: app-sign-in-failed -->
+<!-- Drawn by the design agent for request n-0641 (ADR 0018 §3, rule screens.setup.signs-in-as-the-user). Not yet accepted. -->
+<!-- Intent: when the step that fails is one of the user's sign-in steps, the App pane's card says which step stopped, why, and that it was a step of signing in as that user, by the user's title; the rule still says who the screen signs in as and offers Run setup again. -->
+<!-- Fixture: the expense approval app, with the embed on its pages, on target local (http://localhost:3000). Screen expense-view-only-team has app.as manager.view-only-team. The user's steps: visit /sign-in, post /dev/session, wait for nav.signed-in. The screen's own: visit /expenses?status=submitted, wait for expenses.list. Then /expenses/{fixtures.expense_submitted}. -->
+<!-- A state of the accepted app-setup-failed: the frame, the rule, the card's shape and Run setup again are its own. What is new is the card's heading and its "Whose" row, the sentence saying the step was the user's, and in the rule the signed-in line and the two headings of rule-detail-signed-in. -->
+<!-- The mockup control under the rule moves between three failures, each in the user's steps: step 2 answered 500, step 3's anchor never appeared within ten seconds, and the local target has no value for the fixture that says which account the user is, so nothing ran. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: a user's sign-in step failed, so the screen is not loaded</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  /* "setup-list", never "steps": daisyUI's .steps lays its items out as columns and scrolls sideways (n-0632). */
+  .setup-list { display: block; margin: 0; padding: 0; list-style: none; font-size: 11.5px; line-height: 1.4; min-width: 0; }
+  .setup-list li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); column-gap: .3rem; padding: .25rem 0;
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 15%, transparent); }
+  .setup-list li:last-child { border-bottom: 0; }
+  .setup-list .mark { text-align: center; opacity: .55; }
+  .setup-list .done .mark { color: var(--color-success); opacity: 1; }
+  .setup-list .failed { font-weight: 600; }
+  .setup-list .failed .mark { color: var(--color-error); opacity: 1; }
+  .setup-list .todo { opacity: .45; }
+  .setup-list .body { min-width: 0; }
+  .setup-list .kind { margin-right: .3rem; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .setup-list code { font-size: 10.5px; overflow-wrap: anywhere; }
+  .setup-list .field { display: block; font-weight: 400; opacity: .7; }
+  .setup-list .then { opacity: .45; }
+
+  /* The failure card: the warning card's shape, in the error colour, where the page would be. */
+  .failed-card { width: 22rem; padding: 1rem 1.1rem; border-radius: .6rem; font-size: 12px; line-height: 1.5;
+    background: color-mix(in oklab, var(--color-error) 8%, var(--color-base-100));
+    border: 1px solid color-mix(in oklab, var(--color-error) 45%, transparent); text-align: left; }
+  .failed-card .head { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+  .failed-card .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-error); flex: none; }
+  .failed-card dl { display: grid; grid-template-columns: 4.6rem 1fr; gap: .15rem .5rem; margin: .6rem 0; font-size: 11.5px; }
+  .failed-card dt { opacity: .55; }
+  .failed-card code { font-size: 11px; }
+  .failed-card .cmd { display: block; margin-top: .35rem; padding: .3rem .5rem; border-radius: .3rem; font-size: 11.5px;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+
+  /* Who the screen signs in as: the line of rule-detail-signed-in. */
+  .signed-in { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); column-gap: .3rem; align-items: start;
+    margin-bottom: .3rem; padding: .3rem .4rem; border-radius: .35rem; font-size: 12px; line-height: 1.4;
+    background: color-mix(in oklab, currentColor 6%, transparent); }
+  .signed-in .face { width: .8rem; height: .8rem; margin-top: .15rem; border-radius: 50%;
+    border: 1.5px solid currentColor; opacity: .6; position: relative; overflow: hidden; }
+  .signed-in .face::after { content: ''; position: absolute; left: 50%; bottom: -.35rem; width: .7rem; height: .5rem;
+    transform: translateX(-50%); border-radius: 50%; background: currentColor; }
+  .signed-in .more { display: block; margin-top: .2rem; font-size: 11.5px; color: var(--color-error); }
+  .setup-list li.group { display: block; padding: .45rem 0 .15rem; border-bottom: 0;
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .setup-list li.group:first-child { padding-top: .1rem; }
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50">acme-expenses</span>
+      <button class="btn btn-xs btn-ghost gap-1 font-normal" data-testid="panel.screen-picker"
+              title="Which screen this page is">Expense, view-only team manager ▾</button>
+    </span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28" data-testid="panel.fade">
+      <button class="btn btn-xs btn-active" data-testid="panel.surface-build">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Finish walkdown</button>
+    </span>
+  </header>
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The frame never shows the sign-in page, or whatever the failed step left behind. -->
+    <section class="relative grid flex-1 place-items-center wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+      <div class="failed-card" data-testid="panel.setup-failed" role="alert" id="card"></div>
+    </section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="flex items-center px-2 pt-2 text-xs">
+        <button class="btn btn-xs btn-ghost" data-testid="detail.back">← All rules</button>
+        <span class="ml-auto flex gap-0.5" data-testid="detail.stepper">
+          <button class="btn btn-xs btn-ghost">←</button>
+          <button class="btn btn-xs btn-ghost">→</button>
+        </span>
+      </div>
+
+      <div class="flex flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1 text-xs">
+        <div>
+          <div class="font-mono text-[10px] opacity-40" data-testid="detail.rule-id">expenses.view-only.no-approve</div>
+          <p class="text-sm leading-relaxed" data-testid="detail.statement">A view-only manager opening a submitted expense
+            sees no Approve button, and a note that the expense is view only.</p>
+        </div>
+
+        <div>
+          <textarea class="textarea textarea-xs w-full resize-none border-dashed border-base-content/25" rows="2"
+            placeholder="Why? Filed as a note with your verdict." data-testid="detail.feedback"></textarea>
+          <div class="mt-1 flex gap-2" data-testid="detail.verdict">
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
+          </div>
+        </div>
+
+        <div data-testid="detail.setup">
+          <div class="mb-1 flex items-baseline text-[10px] uppercase tracking-widest opacity-40">
+            <span>Setup</span><span class="ml-auto normal-case tracking-normal" id="setup-state">stopped at step 2</span></div>
+          <!-- Still here after the failure: who the screen signs in as, and that the sign-in did not finish. -->
+          <div class="signed-in" data-testid="detail.signed-in" title="as: manager.view-only-team">
+            <i class="face"></i>
+            <span>Signs in as <b>View-only team manager</b>, a Manager.
+              <span class="more" id="signed-in-state">The sign-in did not finish.</span></span>
+          </div>
+          <ol class="setup-list" data-testid="detail.setup-steps" id="steps"></ol>
+          <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
+                  data-testid="detail.setup-again" title="Run every step again, from step 1">↻ Run setup again</button>
+        </div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Steps</div>
+          <div class="leading-relaxed opacity-80" data-testid="detail.steps">
+            <b>given</b> a view-only team manager and a submitted expense<br>
+            <b>when</b> they open the expense<br>
+            <b>then</b> there is no Approve button, and the note says the expense is view only
+          </div>
+        </div>
+      </div>
+
+      <!-- Mockup control, not part of the design. -->
+      <div class="border-t border-dashed border-base-content/25 p-2 text-[10.5px] leading-relaxed opacity-60">
+        Show:
+        <select class="select select-xs w-56 border-dashed" id="case">
+          <option value="status">the user's step 2 answered 500</option>
+          <option value="timeout">the user's step 3 timed out</option>
+          <option value="fixture">the user's fixture is missing</option>
+        </select>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const WHO = '<b>View-only team manager</b>';
+
+  const CASES = {
+    status: {
+      state: 'stopped at step 2',
+      signedIn: 'The sign-in did not finish.',
+      marks: ['done', 'failed', 'todo', 'todo', 'todo'],
+      card: `
+        <div class="head"><i class="dot"></i>Sign-in stopped at step 2 of 5</div>
+        <dl>
+          <dt>Step</dt><dd>2, post</dd>
+          <dt>Whose</dt><dd>Signing in as ${WHO}</dd>
+          <dt>Path</dt><dd><code>/dev/session</code></dd>
+          <dt>Got</dt><dd>500 Internal Server Error</dd>
+        </dl>
+        <div>This was a step of signing in as ${WHO}, not one of this screen's own.
+          <code>/expenses/412</code> was not loaded, so this is not the screen yet.
+          Look at the app's log for <code>/dev/session</code>, then run the setup again from the rule.</div>`,
+    },
+    timeout: {
+      state: 'stopped at step 3',
+      signedIn: 'The sign-in did not finish.',
+      marks: ['done', 'done', 'failed', 'todo', 'todo'],
+      card: `
+        <div class="head"><i class="dot"></i>Sign-in stopped at step 3 of 5</div>
+        <dl>
+          <dt>Step</dt><dd>3, wait for</dd>
+          <dt>Whose</dt><dd>Signing in as ${WHO}</dd>
+          <dt>Anchor</dt><dd><code>nav.signed-in</code></dd>
+          <dt>Got</dt><dd>Not on the page after ten seconds</dd>
+        </dl>
+        <div>This was a step of signing in as ${WHO}, not one of this screen's own.
+          <code>/expenses/412</code> was not loaded, so this is not the screen yet.
+          Check that the page <code>/dev/session</code> lands on carries <code>nav.signed-in</code>, then run the setup again from the rule.</div>`,
+    },
+    fixture: {
+      state: 'not run',
+      signedIn: 'The sign-in did not run.',
+      marks: ['todo', 'todo', 'todo', 'todo', 'todo'],
+      card: `
+        <div class="head"><i class="dot"></i>Sign-in did not run</div>
+        <dl>
+          <dt>Fixture</dt><dd><code>view_only_team_manager</code></dd>
+          <dt>Target</dt><dd>local</dd>
+          <dt>Whose</dt><dd>Signing in as ${WHO}</dd>
+          <dt>Needed by</dt><dd>step 2, <code>user_id {fixtures.view_only_team_manager}</code></dd>
+        </dl>
+        <div>The fixture says which account ${WHO} is. The local target has no value for it, so nothing was run.
+          Set the local target's fixtures, then run the setup again from the rule.
+          <code class="cmd">walkdown fixtures set --blueprint acme-expenses --target local</code></div>`,
+    },
+  };
+
+  const MARK = { done: '✓', failed: '✗', todo: '' };
+  function steps(marks, missing) {
+    const row = (i, kind, body) => `<li class="${marks[i]}"><span class="mark">${MARK[marks[i]] || i + 1}</span><span class="body"><span class="kind">${kind}</span>${body}</span></li>`;
+    const group = (text) => `<li class="group">${text}</li>`;
+    return group('View-only team manager signs in') +
+      row(0, 'Visit', '<code>/sign-in</code>') +
+      row(1, 'Post', `<code>/dev/session</code><span class="field">user_id <code>${missing ? '{fixtures.view_only_team_manager}' : '14'}</code></span>`) +
+      row(2, 'Wait for', '<code>nav.signed-in</code>') +
+      group("Then this screen's own steps") +
+      row(3, 'Visit', '<code>/expenses?status=submitted</code>') +
+      row(4, 'Wait for', '<code>expenses.list</code>') +
+      `<li class="then"><span class="mark">→</span><span class="body">Then open <code>/expenses/412</code></span></li>`;
+  }
+
+  function render() {
+    const k = $('case').value, c = CASES[k];
+    $('card').innerHTML = c.card;
+    $('setup-state').textContent = c.state;
+    $('signed-in-state').textContent = c.signedIn;
+    $('steps').innerHTML = steps(c.marks, k === 'fixture');
+  }
+  $('case').onchange = render;
+  render();
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>

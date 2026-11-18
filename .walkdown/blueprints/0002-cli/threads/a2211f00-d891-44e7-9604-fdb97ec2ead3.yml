@@ -1,0 +1,24 @@
+id: n-0642
+uuid: a2211f00-d891-44e7-9604-fdb97ec2ead3
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:13.697Z
+anchor:
+  screen: lint-personas-declared
+status: addressed
+body: One run of walkdown lint on a storyboard with four faults. A persona has
+  no title. A persona and a system share an id. A system has users. A persona
+  names a group nobody declared. Show the four errors, each naming the persona,
+  user or system, then the summary and a non-zero exit. Rule
+  personas.declared.named-and-distinct.
+replies:
+  - author: agent
+    created: 2026-11-18T17:05:47Z
+    body: agent named /drafts/lint-personas-declared.html as the version this
+      request proposes, in place of none.
+  - author: agent
+    created: 2026-11-18T17:06:01Z
+    body: "Drawn: prototype-cli/drafts/lint-personas-declared.html. It shows four
+      errors, one for each fault, then the summary and exit 1."
+proposes: /drafts/lint-personas-declared.html

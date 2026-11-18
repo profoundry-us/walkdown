@@ -79,6 +79,26 @@ stories:
               why: the hash covers the excuses now; the rule and its excuse are unchanged
           excused: [agent]
 
+      - id: screens.identity.user-is-identity
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: Who a screen is signed in as is part of which screen it is. Two screens on one path, signed in as different users, do not tie.
+        because: The same page shows a manager and a contractor different things, and a walk that cannot tell them apart lands on the wrong one.
+        history: "ADR 0018 §3. The trial's lint called two screens that differ only by user a tie, because a screen's identity read its own setup alone."
+        screens: [lint-users-not-a-tie]
+        steps:
+          given:
+            - Two screens with one path, signed in as different users
+            - Two with one path, one signed in as a user and one with that user's steps written out as its own setup
+          when:
+            - Run `walkdown lint`
+          then:
+            - The first pair is not warned about
+            - The second pair is warned about as a tie, naming both screens
+          statement_hash: sha256:9c55208de58b
+
   - id: screens.setup
     title: A screen's setup is read, filled in and checked
     statement: As an author, I can write how to reach each screen's state once, with the ids that differ by machine kept apart from the blueprint, and lint tells me what will not run.
@@ -169,3 +189,25 @@ stories:
             - A pair that ties on one target and not another is warned about on the target it ties on, and the warning names that target
             - Two screens sharing a design ref are warned about as before, because a design has no setup
           statement_hash: sha256:9a9388488257
+
+      - id: screens.setup.as-names-a-user
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "A screen's `app.as` names a user as `<persona>.<user>`, or a persona alone for its first user. Lint refuses a name nobody declared, and checks a user's setup as it checks a screen's."
+        because: A sign-in that cannot run should be found by lint at the desk, as a screen's own setup is.
+        history: "ADR 0018 §§3, 8, building on ADR 0017. The trial found a user's wait_for had no screen whose anchors it could be checked against."
+        screens: [lint-screen-as]
+        steps:
+          given:
+            - Screens whose `as:` names a declared user, a persona with users, and a persona with none
+            - Screens whose `as:` names no persona, and a user its persona does not have
+            - A user whose setup has a step of an unknown kind, and one that waits for an anchor none of its screens declares
+          when:
+            - Run `walkdown lint`
+          then:
+            - The first three pass
+            - The two wrong names are errors naming the screen and what it names, and lint exits non-zero
+            - The unknown step is an error and the undeclared anchor a warning, each naming the user and not a screen
+          statement_hash: sha256:fd1cd59bd694

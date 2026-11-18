@@ -1,0 +1,36 @@
+id: n-0640
+uuid: 1746e98a-72da-4db9-85b5-5a9406170568
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:13.246Z
+anchor:
+  screen: rule-detail-signed-in
+status: addressed
+body: "Draw the rule detail of rule-detail-setup for a screen that is signed in
+  as a user. The setup section gains one line, anchor detail.signed-in, naming
+  the user and its persona, as in Signed in as View-only team manager, a
+  Manager. Under it, detail.setup-steps lists the user's steps first and the
+  screen's own steps after, told apart. The App pane's progress,
+  panel.setup-progress, names the step it is on and whose it is. Draw three
+  small states beside it. One is a screen signed in as a persona with no users,
+  where the line says nobody signs in as this persona. One is a screen with
+  prose setup, where the user's steps are listed and the prose is shown under
+  them. One is a user that could not be read because its blueprint is not
+  registered on this machine: the line names the user as written, says it could
+  not be read, and names the blueprint to register. Use the expenses example of
+  the accepted rule-detail-setup design. Rules
+  screens.setup.signs-in-as-the-user and
+  screens.setup.unread-personas-run-no-sign-in name this screen."
+replies:
+  - author: agent
+    created: 2026-11-18T17:05:51Z
+    body: "Drawn: prototype/drafts/rule-detail-signed-in.html. The Setup section
+      opens with a line naming who is signed in. The user's steps and the
+      screen's own sit under a heading each, and the progress card says whose
+      step it is on. Five cases are behind the mockup control."
+  - author: agent
+    created: 2026-11-18T17:05:51Z
+    body: agent named /drafts/rule-detail-signed-in.html as the version this request
+      proposes, in place of none.
+proposes: /drafts/rule-detail-signed-in.html

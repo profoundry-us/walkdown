@@ -1,0 +1,25 @@
+id: n-0648
+uuid: a3e15c28-4e5d-411e-a5a7-0651ada293bb
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T17:02:15.082Z
+anchor:
+  screen: lint-screen-as
+status: addressed
+body: One run of walkdown lint with three errors and one warning. A screen's as
+  names no persona. A screen's as names a user its persona does not have. A
+  user's setup has a step of an unknown kind. A user's setup waits for an anchor
+  that none of the screens signed in as it declares, which is the warning. The
+  first two name the screen and what it names. The last two name the user and
+  not a screen. Lint exits non-zero. Rule screens.setup.as-names-a-user.
+replies:
+  - author: agent
+    created: 2026-11-18T17:06:00Z
+    body: agent named /drafts/lint-screen-as.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-11-18T17:06:02Z
+    body: "Drawn: prototype-cli/drafts/lint-screen-as.html. It shows three errors
+      and one warning, then the summary and exit 1."
+proposes: /drafts/lint-screen-as.html

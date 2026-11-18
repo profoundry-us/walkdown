@@ -1,0 +1,294 @@
+<!doctype html>
+<!-- DESIGN DRAFT: rule-detail-signed-in -->
+<!-- Drawn by the design agent for request n-0640 (ADR 0018 §§2-3, rules screens.setup.signs-in-as-the-user and screens.setup.unread-personas-run-no-sign-in). Not yet accepted. -->
+<!-- Intent: a rule whose screen is signed in as a user says who that is at the top of Setup, lists the user's sign-in steps before the screen's own under a heading each, and the App pane's progress says which step it is on and whose it is. -->
+<!-- Fixture: the expense approval app at http://localhost:3000 (target local). Screen expense-view-only-team has app.as manager.view-only-team. The user's steps: visit /sign-in, post /dev/session with the manager's id (14 on local), wait for nav.signed-in. The screen's own: visit /expenses?status=submitted, wait for expenses.list. Then /expenses/412 opens. Drawn on step 2 of 5. -->
+<!-- A state of the accepted rule-detail-setup: the frame, the rule, the step rows, Run setup again and the progress card are its own. What is new is the signed-in line, the two headings inside the step list, and the "whose" line on the progress card. -->
+<!-- A screen whose as: names the persona alone (as: manager) signs in its first user and looks exactly like the default case. -->
+<!-- The mockup control under the rule moves between five cases: on a step of the user's (the default), on a step of the screen's own, a persona with no users, prose setup under the user's steps, and a user that could not be read. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft: Rule detail, the screen is signed in as a user</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  [hidden] { display: none !important; }
+  /* "setup-list", never "steps": daisyUI's .steps lays its items out as columns and scrolls sideways. */
+  .setup-list { display: block; margin: 0; padding: 0; list-style: none; font-size: 11.5px; line-height: 1.4; min-width: 0; }
+  .setup-list li { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); column-gap: .3rem; padding: .25rem 0;
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 15%, transparent); }
+  .setup-list li:last-child { border-bottom: 0; }
+  .setup-list .mark { text-align: center; opacity: .55; }
+  .setup-list .done .mark { color: var(--color-success); opacity: 1; }
+  .setup-list .now { font-weight: 600; }
+  .setup-list .now .mark { color: var(--color-info); opacity: 1; }
+  .setup-list .todo { opacity: .55; }
+  .setup-list .body { min-width: 0; }
+  .setup-list .kind { margin-right: .3rem; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .setup-list code { font-size: 10.5px; overflow-wrap: anywhere; }
+  .setup-list .field { display: block; font-weight: 400; opacity: .7; }
+  .setup-list .then { opacity: .7; }
+
+  /* The progress card stands where the page would be. */
+  .progress-card { width: 19rem; padding: 1rem 1.1rem; border: 1px dashed color-mix(in oklab, currentColor 25%, transparent);
+    border-radius: .6rem; background: var(--color-base-100); font-size: 12px; line-height: 1.45; text-align: left; }
+  .pips { display: flex; gap: 4px; margin: .5rem 0 .4rem; }
+  .pips i { flex: 1; height: 4px; border-radius: 2px; background: color-mix(in oklab, currentColor 15%, transparent); }
+  .pips i.done { background: var(--color-success); }
+  .pips i.now { background: var(--color-info); }
+  .progress-card code { font-size: 11px; }
+
+  /* Who is signed in: one line at the top of Setup. */
+  .signed-in { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); column-gap: .3rem; align-items: start;
+    margin-bottom: .3rem; padding: .3rem .4rem; border-radius: .35rem; font-size: 12px; line-height: 1.4;
+    background: color-mix(in oklab, currentColor 6%, transparent); }
+  .signed-in .face { width: .8rem; height: .8rem; margin-top: .15rem; border-radius: 50%;
+    border: 1.5px solid currentColor; opacity: .6; position: relative; overflow: hidden; }
+  .signed-in .face::after { content: ''; position: absolute; left: 50%; bottom: -.35rem; width: .7rem; height: .5rem;
+    transform: translateX(-50%); border-radius: 50%; background: currentColor; }
+  .signed-in.nobody .face { border-style: dashed; }
+  .signed-in.nobody .face::after { display: none; }
+  .signed-in.unread { background: color-mix(in oklab, var(--color-warning) 12%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-warning) 45%, transparent); }
+  .signed-in.unread .face { border-color: var(--color-warning); opacity: 1; }
+  .signed-in.unread .face::after { display: none; }
+  .signed-in code { font-size: 10.5px; overflow-wrap: anywhere; }
+  .signed-in .more { display: block; margin-top: .2rem; font-size: 11.5px; opacity: .8; }
+  .signed-in .cmd { display: block; margin-top: .3rem; padding: .25rem .4rem; border-radius: .3rem; font-size: 10.5px;
+    background: var(--color-neutral); color: var(--color-neutral-content); }
+
+  /* Whose steps these are: a heading row inside the one list. */
+  .setup-list li.group { display: block; padding: .45rem 0 .15rem; border-bottom: 0;
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+  .setup-list li.group:first-child { padding-top: .1rem; }
+  .prose-note { margin: .45rem 0 .2rem; font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; opacity: .55; }
+
+  .progress-card .whose { font-size: 11px; opacity: .7; }
+  .pips i.gap { flex: 0 0 5px; background: transparent; }
+  .progress-card .note { margin-top: .5rem; padding-top: .45rem; font-size: 11.5px;
+    border-top: 1px dashed color-mix(in oklab, currentColor 20%, transparent); }
+
+
+</style>
+</head>
+<body class="h-screen overflow-hidden bg-base-200 text-sm">
+  <header class="navbar relative z-20 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+          data-testid="panel.bar">
+    <span class="flex min-w-0 items-center gap-2">
+      <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk">⚙</button>
+      <span class="font-extrabold tracking-tight">walkdown</span>
+      <span class="text-xs opacity-50">acme-expenses</span>
+      <button class="btn btn-xs btn-ghost gap-1 font-normal" data-testid="panel.screen-picker"
+              title="Which screen this page is" id="screen-name">Expense, view-only team manager ▾</button>
+    </span>
+    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+      <input type="range" min="0" max="100" value="100" class="range range-xs w-28">
+      <button class="btn btn-xs btn-active">App</button>
+    </span>
+    <span class="ml-auto flex items-center gap-2">
+      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">📌 Pin mode</button>
+      <button class="btn btn-xs btn-neutral">Finish walkdown</button>
+    </span>
+  </header>
+
+
+  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
+    <!-- The App pane holds the progress, never the half-set-up page. -->
+    <section class="relative grid flex-1 place-items-center wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame" id="frame"></section>
+
+    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+      <div class="flex items-center px-2 pt-2 text-xs">
+        <button class="btn btn-xs btn-ghost" data-testid="detail.back">← All rules</button>
+        <span class="ml-auto flex gap-0.5" data-testid="detail.stepper">
+          <button class="btn btn-xs btn-ghost">←</button>
+          <button class="btn btn-xs btn-ghost">→</button>
+        </span>
+      </div>
+
+      <div class="flex flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1 text-xs">
+        <div>
+          <div class="font-mono text-[10px] opacity-40" data-testid="detail.rule-id" id="rule-id"></div>
+          <p class="text-sm leading-relaxed" data-testid="detail.statement" id="rule-statement"></p>
+        </div>
+
+        <div>
+          <textarea class="textarea textarea-xs w-full resize-none border-dashed border-base-content/25" rows="2"
+            placeholder="Why? Filed as a note with your verdict." data-testid="detail.feedback"></textarea>
+          <div class="mt-1 flex gap-2" data-testid="detail.verdict">
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✓ Pass</button>
+            <button class="btn btn-xs flex-1 border-[1.5px] border-dashed border-base-content/25">✗ Fail</button>
+          </div>
+        </div>
+
+        <!-- Who is signed in comes first, then the steps, under the Setup heading the accepted design has. -->
+        <div id="setup-block"></div>
+
+        <div>
+          <div class="mb-1 text-[10px] uppercase tracking-widest opacity-40">Steps</div>
+          <div class="leading-relaxed opacity-80" data-testid="detail.steps" id="rule-steps"></div>
+        </div>
+      </div>
+
+      <!-- Mockup control, not part of the design. -->
+      <div class="border-t border-dashed border-base-content/25 p-2 text-[10.5px] leading-relaxed opacity-60">
+        Show:
+        <select class="select select-xs w-56 border-dashed" id="case">
+          <option value="user">on the user's step 2 of 5</option>
+          <option value="screen">on the screen's step 4 of 5</option>
+          <option value="nobody">a persona with no users</option>
+          <option value="prose">prose setup under the user's steps</option>
+          <option value="unread">the user could not be read</option>
+        </select>
+      </div>
+    </aside>
+  </main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const MANAGER_RULE = {
+    screen: 'Expense, view-only team manager',
+    id: 'expenses.view-only.no-approve',
+    statement: 'A view-only manager opening a submitted expense sees no Approve button, and a note that the expense is view only.',
+    steps: '<b>given</b> a view-only team manager and a submitted expense<br><b>when</b> they open the expense<br><b>then</b> there is no Approve button, and the note says the expense is view only',
+  };
+  const VISITOR_RULE = {
+    screen: 'Expense policy, visitor',
+    id: 'policy.public.read-without-signing-in',
+    statement: 'A visitor opening the expense policy reads all of it, and is not asked to sign in.',
+    steps: '<b>given</b> nobody is signed in<br><b>when</b> they open the expense policy<br><b>then</b> the whole policy is on the page, and no sign-in form is',
+  };
+
+  // One row of the list, as the accepted rule-detail-setup draws it. `at` is the step the setup is on.
+  const MARK = { done: '✓', now: '◌' };
+  function row(n, at, kind, body) {
+    const state = n < at ? 'done' : n === at ? 'now' : 'todo';
+    return `<li class="${state}"><span class="mark">${MARK[state] || n}</span><span class="body"><span class="kind">${kind}</span>${body}</span></li>`;
+  }
+  const group = (text) => `<li class="group">${text}</li>`;
+  const then = (path, title) => `<li class="then"><span class="mark">→</span><span class="body">Then open <code${title ? ` title="${title}"` : ''}>${path}</code></span></li>`;
+
+  // The user's steps come from the persona's user, the same on every screen signed in as it.
+  const userSteps = (at) =>
+    group('View-only team manager signs in') +
+    row(1, at, 'Visit', '<code>/sign-in</code>') +
+    row(2, at, 'Post', '<code>/dev/session</code><span class="field" title="user_id is {fixtures.view_only_team_manager}, 14 on local">user_id <code>14</code></span>') +
+    row(3, at, 'Wait for', '<code>nav.signed-in</code>');
+  // The screen's own steps, numbered on from the user's (`from` is the number of the first).
+  const screenSteps = (at, from, heading) =>
+    group(heading) +
+    row(from, at, 'Visit', '<code>/expenses?status=submitted</code>') +
+    row(from + 1, at, 'Wait for', '<code>expenses.list</code>');
+
+  const EXPENSE = then('/expenses/412', '/expenses/{fixtures.expense_submitted}');
+  const list = (rows) => `<ol class="setup-list" data-testid="detail.setup-steps">${rows}</ol>`;
+
+  const SIGNED_IN = `
+    <div class="signed-in" data-testid="detail.signed-in" title="as: manager.view-only-team">
+      <i class="face"></i>
+      <span>Signed in as <b>View-only team manager</b>, a Manager.</span>
+    </div>`;
+  const NOBODY = `
+    <div class="signed-in nobody" data-testid="detail.signed-in" title="as: visitor">
+      <i class="face"></i>
+      <span>Nobody signs in as <b>Visitor</b>.
+        <span class="more">No sign-in runs. This screen's own steps still do.</span></span>
+    </div>`;
+  const UNREAD = `
+    <div class="signed-in unread" data-testid="detail.signed-in" role="status">
+      <i class="face"></i>
+      <span><code>manager.view-only-team</code> could not be read, so nobody is signed in.
+        <span class="more">Its personas are in the blueprint <code>acme-people</code>, which is not registered on this machine. Register it, then run the setup again.</span>
+        <code class="cmd">walkdown blueprints import &lt;home of acme-people&gt;</code></span>
+    </div>`;
+
+  const AGAIN = `
+      <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
+              data-testid="detail.setup-again" title="Run every step again, from step 1">↻ Run setup again</button>`;
+  const setup = (inner) => `
+    <div data-testid="detail.setup">
+      <div class="mb-1 flex items-baseline text-[10px] uppercase tracking-widest opacity-40">
+        <span>Setup</span><span class="ml-auto normal-case tracking-normal">on local</span></div>
+      ${inner}
+    </div>`;
+
+  // Prose setup is the screen's own, shown as it is today and never run. The user's steps above it are run.
+  const PROSE = `
+      <div class="prose-note">This screen's own setup, shown and not run</div>
+      <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[12px] leading-relaxed">
+        Filter the list to submitted expenses before opening this one, so its back link returns there.</div>`;
+
+  // The progress card of the accepted design, with one more line: whose step this is.
+  function progress(o) {
+    const pips = o.pips.map((p) => `<i class="${p}"></i>`).join('');
+    return `
+    <div class="progress-card" data-testid="panel.setup-progress" role="status">
+      <div class="font-semibold">Setting up this screen: step ${o.at} of ${o.of}</div>
+      <div class="pips">${pips}</div>
+      <div class="whose">${o.whose}</div>
+      <div>${o.doing}</div>
+      <div class="mt-1 opacity-60">Then <code>${o.path}</code> opens here.</div>
+      ${o.note ? `<div class="note">${o.note}</div>` : ''}
+    </div>`;
+  }
+
+  const CASES = {
+    user: {
+      rule: MANAGER_RULE,
+      setup: setup(SIGNED_IN + list(userSteps(2) + screenSteps(2, 4, "Then this screen's own steps") + EXPENSE) + AGAIN),
+      frame: progress({ at: 2, of: 5, pips: ['done', 'now', '', 'gap', '', ''], path: '/expenses/412',
+        whose: 'A step of signing in as <b>View-only team manager</b>.',
+        doing: 'Posting the sign-in form to <code>/dev/session</code>.' }),
+    },
+    screen: {
+      rule: MANAGER_RULE,
+      setup: setup(SIGNED_IN + list(userSteps(4) + screenSteps(4, 4, "Then this screen's own steps") + EXPENSE) + AGAIN),
+      frame: progress({ at: 4, of: 5, pips: ['done', 'done', 'done', 'gap', 'now', ''], path: '/expenses/412',
+        whose: "One of this screen's own steps. <b>View-only team manager</b> is signed in.",
+        doing: 'Visiting <code>/expenses?status=submitted</code>.' }),
+    },
+    nobody: {
+      rule: VISITOR_RULE,
+      setup: setup(NOBODY + list(
+        group("This screen's own steps") +
+        row(1, 1, 'Visit', '<code>/sign-out</code>') +
+        row(2, 1, 'Wait for', '<code>nav.signed-out</code>') +
+        then('/policy/expenses')) + AGAIN),
+      frame: progress({ at: 1, of: 2, pips: ['now', ''], path: '/policy/expenses',
+        whose: "One of this screen's own steps. Nobody signs in as <b>Visitor</b>.",
+        doing: 'Visiting <code>/sign-out</code>.' }),
+    },
+    prose: {
+      rule: MANAGER_RULE,
+      setup: setup(SIGNED_IN + list(userSteps(2) + EXPENSE) + PROSE + AGAIN),
+      frame: progress({ at: 2, of: 3, pips: ['done', 'now', ''], path: '/expenses/412',
+        whose: 'A step of signing in as <b>View-only team manager</b>.',
+        doing: 'Posting the sign-in form to <code>/dev/session</code>.',
+        note: "This screen's own setup is written as prose. It is shown in the rule, and it is not run." }),
+    },
+    unread: {
+      rule: MANAGER_RULE,
+      setup: setup(UNREAD + list(screenSteps(1, 1, "This screen's own steps") + EXPENSE) + AGAIN),
+      frame: progress({ at: 1, of: 2, pips: ['now', ''], path: '/expenses/412',
+        whose: "One of this screen's own steps.",
+        doing: 'Visiting <code>/expenses?status=submitted</code>.',
+        note: 'No sign-in ran. <code>manager.view-only-team</code> could not be read, because the blueprint <code>acme-people</code> is not registered on this machine. The rule says how to register it.' }),
+    },
+  };
+
+  function render() {
+    const c = CASES[$('case').value];
+    $('screen-name').textContent = c.rule.screen + ' ▾';
+    $('rule-id').textContent = c.rule.id;
+    $('rule-statement').textContent = c.rule.statement;
+    $('rule-steps').innerHTML = c.rule.steps;
+    $('setup-block').innerHTML = c.setup;
+    $('frame').innerHTML = c.frame;
+  }
+  $('case').onchange = render;
+  render();
+</script>
+<script src="/embed.js" data-walkdown></script>
+</body>
+</html>
