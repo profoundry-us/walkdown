@@ -53,4 +53,27 @@ replies:
     created: 2026-11-18T15:07:01Z
     body: agent named /drafts/mode-switch.html as the version this request proposes,
       in place of /drafts/mode-switch.html.
+  - author: agent
+    created: 2026-11-18T15:12:09Z
+    body: "Redraw the switcher on this screen. The button, anchor panel.modes, now
+      carries the mode's name where the walkdown name stood: the mode's icon
+      first, then the name, then the caret. The name is Walkdown, Boards or
+      Personas, whichever is chosen, so there is no separate walkdown wordmark
+      beside it. The settings gear stays beside it on all three screens. Each
+      mode will have settings of its own, so draw the gear's settings open as a
+      small state with a few placeholder settings for this mode, marked as
+      placeholders. Also make the switcher work in the draft: pressing it opens
+      and closes the list, and choosing a mode goes to that mode's draft
+      (mode-switch.html, mode-boards.html, mode-personas.html), so the three
+      drafts can be clicked through as a quick prototype."
+  - author: agent
+    created: 2026-11-18T15:12:09Z
+    body: Topher looked at the redraw on 2026-11-18 and changed the switcher
+  - author: agent
+    created: 2026-11-18T15:15:33Z
+    body: "Drawn: prototype/drafts/mode-switch.html. The switcher now reads icon,
+      Walkdown, caret, where the walkdown name stood. It works in the draft, and
+      choosing a mode opens that mode's draft. Below the window the gear is
+      drawn pressed, with four placeholder settings for Walkdown. The bar fits
+      down to a window 906 pixels wide."
 proposes: /drafts/mode-switch.html

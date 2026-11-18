@@ -2032,9 +2032,9 @@ stories:
         created_at: 2026-11-17
         verify: [checks, agent]
         signoff: [eng, product]
-        statement: A switcher beside the walkdown mark in the top bar opens a list of three modes, Walkdown, Boards and Personas, and marks the one that is chosen.
+        statement: A switcher at the left of the top bar is named for the mode that is chosen. It opens a list of three modes, Walkdown, Boards and Personas.
         because: A board and the rules are two views of one blueprint, and a reviewer moves between them many times in a sitting.
-        history: "ADR 0018 §7. Topher, 2026-11-18: a switcher beside the mark and not three tabs, which crowded a narrow bar, and the first mode is Walkdown, since the side panel already has a tab called Rules."
+        history: "ADR 0018 §7. Topher, 2026-11-18: a switcher beside the mark and not three tabs, which crowded a narrow bar, and the first mode is Walkdown, since the side panel already has a tab called Rules. The same day: the switcher carries the mode's name where the walkdown name stood, icon first."
         screens: [mode-switch, mode-boards, mode-personas]
         steps:
           given:
@@ -2042,14 +2042,15 @@ stories:
           when:
             - Press anchor `panel.modes`, then choose Boards in anchor `modes.menu`
           then:
-            - "`panel.modes` is one button in the top bar, straight after the walkdown mark"
+            - "`panel.modes` is one button in the top bar, where the walkdown name stood"
             - "`modes.menu` lists Walkdown, Boards and Personas, in that order, each with an icon and a line saying what it shows"
             - Walkdown is the chosen one when the address names no mode
             - After choosing Boards the list closes, and opened again it marks Boards as chosen and Walkdown not
-            - "Closed, `panel.modes` shows the chosen mode's icon and is named for that mode"
+            - "Closed, `panel.modes` shows the chosen mode's icon and then its name: Walkdown, Boards or Personas"
+            - The settings button stays beside it in all three modes, and opens the settings of the chosen mode
             - "`panel.modes` is in the same place in all three modes"
             - On a blueprint with no board, Boards is still offered, and its page says the blueprint has none
-          statement_hash: sha256:a2052610762a
+          statement_hash: sha256:7163b2c9ed8a
 
       - id: panel.modes.whole-window
         origin: walkdown

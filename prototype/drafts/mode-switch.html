@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- DESIGN DRAFT: mode-switch -->
-<!-- Drawn for design request n-0637 (ADR 0018 section 7), second drawing. Not yet accepted. -->
-<!-- Intent: the panel as it is today, with one new thing in its top bar: a single switcher button straight after the walkdown mark, which opens a list of Walkdown, Boards and Personas, with Walkdown chosen. -->
+<!-- Drawn for design request n-0637 (ADR 0018 section 7), redrawn 2026-11-18 with the switcher named for its mode. Not yet accepted. -->
+<!-- Intent: the panel as it is today, with one new thing in its top bar: a single switcher button named for the chosen mode, where the walkdown name stood, which opens a list of Walkdown, Boards and Personas, with Walkdown chosen. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
@@ -15,17 +15,18 @@
       repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
     opacity: .08; transform: rotate(35deg);
   }
-  /* The mode switcher. One button, straight after the walkdown mark, in the
-     manner of an app switcher. Closed, it shows the chosen mode's icon and is
-     named for that mode. Pressed, it opens the list of three modes. Nothing to
-     its left changes with the mode, so it is in the same place in all three.
-     This block is the same in the mode-switch, mode-boards and mode-personas
-     drafts. */
+  /* The mode switcher. One button at the left of the bar, in the manner of an
+     app switcher, standing where the walkdown name stood. It shows the chosen
+     mode's icon, then the mode's name, then a caret. Pressed, it opens the
+     list of three modes. Only the gear is to its left, so its left edge is in
+     the same place in all three. This block is the same in the mode-switch,
+     mode-boards and mode-personas drafts. */
   .mi { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4;
     stroke-linecap: round; stroke-linejoin: round; }
-  .switch { display: inline-flex; flex: none; align-items: center; gap: 3px; height: 24px; padding: 0 4px 0 5px;
+  .switch { display: inline-flex; flex: none; align-items: center; gap: 5px; height: 24px; padding: 0 5px 0 6px;
     border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); border-radius: .4rem;
     font-size: 11px; line-height: 1; cursor: pointer; }
+  .switch .name { font-size: 14px; font-weight: 800; letter-spacing: -.025em; }
   .switch:hover, .switch[aria-expanded="true"] { background: var(--color-base-200); }
   .switch .caret { opacity: .55; }
   .anchor { position: relative; display: inline-flex; flex: none; }
@@ -44,6 +45,26 @@
   .menu-modes .tick { margin-left: auto; width: 1rem; flex: none; text-align: center; font-size: 12px; font-weight: 700; }
   .menu-modes p { margin-top: 4px; padding: 6px 8px 4px; font-size: 10.5px; line-height: 1.4; opacity: .55;
     border-top: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .menu-modes[hidden] { display: none; }
+  .menu-modes a { color: inherit; text-decoration: none; }
+  header.navbar { z-index: 30; }
+  /* The gear's settings, open. Every setting in it is a placeholder. */
+  .set-pop { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: 17rem; padding: 8px 10px 9px;
+    background: var(--color-base-100); border: 1.5px dashed color-mix(in oklab, currentColor 40%, transparent);
+    border-radius: .5rem; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .3); font-size: 12px; text-align: left; }
+  .set-pop .head { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; margin-bottom: 4px; font-weight: 700;
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .set-pop .ph { margin-left: auto; padding: 1px 6px; border: 1px dashed currentColor; border-radius: 99px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+  .set-pop .row { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+  .set-pop .row > :last-child { margin-left: auto; flex: none; }
+  .set-pop .val { padding: 2px 7px; border: 1px dashed color-mix(in oklab, currentColor 35%, transparent);
+    border-radius: .3rem; font-size: 11px; opacity: .8; white-space: nowrap; }
+  .set-pop .box { width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 3px; opacity: .6;
+    display: grid; place-items: center; font-size: 10px; line-height: 1; }
+  .set-pop .note { margin-top: 6px; padding-top: 6px; font-size: 10.5px; line-height: 1.4; opacity: .6;
+    border-top: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .gear-on { background: var(--color-base-200); }
 
   /* The example waitlist page, as the app serves it. */
   .wl { height: 100%; display: grid; place-items: center; }
@@ -73,7 +94,7 @@
 </head>
 <body class="bg-base-200 text-sm">
 
-  <!-- ── The main state: one whole window, the switcher closed ─────────── -->
+  <!-- ── The main state: one whole window. Press the switcher to open it ── -->
   <div class="relative flex h-screen flex-col overflow-hidden">
     <div class="desk" data-testid="panel.desk"></div>
 
@@ -82,13 +103,29 @@
       <!-- The left of the bar. It is the same on all three screens as far as
            the blueprint's name. When the window is narrow it is this side that
            gives way: the title after the blueprint's name is cut with an
-           ellipsis, and the mark, the switcher and the name are not. -->
+           ellipsis, and the gear, the switcher and the name are not. -->
       <span class="bar-left">
-        <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
-        <span class="font-extrabold tracking-tight">walkdown</span>
-        <!-- The switcher, straight after the mark. -->
-        <button type="button" class="switch" data-testid="panel.modes" aria-haspopup="menu" aria-expanded="false"
-              aria-label="Mode: Walkdown" title="Walkdown. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg><span class="caret" aria-hidden="true">▾</span></button>
+        <button class="btn btn-xs btn-ghost btn-square" title="Settings for Walkdown" data-testid="panel.desk-tuner">⚙</button>
+        <!-- The switcher, where the walkdown name stood: the mode's icon, its
+             name, then the caret. It is live in this draft. Press it. -->
+        <span class="anchor"><button type="button" class="switch" data-testid="panel.modes" aria-haspopup="menu" aria-expanded="false"
+              aria-label="Mode: Walkdown" title="Walkdown. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg><span class="name">Walkdown</span><span class="caret" aria-hidden="true">▾</span></button>
+          <div class="menu-modes" role="menu" aria-label="Modes" data-testid="modes.menu" hidden>
+            <a href="mode-switch.html" role="menuitemradio" aria-checked="true">
+              <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg>
+              <span><b>Walkdown</b><small>The rules, one at a time, beside the app.</small></span>
+              <span class="tick" aria-hidden="true">✓</span></a>
+            <a href="mode-boards.html" role="menuitemradio" aria-checked="false">
+              <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.75" width="4.5" height="3.5" rx=".8"/><rect x="5.75" y="9.75" width="4.5" height="3.5" rx=".8"/><rect x="10" y="2.75" width="4.5" height="3.5" rx=".8"/><path d="M1.5 8h13" stroke-dasharray="1.5 1.5"/></svg>
+              <span><b>Boards</b><small>Who does what, in the order it happens.</small></span>
+              <span class="tick" aria-hidden="true"></span></a>
+            <a href="mode-personas.html" role="menuitemradio" aria-checked="false">
+              <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg>
+              <span><b>Personas</b><small>Everyone who uses the app, and who they sign in as.</small></span>
+              <span class="tick" aria-hidden="true"></span></a>
+            <p>Boards and Personas take the whole window. The app keeps running underneath, and Walkdown comes back as you left it.</p>
+          </div>
+        </span>
         <span class="text-xs opacity-50" style="white-space:nowrap;flex:none" data-testid="panel.blueprint">walkdown-example</span>
         <button class="pick btn btn-xs btn-ghost max-w-40 shrink gap-1 font-normal" data-testid="panel.screen-picker"
                 title="Which screen this page is: Join the waitlist"><span class="truncate">Join the waitlist</span> ▾</button>
@@ -176,39 +213,31 @@
     </main>
   </div>
 
-  <!-- ── The other state of this screen: the switcher, pressed ─────────── -->
+  <!-- ── The other state of this screen: the gear, pressed ─────────────── -->
   <section class="border-t border-dashed border-base-content/25 bg-base-100" style="padding:1.5rem 1.5rem 2.5rem">
     <h2 class="text-[10px] font-bold uppercase tracking-widest opacity-40">The other state of this screen</h2>
-    <p class="text-xs opacity-60" style="margin-top:.25rem">The same window, drawn small. Only the left of the bar is drawn.</p>
+    <p class="text-xs opacity-60" style="margin-top:.25rem">The same window, drawn small. Only the left of the bar is drawn. The open list is no longer drawn here: press the switcher in the window above.</p>
 
     <div style="margin-top:1rem;max-width:34rem">
-      <figure data-state="menu-open">
-        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">The switcher, pressed</figcaption>
+      <!-- The gear, pressed. It stays beside the switcher on all three screens
+           and opens the settings of the chosen mode. Each mode will have
+           settings of its own. These are placeholders, and none is decided. -->
+      <figure data-state="settings-open">
+        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">The gear, pressed: settings for Walkdown (placeholders)</figcaption>
         <div class="mini tall">
-          <!-- The list drops from the button, over the panel. It holds the three
-               modes in order, each with its icon and one line saying what it
-               shows. Walkdown is marked, as it is whenever the address names no
-               mode. Choosing one closes the list. -->
           <div class="bar">
-            <span class="font-extrabold tracking-tight">walkdown</span>
-            <span class="anchor"><button type="button" class="switch" aria-haspopup="menu" aria-expanded="true"
-              aria-label="Mode: Walkdown" title="Walkdown. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg><span class="caret" aria-hidden="true">▴</span></button>
-              <div class="menu-modes" role="menu" aria-label="Modes" data-testid="modes.menu">
-                <button type="button" role="menuitemradio" aria-checked="true">
-                  <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg>
-                  <span><b>Walkdown</b><small>The rules, one at a time, beside the app.</small></span>
-                  <span class="tick" aria-hidden="true">✓</span></button>
-                <button type="button" role="menuitemradio" aria-checked="false">
-                  <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.75" width="4.5" height="3.5" rx=".8"/><rect x="5.75" y="9.75" width="4.5" height="3.5" rx=".8"/><rect x="10" y="2.75" width="4.5" height="3.5" rx=".8"/><path d="M1.5 8h13" stroke-dasharray="1.5 1.5"/></svg>
-                  <span><b>Boards</b><small>Who does what, in the order it happens.</small></span>
-                  <span class="tick" aria-hidden="true"></span></button>
-                <button type="button" role="menuitemradio" aria-checked="false">
-                  <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg>
-                  <span><b>Personas</b><small>Everyone who uses the app, and who they sign in as.</small></span>
-                  <span class="tick" aria-hidden="true"></span></button>
-                <p>Boards and Personas take the whole window. The app keeps running underneath, and Walkdown comes back as you left it.</p>
+            <span class="anchor"><button class="btn btn-xs btn-ghost btn-square gear-on" title="Settings for Walkdown" aria-expanded="true">⚙</button>
+              <div class="set-pop" role="dialog" aria-label="Settings for Walkdown, placeholders">
+                <div class="head"><span>Walkdown settings</span><span class="ph">Placeholder</span></div>
+                <div class="row"><span>Record as</span><span class="val">Topher Fangio</span></div>
+                <div class="row"><span>Desk ruling</span><span class="val">Tune ▸</span></div>
+                <div class="row"><span>Hide the app for now</span><span class="box"></span></div>
+                <div class="row"><span>Open on the first rule owed</span><span class="box">✓</span></div>
+                <p class="note">None of these is decided. The first three are what the gear holds today. Walkdown's own settings are still to be chosen.</p>
               </div>
             </span>
+            <button type="button" class="switch" aria-haspopup="menu" aria-expanded="false"
+            aria-label="Mode: Walkdown" title="Walkdown. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg><span class="name">Walkdown</span><span class="caret" aria-hidden="true">▾</span></button>
             <span class="bp">walkdown-example</span>
             <span class="text-xs opacity-70" style="white-space:nowrap">Join the waitlist ▾</span>
           </div>
@@ -220,6 +249,35 @@
       </figure>
     </div>
   </section>
+  <!-- The switcher works in this draft, so the three drafts can be clicked
+       through. Pressing it opens and closes the list. Escape or a press
+       anywhere else closes it. Choosing a mode goes to that mode's draft. -->
+  <script>
+    (function () {
+      var button = document.querySelector('header .switch');
+      var menu = document.querySelector('header .menu-modes');
+      var caret = button.querySelector('.caret');
+      function show(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        caret.textContent = open ? '▴' : '▾';
+      }
+      button.addEventListener('click', function () { show(menu.hidden); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.hidden) { show(false); button.focus(); }
+      });
+      document.addEventListener('click', function (e) {
+        if (!button.contains(e.target) && !menu.contains(e.target)) show(false);
+      });
+      menu.addEventListener('click', function (e) {
+        var item = e.target.closest('[role="menuitemradio"]');
+        if (!item) return;
+        // The chosen mode is already showing: close the list and stay here.
+        if (item.getAttribute('aria-checked') === 'true') e.preventDefault();
+        show(false);
+      });
+    })();
+  </script>
   <script src="/embed.js" data-walkdown></script>
 </body>
 </html>
