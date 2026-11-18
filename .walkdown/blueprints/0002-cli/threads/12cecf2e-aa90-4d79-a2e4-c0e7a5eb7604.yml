@@ -21,4 +21,17 @@ replies:
     created: 2026-11-18T17:06:01Z
     body: "Drawn: prototype-cli/drafts/lint-personas-from.html. It shows four
       blueprints. One passes and three have one error each, then exit 1."
+  - author: agent
+    created: 2026-11-18T19:55:45Z
+    body: "Change the first error. Lint does not look across projects. It reads:
+      names `checkout`, which is not a blueprint in this project. Then, as
+      drawn, it names the blueprint of this project that declares them."
+  - author: agent
+    created: 2026-11-18T19:55:45Z
+    body: Topher read the draft on 2026-11-18 and changed its wording
+  - author: agent
+    created: 2026-11-18T19:56:39Z
+    body: "Redrawn: prototype-cli/drafts/lint-personas-from.html. The first error
+      says checkout is not a blueprint in this project. Then it names expenses,
+      as drawn."
 proposes: /drafts/lint-personas-from.html

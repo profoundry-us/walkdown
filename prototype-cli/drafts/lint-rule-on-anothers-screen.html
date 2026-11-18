@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- DESIGN DRAFT: lint-rule-on-anothers-screen -->
 <!-- Drawn by the design agent for request n-0647. Not yet accepted. -->
-<!-- Intent: warn once about the rule on a screen signed in as a persona its story does not name, naming the rule, the screen and both personas, and say it may want a story of its own; say nothing about the system's story with a rule on the same screen; exit 0. -->
+<!-- Intent: warn once about the rule on a screen signed in as a persona its story does not name, naming the rule, the screen and both personas, and say the two things the author can do: move it to a story that is `as: manager`, or leave it; say nothing about the system's story with a rule on the same screen; exit 0. -->
 <!-- Fixture: The storyboard declares persona manager with users view-only-team and view-only-org, persona visitor with no users, system platform, and groups customers, staff and hidden. Story access.request is as visitor, and its rule access.request.manager-is-told is on screen team-requests, which is as manager.view-only-team. Story alerts.overspend is by platform and its rule is on the same screen. -->
 <html lang="en">
 <head>
@@ -33,7 +33,7 @@
       <div class="ln"></div>
       <div data-testid="cli.lint.warnings">
       <div class="ln">WARNINGS</div>
-      <div class="ln">  ⚠ [personas] expenses/features/access.yml › access.request.manager-is-told: this rule is on screen `team-requests`, signed in as manager, and its story access.request is as visitor — that is allowed. If the rule is about what a manager does, it may want a story of its own</div>
+      <div class="ln">  ⚠ [personas] expenses/features/access.yml › access.request.manager-is-told: this rule is on screen `team-requests`, which is signed in as manager, and its story access.request is `as: visitor`. Nothing is refused. If the rule is about what a manager does, move it to a story that is `as: manager`. If it is about what the visitor's request leads to, leave it here.</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.lint.summary">

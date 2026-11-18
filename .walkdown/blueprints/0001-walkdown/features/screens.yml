@@ -312,11 +312,12 @@ stories:
           then:
             - On the first, the App pane runs the second user's steps, then the screen's steps, then loads the path
             - Anchor `detail.signed-in` names the user and its persona, and `detail.setup-steps` lists the user's steps before the screen's
+            - While the user's steps run, `detail.signed-in` reads Signing in as, and once they have passed it reads Signed in as
             - On the second, the persona's first user is signed in
             - On the third nothing signs in, and `detail.signed-in` says nobody signs in as this persona
             - A user's step that fails stops the setup, and anchor `panel.setup-failed` says it was that user's step
             - A screen with `as:` and prose setup runs the user's steps and shows the prose, which is never run
-          statement_hash: sha256:6c51a09911d8
+          statement_hash: sha256:ada7903df295
 
       - id: screens.setup.unread-personas-run-no-sign-in
         origin: walkdown

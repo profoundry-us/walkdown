@@ -184,11 +184,14 @@
   const EXPENSE = then('/expenses/412', '/expenses/{fixtures.expense_submitted}');
   const list = (rows) => `<ol class="setup-list" data-testid="detail.setup-steps">${rows}</ol>`;
 
-  const SIGNED_IN = `
+  // "Signing in as" until the user's last step has passed, "Signed in as" once it has.
+  const signedIn = (verb) => `
     <div class="signed-in" data-testid="detail.signed-in" title="as: manager.view-only-team">
       <i class="face"></i>
-      <span>Signed in as <b>View-only team manager</b>, a Manager.</span>
+      <span>${verb} as <b>View-only team manager</b>, a Manager.</span>
     </div>`;
+  const SIGNING_IN = signedIn('Signing in');
+  const SIGNED_IN = signedIn('Signed in');
   const NOBODY = `
     <div class="signed-in nobody" data-testid="detail.signed-in" title="as: visitor">
       <i class="face"></i>
@@ -236,7 +239,7 @@
   const CASES = {
     user: {
       rule: MANAGER_RULE,
-      setup: setup(SIGNED_IN + list(userSteps(2) + screenSteps(2, 4, "Then this screen's own steps") + EXPENSE) + AGAIN),
+      setup: setup(SIGNING_IN + list(userSteps(2) + screenSteps(2, 4, "Then this screen's own steps") + EXPENSE) + AGAIN),
       frame: progress({ at: 2, of: 5, pips: ['done', 'now', '', 'gap', '', ''], path: '/expenses/412',
         whose: 'A step of signing in as <b>View-only team manager</b>.',
         doing: 'Posting the sign-in form to <code>/dev/session</code>.' }),
@@ -261,7 +264,7 @@
     },
     prose: {
       rule: MANAGER_RULE,
-      setup: setup(SIGNED_IN + list(userSteps(2) + EXPENSE) + PROSE + AGAIN),
+      setup: setup(SIGNING_IN + list(userSteps(2) + EXPENSE) + PROSE + AGAIN),
       frame: progress({ at: 2, of: 3, pips: ['done', 'now', ''], path: '/expenses/412',
         whose: 'A step of signing in as <b>View-only team manager</b>.',
         doing: 'Posting the sign-in form to <code>/dev/session</code>.',

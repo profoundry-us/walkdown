@@ -33,4 +33,18 @@ replies:
     created: 2026-11-18T17:05:51Z
     body: agent named /drafts/rule-detail-signed-in.html as the version this request
       proposes, in place of none.
+  - author: agent
+    created: 2026-11-18T19:55:44Z
+    body: Change the line detail.signed-in while the sign-in is still running. Until
+      the user's last step has passed it reads Signing in as View-only team
+      manager, a Manager. Once those steps have passed it reads Signed in as, as
+      drawn. The other cases stay as they are.
+  - author: agent
+    created: 2026-11-18T19:55:44Z
+    body: Topher read the draft on 2026-11-18 and changed its wording
+  - author: agent
+    created: 2026-11-18T19:56:37Z
+    body: "Redrawn: prototype/drafts/rule-detail-signed-in.html. On the user's step
+      2 the line reads Signing in as. On the screen's step 4 it reads Signed in
+      as. The other cases are as they were."
 proposes: /drafts/rule-detail-signed-in.html

@@ -2,7 +2,7 @@
 <!-- DESIGN DRAFT: lint-personas-from -->
 <!-- Drawn by the design agent for request n-0643. Not yet accepted. -->
 <!-- Intent: over four blueprints of one project, pass the one that declares the personas and refuse the three whose personas_from is wrong, one error each, naming the blueprint it names and the one to name; exit 1. -->
-<!-- Fixture: Project expenses has four blueprints. expenses declares the personas. travel has personas_from checkout, a blueprint of project shop. mileage has personas_from travel. cards has personas_from expenses and a personas list of its own. -->
+<!-- Fixture: Project expenses has four blueprints. expenses declares the personas. travel has personas_from checkout, a blueprint of project shop; the error only says it is not a blueprint in this project. mileage has personas_from travel. cards has personas_from expenses and a personas list of its own. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -43,7 +43,7 @@
       <div class="ln"></div>
       <div data-testid="cli.lint.errors">
       <div class="ln">ERRORS</div>
-      <div class="ln">  ✗ [personas] travel/storyboard.yml › personas_from: names `checkout`, which is a blueprint of project `shop` — personas are shared within one project. Name the blueprint of this project that declares them: expenses</div>
+      <div class="ln">  ✗ [personas] travel/storyboard.yml › personas_from: names `checkout`, which is not a blueprint in this project. Name the blueprint of this project that declares them: expenses</div>
       </div>
       <div class="ln"></div>
       <div data-testid="cli.lint.summary">

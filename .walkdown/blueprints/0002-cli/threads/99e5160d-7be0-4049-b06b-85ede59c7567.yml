@@ -23,4 +23,22 @@ replies:
     body: "Drawn: prototype-cli/drafts/lint-rule-on-anothers-screen.html. It shows
       one warning that names the rule, the screen and both personas, and exit
       0."
+  - author: agent
+    created: 2026-11-18T19:55:45Z
+    body: "Make the warning specific, because an agent is likely to be the one
+      reading it. Drop that is allowed. Say what was found, with the ids, and
+      then the two things the author can do, each with the ids to use. Use these
+      words: this rule is on screen `team-requests`, which is signed in as
+      manager, and its story access.request is `as: visitor`. Nothing is
+      refused. If the rule is about what a manager does, move it to a story that
+      is `as: manager`. If it is about what the visitor's request leads to,
+      leave it here."
+  - author: agent
+    created: 2026-11-18T19:55:45Z
+    body: Topher read the draft on 2026-11-18 and changed its wording
+  - author: agent
+    created: 2026-11-18T19:56:38Z
+    body: "Redrawn: prototype-cli/drafts/lint-rule-on-anothers-screen.html. The
+      warning uses the words given. It says what was found, then the two things
+      to do."
 proposes: /drafts/lint-rule-on-anothers-screen.html
