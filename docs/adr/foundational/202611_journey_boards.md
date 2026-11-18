@@ -1,9 +1,9 @@
 # ADR 0018 — Journey boards
 
-- **Status:** proposed 2026-11-10, a draft. Nothing here is accepted, and nothing is
-    built. It was written to be checked against a real system first (see "Questions
-    for a real system"). One real system has answered them, and the answers changed
-    it; a second would still be worth having.
+- **Status:** accepted 2026-11-18 by Topher. Proposed 2026-11-10 as a draft to be
+    checked against a real system first (see "Questions for a real system"). One
+    real system answered them, and the answers changed it. §7's switch between
+    modes is built; the rest is built in the three parts "Consequences" names.
 - **Date:** 2026-11-10
 - **Deciders:** Topher (product, eng)
 - **Builds on:** ADR 0006 (rule conversation threads), ADR 0009 (design ownership and
@@ -569,14 +569,19 @@ records (ADR 0014), so a board served from a clone that left them out shows desi
 throughout. If either turns out to be most of a real board, a step that takes pictures
 on purpose earns its place back.
 
-### 7. Three modes: Rules, Boards, Personas
+### 7. Three modes: Walkdown, Boards, Personas
 
-walkdown's top bar chooses between three modes. **Rules** is the panel as it is today,
-beside the app. **Boards** and **Personas** are pages of records and pictures, and
-frame no app.
+A switcher at the left of walkdown's top bar chooses between three modes, and is named
+for the one that is chosen. **Walkdown** is the panel as it was, the rules beside the
+app. **Boards** and **Personas** are pages of records and pictures, and frame no app.
+
+*What building it changed* (Topher, 2026-11-18). The first mode was to be called
+Rules, which the side panel's own tab is already called. Three tabs crowded a narrow
+bar, so the switch is one button. Finish walkdown, and the button that puts walkdown
+away, show on Walkdown only: a board judges nothing.
 
 - **Boards and Personas take the whole window.** The panel and the app beside it are
-  hidden, never closed: the app keeps running underneath, and choosing Rules brings
+  hidden, never closed: the app keeps running underneath, and choosing Walkdown brings
   both back where they were, on the same rule and the same screen.
 - **Each mode keeps its place.** Leaving a board hides it. Choosing Boards again
   returns to the same board, at the same position and zoom, with the same card open.
