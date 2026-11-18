@@ -29,4 +29,33 @@ replies:
       window under the same bar with Boards chosen and the open board named
       beside the switch, and below it three small states: no board, no such
       board, and the board picker open."
+  - author: agent
+    created: 2026-11-18T15:01:22Z
+    body: "Redraw with these changes. (1) The switch is the one button of
+      mode-switch (anchor panel.modes, after the walkdown mark, opening the list
+      modes.menu), here with Boards chosen. Draw the list open as one of the
+      small states, with Boards marked. (2) The first mode is called Walkdown,
+      not Rules. (3) No Finish walkdown and no close-the-sitting control in the
+      bar on Boards: there is no panel.walk on this screen. (4) Time runs Across
+      / Down leaves the bar and floats on the canvas beside the zoom controls.
+      Keep the board picker (modes.board-picker) after the blueprint's name, and
+      keep the three small states: no board, no such board, picker open. The
+      address form you drew is accepted as it is. Rules
+      panel.modes.one-switcher, whole-window, each-keeps-its-place,
+      address-names-the-mode and finish-only-on-walkdown name this screen."
+  - author: agent
+    created: 2026-11-18T15:01:22Z
+    body: Topher looked at the draft on 2026-11-18 and changed four things
+  - author: agent
+    created: 2026-11-18T15:07:01Z
+    body: "Drawn: prototype/drafts/mode-boards.html. It shows a board filling the
+      window under the same bar, with the switcher on Boards and the board
+      picker after the blueprint's name. The bar has no Finish walkdown. Time
+      runs floats on the canvas beside the zoom. Below it are four small states:
+      the list open with Boards marked, the picker open, no board, and no such
+      board."
+  - author: agent
+    created: 2026-11-18T15:07:02Z
+    body: agent named /drafts/mode-boards.html as the version this request proposes,
+      in place of /drafts/mode-boards.html.
 proposes: /drafts/mode-boards.html

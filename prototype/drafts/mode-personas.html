@@ -1,0 +1,190 @@
+<!doctype html>
+<!-- DESIGN DRAFT: mode-personas -->
+<!-- Drawn for design request n-0639 (ADR 0018 section 7). Not yet accepted. -->
+<!-- Intent: Personas takes the whole window under the same top bar, with the switcher where it is on Walkdown, nothing after the blueprint's name, and a page that scrolls through everyone who uses the app, one card each. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — Personas, taking the whole window</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  /* The mode switcher. One button, straight after the walkdown mark, in the
+     manner of an app switcher. Closed, it shows the chosen mode's icon and is
+     named for that mode. Pressed, it opens the list of three modes. Nothing to
+     its left changes with the mode, so it is in the same place in all three.
+     This block is the same in the mode-switch, mode-boards and mode-personas
+     drafts. */
+  .mi { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4;
+    stroke-linecap: round; stroke-linejoin: round; }
+  .switch { display: inline-flex; flex: none; align-items: center; gap: 3px; height: 24px; padding: 0 4px 0 5px;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); border-radius: .4rem;
+    font-size: 11px; line-height: 1; cursor: pointer; }
+  .switch:hover, .switch[aria-expanded="true"] { background: var(--color-base-200); }
+  .switch .caret { opacity: .55; }
+  .anchor { position: relative; display: inline-flex; flex: none; }
+  .bar-left { display: flex; flex: 1 1 0; min-width: 0; align-items: center; gap: .5rem; }
+  .bar-left .pick { min-width: 3.25rem; }
+  .bar-right { display: flex; flex: 1 1 0; min-width: max-content; align-items: center; justify-content: flex-end; gap: .5rem; }
+  .menu-modes { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: 17.5rem; padding: 4px;
+    background: var(--color-base-100); border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+    border-radius: .5rem; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .3); text-align: left; }
+  .menu-modes [role="menuitemradio"] { display: flex; width: 100%; align-items: center; gap: 10px; padding: 7px 8px;
+    border-radius: .35rem; text-align: left; cursor: pointer; }
+  .menu-modes [role="menuitemradio"]:hover, .menu-modes [aria-checked="true"] { background: var(--color-base-200); }
+  .menu-modes .mi { width: 20px; height: 20px; }
+  .menu-modes b { display: block; font-size: 12.5px; font-weight: 700; line-height: 1.25; }
+  .menu-modes small { display: block; font-size: 11px; line-height: 1.3; opacity: .65; }
+  .menu-modes .tick { margin-left: auto; width: 1rem; flex: none; text-align: center; font-size: 12px; font-weight: 700; }
+  .menu-modes p { margin-top: 4px; padding: 6px 8px 4px; font-size: 10.5px; line-height: 1.4; opacity: .55;
+    border-top: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+
+  /* The page: everyone who uses the app. It scrolls under the bar, which stays
+     put. Left for another mode and chosen again, it is scrolled to the same
+     place. */
+  .people { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 22px 24px 40px; background: var(--color-base-200); }
+  .people .wrap { max-width: 1120px; margin: 0 auto; }
+  .people h1 { font-size: 20px; font-weight: 700; }
+  .people .lede { margin-top: 4px; max-width: 62ch; font-size: 13px; opacity: .65; }
+  .people .key { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 11.5px; }
+  .people .key span { white-space: nowrap; opacity: .8; }
+  .people h2 { margin: 26px 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; }
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; align-items: start; }
+  .pcard { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--color-base-100);
+    border: 1px solid var(--color-base-300); border-radius: 6px; }
+  .pcard .top { display: flex; align-items: center; gap: 11px; }
+  .pcard .top b { display: block; font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .pcard .top small { font-size: 11.5px; opacity: .6; }
+  .pcard .av { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 999px;
+    background: var(--color-base-content); color: var(--color-base-100); font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+  .pcard .blurb { font-size: 13.5px; line-height: 1.45; }
+  .pcard dl { display: grid; grid-template-columns: 82px 1fr; gap: 7px 10px; margin: 0; padding-top: 10px;
+    border-top: 1px dashed var(--color-base-300); font-size: 12.5px; }
+  .pcard dt { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; padding-top: 2px; }
+  .pcard dd { margin: 0; min-width: 0; }
+  .pcard .user { margin-bottom: 6px; }
+  .pcard .user b { font-weight: 600; }
+  .pcard .user i { font-style: normal; opacity: .55; }
+  .pcard code { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .pcard .tg { display: flex; gap: 8px; font-size: 12px; }
+  .pcard .tg span:first-child { width: 52px; flex: none; opacity: .6; }
+  .pcard .tg.none { color: var(--color-warning); }
+  .pcard .tg.none span:first-child { opacity: 1; }
+  .pcard .bd { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pcard .bd button, .pcard .bd span { padding: 1px 9px; border-radius: 999px; font-size: 11.5px;
+    border: 1px solid color-mix(in oklab, currentColor 35%, transparent); }
+  .pcard .bd button { cursor: pointer; font-weight: 600; }
+  .pcard .bd button:hover { background: var(--color-base-200); }
+  .pcard .bd span { border-style: dashed; opacity: .6; }
+  .people .foot { margin-top: 22px; max-width: 70ch; font-size: 12px; opacity: .65; }
+</style>
+</head>
+<body class="bg-base-200 text-sm">
+  <div class="flex h-screen flex-col">
+    <!-- The same bar as on Boards, and shorter still: nothing follows the
+         blueprint's name. There is no Finish walkdown. This page judges
+         nothing, and the sitting stays open underneath. -->
+    <header class="navbar relative z-10 min-h-0 flex-none gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+            data-testid="panel.bar">
+      <!-- The left of the bar. It is the same on all three screens as far as
+           the blueprint's name. When the window is narrow it is this side that
+           gives way: the title after the blueprint's name is cut with an
+           ellipsis, and the mark, the switcher and the name are not. -->
+      <span class="bar-left">
+        <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+        <span class="font-extrabold tracking-tight">walkdown</span>
+        <!-- The switcher, straight after the mark. -->
+        <button type="button" class="switch" data-testid="panel.modes" aria-haspopup="menu" aria-expanded="false"
+              aria-label="Mode: Personas" title="Personas. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg><span class="caret" aria-hidden="true">▾</span></button>
+        <span class="text-xs opacity-50" style="white-space:nowrap;flex:none" data-testid="panel.blueprint">walkdown-example</span>
+      </span>
+    </header>
+
+    <!-- The page fills the window under the bar. No rule list and no App pane
+         can be seen; both are hidden and still running underneath. -->
+    <main class="people" data-testid="modes.page">
+      <div class="wrap">
+        <h1>Personas</h1>
+        <p class="lede">Everyone who uses the app. A story is one persona's, a screen is signed in as one of its users,
+          and a board's lanes are the personas of its stories.</p>
+        <!-- What the five marks beside a count of stories mean. -->
+        <p class="key" aria-label="What the marks mean"><span><b style="color:var(--color-success)">✓</b> passing</span> <span><b style="color:var(--color-error)">✕</b> failing</span> <span><b style="color:var(--color-warning)">●</b> waiting on you</span> <span><b style="color:var(--color-info)">◐</b> waiting on an agent</span> <span><b style="color:inherit">○</b> not built</span></p>
+
+        <h2>The public</h2>
+        <div class="pgrid">
+          <article class="pcard">
+            <div class="top"><span class="av" aria-hidden="true">V</span><div><b>Visitor</b><small>of the public site</small></div></div>
+            <p class="blurb">Has heard of the product and wants in. Leaves an email address, confirms it, and waits to be asked.</p>
+            <dl>
+              <dt>Uses</dt><dd>The public site, on a phone as often as not.</dd>
+              <dt>Users</dt><dd><div class="user"><b>New visitor</b> <i>· default</i><br><code>{fixtures.visitor}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
+              <div class="user"><b>Visitor already on the list</b><br><code>{fixtures.visitor_waiting}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd>3 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="1 passing">✓ 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd"><button title="Open the board, following Visitor">Getting a spot →</button></dd>
+            </dl>
+          </article>
+          <article class="pcard">
+            <div class="top"><span class="av" aria-hidden="true">M</span><div><b>Member</b><small>of the product</small></div></div>
+            <p class="blurb">Took their spot and now uses the product. Comes back to see where the people they sent stand in line.</p>
+            <dl>
+              <dt>Uses</dt><dd>The product itself, signed in.</dd>
+              <dt>Users</dt><dd><div class="user"><b>Member</b> <i>· default</i><br><code>{fixtures.member}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
+              <dt>Stories</dt><dd>1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd"><span>none yet</span></dd>
+            </dl>
+          </article>
+        </div>
+        <h2>The team</h2>
+        <div class="pgrid">
+          <article class="pcard">
+            <div class="top"><span class="av" aria-hidden="true">WA</span><div><b>Waitlist admin</b><small>of the back office</small></div></div>
+            <p class="blurb">Runs the list day to day. Decides who is invited next, and answers when someone asks where they stand.</p>
+            <dl>
+              <dt>Uses</dt><dd>The back office, at a desk.</dd>
+              <dt>Users</dt><dd><div class="user"><b>Admin</b> <i>· default</i><br><code>{fixtures.admin}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
+              <div class="user"><b>Admin on their first day</b><br><code>{fixtures.admin_new}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd>4 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="2 passing">✓ 2</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-info)" title="1 waiting on an agent">◐ 1</span></dd>
+              <dt>On boards</dt><dd class="bd"><button title="Open the board, following Waitlist admin">Getting a spot →</button><button title="Open the board, following Waitlist admin">Exporting the list →</button></dd>
+            </dl>
+          </article>
+          <article class="pcard">
+            <div class="top"><span class="av" aria-hidden="true">A</span><div><b>Analyst</b><small>of the back office</small></div></div>
+            <p class="blurb">Wants the list as a file once a week, to see where the sign-ups come from.</p>
+            <dl>
+              <dt>Uses</dt><dd>The back office, and a spreadsheet after it.</dd>
+              <dt>Users</dt><dd><div class="user"><b>Analyst</b> <i>· default</i><br><code>{fixtures.analyst}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd>2 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-error)" title="1 failing">✕ 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd"><button title="Open the board, following Analyst">Exporting the list →</button></dd>
+            </dl>
+          </article>
+          <article class="pcard">
+            <div class="top"><span class="av" aria-hidden="true">O</span><div><b>Owner</b><small>of the back office</small></div></div>
+            <p class="blurb">Set the waitlist up, and says who else may run it. Rarely signs in.</p>
+            <dl>
+              <dt>Uses</dt><dd>The back office, a few times a year.</dd>
+              <dt>Users</dt><dd><div class="user"><b>Owner</b> <i>· default</i><br><code>{fixtures.owner}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
+              <dt>Stories</dt><dd>none yet</dd>
+              <dt>On boards</dt><dd class="bd"><span>none yet</span></dd>
+            </dl>
+          </article>
+        </div>
+        <h2>Partners</h2>
+        <div class="pgrid">
+          <article class="pcard">
+            <div class="top"><span class="av" aria-hidden="true">RP</span><div><b>Referral partner</b><small>of the partner page</small></div></div>
+            <p class="blurb">Sends people to the waitlist from a site of their own, and checks how many of them joined.</p>
+            <dl>
+              <dt>Uses</dt><dd>The partner page, from a link in an email.</dd>
+              <dt>Users</dt><dd><div class="user"><b>Partner</b> <i>· default</i><br><code>{fixtures.partner}</code><div class="tg none"><span>local</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd>1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd"><span>none yet</span></dd>
+            </dl>
+          </article>
+        </div>
+
+        <p class="foot">Email service (outside) and Export job have lanes on a board and are not personas: nobody signs in as them.</p>
+      </div>
+    </main>
+  </div>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>

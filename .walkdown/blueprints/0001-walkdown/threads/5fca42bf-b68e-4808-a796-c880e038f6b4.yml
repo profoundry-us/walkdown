@@ -1,0 +1,39 @@
+id: n-0639
+uuid: 5fca42bf-b68e-4808-a796-c880e038f6b4
+kind: note
+reason: request
+author: agent
+created: 2026-11-18T15:01:37.887Z
+anchor:
+  screen: mode-personas
+status: addressed
+body: Draw Personas taking the whole window. The top bar is the one on
+  mode-boards, with the switcher (anchor panel.modes) showing Personas chosen,
+  nothing after the blueprint's name, and no Finish walkdown. Under the bar,
+  anchor modes.page fills the window with the grid of personas from the sketch
+  at sketches/workflow-board/index.html (its Personas mode, the people()
+  function). It has a heading and one line saying what a persona is, then the
+  personas in their groups, one card each. A card has the avatar, the title,
+  what they are a persona of, a line about them and what they use. It lists
+  their users, the first marked default, each with its fixture name and whether
+  each target has a value for it. It ends with how many stories they have,
+  counted by the five marks, and the boards they are on. Below the grid is the
+  line saying which systems have lanes and are not personas. Use the made-up
+  waitlist blueprint of the other two drafts, not the sketch's own names. The
+  page scrolls, so draw it long enough to show that. The card's contents get
+  rules of their own with the personas-and-users work. Here the rules are
+  panel.modes.one-switcher, whole-window, each-keeps-its-place and
+  finish-only-on-walkdown.
+replies:
+  - author: agent
+    created: 2026-11-18T15:07:01Z
+    body: "Drawn: prototype/drafts/mode-personas.html. It shows Personas filling the
+      window under the same bar, with the switcher on Personas and nothing after
+      the blueprint's name. The page scrolls through six personas in three
+      groups, one card each. It ends with the line naming the systems that have
+      lanes and are not personas."
+  - author: agent
+    created: 2026-11-18T15:07:02Z
+    body: agent named /drafts/mode-personas.html as the version this request
+      proposes, in place of none.
+proposes: /drafts/mode-personas.html

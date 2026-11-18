@@ -24,4 +24,33 @@ replies:
     body: "Drawn: prototype/drafts/mode-switch.html. It shows the panel on Rules
       with the switch in the top bar, after the blueprint's name and before the
       screen picker, with Rules chosen."
+  - author: agent
+    created: 2026-11-18T15:01:22Z
+    body: "Redraw with these changes. (1) No row of three tabs. The switch is one
+      button, anchor panel.modes, straight after the walkdown mark at the far
+      left of the bar, in the manner of an app switcher. Pressed, it opens a
+      list, anchor modes.menu, of the three modes in order: Walkdown, Boards,
+      Personas, each with an icon and one line saying what it shows, and the
+      chosen one marked. Closed, the button shows the chosen mode's icon. Draw
+      the bar closed, and the list open as a small state beside it. (2) The
+      first mode is called Walkdown, not Rules, because the side panel already
+      has a tab called Rules. (3) Finish walkdown, anchor panel.walk, stays in
+      the bar on this screen: it is offered on Walkdown only. With the tabs
+      gone, the bar should no longer crowd on a narrow window; say at what width
+      it still would. Rules panel.modes.one-switcher, panel.modes.whole-window
+      and panel.modes.finish-only-on-walkdown name this screen."
+  - author: agent
+    created: 2026-11-18T15:01:22Z
+    body: Topher looked at the draft on 2026-11-18 and changed four things
+  - author: agent
+    created: 2026-11-18T15:07:01Z
+    body: "Drawn: prototype/drafts/mode-switch.html. It shows the panel on Walkdown
+      with one switcher button straight after the walkdown mark, and Finish
+      walkdown still in the bar. Below it the list is drawn open, with Walkdown
+      marked. The bar fits down to a window 904 pixels wide. Below that the
+      screen picker meets the fade."
+  - author: agent
+    created: 2026-11-18T15:07:01Z
+    body: agent named /drafts/mode-switch.html as the version this request proposes,
+      in place of /drafts/mode-switch.html.
 proposes: /drafts/mode-switch.html

@@ -2022,52 +2022,55 @@ stories:
           statement_hash: sha256:48cd3b6f3cb6
 
   - id: panel.modes
-    title: Rules, Boards and Personas are three modes of one window
+    title: Walkdown, Boards and Personas are three modes of one window
     statement: As a reviewer, I can move between the rules, a board of the process and the list of personas, and find each where I left it.
     rules:
 
-      - id: panel.modes.three-in-the-bar
+      - id: panel.modes.one-switcher
+        formerly: [panel.modes.three-in-the-bar]
         origin: walkdown
         created_at: 2026-11-17
         verify: [checks, agent]
         signoff: [eng, product]
-        statement: The panel's top bar offers three modes, Rules, Boards and Personas, and marks the one that is chosen.
+        statement: A switcher beside the walkdown mark in the top bar opens a list of three modes, Walkdown, Boards and Personas, and marks the one that is chosen.
         because: A board and the rules are two views of one blueprint, and a reviewer moves between them many times in a sitting.
-        history: "ADR 0018 §7. Before it the panel had the rules alone."
-        screens: [mode-switch, mode-boards]
+        history: "ADR 0018 §7. Topher, 2026-11-18: a switcher beside the mark and not three tabs, which crowded a narrow bar, and the first mode is Walkdown, since the side panel already has a tab called Rules."
+        screens: [mode-switch, mode-boards, mode-personas]
         steps:
           given:
             - The panel open on a blueprint with at least one board and one persona
           when:
-            - Read anchor `panel.modes`, then choose Boards in it
+            - Press anchor `panel.modes`, then choose Boards in anchor `modes.menu`
           then:
-            - "`panel.modes` holds Rules, Boards and Personas, in that order, in the panel's top bar"
-            - Rules is the chosen one when the address names no mode
-            - After choosing Boards it is marked as chosen and Rules is not
+            - "`panel.modes` is one button in the top bar, straight after the walkdown mark"
+            - "`modes.menu` lists Walkdown, Boards and Personas, in that order, each with an icon and a line saying what it shows"
+            - Walkdown is the chosen one when the address names no mode
+            - After choosing Boards the list closes, and opened again it marks Boards as chosen and Walkdown not
+            - "Closed, `panel.modes` shows the chosen mode's icon and is named for that mode"
             - "`panel.modes` is in the same place in all three modes"
             - On a blueprint with no board, Boards is still offered, and its page says the blueprint has none
-          statement_hash: sha256:beb594df0c8b
+          statement_hash: sha256:a2052610762a
 
       - id: panel.modes.whole-window
         origin: walkdown
         created_at: 2026-11-17
         verify: [checks, agent]
         signoff: [eng, product]
-        statement: Boards and Personas take the whole window. The panel and the app beside it are hidden and kept running, and choosing Rules shows both as they were.
+        statement: Boards and Personas take the whole window. The panel and the app beside it are hidden and kept running, and choosing Walkdown shows both as they were.
         because: A board is too wide to share a window with an app, and a reviewer who looks at one should not lose the rule and the page they were on.
         history: "Topher, 2026-11-17: Boards takes the whole window, and the app keeps running underneath."
-        screens: [mode-boards, mode-switch]
+        screens: [mode-boards, mode-switch, mode-personas]
         steps:
           given:
             - The panel on a rule, with its screen loaded in the App pane and something typed into a field of that page
           when:
-            - Choose Boards in anchor `panel.modes`, then choose Rules
+            - Choose Boards in anchor `modes.menu`, then choose Walkdown
           then:
             - On Boards, anchor `modes.page` fills the window under the top bar, and neither the rule list nor the App pane can be seen
             - The App pane's page is not loaded again on the way back, and the field still holds what was typed
-            - Back on Rules, the same rule is open on the same screen, with the same surface showing
+            - Back on Walkdown, the same rule is open on the same screen, with the same surface showing
             - Personas takes the whole window in the same way
-          statement_hash: sha256:22c29006ceb8
+          statement_hash: sha256:4ca141e23bb8
 
       - id: panel.modes.each-keeps-its-place
         origin: walkdown
@@ -2077,18 +2080,18 @@ stories:
         statement: A mode that is left and chosen again shows what it showed when it was left.
         because: Checking one rule should not cost a reviewer their place on a board of forty cards.
         history: "Topher, 2026-11-17: a board hides, and remembers its place for when Boards is chosen again."
-        screens: [mode-boards]
+        screens: [mode-boards, mode-personas]
         steps:
           given:
             - Boards open on the second of two boards, moved and zoomed away from where it opened
           when:
-            - Choose Rules in anchor `panel.modes`, then choose Boards
+            - Choose Walkdown in anchor `modes.menu`, then choose Boards
             - Reload the window
           then:
             - Boards shows the second board, at the position and zoom it was left at
             - After the reload it shows the same board at the same position and zoom
             - Personas, scrolled down and left for another mode, is scrolled to the same place when chosen again
-          statement_hash: sha256:646fb1b8e103
+          statement_hash: sha256:f62f58d1bc90
 
       - id: panel.modes.address-names-the-mode
         origin: walkdown
@@ -2101,13 +2104,33 @@ stories:
         screens: [mode-boards]
         steps:
           given:
-            - A blueprint with two boards, and the panel on Rules
+            - A blueprint with two boards, and the panel on Walkdown
           when:
-            - Choose Boards in anchor `panel.modes`, then the second board
+            - Choose Boards in anchor `modes.menu`, then the second board in anchor `modes.board-picker`
             - Open the address shown in a new window
           then:
             - The address changes on each choice, and names Boards and the second board
             - The new window opens on Boards, on the second board, with no choice made in it
             - Back and Forward in the browser move between the modes chosen
             - An address naming a board the blueprint does not have opens Boards and says there is no such board
-          statement_hash: sha256:e0f68326a5ea
+          statement_hash: sha256:b1186283c00e
+
+      - id: panel.modes.finish-only-on-walkdown
+        origin: walkdown
+        created_at: 2026-11-18
+        verify: [checks, agent]
+        signoff: [eng, product]
+        statement: Finish walkdown is offered only in the Walkdown mode. A sitting that is under way stays open while Boards or Personas is shown.
+        because: A board judges nothing, so a button that ends the sitting has no business on it, and looking at one must not end the sitting.
+        history: "Topher, 2026-11-18: the Finish walkdown button shows only on the first mode."
+        screens: [mode-switch, mode-boards, mode-personas]
+        steps:
+          given:
+            - A sitting under way with two rules judged, and the panel on Walkdown
+          when:
+            - Choose Boards in anchor `modes.menu`, then Personas, then Walkdown
+          then:
+            - On Walkdown, anchor `panel.walk` offers Finish walkdown
+            - On Boards and on Personas there is no `panel.walk`
+            - Back on Walkdown the sitting is the same one, with both rules still judged
+          statement_hash: sha256:c6267753d8ea

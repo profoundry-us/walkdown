@@ -1,31 +1,49 @@
 <!doctype html>
 <!-- DESIGN DRAFT: mode-switch -->
-<!-- Drawn for design request n-0637 (ADR 0018 section 7). Not yet accepted. -->
-<!-- Intent: the panel as it is today, with one new thing in its top bar: a switch between Rules, Boards and Personas, sitting after the blueprint's name with Rules chosen. -->
+<!-- Drawn for design request n-0637 (ADR 0018 section 7), second drawing. Not yet accepted. -->
+<!-- Intent: the panel as it is today, with one new thing in its top bar: a single switcher button straight after the walkdown mark, which opens a list of Walkdown, Boards and Personas, with Walkdown chosen. -->
 <html lang="en" data-theme="wireframe">
 <head>
 <meta charset="utf-8">
-<title>Draft — the mode switch, on Rules</title>
+<title>Draft — the mode switcher, on Walkdown</title>
 <link rel="stylesheet" href="/walkdown.css">
 <style>
   .desk {
-    position: fixed; inset: -60vmax; z-index: 0; pointer-events: none;
+    position: absolute; inset: -60vmax; z-index: 0; pointer-events: none;
     background:
       repeating-linear-gradient(0deg, transparent 0 59px, currentColor 59px 60px),
       repeating-linear-gradient(90deg, transparent 0 59px, currentColor 59px 60px);
     opacity: .08; transform: rotate(35deg);
   }
-  /* The mode switch: three segments in one dashed box, the chosen one filled.
-     It is the same shape as the bar's other small switches, so it reads as
-     part of this bar. It sits after the blueprint's name because it chooses
-     between three views of that blueprint. Nothing to its left changes with
-     the mode, so it is in the same place in all three. The same block is in
-     the mode-boards draft, unchanged. */
-  .modes { display: inline-flex; flex: none; border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent);
-    border-radius: .4rem; padding: 1px; gap: 1px; }
-  .modes button { font-size: 11px; font-weight: 600; line-height: 1; padding: 4px 8px; border-radius: .3rem; cursor: pointer; }
-  .modes button[aria-pressed="true"] { background: var(--color-base-content); color: var(--color-base-100); }
-  .modes button[aria-pressed="false"]:hover { background: var(--color-base-200); }
+  /* The mode switcher. One button, straight after the walkdown mark, in the
+     manner of an app switcher. Closed, it shows the chosen mode's icon and is
+     named for that mode. Pressed, it opens the list of three modes. Nothing to
+     its left changes with the mode, so it is in the same place in all three.
+     This block is the same in the mode-switch, mode-boards and mode-personas
+     drafts. */
+  .mi { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4;
+    stroke-linecap: round; stroke-linejoin: round; }
+  .switch { display: inline-flex; flex: none; align-items: center; gap: 3px; height: 24px; padding: 0 4px 0 5px;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); border-radius: .4rem;
+    font-size: 11px; line-height: 1; cursor: pointer; }
+  .switch:hover, .switch[aria-expanded="true"] { background: var(--color-base-200); }
+  .switch .caret { opacity: .55; }
+  .anchor { position: relative; display: inline-flex; flex: none; }
+  .bar-left { display: flex; flex: 1 1 0; min-width: 0; align-items: center; gap: .5rem; }
+  .bar-left .pick { min-width: 3.25rem; }
+  .bar-right { display: flex; flex: 1 1 0; min-width: max-content; align-items: center; justify-content: flex-end; gap: .5rem; }
+  .menu-modes { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: 17.5rem; padding: 4px;
+    background: var(--color-base-100); border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+    border-radius: .5rem; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .3); text-align: left; }
+  .menu-modes [role="menuitemradio"] { display: flex; width: 100%; align-items: center; gap: 10px; padding: 7px 8px;
+    border-radius: .35rem; text-align: left; cursor: pointer; }
+  .menu-modes [role="menuitemradio"]:hover, .menu-modes [aria-checked="true"] { background: var(--color-base-200); }
+  .menu-modes .mi { width: 20px; height: 20px; }
+  .menu-modes b { display: block; font-size: 12.5px; font-weight: 700; line-height: 1.25; }
+  .menu-modes small { display: block; font-size: 11px; line-height: 1.3; opacity: .65; }
+  .menu-modes .tick { margin-left: auto; width: 1rem; flex: none; text-align: center; font-size: 12px; font-weight: 700; }
+  .menu-modes p { margin-top: 4px; padding: 6px 8px 4px; font-size: 10.5px; line-height: 1.4; opacity: .55;
+    border-top: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
 
   /* The example waitlist page, as the app serves it. */
   .wl { height: 100%; display: grid; place-items: center; }
@@ -35,107 +53,173 @@
   .wl input { width: 100%; margin-top: 1rem; padding: .5rem .65rem; border: 1px solid var(--color-base-300); border-radius: .4rem; font-size: 13px; }
   .wl .go { margin-top: .6rem; width: 100%; padding: .5rem; border-radius: .4rem; font-weight: 700; font-size: 13px;
     background: var(--color-neutral); color: var(--color-neutral-content); }
+
+  /* The small states under the main one: the same window, drawn small. */
+  .mini { display: flex; flex-direction: column; height: 15.5rem; background: var(--color-base-200);
+    border: 1px solid var(--color-base-300); border-radius: .6rem; overflow: hidden; }
+  .mini.tall { height: 19.5rem; }
+  .mini .addr { font: 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 4px 10px; opacity: .6;
+    background: var(--color-base-100); border-bottom: 1px solid var(--color-base-300); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini .addr b { opacity: 1; font-weight: 700; }
+  .mini .bar { position: relative; z-index: 6; display: flex; flex: none; align-items: center; gap: .5rem;
+    padding: .375rem .75rem; background: var(--color-base-100);
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .mini .bar .bp { font-size: 12px; opacity: .5; white-space: nowrap; }
+  .mini .under { display: flex; flex: 1; gap: .5rem; padding: .5rem; min-height: 0; }
+  .mini .under div { display: grid; place-items: center; background: var(--color-base-100); border-radius: .5rem;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); font-size: 11px; }
+  .mini .under div span { opacity: .45; }
 </style>
 </head>
-<body class="h-screen overflow-hidden bg-base-200 text-sm">
-  <div class="desk" data-testid="panel.desk"></div>
+<body class="bg-base-200 text-sm">
 
-  <header class="navbar relative z-10 min-h-0 gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
-          data-testid="panel.bar">
-    <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
-    <span class="font-extrabold tracking-tight">walkdown</span>
-    <span class="text-xs opacity-50" data-testid="panel.blueprint">walkdown-example</span>
+  <!-- ── The main state: one whole window, the switcher closed ─────────── -->
+  <div class="relative flex h-screen flex-col overflow-hidden">
+    <div class="desk" data-testid="panel.desk"></div>
 
-    <!-- New. Rules is chosen whenever the address names no mode. Boards is
-         offered even when the blueprint has no board; its page then says so. -->
-    <span class="modes" data-testid="panel.modes" role="group" aria-label="Mode">
-      <button type="button" aria-pressed="true"
-              title="The rules, beside the app. You are here.">Rules</button>
-      <button type="button" aria-pressed="false"
-              title="A board of the process. It takes the whole window, and the app keeps running underneath.">Boards</button>
-      <button type="button" aria-pressed="false"
-              title="Everyone who uses the app. It takes the whole window, and the app keeps running underneath.">Personas</button>
-    </span>
-
-    <!-- The screen picker gives way first when the bar is narrow: its title is
-         cut with an ellipsis before the switch and the fade can meet. -->
-    <button class="btn btn-xs btn-ghost min-w-0 max-w-40 shrink gap-1 font-normal" data-testid="panel.screen-picker"
-            title="Which screen this page is: Join the waitlist"><span class="truncate">Join the waitlist</span> ▾</button>
-
-    <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" data-testid="panel.fade">
-      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
-      <input type="range" min="0" max="100" value="100" class="range range-xs w-28"
-             aria-label="Fade between the design and the app">
-      <button class="btn btn-xs btn-active">App</button>
-    </span>
-
-    <span class="ml-auto flex items-center gap-2">
-      <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
-        <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
-        <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
-        <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
+    <header class="navbar relative z-10 min-h-0 flex-none gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+            data-testid="panel.bar">
+      <!-- The left of the bar. It is the same on all three screens as far as
+           the blueprint's name. When the window is narrow it is this side that
+           gives way: the title after the blueprint's name is cut with an
+           ellipsis, and the mark, the switcher and the name are not. -->
+      <span class="bar-left">
+        <button class="btn btn-xs btn-ghost btn-square" title="Tune the desk" data-testid="panel.desk-tuner">⚙</button>
+        <span class="font-extrabold tracking-tight">walkdown</span>
+        <!-- The switcher, straight after the mark. -->
+        <button type="button" class="switch" data-testid="panel.modes" aria-haspopup="menu" aria-expanded="false"
+              aria-label="Mode: Walkdown" title="Walkdown. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg><span class="caret" aria-hidden="true">▾</span></button>
+        <span class="text-xs opacity-50" style="white-space:nowrap;flex:none" data-testid="panel.blueprint">walkdown-example</span>
+        <button class="pick btn btn-xs btn-ghost max-w-40 shrink gap-1 font-normal" data-testid="panel.screen-picker"
+                title="Which screen this page is: Join the waitlist"><span class="truncate">Join the waitlist</span> ▾</button>
       </span>
-      <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
-      <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
-      <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
-    </span>
-  </header>
 
-  <!-- Everything under the bar is the panel as it is today. Choosing Boards or
-       Personas hides all of it without closing it: the page in the frame is
-       not loaded again, and what was typed into it is still there on the way
-       back, with the same rule open. -->
-  <main class="relative z-10 flex h-[calc(100vh-2.5rem)] gap-3 p-3">
-    <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
-      <div class="wl"><div class="wl-card">
-        <h1>Join the waitlist</h1>
-        <p>We'll email you when a spot opens.</p>
-        <input placeholder="you@example.com" value="ada@example.com">
-        <div class="go">Join the waitlist</div>
-      </div></div>
-      <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 border-dashed"
-            data-testid="panel.zoom" title="Wider than the space? Scaled down whole, never reflowed">fit 74%</span>
-    </section>
+      <!-- The fade stays in the middle of the bar while there is room on both
+           sides of it. -->
+      <span class="flex flex-none items-center gap-2" data-testid="panel.fade">
+        <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25">Design</button>
+        <input type="range" min="0" max="100" value="100" class="range range-xs w-28"
+               aria-label="Fade between the design and the app">
+        <button class="btn btn-xs btn-active">App</button>
+      </span>
 
-    <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
-      <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
-           data-testid="panel.tabs">
-        <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
-        <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
-        <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
-      </div>
-      <div class="flex items-center gap-2 border-b border-dashed border-base-content/25 px-3 py-1.5 text-xs"
-           data-testid="panel.actor">
-        <span>Recording as <b title="change in Settings (the gear)">Topher Fangio</b></span>
-        <span class="ml-auto opacity-60">3 judged</span>
-      </div>
-
-      <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
-        <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.join</div>
-        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="verified">
-          <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">email-required</span></button>
-        <button class="flex w-full items-center gap-2 rounded bg-base-200 px-2 py-1 text-left" title="built — awaiting your walkdown">
-          <span class="w-3.5 shrink-0 text-center text-warning">○</span><span class="truncate">confirmation</span>
-          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">walk</span></button>
-        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="approved — spec signed off, awaiting build">
-          <span class="w-3.5 shrink-0 text-center opacity-60">✍︎</span><span class="truncate">shows-place-in-line</span></button>
-
-        <div class="px-2 pb-0.5 pt-2.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.export</div>
-        <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="designed — awaiting your sign-off">
-          <span class="w-3.5 shrink-0 text-center text-warning">□</span><span class="truncate">says-why-it-waits</span>
-          <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">sign</span></button>
-      </div>
-
-      <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
-              data-testid="panel.counts">
-        <span><b>1 of 4</b> rules verified</span>
-        <span class="ml-auto flex gap-1">
-          <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your sign-off">1 to sign</span>
-          <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your walkdown">1 to walk</span>
+      <span class="bar-right">
+        <span class="join border-[1.5px] border-dashed border-base-content/25" data-testid="panel.viewport-toggle">
+          <button class="btn btn-xs join-item btn-ghost" title="Fit the frame to the space">Fit</button>
+          <button class="btn btn-xs join-item btn-active" title="Desktop — lay the page out at 1440px">▭</button>
+          <button class="btn btn-xs join-item btn-ghost" title="Mobile — lay the page out at 390px">▯</button>
         </span>
-      </footer>
-    </aside>
-  </main>
+        <button class="btn btn-xs btn-ghost border-[1.5px] border-dashed border-base-content/25" data-testid="panel.pin-mode">📌 Pin mode</button>
+        <!-- Finish walkdown is offered on this mode only. Boards and Personas
+             have no such button, and looking at either leaves the sitting open. -->
+        <button class="btn btn-xs btn-neutral" data-testid="panel.walk">Finish walkdown</button>
+        <button class="btn btn-xs btn-ghost" title="Put walkdown away">✕</button>
+      </span>
+    </header>
+
+    <!-- Everything under the bar is the panel as it is today. Choosing Boards or
+         Personas hides all of it without closing it: the page in the frame is
+         not loaded again, and what was typed into it is still there on the way
+         back, with the same rule open. -->
+    <main class="relative z-10 flex min-h-0 flex-1 gap-3 p-3">
+      <section class="relative flex-1 wire rounded-xl bg-base-100 shadow-lg" data-testid="panel.app-frame">
+        <div class="wl"><div class="wl-card">
+          <h1>Join the waitlist</h1>
+          <p>We'll email you when a spot opens.</p>
+          <input placeholder="you@example.com" value="ada@example.com">
+          <div class="go">Join the waitlist</div>
+        </div></div>
+        <span class="badge badge-sm badge-ghost absolute bottom-2 right-2 border-dashed"
+              data-testid="panel.zoom" title="Wider than the space? Scaled down whole, never reflowed">fit 74%</span>
+      </section>
+
+      <aside class="flex w-72 shrink-0 flex-col wire rounded-xl bg-base-100 shadow-lg">
+        <!-- The side panel's own tab is still called Rules. The mode is called
+             Walkdown so the two are never mistaken for each other. -->
+        <div class="m-2 flex items-center justify-center gap-1 self-center rounded-lg border border-dashed border-base-content/25 p-1 text-xs"
+             data-testid="panel.tabs">
+          <button class="btn btn-xs btn-ghost gap-1">▦ Blueprints</button>
+          <button class="btn btn-xs btn-active gap-1">✓ Rules</button>
+          <button class="btn btn-xs btn-ghost gap-1">⛶ Screens</button>
+        </div>
+        <div class="flex items-center gap-2 border-b border-dashed border-base-content/25 px-3 py-1.5 text-xs"
+             data-testid="panel.actor">
+          <span>Recording as <b title="change in Settings (the gear)">Topher Fangio</b></span>
+          <span class="ml-auto opacity-60">3 judged</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-2 text-xs" data-testid="panel.rules-list">
+          <div class="px-2 pb-0.5 pt-1.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.join</div>
+          <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="verified">
+            <span class="w-3.5 shrink-0 text-center text-success">✓</span><span class="truncate">email-required</span></button>
+          <button class="flex w-full items-center gap-2 rounded bg-base-200 px-2 py-1 text-left" title="built — awaiting your walkdown">
+            <span class="w-3.5 shrink-0 text-center text-warning">○</span><span class="truncate">confirmation</span>
+            <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">walk</span></button>
+          <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="approved — spec signed off, awaiting build">
+            <span class="w-3.5 shrink-0 text-center opacity-60">✍︎</span><span class="truncate">shows-place-in-line</span></button>
+
+          <div class="px-2 pb-0.5 pt-2.5 text-[10px] font-bold uppercase tracking-widest opacity-40">waitlist.export</div>
+          <button class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-base-200" title="designed — awaiting your sign-off">
+            <span class="w-3.5 shrink-0 text-center text-warning">□</span><span class="truncate">says-why-it-waits</span>
+            <span class="badge badge-xs ml-auto shrink-0 border-dashed text-warning">sign</span></button>
+        </div>
+
+        <footer class="flex items-center gap-2 border-t border-dashed border-base-content/25 px-3 py-2 text-xs opacity-70"
+                data-testid="panel.counts">
+          <span><b>1 of 4</b> rules verified</span>
+          <span class="ml-auto flex gap-1">
+            <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your sign-off">1 to sign</span>
+            <span class="badge badge-xs badge-ghost border-dashed" title="rules owing your walkdown">1 to walk</span>
+          </span>
+        </footer>
+      </aside>
+    </main>
+  </div>
+
+  <!-- ── The other state of this screen: the switcher, pressed ─────────── -->
+  <section class="border-t border-dashed border-base-content/25 bg-base-100" style="padding:1.5rem 1.5rem 2.5rem">
+    <h2 class="text-[10px] font-bold uppercase tracking-widest opacity-40">The other state of this screen</h2>
+    <p class="text-xs opacity-60" style="margin-top:.25rem">The same window, drawn small. Only the left of the bar is drawn.</p>
+
+    <div style="margin-top:1rem;max-width:34rem">
+      <figure data-state="menu-open">
+        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">The switcher, pressed</figcaption>
+        <div class="mini tall">
+          <!-- The list drops from the button, over the panel. It holds the three
+               modes in order, each with its icon and one line saying what it
+               shows. Walkdown is marked, as it is whenever the address names no
+               mode. Choosing one closes the list. -->
+          <div class="bar">
+            <span class="font-extrabold tracking-tight">walkdown</span>
+            <span class="anchor"><button type="button" class="switch" aria-haspopup="menu" aria-expanded="true"
+              aria-label="Mode: Walkdown" title="Walkdown. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg><span class="caret" aria-hidden="true">▴</span></button>
+              <div class="menu-modes" role="menu" aria-label="Modes" data-testid="modes.menu">
+                <button type="button" role="menuitemradio" aria-checked="true">
+                  <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg>
+                  <span><b>Walkdown</b><small>The rules, one at a time, beside the app.</small></span>
+                  <span class="tick" aria-hidden="true">✓</span></button>
+                <button type="button" role="menuitemradio" aria-checked="false">
+                  <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.75" width="4.5" height="3.5" rx=".8"/><rect x="5.75" y="9.75" width="4.5" height="3.5" rx=".8"/><rect x="10" y="2.75" width="4.5" height="3.5" rx=".8"/><path d="M1.5 8h13" stroke-dasharray="1.5 1.5"/></svg>
+                  <span><b>Boards</b><small>Who does what, in the order it happens.</small></span>
+                  <span class="tick" aria-hidden="true"></span></button>
+                <button type="button" role="menuitemradio" aria-checked="false">
+                  <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg>
+                  <span><b>Personas</b><small>Everyone who uses the app, and who they sign in as.</small></span>
+                  <span class="tick" aria-hidden="true"></span></button>
+                <p>Boards and Personas take the whole window. The app keeps running underneath, and Walkdown comes back as you left it.</p>
+              </div>
+            </span>
+            <span class="bp">walkdown-example</span>
+            <span class="text-xs opacity-70" style="white-space:nowrap">Join the waitlist ▾</span>
+          </div>
+          <div class="under">
+            <div style="flex:1"><span>The app</span></div>
+            <div style="width:9rem"><span>The rules</span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
   <script src="/embed.js" data-walkdown></script>
 </body>
 </html>

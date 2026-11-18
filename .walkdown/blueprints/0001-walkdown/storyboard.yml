@@ -261,10 +261,12 @@ screens:
       - detail.evidence
 
   - id: mode-switch
-    title: "The mode switch, on Rules"
+    title: "The mode switcher, on Walkdown"
     prototype: null
     anchors:
       - panel.modes
+      - modes.menu
+      - panel.walk
 
   - id: mode-boards
     title: "Boards, taking the whole window"
@@ -273,3 +275,11 @@ screens:
       - panel.modes
       - modes.page
       - modes.board-picker
+      - modes.menu
+
+  - id: mode-personas
+    title: "Personas, taking the whole window"
+    prototype: null
+    anchors:
+      - panel.modes
+      - modes.page
