@@ -23,6 +23,11 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   one a user does with no step of its own to sign out. Two screens on one path signed in as different
   users are no longer a tie. Nothing changes for a blueprint that uses none
   of these keys.
+- **The Personas page** (ADR 0018 §7). Each persona is a card under its
+  group's title: who it is, its users with the fixture each signs in with and
+  whether every target has a value for it, its stories counted by where they
+  stand, and the boards it is on, each of which opens Boards on that board.
+  Systems follow as small dashed cards.
 - **Three modes of one window** ([ADR 0018](docs/adr/foundational/202611_journey_boards.md) §7).
   A switcher at the left of the top bar, named for the mode that is chosen,
   moves between Walkdown (the rules beside the app, as before), Boards and

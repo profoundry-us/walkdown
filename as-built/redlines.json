@@ -154,9 +154,9 @@
   "mode-personas": {
     "title": "Personas, taking the whole window",
     "redlines": [
-      "A card holds the persona's title, what they are a persona of, a line about them, what they use and their users. The avatar, the fixtures and targets of each user, the stories by mark and the boards wait for the personas' own rules.",
-      "Personas are listed in the storyboard's order, with no group headings and no key to the marks.",
-      "The line under the grid naming the systems is not drawn.",
+      "A card counts its stories in the order failing, not built, waiting on you, waiting on an agent, passing, as the rule says, and the key above the cards is in that order too. The design draws passing first.",
+      "This drawing is of the example blueprint, which declares no groups and no users. So it has no group headings, and each card says nobody signs in as the persona. The design draws no persona without users.",
+      "A user that signs in with no fixture names none, and says nothing of the targets.",
       "The gear opens a pop-over that says Personas has no settings yet."
     ]
   },

@@ -102,3 +102,31 @@ test('a screen nobody signs in as is warned about only after one a user does, an
   assert.equal(none.status, 0, none.text);
   assert.doesNotMatch(none.text, said);
 });
+
+test('a story is marked by the first of five that holds among its rules (ADR 0018 §5)', async () => {
+  const { storyMarks } = await import('../lib/boards.js');
+  const row = (story, rule, verdict, built) => ({ story, rule, verdict, built });
+  const marks = storyMarks(
+    [
+      row('a', 'a.1', 'fail', true),
+      row('a', 'a.2', 'pending', false),
+      row('b', 'b.1', 'pending', false),
+      row('b', 'b.2', 'pending', true),
+      row('c', 'c.1', 'pending', true),
+      row('c', 'c.2', 'pass', true),
+      row('d', 'd.1', 'pending', true),
+      row('e', 'e.1', 'pass', true),
+    ],
+    [
+      { who: 'human', action: 'judge', rule: 'c.1' },
+      { who: 'agent', action: 'judge-first', rule: 'd.1' },
+    ],
+  );
+  assert.deepEqual(Object.fromEntries(marks), {
+    a: 'failing',
+    b: 'not-built',
+    c: 'you',
+    d: 'agent',
+    e: 'passing',
+  });
+});

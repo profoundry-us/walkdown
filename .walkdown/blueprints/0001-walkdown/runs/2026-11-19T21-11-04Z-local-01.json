@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-11-19T21-11-04Z-local-01",
+  "created": "2026-11-19T21:11:04Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a58b444d-dirty",
+  "spec_hash": "sha256:2059db25f5ae",
+  "results": [
+    {
+      "rule": "panel.start.choose-a-blueprint",
+      "status": "pass",
+      "statement_hash": "sha256:f89c8ffc710e",
+      "duration_ms": 2602,
+      "checks": [
+        "checks/panel.spec.js:2860",
+        "checks/panel.spec.js:3127"
+      ]
+    },
+    {
+      "rule": "panel.start.which-project",
+      "status": "pass",
+      "statement_hash": "sha256:7241796d7522",
+      "duration_ms": 1771,
+      "checks": [
+        "checks/panel.spec.js:3127"
+      ]
+    }
+  ]
+}

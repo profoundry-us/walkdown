@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-11-19T21-00-40Z-local-01",
+  "created": "2026-11-19T21:00:40Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "a58b444d-dirty",
+  "spec_hash": "sha256:6df18add8c00",
+  "results": [
+    {
+      "rule": "screens.setup.nobody-after-a-user-is-warned",
+      "status": "pass",
+      "statement_hash": "sha256:7a7a536b6c44",
+      "evidence": [
+        "runs/evidence/2026-11-19T20-58-08Z/nobody-after-a-user.txt",
+        "runs/evidence/2026-11-19T20-58-08Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-nobody-after-a-user.html",
+        "as-built/cli/lint-nobody-after-a-user.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and the as-built capture of lint-nobody-after-a-user read the same on all 8 lines with the same four anchors, and a live run of the scenario printed the same text. Every step held. With expense-team as manager.view-only-team and two screens as visitor, lint printed one warning, on expense-public, naming the screen, persona visitor and the screen and user whose session may be left, and saying to give it a setup step that signs out. expense-help, whose setup visits the sign-out route, was not warned about. In the second blueprint, where no persona has a user, a visitor screen with no setup drew no such warning. Both exited 0, and `--json` carried the same finding at level warn. Then I rewrote the storyboard 24 more ways. A prose setup and a recipe setup each silence the warning; `setup: []`, `setup: \"\"` and `setup: null` do not. Two setup-less visitor screens get a warning each. A retired visitor screen is not warned about, and retired user screens do not count as a user signing in. The warning does not depend on order: a visitor screen placed first is still warned about. `as: manager` alone counts as its first user and is named as manager.view-only-team. A user declared but named by no screen raises nothing. In a sibling that takes its people with `personas_from:`, a visitor screen beside a user screen is warned about and one with a setup is not; where the sibling's people could not be read there is the one unread warning and nothing else, exit 0. A name nobody declared, a user the persona lacks and a recipe nobody declared each keep their own error and add no warning here. Under 10%, named and not filed: a prose setup of spaces alone silences the warning, which takes a typing slip; a setup that does not sign out (a lone wait_for) silences it too, which the rule's own words allow; a sibling whose every screen is as visitor is not warned about though the user screens of the blueprint it takes its people from share its app, about 5% since it takes two blueprints on one app with one of them wholly public; and the user named in the warning may have no setup of its own, so no session was ever made, also a few percent. One edge between 10% and 80% is reported to whoever sent me and not filed: a screen with no `as:` at all and no setup, the usual sign-in page, opens on the same left-over session and lint says nothing of it. The rule and q-0654 speak only of a screen as a persona with no users, so the steps hold.",
+      "threads": []
+    }
+  ]
+}

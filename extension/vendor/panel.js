@@ -6653,7 +6653,7 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
   const wholeWindow = () => modeNow() !== 'walkdown';
 
   const boards = () => S.data?.boards ?? [];
-  const personas = () => S.data?.personas ?? [];
+  const people = () => S.data?.people ?? { groups: [], personas: [], systems: [], targets: [] };
 
   // ---- each mode's place ------------------------------------------------------
   /*
@@ -6988,38 +6988,125 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     requestRender();
   }
 
+  /*
+   * The five marks a story can carry (ADR 0018 §5), in the order a card counts
+   * them. Warning yellow is this panel's "waiting on you", as on a rule's glyph.
+   */
+  const MARKS = [
+    ['failing', '✕', 'failing', 'var(--color-error)'],
+    ['not-built', '○', 'not built', 'inherit'],
+    ['you', '●', 'waiting on you', 'var(--color-warning)'],
+    ['agent', '◐', 'waiting on an agent', 'var(--color-info)'],
+    ['passing', '✓', 'passing', 'var(--color-success)'],
+  ];
+
+  /* The first letters of a title's first two words: who a card is, at a glance. */
+  const initials = (title) =>
+    String(title)
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join('');
+
+  /* Boards, on this board: one step in the browser's history, as choosing a mode is. */
+  function openBoard(id) {
+    notePlace();
+    S.board = id;
+    readPlace().board = id;
+    keepPlace();
+    setMode('boards');
+  }
+
+  function userRow(u, first) {
+    return b`<div class="user" data-user="${u.id}">
+    <b>${u.title}</b>${first ? b` <i>· default</i>` : A}
+    ${u.fixtures.map((k) => b`<br /><code>{fixtures.${k}}</code>`)}
+    ${u.targets.map(
+      (t) => b`<div class="tg ${t.set ? '' : 'none'}" data-target="${t.target}">
+        <span>${t.target}</span><span>${
+          t.set
+            ? 'has a value'
+            : 'no value, so nothing signed in as this user can be walked or pictured there'
+        }</span></div>`,
+    )}
+  </div>`;
+  }
+
+  function personaCard(p) {
+    const n = p.stories.total;
+    return b`<article class="pcard" data-testid="personas.card" data-persona="${p.id}">
+    <div class="top"><span class="av" aria-hidden="true">${initials(p.title)}</span>
+      <div><b>${p.title}</b>${p.of ? b`<small>of ${p.of}</small>` : A}</div></div>
+    ${p.blurb ? b`<p class="blurb">${p.blurb}</p>` : A}
+    <dl>
+      ${p.uses ? b`<dt>Uses</dt><dd>${p.uses}</dd>` : A}
+      <dt>Users</dt>
+      <dd data-testid="personas.users">${
+        p.users.length
+          ? p.users.map((u, i) => userRow(u, i === 0))
+          : 'Nobody signs in as this persona.'
+      }</dd>
+      <dt>Stories</dt>
+      <dd data-testid="personas.stories">${
+        n
+          ? b`${n} ${n === 1 ? 'story' : 'stories'} ${MARKS.filter(([id]) => p.stories[id]).map(
+              ([id, mark, words, colour]) =>
+                b`<span class="count" data-mark="${id}" style="color:${colour}"
+                  title="${p.stories[id]} ${words}">${mark} ${p.stories[id]}</span>`,
+            )}`
+          : 'none yet'
+      }</dd>
+      <dt>On boards</dt>
+      <dd class="bd" data-testid="personas.boards">${
+        p.boards.length
+          ? p.boards.map(
+              (b$1) => b`<button data-board="${b$1.id}" title="Open the board, following ${p.title}"
+                @click=${() => openBoard(b$1.id)}>${b$1.title} →</button>`,
+            )
+          : b`<span>none yet</span>`
+      }</dd>
+    </dl>
+  </article>`;
+  }
+
   function personasPage() {
-    const all = personas();
-    if (!all.length)
+    const { groups, personas: all, systems } = people();
+    if (!all.length && !systems.length)
       return say(
         'This blueprint has no personas.',
         "A persona is someone who uses the app. A story is one persona's, and a board's lanes are the personas of its stories.",
         b`Declare them under <code>personas:</code> in the storyboard and they are listed here.`,
       );
+    const named = new Set(groups.map((g) => g.id));
+    // Personas of no declared group come first, under no heading: a storyboard with no groups is all of them.
+    const loose = all.filter((p) => !named.has(p.group));
     return b`<div class="modes-people">
     <h1>Personas</h1>
-    <p class="lede">Everyone who uses the app. A story is one persona's, and a board's lanes are the personas of its stories.</p>
-    <div class="grid">
-      ${all.map(
-        (p) => b`<article data-persona="${p.id}">
-          <h2>${p.title}</h2>
-          ${p.of ? b`<small>${p.of}</small>` : A}
-          ${p.blurb ? b`<p>${p.blurb}</p>` : A}
-          <dl>
-            ${p.uses ? b`<dt>Uses</dt><dd>${p.uses}</dd>` : A}
-            <dt>Users</dt>
-            <dd>${
-              p.users.length
-                ? p.users.map(
-                    (u, i) =>
-                      b`<div>${u.title}${i ? A : b` <span class="opacity-50">· default</span>`}</div>`,
-                  )
-                : 'Nobody signs in as this persona.'
-            }</dd>
-          </dl>
-        </article>`,
-      )}
-    </div>
+    <p class="lede">Everyone who uses the app. A story is one persona's, a screen is signed in as one of its users,
+      and a board's lanes are the personas of its stories.</p>
+    <p class="key" aria-label="What the marks mean">${MARKS.map(
+      ([id, mark, words, colour]) =>
+        b`<span data-mark="${id}"><b style="color:${colour}">${mark}</b> ${words}</span>`,
+    )}</p>
+    ${loose.length ? b`<div class="pgrid loose">${loose.map(personaCard)}</div>` : A}
+    ${groups.map(
+      (g) => b`<h2 data-testid="personas.group" data-group="${g.id}">${g.title}</h2>
+        <div class="pgrid">${all.filter((p) => p.group === g.id).map(personaCard)}</div>`,
+    )}
+    ${
+      systems.length
+        ? b`<h2 data-systems>Systems nobody signs in as</h2>
+            <div class="sgrid">${systems.map(
+              (
+                s2,
+              ) => b`<article class="scard" data-testid="personas.system" data-system="${s2.id}">
+                <span class="sq" aria-hidden="true">${initials(s2.title)}</span>
+                <div><b>${s2.title}</b>${s2.outside ? b` <small>(outside)</small>` : A}</div>
+              </article>`,
+            )}</div>`
+        : A
+    }
   </div>`;
   }
 

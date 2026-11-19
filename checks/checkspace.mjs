@@ -43,6 +43,7 @@ export const CLI_HOME = join('.walkdown', 'blueprints', '0002-cli');
 /** Where the expenses blueprint's project is checked out (ADR 0017's checks). */
 export const EXPENSES_CHECKOUT = join(CHECKSPACE, 'expenses-app');
 export const TRAVEL_CHECKOUT = join(CHECKSPACE, 'travel-app');
+export const PEOPLE_CHECKOUT = join(CHECKSPACE, 'people-app');
 
 /**
  * @param {{ exampleDeclared: string, exampleOrigin: string, expenses: { local: string, review: string } }} addresses
@@ -195,7 +196,7 @@ export function prepare({
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'registry.yml'),
     [
-      'next: 6',
+      'next: 8',
       'blueprints:',
       '  - id: 0001-cs-blueprint',
       '    project: checkspace',
@@ -230,11 +231,25 @@ export function prepare({
       `    checkout: ${TRAVEL_CHECKOUT}`,
       `    home: ${join(TRAVEL_CHECKOUT, 'blueprint')}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
+      // Two blueprints of one project, for the Personas page: `staff` declares the people, `payroll` takes them.
+      '  - id: 0006-pe-staff',
+      '    project: people',
+      '    code: pe',
+      `    checkout: ${PEOPLE_CHECKOUT}`,
+      `    home: ${join(PEOPLE_CHECKOUT, 'staff')}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
+      '  - id: 0007-pe-payroll',
+      '    project: people',
+      '    code: pe',
+      `    checkout: ${PEOPLE_CHECKOUT}`,
+      `    home: ${join(PEOPLE_CHECKOUT, 'payroll')}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),
   );
   expensesBlueprint(join(EXPENSES_CHECKOUT, 'blueprint'), EXPENSES);
   travelBlueprint(join(TRAVEL_CHECKOUT, 'blueprint'), EXPENSES);
+  peopleBlueprints(PEOPLE_CHECKOUT, EXPENSES);
 
   /*
    * A rule nothing has ever verified, so the checks that read an UNBUILT
@@ -340,6 +355,232 @@ function placeholderEvidence(dir) {
         writeFileSync(file, ONE_PIXEL);
       }
   }
+}
+
+/*
+ * Two blueprints of one project, for the Personas page (ADR 0018 §7). `staff`
+ * declares three groups with personas in two of them, two systems, a manager
+ * with two users (the second has no account on review), and a visitor nobody
+ * signs in as and no story names. Its manager has four stories, one at each
+ * of failing, not built, waiting on you and passing; its auditor has one that
+ * waits on an agent. The manager is on one of its two boards. `payroll` takes
+ * its people from `staff`.
+ */
+function peopleBlueprints(checkout, { local, review }) {
+  const lines = (...l) => `${l.join('\n')}\n`;
+  const home = (name) => {
+    const dir = join(checkout, name);
+    for (const kind of ['features', 'threads', 'runs', 'boards'])
+      mkdirSync(join(dir, kind), { recursive: true });
+    return dir;
+  };
+  const staff = home('staff');
+  writeFileSync(
+    join(staff, 'spec.yml'),
+    lines(
+      'blueprint: staff',
+      'description: People in groups, with users, stories and boards, for the checks of the Personas page.',
+      'authoring:',
+      '  location: checks',
+      'runner:',
+      '  targets:',
+      '    local:',
+      `      base_url: ${local}`,
+      '      fixtures: { team_manager: 14, org_manager: 31 }',
+      '    review:',
+      `      base_url: ${review}`,
+      '      fixtures: { team_manager: 77 }',
+    ),
+  );
+  writeFileSync(
+    join(staff, 'storyboard.yml'),
+    lines(
+      'groups:',
+      '  - { id: customers, title: Customers }',
+      '  - { id: partners, title: Partners }',
+      '  - { id: back-office, title: The back office }',
+      'personas:',
+      '  - id: manager',
+      '    title: Team manager',
+      '    of: a client company',
+      '    group: customers',
+      '    blurb: Runs a team and approves what it spends.',
+      '    uses: The expenses app, at a desk.',
+      '    users:',
+      '      - id: team',
+      '        title: View-only team manager',
+      '        setup:',
+      '          - post: /dev/session',
+      '            fields: { user_id: "{fixtures.team_manager}" }',
+      '      - id: org',
+      '        title: View-only org manager',
+      '        setup: { recipe: as_org_manager }',
+      '  - id: auditor',
+      '    title: Auditor',
+      '    of: the finance team',
+      '    group: back-office',
+      '    blurb: Reads every expense once a quarter.',
+      '    uses: The audit page.',
+      '    users:',
+      '      - id: auditor',
+      '        title: Auditor',
+      '        setup:',
+      '          - visit: /dev/impersonate?id=14',
+      '  - id: visitor',
+      '    title: Visitor',
+      '    of: the public site',
+      '    group: customers',
+      '    blurb: Anyone who reaches the sign-in page.',
+      'systems:',
+      '  - { id: platform, title: Platform jobs }',
+      '  - { id: bank, title: Bank feed, outside: true }',
+      'recipes:',
+      '  as_org_manager:',
+      '    - post: /dev/session',
+      '      fields: { user_id: "{fixtures.org_manager}" }',
+      'screens:',
+      '  - id: desk',
+      '    title: An expense',
+      '    app: { as: manager, path: /expenses/7 }',
+      '    anchors: [expense.title]',
+    ),
+  );
+  const story = (id, title, as) => [
+    `  - id: staff.${id}`,
+    `    title: ${title}`,
+    `    statement: As somebody, I can ${id}.`,
+    `    as: ${as}`,
+    '    rules:',
+    `      - id: staff.${id}.holds`,
+    `        statement: The expense page lets a person ${id}.`,
+    '        verify: [checks, agent]',
+    '        signoff: [eng]',
+    '        screens: [desk]',
+    '        steps:',
+    '          then: [It does]',
+  ];
+  writeFileSync(
+    join(staff, 'features', 'staff.yml'),
+    lines(
+      'feature: staff',
+      'stories:',
+      ...story('approve', 'Approving an expense', 'manager'),
+      ...story('export', 'Exporting a month', 'manager'),
+      ...story('review', 'Reviewing a claim', 'manager'),
+      ...story('open', 'Opening an expense', 'manager'),
+      ...story('audit', 'Auditing a quarter', 'auditor'),
+    ),
+  );
+  const at = (minutesAgo) =>
+    `${new Date(Date.now() - minutesAgo * 6e4).toISOString().slice(0, 19)}Z`;
+  let n = 0;
+  const run = (minutesAgo, head, results, target = 'local') => {
+    const created = at(minutesAgo);
+    const id = `${created.replace(/:/g, '-')}-${target}-0${++n}`;
+    writeFileSync(
+      join(staff, 'runs', `${id}.json`),
+      JSON.stringify({ run_id: id, created, target, ...head, results }, null, 2),
+    );
+  };
+  const res = (id, status) => ({ rule: `staff.${id}.holds`, status });
+  // approve fails its check; export has no run at all; the other three are built.
+  // On both targets: a rule is verified only where its checks pass on each.
+  for (const target of ['local', 'review'])
+    run(
+      30,
+      { actor: 'checks-person', kind: 'checks' },
+      [res('approve', 'fail'), res('review', 'pass'), res('open', 'pass'), res('audit', 'pass')],
+      target,
+    );
+  // And a check that claims each rule, as the checks of a real project would.
+  mkdirSync(join(checkout, 'checks'), { recursive: true });
+  writeFileSync(
+    join(checkout, 'checks', 'staff.spec.js'),
+    lines(
+      ...['approve', 'export', 'review', 'open', 'audit'].map(
+        // Joined here, so this file is not itself read as a check of a rule called `staff.`.
+        (id) =>
+          `test('a person can ${id}', { tag: '${['@rule', `staff.${id}.holds`].join(':')}' }, () => {});`,
+      ),
+    ),
+  );
+  // review and open are judged; audit still waits on the agent tier.
+  run(20, { actor: 'agent', kind: 'walkdown' }, [
+    { ...res('review', 'pass'), reasoning: 'Every step held on the expense page.' },
+    { ...res('open', 'pass'), reasoning: 'Every step held on the expense page.' },
+  ]);
+  // open is signed; review waits on its signer.
+  run(
+    10,
+    {
+      actor: 'checks-person',
+      kind: 'walkdown',
+      signatures: [{ role: 'eng', signer: 'checks-person' }],
+    },
+    [res('open', 'pass')],
+  );
+  writeFileSync(
+    join(staff, 'boards', 'month-end.yml'),
+    lines(
+      'board: month-end',
+      'title: Closing the month',
+      'cards:',
+      '  - { story: staff.approve }',
+      '  - { story: staff.export }',
+    ),
+  );
+  writeFileSync(
+    join(staff, 'boards', 'quarter-audit.yml'),
+    lines(
+      'board: quarter-audit',
+      'title: The quarterly audit',
+      'cards:',
+      '  - { story: staff.audit }',
+    ),
+  );
+
+  const payroll = home('payroll');
+  writeFileSync(
+    join(payroll, 'spec.yml'),
+    lines(
+      'blueprint: payroll',
+      'description: A blueprint that takes its personas from staff.',
+      'runner:',
+      '  targets:',
+      '    local:',
+      `      base_url: ${local}`,
+      '      fixtures: { team_manager: 14, org_manager: 31 }',
+    ),
+  );
+  writeFileSync(
+    join(payroll, 'storyboard.yml'),
+    lines(
+      'personas_from: staff',
+      'screens:',
+      '  - id: payslip',
+      '    title: A payslip',
+      '    app: { as: manager.team, path: /expenses/8 }',
+      '    anchors: [expense.title]',
+    ),
+  );
+  writeFileSync(
+    join(payroll, 'features', 'payroll.yml'),
+    lines(
+      'feature: payroll',
+      'stories:',
+      '  - id: payroll.pay',
+      '    title: Paying a team',
+      '    statement: As a manager, I can see what my team is paid.',
+      '    as: manager',
+      '    rules:',
+      '      - id: payroll.pay.shown',
+      '        statement: A manager sees a payslip.',
+      '        verify: [checks]',
+      '        screens: [payslip]',
+      '        steps:',
+      '          then: [It does]',
+    ),
+  );
 }
 
 /*
