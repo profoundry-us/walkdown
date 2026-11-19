@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-19T19:25:56.047Z
 anchor:
   screen: lint-nobody-after-a-user
-status: addressed
+status: verified
 body: Draw what walkdown lint prints for rule
   screens.setup.nobody-after-a-user-is-warned. One warning under WARNINGS, in
   the personas category. It names the screen and the persona nobody signs in as.
@@ -24,4 +24,12 @@ replies:
       warning on screen expense-public: nobody signs in for it, expense-team
       signs in as a user so that session may still be there, give it a setup
       step that signs out. 0 errors, 1 warning, exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T20:54:00Z
+    body: Accepted by topher's approval of every rule on lint-nobody-after-a-user
+      (2026-11-19T20-54-00Z-local-01).
 proposes: /drafts/lint-nobody-after-a-user.html
+verified_by: topher
+verified_via: 2026-11-19T20-54-00Z-local-01
+verified_at: 2026-11-19T20:54:00Z
