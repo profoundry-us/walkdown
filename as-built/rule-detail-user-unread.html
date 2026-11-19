@@ -1,0 +1,371 @@
+<!doctype html>
+<!--
+  AS-BUILT: Rule detail (state — the screen's user could not be read)
+
+  A drawing of walkdown's panel as it was actually built - the panel's own
+  markup, captured from the running build by tools/as-built.mjs on 2026-11-19
+  and kept by hand since (ADR 0007). It is neither the design
+  (prototype/screens/rule-detail-user-unread.html, which stays as it was drawn) nor the build
+  (the panel you are holding, which cannot frame itself). It exists so the
+  App side of the fade has something true to show, and so the distance
+  between what was designed and what was built is visible on the slider.
+
+  Nothing here is evidence. A verdict given against this page is a verdict
+  about a drawing of the build.
+-->
+<html lang="en" data-theme="redline"> 
+  <head> 
+    <meta charset="utf-8"> 
+    <title>As-built &mdash; walkdown Rule detail (state — the screen's user could not be read)</title> 
+    <link rel="stylesheet" href="/walkdown.css"> 
+    <style>
+  /* The as-built's own marks. Baked into the page rather than injected by the
+     server, because this is a file somebody keeps - not a trick. The ring
+     stands 4px in with its own corner: flush, it was a square inside the
+     frame's rounded clip, cut through at every corner (Topher, 2026-09-18). */
+  .as-built-ring { position: fixed; inset: 4px; z-index: 10; pointer-events: none;
+    border: 2px solid oklch(72% 0.17 25); border-radius: 10px; }
+  .as-built-label { position: fixed; left: 0; bottom: 0; z-index: 11; pointer-events: none;
+    padding: 3px 10px; font: 700 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .08em; text-transform: uppercase; color: oklch(22% 0.045 25);
+    background: oklch(72% 0.17 25); border-top-right-radius: 6px; }
+  .as-built-notes { position: fixed; left: 12px; bottom: 34px; z-index: 11; width: 320px; max-height: 60vh; overflow-y: auto;
+    padding: 10px 12px; border: 1px dashed oklch(72% 0.17 25); border-radius: 6px;
+    background: oklch(26% 0.042 25 / .96); color: oklch(93% 0.015 40); font-size: 11.5px; line-height: 1.5; }
+  .as-built-notes summary { cursor: pointer; font-weight: 700; color: oklch(78% 0.15 30); letter-spacing: .04em; }
+  .as-built-notes ul { margin: 6px 0 0; padding-left: 16px; }
+  .as-built-notes li { margin: 4px 0; }
+  .as-built-notes li + li { border-top: 1px dotted oklch(41% 0.05 25); padding-top: 4px; }
+</style> 
+    <style>.wd-msg { display: grid; grid-template-columns: 1.6rem 1fr; gap: .45rem; padding: .18rem 0; }
+    .wd-msg.cont { padding-top: 0; }
+    /* Faces are discs, as a chat draws them (Topher, 2026-09-17). */
+    .wd-ava { width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center;
+      font-size: 10px; font-weight: 700; color: #fff; position: relative; }
+    .wd-msg.cont .wd-ava { visibility: hidden; height: 0; }
+    /* The agent's face: a robot, drawn in line, ringed rather than filled. */
+    .wd-bot { background: transparent; border: 1.5px dashed; box-sizing: border-box; }
+    .wd-bot svg { width: 72%; height: 72%; }
+    /* A person's face with a machine's mark: their words, typed for them. */
+    .wd-mark { position: absolute; right: -.2rem; bottom: -.2rem; width: .8rem; height: .8rem;
+      border-radius: 50%; background: var(--color-base-100, #0f1729); display: grid; place-items: center; }
+    .wd-mark svg { width: 70%; height: 70%; }
+    /* The pictures on a message: small, in a row, each one opening. */
+    .wd-shots { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .4rem; }
+    .wd-shot { display: block; line-height: 0; }
+    .wd-shot img { max-height: 5rem; max-width: 100%; border-radius: .25rem; border: 1px solid rgba(128,128,128,.35); }
+    /* What the machine added beside the person's words, apart and named. */
+    .wd-added { margin-top: .35rem; padding: .3rem .5rem; border: 1px dashed; border-radius: .3rem;
+      opacity: .85; }
+    .wd-added summary { list-style: none; cursor: pointer; position: relative; }
+    /* Top right, a caret that says which way the box is: down closed, up open. */
+    .wd-added-caret { position: absolute; top: 0; right: 0; width: .9rem; height: .9rem;
+      opacity: .8; transition: transform .15s ease; }
+    .wd-added-caret svg { width: 100%; height: 100%; }
+    .wd-added[open] .wd-added-caret { transform: rotate(180deg); }
+    .wd-added summary::-webkit-details-marker { display: none; }
+    .wd-added-hint { font-weight: 400; letter-spacing: 0; text-transform: none; opacity: .7;
+      margin-left: .35rem; }
+    .wd-added-hint::before { content: '· show all'; }
+    .wd-added[open] .wd-added-hint::before { content: '· show less'; }
+    /* Closed, two lines of the words; open, the peek gives way to all of them. */
+    .wd-added-peek { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; }
+    .wd-added[open] .wd-added-peek { display: none; }
+    .wd-added-by { display: inline-flex; align-items: center; gap: .25rem; font-size: 9.5px;
+      font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .15rem; }
+    .wd-added-by svg { width: .8rem; height: .8rem; }
+    .wd-head { display: flex; align-items: center; gap: .4rem; margin-bottom: .18rem; min-height: 1.15rem; }
+    .wd-head .badge { padding-inline: .5rem; margin-left: .15rem; }
+    .wd-who { font-weight: 600; font-size: 12px; }
+    /* Quieter than the name and louder than nothing: provenance is a fact
+       about the message, not a second author. */
+    .wd-via { font-size: 10px; opacity: .55; font-style: italic; }
+    .wd-tag { font-size: 10px; opacity: .55; font-family: ui-monospace, Menlo, monospace; }
+    .wd-tag[data-thread] { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+    .wd-tag[data-thread]:hover { opacity: .9; }
+    .wd-at { font-size: 10px; opacity: .45; }
+    .wd-msg.cont .wd-at { visibility: hidden; }
+    .wd-msg.cont:hover .wd-at { visibility: visible; }
+    .wd-text { overflow-wrap: anywhere; }
+    /* An answer on a rule's stream is cut to a few lines; its tag is the way to the whole of it. */
+    .wd-clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+    /* The question, as the headline of its thread: what is being asked, read
+       before the context under it. Its own paragraph margin, so the body
+       below reads as the rest. */
+    .wd-ask { font-weight: 600; font-size: 1.06em; line-height: 1.35; }
+    .wd-ask + * { margin-top: .5em; }
+    .wd-opts { margin: .5em 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .wd-opt { font-size: .95em; padding: 3px 7px; border: 1px solid currentColor; border-color: color-mix(in oklch, currentColor 22%, transparent); border-radius: 5px; }
+    .wd-opt span { opacity: .7; }
+    .wd-opt.chosen { border-color: oklch(70% .14 160); background: oklch(70% .14 160 / .12); }
+    .wd-opt.chosen b::before { content: '\2713 '; color: oklch(70% .14 160); }
+    /* The chat's size is for the chat. A rule's statement and steps read
+       through the same renderer but keep the size the detail gave them - and
+       a size utility on the element must win, so this is the rule that
+       steps aside rather than one that overrides. */
+    .wd-text:not(.wd-inherit) { font-size: 12.5px; line-height: 1.45; }
+    /* Markdown's blocks, spaced as paragraphs in a chat rather than sections
+       in a document: a little air between them, none above the first or
+       below the last, so a one-line reply sits exactly where plain text did. */
+    .wd-text > *, .wd-added-text > *, .wd-added-peek > * { margin: 0; }
+    .wd-text > * + *, .wd-added-text > * + *, .wd-added-peek > * + * { margin-top: .45em; }
+    .wd-text ul, .wd-text ol, .wd-added ul, .wd-added ol { padding-left: 1.25rem; }
+    .wd-text ul, .wd-added ul { list-style: disc; }
+    .wd-text ol, .wd-added ol { list-style: decimal; }
+    .wd-text li + li, .wd-added li + li { margin-top: .15em; }
+    .wd-text li > p, .wd-added li > p { margin: 0; }
+    /* Code wears a wash of the chrome's own blue - the primary, the colour
+       the links and the bar already speak in - so a path or an id stands
+       apart from the prose in more than typeface. Yellow was tried first and
+       read as yellow-on-yellow beside the warning badges. Tinted from the
+       theme token, so a delivery with no theme still gets a wash. */
+    .wd-text code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em;
+      padding: .05em .3em; border-radius: .25rem;
+      color: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 88%, currentColor);
+      background: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 13%, transparent); }
+    .wd-text pre { padding: .4rem .5rem; border-radius: .3rem; overflow-x: auto; white-space: pre;
+      background: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 9%, transparent);
+      border: 1px solid color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 22%, transparent); }
+    .wd-text pre code { padding: 0; background: none; color: inherit; font-size: .88em; }
+    /* An id linked in the prose takes the same tint, rule and thread alike:
+       a thread id in the body's own colour read as prose until the pointer
+       found it, while the rule id beside it was already blue (n-0299). */
+    .wd-text .wd-ref { color: color-mix(in oklch, var(--color-primary, oklch(78% 0.10 235)) 88%, currentColor); }
+    .wd-text blockquote { padding-left: .6rem; border-left: 2px solid color-mix(in oklch, currentColor 25%, transparent); opacity: .85; }
+    .wd-text a { text-decoration: underline; text-underline-offset: 2px; }
+    .wd-text hr { border: 0; border-top: 1px solid color-mix(in oklch, currentColor 15%, transparent); }
+    /* A collapsed thread sits a little lower under its header, so the name and
+       the status read as the label of what follows rather than as part of it. */
+    .wd-row .wd-text { margin-top: .1rem; }
+    .wd-row { padding-block: .55rem; }
+    .wd-msg.pending { opacity: .55; }
+    .wd-msg.failed .wd-at { opacity: 1; color: oklch(72% 0.17 22); }
+    .wd-ref { font-size: inherit; }
+    /* Threads share one surface, like messages in a channel: no card, no rail,
+       just a hairline between them and a lift under the cursor. */
+    .wd-row + .wd-row { border-top: 1px solid color-mix(in oklch, currentColor 10%, transparent); }
+    .wd-row:hover { background: color-mix(in oklch, currentColor 5%, transparent); }
+    /* The collapsed thread: one message, then the way into the rest of it. */
+    .wd-preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .wd-replies { display: flex; align-items: center; gap: .35rem; margin-top: .2rem;
+      padding: .12rem .3rem .12rem .12rem; border-radius: .3rem; max-width: 100%; }
+    .wd-replies:hover { background: color-mix(in oklch, currentColor 8%, transparent);
+      outline: 1px solid color-mix(in oklch, currentColor 15%, transparent); }
+    .wd-faces { display: flex; }
+    .wd-face { width: 1.05rem; height: 1.05rem; border-radius: 50%; display: grid; place-items: center;
+      font-size: 7.5px; font-weight: 700; color: #fff; margin-right: -.2rem;
+      box-shadow: 0 0 0 1.5px color-mix(in oklch, currentColor 12%, transparent); }
+    .wd-count { font-size: 11.5px; font-weight: 600; color: var(--color-primary, currentColor); }
+    .wd-last { font-size: 10.5px; opacity: .45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wd-replies.empty { font-size: 11px; opacity: .4; padding-left: .3rem; }
+    .wd-day, .wd-new { display: flex; align-items: center; gap: .5rem; margin: .45rem 0 .3rem;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .45; }
+    .wd-day span, .wd-new span { flex: 1; height: 1px; background: currentColor; opacity: .25; }
+    .wd-new { color: oklch(72% 0.17 22); opacity: .9; }
+    /* The preview under a reference (n-0298): fixed to the viewport so it
+       clears whatever pane the reference sits in, and never the pointer's -
+       it is for reading, and the click goes to the reference beneath. Above
+       everything either surface draws: the card is the last thing drawn
+       over the popover it was summoned from, and at the popover's own
+       z-index it painted underneath (n-0299). */
+    .wd-card { position: fixed; z-index: 2147483647; pointer-events: none; width: max-content; max-width: 19rem;
+      padding: .45rem .6rem; border-radius: .4rem; font-size: 11.5px; line-height: 1.35;
+      color: var(--color-base-content, currentColor); background: var(--color-base-100, #fff);
+      border: 1px solid color-mix(in oklch, currentColor 18%, transparent);
+      box-shadow: 0 6px 20px -6px rgba(0,0,0,.35); }
+    .wd-card-head { display: flex; align-items: center; gap: .35rem; margin-bottom: .2rem; }
+    .wd-card-head b { font-size: 11px; }
+    .wd-card-meta { font-size: 10.5px; opacity: .6; margin-bottom: .15rem; }
+    .wd-card-text { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .wd-card-foot { margin-top: .3rem; padding-top: .25rem; font-size: 10px; opacity: .5;
+      border-top: 1px solid color-mix(in oklch, currentColor 12%, transparent); }</style> 
+  </head> 
+  <body> 
+    <div style="position: fixed; inset: 0px; z-index: 1; pointer-events: none; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0px; border: 0px; padding: 0px; background: transparent; overflow: visible;">
+      <div class="h-full w-full text-sm" style="letter-spacing: normal; word-spacing: normal; text-transform: none; font-variant: normal; font-style: normal; text-indent: 0px; text-shadow: none; white-space: normal; word-break: normal; text-align: left; direction: ltr; text-decoration: none;">
+        <header data-testid="panel.bar" data-theme="redline" class="flex items-center gap-2 px-3 text-base-content" style="position: absolute; top: 0px; left: 0px; right: 0px; height: 44px; pointer-events: auto; transition: transform 0.2s; background: transparent; z-index: 4; transform: none;"> <span class="flex min-w-0 max-w-[calc(50%-8.5rem)] items-center gap-2 overflow-hidden"> 
+            <button class="btn btn-xs btn-ghost" id="wdp-desk-btn" data-testid="panel.desk-tuner" title="Settings">
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"></svg>
+            </button> <span class="relative shrink-0" data-mode-menu=""> 
+              <button type="button" data-testid="panel.modes" aria-haspopup="menu" class="btn btn-xs btn-ghost gap-1 px-1.5 font-bold tracking-tight " data-mode="walkdown" aria-expanded="false" aria-label="Mode: Walkdown" title="Walkdown. Choose another mode.">
+                <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"><path d="M9.5 3v10"><path d="M3.9 8.2l1.3 1.3 2.2-2.8"><path d="M11.2 6.4h1.4M11.2 8.6h1.4"></svg><span>Walkdown</span>
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+              </button> </span> 
+            <button data-testid="panel.project" id="wdp-project-btn" title="Which project you are working in — open to switch" class="btn btn-xs min-w-0 gap-1 px-1.5 font-normal btn-ghost"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"></svg><span class="max-w-24 truncate">walkdown-example</span>
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+            </button> <span class="min-w-0 truncate text-[11.5px] opacity-50" data-testid="panel.blueprint">walkdown-example</span> 
+            <button id="wdp-screen-btn" data-testid="panel.screen-picker" class="btn btn-xs min-w-0 gap-1 px-1.5 font-normal btn-ghost" title="Which screen this page is, detected from its address — open to pick one by hand"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"></svg><span class="max-w-32 truncate">Already on the list</span>
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+            </button> </span> <span class="absolute left-1/2 flex -translate-x-1/2 items-center gap-2" title="Fade between the design and the app"> 
+            <button data-surface="prototype" data-testid="panel.surface-design" class="btn btn-xs btn-primary btn-outline" title="Show the design">Design</button> 
+            <input type="range" min="0" max="100" id="wdp-fade" data-testid="panel.fade" class="range range-xs range-primary w-28" aria-label="Fade between the design and the app"> 
+            <button data-surface="app" data-testid="panel.surface-build" class="btn btn-xs btn-primary" title="Show the app">App</button> <span class="relative" data-testid="panel.target"> 
+              <button title="Which target the App pane shows" class="btn btn-xs btn-ghost gap-1 font-normal " aria-expanded="false">local
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></svg>
+              </button> </span> </span> <span class="ml-auto flex items-center gap-2"> <span class="join" data-testid="panel.viewport-toggle"> 
+              <button data-vp="0" title="Fit the frame to the space" class="btn btn-xs join-item btn-primary">Fit</button> 
+              <button data-vp="1440" title="Desktop — lay the page out at 1440px" class="btn btn-xs join-item btn-outline btn-primary">
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"></svg>
+              </button> 
+              <button data-vp="390" title="Mobile — lay the page out at 390px" class="btn btn-xs join-item btn-outline btn-primary">
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"></svg>
+              </button> </span> <span class="tooltip tooltip-bottom tooltip-end [--tt-trans:0] shrink-0" data-testid="panel.pin-why"> <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug">Click anything to attach a note — it lands on the app</span> 
+              <button id="wdp-pin" data-testid="panel.pin-mode" class="btn btn-xs gap-1 btn-outline btn-primary" title="Click anything to attach a note — it lands on the app">
+                <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"></svg>Pin mode</button> </span> 
+            <button id="wdp-walk" data-testid="panel.walk" class="btn btn-xs btn-warning" title="Begin a sitting — 3 rules owe you a verdict">Start walkdown</button> 
+            <button class="btn btn-xs btn-ghost" id="wdp-undock" title="Put walkdown away">×</button> </span></header>
+        <aside data-theme="redline" class="flex flex-col overflow-hidden border border-primary/45 bg-base-100 text-base-content" style="position: absolute; top: 44px; right: 12px; bottom: 12px; width: 384px; pointer-events: auto; transition: transform 0.22s; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transform: none;"> 
+          <div role="tablist" class="tabs tabs-box tabs-sm m-2 shrink-0 self-center" data-testid="panel.tabs"> 
+            <button role="tab" class="tab px-3 gap-1" data-tab="blueprints"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M208,96a16,16,0,0,0,16-16V48a16,16,0,0,0-16-16H176a16,16,0,0,0-16,16v8H96V48A16,16,0,0,0,80,32H48A16,16,0,0,0,32,48V80A16,16,0,0,0,48,96h8v64H48a16,16,0,0,0-16,16v32a16,16,0,0,0,16,16H80a16,16,0,0,0,16-16v-8h64v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16h-8V96ZM176,48h32V80H176ZM48,48H80V63.9a.51.51,0,0,0,0,.2V80H48ZM80,208H48V176H80v15.9a.51.51,0,0,0,0,.2V208Zm128,0H176V176h32Zm-24-48h-8a16,16,0,0,0-16,16v8H96v-8a16,16,0,0,0-16-16H72V96h8A16,16,0,0,0,96,80V72h64v8a16,16,0,0,0,16,16h8Z"></svg>Blueprints</button>
+            <button role="tab" class="tab px-3 gap-1 tab-active" data-tab="rules"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M149.61,85.71l-89.6,88a8,8,0,0,1-11.22,0L10.39,136a8,8,0,1,1,11.22-11.41L54.4,156.79l84-82.5a8,8,0,1,1,11.22,11.42Zm96.1-11.32a8,8,0,0,0-11.32-.1l-84,82.5-18.83-18.5a8,8,0,0,0-11.21,11.42l24.43,24a8,8,0,0,0,11.22,0l89.6-88A8,8,0,0,0,245.71,74.39Z"></svg>Rules<span class="badge badge-xs badge-warning" title="3 rules a walkdown would take you through — 3 to sign">3</span></button>
+            <button role="tab" class="tab px-3 gap-1" data-tab="threads"> 
+              <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-4"><path d="M232.07,186.76a80,80,0,0,0-62.5-114.17A80,80,0,1,0,23.93,138.76l-7.27,24.71a16,16,0,0,0,19.87,19.87l24.71-7.27a80.39,80.39,0,0,0,25.18,7.35,80,80,0,0,0,108.34,40.65l24.71,7.27a16,16,0,0,0,19.87-19.86ZM62,159.5a8.28,8.28,0,0,0-2.26.32L32,168l8.17-27.76a8,8,0,0,0-.63-6,64,64,0,1,1,26.26,26.26A8,8,0,0,0,62,159.5Zm153.79,28.73L224,216l-27.76-8.17a8,8,0,0,0-6,.63,64.05,64.05,0,0,1-85.87-24.88A79.93,79.93,0,0,0,174.7,89.71a64,64,0,0,1,41.75,92.48A8,8,0,0,0,215.82,188.23Z"></svg>Threads</button> 
+          </div> 
+          <div class="flex min-h-0 flex-1 overflow-hidden"> 
+            <div class="wdp-track flex min-h-0 min-w-0 flex-[0_0_300%] transition-transform duration-300 ease-out" style="transform: translateX(-33.3333%);"> 
+              <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden">
+              </div> 
+              <div class="wdp-pane wdp-detail flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-y-auto"> 
+                <div class="flex items-center px-2 pt-2"> 
+                  <button class="wdp-back btn btn-ghost btn-xs text-primary" data-testid="detail.back">← All rules</button> 
+                  <div class="ml-auto flex gap-0.5"> 
+                    <div class="tooltip tooltip-left" data-tip="Previous rule: visual-match"> 
+                      <button data-testid="detail.stepper" class="wdp-prev btn btn-ghost btn-xs" data-goto="waitlist.join.visual-match">←</button> 
+                    </div> 
+                    <div class="tooltip tooltip-left" data-tip="Next rule: confirm-count"> 
+                      <button data-testid="detail.stepper" class="wdp-next btn btn-ghost btn-xs" data-goto="invites.batch.confirm-count">→</button> 
+                    </div> 
+                  </div> 
+                </div> 
+                <div class="flex flex-col gap-3 px-3.5 pb-3.5 pt-1"> 
+                  <div> 
+                    <div class="flex items-center gap-2"> <span class="tooltip tooltip-right flex w-13 shrink-0 items-center justify-center gap-0.5 text-[12px] leading-none" title="" data-testid="panel.rule-tiers" style="--tt-inset:0 auto; --tt-trans:0; --tt-tail-inset:.35rem auto" data-tiers="checks:pass agent:never"><span class="tooltip-content z-20 w-60 whitespace-normal text-left text-[11px] leading-snug" data-testid="panel.rule-tiers-tip"><span class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5"><span class="opacity-60">checks</span><span>passed</span><span class="opacity-60">agent</span><span>required, but no run has touched it</span><span class="col-span-2 mt-0.5 opacity-40">accepted by</span><span class="opacity-60">eng</span><span>has not signed</span></span></span><span class="inline-block w-4 text-center text-success">✓</span><span class="inline-block w-4 text-center opacity-60">○</span><span class="grid shrink-0 grid-flow-col grid-rows-2 items-center justify-center gap-x-[3px]" data-testid="panel.rule-signoff" data-signoff="eng:none" data-columns="1"><span class="flex h-[9px] w-[9px] items-center justify-center row-span-2"><span class="block rounded-full size-[6px] border border-current text-blue-400 opacity-60"></span></span></span></span> 
+                      <button type="button" class="cursor-pointer break-all text-left font-mono text-[11px] opacity-40 hover:opacity-80" data-testid="detail.rule-id" title="Copy the rule id">waitlist.join.already-joined</button> 
+                    </div> 
+                    <p data-testid="detail.statement" class="wd-text wd-inherit text-[15px] leading-relaxed">Submitting an email that is already on the waitlist shows a distinct "you're already on the list" message instead of the standard confirmation.</p> 
+                  </div> 
+                  <div data-testid="detail.setup"> 
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5 flex items-baseline"> <span>Setup</span><span class="ml-auto normal-case tracking-normal" data-testid="detail.setup-state">step 1 of 2</span></div> 
+                    <div class="signed-in unread" data-testid="detail.signed-in" role="status"> <i class="face"></i> <span><code>visitor.returning</code> could not be read, so nobody is signed in.
+              <span class="more">Its personas are in the blueprint <code>acme-people</code>, which is not registered on this machine. Register it, then run the setup again.</span> <code class="cmd">walkdown blueprints import &lt;home of acme-people&gt;</code></span></div> 
+                    <ol class="setup-list" data-testid="detail.setup-steps"> 
+                      <li class="group">This screen's own steps</li>
+                      <li class="now" data-step="1" data-state="now" data-whose="screen"><span class="mark">◌</span> <span class="body"><span class="kind">Post</span><code>/dev/join</code> <span class="field">email <code>you@example.com</code></span></span></li>
+                      <li class="todo" data-step="2" data-state="todo" data-whose="screen"><span class="mark">2</span> <span class="body"><span class="kind">Wait for</span><code>waitlist.already-message</code> </span></li> 
+                      <li class="then"><span class="mark">→</span> <span class="body">Then open <code title="/confirm.html?email=you@example.com&amp;already=1">/confirm.html?email=you@example.com&amp;already=1</code></span></li> 
+                    </ol> 
+                    <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25" data-testid="detail.setup-again" title="Run every step again, from step 1">↻ Run setup again</button> 
+                  </div> 
+                  <div> 
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5">Screen</div> 
+                    <div class="text-[13px] leading-relaxed" data-testid="detail.screen"><span>Join the waitlist</span> <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">waitlist-join</code> → <span>Already on the list</span> <code class="rounded bg-base-200 px-1 text-[11px] opacity-70">waitlist-already</code></div> 
+                  </div> 
+                  <div>
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5">Steps</div> 
+                    <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-[13px] leading-relaxed" data-testid="detail.steps"><span class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 pt-1">given</span>
+                      <div class="wd-text wd-inherit" data-testid="detail.given">A visitor who has already joined with a given email</div><span class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 pt-1">when</span>
+                      <div class="wd-text wd-inherit" data-testid="detail.when">Visit screen <code>waitlist-join</code><br>Enter the same email into anchor <code class="wdp-anchor cursor-help underline decoration-dotted underline-offset-2" data-anchor="waitlist.email" title="Show this on the surface">waitlist.email</code><br>Click anchor <code class="wdp-anchor cursor-help underline decoration-dotted underline-offset-2" data-anchor="waitlist.submit" title="Show this on the surface">waitlist.submit</code></div>
+                      <div class="col-span-2 pt-1">
+                        <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40">then</div> 
+                        <ul data-testid="detail.then" class="wd-text wd-inherit list-disc pl-4 pt-0.5">
+                          <li>The visitor is on screen <code>waitlist-already</code></li>
+                          <li>Anchor <code class="wdp-anchor cursor-help underline decoration-dotted underline-offset-2" data-anchor="waitlist.already-message" title="Show this on the surface">waitlist.already-message</code> reads "you're already on the list"</li>
+                          <li>Anchor <code class="wdp-anchor cursor-help underline decoration-dotted underline-offset-2" data-anchor="waitlist.confirmed-email" title="Show this on the surface">waitlist.confirmed-email</code> shows the submitted email</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div> 
+                  <button type="button" class="flex w-full items-center gap-1 rounded border border-base-300 bg-base-200/60 px-2 py-1 text-left text-[11.5px] hover:bg-base-200" data-testid="detail.technical-disclosure" title="Read the checks that verify this rule" data-checks="waitlist.join.already-joined"> <span class="opacity-60">Check source · checks/waitlist.spec.ts:26</span> <span class="ml-auto opacity-50">↗</span> </button> 
+                  <div> 
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5">Evidence</div> 
+                    <div data-testid="detail.evidence">
+                      <div class="evrow" title="2026-08-27T16-19-24Z-local-01"> <span class="src">checks/local</span> <span class="text-success">✓ pass · agent · 84d ago</span></div>
+                      <div class="evrow" title=""> <span class="src">agent</span> <span class="opacity-50">○ never run</span></div>
+                    </div> 
+                  </div> 
+                  <div> 
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1.5">Verify</div> 
+                    <div class="text-[13px]" data-testid="detail.verify">checks, agent</div> 
+                  </div> 
+                  <div data-testid="detail.conversation" class="relative -mx-3.5 border-t border-base-300 px-3.5 pt-2 "> 
+                    <div class="text-[10.5px] font-bold uppercase tracking-widest opacity-40 mb-1 flex items-center">Conversation <span class="ml-1 font-normal normal-case tracking-normal opacity-70">· 1 thread</span>
+                      <button class="btn btn-ghost btn-xs ml-auto h-5 min-h-0 px-1.5 font-normal normal-case tracking-normal text-primary" data-testid="detail.history-open" title="Every message of every thread on this rule, oldest first">History · 3 →</button>
+                    </div> 
+                    <div class="wd-stream" data-testid="detail.stream">
+                      <div class="wd-day"><span></span>Aug 22<span></span></div>
+                      <div class="wd-msg"> 
+                        <div class="wd-ava wd-bot" style="color:oklch(58% 0.16 255);border-color:oklch(58% 0.16 255)" title="Agent">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2.5"><path d="M12 8V4M9 4h6"><circle cx="9" cy="14" r="1.1" fill="currentColor" stroke="none"><circle cx="15" cy="14" r="1.1" fill="currentColor" stroke="none"><path d="M9.5 17.5h5"></svg>
+                        </div> 
+                        <div class="wd-col"> 
+                          <div class="wd-head"><span class="wd-who">Agent</span><span class="wd-tag" data-thread="q-0002" title="Open this thread" role="link">↳ q-0002</span><span class="wd-at" title="8/22/2026, 11:11:41 PM CDT">89d ago</span></div> 
+                          <div class="wd-text">
+                            <p>Adopted. proposals/waitlist-already.html is now prototype/screens/waitlist-already.html, restyled to match the other example screens (wireframe theme), and the storyboard's waitlist-already screen points at it — the proposal field and the proposals/ directory are gone. Anchors carried verbatim: waitlist.already-message, waitlist.confirmed-email. The screen is no longer undesigned, so it drops out of the drift report.</p> 
+                          </div> 
+                        </div> 
+                      </div>
+                    </div> 
+                    <div data-testid="detail.turn" class="relative mt-3 mb-1.5 rounded border border-dashed px-2 pt-2.5 pb-1.5 text-[11px] leading-snug border-info" data-party="agent"> <span class="absolute -top-[7px] left-2 rounded px-1 text-[9px] font-bold uppercase leading-[14px] tracking-wider bg-info text-info-content">Agent's move</span> <span class="opacity-75">It judges the build first; you are asked to sign once it has.</span> </div> 
+                    <textarea id="wdp-vnote" data-testid="detail.feedback" rows="2" class="textarea textarea-xs w-full resize-none" placeholder="Start a conversation about this rule…"></textarea> 
+                    <div class="mt-1 flex flex-wrap items-center justify-end gap-1" data-testid="detail.verdict"> 
+                      <button class="btn btn-xs btn-outline border-base-300 text-base-content/70" data-v="reply" data-note-rule="waitlist.join.already-joined">Reply</button> 
+                    </div> 
+                  </div> 
+                </div>
+              </div> 
+              <div class="flex min-h-0 w-1/3 flex-[0_0_33.3333%] flex-col overflow-hidden">
+              </div> 
+            </div> 
+          </div> 
+          <div class="flex shrink-0 items-center justify-between gap-2 border-t border-base-300 px-3.5 py-2 text-xs" data-testid="panel.counts"> <span class="flex items-center gap-2"> <span class="tooltip tooltip-top tooltip-start [--tt-trans:0] shrink-0 whitespace-nowrap"> <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug">Rules holding a current pass on every tier they ask for. The rest are what a walkdown is for.</span> <span class="opacity-70"><b>0/9</b> verified</span></span></span> <span class="flex shrink-0 items-center gap-2"> <span class="tooltip tooltip-top tooltip-end [--tt-trans:0]"> <span class="tooltip-content w-52 whitespace-normal text-left text-[11.5px] leading-snug">3 rules designed but not built. Your sign-off on the spec is what they wait for.</span> <span class="badge badge-xs badge-warning badge-outline">3 sign</span></span> <span class="tooltip tooltip-top tooltip-end shrink-0" data-testid="panel.legend"> <span class="tooltip-content z-50 w-72 whitespace-normal text-left text-[11.5px] leading-snug" data-testid="panel.legend-tip"><span class="grid grid-cols-[minmax(1.25rem,auto)_1fr] items-center gap-x-2 gap-y-0.5"> <span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">Evidence — checks, then agent</span><span class="text-center text-success">✓</span><span>passed</span><span class="text-center text-error">✗</span><span>failed</span><span class="text-center text-warning">~</span><span>stale — it passed, then the statement moved</span><span class="text-center text-warning">○</span><span>required, but no run has touched it</span><span class="text-center text-warning">⊘</span><span>blocked</span><span class="text-center opacity-40">⋯</span><span>skipped — a run went past this rule</span><span class="text-center opacity-25">✓</span><span>nothing to judge yet — the rule is not built</span><span class="text-center opacity-30">–</span><span>not applicable — this rule does not ask for it</span> <span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">Signatures — one slot per role</span><span class="flex justify-center"><span class="block rounded-full size-[6px] bg-current text-base-content"></span></span> <span>signed the build</span><span class="flex justify-center"><span class="block rounded-full size-[6px] border border-current text-base-content" style="background:linear-gradient(to top, currentColor 50%, transparent 50%)"></span></span> <span>approved the wording, not the build</span><span class="flex justify-center"><span class="block rounded-full size-[6px] border border-current text-base-content" style="background:radial-gradient(currentColor 0 1.25px, transparent 1.25px)"></span></span> <span>signed an older wording</span><span class="flex justify-center"><span class="block rounded-full size-[6px] border border-current text-base-content"></span></span> <span>has not signed</span><span class="flex justify-center"><span class="text-[8px] leading-none text-error">✗</span></span> <span>sent it back — not yet</span> <span class="col-span-2 pt-1 text-[10px] font-bold uppercase tracking-widest opacity-40">And around them</span> <span class="text-center text-warning">◆</span><span>Warning yellow anywhere means the rule is waiting on <b>you</b>.</span> <span class="flex justify-center"><span class="badge badge-xs badge-info font-semibold uppercase tracking-wide">sign</span></span><span>a wording to approve or send back.</span><span class="flex justify-center"><span class="badge badge-xs badge-info font-semibold uppercase tracking-wide">asks</span></span><span>a question on the rule to answer.</span><span class="flex justify-center"><span class="badge badge-xs badge-warning font-semibold uppercase tracking-wide">fixed</span></span><span>a claimed fix to judge - pass ends the conversation, fail continues it.</span><span class="flex justify-center"><span class="badge badge-xs badge-success font-semibold uppercase tracking-wide">walk</span></span><span>a build to judge.</span> <span class="text-center opacity-45">⚑</span><span>Open conversations on the rule.</span> </span></span> <span class="flex cursor-help items-center gap-1 opacity-50">
+                  <svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" class="size-3.5"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></svg>Legend</span> </span> </span> </div>
+        </aside>
+        <main data-testid="modes.page" data-theme="redline" class="modes-page text-base-content" data-mode="walkdown" style="position: absolute; inset: 44px 0px 0px; display: none; pointer-events: auto; z-index: 2;">
+        </main>
+        <div data-testid="settings.panel" data-theme="redline" class="w-64 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto;">
+        </div>
+        <div data-testid="walkdown.signing" data-theme="redline" class="w-96 rounded-box border border-primary/45 bg-base-100 p-3 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); display: none; pointer-events: auto; z-index: 3;">
+        </div>
+        <div data-testid="panel.screens-list" data-theme="redline" class="w-72 overflow-hidden rounded-box border border-primary/45 bg-base-100 py-1 text-base-content shadow-xl" style="position: absolute; top: 56px; left: 24px; display: none; pointer-events: auto; max-height: 60vh; overflow-y: auto;">
+        </div>
+        <div style="position: absolute; inset: 0px; display: none; pointer-events: auto; z-index: 5;">
+        </div>
+      </div>
+      <div data-theme="redline" class="wdp-setup-cover" style="top: 44px; left: 12px; width: calc(-420px + 100vw); height: calc(-56px + 100vh);"> 
+        <div class="progress-card" data-testid="panel.setup-progress" role="status"> 
+          <div class="font-semibold">Setting up this screen: step 1 of 2</div> 
+          <div class="pips"><i class="now"></i><i class=""></i></div> 
+          <div class="whose">One of this screen's own steps.</div> 
+          <div>Posting the form to <code>/dev/join</code>.</div> 
+          <div class="mt-1 opacity-60">Then <code>/confirm.html?email=you@example.com&amp;already=1</code> opens here.</div> 
+          <div class="note">No sign-in ran. <code>visitor.returning</code> could not be read, because the blueprint <code>acme-people</code> is not registered on this machine. The rule says how to register it.</div> 
+        </div>
+      </div>
+    </div>
+    <button style="position: fixed; right: 0px; top: 50%; z-index: 1; transform: translateY(-50%); background: rgb(22, 24, 29); color: rgb(255, 255, 255); border: 0px; border-radius: 8px 0px 0px 8px; padding: 11px 7px; cursor: pointer; font: 600 11px / 1 -apple-system, sans-serif; writing-mode: vertical-rl; letter-spacing: 0.08em; display: none;">WALKDOWN</button>
+    <button data-testid="panel.tab-swap" style="position: fixed; right: 0px; top: 50%; z-index: 1; background: rgb(43, 48, 58); color: rgb(255, 255, 255); border: 0px; border-radius: 8px 0px 0px 8px; padding: 9px 7px; cursor: pointer; font: 600 10px / 1 -apple-system, sans-serif; writing-mode: vertical-rl; letter-spacing: 0.08em; display: none;">
+    </button>
+    <div data-testid="panel.app-frame" title="the application under review" class="grid place-items-center text-center text-[12px] leading-relaxed" style="position: fixed; top: 44px; left: 12px; width: calc(-420px + 100vw); height: calc(-56px + 100vh); border: 0px; border-radius: 10px; background: oklch(97% 0.01 40); transform: none; box-shadow: rgba(0, 0, 0, 0.28) 0px 1px 2px, rgba(0, 0, 0, 0.34) 0px 12px 32px; transition: width 0.22s, height 0.22s, top 0.22s, left 0.22s;; color: oklch(50% 0.03 25)"> 
+      <div>THE APP &mdash; the page under review, framed at the chosen viewport.<br>The as-built cannot frame a page: this box stands where the frame stands.</div> 
+    </div> 
+    <div class="as-built-ring" aria-hidden="true">
+    </div> 
+    <div class="as-built-label" aria-hidden="true">as-built &mdash; a drawing of the build, redlined after the fact</div> 
+    <details class="as-built-notes"> 
+      <summary>Redlines &mdash; where the build left the design</summary> 
+      <ul> 
+        <li>As designed: the user as written, that it could not be read, the blueprint to register and the command.</li> 
+        <li>Drawn over the example: the unread user is given to the payload for this drawing.</li> 
+      </ul> 
+    </details> 
+    <script src="/embed.js" data-walkdown>
+    </script> 
+  </body>
+  <div data-testid="panel.desk" style="position: fixed; left: 50%; top: 50%; width: 320vmax; height: 320vmax; margin: -160vmax 0px 0px -160vmax; z-index: -1; pointer-events: none; background-image: repeating-linear-gradient(0deg, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 0px, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 1px, transparent 1px, transparent 60px), repeating-linear-gradient(90deg, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 0px, color-mix(in oklch, oklch(0.93 0.02 230) 10%, transparent) 1px, transparent 1px, transparent 60px); transform: perspective(600px) rotateX(35deg) rotate(35deg);">
+  </div>
+</html>

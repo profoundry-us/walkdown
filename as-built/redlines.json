@@ -159,5 +159,27 @@
       "The line under the grid naming the systems is not drawn.",
       "The gear opens a pop-over that says Personas has no settings yet."
     ]
+  },
+  "rule-detail-signed-in": {
+    "title": "Rule detail (state — the screen is signed in as a user)",
+    "redlines": [
+      "As designed: the line above the steps, the two headed lists numbered straight through, and whose step it is in the App pane.",
+      "Drawn over the example, which has no users: the returning visitor and its steps are given to the payload for this drawing.",
+      "Before any step has run, and after a sign-in step fails, the line reads Signs in as. The design draws only Signing in as and Signed in as."
+    ]
+  },
+  "rule-detail-user-unread": {
+    "title": "Rule detail (state — the screen's user could not be read)",
+    "redlines": [
+      "As designed: the user as written, that it could not be read, the blueprint to register and the command.",
+      "Drawn over the example: the unread user is given to the payload for this drawing."
+    ]
+  },
+  "app-sign-in-failed": {
+    "title": "A user's sign-in step failed, so the screen is not loaded",
+    "redlines": [
+      "As designed for a step that answers with an error: the heading says Sign-in, a Whose row names the user, and the first sentence says it was not one of the screen's own steps.",
+      "Only the failed status is drawn here. The design's other two cases, a wait that never lands and a fixture with no value, are built and not drawn."
+    ]
   }
 }

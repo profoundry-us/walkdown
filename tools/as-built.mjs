@@ -131,6 +131,49 @@ function withSetup(data) {
 }
 
 /*
+ * ADR 0018 §3. The example has personas and no users, so the "already on the
+ * list" screen is given one here: it is signed in as a returning visitor, whose
+ * three steps run before the screen's own two.
+ */
+function withSignIn(data) {
+  withTargets(data);
+  setUp(data, 'waitlist-already', [
+    { kind: 'visit', value: '/dev/sign-in', whose: 'user' },
+    { kind: 'post', value: '/dev/session', fields: { user_id: '7' }, whose: 'user' },
+    { kind: 'wait_for', value: 'nav.signed-in', whose: 'user' },
+    { kind: 'post', value: '/dev/join', fields: { email: 'you@example.com' } },
+    { kind: 'wait_for', value: 'waitlist.already-message' },
+  ]);
+  const screen = data?.storyboard.find((s) => s.id === 'waitlist-already');
+  if (screen)
+    screen.signedIn = {
+      kind: 'user',
+      as: 'visitor.returning',
+      title: 'Returning visitor',
+      persona: 'Visitor',
+    };
+  return data;
+}
+
+/* And the same screen where the personas are in a blueprint this machine has not registered. */
+function withUnreadUser(data) {
+  withTargets(data);
+  setUp(data, 'waitlist-already', [
+    { kind: 'post', value: '/dev/join', fields: { email: 'you@example.com' } },
+    { kind: 'wait_for', value: 'waitlist.already-message' },
+  ]);
+  const screen = data?.storyboard.find((s) => s.id === 'waitlist-already');
+  if (screen)
+    screen.signedIn = {
+      kind: 'unread',
+      as: 'visitor.returning',
+      from: 'acme-people',
+      register: 'walkdown blueprints import <home of acme-people>',
+    };
+  return data;
+}
+
+/*
  * Two states of one page: in the example a query tells the two confirmation
  * pages apart for the matcher, so here they are given one address, and only
  * their setup differs.
@@ -299,6 +342,33 @@ const STATES = {
     app: [
       ['**/dev/sign-in*', 200],
       ['**/dev/join', 500],
+    ],
+    steps: [
+      ...OPEN_ALREADY,
+      ...RUN_SETUP,
+      ['fn', `r => r.querySelector('[data-testid="panel.setup-failed"]')`],
+      ['wait', 400],
+    ],
+  },
+  /* ADR 0018 §3: held on the second of the user's steps, so the line reads Signing in as. */
+  'rule-detail-signed-in': {
+    routes: [[/\/api\/blueprint(\?|$)/, withSignIn]],
+    app: [
+      ['**/dev/sign-in*', 200],
+      ['**/dev/session', 'hang'],
+    ],
+    steps: [...OPEN_ALREADY, ...RUN_SETUP, ['wait', 2500]],
+  },
+  'rule-detail-user-unread': {
+    routes: [[/\/api\/blueprint(\?|$)/, withUnreadUser]],
+    app: [['**/dev/join', 'hang']],
+    steps: [...OPEN_ALREADY, ...RUN_SETUP, ['wait', 2500]],
+  },
+  'app-sign-in-failed': {
+    routes: [[/\/api\/blueprint(\?|$)/, withSignIn]],
+    app: [
+      ['**/dev/sign-in*', 200],
+      ['**/dev/session', 500],
     ],
     steps: [
       ...OPEN_ALREADY,

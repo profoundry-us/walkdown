@@ -1,0 +1,105 @@
+{
+  "run_id": "2026-11-19T16-31-32Z-local-01",
+  "created": "2026-11-19T16:31:32Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "efeb6ea4-dirty",
+  "spec_hash": "sha256:62347db6e4ff",
+  "results": [
+    {
+      "rule": "personas.declared.named-and-distinct",
+      "status": "pass",
+      "statement_hash": "sha256:386baa71e0bd",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/named-and-distinct.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-personas-declared.html",
+        "as-built/cli/lint-personas-declared.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and the as-built capture of lint-personas-declared read the same on all 11 lines, and a live run of the scenario printed the same text: four errors, naming finance-admin (no title), platform (a persona and a system), visitor (group `public`) and bank (a system with users), and exit 1. The same storyboard without the faults lints clean with the visitor persona having no users. With `groups:` removed, or empty, and every `group:` still named, lint said nothing about groups. Beyond the steps: a user with no title is an error naming manager.view-only-org, two personas with one id is an error, `users: []` on a system is refused, and a system naming an undeclared group is refused as a persona is. Edges I weighed and did not file, each under 10% because it takes a copy-paste slip the ADR's own list (0018 §8) never promised to catch: two users with one id under one persona pass silently and `as:` then reaches the first; a persona or user with no `id:` is not refused, and the persona is later warned about as `undefined`; two systems with one id pass; a group with no title or a repeated group id passes.",
+      "threads": []
+    },
+    {
+      "rule": "personas.declared.shared-by-siblings",
+      "status": "pass",
+      "statement_hash": "sha256:e9ab0bb34483",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/shared-by-siblings.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-personas-from.html",
+        "as-built/cli/lint-personas-from.html",
+        "prototype-cli/screens/lint-personas-from-unread.html",
+        "as-built/cli/lint-personas-from-unread.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. Both designs match their as-built captures line for line (34 and 8 lines) and live runs printed the same. In lint-personas-from, travel (names `checkout`, another project's), mileage (names travel, which has `personas_from:` itself) and cards (has both) each got one error naming the blueprint, expenses passed, and lint exited 1. No screen shows the first then step, so I ran the personas-from-sibling fixture: travel's story `as: manager` and screen `as: manager.view-only-team` passed against expenses' people, a story `by: platform` passed, `by:` an outside system of the sibling's was refused, and only the undeclared `auditor` was an error. Naming the sibling by its full registry id (0001-en-expenses) read the same people. On the machine where expenses is not registered there was one warning naming `expenses` and exit 0; I then gave travel a story `as: ghost`, a story with both `as:` and `by: nothing`, and a screen `as: ghost.user`, and lint still refused nothing. `groups:` alone beside `personas_from:` is refused as `personas:` is; `recipes:` and an empty `personas: []` are not, which reads right. Under 10%: a storyboard naming itself is refused, but as \"not a blueprint in this project\". Two edges between 10% and 80% are reported to whoever sent me and not filed: in a blueprint that takes its people from a sibling, a wrong name is told to \"declare it under the storyboard's `personas:`\", which there earns the both-error; and a sibling that declares nobody is accepted as the source, so every name fails one by one.",
+      "threads": []
+    },
+    {
+      "rule": "personas.declared.unused-is-warned",
+      "status": "pass",
+      "statement_hash": "sha256:18cef79cedca",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/unused-is-warned.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-persona-unused.html",
+        "as-built/cli/lint-persona-unused.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and as-built of lint-persona-unused match on all 9 lines and the live run printed the same two warnings and exit 0: one naming the persona visitor, one naming target `review`, fixture `view_only_org_manager` and user manager.view-only-org. Naming the visitor on a screen's `as:` alone, or on a story alone, removed the first warning; a second idle persona got its own. A persona used only by a sibling that takes its personas from this blueprint was not warned about, by a story or by a screen, and was warned about again when the sibling stopped naming it. A persona named only by a retired screen is warned about. In the sibling, whose screens sign in only as manager.view-only-team, the fixtures warning named that user and key and never the org manager's. A key both a screen's path and a user need is attributed to the screen, once. One edge between 10% and 80% is reported and not filed: where the target has no fixtures at all, the single ADR 0017 warning (\"has no fixtures set on this machine, so ... have no value there\") names the keys and the target and not the user. I read the step as the drawn case, a target that has some values and lacks this one, where it holds.",
+      "threads": []
+    },
+    {
+      "rule": "personas.acting.story-names-who-acts",
+      "status": "pass",
+      "statement_hash": "sha256:3b49252f6a6a",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/story-names-who-acts.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-story-as.html",
+        "as-built/cli/lint-story-as.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and as-built of lint-story-as match on all 11 lines and the live run printed the same: four errors and exit 1, naming expenses.approve and `approver`, expenses.remind and `scheduler`, expenses.export with both `as: manager` and `by: platform`, and expenses.reimburse with `bank` marked outside. The four good stories (as one persona, as a list of two, by platform, neither) drew nothing, there and in every clean fixture. Probes: `as:` naming a system is an error that says to write `by: platform`; in a list of two with one wrong name only the wrong one is an error; a user id on a story (`manager.view-only-team`) is refused as not a persona. For the last step I rewrote two statements to begin \"As a ghost\" and \"As a visitor\" on stories with no `as:` or a different one, and lint's output did not change by a line. Under 10%, named only: `as: []` and `by: ''` read as absent, `as: ''` is an error naming an empty name, and `by:` a one-item list is read as its item.",
+      "threads": []
+    },
+    {
+      "rule": "personas.acting.another-personas-screen-is-warned",
+      "status": "pass",
+      "statement_hash": "sha256:dda19b1d6061",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/another-personas-screen.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-rule-on-anothers-screen.html",
+        "as-built/cli/lint-rule-on-anothers-screen.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and as-built of lint-rule-on-anothers-screen match on all 8 lines and the live run printed the same: one warning naming rule access.request.manager-is-told, screen `team-requests`, manager and visitor, and exit 0, while alerts.overspend, `by: platform` with a rule on the same manager screen, drew nothing. I tried to get it said twice: the one rule on three screens of the manager's was still one warning; a second rule of the story on another manager screen got its own, which is once a rule. A story `as: [visitor, manager]` on the manager's screen is not warned about, a story with no `as:` is not, and a manager's rule on the visitor's screen (a persona with no users) is warned about with `a visitor`. It holds in a sibling that takes its people from another blueprint. Retiring the screen replaces the warning with lint's existing retired-screen error, and a story that also names an undeclared persona gets that error and no warning. Nothing here reached 10%.",
+      "threads": []
+    },
+    {
+      "rule": "screens.identity.user-is-identity",
+      "status": "pass",
+      "statement_hash": "sha256:9c55208de58b",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/user-is-identity.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-users-not-a-tie.html",
+        "as-built/cli/lint-users-not-a-tie.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and as-built of lint-users-not-a-tie match on all 8 lines and the live run printed the same: expense-team and expense-org share /expenses/{fixtures.expense_submitted} as two users and are not warned about, and expense-org-by-hand, with the org manager's recipe as its own setup, is one tie warning naming it and `expense-org`, exit 0. The tie holds with the steps written inline instead of the recipe, and with the by-hand screen listed first, where the warning lands on expense-org and names expense-org-by-hand. `as: manager` and `as: manager.view-only-team` on one path tie, which is right since a persona alone is its first user; the same user plus one extra setup step does not; a persona with no users ties with a screen with no `as:`. Two edges between 10% and 80% are reported and not filed. Two users with no `setup:` yet (lint accepts a user without one) tie on one path, and the warning says \"`as: visitor.b` are both screen `policy`'s\" though policy is `as: visitor.a`. And where `personas_from:` could not be read, two screens on one path as different users are warned about as a tie with \"neither has a setup to tell them apart\", under the warning that nothing was checked. Under 10%: two users with identical steps, or prose setups, tie.",
+      "threads": []
+    },
+    {
+      "rule": "screens.setup.as-names-a-user",
+      "status": "pass",
+      "statement_hash": "sha256:fd1cd59bd694",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-30-52Z/as-names-a-user.txt",
+        "runs/evidence/2026-11-19T16-30-52Z/design-vs-as-built.txt",
+        "prototype-cli/screens/lint-screen-as.html",
+        "as-built/cli/lint-screen-as.html"
+      ],
+      "reasoning": "Judged at a terminal, not in a browser: the working tree's bin/walkdown.js on throwaway machines from tools/cli-scenarios.mjs, each with its own HOME and WALKDOWN_HOME, so no port was driven. The design and as-built of lint-screen-as match on all 13 lines and the live run printed the same: errors naming screen expense-approve and `finance-admin`, screen expense-org and `manager.org-admin` with the users manager has, an error for the `click` step naming user manager.view-only-org, a warning for `nav.signed-in` naming user manager.view-only-team and the two screens signed in as it, and exit 1. The three good forms pass in every clean fixture: `manager.view-only-team`, `manager` alone, and `visitor`, who has no users. Probes: `as:` naming a system, `manager.`, `.x`, a three-part name and a number are each an error naming the screen and the name; a user's undeclared recipe, whole address, empty visit, nested fields and a string step are each an error naming the user; a `wait_for` that one of the user's screens declares is not warned about, nor is one on a user no screen signs in as; a retired screen's `as:` is not read. In a sibling, a wrong user is refused there and the user's own setup faults are said once, in the blueprint that declares it. Two edges between 10% and 80% are reported and not filed: a user with no `setup:` is accepted in silence, so a screen is signed in as it by running nothing; and `as:` written on the screen instead of under `app:` is ignored in silence. Under 10%: a user's `wait_for` anchor that only a sibling's screen declares is still warned about in the declarer.",
+      "threads": []
+    }
+  ]
+}

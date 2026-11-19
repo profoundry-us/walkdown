@@ -218,6 +218,15 @@ export async function runSetup(screen, { answers, paint }) {
   if (run.missing.length) {
     const key = run.missing[0];
     const inPath = String(screen.app?.written ?? '').includes(`{fixtures.${key}}`);
+    // A key the user's sign-in names: which step needs it, and how the step wrote it.
+    const mark = `{fixtures.${key}}`;
+    const needed = run.steps.findIndex(
+      (s) =>
+        s.whose === 'user' &&
+        [s.value, ...Object.values(s.fields ?? {})].some((v) => String(v).includes(mark)),
+    );
+    const at = run.steps[needed];
+    const field = at && Object.entries(at.fields ?? {}).find(([, v]) => String(v).includes(mark));
     return fail({
       kind: 'fixture',
       key,
@@ -225,6 +234,7 @@ export async function runSetup(screen, { answers, paint }) {
       inPath,
       written: screen.app?.written,
       set: run.set,
+      ...(at ? { needed, wrote: field ? `${field[0]} ${field[1]}` : at.value } : {}),
     });
   }
   if (!base || !(await answers(appUrlOf('/', base)))) {
@@ -311,6 +321,20 @@ const DOING = {
   wait_for: (s) => `Waiting for <code>${esc(s.value)}</code> on the page.`,
 };
 
+/** How many of a run's steps are its user's sign-in: they come first. */
+export const signInCount = (run) => (run?.steps ?? []).filter((s) => s.whose === 'user').length;
+
+/* Whose step the setup is on, in the App pane's words (ADR 0018 §3). */
+function whoseStep(screen, run, step) {
+  const who = screen?.signedIn;
+  if (!who) return '';
+  const own = "One of this screen's own steps.";
+  if (step?.whose === 'user') return `A step of signing in as <b>${esc(who.title)}</b>.`;
+  if (who.kind === 'user') return `${own} <b>${esc(who.title)}</b> is signed in.`;
+  if (who.kind === 'nobody') return `${own} Nobody signs in as <b>${esc(who.persona)}</b>.`;
+  return own;
+}
+
 function paintCover() {
   const st = S.setup;
   const screen = (S.data?.storyboard ?? []).find((s) => s.id === st?.screen);
@@ -330,21 +354,78 @@ function paintCover() {
   const path = `<code>${esc(run.path ?? '')}</code>`;
   if (st.state === 'running') {
     const step = run.steps[st.at];
+    const users = signInCount(run);
+    const who = screen.signedIn;
+    const whose = whoseStep(screen, run, step);
+    const doing = !step
+      ? ''
+      : step.whose === 'user' && step.kind === 'post'
+        ? `Posting the sign-in form to <code>${esc(step.value)}</code>.`
+        : DOING[step.kind](step);
+    // What the reviewer would otherwise wonder about: prose that is not run, a sign-in that did not.
+    const note =
+      who?.kind === 'unread'
+        ? `No sign-in ran. <code>${esc(who.as)}</code> could not be read, because the blueprint <code>${esc(who.from)}</code> is not registered on this machine. The rule says how to register it.`
+        : who && run.prose
+          ? "This screen's own setup is written as prose. It is shown in the rule, and it is not run."
+          : '';
     cover.innerHTML = `
       <div class="progress-card" data-testid="panel.setup-progress" role="status">
         <div class="font-semibold">Setting up this screen: step ${st.at + 1} of ${n}</div>
         <div class="pips">${run.steps
-          .map((_, i) => `<i class="${i < st.at ? 'done' : i === st.at ? 'now' : ''}"></i>`)
+          .map(
+            (_, i) =>
+              `${users && i === users ? '<i class="gap"></i>' : ''}<i class="${i < st.at ? 'done' : i === st.at ? 'now' : ''}"></i>`,
+          )
           .join('')}</div>
-        <div>${step ? DOING[step.kind](step) : ''}</div>
+        ${whose ? `<div class="whose">${whose}</div>` : ''}
+        <div>${doing}</div>
         <div class="mt-1 opacity-60">Then ${path} opens here.</div>
+        ${note ? `<div class="note">${note}</div>` : ''}
       </div>`;
   } else if (st.state === 'failed') {
     const f = st.failure;
     const step = run.steps[f.step];
     const not = `${path} was not loaded, so this is not the screen yet.`;
-    const body =
-      f.kind === 'fixture'
+    /*
+     * A step of the user's sign-in that failed says so (ADR 0018 §3): the
+     * reviewer looking for the fault should look at the sign-in, which every
+     * screen signed in as this user shares, and not at this screen.
+     */
+    const theirs = step?.whose === 'user' || f.needed !== undefined;
+    const WHO = `<b>${esc(screen.signedIn?.title ?? '')}</b>`;
+    const whose = `<dt>Whose</dt><dd>Signing in as ${WHO}</dd>`;
+    const was = `This was a step of signing in as ${WHO}, not one of this screen's own.`;
+    const before = run.steps[f.step - 1];
+    const body = theirs
+      ? f.kind === 'fixture'
+        ? `<div class="head"><i class="dot"></i>Sign-in did not run</div>
+           <dl>
+             <dt>Fixture</dt><dd><code>${esc(f.key)}</code></dd>
+             <dt>Target</dt><dd>${esc(f.target)}</dd>
+             ${whose}
+             <dt>Needed by</dt><dd>step ${f.needed + 1}, <code>${esc(f.wrote)}</code></dd>
+           </dl>
+           <div>The fixture says which account ${WHO} is. The ${esc(f.target)} target has no value for it, so nothing was run. Set the ${esc(f.target)} target's fixtures, then run the setup again from the rule.
+             <code class="cmd">${esc(f.set)}</code></div>`
+        : f.kind === 'wait'
+          ? `<div class="head"><i class="dot"></i>Sign-in stopped at step ${f.step + 1} of ${n}</div>
+             <dl>
+               <dt>Step</dt><dd>${f.step + 1}, wait for</dd>
+               ${whose}
+               <dt>Anchor</dt><dd><code>${esc(f.anchor)}</code></dd>
+               <dt>Got</dt><dd>Not on the page after ten seconds</dd>
+             </dl>
+             <div>${was} ${not} Check that the page ${before && before.kind !== 'wait_for' ? `<code>${esc(before.value)}</code>` : 'the step before'} lands on carries <code>${esc(f.anchor)}</code>, then run the setup again from the rule.</div>`
+          : `<div class="head"><i class="dot"></i>Sign-in stopped at step ${f.step + 1} of ${n}</div>
+             <dl>
+               <dt>Step</dt><dd>${f.step + 1}, ${KIND[step.kind]}</dd>
+               ${whose}
+               <dt>Path</dt><dd><code>${esc(step.value)}</code></dd>
+               <dt>Got</dt><dd>${esc(f.got)}</dd>
+             </dl>
+             <div>${was} ${not} Look at the app's log for <code>${esc(step.value)}</code>, then run the setup again from the rule.</div>`
+      : f.kind === 'fixture'
         ? `<div class="head"><i class="dot"></i>Setup did not run</div>
            <dl>
              <dt>Fixture</dt><dd><code>${esc(f.key)}</code></dd>

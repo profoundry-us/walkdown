@@ -36,7 +36,7 @@ const ruleZone = dropZone(
 
 import { askOptions } from './ask.js';
 import { openEvidence } from './evidence.js';
-import { isSetUp, runOf, setupState, targetNow } from './setup.js';
+import { isSetUp, runOf, setupState, signInCount, targetNow } from './setup.js';
 import { openSource } from './source.js';
 import { S } from './state.js';
 import { toast } from './toast.js';
@@ -275,21 +275,81 @@ function setupSteps(screen, run) {
     return done || st?.state === 'done' ? 'done' : 'todo';
   };
   const GLYPH = { done: '✓', failed: '✗', now: '◌' };
+  /*
+   * Who the screen is signed in as, in one line above the steps (ADR 0018
+   * §3). It reads Signing in as while the user's steps run and Signed in as
+   * once they have passed, so the line never claims a sign-in that has not
+   * happened. Each list of steps is headed by whose it is.
+   */
+  const who = screen.signedIn;
+  const users = signInCount(run);
+  const failedTheirs =
+    st?.state === 'failed' &&
+    (st.failure.needed !== undefined || (st.failure.step ?? users) < users);
+  const verb = failedTheirs
+    ? 'Signs in'
+    : st?.state === 'running'
+      ? st.at < users
+        ? 'Signing in'
+        : 'Signed in'
+      : done || st?.state === 'done' || st?.state === 'failed'
+        ? 'Signed in'
+        : 'Signs in';
+  const line = !who
+    ? nothing
+    : who.kind === 'user'
+      ? html`<div class="signed-in" data-testid="detail.signed-in" data-state="${verb}" title="as: ${who.as}">
+          <i class="face"></i>
+          <span>${verb} as <b>${who.title}</b>, a ${who.persona}.${
+            failedTheirs
+              ? html`<span class="more">${st.failure.kind === 'fixture' ? 'The sign-in did not run.' : 'The sign-in did not finish.'}</span>`
+              : nothing
+          }</span></div>`
+      : who.kind === 'nobody'
+        ? html`<div class="signed-in nobody" data-testid="detail.signed-in" title="as: ${who.as}">
+            <i class="face"></i>
+            <span>Nobody signs in as <b>${who.persona}</b>.
+              <span class="more">No sign-in runs.${run.steps.length ? " This screen's own steps still do." : ''}</span></span></div>`
+        : html`<div class="signed-in unread" data-testid="detail.signed-in" role="status">
+            <i class="face"></i>
+            <span><code>${who.as}</code> could not be read, so nobody is signed in.
+              <span class="more">Its personas are in the blueprint <code>${who.from}</code>, which is not registered on this machine. Register it, then run the setup again.</span>
+              <code class="cmd">${who.register}</code></span></div>`;
+  const group = (i) =>
+    !who
+      ? nothing
+      : users && i === 0
+        ? html`<li class="group">${who.title} signs in</li>`
+        : i === users
+          ? html`<li class="group">${users ? "Then this screen's own steps" : "This screen's own steps"}</li>`
+          : nothing;
   return html`<div data-testid="detail.setup">
     <div class="${LBL} mb-1.5 flex items-baseline">
       <span>Setup</span><span class="ml-auto normal-case tracking-normal" data-testid="detail.setup-state">${state}</span></div>
+    ${line}
     <ol class="setup-list" data-testid="detail.setup-steps">
       ${run.steps.map((step, i) => {
         const mark = markOf(i);
-        return html`<li class="${mark}" data-step="${i + 1}" data-state="${mark}"><span class="mark">${GLYPH[mark] ?? i + 1}</span>
+        return html`${group(i)}<li class="${mark}" data-step="${i + 1}" data-state="${mark}" data-whose="${step.whose ?? 'screen'}"><span class="mark">${GLYPH[mark] ?? i + 1}</span>
           <span class="body"><span class="kind">${STEP_KIND[step.kind] ?? step.kind}</span><code>${step.value}</code>
             ${Object.entries(step.fields ?? {}).map(
               ([k, v]) => html`<span class="field">${k} <code>${v}</code></span>`,
             )}</span></li>`;
       })}
-      <li class="then"><span class="mark">→</span>
-        <span class="body">Then open <code title="${screen.app?.written ?? ''}">${run.path}</code></span></li>
+      ${
+        run.path
+          ? html`<li class="then"><span class="mark">→</span>
+        <span class="body">Then open <code title="${screen.app?.written ?? ''}">${run.path}</code></span></li>`
+          : nothing
+      }
     </ol>
+    ${
+      who && run.prose
+        ? html`<div class="prose-note">This screen's own setup, shown and not run</div>
+          <div class="rounded border border-warning/40 bg-warning/10 px-2 py-1.5 text-[12px] leading-relaxed"
+            data-testid="detail.setup-prose">${run.prose}</div>`
+        : nothing
+    }
     <button class="btn btn-xs mt-1.5 w-full border-[1.5px] border-dashed border-base-content/25"
       data-testid="detail.setup-again" title="Run every step again, from step 1"
       @click=${(e) => fire(e.currentTarget, 'run-setup', { screen: screen.id })}>↻ Run setup again</button>
@@ -900,7 +960,10 @@ export function detailPane() {
   const setupScreen = ruleScreen(r);
   const setupRun = runOf(setupScreen);
   // Steps the panel runs (ADR 0017 §2), or prose it shows and never runs.
-  const setup = setupRun?.steps.length ? null : (setupRun?.prose ?? setupScreen?.app?.setup);
+  // A screen signed in as somebody shows its setup block whatever it runs, and its prose inside it.
+  const signedIn = Boolean(setupScreen?.signedIn);
+  const setup =
+    setupRun?.steps.length || signedIn ? null : (setupRun?.prose ?? setupScreen?.app?.setup);
   /*
    * Which screen this rule is about, said plainly and above the steps.
    *
@@ -981,7 +1044,7 @@ export function detailPane() {
         }
         ${elsewhere(r)}
       </div>
-      ${setupRun?.steps.length ? setupSteps(setupScreen, setupRun) : nothing}
+      ${setupRun?.steps.length || signedIn ? setupSteps(setupScreen, setupRun) : nothing}
       ${
         typeof setup === 'string' && setup
           ? html`<div>

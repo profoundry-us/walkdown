@@ -296,6 +296,7 @@ screens:
   - id: rule-detail-signed-in
     title: "Rule detail (state — the screen is signed in as a user)"
     prototype: /screens/rule-detail-signed-in.html
+    app: { path: /as-built/rule-detail-signed-in.html }
     anchors:
       - detail.signed-in
       - detail.setup
@@ -306,6 +307,7 @@ screens:
   - id: rule-detail-user-unread
     title: "Rule detail (state — the screen's user could not be read)"
     prototype: /screens/rule-detail-user-unread.html
+    app: { path: /as-built/rule-detail-user-unread.html }
     anchors:
       - detail.signed-in
       - detail.setup
@@ -315,6 +317,7 @@ screens:
   - id: app-sign-in-failed
     title: "A user's sign-in step failed, so the screen is not loaded"
     prototype: /screens/app-sign-in-failed.html
+    app: { path: /as-built/app-sign-in-failed.html }
     anchors:
       - panel.setup-failed
       - detail.signed-in

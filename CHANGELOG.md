@@ -11,6 +11,17 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
 
 ### Added
 
+- **Personas, users and systems** ([ADR 0018](docs/adr/foundational/202611_journey_boards.md) §§2, 3, 8).
+  A storyboard declares `personas:` (each with optional `users:`), `systems:`
+  and `groups:`, or takes them from a sibling with `personas_from:`. A story
+  says who acts in it with `as:` or `by:`, and a screen's `app.as` names the
+  user it is signed in as: the panel runs that user's setup steps before the
+  screen's own, and the rule's detail says who is signed in. Lint refuses a
+  name nobody declared, checks a user's setup as it checks a screen's, and
+  warns about an unused persona, a user a target cannot sign in, and a rule on
+  another persona's screen. Two screens on one path signed in as different
+  users are no longer a tie. Nothing changes for a blueprint that uses none
+  of these keys.
 - **Three modes of one window** ([ADR 0018](docs/adr/foundational/202611_journey_boards.md) §7).
   A switcher at the left of the top bar, named for the mode that is chosen,
   moves between Walkdown (the rules beside the app, as before), Boards and

@@ -42,6 +42,7 @@ export const EXAMPLE_HOME = join('.walkdown', 'blueprints', '0001-example');
 export const CLI_HOME = join('.walkdown', 'blueprints', '0002-cli');
 /** Where the expenses blueprint's project is checked out (ADR 0017's checks). */
 export const EXPENSES_CHECKOUT = join(CHECKSPACE, 'expenses-app');
+export const TRAVEL_CHECKOUT = join(CHECKSPACE, 'travel-app');
 
 /**
  * @param {{ exampleDeclared: string, exampleOrigin: string, expenses: { local: string, review: string } }} addresses
@@ -194,7 +195,7 @@ export function prepare({
   writeFileSync(
     join(process.env.WALKDOWN_HOME, 'registry.yml'),
     [
-      'next: 5',
+      'next: 6',
       'blueprints:',
       '  - id: 0001-cs-blueprint',
       '    project: checkspace',
@@ -222,10 +223,18 @@ export function prepare({
       `    checkout: ${EXPENSES_CHECKOUT}`,
       `    home: ${join(EXPENSES_CHECKOUT, 'blueprint')}`,
       "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
+      // Alone in its project, and its personas are in a blueprint nobody registered here.
+      '  - id: 0005-tr-travel',
+      '    project: travel',
+      '    code: tr',
+      `    checkout: ${TRAVEL_CHECKOUT}`,
+      `    home: ${join(TRAVEL_CHECKOUT, 'blueprint')}`,
+      "    registered: { by: import, at: '2026-01-01T00:00:00Z' }",
       '',
     ].join('\n'),
   );
   expensesBlueprint(join(EXPENSES_CHECKOUT, 'blueprint'), EXPENSES);
+  travelBlueprint(join(TRAVEL_CHECKOUT, 'blueprint'), EXPENSES);
 
   /*
    * A rule nothing has ever verified, so the checks that read an UNBUILT
@@ -334,6 +343,64 @@ function placeholderEvidence(dir) {
 }
 
 /*
+ * A blueprint whose personas are somebody else's (ADR 0018 §2): `travel`
+ * takes them from `acme-people`, which this checkspace never registers, so
+ * its one screen's `as:` cannot be read. It is pointed at the expenses app.
+ */
+function travelBlueprint(home, { local }) {
+  mkdirSync(join(home, 'features'), { recursive: true });
+  for (const kind of ['threads', 'runs']) mkdirSync(join(home, kind), { recursive: true });
+  writeFileSync(
+    join(home, 'spec.yml'),
+    [
+      'blueprint: travel',
+      'description: A blueprint whose personas are in one this machine has not registered.',
+      'runner:',
+      '  targets:',
+      '    local:',
+      `      base_url: ${local}`,
+      '      fixtures: { expense_submitted: 412 }',
+      '',
+    ].join('\n'),
+  );
+  writeFileSync(
+    join(home, 'storyboard.yml'),
+    [
+      'personas_from: acme-people',
+      'screens:',
+      '  - id: trip-team',
+      '    title: Trip, view-only team manager',
+      '    app:',
+      '      as: manager.view-only-team',
+      '      setup:',
+      '        - visit: /dev/slow',
+      '      path: /expenses/{fixtures.expense_submitted}',
+      '    anchors: [app.sign-in]',
+      '',
+    ].join('\n'),
+  );
+  writeFileSync(
+    join(home, 'features', 'travel.yml'),
+    [
+      'feature: travel',
+      'stories:',
+      '  - id: travel.view',
+      '    title: Viewing a trip',
+      '    statement: As a manager I open a trip.',
+      '    as: manager',
+      '    rules:',
+      '      - id: travel.view.trip',
+      '        statement: A view-only team manager sees the trip.',
+      '        verify: [checks]',
+      '        screens: [trip-team]',
+      '        steps:',
+      '          then: [It does]',
+      '',
+    ].join('\n'),
+  );
+}
+
+/*
  * A blueprint of the checkspace's own, for ADR 0017: an app with sign-in
  * (checks/fixtures/expenses-app.mjs), whose screens are states of one page
  * reached by setup steps. A throwaway home rather than rules added to the
@@ -423,6 +490,73 @@ function expensesBlueprint(home, { local, review }) {
         ['setup:', '  - visit: /dev/impersonate?id=14', 'path: /expenses/{fixtures.expense_draft}'],
         ['expense.title'],
       ),
+      /*
+       * Screens signed in `as:` a user (ADR 0018 §3): the second user with
+       * steps of the screen's own, the persona alone, a persona nobody signs
+       * in as, a user whose sign-in fails, and a user above prose.
+       */
+      ...screen(
+        'expense-as-org',
+        'Expense, as the view-only org manager',
+        [
+          'as: manager.view-only-org',
+          'setup:',
+          '  - visit: /expenses/7',
+          '  - wait_for: expense.title',
+          // A path of its own: two other screens already share the submitted expense's.
+          'path: /expenses/11',
+        ],
+        ['nav.signed-in', 'expense.title', 'expense.note'],
+      ),
+      ...screen(
+        'expense-as-manager',
+        'Expense, as a manager',
+        ['as: manager', 'path: /expenses/8'],
+        ['nav.signed-in', 'expense.title'],
+      ),
+      ...screen(
+        'expense-as-visitor',
+        'Expense, as a visitor',
+        ['as: visitor', 'path: /expenses/9'],
+        ['app.sign-in'],
+      ),
+      ...screen(
+        'expense-as-locked-out',
+        'Expense, as a manager whose sign-in fails',
+        ['as: manager.locked-out', 'path: /expenses/501'],
+        ['expense.title'],
+      ),
+      ...screen(
+        'expense-as-prose',
+        'Expense, as the org manager, then by hand',
+        [
+          'as: manager.view-only-org',
+          'setup: Filter the list to submitted expenses before opening this one.',
+          'path: /expenses/10',
+        ],
+        ['expense.title'],
+      ),
+      'personas:',
+      '  - id: manager',
+      '    title: Manager',
+      '    users:',
+      '      - id: view-only-team',
+      '        title: View-only team manager',
+      '        setup:',
+      '          - visit: /dev/impersonate?id=1',
+      '          - post: /dev/session',
+      '            fields: { user_id: "{fixtures.view_only_team_manager}" }',
+      '          - wait_for: nav.signed-in',
+      '      - id: view-only-org',
+      '        title: View-only org manager',
+      '        setup: { recipe: as_view_only_org_manager }',
+      '      - id: locked-out',
+      '        title: Locked-out manager',
+      '        setup:',
+      '          - visit: /dev/impersonate?id=14',
+      '          - post: /dev/broken',
+      '  - id: visitor',
+      '    title: Visitor',
       'recipes:',
       '  as_view_only_org_manager:',
       '    - post: /dev/session',
@@ -471,6 +605,8 @@ function expensesBlueprint(home, { local, review }) {
     '        steps:',
     '          then: [It does]',
   ];
+  // The second story's rules: `expenses.signed-in.<id>`, where the helper writes `expenses.view.<id>`.
+  const as = (l) => l.replace('expenses.view.', 'expenses.signed-in.');
   writeFileSync(
     join(home, 'features', 'expenses.yml'),
     [
@@ -491,6 +627,18 @@ function expensesBlueprint(home, { local, review }) {
       ...rule('broken', 'An expense behind a failing sign-in is not shown.', 'expense-broken'),
       ...rule('slow', 'An expense behind a sign-in that never lands is not shown.', 'expense-slow'),
       ...rule('unseeded', 'An expense nobody made is not shown.', 'expense-unseeded'),
+      '  - id: expenses.signed-in',
+      '    title: Viewing an expense as somebody',
+      '    statement: As a manager I open an expense without signing in by hand.',
+      '    as: [manager, visitor]',
+      '    rules:',
+      ...rule('as-org', 'The org manager sees the organisation note.', 'expense-as-org').map(as),
+      ...rule('as-manager', 'A manager sees the expense.', 'expense-as-manager').map(as),
+      ...rule('as-visitor', 'A visitor is asked to sign in.', 'expense-as-visitor').map(as),
+      ...rule('as-locked-out', 'A locked-out manager sees nothing.', 'expense-as-locked-out').map(
+        as,
+      ),
+      ...rule('as-prose', 'The org manager sees a filtered expense.', 'expense-as-prose').map(as),
       '',
     ].join('\n'),
   );
