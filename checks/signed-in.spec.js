@@ -139,6 +139,19 @@ test("a screen signed in as a user runs the user's steps, then its own, then loa
   await expect(signedIn).toContainText('The sign-in did not finish.');
   expect(await asked(page)).toEqual(['GET /dev/impersonate?id=14', 'POST /dev/broken']);
 
+  // Arriving on a screen with nothing to run leaves that failure behind: it was another screen's.
+  await openRule(page, 'as-visitor');
+  await expect(signedIn).toContainText('Nobody signs in as Visitor.');
+  await expect(failed).toHaveCount(0);
+  await expect(progress).toHaveCount(0);
+
+  // A fixture with no value stops the setup before any step, so nobody has been signed in.
+  await page.request.post(`${EXPENSES_ORIGIN}/__reset`);
+  await openRule(page, 'as-unseeded');
+  await expect(failed).toContainText('Setup did not run');
+  await expect(signedIn).toHaveText(/^\s*Signs in as View-only org manager, a Manager\.\s*$/);
+  expect(await asked(page)).toEqual([]);
+
   // `as:` above prose: the user's steps run, the prose is shown, and it is never run.
   await page.request.post(`${EXPENSES_ORIGIN}/__reset`);
   release = await hold(page, '/dev/session');

@@ -2720,7 +2720,14 @@ export function goTo(screen, surface = pageSurface(), pick = null, { again = fal
     Boolean(run) && (again ? run.steps.length + run.missing.length > 0 : needsSetup(screen));
   // A setup that stopped part-way left the frame on a step, not on a screen.
   const astray = Boolean(S.setup && S.setup.state !== 'done');
-  if (setUpFirst || !toApp || !run) {
+  /*
+   * A screen with nothing to run was never set up, so it keeps nothing: a
+   * screen signed in as nobody has a run and no steps (ADR 0018 §3), and
+   * arriving on one left the last screen's progress or failure standing
+   * over its page.
+   */
+  const nothingToRun = Boolean(run) && !run.steps.length && !run.missing.length;
+  if (setUpFirst || !toApp || !run || nothingToRun) {
     leaveSetup();
     if (!setUpFirst) S.setupFor = null;
   }

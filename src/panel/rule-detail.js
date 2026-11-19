@@ -286,15 +286,18 @@ function setupSteps(screen, run) {
   const failedTheirs =
     st?.state === 'failed' &&
     (st.failure.needed !== undefined || (st.failure.step ?? users) < users);
-  const verb = failedTheirs
-    ? 'Signs in'
-    : st?.state === 'running'
-      ? st.at < users
-        ? 'Signing in'
-        : 'Signed in'
-      : done || st?.state === 'done' || st?.state === 'failed'
-        ? 'Signed in'
-        : 'Signs in';
+  // A fixture with no value stops the setup before any step, the user's included.
+  const neverRan = st?.state === 'failed' && st.failure.kind === 'fixture';
+  const verb =
+    failedTheirs || neverRan
+      ? 'Signs in'
+      : st?.state === 'running'
+        ? st.at < users
+          ? 'Signing in'
+          : 'Signed in'
+        : done || st?.state === 'done' || st?.state === 'failed'
+          ? 'Signed in'
+          : 'Signs in';
   const line = !who
     ? nothing
     : who.kind === 'user'

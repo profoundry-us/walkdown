@@ -8767,15 +8767,18 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
     const failedTheirs =
       st?.state === 'failed' &&
       (st.failure.needed !== undefined || (st.failure.step ?? users) < users);
-    const verb = failedTheirs
-      ? 'Signs in'
-      : st?.state === 'running'
-        ? st.at < users
-          ? 'Signing in'
-          : 'Signed in'
-        : done || st?.state === 'done' || st?.state === 'failed'
-          ? 'Signed in'
-          : 'Signs in';
+    // A fixture with no value stops the setup before any step, the user's included.
+    const neverRan = st?.state === 'failed' && st.failure.kind === 'fixture';
+    const verb =
+      failedTheirs || neverRan
+        ? 'Signs in'
+        : st?.state === 'running'
+          ? st.at < users
+            ? 'Signing in'
+            : 'Signed in'
+          : done || st?.state === 'done' || st?.state === 'failed'
+            ? 'Signed in'
+            : 'Signs in';
     const line = !who
       ? A
       : who.kind === 'user'
@@ -12619,7 +12622,14 @@ Please report this to https://github.com/markedjs/marked.`,e){let i="<p>An error
       Boolean(run) && (again ? run.steps.length + run.missing.length > 0 : needsSetup(screen));
     // A setup that stopped part-way left the frame on a step, not on a screen.
     const astray = Boolean(S.setup && S.setup.state !== 'done');
-    if (setUpFirst || !toApp || !run) {
+    /*
+     * A screen with nothing to run was never set up, so it keeps nothing: a
+     * screen signed in as nobody has a run and no steps (ADR 0018 §3), and
+     * arriving on one left the last screen's progress or failure standing
+     * over its page.
+     */
+    const nothingToRun = Boolean(run) && !run.steps.length && !run.missing.length;
+    if (setUpFirst || !toApp || !run || nothingToRun) {
       leaveSetup();
       if (!setUpFirst) S.setupFor = null;
     }

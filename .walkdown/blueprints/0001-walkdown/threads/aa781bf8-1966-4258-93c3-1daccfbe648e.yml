@@ -1,0 +1,23 @@
+id: q-0654
+uuid: aa781bf8-1966-4258-93c3-1daccfbe648e
+kind: question
+author: agent
+created: 2026-11-19T16:58:00.445Z
+anchor:
+  rule: screens.setup.signs-in-as-the-user
+status: open
+body: A screen signed in as a persona with no users runs no sign-in. Opened
+  after a manager's screen in the same tab, the app still holds the manager's
+  session. The detail says nobody signs in as Visitor, and the App pane shows
+  the manager's page. What should happen there?
+options:
+  - label: Lint warns
+    why: A screen as a persona with no users, in a blueprint where some user signs
+      in, is warned about unless its own setup has a step. The author adds a
+      sign-out step.
+  - label: The detail says so
+    why: The line adds that an earlier session may still be signed in, and names the
+      last user the panel signed in on this target.
+  - label: Leave it
+    why: The author writes a sign-out step where the page needs one, as the design's
+      own example does.

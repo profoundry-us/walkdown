@@ -536,6 +536,12 @@ function expensesBlueprint(home, { local, review }) {
         ],
         ['expense.title'],
       ),
+      ...screen(
+        'expense-as-unseeded',
+        'Expense nobody made, as the org manager',
+        ['as: manager.view-only-org', 'path: /expenses/{fixtures.expense_draft}'],
+        ['expense.title'],
+      ),
       'personas:',
       '  - id: manager',
       '    title: Manager',
@@ -639,6 +645,11 @@ function expensesBlueprint(home, { local, review }) {
         as,
       ),
       ...rule('as-prose', 'The org manager sees a filtered expense.', 'expense-as-prose').map(as),
+      ...rule(
+        'as-unseeded',
+        'The org manager sees no expense nobody made.',
+        'expense-as-unseeded',
+      ).map(as),
       '',
     ].join('\n'),
   );

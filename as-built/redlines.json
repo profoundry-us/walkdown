@@ -165,7 +165,8 @@
     "redlines": [
       "As designed: the line above the steps, the two headed lists numbered straight through, and whose step it is in the App pane.",
       "Drawn over the example, which has no users: the returning visitor and its steps are given to the payload for this drawing.",
-      "Before any step has run, and after a sign-in step fails, the line reads Signs in as. The design draws only Signing in as and Signed in as."
+      "Before any step has run the line reads Signs in as, which no design draws. After a sign-in step fails it reads Signs in as, as the failed sign-in's design has it.",
+      "While steps run the Setup heading says which step it is on, where the design says on local."
     ]
   },
   "rule-detail-user-unread": {
