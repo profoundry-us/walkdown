@@ -2147,7 +2147,7 @@ stories:
         created_at: 2026-11-18
         verify: [checks, agent]
         signoff: [eng, product]
-        statement: Personas lists every persona of the project under its group's title, in the storyboard's order. Systems are not listed.
+        statement: Personas lists every persona of the project under its group's title, in the storyboard's order, and the systems after them as small cards of their own.
         because: A reviewer reading a board needs one place that says who each lane is, in the words the blueprint uses.
         history: "ADR 0018 §7."
         screens: [mode-personas]
@@ -2160,10 +2160,12 @@ stories:
             - Each group with a persona is a heading, anchor `personas.group`, in the storyboard's order, with its personas under it in theirs
             - A group with no persona has no heading
             - Each persona is one card, anchor `personas.card`, with its title, who it is a persona of, its blurb and what it uses
-            - No system has a card, and a line under the grid names the systems and says nobody signs in as them
+            - The systems come after the personas, under one heading that says nobody signs in as them
+            - Each system is a small card with a dashed outline, anchor `personas.system`, with its title and no users, stories or boards
+            - A blueprint with no systems has no such heading
             - A blueprint with no groups lists its personas under no heading
             - A blueprint whose storyboard has `personas_from:` lists the personas of the blueprint it names
-          statement_hash: sha256:405bfe8e1f46
+          statement_hash: sha256:446af91eecee
 
       - id: panel.personas.users-per-target
         origin: walkdown

@@ -1,0 +1,25 @@
+id: n-0653
+uuid: fe95a117-6672-4db9-a7ed-531ed889920c
+kind: note
+reason: request
+author: agent
+created: 2026-11-19T16:14:25.270Z
+anchor:
+  screen: mode-personas
+status: addressed
+body: Topher sent the Personas page back on n-0650. The systems want more weight
+  than a line under the grid. Draw them after the personas, under one heading
+  that says nobody signs in as them. Each system is a small card with a dashed
+  outline, anchor personas.system, holding its title and nothing about users,
+  stories or boards. Start from the accepted page and change nothing else.
+replies:
+  - author: agent
+    created: 2026-11-19T16:15:33Z
+    body: agent named /drafts/mode-personas.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-11-19T16:15:42Z
+    body: "Drawn: prototype/drafts/mode-personas.html. The line under the grid is
+      gone, and the two systems are small dashed cards under the heading Systems
+      nobody signs in as, after the last group of personas."
+proposes: /drafts/mode-personas.html

@@ -291,6 +291,7 @@ screens:
       - personas.users
       - personas.stories
       - personas.boards
+      - personas.system
 
   - id: rule-detail-signed-in
     title: "Rule detail (state — the screen is signed in as a user)"

@@ -1,0 +1,322 @@
+<!doctype html>
+<!-- DESIGN DRAFT: mode-personas -->
+<!-- Drawn for design request n-0639 (ADR 0018 section 7), redrawn 2026-11-18 with the switcher named for its mode. Anchors added for design request n-0651. Redrawn 2026-11-19 for design request n-0653, which answers n-0650: the systems are small dashed cards under a heading of their own, after the personas. Not yet accepted. -->
+<!-- Intent: Personas takes the whole window under the same top bar, with the switcher where it is on Walkdown, nothing after the blueprint's name, and a page that scrolls through everyone who uses the app, one card each, and then the systems as smaller, dashed cards that nobody signs in as. -->
+<html lang="en" data-theme="wireframe">
+<head>
+<meta charset="utf-8">
+<title>Draft — Personas, taking the whole window</title>
+<link rel="stylesheet" href="/walkdown.css">
+<style>
+  /* The mode switcher. One button at the left of the bar, in the manner of an
+     app switcher, standing where the walkdown name stood. It shows the chosen
+     mode's icon, then the mode's name, then a caret. Pressed, it opens the
+     list of three modes. Only the gear is to its left, so its left edge is in
+     the same place in all three. This block is the same in the mode-switch,
+     mode-boards and mode-personas drafts. */
+  .mi { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4;
+    stroke-linecap: round; stroke-linejoin: round; }
+  .switch { display: inline-flex; flex: none; align-items: center; gap: 5px; height: 24px; padding: 0 5px 0 6px;
+    border: 1.5px dashed color-mix(in oklab, currentColor 25%, transparent); border-radius: .4rem;
+    font-size: 11px; line-height: 1; cursor: pointer; }
+  .switch .name { font-size: 14px; font-weight: 800; letter-spacing: -.025em; }
+  .switch:hover, .switch[aria-expanded="true"] { background: var(--color-base-200); }
+  .switch .caret { opacity: .55; }
+  .anchor { position: relative; display: inline-flex; flex: none; }
+  .bar-left { display: flex; flex: 1 1 0; min-width: 0; align-items: center; gap: .5rem; }
+  .bar-left .pick { min-width: 3.25rem; }
+  .bar-right { display: flex; flex: 1 1 0; min-width: max-content; align-items: center; justify-content: flex-end; gap: .5rem; }
+  .menu-modes { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: 17.5rem; padding: 4px;
+    background: var(--color-base-100); border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
+    border-radius: .5rem; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .3); text-align: left; }
+  .menu-modes [role="menuitemradio"] { display: flex; width: 100%; align-items: center; gap: 10px; padding: 7px 8px;
+    border-radius: .35rem; text-align: left; cursor: pointer; }
+  .menu-modes [role="menuitemradio"]:hover, .menu-modes [aria-checked="true"] { background: var(--color-base-200); }
+  .menu-modes .mi { width: 20px; height: 20px; }
+  .menu-modes b { display: block; font-size: 12.5px; font-weight: 700; line-height: 1.25; }
+  .menu-modes small { display: block; font-size: 11px; line-height: 1.3; opacity: .65; }
+  .menu-modes .tick { margin-left: auto; width: 1rem; flex: none; text-align: center; font-size: 12px; font-weight: 700; }
+  .menu-modes p { margin-top: 4px; padding: 6px 8px 4px; font-size: 10.5px; line-height: 1.4; opacity: .55;
+    border-top: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .menu-modes[hidden] { display: none; }
+  .menu-modes a { color: inherit; text-decoration: none; }
+  header.navbar { z-index: 30; }
+  /* The gear's settings, open. Every setting in it is a placeholder. */
+  .set-pop { position: absolute; left: 0; top: calc(100% + 6px); z-index: 20; width: 17rem; padding: 8px 10px 9px;
+    background: var(--color-base-100); border: 1.5px dashed color-mix(in oklab, currentColor 40%, transparent);
+    border-radius: .5rem; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .3); font-size: 12px; text-align: left; }
+  .set-pop .head { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; margin-bottom: 4px; font-weight: 700;
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .set-pop .ph { margin-left: auto; padding: 1px 6px; border: 1px dashed currentColor; border-radius: 99px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+  .set-pop .row { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+  .set-pop .row > :last-child { margin-left: auto; flex: none; }
+  .set-pop .val { padding: 2px 7px; border: 1px dashed color-mix(in oklab, currentColor 35%, transparent);
+    border-radius: .3rem; font-size: 11px; opacity: .8; white-space: nowrap; }
+  .set-pop .box { width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 3px; opacity: .6;
+    display: grid; place-items: center; font-size: 10px; line-height: 1; }
+  .set-pop .note { margin-top: 6px; padding-top: 6px; font-size: 10.5px; line-height: 1.4; opacity: .6;
+    border-top: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .gear-on { background: var(--color-base-200); }
+
+  /* The page: everyone who uses the app. It scrolls under the bar, which stays
+     put. Left for another mode and chosen again, it is scrolled to the same
+     place. */
+  .people { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 22px 24px 40px; background: var(--color-base-200); }
+  .people .wrap { max-width: 1120px; margin: 0 auto; }
+  .people h1 { font-size: 20px; font-weight: 700; }
+  .people .lede { margin-top: 4px; max-width: 62ch; font-size: 13px; opacity: .65; }
+  .people .key { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 11.5px; }
+  .people .key span { white-space: nowrap; opacity: .8; }
+  .people h2 { margin: 26px 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; }
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; align-items: start; }
+  .pcard { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--color-base-100);
+    border: 1px solid var(--color-base-300); border-radius: 6px; }
+  .pcard .top { display: flex; align-items: center; gap: 11px; }
+  .pcard .top b { display: block; font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .pcard .top small { font-size: 11.5px; opacity: .6; }
+  .pcard .av { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 999px;
+    background: var(--color-base-content); color: var(--color-base-100); font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+  .pcard .blurb { font-size: 13.5px; line-height: 1.45; }
+  .pcard dl { display: grid; grid-template-columns: 82px 1fr; gap: 7px 10px; margin: 0; padding-top: 10px;
+    border-top: 1px dashed var(--color-base-300); font-size: 12.5px; }
+  .pcard dt { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; padding-top: 2px; }
+  .pcard dd { margin: 0; min-width: 0; }
+  .pcard .user { margin-bottom: 6px; }
+  .pcard .user b { font-weight: 600; }
+  .pcard .user i { font-style: normal; opacity: .55; }
+  .pcard code { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .pcard .tg { display: flex; gap: 8px; font-size: 12px; }
+  .pcard .tg span:first-child { width: 52px; flex: none; opacity: .6; }
+  .pcard .tg.none { color: var(--color-warning); }
+  .pcard .tg.none span:first-child { opacity: 1; }
+  .pcard .bd { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pcard .bd button, .pcard .bd span { padding: 1px 9px; border-radius: 999px; font-size: 11.5px;
+    border: 1px solid color-mix(in oklab, currentColor 35%, transparent); }
+  .pcard .bd button { cursor: pointer; font-weight: 600; }
+  .pcard .bd button:hover { background: var(--color-base-200); }
+  .pcard .bd span { border-style: dashed; opacity: .6; }
+  /* The systems, after the last group of personas. A system has a lane on a
+     board and nobody signs in as it, so its card is smaller and quieter than a
+     persona's: a dashed outline, no fill, a square mark where the round
+     portrait is, and the title alone. */
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 240px)); gap: 10px; align-items: start; }
+  .scard { display: flex; align-items: center; gap: 9px; padding: 8px 11px;
+    border: 1.5px dashed color-mix(in oklab, currentColor 35%, transparent); border-radius: 6px; }
+  .scard .sq { display: grid; place-items: center; width: 24px; height: 24px; flex: none; border-radius: 4px;
+    border: 1px dashed color-mix(in oklab, currentColor 45%, transparent); font-size: 10px; font-weight: 700; letter-spacing: .02em; opacity: .7; }
+  .scard b { font-size: 13px; font-weight: 600; line-height: 1.25; }
+  .scard small { font-size: 11px; opacity: .6; }
+  /* The small state under the main one: the same window, drawn small. */
+  .mini { display: flex; flex-direction: column; height: 15.5rem; background: var(--color-base-200);
+    border: 1px solid var(--color-base-300); border-radius: .6rem; overflow: hidden; }
+  .mini.tall { height: 19.5rem; }
+  .mini .addr { font: 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 4px 10px; opacity: .6;
+    background: var(--color-base-100); border-bottom: 1px solid var(--color-base-300); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini .addr b { opacity: 1; font-weight: 700; }
+  .mini .bar { position: relative; z-index: 6; display: flex; flex: none; align-items: center; gap: .5rem;
+    padding: .375rem .75rem; background: var(--color-base-100);
+    border-bottom: 1px dashed color-mix(in oklab, currentColor 25%, transparent); }
+  .mini .bar .bp { font-size: 12px; opacity: .5; white-space: nowrap; }
+</style>
+</head>
+<body class="bg-base-200 text-sm">
+  <div class="flex h-screen flex-col">
+    <!-- The same bar as on Boards, and shorter still: nothing follows the
+         blueprint's name. There is no Finish walkdown. This page judges
+         nothing, and the sitting stays open underneath. -->
+    <header class="navbar relative z-10 min-h-0 flex-none gap-2 border-b border-dashed border-base-content/25 bg-base-100 px-3 py-1.5"
+            data-testid="panel.bar">
+      <!-- The left of the bar. It is the same on all three screens as far as
+           the blueprint's name. When the window is narrow it is this side that
+           gives way: the title after the blueprint's name is cut with an
+           ellipsis, and the gear, the switcher and the name are not. -->
+      <span class="bar-left">
+        <button class="btn btn-xs btn-ghost btn-square" title="Settings for Personas" data-testid="panel.desk-tuner">⚙</button>
+        <!-- The switcher, where the walkdown name stood: the mode's icon, its
+             name, then the caret. It is live in this draft. Press it. -->
+        <span class="anchor"><button type="button" class="switch" data-testid="panel.modes" aria-haspopup="menu" aria-expanded="false"
+              aria-label="Mode: Personas" title="Personas. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg><span class="name">Personas</span><span class="caret" aria-hidden="true">▾</span></button>
+          <div class="menu-modes" role="menu" aria-label="Modes" data-testid="modes.menu" hidden>
+            <a href="mode-switch.html" role="menuitemradio" aria-checked="false">
+              <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3" width="12.5" height="10" rx="1.5"/><path d="M9.5 3v10"/><path d="M3.9 8.2l1.3 1.3 2.2-2.8"/><path d="M11.2 6.4h1.4M11.2 8.6h1.4"/></svg>
+              <span><b>Walkdown</b><small>The rules, one at a time, beside the app.</small></span>
+              <span class="tick" aria-hidden="true"></span></a>
+            <a href="mode-boards.html" role="menuitemradio" aria-checked="false">
+              <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.75" width="4.5" height="3.5" rx=".8"/><rect x="5.75" y="9.75" width="4.5" height="3.5" rx=".8"/><rect x="10" y="2.75" width="4.5" height="3.5" rx=".8"/><path d="M1.5 8h13" stroke-dasharray="1.5 1.5"/></svg>
+              <span><b>Boards</b><small>Who does what, in the order it happens.</small></span>
+              <span class="tick" aria-hidden="true"></span></a>
+            <a href="mode-personas.html" role="menuitemradio" aria-checked="true">
+              <svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg>
+              <span><b>Personas</b><small>Everyone who uses the app, and who they sign in as.</small></span>
+              <span class="tick" aria-hidden="true">✓</span></a>
+            <p>Boards and Personas take the whole window. The app keeps running underneath, and Walkdown comes back as you left it.</p>
+          </div>
+        </span>
+        <span class="text-xs opacity-50" style="white-space:nowrap;flex:none" data-testid="panel.blueprint">walkdown-example</span>
+      </span>
+    </header>
+
+    <!-- The page fills the window under the bar. No rule list and no App pane
+         can be seen; both are hidden and still running underneath. -->
+    <main class="people" data-testid="modes.page">
+      <div class="wrap">
+        <h1>Personas</h1>
+        <p class="lede">Everyone who uses the app. A story is one persona's, a screen is signed in as one of its users,
+          and a board's lanes are the personas of its stories.</p>
+        <!-- What the five marks beside a count of stories mean. -->
+        <p class="key" aria-label="What the marks mean"><span><b style="color:var(--color-success)">✓</b> passing</span> <span><b style="color:var(--color-error)">✕</b> failing</span> <span><b style="color:var(--color-warning)">●</b> waiting on you</span> <span><b style="color:var(--color-info)">◐</b> waiting on an agent</span> <span><b style="color:inherit">○</b> not built</span></p>
+
+        <h2 data-testid="personas.group">The public</h2>
+        <div class="pgrid">
+          <article class="pcard" data-testid="personas.card">
+            <div class="top"><span class="av" aria-hidden="true">V</span><div><b>Visitor</b><small>of the public site</small></div></div>
+            <p class="blurb">Has heard of the product and wants in. Leaves an email address, confirms it, and waits to be asked.</p>
+            <dl>
+              <dt>Uses</dt><dd>The public site, on a phone as often as not.</dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>New visitor</b> <i>· default</i><br><code>{fixtures.visitor}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
+              <div class="user"><b>Visitor already on the list</b><br><code>{fixtures.visitor_waiting}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">3 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="1 passing">✓ 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><button title="Open the board, following Visitor">Getting a spot →</button></dd>
+            </dl>
+          </article>
+          <article class="pcard" data-testid="personas.card">
+            <div class="top"><span class="av" aria-hidden="true">M</span><div><b>Member</b><small>of the product</small></div></div>
+            <p class="blurb">Took their spot and now uses the product. Comes back to see where the people they sent stand in line.</p>
+            <dl>
+              <dt>Uses</dt><dd>The product itself, signed in.</dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Member</b> <i>· default</i><br><code>{fixtures.member}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><span>none yet</span></dd>
+            </dl>
+          </article>
+        </div>
+        <h2 data-testid="personas.group">The team</h2>
+        <div class="pgrid">
+          <article class="pcard" data-testid="personas.card">
+            <div class="top"><span class="av" aria-hidden="true">WA</span><div><b>Waitlist admin</b><small>of the back office</small></div></div>
+            <p class="blurb">Runs the list day to day. Decides who is invited next, and answers when someone asks where they stand.</p>
+            <dl>
+              <dt>Uses</dt><dd>The back office, at a desk.</dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Admin</b> <i>· default</i><br><code>{fixtures.admin}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
+              <div class="user"><b>Admin on their first day</b><br><code>{fixtures.admin_new}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">4 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="2 passing">✓ 2</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-info)" title="1 waiting on an agent">◐ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><button title="Open the board, following Waitlist admin">Getting a spot →</button><button title="Open the board, following Waitlist admin">Exporting the list →</button></dd>
+            </dl>
+          </article>
+          <article class="pcard" data-testid="personas.card">
+            <div class="top"><span class="av" aria-hidden="true">A</span><div><b>Analyst</b><small>of the back office</small></div></div>
+            <p class="blurb">Wants the list as a file once a week, to see where the sign-ups come from.</p>
+            <dl>
+              <dt>Uses</dt><dd>The back office, and a spreadsheet after it.</dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Analyst</b> <i>· default</i><br><code>{fixtures.analyst}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">2 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-error)" title="1 failing">✕ 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><button title="Open the board, following Analyst">Exporting the list →</button></dd>
+            </dl>
+          </article>
+          <article class="pcard" data-testid="personas.card">
+            <div class="top"><span class="av" aria-hidden="true">O</span><div><b>Owner</b><small>of the back office</small></div></div>
+            <p class="blurb">Set the waitlist up, and says who else may run it. Rarely signs in.</p>
+            <dl>
+              <dt>Uses</dt><dd>The back office, a few times a year.</dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Owner</b> <i>· default</i><br><code>{fixtures.owner}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">none yet</dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><span>none yet</span></dd>
+            </dl>
+          </article>
+        </div>
+        <h2 data-testid="personas.group">Partners</h2>
+        <div class="pgrid">
+          <article class="pcard" data-testid="personas.card">
+            <div class="top"><span class="av" aria-hidden="true">RP</span><div><b>Referral partner</b><small>of the partner page</small></div></div>
+            <p class="blurb">Sends people to the waitlist from a site of their own, and checks how many of them joined.</p>
+            <dl>
+              <dt>Uses</dt><dd>The partner page, from a link in an email.</dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Partner</b> <i>· default</i><br><code>{fixtures.partner}</code><div class="tg none"><span>local</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><span>none yet</span></dd>
+            </dl>
+          </article>
+        </div>
+
+        <!-- The systems, after the last group. One heading, which is not a
+             group of personas, and one small card each. A card holds the
+             system's title and nothing about users, stories or boards. A
+             blueprint with no systems has no heading and no cards. -->
+        <h2>Systems nobody signs in as</h2>
+        <div class="sgrid">
+          <article class="scard" data-testid="personas.system">
+            <span class="sq" aria-hidden="true">ES</span><div><b>Email service</b> <small>(outside)</small></div>
+          </article>
+          <article class="scard" data-testid="personas.system">
+            <span class="sq" aria-hidden="true">EJ</span><div><b>Export job</b></div>
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- ── The other state of this screen: the gear, pressed ─────────────── -->
+  <section class="border-t border-dashed border-base-content/25 bg-base-100" style="padding:1.5rem 1.5rem 2.5rem">
+    <h2 class="text-[10px] font-bold uppercase tracking-widest opacity-40">The other state of this screen</h2>
+    <p class="text-xs opacity-60" style="margin-top:.25rem">The same window, drawn small. Only the left of the bar is drawn.</p>
+
+    <div style="margin-top:1rem;max-width:34rem">
+      <!-- The gear, pressed. It stays beside the switcher on all three screens
+           and opens the settings of the chosen mode. Each mode will have
+           settings of its own. These are placeholders, and none is decided. -->
+      <figure data-state="settings-open">
+        <figcaption class="text-xs font-semibold" style="margin-bottom:.4rem">The gear, pressed: settings for Personas (placeholders)</figcaption>
+        <div class="mini tall">
+          <div class="addr">…<b>?mode=personas</b></div>
+          <div class="bar">
+            <span class="anchor"><button class="btn btn-xs btn-ghost btn-square gear-on" title="Settings for Personas" aria-expanded="true">⚙</button>
+              <div class="set-pop" role="dialog" aria-label="Settings for Personas, placeholders">
+                <div class="head"><span>Personas settings</span><span class="ph">Placeholder</span></div>
+                <div class="row"><span>Group by</span><span class="val">Kind ▾</span></div>
+                <div class="row"><span>Show each persona's users</span><span class="box">✓</span></div>
+                <div class="row"><span>Show targets with no value</span><span class="box">✓</span></div>
+                <div class="row"><span>Count stories by mark</span><span class="box">✓</span></div>
+                <p class="note">None of these is decided. They stand in for the settings Personas will have.</p>
+              </div>
+            </span>
+            <button type="button" class="switch" aria-haspopup="menu" aria-expanded="false"
+            aria-label="Mode: Personas" title="Personas. Choose another mode."><svg class="mi" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="5.4" r="2.2"/><path d="M2 13c0-2.2 1.8-3.8 4-3.8s4 1.6 4 3.8"/><circle cx="11.6" cy="6.2" r="1.6"/><path d="M11.4 9.5c1.6 0 2.9 1.2 2.9 3"/></svg><span class="name">Personas</span><span class="caret" aria-hidden="true">▾</span></button>
+            <span class="bp">walkdown-example</span>
+          </div>
+          <div style="flex:1;background:var(--color-base-200)"></div>
+        </div>
+      </figure>
+    </div>
+  </section>
+  <!-- The switcher works in this draft, so the three drafts can be clicked
+       through. Pressing it opens and closes the list. Escape or a press
+       anywhere else closes it. Choosing a mode goes to that mode's draft. -->
+  <script>
+    (function () {
+      var button = document.querySelector('header .switch');
+      var menu = document.querySelector('header .menu-modes');
+      var caret = button.querySelector('.caret');
+      function show(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        caret.textContent = open ? '▴' : '▾';
+      }
+      button.addEventListener('click', function () { show(menu.hidden); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.hidden) { show(false); button.focus(); }
+      });
+      document.addEventListener('click', function (e) {
+        if (!button.contains(e.target) && !menu.contains(e.target)) show(false);
+      });
+      menu.addEventListener('click', function (e) {
+        var item = e.target.closest('[role="menuitemradio"]');
+        if (!item) return;
+        // The chosen mode is already showing: close the list and stay here.
+        if (item.getAttribute('aria-checked') === 'true') e.preventDefault();
+        show(false);
+      });
+    })();
+  </script>
+  <script src="/embed.js" data-walkdown></script>
+</body>
+</html>
