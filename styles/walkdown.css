@@ -359,9 +359,9 @@
   .modes-people .pcard .user { margin-bottom: 6px; }
   .modes-people .pcard .user b { font-weight: 600; }
   .modes-people .pcard .user i { font-style: normal; opacity: .55; }
-  .modes-people .pcard code { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .modes-people .pcard code { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
   .modes-people .pcard .tg { display: flex; gap: 8px; font-size: 12px; }
-  .modes-people .pcard .tg span:first-child { width: 52px; flex: none; opacity: .6; }
+  .modes-people .pcard .tg span:first-child { min-width: 52px; flex: none; opacity: .6; }
   .modes-people .pcard .tg.none { color: var(--color-warning); }
   .modes-people .pcard .tg.none span:first-child { opacity: 1; }
   .modes-people .pcard .count { margin-left: 6px; white-space: nowrap; }

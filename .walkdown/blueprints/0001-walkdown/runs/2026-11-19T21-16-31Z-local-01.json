@@ -1,0 +1,69 @@
+{
+  "run_id": "2026-11-19T21-16-31Z-local-01",
+  "created": "2026-11-19T21:16:31Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b824b174-dirty",
+  "note": "Agent judging of the three Personas rules after they were built. Driven on port 4761 over a private copy of the checkspace people blueprints.",
+  "spec_hash": "sha256:2059db25f5ae",
+  "results": [
+    {
+      "rule": "panel.personas.listed-by-group",
+      "status": "pass",
+      "statement_hash": "sha256:446af91eecee",
+      "evidence": [
+        "runs/evidence/2026-11-19T21-11-48Z/staff-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-1440-bottom.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-systems.png",
+        "runs/evidence/2026-11-19T21-11-48Z/expenses-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/payroll-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/sysonly-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/travel-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/edges-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-390.png",
+        "runs/evidence/2026-11-19T21-11-48Z/design-mode-personas.png",
+        "runs/evidence/2026-11-19T21-11-48Z/probe.json"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright) at 1440x900 against a private copy of the checkspace people fixtures (staff, payroll, expenses, travel) plus throwaway edge blueprints, served read-only with its own home on port 4761 and confirmed by GET /api/blueprint to name only that copy; the panel build was confirmed current with check:js. Pressing panel.modes and choosing Personas on staff (three groups, personas in two, two systems) drew, in document order and measured top to bottom: h2 CUSTOMERS (personas.group, 11px uppercase, on top at its centre), cards Team manager then Visitor, h2 THE BACK OFFICE, card Auditor, h2 SYSTEMS NOBODY SIGNS IN AS, then Platform jobs and Bank feed (outside). That is the groups order of the storyboard with each group's personas in the storyboard's order; Partners, which has no persona, has no heading. Each persona is one personas.card with title, \"of a client company\", blurb and a Uses row. Each system is a personas.system card 240x42 against a 348x388 persona card, dashed border where persona cards are solid, with initials and title only: no dl, no users, stories or boards. expenses (no groups, no systems) lists Manager and Visitor under no h2 at all and no systems heading; payroll (personas_from: staff) lists staff's three personas under staff's two headings and its systems. Heading, lede, systems heading and (outside) match the accepted design verbatim. At 900, 600 and 390 wide the staff page has no horizontal scroll and every heading stays visible. Edges, none failing: a persona whose group is not declared is listed first under no heading, which lint already refuses as an error (under 10%, a state that does not survive a lint run); a blueprint with systems and no personas shows the systems heading and cards alone (under 10%, and reads correctly); a very long unbroken word in a blurb runs out of its card (under 5%). One edge between 10% and 80% is reported to the dispatcher and not filed: a blueprint whose personas_from names a blueprint not registered here (checkspace travel) says \"This blueprint has no personas\" and advises declaring them under personas:, where lint says the named blueprint could not be read."
+    },
+    {
+      "rule": "panel.personas.users-per-target",
+      "status": "pass",
+      "statement_hash": "sha256:05b89130ccd7",
+      "evidence": [
+        "runs/evidence/2026-11-19T21-11-48Z/staff-manager-card.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-visitor-card.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-390.png",
+        "runs/evidence/2026-11-19T21-11-48Z/expenses-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/edges-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/real-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/real-390.png",
+        "runs/evidence/2026-11-19T21-11-48Z/probe.json",
+        "runs/evidence/2026-11-19T21-11-48Z/probe-realistic-names.json"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright) at 1440x900 against a private copy of the checkspace people fixtures (staff, payroll, expenses, travel) plus throwaway edge blueprints, served read-only with its own home on port 4761 and confirmed by GET /api/blueprint to name only that copy; the panel build was confirmed current with check:js. On staff the Team manager card's personas.users lists View-only team manager, followed by \"· default\", then View-only org manager with no such mark. Each names its fixture in code, {fixtures.team_manager} and {fixtures.org_manager}, and has one row per target of the blueprint: local \"has a value\" and review \"has a value\" for the first; local \"has a value\" and review \"no value, so nothing signed in as this user can be walked or pictured there\" for the second, that row alone in the warning colour (oklch 0.84 0.15 85 against 0.93 0.02 230). That agrees with the spec: review sets team_manager and not org_manager. The Visitor card, with no users, says \"Nobody signs in as this persona.\" All of this copy matches the accepted design verbatim. payroll, with one target, gives one row per user. A user that signs in with two fixtures names both and has a value only where both are set (edges: local has, review has key_one only and says none), which is under 10% likely to be met and behaves correctly. A user with no fixture (a visit step, a prose setup or a missing recipe) names none and says nothing of the targets, as the as-built redline records. Two edges between 10% and 80% are reported to the dispatcher and not filed, both inherited from the accepted design's own measurements: a target name wider than the 52px label column that cannot wrap, such as production (61px), runs into the words beside it with no gap (\"productionhas a value\"); and a fixture key longer than about 24 characters runs past the card's right edge (29px for {fixtures.expense_submitted_by_manager}), giving an 11px sideways scroll at 390 wide. Neither stops a step from holding: the key and both statements are still on screen and legible."
+    },
+    {
+      "rule": "panel.personas.stories-and-boards",
+      "status": "pass",
+      "statement_hash": "sha256:88343ac0bc6e",
+      "evidence": [
+        "runs/evidence/2026-11-19T21-11-48Z/staff-manager-card.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-auditor-card.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-visitor-card.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-board-opened-from-manager.png",
+        "runs/evidence/2026-11-19T21-11-48Z/staff-board-opened-from-auditor.png",
+        "runs/evidence/2026-11-19T21-11-48Z/edges-1440.png",
+        "runs/evidence/2026-11-19T21-11-48Z/edges-board.png",
+        "runs/evidence/2026-11-19T21-11-48Z/design-mode-personas.png",
+        "runs/evidence/2026-11-19T21-11-48Z/as-built-mode-personas.png",
+        "runs/evidence/2026-11-19T21-11-48Z/probe.json"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright) at 1440x900 against a private copy of the checkspace people fixtures (staff, payroll, expenses, travel) plus throwaway edge blueprints, served read-only with its own home on port 4761 and confirmed by GET /api/blueprint to name only that copy; the panel build was confirmed current with check:js. The CLI's status for the staff copy gives approve failing, export never built, review passed and judged but waiting on eng, open signed, audit waiting on the agent tier. The Team manager card's personas.stories reads \"4 stories\" then, left to right by measured x, ✕ 1 (failing, error red), ○ 1 (not built), ● 1 (waiting on you, warning yellow), ✓ 1 (passing, green), each with a title such as \"1 failing\"; no count is drawn for waiting on an agent, which it has none of. The Auditor card reads \"1 story ◐ 1\" (waiting on an agent), so all five marks were seen and the order is the rule's. The key sits above every card (y 146 against the first heading at 188) and reads ✕ failing, ○ not built, ● waiting on you, ◐ waiting on an agent, ✓ passing. The design draws passing first; as-built/redlines.json records that the build follows the rule's order on purpose, so that is an intended gap. personas.boards on the manager names \"Closing the month →\" and not The quarterly audit; clicking it (and pressing Enter on it) changed the switcher to Boards with ?mode=boards&board=month-end and drew the board labelled \"The board Closing the month\" with its two cards, and Back returned to Personas. The auditor's button opened quarter-audit, so the button follows its own board and not a default. The Visitor card, with no story, says \"none yet\" for Stories and a dashed \"none yet\" for On boards, as the design does. A long board title wraps inside its button. One edge between 10% and 80% is reported to the dispatcher and not filed: a persona whose only story has no live rule (none written yet, or all retired) reads \"none yet\" for stories and for boards even where a board carries that story's card."
+    }
+  ]
+}

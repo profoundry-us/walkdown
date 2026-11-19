@@ -1,0 +1,39 @@
+{
+  "run_id": "2026-11-19T21-17-12Z-local-01",
+  "created": "2026-11-19T21:17:12Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "b824b174-dirty",
+  "spec_hash": "sha256:2059db25f5ae",
+  "results": [
+    {
+      "rule": "panel.personas.listed-by-group",
+      "status": "pass",
+      "statement_hash": "sha256:446af91eecee",
+      "duration_ms": 3690,
+      "checks": [
+        "checks/personas.spec.js:28"
+      ]
+    },
+    {
+      "rule": "panel.personas.users-per-target",
+      "status": "pass",
+      "statement_hash": "sha256:05b89130ccd7",
+      "duration_ms": 1089,
+      "checks": [
+        "checks/personas.spec.js:94"
+      ]
+    },
+    {
+      "rule": "panel.personas.stories-and-boards",
+      "status": "pass",
+      "statement_hash": "sha256:88343ac0bc6e",
+      "duration_ms": 1113,
+      "checks": [
+        "checks/personas.spec.js:121"
+      ]
+    }
+  ]
+}

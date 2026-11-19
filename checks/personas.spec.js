@@ -83,6 +83,12 @@ test('Personas lists each persona under its group, and the systems after them as
     'Auditor',
   ]);
   await expect(taken.getByTestId('personas.system')).toHaveCount(2);
+
+  // And where that blueprint cannot be read on this machine, the page says so, and does not say there are none.
+  const unread = await personasOf(page, 'travel');
+  await expect(unread).toContainText("This blueprint's personas could not be read.");
+  await expect(unread).toContainText('acme-people');
+  await expect(unread.getByTestId('personas.card')).toHaveCount(0);
 });
 
 test("a persona's card lists its users, and says for each target whether the user has an account there", {

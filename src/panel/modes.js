@@ -468,7 +468,13 @@ function personaCard(p) {
 }
 
 function personasPage() {
-  const { groups, personas: all, systems } = people();
+  const { groups, personas: all, systems, unread } = people();
+  if (unread)
+    return say(
+      html`This blueprint's personas could not be read.`,
+      html`Its storyboard takes them from <code>${unread}</code>, which is not registered on this machine.`,
+      html`Register that blueprint here and they are listed. <code>walkdown lint</code> says the same.`,
+    );
   if (!all.length && !systems.length)
     return say(
       'This blueprint has no personas.',
