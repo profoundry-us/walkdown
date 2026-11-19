@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-19T16:14:25.270Z
 anchor:
   screen: mode-personas
-status: addressed
+status: verified
 body: Topher sent the Personas page back on n-0650. The systems want more weight
   than a line under the grid. Draw them after the personas, under one heading
   that says nobody signs in as them. Each system is a small card with a dashed
@@ -23,3 +23,5 @@ replies:
       gone, and the two systems are small dashed cards under the heading Systems
       nobody signs in as, after the last group of personas."
 proposes: /drafts/mode-personas.html
+verified_by: topher
+verified_at: 2026-11-19T19:24:18Z
