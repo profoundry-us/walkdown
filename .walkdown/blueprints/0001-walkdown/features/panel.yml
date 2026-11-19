@@ -2155,7 +2155,7 @@ stories:
           given:
             - A blueprint with three groups, personas in two of them, and two systems
           when:
-            - Choose Personas in anchor `modes.menu`
+            - Press anchor `panel.modes` and choose Personas
           then:
             - Each group with a persona is a heading, anchor `personas.group`, in the storyboard's order, with its personas under it in theirs
             - A group with no persona has no heading
@@ -2163,7 +2163,7 @@ stories:
             - No system has a card, and a line under the grid names the systems and says nobody signs in as them
             - A blueprint with no groups lists its personas under no heading
             - A blueprint whose storyboard has `personas_from:` lists the personas of the blueprint it names
-          statement_hash: sha256:f6bb9b92fa4b
+          statement_hash: sha256:405bfe8e1f46
 
       - id: panel.personas.users-per-target
         origin: walkdown
@@ -2179,13 +2179,13 @@ stories:
             - A persona with two users, where the second user's fixture has a value on the local target and none on review
             - A persona with no users
           when:
-            - Choose Personas in anchor `modes.menu`
+            - Press anchor `panel.modes` and choose Personas
           then:
             - Anchor `personas.users` lists both users by title, the first marked as the default
             - Each user names its fixture and, for each target, says it has a value or says it has none
             - Where it has none, it says nothing signed in as this user can be walked there
             - The persona with no users says nobody signs in as it
-          statement_hash: sha256:b067d63eeb61
+          statement_hash: sha256:05b89130ccd7
 
       - id: panel.personas.stories-and-boards
         origin: walkdown
@@ -2201,11 +2201,11 @@ stories:
             - "A persona with four stories: one failing, one not built, one waiting on the reviewer and one passing"
             - A persona on one of the blueprint's two boards, and a persona with no story
           when:
-            - Choose Personas in anchor `modes.menu`, then choose the board on the first persona's card
+            - Press anchor `panel.modes` and choose Personas, then choose the board on the first persona's card
           then:
             - Anchor `personas.stories` gives the number of stories and a count for each mark that has any, in the order failing, not built, waiting on you, waiting on an agent, passing
             - A key above the cards says what each mark means
             - Anchor `personas.boards` names the board the persona has a card on, and not the other
             - Choosing it opens Boards on that board
             - The persona with no story says it has none, and is on no board
-          statement_hash: sha256:b20d3b866ac7
+          statement_hash: sha256:88343ac0bc6e
