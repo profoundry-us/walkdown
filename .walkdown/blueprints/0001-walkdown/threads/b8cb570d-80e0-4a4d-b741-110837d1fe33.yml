@@ -1,0 +1,26 @@
+id: n-0651
+uuid: b8cb570d-80e0-4a4d-b741-110837d1fe33
+kind: note
+reason: request
+author: agent
+created: 2026-11-19T15:14:46.614Z
+anchor:
+  screen: mode-personas
+status: addressed
+body: The accepted Personas design carries none of the five anchors its rules
+  point at. Draw the same design again as a draft, changed in nothing a person
+  can see. Add personas.group to each group heading and personas.card to each
+  persona card. On a card, add personas.users to its users, personas.stories to
+  its stories and personas.boards to its boards.
+replies:
+  - author: agent
+    created: 2026-11-19T15:15:45Z
+    body: agent named /drafts/mode-personas.html as the version this request
+      proposes, in place of none.
+  - author: agent
+    created: 2026-11-19T15:15:46Z
+    body: "Drawn: prototype/drafts/mode-personas.html. The accepted Personas design
+      unchanged to the eye, with personas.group on its 3 group headings and
+      personas.card, personas.users, personas.stories and personas.boards on
+      each of its 6 cards."
+proposes: /drafts/mode-personas.html
