@@ -302,6 +302,15 @@ screens:
       - detail.setup-again
       - panel.setup-progress
 
+  - id: rule-detail-user-unread
+    title: "Rule detail (state — the screen's user could not be read)"
+    prototype: null
+    anchors:
+      - detail.signed-in
+      - detail.setup
+      - detail.setup-steps
+      - panel.setup-progress
+
   - id: app-sign-in-failed
     title: "A user's sign-in step failed, so the screen is not loaded"
     prototype: null

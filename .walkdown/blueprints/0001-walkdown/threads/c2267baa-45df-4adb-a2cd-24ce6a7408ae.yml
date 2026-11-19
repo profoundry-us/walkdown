@@ -1,0 +1,28 @@
+id: n-0652
+uuid: c2267baa-45df-4adb-a2cd-24ce6a7408ae
+kind: note
+reason: request
+author: agent
+created: 2026-11-19T15:57:29.803Z
+anchor:
+  screen: rule-detail-user-unread
+status: addressed
+body: The rule's detail when the screen's user could not be read. The case is
+  already drawn in the draft rule-detail-signed-in, behind its Show control,
+  where a reviewer does not find it. Draw it as this screen's own draft, with
+  that case the only one shown and no control. The line detail.signed-in names
+  the user as written, says it could not be read, and names the blueprint to
+  register.
+replies:
+  - author: agent
+    created: 2026-11-19T15:58:56Z
+    body: agent named /drafts/rule-detail-user-unread.html as the version this
+      request proposes, in place of none.
+  - author: agent
+    created: 2026-11-19T15:59:19Z
+    body: "Drawn: prototype/drafts/rule-detail-user-unread.html. It shows the unread
+      case alone, with no Show control. The line at the top of Setup names
+      manager.view-only-team as written, says it could not be read, and names
+      the blueprint acme-people to register. The screen's own two steps still
+      run."
+proposes: /drafts/rule-detail-user-unread.html

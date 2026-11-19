@@ -327,7 +327,7 @@ stories:
         statement: "A screen whose `as:` names a user of a blueprint that is not registered on this machine runs no sign-in, and the rule's detail says so."
         because: Part of a project can be on a machine without the rest, and a screen that quietly loads signed in as nobody is judged as the wrong page.
         history: "ADR 0018 §2."
-        screens: [rule-detail-signed-in]
+        screens: [rule-detail-user-unread]
         steps:
           given:
             - A blueprint whose storyboard has `personas_from:` a sibling that is not registered on this machine, and a screen signed in `as:` one of its users
