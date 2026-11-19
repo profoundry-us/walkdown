@@ -1,0 +1,16 @@
+# `walkdown lint` over one path three times: as two users, and once with the
+# second user's steps written out as the screen's own setup.
+screen: lint-users-not-a-tie
+title: Lint does not call two users on one path a tie
+rule: screens.identity.user-is-identity
+fixture: users-not-a-tie
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[storyboard\] expenses/storyboard\.yml › expense-org-by-hand: app path /expenses/\{fixtures\.expense_submitted\} \(/expenses/412 on local\) and setup \{ recipe: as_view_only_org_manager \} are both screen `expense-org`''s, which is signed in as manager\.view-only-org — a tie is never matched, so this screen can only be reached by picking it by hand\. Give one of them its own setup or its own path$'
+  # expense-team and expense-org share the path as different users, and are not warned about.
+  - '^✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

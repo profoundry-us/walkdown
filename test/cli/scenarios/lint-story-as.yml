@@ -1,0 +1,19 @@
+# `walkdown lint` over eight stories: four that say who acts or say nothing,
+# and four whose `as:` or `by:` names nobody it can.
+screen: lint-story-as
+title: Lint refuses a story whose as or by names nobody
+rule: personas.acting.story-names-who-acts
+fixture: story-as
+cwd: expenses
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[personas\] expenses/features/expenses\.yml › expenses\.approve: `as:` names `approver`, which is not a persona — declare it under the storyboard''s `personas:`, or name one that is: manager, visitor$'
+  - '^  ✗ \[personas\] expenses/features/expenses\.yml › expenses\.remind: `by:` names `scheduler`, which is not a system — declare it under the storyboard''s `systems:`, or name one that is: platform$'
+  - '^  ✗ \[personas\] expenses/features/expenses\.yml › expenses\.export: story has both `as: manager` and `by: platform` — a persona acts in a story or a system does, never both\. Keep the one that does what the story describes$'
+  - '^  ✗ \[personas\] expenses/features/expenses\.yml › expenses\.reimburse: `by:` names `bank`, which is marked `outside: true` — what another company''s system does is nobody''s here to verify\. Name a system of your own, or leave `by:` out$'
+  # `as: manager`, `as: [manager, visitor]`, `by: platform` and neither say nothing.
+  - '^✗ 14 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 4 error\(s\), 0 warning\(s\)$'
+anchors:
+  - { id: cli.lint.errors, match: '^ERRORS$|^  ✗ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

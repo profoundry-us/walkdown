@@ -1,0 +1,16 @@
+# `walkdown lint` on travel, whose personas are in a blueprint this machine has
+# not registered: one warning, and nothing that names a persona is refused.
+screen: lint-personas-from-unread
+title: Lint warns once where the personas could not be read
+rule: personas.declared.shared-by-siblings
+fixture: personas-from-unread
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[personas\] travel/storyboard\.yml › personas_from: blueprint `expenses` is not registered on this machine, so its personas could not be read\. Nothing that names a persona, user, system or group was checked — `walkdown blueprints import <its folder>` registers it$'
+  # Two stories are `as: manager` and two screens `as: manager.view-only-team`; none is refused.
+  - '^✓ 4 rules, 3 screens, 9 anchors, 0 threads, 0 runs — 0 errors, 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

@@ -1,0 +1,19 @@
+# `walkdown lint` over a storyboard that declares its people: two personas, a
+# system and three groups that hold together, and four that cannot be named or told apart.
+screen: lint-personas-declared
+title: Lint refuses a persona or system that cannot be named or told apart
+rule: personas.declared.named-and-distinct
+fixture: personas-declared
+cwd: expenses
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[personas\] expenses/storyboard\.yml › finance-admin: persona has no `title:` — a lane, the Personas list and a story each show it by its title\. Give it one$'
+  - '^  ✗ \[personas\] expenses/storyboard\.yml › platform: this id is both a persona and a system — a lane, an `as:` and a `by:` each name one by its id, so an id that is both means two things\. Rename one of them$'
+  - '^  ✗ \[personas\] expenses/storyboard\.yml › visitor: persona names group `public`, which is not under the storyboard''s `groups:` — declare it there, or name one that is: customers, staff, hidden$'
+  - '^  ✗ \[personas\] expenses/storyboard\.yml › bank: system has `users:`, and nobody signs in as a system — move them to the persona who signs in, or declare this as a persona$'
+  # The manager, its two users, the first system and the groups say nothing.
+  - '^✗ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 4 error\(s\), 0 warning\(s\)$'
+anchors:
+  - { id: cli.lint.errors, match: '^ERRORS$|^  ✗ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

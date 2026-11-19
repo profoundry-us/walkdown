@@ -7,6 +7,7 @@ stories:
   - id: waitlist.join
     title: Visitor joins the waitlist
     statement: As a visitor, I can join the launch waitlist with my email.
+    as: visitor
     rules:
       - id: waitlist.join.email-required
         origin: prototype
@@ -96,6 +97,7 @@ stories:
   - id: waitlist.export
     title: An operator exports the waitlist
     statement: As an operator, I can export the whole waitlist, and the wait while it is assembled never looks like a page that has broken.
+    as: operator
     rules:
       - id: waitlist.export.says-why-it-waits
         origin: walkdown

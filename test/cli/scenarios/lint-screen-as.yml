@@ -1,0 +1,19 @@
+# `walkdown lint` over screens signed in as a user, a persona and a persona
+# with no users, two whose `as:` names nobody, and two users whose setup is wrong.
+screen: lint-screen-as
+title: Lint refuses a screen whose as names nobody, and checks a user's setup
+rule: screens.setup.as-names-a-user
+fixture: screen-as
+cwd: expenses
+command: [lint]
+exit: 1
+expect:
+  - '^  ✗ \[personas\] expenses/storyboard\.yml › expense-approve: `as:` names `finance-admin`, which is not a persona — declare it under the storyboard''s `personas:`, or name one that is: manager, visitor$'
+  - '^  ✗ \[personas\] expenses/storyboard\.yml › expense-org: `as:` names `manager\.org-admin`, and persona manager has no user `org-admin` — add it under manager''s `users:`, or name one it has: manager\.view-only-team, manager\.view-only-org$'
+  - '^  ✗ \[storyboard\] expenses/storyboard\.yml › manager\.view-only-org: this user''s setup step 2 is `click`, which the panel cannot run — a step is `visit`, `post` or `wait_for`\. To reach a state a click reaches, give it a dev route and `visit` it, or have the seed make it$'
+  - '^  ⚠ \[storyboard\] expenses/storyboard\.yml › manager\.view-only-team: this user''s setup step 2 waits for `nav\.signed-in`, which is not an anchor on any screen signed in as it \(expense-team, expense-list\) — declare it on one of them, or wait for one they declare: nav\.account, expense\.title, expense\.total$'
+  - '^✗ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 3 error\(s\), 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.errors, match: '^ERRORS$|^  ✗ ' }
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

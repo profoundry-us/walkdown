@@ -1,0 +1,16 @@
+# `walkdown lint` where a visitor's story has a rule on a screen signed in as a
+# manager, and a system's story has one on the same screen.
+screen: lint-rule-on-anothers-screen
+title: Lint warns once about a rule on another persona's screen
+rule: personas.acting.another-personas-screen-is-warned
+fixture: rule-on-anothers-screen
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[personas\] expenses/features/access\.yml › access\.request\.manager-is-told: this rule is on screen `team-requests`, which is signed in as manager, and its story access\.request is `as: visitor`\. Nothing is refused\. If the rule is about what a manager does, move it to a story that is `as: manager`\. If it is about what the visitor''s request leads to, leave it here\.$'
+  # alerts.overspend is `by: platform`, on the same screen, and is not warned about.
+  - '^✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

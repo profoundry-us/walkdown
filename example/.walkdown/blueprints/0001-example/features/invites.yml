@@ -7,6 +7,7 @@ stories:
   - id: invites.batch
     title: An operator invites a batch of people
     statement: As an operator, I can invite a batch of people off the waitlist without fear of emailing the wrong number of them.
+    as: operator
     rules:
       - id: invites.batch.confirm-count
         origin: prototype
@@ -41,6 +42,7 @@ stories:
   - id: invites.list
     title: An operator sees who has been invited
     statement: As an operator, I can tell at a glance who has already been invited and who is still waiting.
+    as: operator
     rules:
       - id: invites.list.status-per-row
         origin: prototype

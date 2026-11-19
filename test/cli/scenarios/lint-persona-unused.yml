@@ -1,0 +1,16 @@
+# `walkdown lint` where no story and no screen is `as: visitor`, and target
+# review has no value for the fixture one user signs in with.
+screen: lint-persona-unused
+title: Lint warns about a persona nothing names and a user a target cannot sign in
+rule: personas.declared.unused-is-warned
+fixture: persona-unused
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[personas\] expenses/storyboard\.yml › visitor: no story and no screen names this persona in its `as:`, so its lane has nothing in it — name it on a story it acts in, or remove it$'
+  - '^  ⚠ \[fixtures\] expenses/spec\.yml › runner\.targets\.review: target `review` has no `view_only_org_manager`, which user manager\.view-only-org uses in its setup, so no screen can be signed in as it there — add it under runner\.targets\.review\.fixtures$'
+  - '^✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 2 warning\(s\)$'
+anchors:
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

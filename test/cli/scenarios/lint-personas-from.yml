@@ -1,0 +1,20 @@
+# `walkdown lint` over four blueprints of one project: one declares the people,
+# and three have a `personas_from:` that is wrong in its own way.
+screen: lint-personas-from
+title: Lint refuses a personas_from that names the wrong blueprint
+rule: personas.declared.shared-by-siblings
+fixture: personas-from
+cwd: expenses
+command: [lint]
+exit: 1
+expect:
+  - '^✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 0 warning\(s\)$'
+  - '^  ✗ \[personas\] travel/storyboard\.yml › personas_from: names `checkout`, which is not a blueprint in this project\. Name the blueprint of this project that declares them: expenses$'
+  - '^  ✗ \[personas\] mileage/storyboard\.yml › personas_from: names `travel`, which takes its own personas from another blueprint — name the blueprint that declares them: expenses$'
+  - '^  ✗ \[personas\] cards/storyboard\.yml › personas_from: this storyboard takes its personas from `expenses` and declares `personas:` of its own — two copies drift\. Remove `personas:` here, or remove `personas_from:` and declare them all here$'
+  - '^✗ 4 rules, 3 screens, 9 anchors, 0 threads, 0 runs — 1 error\(s\), 0 warning\(s\)$'
+  - '^✗ 3 rules, 2 screens, 6 anchors, 0 threads, 0 runs — 1 error\(s\), 0 warning\(s\)$'
+  - '^✗ 5 rules, 3 screens, 11 anchors, 0 threads, 0 runs — 1 error\(s\), 0 warning\(s\)$'
+anchors:
+  - { id: cli.lint.errors, match: '^ERRORS$|^  ✗ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

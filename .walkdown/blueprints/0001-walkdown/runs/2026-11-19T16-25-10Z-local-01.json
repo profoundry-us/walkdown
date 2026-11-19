@@ -1,0 +1,48 @@
+{
+  "run_id": "2026-11-19T16-25-10Z-local-01",
+  "created": "2026-11-19T16:25:10Z",
+  "actor": "topher",
+  "kind": "checks",
+  "target": "local",
+  "git_sha": "95e6bb70-dirty",
+  "tree_hash": "sha256:1bde82705ba9",
+  "spec_hash": "sha256:61c0fcb1a7f0",
+  "results": [
+    {
+      "rule": "screens.anchors.renames-are-recorded",
+      "status": "pass",
+      "statement_hash": "sha256:a0495cc39a56",
+      "duration_ms": 102,
+      "checks": [
+        "test/lint.test.js:827"
+      ]
+    },
+    {
+      "rule": "threads.question.one-ask",
+      "status": "pass",
+      "statement_hash": "sha256:9876aeacfd14",
+      "duration_ms": 151,
+      "checks": [
+        "test/lint.test.js:859"
+      ]
+    },
+    {
+      "rule": "screens.identity.setup-tells-states-apart",
+      "status": "pass",
+      "statement_hash": "sha256:099086f49c0a",
+      "duration_ms": 56,
+      "checks": [
+        "test/setup.test.js:128"
+      ]
+    },
+    {
+      "rule": "screens.setup.runs-before-the-screen",
+      "status": "pass",
+      "statement_hash": "sha256:8cd7148f06fd",
+      "duration_ms": 0,
+      "checks": [
+        "test/setup.test.js:158"
+      ]
+    }
+  ]
+}
