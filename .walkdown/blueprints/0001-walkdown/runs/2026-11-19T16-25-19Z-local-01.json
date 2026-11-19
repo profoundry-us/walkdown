@@ -1,0 +1,97 @@
+{
+  "run_id": "2026-11-19T16-25-19Z-local-01",
+  "created": "2026-11-19T16:25:19Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "95e6bb70-dirty",
+  "note": "Re-judging of four panel.modes rules whose agent cell went stale when the accepted mode-personas design gained data-testid anchors (a03a6b03). Driven on port 4741 over tmp/checkspace.",
+  "spec_hash": "sha256:61c0fcb1a7f0",
+  "results": [
+    {
+      "rule": "panel.modes.one-switcher",
+      "status": "pass",
+      "statement_hash": "sha256:7163b2c9ed8a",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-01-walkdown-closed.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-02-menu-open-walkdown.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-03-boards-closed.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-04-menu-open-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-05-personas-closed.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-06-menu-open-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-settings-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-settings-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-settings-walkdown.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-07-no-board-blueprint.png",
+        "runs/evidence/2026-11-19T16-17-36Z/one-switcher-probe.json",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-switch.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-personas-proposed.png"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright, 1440x900) against the checkspace copy served on port 4741 from an export of HEAD (the working tree had uncommitted edits to lib/ by another session; lib/viewer/panel.js was byte-identical to HEAD), with the example app on 4725; /api/blueprint named tmp/checkspace/example before driving. Every step held. The bar holds exactly one `panel.modes`, a button at x=52 directly after the settings gear (x=12) and before the project name, and the bar no longer carries the word \"walkdown\" as a name. With no mode in the address it reads \"Walkdown\", its 16px icon at x=59 ahead of the name at x=79. Pressed, `modes.menu` opens under it (304x223, every row hit-tested as the topmost thing at its centre) and lists Walkdown, Boards, Personas in that order, each with a visible icon and a line (\"The rules, one at a time, beside the app.\" / \"Who does what, in the order it happens.\" / \"Everyone who uses the app, and who they sign in as.\"), copy that matches the accepted mode-switch design word for word; Walkdown alone carries the tick and aria-checked. Choosing Boards removed the menu and the button read \"Boards\" with the boards icon; reopened, Boards was ticked and Walkdown was not, and the same was true of Personas in its turn. The button stayed at x=52,y=10 in all three modes (only its width follows the name), the gear stayed at x=12 beside it, and the gear opened \"Boards settings\", \"Personas settings\" and the walkdown settings panel respectively. On the copy of the walkdown blueprint, which has no board, Boards was still offered and its page said \"This blueprint has no boards.\" with no board picker. No page errors. I looked at the mode-personas screen in both its accepted version and the version proposed on n-0653, which nobody has accepted yet: this rule touches only its bar, and the bar is the same in both. One difference from the designs that no step speaks to: the built bar has a project picker between the switcher and the blueprint name, where the drawings go straight to the name; I put under 10% on a person reading that as the switcher being in the wrong place, since it is still the first thing after the gear.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.whole-window",
+      "status": "pass",
+      "statement_hash": "sha256:4ca141e23bb8",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-app-01-walkdown-before.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-app-02-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-app-03-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-app-04-walkdown-after.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-design-01-walkdown-before.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-design-02-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-design-03-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-design-04-walkdown-after.png",
+        "runs/evidence/2026-11-19T16-17-36Z/whole-window-probe.json",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-personas-proposed.png"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright, 1440x900) against the checkspace copy served on port 4741 from an export of HEAD (the working tree had uncommitted edits to lib/ by another session; lib/viewer/panel.js was byte-identical to HEAD), with the example app on 4725; /api/blueprint named tmp/checkspace/example before driving. Every step held, on two passes. I opened waitlist.join.email-required, typed kept-by-judge@example.com into the email field of the framed join page with the keyboard, and planted a random marker on the frame's window so a reload could not hide. On Boards `modes.page` measured x=0, y=44, 1440x856, which is the whole window under the 44px bar, and a hit test at 210 points across the window found `modes.page` on top at every one: no rule list, no rule detail, no App pane. Personas measured and hit-tested the same. Meanwhile the frame was still alive underneath, holding the typed value and the marker. Back on Walkdown the same rule was open, the screen picker still read \"Join the waitlist\", the frame was back at the same box, the field still held what was typed, the marker was still there and the frame had navigated zero times; the address returned to what it was. The second pass moved the fade fully to Design before leaving, and came back with Design still the surface showing (fade at 0) and the app frame, hidden behind it, still unreloaded with its field intact. No page errors. One thing about the fixture, not the rule: the checkspace copy of the example has no design files, so its Design side reads \"not found\" before and after alike. The Personas page drawn in the version proposed on n-0653 (not yet accepted) is fuller than the built one, but both it and the accepted version take the whole window under the bar as the panel does, which is all this rule asks of that screen.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.each-keeps-its-place",
+      "status": "pass",
+      "statement_hash": "sha256:f62f58d1bc90",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-01-board-picker.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-02-left-at.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-03-on-walkdown.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-04-back-on-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-05-after-reload.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-06-personas-scrolled.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-07-personas-again.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-probe.json",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-edge-a-reload-on-walkdown.png",
+        "runs/evidence/2026-11-19T16-17-36Z/keeps-place-edges-probe.json"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright, 1440x900) against the checkspace copy served on port 4741 from an export of HEAD (the working tree had uncommitted edits to lib/ by another session; lib/viewer/panel.js was byte-identical to HEAD), with the example app on 4725; /api/blueprint named tmp/checkspace/example before driving. Every step held. I chose the second board, Running the list, from the board picker, dragged it by 210x140 and pressed Zoom in three times: its first card moved on the glass from (42.6, 108.9) at 152px wide to (255.8, 258.7) at 197.6px wide, and the readout said 130%. After choosing Walkdown and then Boards again the picker still named Running the list and both cards sat at exactly the same pixels and width; after reloading the window, the same again. I measured where the cards are drawn, not only the sheet's data attributes, and the two agreed. Personas, in a 620x320 window so that it overflows, was scrolled 75px with the wheel (Operator heading from y=168 to y=93); left for Boards and chosen again it was at 75px with the heading at y=93, and the same after leaving for Walkdown. No page errors. Beyond the steps I tried to break it and could not: leaving Boards by way of Personas, visiting the first board and returning (the first board kept its own unmoved place and the second kept its moved one), reloading while on Walkdown and only then choosing Boards, a place set by ctrl+wheel, and resizing the window while away all came back to the place left; Personas even kept its scroll across a reload, which the rule does not claim. I found no edge worth weighing.",
+      "threads": []
+    },
+    {
+      "rule": "panel.modes.finish-only-on-walkdown",
+      "status": "pass",
+      "statement_hash": "sha256:962563de1c59",
+      "evidence": [
+        "runs/evidence/2026-11-19T16-17-36Z/finish-01-signing.png",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-02-walkdown-two-judged.png",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-03-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-04-personas.png",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-05-walkdown-after.png",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-06-walkdown-after-reload-on-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-draft-after.json",
+        "runs/evidence/2026-11-19T16-17-36Z/finish-probe.json",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-switch.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T16-17-36Z/proto-mode-personas.png"
+      ],
+      "reasoning": "Driven in headless Chromium (Playwright, 1440x900) against the checkspace copy served on port 4741 from an export of HEAD (the working tree had uncommitted edits to lib/ by another session; lib/viewer/panel.js was byte-identical to HEAD), with the example app on 4725; /api/blueprint named tmp/checkspace/example before driving. Every step held. I started a walkdown as the copy's own person, signing as eng, and approved two rules (invites.batch.confirm-count and invites.batch.cancel-sends-nothing); on Walkdown `panel.walk` then read \"Finish walkdown\" at the right of the bar, with \"+2/9\" in the footer and the strip \"Recording as A Checks Person\". On Boards there was no `panel.walk` at all, and the bar's only visible buttons were the gear, the switcher, the project picker and the board picker; on Personas the gear, the switcher and the project picker. Neither had the \"Put walkdown away\" cross that Walkdown's bar ends with, Escape put nothing away, and the switcher was what took me back. Back on Walkdown the button read \"Finish walkdown\" again, the count was still +2/9, both rows still carried their signed mark, and the draft the server holds was the same sitting throughout: started 16:23:32.624Z, with the same two approved verdicts, read on Boards, on Personas and after returning; no run was written to the ledger of the copy while away (12 files before and after). No page errors. Beyond the steps, reloading the window on Boards in mid-sitting still showed no `panel.walk`, and going back to Walkdown found the same sitting with both rules judged. The accepted mode-boards and mode-personas designs draw their bars without Finish walkdown or the cross, as built; the version of mode-personas proposed on n-0653, which nobody has accepted yet, draws the same bar. I found no edge worth weighing. I did not finish the sitting: its draft was removed from the copy afterwards.",
+      "threads": []
+    }
+  ]
+}
