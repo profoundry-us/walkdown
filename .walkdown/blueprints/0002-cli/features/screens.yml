@@ -211,3 +211,26 @@ stories:
             - The two wrong names are errors naming the screen and what it names, and lint exits non-zero
             - The unknown step is an error and the undeclared anchor a warning, each naming the user and not a screen
           statement_hash: sha256:fd1cd59bd694
+
+      - id: screens.setup.nobody-after-a-user-is-warned
+        origin: walkdown
+        created_at: 2026-11-19
+        verify: [checks]
+        signoff: [eng, product]
+        statement: "Lint warns about a screen signed in as a persona with no users, where another screen signs in as a user, unless the screen has a setup of its own."
+        because: An app keeps the last user's session, so a screen nobody signs in as can show that user's page until a step signs them out.
+        history: "q-0654, Topher, 2026-11-19, on ADR 0018 §3. A judge opened a visitor's screen after a manager's, and the App pane showed the manager's page."
+        screens: [lint-nobody-after-a-user]
+        steps:
+          given:
+            - A blueprint where one screen is signed in as a user
+            - Two screens signed in as a persona with no users, one with a setup of its own and one with none
+            - A second blueprint where no persona has a user, and a screen signed in as one of them
+          when:
+            - Run `walkdown lint` on each
+          then:
+            - The screen with no setup is a warning that names the screen and the persona, and says to give it a step that signs out
+            - The screen with a setup of its own is not warned about
+            - The second blueprint has no such warning
+            - Lint exits zero
+          statement_hash: sha256:7a7a536b6c44

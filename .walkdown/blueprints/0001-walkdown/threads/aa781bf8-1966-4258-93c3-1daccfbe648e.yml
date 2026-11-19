@@ -5,7 +5,7 @@ author: agent
 created: 2026-11-19T16:58:00.445Z
 anchor:
   rule: screens.setup.signs-in-as-the-user
-status: answered
+status: incorporated
 body: A screen signed in as a persona with no users runs no sign-in. Opened
   after a manager's screen in the same tab, the app still holds the manager's
   session. The detail says nobody signs in as Visitor, and the App pane shows
@@ -26,4 +26,8 @@ replies:
     created: 2026-11-19T19:24:01Z
     body: Lint warns
     answer: true
+  - author: agent
+    created: 2026-11-19T19:26:30Z
+    body: Written as the cli rule screens.setup.nobody-after-a-user-is-warned. It is
+      unbuilt and waits on its design (n-0655) and your approval.
 chosen: Lint warns

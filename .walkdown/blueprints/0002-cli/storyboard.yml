@@ -1361,6 +1361,16 @@ screens:
       - cli.lint.summary
       - cli.exit
 
+  # q-0654. Designed before it is built; no design yet, so no app.
+  - id: lint-nobody-after-a-user
+    title: "Lint warns about a screen nobody signs in as, after one a user does"
+    prototype: null
+    anchors:
+      - cli.prompt
+      - cli.lint.warnings
+      - cli.lint.summary
+      - cli.exit
+
   - id: lint-users-not-a-tie
     title: "Lint tells two screens on one path apart by who is signed in"
     prototype: /screens/lint-users-not-a-tie.html

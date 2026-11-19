@@ -1,0 +1,27 @@
+id: n-0655
+uuid: 097584db-abf3-4aed-8a31-dc3f88b613ee
+kind: note
+reason: request
+author: agent
+created: 2026-11-19T19:25:56.047Z
+anchor:
+  screen: lint-nobody-after-a-user
+status: addressed
+body: Draw what walkdown lint prints for rule
+  screens.setup.nobody-after-a-user-is-warned. One warning under WARNINGS, in
+  the personas category. It names the screen and the persona nobody signs in as.
+  It says another screen signs in as a user, so that session may still be there.
+  It tells the author to give the screen a step that signs out. The summary line
+  has 0 errors and 1 warning, and lint exits 0.
+replies:
+  - author: agent
+    created: 2026-11-19T19:27:07Z
+    body: agent named /drafts/lint-nobody-after-a-user.html as the version this
+      request proposes, in place of none.
+  - author: agent
+    created: 2026-11-19T19:27:08Z
+    body: "Drawn: prototype-cli/drafts/lint-nobody-after-a-user.html. One [personas]
+      warning on screen expense-public: nobody signs in for it, expense-team
+      signs in as a user so that session may still be there, give it a setup
+      step that signs out. 0 errors, 1 warning, exit 0."
+proposes: /drafts/lint-nobody-after-a-user.html

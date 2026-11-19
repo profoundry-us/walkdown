@@ -1,0 +1,107 @@
+{
+  "run_id": "2026-11-19T19-33-48Z-local-01",
+  "created": "2026-11-19T19:33:48Z",
+  "actor": "agent",
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "80adb962-dirty",
+  "spec_hash": "sha256:2059db25f5ae",
+  "results": [
+    {
+      "rule": "panel.modes.one-switcher",
+      "statement_hash": "sha256:7163b2c9ed8a",
+      "status": "pass",
+      "threads": [],
+      "evidence": [
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-01-walkdown-closed.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-02-menu-open-walkdown.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-03-boards-closed.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-04-menu-open-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-05-personas-closed.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-06-menu-open-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-settings-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-settings-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-settings-walkdown.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-07-no-board-blueprint.png",
+        "runs/evidence/2026-11-19T19-40-00Z/one-switcher-probe.json",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-switch.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-switch.png",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-personas.png"
+      ],
+      "reasoning": "Driven afresh in headless Chromium (Playwright, 1440x900) against the panel already served on port 4700 from the working tree, read-only; /api/blueprint named this repository's walkdown blueprint and the example blueprint beside it before driving. Judged because the accepted design of mode-personas changed (systems are now small dashed cards, `personas.system`). Every step held, on the example blueprint (two boards, two personas). The bar holds exactly one `panel.modes`, a button at x=52 directly after the settings gear (x=12) and before the project picker, and nothing in the bar reads \"walkdown\" as a name. With no mode in the address it reads \"Walkdown\", its 16px icon at x=59 ahead of the name at x=79. Pressed, `modes.menu` opens under it (304x223, each row hit-tested as the topmost thing at its centre) and lists Walkdown, Boards, Personas in that order, each with a 16px icon and a line (\"The rules, one at a time, beside the app.\" / \"Who does what, in the order it happens.\" / \"Everyone who uses the app, and who they sign in as.\"), word for word what the accepted mode-switch, mode-boards and mode-personas designs draw in their menus; Walkdown alone carried the tick and aria-checked. Choosing Boards removed the menu and the button read \"Boards\" behind the boards icon; opened again Boards was ticked and Walkdown not, and Personas likewise in its turn. The button stayed at x=52, y=10 in all three modes (only its width follows the name) with the gear at x=12 beside it, and the gear opened \"Boards settings\", \"Personas settings\" and, on Walkdown, the walkdown settings (Record as, Desk ruling). On this repository's walkdown blueprint, which has no board, Boards was still offered and its page said \"This blueprint has no boards.\" with no board picker. No page errors. The changed mode-personas design touches this rule only through its bar (gear, switcher, name) and its menu copy, and both are as built; the system cards it adds are below the bar and belong to the personas rules, which this verdict says nothing about (the as-built drawing of that screen shows no system cards). Edges, neither worth filing: the built bar has a project picker between the switcher and the blueprint name where the drawings go straight to the name, under 10% that a person reads the switcher as misplaced since it is still the first thing after the gear; the design draws the switcher with a dashed outline and a small triangle where the build has a chevron, under 10% and a matter of skin."
+    },
+    {
+      "rule": "panel.modes.whole-window",
+      "statement_hash": "sha256:4ca141e23bb8",
+      "status": "pass",
+      "threads": [],
+      "evidence": [
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-app-01-walkdown-before.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-app-02-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-app-03-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-app-04-walkdown-after.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-design-01-walkdown-before.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-design-02-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-design-03-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-design-04-walkdown-after.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-example-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/whole-window-probe.json",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-personas.png"
+      ],
+      "reasoning": "Driven afresh in headless Chromium (Playwright, 1440x900) against the panel already served on port 4700 from the working tree, read-only; /api/blueprint named this repository's walkdown blueprint and the example blueprint beside it before driving. Judged because the accepted design of mode-personas changed (systems are now small dashed cards, `personas.system`). Every step held, on two passes. On the walkdown blueprint I opened embed.pin.anchored-target, whose screen (The review page) loaded in the App pane from /as-built/review.html, typed \"kept-by-judge 1940\" into that page's search field with the keyboard, and planted a random marker on the frame's window so a reload could not hide. On Boards `modes.page` measured x=0, y=44, 1440x856, the whole window under the 44px bar, and a hit test at 450 points across the window found `modes.page` on top at every one; the rule list, the rule detail and the App pane were all not visible. Personas measured and hit-tested the same. Underneath, the frame was still attached, holding the typed text and the marker. Back on Walkdown the same rule was open, the screen picker still read \"The review page\", the frame was back in the same box (12,44 1020x844), the field still held what was typed, the marker was still there, the frame had navigated zero times and the address was what it had been. The second pass switched the surface to Design before leaving and came back with Design still the surface showing and the frame behind it still unreloaded with its field intact. On the example blueprint, where Boards has a board to draw, the page filled the window the same way at 1440x900 and at 900x600 (190 of 190 points), and so did Personas. Nothing but GET left the browser. No page errors. The example's own app on 4310 was not running, which is why the typed-field pass was made on the walkdown blueprint, whose App pane is served by 4700 itself. The newly accepted mode-personas design draws its page from the left edge to the right under the bar (x=0, 1440 wide), as built; that the built Personas page is plainer than the drawing (no groups, no system cards) is for the personas rules and not this one. I found no edge worth weighing."
+    },
+    {
+      "rule": "panel.modes.each-keeps-its-place",
+      "statement_hash": "sha256:f62f58d1bc90",
+      "status": "pass",
+      "threads": [],
+      "evidence": [
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-01-board-picker.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-02-left-at.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-03-on-walkdown.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-04-back-on-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-05-after-reload.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-06-personas-scrolled.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-07-personas-again.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-08-personas-mid-0002-we-example.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-09-personas-mid-again-0002-we-example.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-edge-a-reload-on-walkdown.png",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-probe.json",
+        "runs/evidence/2026-11-19T19-40-00Z/keeps-place-personas-mid-probe.json",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-personas.png"
+      ],
+      "reasoning": "Driven afresh in headless Chromium (Playwright, 1440x900) against the panel already served on port 4700 from the working tree, read-only; /api/blueprint named this repository's walkdown blueprint and the example blueprint beside it before driving. Judged because the accepted design of mode-personas changed (systems are now small dashed cards, `personas.system`). Every step held, on the example blueprint. I chose the second board, Running the list, from the board picker, dragged it by 210x140 and pressed Zoom in three times: its first card moved on the glass from (42.6, 108.9) at 152px wide to (255.8, 258.7) at 197.6px wide, and the readout said 130%. After choosing Walkdown and then Boards the picker still named Running the list and the cards sat at exactly those pixels and that width; after reloading the window, the same again, still on Boards. I measured where the cards are drawn as well as the sheet's own x, y and zoom, and the two agreed. Personas, in a 620x320 window so that it overflows, was scrolled 75px with the wheel (the Operator heading from y=168 to y=93); left for Boards and chosen again it was at 75px with the heading at y=93, and the same after leaving for Walkdown. Since 75px was the bottom of that page, I repeated it at 520x260 with a place in the middle (47 of 255px) so that \"the same place\" could not be mistaken for \"the end\": 47px after Boards and after Walkdown. No page errors, and nothing but GET left the browser. Beyond the steps I tried to break it and could not: leaving Boards by way of Personas, visiting the first board and returning (the first kept its own unmoved place, the second its moved one), reloading while on Walkdown and only then choosing Boards, and resizing the window while away all came back to the place left; Personas kept its scroll across a reload too, which the rule does not claim. The newly accepted mode-personas design is a taller page than the built one (groups and system cards), which changes how far there is to scroll and nothing about whether the place is kept. I found no edge worth weighing."
+    },
+    {
+      "rule": "panel.modes.finish-only-on-walkdown",
+      "statement_hash": "sha256:962563de1c59",
+      "status": "pass",
+      "threads": [],
+      "evidence": [
+        "runs/evidence/2026-11-19T19-40-00Z/finish-01-signing.png",
+        "runs/evidence/2026-11-19T19-40-00Z/finish-02-walkdown-two-judged.png",
+        "runs/evidence/2026-11-19T19-40-00Z/finish-03-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/finish-04-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/finish-05-walkdown-after.png",
+        "runs/evidence/2026-11-19T19-40-00Z/finish-06-walkdown-after-reload-on-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/finish-probe.json",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-switch.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-switch.png",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-boards.png",
+        "runs/evidence/2026-11-19T19-40-00Z/proto-mode-personas.png",
+        "runs/evidence/2026-11-19T19-40-00Z/app-mode-personas.png"
+      ],
+      "reasoning": "Driven afresh in headless Chromium (Playwright, 1440x900) against the panel already served on port 4700 from the working tree, read-only; /api/blueprint named this repository's walkdown blueprint and the example blueprint beside it before driving. Judged because the accepted design of mode-personas changed (systems are now small dashed cards, `personas.system`). A sitting writes a draft, and this panel serves real blueprints, so every request that was not a GET was held in the browser and never reached the server: the three POSTs to /api/draft the panel made are in the probe, and the draft door was answered in the browser the way lib/api.js answers it. That means the panel's side of the sitting is what was judged, and the server keeping a draft on disk was not exercised here; afterwards the server held no draft and no file had been written. Every step held, on the example blueprint. I started a walkdown (signing eng and product, as the profile offers) and passed waitlist.join.email-required and waitlist.join.confirm-requires-email; on Walkdown `panel.walk` then read \"Finish walkdown\" at the right of the bar, with \"+2/5\" in the footer and the strip \"Recording as Topher Fangio\". On Boards there was no `panel.walk` in the page at all, and the bar's only visible buttons were the gear, the switcher, the project picker and the board picker; on Personas the gear, the switcher and the project picker. Neither had the \"Put walkdown away\" cross that Walkdown's bar ends with, Escape put nothing away and changed no mode, and the switcher was what took me back. Back on Walkdown the button read \"Finish walkdown\" again, the count was still +2/5, both rows still carried their tick, and the sitting was the same one throughout: started 19:32:40.575Z with the same two verdicts, and the panel sent no discard, no further draft and no finished run while Boards or Personas was shown (three held writes before, three after). No page errors. Beyond the steps: reloading the window on Boards in mid-sitting still showed no `panel.walk`, and going back to Walkdown found the same sitting with both rules judged; opening the address straight on Personas in mid-sitting showed no `panel.walk` either. The accepted designs agree with the build: mode-switch draws Finish walkdown and the cross on Walkdown, and mode-boards and the newly accepted mode-personas draw bars with neither. I did not finish the sitting, and nothing of it was left behind. I found no edge worth weighing."
+    }
+  ]
+}
