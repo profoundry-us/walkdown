@@ -32,7 +32,7 @@ stories:
         created_at: 2026-11-18
         verify: [checks]
         signoff: [eng, product]
-        statement: "A storyboard with `personas_from:` takes its personas, users, systems and groups from the blueprint it names, which is one of the same project and declares them itself."
+        statement: "A storyboard with `personas_from:` takes its personas, users, systems and groups from the blueprint it names. That blueprint belongs to the same project and declares them itself."
         because: The people in a process do not change with the blueprint a story is filed in, and declaring them twice lets the two copies drift.
         history: "ADR 0018 §2. The real-system trial took stories from two blueprints of one project, and its managers would have been declared twice."
         screens: [lint-personas-from, lint-personas-from-unread]
@@ -48,7 +48,11 @@ stories:
             - The third, fourth and fifth are each an error that names the blueprint, and lint exits non-zero
             - Where the first is not registered, lint warns that the personas could not be read and names the blueprint
             - It then refuses nothing that depends on them, and exits zero
-          statement_hash: sha256:e9ab0bb34483
+          statement_hash: sha256:71a96cac0de6
+          reworded:
+            - hash: sha256:e9ab0bb34483
+              at: 2026-11-19T18:58:53Z
+              why: The clause 'which is one of the same project' read badly; it is now a sentence of its own. The meaning did not change.
 
       - id: personas.declared.unused-is-warned
         origin: walkdown
