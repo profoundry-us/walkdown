@@ -1292,7 +1292,7 @@ screens:
 
   - id: lint-personas-declared
     title: "Lint refuses a persona, user or system that cannot be named or told apart"
-    prototype: null
+    prototype: /screens/lint-personas-declared.html
     anchors:
       - cli.prompt
       - cli.lint.errors
@@ -1301,7 +1301,7 @@ screens:
 
   - id: lint-personas-from
     title: "Lint refuses a personas_from that names the wrong blueprint"
-    prototype: null
+    prototype: /screens/lint-personas-from.html
     anchors:
       - cli.prompt
       - cli.lint.errors
@@ -1310,7 +1310,7 @@ screens:
 
   - id: lint-personas-from-unread
     title: "Lint warns that a sibling blueprint's personas could not be read"
-    prototype: null
+    prototype: /screens/lint-personas-from-unread.html
     anchors:
       - cli.prompt
       - cli.lint.warnings
@@ -1319,7 +1319,7 @@ screens:
 
   - id: lint-persona-unused
     title: "Lint warns about a persona nothing names and a user with no account on a target"
-    prototype: null
+    prototype: /screens/lint-persona-unused.html
     anchors:
       - cli.prompt
       - cli.lint.warnings
@@ -1328,7 +1328,7 @@ screens:
 
   - id: lint-story-as
     title: "Lint refuses a story whose as or by names nobody"
-    prototype: null
+    prototype: /screens/lint-story-as.html
     anchors:
       - cli.prompt
       - cli.lint.errors
@@ -1337,7 +1337,7 @@ screens:
 
   - id: lint-rule-on-anothers-screen
     title: "Lint warns about a rule on another persona's screen"
-    prototype: null
+    prototype: /screens/lint-rule-on-anothers-screen.html
     anchors:
       - cli.prompt
       - cli.lint.warnings
@@ -1346,7 +1346,7 @@ screens:
 
   - id: lint-screen-as
     title: "Lint refuses a screen signed in as nobody declared, and checks a user's setup"
-    prototype: null
+    prototype: /screens/lint-screen-as.html
     anchors:
       - cli.prompt
       - cli.lint.errors
@@ -1356,7 +1356,7 @@ screens:
 
   - id: lint-users-not-a-tie
     title: "Lint tells two screens on one path apart by who is signed in"
-    prototype: null
+    prototype: /screens/lint-users-not-a-tie.html
     anchors:
       - cli.prompt
       - cli.lint.warnings

@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- DESIGN DRAFT: mode-personas -->
-<!-- Drawn for design request n-0639 (ADR 0018 section 7), redrawn 2026-11-18 with the switcher named for its mode. Not yet accepted. -->
+<!-- Drawn for design request n-0639 (ADR 0018 section 7), redrawn 2026-11-18 with the switcher named for its mode. Anchors added for design request n-0651, nothing visible changed. Not yet accepted. -->
 <!-- Intent: Personas takes the whole window under the same top bar, with the switcher where it is on Walkdown, nothing after the blueprint's name, and a page that scrolls through everyone who uses the app, one card each. -->
 <html lang="en" data-theme="wireframe">
 <head>
@@ -157,74 +157,74 @@
         <!-- What the five marks beside a count of stories mean. -->
         <p class="key" aria-label="What the marks mean"><span><b style="color:var(--color-success)">✓</b> passing</span> <span><b style="color:var(--color-error)">✕</b> failing</span> <span><b style="color:var(--color-warning)">●</b> waiting on you</span> <span><b style="color:var(--color-info)">◐</b> waiting on an agent</span> <span><b style="color:inherit">○</b> not built</span></p>
 
-        <h2>The public</h2>
+        <h2 data-testid="personas.group">The public</h2>
         <div class="pgrid">
-          <article class="pcard">
+          <article class="pcard" data-testid="personas.card">
             <div class="top"><span class="av" aria-hidden="true">V</span><div><b>Visitor</b><small>of the public site</small></div></div>
             <p class="blurb">Has heard of the product and wants in. Leaves an email address, confirms it, and waits to be asked.</p>
             <dl>
               <dt>Uses</dt><dd>The public site, on a phone as often as not.</dd>
-              <dt>Users</dt><dd><div class="user"><b>New visitor</b> <i>· default</i><br><code>{fixtures.visitor}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>New visitor</b> <i>· default</i><br><code>{fixtures.visitor}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
               <div class="user"><b>Visitor already on the list</b><br><code>{fixtures.visitor_waiting}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
-              <dt>Stories</dt><dd>3 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="1 passing">✓ 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
-              <dt>On boards</dt><dd class="bd"><button title="Open the board, following Visitor">Getting a spot →</button></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">3 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="1 passing">✓ 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><button title="Open the board, following Visitor">Getting a spot →</button></dd>
             </dl>
           </article>
-          <article class="pcard">
+          <article class="pcard" data-testid="personas.card">
             <div class="top"><span class="av" aria-hidden="true">M</span><div><b>Member</b><small>of the product</small></div></div>
             <p class="blurb">Took their spot and now uses the product. Comes back to see where the people they sent stand in line.</p>
             <dl>
               <dt>Uses</dt><dd>The product itself, signed in.</dd>
-              <dt>Users</dt><dd><div class="user"><b>Member</b> <i>· default</i><br><code>{fixtures.member}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
-              <dt>Stories</dt><dd>1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
-              <dt>On boards</dt><dd class="bd"><span>none yet</span></dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Member</b> <i>· default</i><br><code>{fixtures.member}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><span>none yet</span></dd>
             </dl>
           </article>
         </div>
-        <h2>The team</h2>
+        <h2 data-testid="personas.group">The team</h2>
         <div class="pgrid">
-          <article class="pcard">
+          <article class="pcard" data-testid="personas.card">
             <div class="top"><span class="av" aria-hidden="true">WA</span><div><b>Waitlist admin</b><small>of the back office</small></div></div>
             <p class="blurb">Runs the list day to day. Decides who is invited next, and answers when someone asks where they stand.</p>
             <dl>
               <dt>Uses</dt><dd>The back office, at a desk.</dd>
-              <dt>Users</dt><dd><div class="user"><b>Admin</b> <i>· default</i><br><code>{fixtures.admin}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Admin</b> <i>· default</i><br><code>{fixtures.admin}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div>
               <div class="user"><b>Admin on their first day</b><br><code>{fixtures.admin_new}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
-              <dt>Stories</dt><dd>4 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="2 passing">✓ 2</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-info)" title="1 waiting on an agent">◐ 1</span></dd>
-              <dt>On boards</dt><dd class="bd"><button title="Open the board, following Waitlist admin">Getting a spot →</button><button title="Open the board, following Waitlist admin">Exporting the list →</button></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">4 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-success)" title="2 passing">✓ 2</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-warning)" title="1 waiting on you">● 1</span> <span style="margin-right:6px;white-space:nowrap;color:var(--color-info)" title="1 waiting on an agent">◐ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><button title="Open the board, following Waitlist admin">Getting a spot →</button><button title="Open the board, following Waitlist admin">Exporting the list →</button></dd>
             </dl>
           </article>
-          <article class="pcard">
+          <article class="pcard" data-testid="personas.card">
             <div class="top"><span class="av" aria-hidden="true">A</span><div><b>Analyst</b><small>of the back office</small></div></div>
             <p class="blurb">Wants the list as a file once a week, to see where the sign-ups come from.</p>
             <dl>
               <dt>Uses</dt><dd>The back office, and a spreadsheet after it.</dd>
-              <dt>Users</dt><dd><div class="user"><b>Analyst</b> <i>· default</i><br><code>{fixtures.analyst}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
-              <dt>Stories</dt><dd>2 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-error)" title="1 failing">✕ 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
-              <dt>On boards</dt><dd class="bd"><button title="Open the board, following Analyst">Exporting the list →</button></dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Analyst</b> <i>· default</i><br><code>{fixtures.analyst}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">2 stories &nbsp;<span style="margin-right:6px;white-space:nowrap;color:var(--color-error)" title="1 failing">✕ 1</span> <span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><button title="Open the board, following Analyst">Exporting the list →</button></dd>
             </dl>
           </article>
-          <article class="pcard">
+          <article class="pcard" data-testid="personas.card">
             <div class="top"><span class="av" aria-hidden="true">O</span><div><b>Owner</b><small>of the back office</small></div></div>
             <p class="blurb">Set the waitlist up, and says who else may run it. Rarely signs in.</p>
             <dl>
               <dt>Uses</dt><dd>The back office, a few times a year.</dd>
-              <dt>Users</dt><dd><div class="user"><b>Owner</b> <i>· default</i><br><code>{fixtures.owner}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
-              <dt>Stories</dt><dd>none yet</dd>
-              <dt>On boards</dt><dd class="bd"><span>none yet</span></dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Owner</b> <i>· default</i><br><code>{fixtures.owner}</code><div class="tg"><span>local</span><span>has a value</span></div><div class="tg"><span>staging</span><span>has a value</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">none yet</dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><span>none yet</span></dd>
             </dl>
           </article>
         </div>
-        <h2>Partners</h2>
+        <h2 data-testid="personas.group">Partners</h2>
         <div class="pgrid">
-          <article class="pcard">
+          <article class="pcard" data-testid="personas.card">
             <div class="top"><span class="av" aria-hidden="true">RP</span><div><b>Referral partner</b><small>of the partner page</small></div></div>
             <p class="blurb">Sends people to the waitlist from a site of their own, and checks how many of them joined.</p>
             <dl>
               <dt>Uses</dt><dd>The partner page, from a link in an email.</dd>
-              <dt>Users</dt><dd><div class="user"><b>Partner</b> <i>· default</i><br><code>{fixtures.partner}</code><div class="tg none"><span>local</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
-              <dt>Stories</dt><dd>1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
-              <dt>On boards</dt><dd class="bd"><span>none yet</span></dd>
+              <dt>Users</dt><dd data-testid="personas.users"><div class="user"><b>Partner</b> <i>· default</i><br><code>{fixtures.partner}</code><div class="tg none"><span>local</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div><div class="tg none"><span>staging</span><span>no value, so nothing signed in as this user can be walked or pictured there</span></div></div></dd>
+              <dt>Stories</dt><dd data-testid="personas.stories">1 story &nbsp;<span style="margin-right:6px;white-space:nowrap;color:inherit" title="1 not built">○ 1</span></dd>
+              <dt>On boards</dt><dd class="bd" data-testid="personas.boards"><span>none yet</span></dd>
             </dl>
           </article>
         </div>
