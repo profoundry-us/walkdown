@@ -1,0 +1,53 @@
+{
+  "run_id": "2026-11-19T16-06-11Z-local-01",
+  "created": "2026-11-19T16:06:11Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    },
+    {
+      "role": "design",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ba4c916f-dirty",
+  "spec_hash": "sha256:4526f89de891",
+  "results": [
+    {
+      "rule": "panel.personas.listed-by-group",
+      "status": "refining",
+      "threads": [
+        "6b9e022e-9579-45f4-a979-80d002c6a7ff"
+      ]
+    },
+    {
+      "rule": "panel.personas.users-per-target",
+      "status": "approved",
+      "statement_hash": "sha256:05b89130ccd7"
+    },
+    {
+      "rule": "panel.personas.stories-and-boards",
+      "status": "approved",
+      "statement_hash": "sha256:88343ac0bc6e"
+    },
+    {
+      "rule": "screens.setup.signs-in-as-the-user",
+      "status": "approved",
+      "statement_hash": "sha256:ada7903df295"
+    },
+    {
+      "rule": "screens.setup.unread-personas-run-no-sign-in",
+      "status": "approved",
+      "statement_hash": "sha256:a0292f681821"
+    }
+  ]
+}

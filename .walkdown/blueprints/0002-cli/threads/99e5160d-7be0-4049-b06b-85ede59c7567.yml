@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:14.840Z
 anchor:
   screen: lint-rule-on-anothers-screen
-status: addressed
+status: verified
 body: One run of walkdown lint with one warning. A story is as one persona, and
   one of its rules is on a screen signed in as another. The warning names the
   rule, the screen and both personas, and says the rule may want a story of its
@@ -41,4 +41,12 @@ replies:
     body: "Redrawn: prototype-cli/drafts/lint-rule-on-anothers-screen.html. The
       warning uses the words given. It says what was found, then the two things
       to do."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on
+      lint-rule-on-anothers-screen (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-rule-on-anothers-screen.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z

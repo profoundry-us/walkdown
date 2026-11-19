@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:13.465Z
 anchor:
   screen: app-sign-in-failed
-status: addressed
+status: verified
 body: Draw the accepted app-setup-failed design for the case where the step that
   failed is the user's and not the screen's. The App pane, anchor
   panel.setup-failed, says which step failed, why, and that it was a step of
@@ -24,4 +24,12 @@ replies:
     created: 2026-11-18T17:05:52Z
     body: agent named /drafts/app-sign-in-failed.html as the version this request
       proposes, in place of none.
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:06:11Z
+    body: Accepted by topher's approval of every rule on app-sign-in-failed
+      (2026-11-19T16-06-11Z-local-01).
 proposes: /drafts/app-sign-in-failed.html
+verified_by: topher
+verified_via: 2026-11-19T16-06-11Z-local-01
+verified_at: 2026-11-19T16:06:11Z

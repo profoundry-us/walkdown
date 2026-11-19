@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:14.152Z
 anchor:
   screen: lint-personas-from-unread
-status: addressed
+status: verified
 body: One run of walkdown lint on a blueprint whose personas_from names a
   sibling that is not registered on this machine. Show one warning saying the
   personas could not be read and naming the blueprint to register. No error
@@ -21,4 +21,12 @@ replies:
     created: 2026-11-18T17:06:01Z
     body: "Drawn: prototype-cli/drafts/lint-personas-from-unread.html. It shows one
       warning that names the blueprint to register, and exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on lint-personas-from-unread
+      (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-personas-from-unread.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z

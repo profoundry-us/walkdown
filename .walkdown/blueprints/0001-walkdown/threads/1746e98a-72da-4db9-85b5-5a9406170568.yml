@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:13.246Z
 anchor:
   screen: rule-detail-signed-in
-status: addressed
+status: verified
 body: "Draw the rule detail of rule-detail-setup for a screen that is signed in
   as a user. The setup section gains one line, anchor detail.signed-in, naming
   the user and its persona, as in Signed in as View-only team manager, a
@@ -47,4 +47,12 @@ replies:
     body: "Redrawn: prototype/drafts/rule-detail-signed-in.html. On the user's step
       2 the line reads Signing in as. On the screen's step 4 it reads Signed in
       as. The other cases are as they were."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:06:11Z
+    body: Accepted by topher's approval of every rule on rule-detail-signed-in
+      (2026-11-19T16-06-11Z-local-01).
 proposes: /drafts/rule-detail-signed-in.html
+verified_by: topher
+verified_via: 2026-11-19T16-06-11Z-local-01
+verified_at: 2026-11-19T16:06:11Z

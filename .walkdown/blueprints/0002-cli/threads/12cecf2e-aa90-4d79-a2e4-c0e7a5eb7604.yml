@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:13.924Z
 anchor:
   screen: lint-personas-from
-status: addressed
+status: verified
 body: One run of walkdown lint over three blueprints of one project whose
   personas_from is wrong. One names a blueprint of another project. One names a
   blueprint that itself has personas_from. One has personas_from and declares
@@ -34,4 +34,12 @@ replies:
     body: "Redrawn: prototype-cli/drafts/lint-personas-from.html. The first error
       says checkout is not a blueprint in this project. Then it names expenses,
       as drawn."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on lint-personas-from
+      (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-personas-from.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z

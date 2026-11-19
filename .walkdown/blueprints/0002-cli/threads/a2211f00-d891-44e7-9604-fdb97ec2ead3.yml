@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:13.697Z
 anchor:
   screen: lint-personas-declared
-status: addressed
+status: verified
 body: One run of walkdown lint on a storyboard with four faults. A persona has
   no title. A persona and a system share an id. A system has users. A persona
   names a group nobody declared. Show the four errors, each naming the persona,
@@ -21,4 +21,12 @@ replies:
     created: 2026-11-18T17:06:01Z
     body: "Drawn: prototype-cli/drafts/lint-personas-declared.html. It shows four
       errors, one for each fault, then the summary and exit 1."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on lint-personas-declared
+      (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-personas-declared.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z

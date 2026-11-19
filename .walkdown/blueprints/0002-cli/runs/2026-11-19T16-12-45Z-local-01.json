@@ -1,0 +1,58 @@
+{
+  "run_id": "2026-11-19T16-12-45Z-local-01",
+  "created": "2026-11-19T16:12:45Z",
+  "actor": "topher",
+  "signatures": [
+    {
+      "role": "eng",
+      "signer": "topher"
+    },
+    {
+      "role": "product",
+      "signer": "topher"
+    }
+  ],
+  "kind": "walkdown",
+  "target": "local",
+  "base_url": "http://localhost:4700",
+  "git_sha": "ba4c916f-dirty",
+  "tree_hash": "sha256:a76eef6c3db7",
+  "spec_hash": "sha256:15a8c4268914",
+  "results": [
+    {
+      "rule": "personas.declared.named-and-distinct",
+      "status": "approved",
+      "statement_hash": "sha256:386baa71e0bd"
+    },
+    {
+      "rule": "personas.declared.shared-by-siblings",
+      "status": "approved",
+      "statement_hash": "sha256:e9ab0bb34483"
+    },
+    {
+      "rule": "personas.declared.unused-is-warned",
+      "status": "approved",
+      "statement_hash": "sha256:18cef79cedca"
+    },
+    {
+      "rule": "personas.acting.story-names-who-acts",
+      "status": "approved",
+      "statement_hash": "sha256:3b49252f6a6a"
+    },
+    {
+      "rule": "personas.acting.another-personas-screen-is-warned",
+      "status": "approved",
+      "statement_hash": "sha256:dda19b1d6061"
+    },
+    {
+      "rule": "screens.setup.as-names-a-user",
+      "status": "approved",
+      "statement_hash": "sha256:fd1cd59bd694"
+    },
+    {
+      "rule": "screens.identity.user-is-identity",
+      "status": "approved",
+      "statement_hash": "sha256:9c55208de58b"
+    }
+  ]
+}

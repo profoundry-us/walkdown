@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-19T15:14:46.614Z
 anchor:
   screen: mode-personas
-status: addressed
+status: verified
 body: The accepted Personas design carries none of the five anchors its rules
   point at. Draw the same design again as a draft, changed in nothing a person
   can see. Add personas.group to each group heading and personas.card to each
@@ -24,3 +24,5 @@ replies:
       personas.card, personas.users, personas.stories and personas.boards on
       each of its 6 cards."
 proposes: /drafts/mode-personas.html
+verified_by: topher
+verified_at: 2026-11-19T16:06:23Z

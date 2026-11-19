@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:15.312Z
 anchor:
   screen: lint-users-not-a-tie
-status: addressed
+status: verified
 body: One run of walkdown lint with one warning. Two screens share a path and
   are signed in as different users, and are not warned about. Two others share a
   path, one signed in as a user and one with that user's steps written out as
@@ -22,4 +22,12 @@ replies:
     created: 2026-11-18T17:06:03Z
     body: "Drawn: prototype-cli/drafts/lint-users-not-a-tie.html. It shows one tie
       warning that names both screens, and exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on lint-users-not-a-tie
+      (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-users-not-a-tie.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z

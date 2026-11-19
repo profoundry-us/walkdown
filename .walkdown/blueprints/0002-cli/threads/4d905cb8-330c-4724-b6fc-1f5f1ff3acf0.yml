@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:14.613Z
 anchor:
   screen: lint-story-as
-status: addressed
+status: verified
 body: One run of walkdown lint on four stories. One has an as that names no
   persona. One has a by that names no system. One has both as and by. One is by
   a system marked outside. Show one error for each, naming the story and what it
@@ -21,4 +21,12 @@ replies:
     created: 2026-11-18T17:06:02Z
     body: "Drawn: prototype-cli/drafts/lint-story-as.html. It shows four errors, one
       for each story, then the summary and exit 1."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on lint-story-as
+      (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-story-as.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z

@@ -6,7 +6,7 @@ author: agent
 created: 2026-11-18T17:02:14.384Z
 anchor:
   screen: lint-persona-unused
-status: addressed
+status: verified
 body: One run of walkdown lint with two warnings. One names a persona that no
   story and no screen names. One names a user, the fixture its setup needs, and
   the target that has no value for it. Lint exits zero. Rule
@@ -20,4 +20,12 @@ replies:
     created: 2026-11-18T17:06:02Z
     body: "Drawn: prototype-cli/drafts/lint-persona-unused.html. It shows two
       warnings, one for the persona and one for the user, and exit 0."
+  - author: topher
+    via: verdict
+    created: 2026-11-19T16:12:46Z
+    body: Accepted by topher's approval of every rule on lint-persona-unused
+      (2026-11-19T16-12-45Z-local-01).
 proposes: /drafts/lint-persona-unused.html
+verified_by: topher
+verified_via: 2026-11-19T16-12-45Z-local-01
+verified_at: 2026-11-19T16:12:46Z
