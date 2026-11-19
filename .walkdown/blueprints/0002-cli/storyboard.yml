@@ -1361,10 +1361,11 @@ screens:
       - cli.lint.summary
       - cli.exit
 
-  # q-0654. Designed before it is built; no design yet, so no app.
+  # q-0654. Accepted 2026-11-19 in Topher's walk (n-0655).
   - id: lint-nobody-after-a-user
     title: "Lint warns about a screen nobody signs in as, after one a user does"
-    prototype: null
+    prototype: /screens/lint-nobody-after-a-user.html
+    app: { path: /as-built/cli/lint-nobody-after-a-user.html }
     anchors:
       - cli.prompt
       - cli.lint.warnings

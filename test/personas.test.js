@@ -89,3 +89,16 @@ test('a storyboard with no groups is not asked for one, and a persona with no us
   assert.deepEqual([none.state, none.personas.length, none.groups.length], ['own', 0, 0]);
   assert.equal(people.groups.length, 0);
 });
+
+test('a screen nobody signs in as is warned about only after one a user does, and only with no setup of its own @rule:screens.setup.nobody-after-a-user-is-warned', () => {
+  const said = /nobody signs in for this screen/g;
+  const out = run({ fixture: 'nobody-after-a-user', cwd: 'expenses', command: ['lint'] });
+  assert.equal(out.status, 0, out.text);
+  assert.equal(out.text.match(said)?.length, 1, out.text);
+  // expense-help is as the same persona, and signs out in a step of its own.
+  assert.doesNotMatch(out.text, /expense-help/);
+  // Where no persona has a user, no session is left over for a screen to meet.
+  const none = run({ fixture: 'nobody-signs-in', cwd: 'expenses', command: ['lint'] });
+  assert.equal(none.status, 0, none.text);
+  assert.doesNotMatch(none.text, said);
+});

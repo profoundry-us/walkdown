@@ -1,0 +1,15 @@
+# `walkdown lint` where two screens are as a persona with no users, after one a
+# user signs in for. One of the two signs out in a setup of its own.
+screen: lint-nobody-after-a-user
+title: Lint warns about a screen nobody signs in as, after one a user does
+rule: screens.setup.nobody-after-a-user-is-warned
+fixture: nobody-after-a-user
+cwd: expenses
+command: [lint]
+exit: 0
+expect:
+  - '^  ⚠ \[personas\] expenses/storyboard\.yml › expense-public: nobody signs in for this screen, because persona visitor has no users\. Screen expense-team signs in as manager\.view-only-team, so that session may still be there when this screen opens — give this screen a setup step that signs out$'
+  - '^✓ 9 rules, 6 screens, 21 anchors, 0 threads, 0 runs — 0 errors, 1 warning\(s\)$'
+anchors:
+  - { id: cli.lint.warnings, match: '^WARNINGS$|^  ⚠ ' }
+  - { id: cli.lint.summary, match: '^[✓✗] \d+ rules' }

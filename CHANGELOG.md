@@ -18,8 +18,9 @@ registry formats; [UPGRADING.md](UPGRADING.md) says what to do when one does.
   user it is signed in as: the panel runs that user's setup steps before the
   screen's own, and the rule's detail says who is signed in. Lint refuses a
   name nobody declared, checks a user's setup as it checks a screen's, and
-  warns about an unused persona, a user a target cannot sign in, and a rule on
-  another persona's screen. Two screens on one path signed in as different
+  warns about an unused persona, a user a target cannot sign in, a rule on
+  another persona's screen, and a screen nobody signs in as that opens after
+  one a user does with no step of its own to sign out. Two screens on one path signed in as different
   users are no longer a tie. Nothing changes for a blueprint that uses none
   of these keys.
 - **Three modes of one window** ([ADR 0018](docs/adr/foundational/202611_journey_boards.md) §7).

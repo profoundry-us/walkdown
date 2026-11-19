@@ -97,7 +97,8 @@ const screens = () => [
     'expense.team-name',
     'expense.history',
   ]),
-  screen('policy', { as: 'visitor', path: '/policy' }, [
+  // Its own step signs out, so lint has nothing to say of the session before it.
+  screen('policy', { as: 'visitor', setup: [{ visit: '/dev/sign-out' }], path: '/policy' }, [
     'policy.body',
     'policy.updated',
     'policy.contact',
@@ -427,6 +428,35 @@ export default {
     ];
     f.all[0].rules = ['expense-list', 'expense-team', 'expense-org', 'expense-approve'];
     f.all[1].rules = ['expense-list', 'expense-team'];
+    write(blueprint(m, 'expenses'), f);
+  },
+
+  /* Two screens nobody signs in as, after one a user does: one signs out first, one does not. */
+  'nobody-after-a-user'(m) {
+    const f = base();
+    const [list, , , policy, signIn] = f.board.screens;
+    // The first screen a user signs in for is then expense-team.
+    delete list.app.as;
+    f.board.screens[3] = { ...policy, id: 'expense-help' };
+    f.board.screens[4] = {
+      ...signIn,
+      id: 'expense-public',
+      app: { as: 'visitor', path: '/public' },
+    };
+    f.all[1].rules = ['expense-public', 'expense-public'];
+    f.all[3].rules = ['expense-help', 'expense-help'];
+    write(blueprint(m, 'expenses'), f);
+  },
+
+  /* Personas with no users at all, and a screen as one: there is no session to be left over. */
+  'nobody-signs-in'(m) {
+    const f = base();
+    delete f.board.personas[0].users;
+    delete f.board.recipes;
+    for (const s2 of f.board.screens) {
+      if (s2.app.as) s2.app.as = String(s2.app.as).split('.')[0];
+      delete s2.app.setup;
+    }
     write(blueprint(m, 'expenses'), f);
   },
 
